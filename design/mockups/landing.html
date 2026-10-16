@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AntGo — Một khu, một nhà</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  /* Kích thước cửa sổ trời: --wx, --wy là nửa chiều rộng / nửa chiều cao, do JS điều khiển */
+  :root {
+    --ink: #22304A;
+    --ink-soft: #3B4A66;
+    --paper: #FBF4E4;          /* nền kem lúc mở màn */
+    --line: rgba(34,48,74,.22);
+    --sans: "Bricolage Grotesque", system-ui, sans-serif;
+    --serif: "Newsreader", Georgia, serif;
+    --pw: clamp(320px, 31vw, 540px);   /* chiều rộng máy bay */
+    --accent: #D9601A;
+    --mx: 0; --my: 0;
+    --wx: 0px; --wy: 0px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: var(--sans); color: var(--ink); background: var(--paper); overflow: hidden; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ================= BẦU TRỜI (nằm trong "cửa sổ") ================= */
+  .sky { position: fixed; inset: 0; overflow: hidden; opacity: 0;
+    clip-path: inset(calc(50vh - var(--wy)) calc(50vw - var(--wx)) calc(50vh - var(--wy)) calc(50vw - var(--wx))); }
+  .sky .base { position: absolute; inset: 0; background: url(assets/sky.webp) center / cover; }
+  /* phủ màu để bầu trời ấm hơn, hợp tông cam AntGo */
+  .sky .warm { position: absolute; inset: 0; mix-blend-mode: soft-light;
+    background: linear-gradient(180deg, rgba(255,170,120,.55) 0%, rgba(255,140,60,.35) 45%, rgba(255,210,150,.2) 100%); }
+  .sky .glow { position: absolute; inset: 0;
+    background: radial-gradient(48vw 40vh at 50% 100%, rgba(255,250,232,.75), rgba(255,250,232,0) 70%); }
+  .cloud { position: absolute; transform: translate(calc(var(--mx) * var(--d) * 1px), calc(var(--my) * var(--d) * .5px)); }
+  .cloud img { display: block; width: 100%; height: auto; animation: drift var(--t, 26s) ease-in-out infinite alternate; will-change: translate; }
+  .cloud.flip img { transform: scaleX(-1); animation-name: driftFlip; }
+  @keyframes drift { to { translate: var(--dx, 30px) 0; } }
+  @keyframes driftFlip { to { translate: var(--dx, 30px) 0; } }
+  .cloud .rise { transform: translateY(var(--rise, 0)); transition: transform 1.4s cubic-bezier(.2,.7,.2,1); }
+  /* Mây chia 3 lớp xa – giữa – gần. --d: độ dịch theo chuột (xa ít, gần nhiều), --t: tốc độ trôi */
+  .cloud.far  { opacity: .55; filter: blur(1.2px) saturate(.8); --t: 52s; --dx: 12px; }
+  .cloud.mid  { opacity: .92; --t: 34s; --dx: 26px; }
+  .cloud.near { filter: saturate(1.08) contrast(1.04); --t: 24s; --dx: 42px; }
+  .cloud.far  .rise { transition-duration: 1.9s; }
+  .cloud.near .rise { transition-duration: 1.15s; }
+  .f1 { right: 7vw;  top: 25vh; width: 12vw; --d: 4; }
+  .f2 { left: -2vw;  top: 15vh; width: 10vw; --d: 3; }
+  .m1 { left: -7vw;  top: 49vh; width: 30vw; --d: 13; }
+  .m2 { right: -5vw; top: 29vh; width: 17vw; --d: 11; --dx: -22px; }
+  .n1 { left: 9vw;  bottom: -9vh; width: 47vw; --d: 30; }
+  .n2 { right: -17vw; bottom: -8vh; width: 37vw; --d: 26; --dx: -38px; }
+  /* lớp mây gần nằm TRƯỚC vệt bụi nhưng SAU máy bay → vệt bụi chui vào biển mây */
+  .sky.near-layer { z-index: 5; pointer-events: none; }
+
+  .grain { position: fixed; inset: 0; pointer-events: none; opacity: .09; z-index: 1;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .4  0 0 0 0 .3  0 0 0 1.2 -.1'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+  /* ================= LƯỚI KẺ + NHÃN MỞ MÀN ================= */
+  .grid { position: fixed; inset: 0; pointer-events: none; z-index: 2; transition: opacity .5s; }
+  .grid i { position: absolute; background: var(--line); }
+  .grid .v1, .grid .v2 { top: 0; bottom: 0; width: 1px; }
+  .grid .h1, .grid .h2 { left: 0; right: 0; height: 1px; }
+  .grid .v1 { left: calc(50vw - var(--wx)); }
+  .grid .v2 { left: calc(50vw + var(--wx)); }
+  .grid .h1 { top: calc(50vh - var(--wy)); }
+  .grid .h2 { top: calc(50vh + var(--wy)); }
+  .tag { position: fixed; z-index: 3; font-family: var(--serif); font-size: 15px; transition: opacity .4s; white-space: nowrap; }
+  .tag.t1 { right: calc(50vw + var(--wx) + 12px); bottom: calc(50vh + var(--wy) + 10px); }
+  .tag.t2 { left: calc(50vw + var(--wx) + 14px); top: calc(50vh + var(--wy) + 12px); }
+
+  .wordmark { position: fixed; left: 50%; top: 50%; z-index: 4; transform: translate(-50%, -54%); font-weight: 700; font-size: clamp(120px, 15vw, 260px);
+    letter-spacing: -.06em; line-height: 1; color: #A9A39A; opacity: 0; white-space: nowrap; pointer-events: none;
+    transition: opacity .6s, color .8s, transform 1.2s cubic-bezier(.2,.7,.2,1), filter .6s; }
+
+  /* ================= HEADER ================= */
+  header { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 52px; padding: 20px 36px; z-index: 20; }
+  .logo { font-weight: 800; font-size: 30px; letter-spacing: -.05em; display: flex; align-items: center; gap: 6px; }
+  .logo svg { width: 16px; height: 16px; margin-top: -14px; }
+  .logo svg path { fill: #E56A16; }
+  nav { display: flex; gap: 40px; font-weight: 500; font-size: 17px; }
+  nav a { display: inline-flex; align-items: center; gap: 8px; }
+  nav a svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+  nav a:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1.5px; }
+  .hbtns { margin-left: auto; display: flex; gap: 10px; }
+  .hbtn { font-family: var(--serif); font-size: 17px; padding: 10px 16px; border-radius: 9px; border: 1px solid rgba(34,48,74,.08); transition: transform .15s; }
+  .hbtn:hover { transform: translateY(-1px); }
+  .hbtn.peach { background: #F5C6A1; color: #6B3A1A; }
+  .hbtn.cream { background: #FFF7DE; }
+
+  /* ================= NỘI DUNG HERO ================= */
+  .hero > * { position: fixed; z-index: 8; }
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s, transform .9s cubic-bezier(.2,.7,.2,1); }
+  .on .reveal { opacity: 1; transform: none; }
+  .badge { left: 50%; top: 13vh; translate: -50% 0; font-family: var(--serif); font-size: 19px; padding: 7px 18px; border: 1.3px solid var(--ink);
+    border-radius: 999px; white-space: nowrap; background: rgba(255,248,235,.2); }
+  .line { font-weight: 700; font-size: clamp(64px, 7.4vw, 132px); letter-spacing: -.012em; line-height: .95; white-space: nowrap; }
+  .l1 { left: 9vw; top: 23vh; }
+  .l2 { left: 54vw; top: 45vh; }
+  .on .l2 { transition-delay: .15s; }
+  .lede { left: 59.5vw; top: 66vh; width: min(31vw, 480px); font-family: var(--sans); font-weight: 400; font-size: clamp(17px, 1.35vw, 21px); line-height: 1.45; color: var(--ink-soft); }
+  .on .lede { transition-delay: .3s; }
+  .ctas { left: 59.5vw; top: calc(66vh + 108px); display: flex; align-items: center; gap: 22px; }
+  .on .ctas { transition-delay: .42s; }
+  .cta { font-family: var(--sans); font-weight: 600; font-size: 18px; color: #FFF5E6; background: var(--ink); padding: 15px 26px; border-radius: 12px; display: inline-block;
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12), 0 8px 22px -8px rgba(34,48,74,.55); transition: transform .15s, box-shadow .15s; }
+  .cta:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.16), 0 14px 28px -10px rgba(34,48,74,.6); }
+  .alt { font-family: var(--sans); font-weight: 500; font-size: 17px; border-bottom: 1.3px solid currentColor; padding-bottom: 2px; }
+
+  /* ================= MÁY BAY + KIẾN ================= */
+  #trail { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+  .flyer { position: fixed; left: 20vw; top: 42vh; width: var(--pw); height: calc(var(--pw) * .79); z-index: 6; opacity: 0; will-change: transform; cursor: pointer; }
+  .flyer .tilt { position: absolute; inset: 0; transform-origin: 40% 70%;
+    transform: rotate(calc(var(--mx) * 3deg + var(--lean, 0deg))) translateY(calc(var(--my) * -6px)); transition: transform .45s ease-out; }
+  .flyer.lean { --lean: 4deg; }
+  .flyer .bob { position: absolute; inset: 0; }
+  .idle .flyer .bob { animation: bob 4.2s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translate(0,0) rotate(0); } 50% { transform: translate(6px,-12px) rotate(-1.6deg); } }
+  /* 2 dáng dùng chung MỘT máy bay: ảnh "giơ tay" được đặt bằng ma trận --mA (tính từ 3 điểm mốc: đầu cánh trái,
+     mũi, đuôi) sao cho máy bay trùng khít ảnh "vẫy tay" → lúc đổi dáng máy bay đứng yên, chỉ có kiến thay đổi. */
+  .swapper { position: absolute; inset: 0; will-change: transform; }
+  .flyer .bob { will-change: transform; }
+  /* bóng đổ là một lớp riêng đứng yên (rẻ), thay cho drop-shadow trên ảnh (phải vẽ lại cả ảnh mỗi khung hình) */
+  .swapper::before { content: ""; position: absolute; left: 18%; right: 14%; top: 78%; height: 22%; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(150,70,20,.18), rgba(150,70,20,0)); transform: translateY(18%); }
+  /* Chỉ đổi opacity + transform → trình duyệt xử lý trên GPU, không vẽ lại ảnh. Đổi dáng ngắn, gọn (~0,3s). */
+  .rider { position: absolute; left: 0; top: 0; height: auto; transform-origin: 0 0; user-select: none; -webkit-user-drag: none;
+    will-change: opacity, transform; transition: opacity .2s ease; }
+  .rider.wave  { width: 100%; transform: none; }
+  .rider.point { width: calc(var(--pw) * 1.01821); transform: var(--mA); }
+  .flyer:not(.pointing) .rider.point, .flyer.pointing .rider.wave { opacity: 0; }
+  /* ảnh đang ẩn: tắt nhanh; ảnh đang hiện: vào trễ một chút → không thấy hai con kiến chồng nhau */
+  .flyer:not(.pointing) .rider.point, .flyer.pointing .rider.wave { transition: none; }
+  .flyer.pointing .rider.point, .flyer:not(.pointing) .rider.wave { transition: none; }
+  .swapper { transform-origin: 50% 82%; }
+  /* lóe sáng "poof" che khoảnh khắc đổi hình */
+  .flash { position: absolute; left: 30%; top: 0; width: 46%; height: 62%; border-radius: 50%; pointer-events: none; opacity: 0; z-index: 1;
+    background: radial-gradient(closest-side, rgba(255,252,240,.95), rgba(255,236,200,.55) 45%, rgba(255,220,170,0)); will-change: opacity, transform; }
+  /* chùm chấm hạt bung ra quanh kiến lúc đổi dáng — che chỗ chuyển */
+  .puff { position: absolute; z-index: 2; border-radius: 50%; pointer-events: none; will-change: transform, opacity;
+    animation: puff var(--dur, .8s) cubic-bezier(.15,.7,.3,1) var(--delay, 0s) both; }
+  @keyframes puff { 0% { opacity: 0; transform: translate(0,0) scale(.4); } 12% { opacity: 1; transform: translate(0,0) scale(1); } 100% { opacity: 0; transform: translate(var(--vx), var(--vy)) scale(.3); } }
+
+  .bubble { position: absolute; z-index: 3; right: 72%; top: 6%; font-family: var(--serif); font-size: 20px; white-space: nowrap;   /* bên trái đầu kiến, phía tay đang vẫy */
+    background: #FFF8EC; padding: 10px 17px; border-radius: 18px 18px 4px 18px; box-shadow: 0 10px 30px -10px rgba(120,60,20,.35);
+    opacity: 0; transform: translateY(8px) scale(.9); transform-origin: 100% 100%; transition: opacity .25s, transform .35s cubic-bezier(.3,1.6,.5,1); pointer-events: none; }
+  .bubble.show { opacity: 1; transform: none; }
+  .bubble i { font-style: italic; color: #C25415; }
+
+  .replay { position: fixed; right: 22px; bottom: 20px; z-index: 20; font-family: var(--serif); font-size: 16px; background: rgba(255,248,235,.75);
+    padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(34,48,74,.1); cursor: pointer; color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- Bầu trời -->
+<div class="sky" id="sky">
+  <div class="base"></div><div class="warm"></div><div class="glow"></div>
+  <div class="cloud far f1" data-rise="25"><div class="rise"><img src="assets/cloud.png" alt=""></div></div>
+  <div class="cloud far flip f2" data-rise="25"><div class="rise"><img src="assets/cloud.png" alt=""></div></div>
+  <div class="cloud mid m1" data-rise="70"><div class="rise"><img src="assets/cloud.png" alt=""></div></div>
+  <div class="cloud mid flip m2" data-rise="60"><div class="rise"><img src="assets/cloud.png" alt=""></div></div>
+</div>
+<div class="grain"></div>
+
+<!-- Lưới kẻ và nhãn của màn mở đầu -->
+<div class="grid" id="grid"><i class="v1"></i><i class="v2"></i><i class="h1"></i><i class="h2"></i></div>
+<span class="tag t1" id="tag1">Một khu</span>
+<span class="tag t2" id="tag2">Một nhà</span>
+<div class="wordmark" id="wordmark">AntGo</div>
+
+<header>
+  <a class="logo" href="#">AntGo<svg viewBox="0 0 40 40"><path d="M20 0C21 13 27 19 40 20 27 21 21 27 20 40 19 27 13 21 0 20 13 19 19 13 20 0Z"/></svg></a>
+  <nav>
+    <a href="#">Khám phá</a>
+    <a href="#">Dịch vụ</a>
+    <a href="#">Về AntGo <svg viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+  </nav>
+  <div class="hbtns">
+    <a class="hbtn peach" href="#">Đăng nhập</a>
+    <a class="hbtn cream" href="#">Tạo tài khoản</a>
+  </div>
+</header>
+
+<!-- Vệt chấm hạt sau máy bay -->
+<canvas id="trail"></canvas>
+
+<!-- Mây lớp gần (trước vệt bụi, sau máy bay) -->
+<div class="sky near-layer" id="skyNear">
+  <div class="cloud near n1" data-rise="150"><div class="rise"><img src="assets/cloud.png" alt=""></div></div>
+  <div class="cloud near flip n2" data-rise="140"><div class="rise"><img src="assets/cloud.png" alt=""></div></div>
+</div>
+
+<!-- Kiến cưỡi máy bay giấy -->
+<div class="flyer" id="flyer" title="Bấm vào mình nè!">
+  <div class="tilt"><div class="bob">
+    <div class="swapper" id="swapper">
+      <div class="flash" id="flash"></div>
+      <img class="rider point" src="assets/clean/ride_start.png" alt="">
+      <img class="rider wave" src="assets/clean/ride_wave.png" alt="Linh vật AntGo cưỡi máy bay giấy">
+    </div>
+    <div class="bubble" id="bubble">Chào <i>hàng xóm</i>!</div>
+  </div></div>
+</div>
+
+<!-- Nội dung hero (hiện ở cuối màn mở đầu) -->
+<main class="hero" id="hero">
+  <div class="badge reveal">Ứng dụng kết nối hàng xóm trong khu</div>
+  <h1 class="line l1 reveal">Một khu,</h1>
+  <div class="line l2 reveal">một nhà.</div>
+  <p class="lede reveal">Mua món ngon, đặt dịch vụ hay nhờ một tay — AntGo kết nối bạn với chính những người hàng xóm quanh khu.</p>
+  <div class="ctas reveal"><a class="cta" id="cta" href="#">Bắt đầu khám phá</a><a class="alt" href="#">Tôi muốn đăng bài</a></div>
+</main>
+
+<button class="replay" id="replay">↻ Xem lại</button>
+
+<script>
+/* ================= Linh vật ================= */
+const $ = id => document.getElementById(id);
+const root = document.documentElement, body = document.body;
+const bubble = $("bubble"), flyer = $("flyer");
+let timers = [], hovering = false, ready = false;
+const FLY_MS = 1350;                                   // thời gian máy bay bay vào
+let flyStart = 0, flyerShown = false, flyRaf = 0;
+const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+const greetings = ["Cần gì <i>cứ gọi</i>!", "Có <i>mình</i> đây!", "Ghé chơi <i>nha</i>!", "Chào <i>hàng xóm</i>!"];
+let gi = 0;
+function say(html, ms = 2600) { bubble.innerHTML = html; bubble.classList.add("show"); later(() => bubble.classList.remove("show"), ms); }
+function wave(text) { if (!ready) return; say(text || greetings[gi++ % greetings.length]); }
+
+/* ================= Màn mở đầu =================
+   Các mốc thời gian lấy theo video Trajectory (~2,5 giây). */
+const ease = {
+  inOut: t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+  out: t => 1 - Math.pow(1 - t, 3),
+};
+const win = { wx: 0, wy: 0 }; let winRaf = 0;
+function applyWin() { root.style.setProperty("--wx", win.wx + "px"); root.style.setProperty("--wy", win.wy + "px"); }
+// đổi kích thước cửa sổ trời trong ms mili giây (0 = ngay lập tức)
+function W(wx, wy, ms, fn = ease.inOut) {
+  cancelAnimationFrame(winRaf);
+  if (!ms) { win.wx = wx; win.wy = wy; return applyWin(); }
+  const from = { ...win }, t0 = performance.now();
+  const step = () => {
+    const k = fn(Math.min(1, Math.max(0, (performance.now() - t0) / ms)));
+    win.wx = from.wx + (wx - from.wx) * k; win.wy = from.wy + (wy - from.wy) * k; applyWin();
+    if (k < 1) winRaf = requestAnimationFrame(step);
+  };
+  winRaf = requestAnimationFrame(step);
+}
+function setSky(k, v) { $("sky").style[k] = v; $("skyNear").style[k] = v; }
+const vw = v => innerWidth * v / 100, vh = v => innerHeight * v / 100;
+function setup() {
+  timers.forEach(clearTimeout); timers = []; ready = false;
+  body.classList.remove("on", "idle"); bubble.classList.remove("show");
+  W(70, 70, 0);
+  setSky("transition", "none"); setSky("opacity", 0);
+  document.querySelectorAll(".cloud .rise").forEach(r => { r.style.transition = "none"; r.style.setProperty("--rise", r.parentElement.dataset.rise + "px"); });
+  $("grid").style.opacity = 0; $("tag1").style.opacity = 0; $("tag2").style.opacity = 0;
+  const wm = $("wordmark"); wm.style.transition = "none"; wm.style.opacity = 0; wm.style.color = "#B9B2A6"; wm.style.transform = "translate(-50%,-54%) scale(.96)"; wm.style.filter = "none";
+  stopFly(); flyer.style.transform = ""; flyer.style.opacity = 0; flyerShown = false;
+  flyer.classList.remove("arrived", "lean"); flyer.classList.add("pointing");
+  void body.offsetWidth;
+  wm.style.transition = ""; setSky("transition", "opacity .5s");
+  document.querySelectorAll(".cloud .rise").forEach(r => r.style.transition = "");
+}
+function play() {
+  setup();
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return finish(true);
+  later(() => { $("grid").style.opacity = 1; $("tag1").style.opacity = 1; $("tag2").style.opacity = 1; }, 80);
+  // chữ AntGo hiện dần, từ xám sang xanh đen
+  later(() => { const wm = $("wordmark"); wm.style.opacity = 1; wm.style.transform = "translate(-50%,-54%) scale(1)"; }, 250);
+  later(() => { $("wordmark").style.color = "var(--ink)"; }, 600);
+  // cửa sổ trời mở thành ô vuông, mây trồi lên
+  later(() => { setSky("opacity", 1); const q = Math.min(vw(15), vh(22)); W(q, q, 900);
+                document.querySelectorAll(".cloud .rise").forEach(r => r.style.setProperty("--rise", "0px")); }, 650);
+  // máy bay chở kiến bay vào từ góc dưới-trái theo một đường cong liền mạch
+  later(flyIn, 1350);
+  // máy bay dừng hẳn rồi mới đổi dáng
+  later(() => { stopFly(); flyer.classList.add("arrived"); }, 1350 + FLY_MS);
+  later(() => setRider(false), 1350 + FLY_MS + 240);
+  // chữ AntGo mờ đi, cửa sổ mở rộng
+  later(() => { const wm = $("wordmark"); wm.style.opacity = 0; wm.style.filter = "blur(6px)"; wm.style.transform = "translate(-50%,-54%) scale(1.05)";
+                W(vw(44), vh(40), 650); }, 1900);
+  later(() => { W(vw(51), vh(51), 550, ease.out); $("grid").style.opacity = 0; $("tag1").style.opacity = 0; $("tag2").style.opacity = 0; }, 2500);
+  later(() => finish(false), 2650);
+}
+/* ---------- Ma trận căn máy bay giữa 2 ảnh ----------
+   Điểm mốc (pixel ảnh): vẫy tay 769×608: đầu cánh (1,397) mũi (766,197) đuôi (269,606)
+                         giơ tay 783×578: đầu cánh (1,406) mũi (781,176) đuôi (305,576)
+   mA đưa 3 điểm của ảnh giơ tay về đúng 3 điểm của ảnh vẫy tay. */
+const MATS = { mA: [.94652, .06948, -.11614, 1.10518, 47.21, -51.77] };
+let swapperW = 1;                                      // chiều rộng gốc của khung máy bay (không tính transform)
+function setMatrices() {
+  swapperW = $("swapper").offsetWidth || 1;
+  const k = swapperW / 769;                            // px màn hình trên mỗi pixel ảnh
+  for (const [name, [a, b, c, d, e, f]] of Object.entries(MATS))
+    root.style.setProperty("--" + name, `matrix(${a},${b},${c},${d},${(e * k).toFixed(2)},${(f * k).toFixed(2)})`);
+}
+setMatrices(); addEventListener("resize", setMatrices);
+
+/* ---------- Đổi dáng kiến: chỉ tay (bay vào, rê chuột vào nút) <-> vẫy tay (đã đến) ---------- */
+function setRider(pointing) {
+  if (flyer.classList.contains("pointing") === pointing) return;
+  const sw = $("swapper"), SW = 560, AT = .32;            // đổi hình ở 32% (đáy của nhịp "gom lại")
+  sw.getAnimations().forEach(a => a.cancel());
+  sw.animate([
+    { transform: "none", easing: "cubic-bezier(.4,0,.6,1)" },
+    { transform: "translateY(5px) scale(1.035,.95)", offset: AT, easing: "cubic-bezier(.2,.8,.3,1)" },
+    { transform: "translateY(-7px) scale(.975,1.045)", offset: .62, easing: "cubic-bezier(.4,0,.3,1)" },
+    { transform: "none" }], { duration: SW });
+  $("flash").animate([
+    { opacity: 0, transform: "scale(.6)" }, { opacity: 1, transform: "scale(1)", offset: AT }, { opacity: 0, transform: "scale(1.25)" }],
+    { duration: SW * .62, easing: "ease-out" });
+  setTimeout(() => { flyer.classList.toggle("pointing", pointing); puff(); }, SW * AT);
+}
+function puff() {
+  const sw = $("swapper"), w = swapperW, h = w * .79;
+  const tints = [...COLORS, "255,255,255", "255,220,200"];
+  for (let i = 0; i < 46; i++) {
+    const d = document.createElement("span"), a = Math.random() * 6.283;
+    // điểm xuất phát rải quanh thân kiến (hình elip), bay ra ngoài
+    const cx = w * .52 + Math.cos(a) * w * (.08 + Math.random() * .14), cy = h * .38 + Math.sin(a) * h * (.1 + Math.random() * .18);
+    const r = 50 + Math.random() * 110, s = 3 + Math.random() * 7;
+    d.className = "puff";
+    d.style.cssText = `left:${cx}px; top:${cy}px; width:${s}px; height:${s}px; background: rgb(${tints[i % tints.length]});` +
+      `--vx:${Math.cos(a) * r}px; --vy:${Math.sin(a) * r - 20}px; --dur:${(.6 + Math.random() * .45).toFixed(2)}s; --delay:${(Math.random() * .08).toFixed(2)}s;`;
+    sw.appendChild(d); setTimeout(() => d.remove(), 1200);
+  }
+}
+function arrive() { flyer.classList.add("arrived"); setRider(false); }
+
+/* ---------- Bay vào ----------
+   - Xuất phát hẳn ngoài mép trái, bay THEO HƯỚNG MŨI máy bay (sang phải, chếch lên ~16°) → đọc là "bay", không phải "nhảy".
+   - easeOutSine: lúc đầu đi đều (không bật mạnh), chậm dần khi tới nơi.
+   - Dập dềnh nhẹ trên đường bay như lướt gió; gần tới nơi lướt quá một chút rồi trôi về (làm riêng, không đổi tốc độ đầu). */
+/* Chạy bằng Web Animations trên card đồ họa (không phụ thuộc JavaScript mỗi khung hình) → không bị khựng
+   kể cả khi trang đang bận mở cửa sổ trời / vẽ vệt hạt. Mỗi trục chỉ có 1 đường cong làm mượt (không chia đoạn):
+   - trục ngang (lớp .flyer): phóng nhanh rồi lướt quá đích một chút và trôi về — vận tốc liên tục
+   - trục dọc (lớp .bob): nâng lên chậm hơn trục ngang → đường bay cong nhẹ theo hướng mũi
+   - nghiêng + thu phóng (lớp .swapper) */
+function flyIn() {
+  stopFly(); flyStart = performance.now(); flyerShown = true;
+  const w = innerWidth, h = innerHeight, o = { duration: FLY_MS, fill: "both" };
+  flyer.style.opacity = 1;
+  flyer.animate([{ transform: `translate3d(${-.62 * w}px,0,0)` }, { transform: "translate3d(0,0,0)" }],
+    { ...o, easing: "cubic-bezier(.25,.75,.3,1.035)" });
+  flyer.querySelector(".bob").animate([{ transform: `translate3d(0,${.2 * h}px,0)` }, { transform: "translate3d(0,0,0)" }],
+    { ...o, easing: "cubic-bezier(.35,.65,.4,1)" });
+  $("swapper").animate([{ transform: "rotate(-5deg) scale(.82)" }, { transform: "rotate(0) scale(1)" }],
+    { ...o, easing: "cubic-bezier(.3,.7,.35,1)" });
+}
+function stopFly() { [flyer, flyer.querySelector(".bob"), $("swapper")].forEach(el => el.getAnimations().forEach(a => a.cancel())); }
+
+function finish(instant) {
+  if (instant) { flyer.classList.add("arrived"); flyer.classList.remove("pointing"); flyerShown = true; flyStart = -1e9; W(vw(51), vh(51), 0); setSky("opacity", 1); $("grid").style.opacity = 0; $("tag1").style.opacity = 0; $("tag2").style.opacity = 0;
+                 flyer.style.opacity = 1; document.querySelectorAll(".cloud .rise").forEach(r => r.style.setProperty("--rise", "0px")); }
+  if (instant) arrive();
+  body.classList.add("on");
+  later(() => { body.classList.add("idle"); ready = true; wave("Chào <i>hàng xóm</i>!"); }, instant ? 0 : 500);
+}
+
+/* ================= Vệt chấm hạt sau máy bay ================= */
+const cv = $("trail"), ctx = cv.getContext("2d");
+let dpr = 1;
+function resize() { dpr = Math.min(devicePixelRatio || 1, 2); cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; }
+resize(); addEventListener("resize", () => { resize(); if (body.classList.contains("on")) W(vw(51), vh(51), 0); });
+const COLORS = ["255,214,107", "255,200,92", "255,232,160", "250,180,90", "255,246,214", "255,222,120"];
+// Vệt bụi kiểu Trajectory: hạt nhỏ li ti, vàng tươi, dốc ~60° xuống trái, kéo tới mép dưới màn hình
+const TRAIL = ["255,226,92", "255,236,140", "255,214,70", "255,246,190", "255,200,90", "255,255,230"];
+const P = Array.from({ length: 5200 }, () => {
+  const g = (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;   // dày ở giữa vệt, thưa ở rìa
+  return { s0: Math.random(), g, r: .8 + Math.random() * 1.9, c: `rgb(${TRAIL[(Math.random() * TRAIL.length) | 0]})`,
+           k: .65 + Math.random() * .35, ph: Math.random() * 6.28, sp: 1.5 + Math.random() * 3.5 };
+});
+let drawErr = false;
+function draw(t) {
+  requestAnimationFrame(draw);
+  try { drawTrail(t); } catch (e) { if (!drawErr) { drawErr = true; console.error("Lỗi vẽ vệt hạt:", e); } }
+}
+function drawTrail(t) {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = 1; ctx.clearRect(0, 0, innerWidth, innerHeight);
+  if (!flyerShown) return;
+  const r = $("swapper").getBoundingClientRect(), sc = r.width / swapperW;
+  const tx = r.left + r.width * .37, ty = r.top + r.height * .93;          // đuôi máy bay
+  const dx = -.52, dy = 1, n = Math.hypot(dx, dy), ux = dx / n, uy = dy / n, px = -uy, py = ux;
+  const len = Math.max(260, (innerHeight - ty) / uy * 1.15);                // kéo quá mép dưới màn hình
+  const W0 = 10 * sc, W1 = 150 * sc;
+  // quầng vàng rất nhẹ bên dưới
+  const gr = ctx.createLinearGradient(tx, ty, tx + ux * len, ty + uy * len);
+  gr.addColorStop(0, "rgba(255,225,110,.22)"); gr.addColorStop(.6, "rgba(255,225,110,.08)"); gr.addColorStop(1, "rgba(255,225,110,0)");
+  ctx.fillStyle = gr; ctx.beginPath();
+  ctx.moveTo(tx + px * W0 * .6, ty + py * W0 * .6); ctx.lineTo(tx + ux * len + px * W1 * .5, ty + uy * len + py * W1 * .5);
+  ctx.lineTo(tx + ux * len - px * W1 * .5, ty + uy * len - py * W1 * .5); ctx.lineTo(tx - px * W0 * .6, ty - py * W0 * .6); ctx.fill();
+  const flow = t / 1000 * .05;                                               // hạt trôi dần ra xa đuôi
+  for (const p of P) {
+    const s = (p.s0 + flow) % 1;
+    const d = s * len, lat = p.g * (W0 + (W1 - W0) * Math.pow(s, .85));
+    const x = tx + ux * d + px * lat, y = ty + uy * d + py * lat;
+    const tw = .65 + .35 * Math.sin(t / 1000 * p.sp + p.ph);
+    const fade = Math.min(1, s * 25) * (1 - Math.pow(s, 2.2));              // đậm sát đuôi, tan dần về cuối
+    ctx.globalAlpha = p.k * tw * fade; ctx.fillStyle = p.c;
+    ctx.fillRect(x, y, p.r, p.r);
+  }
+}
+requestAnimationFrame(draw);
+
+/* ================= Tương tác ================= */
+const cta = $("cta");
+cta.addEventListener("mouseenter", () => { if (!ready) return; hovering = true; flyer.classList.add("lean"); setRider(true); say("Đi <i>thôi</i>!", 1800); });
+cta.addEventListener("mouseleave", () => { hovering = false; flyer.classList.remove("lean"); if (ready) setRider(false); });
+flyer.addEventListener("click", () => wave());
+$("replay").addEventListener("click", play);
+setInterval(() => { if (ready && !hovering && !document.hidden) wave(); }, 15000);
+let mx = 0, my = 0, mQueued = false;
+addEventListener("mousemove", e => {
+  mx = (e.clientX / innerWidth - .5) * 2; my = (e.clientY / innerHeight - .5) * 2;
+  if (mQueued) return; mQueued = true;
+  requestAnimationFrame(() => { root.style.setProperty("--mx", mx.toFixed(3)); root.style.setProperty("--my", my.toFixed(3)); mQueued = false; });
+});
+
+Promise.all([document.fonts.ready, ...[...document.images].map(i => i.decode().catch(() => {}))]).then(() => setTimeout(play, 200));
+</script>
+</body>
+</html>

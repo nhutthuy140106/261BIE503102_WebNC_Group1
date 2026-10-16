@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AntGo — Đơn hàng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Mona+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== THEME: chỉ đổi biến màu, bố cục giữ nguyên ===== */
+  /* Bảng màu lấy từ ảnh khối mở đầu + con kiến: chữ xanh đen (hợp trời lavender),
+     mảng phụ kem ngả hồng (hợp mây), một màu nhấn duy nhất là cam con kiến */
+  :root, body.t-warm {
+    --bg: #FFFFFF; --card: #FFFFFF; --soft: #FBF4F1; --border: #F0E2DC;
+    --ink: #22304A; --smoke: #6A6879; --fog: #A3A0B0;
+    --accent: #D85A1C; --accent-soft: #FDE8DD; --frame: #F7ECE8;
+  }
+  body.t-old {                         /* bảng màu cũ (Trắng ấm nâu) — ?theme=old để so sánh */
+    --bg: #FFFFFF; --card: #FFFFFF; --soft: #F8F4EE; --border: #ECE4D8;
+    --ink: #231C15; --smoke: #76695B; --fog: #A99C8C;
+    --accent: #C2541A; --accent-soft: #FBEADF; --frame: #F3ECE2;
+  }
+  body.t-cream {                       /* Kem: nền kem như trang giới thiệu, thẻ trắng nổi lên */
+    --bg: #FBF6EE; --card: #FFFFFF; --soft: #F3EBDF; --border: #E9DFCF;
+    --ink: #22304A; --smoke: #6B6656; --fog: #A39A88;
+    --accent: #C2541A; --accent-soft: #FBE7DA; --frame: #F1E7D8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Mona Sans", sans-serif; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; font-size: 14px; }
+  svg.i { width: 18px; height: 18px; fill: currentColor; stroke: none; flex: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  a { color: inherit; text-decoration: none; cursor: pointer; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+
+  /* ===== HEADER =====
+     Một hàng duy nhất, không bao giờ xuống dòng: trái và phải giữ kích thước tự nhiên,
+     ô tìm kiếm ở giữa là phần co giãn. Màn hình hẹp → menu chỉ còn icon. */
+  header { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+  .bar { display: flex; align-items: center; gap: 20px; height: 64px; }
+  .bar > * { flex: none; white-space: nowrap; }
+  .left { display: flex; align-items: center; gap: 28px; }
+  .logo { font-weight: 700; font-size: 21px; letter-spacing: -.02em; }
+  .logo span { color: var(--accent); }
+  nav { display: flex; gap: 4px; }
+  nav a { display: inline-flex; align-items: center; gap: 7px; height: 64px; padding: 0 10px; font-weight: 500; color: var(--smoke); position: relative; }
+  nav a svg { width: 18px; height: 18px; display: none; }
+  nav a.on { color: var(--ink); }
+  nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; background: var(--ink); }
+  nav a .n { min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--ink); color: #fff; font-size: 10.5px; font-weight: 600; display: inline-grid; place-items: center; }
+
+  .right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+  .hbtn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; border-radius: 10px; font-weight: 500; color: var(--ink); transition: background .15s; }
+  .hbtn:hover { background: var(--soft); }
+  .hbtn svg { width: 16px; height: 16px; color: var(--smoke); }
+  .hbtn .chev { width: 13px; height: 13px; }
+  .sep { width: 1px; height: 22px; background: var(--border); margin: 0 6px; }
+  .coin { width: 20px; height: 20px; flex: none; object-fit: contain; }
+  .iconbtn { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: var(--smoke); position: relative; }
+  .iconbtn:hover { background: var(--soft); }
+  .iconbtn .d { position: absolute; top: 8px; right: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); border: 1.5px solid var(--bg); }
+  .av { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; margin-left: 6px; }
+  .av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .role { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--border); }
+  .role button { height: 32px; padding: 0 16px; border-radius: 999px; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; color: var(--smoke); white-space: nowrap; transition: background .2s, color .2s; }
+  .role button.on { background: var(--soft); color: var(--ink); }
+  /* nút vai trò bản gọn trên header — chỉ chiếm chỗ khi đã dính lên */
+  .bar .role { padding: 3px; margin-right: 4px; display: inline-flex; }
+  .bar .role button { height: 28px; padding: 0 11px; font-size: 12px; }
+  body.docked .bar .role { display: inline-flex; animation: dockIn .4s cubic-bezier(.2,.8,.2,1); }
+
+  /* ô tìm kiếm gọn — phần co giãn của header */
+  .hsearch { flex: 1 1 auto; min-width: 0; max-width: 460px; margin: 0 auto; height: 42px; display: flex; align-items: center; gap: 10px; padding: 0 5px 0 16px;
+    border-radius: 999px; background: var(--soft); border: 1px solid var(--border); visibility: hidden; opacity: 0; }
+  body.searchdock .hsearch { visibility: visible; opacity: 1; animation: dockIn .4s cubic-bezier(.2,.8,.2,1); }
+  @keyframes dockIn { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
+  .hsearch .kind { font-size: 12px; font-weight: 600; color: var(--accent); padding-right: 10px; border-right: 1px solid var(--border); flex: none; }
+  .hsearch input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--ink); outline: none; text-overflow: ellipsis; }
+  .hsearch input::placeholder { color: var(--smoke); }
+  .hsearch .go { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; flex: none; }
+  .hsearch .go svg { width: 15px; height: 15px; }
+
+  /* màn hình hẹp / trình duyệt phóng to: menu chỉ còn icon, khu vực chỉ còn ghim */
+  @media (max-width: 1240px) {
+    .wrap { padding: 0 24px; }
+    .left { gap: 16px; }
+    nav a { padding: 0 9px; }
+    nav a .t { display: none; }
+    nav a svg { display: block; }
+    nav a .n { position: absolute; top: 13px; right: 1px; min-width: 15px; height: 15px; font-size: 9.5px; padding: 0 4px; }
+    .hbtn .t, .hbtn .chev { display: none; }
+  }
+  .hero .role { transition: opacity .25s; }
+  body.docked .hero .role { opacity: 0; }
+
+  .hsearch { visibility: visible; opacity: 1; }
+  .wrap { max-width: 1200px; }
+  .sec { margin-top: 56px; }
+  .sh { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; }
+  .sh h2 { font-size: 22px; font-weight: 700; letter-spacing: -.015em; }
+  .sh .more { margin-left: auto; font-weight: 600; font-size: 13px; display: inline-flex; gap: 4px; align-items: center; }
+  .sh .more svg { width: 14px; height: 14px; }
+  .g6, .g5, .g4 { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 20px; }
+  .item { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; }
+  body.t-warm .item { border: 0; border-radius: 0; background: transparent; overflow: visible; }
+  .item .ph { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--soft); }
+  body.t-warm .item .ph { border-radius: 10px; }
+  .item .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .item .save { position: absolute; right: 8px; top: 8px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,.92); display: grid; place-items: center; color: var(--ink); }
+  .item .save svg { width: 15px; height: 15px; }
+  .item .kind { position: absolute; left: 8px; top: 8px; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,.92); font-size: 11px; font-weight: 600; }
+  .item .body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  body.t-warm .item .body { padding: 10px 2px 0; }
+  .item h3 { font-size: 14px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.7em; }
+  .item .pr { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .item:has(.kind.ad) .pr { color: var(--accent); }   /* cam chỉ cho giá bài quảng bá */
+  .item .pr span { font-size: 12px; font-weight: 400; color: var(--smoke); }
+  .item .xu { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 8px; background: #FDF3DC; color: #7A5410; font-size: 12px; font-weight: 500; }
+  .item .xu .coin { width: 18px; height: 18px; }
+  .item .kind.ad { background: rgba(34,28,21,.74); color: #fff; letter-spacing: .02em; }
+  .item .meta { margin-top: auto; display: flex; justify-content: space-between; color: var(--smoke); font-size: 12px; }
+  .item .meta span { display: inline-flex; align-items: center; gap: 4px; }
+  .item .meta svg { width: 13px; height: 13px; }
+  .star { color: #E39B1A; }
+  .star svg { fill: currentColor; stroke: none; }
+  .item.jobc .ph { display: flex; flex-direction: column; justify-content: space-between; padding: 14px; background: var(--soft); }
+  .item.jobc .ph .jcat { align-self: flex-start; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,.75); font-size: 11px; font-weight: 600; }
+  .item.jobc .ph .jpay { font-size: 24px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); line-height: 1.1; }
+  .item.jobc .ph .jpay small { display: block; font-size: 12px; font-weight: 500; color: var(--smoke); letter-spacing: 0; }
+  .item.jobc .jpay { color: var(--ink); }
+  .item .poster { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--smoke); }
+  .item .poster img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
+  .item .poster b { color: var(--ink); font-weight: 600; }
+  .item .save.on { color: var(--accent); }
+  .flyheart { position: fixed; z-index: 60; width: 22px; height: 22px; color: var(--accent); pointer-events: none; }
+  .xuok { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; padding: 2px 7px 2px 3px; border-radius: 999px; background: #FDF1DB; color: #8A5A10; font-size: 11px; font-weight: 600; }
+  .xuok img { width: 14px; height: 14px; }
+  .item { cursor: pointer; }
+  /* ===== FOOTER — nền xanh đen "đóng khung" trang kem; kiến ló đầu ở mép trên ===== */
+  footer { margin-top: 130px; position: relative; background: #1E2638; color: #C8C6D6; }
+  footer .peek { position: absolute; right: max(40px, calc(50% - 600px)); top: 0; width: 92px; transform: translateY(-55%); pointer-events: none;
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,.15)); clip-path: inset(0 0 45% 0); }
+  footer .top { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; padding-top: 64px; padding-bottom: 48px; }
+  footer .brand .logo { font-size: 24px; color: #FFF6EA; }
+  footer .brand p { margin-top: 10px; max-width: 260px; line-height: 1.55; font-size: 14px; }
+  footer h4 { color: #FFF6EA; font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+  footer ul { list-style: none; display: grid; gap: 10px; font-size: 14px; }
+  footer ul a { transition: color .15s; }
+  footer ul a:hover { color: #FFF6EA; }
+  footer .xu { display: inline-flex; align-items: center; gap: 6px; }
+  footer .xu .coin { width: 18px; height: 18px; }
+  footer .bottom { border-top: 1px solid rgba(255,246,234,.1); }
+  footer .bottom .wrap { display: flex; align-items: center; gap: 22px; height: 60px; font-size: 13px; color: #9A937F; }
+  footer .bottom a:hover { color: #FFF6EA; }
+  footer .bottom .end { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  footer .bottom .end svg { width: 14px; height: 14px; }
+  .tag { position: fixed; right: 14px; bottom: 14px; z-index: 30; font-size: 13px; font-weight: 600; background: var(--ink); color: #fff; padding: 7px 12px; border-radius: 8px; }
+
+  .iconbtn .cnt { position: absolute; top: 3px; right: 1px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--accent); color: #fff;
+    font-size: 10.5px; font-weight: 700; display: grid; place-items: center; border: 2px solid var(--bg); }
+  .iconbtn .cnt:empty { display: none; }
+  @keyframes bump { 40% { transform: scale(1.25); } }
+  .xubtn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; border-radius: 10px; font-weight: 600; transition: background .15s; }
+  .xubtn:hover { background: var(--soft); }
+  .xubtn .coin { width: 20px; height: 20px; }
+  .flyheart { position: fixed; z-index: 60; width: 22px; height: 22px; color: var(--accent); pointer-events: none; }
+  .iconbtn.bump { animation: bump .45s cubic-bezier(.3,1.6,.5,1); }
+  /* lightbox xem ảnh lớn */
+  .lb { position: fixed; inset: 0; z-index: 95; background: rgba(18,22,34,.94); display: none; flex-direction: column; color: #fff; }
+  .lb.show { display: flex; animation: lbIn .2s ease-out; }
+  @keyframes lbIn { from { opacity: 0; } }
+  .lbtop { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; font-size: 14px; font-weight: 600; }
+  .lb .x { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: rgba(255,255,255,.1); }
+  .lb .x:hover { background: rgba(255,255,255,.2); }
+  .lb .stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 20px; padding: 0 24px; }
+  .lb .big { max-width: min(1200px, calc(100vw - 180px)); max-height: 100%; object-fit: contain; border-radius: 10px; animation: lbIn .25s ease-out; }
+  .lb .nav { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: #fff; flex: none; }
+  .lb .nav:hover { transform: scale(1.06); }
+  .lb .prev svg { transform: rotate(180deg); }
+  .lb .thumbs { display: flex; justify-content: center; gap: 8px; padding: 16px; }
+  .lb .thumbs img { width: 72px; height: 54px; object-fit: cover; border-radius: 8px; opacity: .45; cursor: pointer; transition: opacity .15s; outline: 2px solid transparent; outline-offset: 2px; }
+  .lb .thumbs img.on { opacity: 1; outline-color: #fff; }
+  .lb .thumbs img:hover { opacity: .85; }
+  /* ===== CHI TIẾT BÀI ===== */
+  .crumb { margin-top: 22px; display: flex; align-items: center; gap: 8px; color: var(--smoke); font-size: 13px; }
+  .crumb a:hover { color: var(--ink); }
+  .crumb .back { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px 6px 6px; border-radius: 8px; color: var(--ink); font-weight: 600; }
+  .crumb .back:hover { background: var(--soft); }
+  .crumb .back svg { width: 16px; height: 16px; transform: rotate(180deg); }
+  .titlerow { margin-top: 14px; display: flex; align-items: flex-end; gap: 20px; }
+  .titlerow h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
+  .titlerow .sub { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--smoke); font-size: 14px; }
+  .titlerow .sub span { display: inline-flex; align-items: center; gap: 5px; }
+  .titlerow .sub svg { width: 15px; height: 15px; }
+  .titlerow .sub .st { color: var(--ink); font-weight: 600; }
+  .titlerow .sub .st svg { color: #E39B1A; }
+  .acts { margin-left: auto; display: flex; gap: 8px; flex: none; }
+  .acts button { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 10px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .acts button:hover { background: var(--soft); }
+  .acts button svg { width: 18px; height: 18px; }
+  .acts button.on { color: var(--accent); }
+
+  .gallery { margin-top: 22px; display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 210px 210px; gap: 8px; border-radius: 18px; overflow: hidden; position: relative; }
+  .gallery img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: zoom-in; transition: filter .2s; }
+  .gallery img:hover { filter: brightness(.92); }
+  .gallery img:first-child { grid-row: span 2; }
+  .gallery .all { position: absolute; right: 14px; bottom: 14px; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 10px; background: #fff; border: 1px solid var(--ink); font-weight: 600; font-size: 13px; }
+
+  .cols { margin-top: 32px; display: grid; grid-template-columns: minmax(0,1fr) 380px; gap: 56px; align-items: start; }
+  .block { padding: 26px 0; border-top: 1px solid var(--border); }
+  .block:first-child { border-top: 0; padding-top: 0; }
+  .block h2 { font-size: 19px; font-weight: 700; margin-bottom: 14px; }
+  .seller { display: flex; align-items: center; gap: 14px; }
+  .seller img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+  .seller b { display: block; font-size: 16px; }
+  .seller small { color: var(--smoke); font-size: 13px; }
+  .seller .msg { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--ink); font-weight: 600; }
+  .seller .msg:hover { background: var(--soft); }
+  .seller .msg svg { width: 18px; height: 18px; }
+  .facts { margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .facts div { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 12px; background: var(--soft); font-size: 13px; color: var(--smoke); }
+  .facts svg { width: 20px; height: 20px; color: var(--ink); flex: none; }
+  .facts b { display: block; color: var(--ink); font-size: 14px; }
+  .desc p { line-height: 1.65; color: #3C4660; }
+  .desc p + p { margin-top: 10px; }
+  .desc ul { margin-top: 12px; padding-left: 18px; line-height: 1.8; color: #3C4660; }
+  .opts { display: grid; gap: 14px; }
+  .opt b { display: block; font-size: 14px; margin-bottom: 8px; }
+  .opt .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt .chips button { height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); font-size: 13.5px; font-weight: 500; }
+  .opt .chips button.on { border-color: var(--ink); background: var(--ink); color: #fff; }
+  .opt .chips button small { color: inherit; opacity: .7; margin-left: 4px; }
+  .revhead { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 700; margin-bottom: 16px; }
+  .revhead svg { width: 20px; height: 20px; color: #E39B1A; }
+  .revs { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 36px; }
+  .rev .who { display: flex; align-items: center; gap: 10px; }
+  .rev .who img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+  .rev .who b { display: block; font-size: 14px; }
+  .rev .who small { color: var(--smoke); font-size: 12px; }
+  .rev .stars { margin-top: 8px; color: #E39B1A; font-size: 12px; letter-spacing: 1px; }
+  .rev p { margin-top: 4px; line-height: 1.55; color: #3C4660; font-size: 14px; }
+
+  /* khung đặt hàng dính khi cuộn */
+  .order { position: sticky; top: 92px; border: 1px solid var(--border); border-radius: 18px; padding: 22px; background: var(--card); box-shadow: 0 18px 40px -22px rgba(34,48,74,.35); }
+  .order .price { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+  .order .price span { font-size: 15px; font-weight: 400; color: var(--smoke); }
+  .order .avail { margin-top: 4px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #2E7D4F; font-weight: 600; }
+  .order .avail i { width: 7px; height: 7px; border-radius: 50%; background: #3BAA6A; }
+  .field { margin-top: 14px; }
+  .field label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--smoke); margin-bottom: 6px; }
+  .qty { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 12px; height: 46px; }
+  .qty button { width: 46px; height: 100%; font-size: 20px; color: var(--ink); }
+  .qty button:disabled { opacity: .3; }
+  .qty span { flex: 1; text-align: center; font-weight: 700; font-size: 16px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .seg button { height: 42px; border-radius: 10px; border: 1px solid var(--border); font-weight: 600; font-size: 13.5px; }
+  .seg button.on { border-color: var(--ink); background: var(--ink); color: #fff; }
+  .field textarea, .field input { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 11px 13px; font: inherit; font-size: 14px; color: var(--ink); resize: none; outline: none; background: #fff; }
+  .field textarea:focus, .field input:focus { border-color: var(--ink); }
+  .xurow { margin-top: 14px; display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 12px; border-radius: 12px; border: 1px dashed #EDC9B4; background: #FFFBF8; text-align: left; }
+  .xurow img { width: 22px; height: 22px; }
+  .xurow b { display: block; font-size: 14px; }
+  .xurow small { color: var(--smoke); font-size: 12.5px; }
+  .xurow .chev { margin-left: auto; width: 16px; height: 16px; color: var(--smoke); transform: rotate(-90deg); }
+  .vlist { display: none; margin-top: 6px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .vlist.show { display: block; }
+  .vlist button { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 11px 12px; font-size: 13.5px; text-align: left; border-top: 1px solid var(--border); }
+  .vlist button:first-child { border-top: 0; }
+  .vlist button:hover { background: var(--soft); }
+  .vlist button.dis { opacity: .45; cursor: not-allowed; }
+  .vlist button small { color: var(--smoke); }
+  .sum { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); display: grid; gap: 8px; font-size: 14px; color: var(--smoke); }
+  .sum div { display: flex; justify-content: space-between; }
+  .sum .disc { color: #2E7D4F; }
+  .sum .tot { color: var(--ink); font-weight: 700; font-size: 17px; }
+  .primary { margin-top: 16px; width: 100%; height: 52px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 700; font-size: 16px; box-shadow: 0 12px 24px -12px rgba(216,90,28,.8); transition: transform .15s; }
+  .primary:hover { transform: translateY(-1px); }
+  .order .note { margin-top: 10px; text-align: center; font-size: 12.5px; color: var(--smoke); line-height: 1.5; }
+  .order .demo { margin-top: 12px; padding: 9px 11px; border-radius: 10px; background: var(--soft); font-size: 12px; color: var(--fog); line-height: 1.5; }
+
+  /* đánh giá: thêm + xem tất cả */
+  .rev .ok { font-style: normal; color: #2E7D4F; font-weight: 600; }
+  .rev .stars span { color: #E5DED6; }
+  .rimgs { margin-top: 8px; display: flex; gap: 6px; }
+  .rimgs img { width: 72px; height: 56px; border-radius: 8px; object-fit: cover; cursor: zoom-in; }
+  .reply { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: var(--soft); font-size: 13.5px; line-height: 1.5; color: #3C4660; }
+  .reply b { display: block; font-size: 12px; color: var(--ink); margin-bottom: 2px; }
+  .allrev { margin-top: 20px; height: 44px; padding: 0 20px; border-radius: 10px; border: 1px solid var(--ink); font-weight: 600; }
+  .allrev:hover { background: var(--soft); }
+  .rvwrap { position: fixed; inset: 0; z-index: 85; background: rgba(34,48,74,.38); display: none; place-items: center; padding: 28px; }
+  .rvwrap.show { display: grid; }
+  .rv { width: 980px; max-width: 100%; height: min(760px, 100%); border-radius: 22px; background: #fff; display: grid; grid-template-columns: 280px 1fr; overflow: hidden; animation: pop .3s cubic-bezier(.3,1.3,.5,1); }
+  .rvside { padding: 28px 26px; border-right: 1px solid var(--border); }
+  .rvscore { display: flex; align-items: center; gap: 10px; }
+  .rvscore svg { width: 30px; height: 30px; color: #E39B1A; }
+  .rvscore b { font-size: 40px; font-weight: 700; letter-spacing: -.02em; }
+  .rvside small { display: block; margin-top: 4px; color: var(--smoke); }
+  .bars { margin-top: 22px; display: grid; gap: 9px; }
+  .bars div { display: grid; grid-template-columns: 22px 1fr 22px; align-items: center; gap: 10px; font-size: 13px; color: var(--smoke); }
+  .bars i { height: 6px; border-radius: 3px; background: var(--soft); overflow: hidden; }
+  .bars i em { display: block; height: 100%; background: var(--ink); border-radius: 3px; }
+  .rvmain { display: flex; flex-direction: column; min-height: 0; }
+  .rvtop { display: flex; gap: 10px; align-items: center; padding: 20px 24px 12px; }
+  .rvsearch { flex: 1; display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); color: var(--fog); }
+  .rvsearch input { flex: 1; border: 0; outline: none; font: inherit; color: var(--ink); background: none; }
+  #rvSort { height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--border); font: inherit; background: #fff; color: var(--ink); }
+  .rv .x { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--smoke); }
+  .rv .x:hover { background: var(--soft); }
+  .rvchips { display: flex; gap: 6px; padding: 0 24px 12px; border-bottom: 1px solid var(--border); }
+  .rvchips button { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); font-size: 13px; font-weight: 500; }
+  .rvchips button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .rvlist { flex: 1; overflow: auto; padding: 8px 24px 24px; }
+  .rvlist .rev { padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .rvlist mark { background: #FFE7C2; color: inherit; border-radius: 3px; padding: 0 2px; }
+  .rvempty { padding: 40px 0; text-align: center; color: var(--smoke); }
+  /* khối mới trong khung đặt hàng */
+  .order { max-height: calc(100vh - 110px); overflow: auto; overscroll-behavior: contain; }
+  .order .psub { margin-top: 4px; font-size: 13px; color: var(--smoke); }
+  .order .avail { flex-wrap: wrap; }
+  .order .avail small { flex-basis: 100%; margin-left: 13px; font-weight: 400; color: var(--smoke); font-size: 12px; }
+  .order .avail.off { color: #9A3B1C; } .order .avail.off i { background: #D85A1C; }
+  .primary:disabled { background: #D9D3CF; box-shadow: none; cursor: not-allowed; }
+  .seg button small, .chips2 button small { display: block; font-size: 11px; font-weight: 500; opacity: .75; }
+  .seg button { height: auto; min-height: 42px; padding: 6px 8px; line-height: 1.25; }
+  .chips2 { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips2 button { min-height: 36px; padding: 5px 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 13px; font-weight: 500; line-height: 1.2; text-align: left; }
+  .chips2 button.on { border-color: var(--ink); background: var(--ink); color: #fff; }
+  .field label em { color: var(--accent); font-style: normal; }
+  .field label .opt { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--fog); }
+  .field.err input, .field.err textarea, .field.err .slots, .field.err .chips2 { outline: 2px solid #E8693A; outline-offset: 2px; border-radius: 12px; }
+  .field.err::after { content: attr(data-msg); display: block; margin-top: 6px; font-size: 12.5px; font-weight: 600; color: #C2451A; }
+  .where { display: flex; gap: 10px; padding: 11px 12px; border-radius: 12px; background: var(--soft); font-size: 13px; color: var(--smoke); }
+  .where svg { width: 18px; height: 18px; color: var(--ink); flex: none; }
+  .where b { display: block; color: var(--ink); font-size: 14px; }
+  .field label.upload { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px; border-radius: 12px; border: 1.5px dashed var(--border); color: var(--smoke); cursor: pointer; text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 500; }
+  .upload:hover { border-color: var(--ink); color: var(--ink); }
+  .upload svg { width: 20px; height: 20px; }
+  .days.scroll { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+  .days.scroll button { flex: none; }
+  .durrow { margin-top: 10px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--smoke); }
+  .check { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13.5px; text-transform: none !important; letter-spacing: 0 !important; color: var(--ink) !important; font-weight: 500 !important; cursor: pointer; }
+  .check input { width: 16px; height: 16px; accent-color: var(--accent); }
+  .safety { margin-top: 14px; display: flex; gap: 10px; padding: 11px 12px; border-radius: 12px; background: #EEF5EF; color: #2C5A3B; font-size: 12.5px; line-height: 1.5; }
+  .safety svg { width: 18px; height: 18px; flex: none; }
+  .sum .est { font-size: 12px; color: var(--fog); }
+  .order .demo a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+  .order .demo b { color: var(--accent); }
+  .modal { max-height: calc(100vh - 40px); overflow: auto; }
+  .modal dd { word-break: break-word; }
+  .steps { flex-wrap: wrap; }
+  /* chọn giờ */
+  .slotbox { display: none; margin-top: 8px; }
+  .slotbox.show { display: block; }
+  .days { display: flex; gap: 6px; margin-bottom: 8px; }
+  .days button { height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); font-size: 13px; font-weight: 500; }
+  .days button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .slots button { height: 36px; border-radius: 9px; border: 1px solid var(--border); font-size: 13px; font-weight: 600; }
+  .slots button:hover:not(:disabled) { border-color: var(--ink); }
+  .slots button.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .slots button:disabled { opacity: .35; text-decoration: line-through; cursor: not-allowed; }
+  .whenhint { margin-top: 8px; font-size: 12.5px; color: var(--smoke); }
+  .whenhint b { color: var(--ink); }
+  /* hộp xác nhận + thành công */
+  .scrim { position: fixed; inset: 0; z-index: 80; background: rgba(34,48,74,.35); display: none; place-items: center; padding: 20px; }
+  .scrim.show { display: grid; }
+  .modal { width: 460px; max-width: 100%; border-radius: 20px; background: #fff; padding: 26px; box-shadow: 0 30px 60px -20px rgba(34,48,74,.45); animation: pop .3s cubic-bezier(.3,1.3,.5,1); }
+  @keyframes pop { from { opacity: 0; transform: translateY(14px) scale(.97); } }
+  .modal h3 { font-size: 20px; font-weight: 700; }
+  .modal .line { margin-top: 16px; display: flex; gap: 12px; align-items: center; }
+  .modal .line img { width: 64px; height: 56px; border-radius: 10px; object-fit: cover; }
+  .modal .line b { display: block; }
+  .modal .line small { color: var(--smoke); }
+  .modal dl { margin-top: 16px; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 14px; }
+  .modal dt { color: var(--smoke); }
+  .modal dd { text-align: right; font-weight: 500; }
+  .modal dd.tot { font-weight: 700; font-size: 17px; }
+  .modal .btns { margin-top: 22px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; }
+  .modal .btns button { height: 48px; border-radius: 12px; font-weight: 700; }
+  .modal .ghost { border: 1px solid var(--border); }
+  .modal .go { background: var(--accent); color: #fff; }
+  .done { text-align: center; }
+  .done img { width: 190px; margin: -6px auto 4px; display: block; animation: floaty 3s ease-in-out infinite; }
+  @keyframes floaty { 50% { transform: translateY(-8px) rotate(-2deg); } }
+  .done p { margin-top: 8px; color: var(--smoke); line-height: 1.55; }
+  .steps { margin: 18px 0 4px; display: flex; justify-content: center; gap: 6px; font-size: 12.5px; color: var(--smoke); }
+  .steps span { padding: 5px 10px; border-radius: 999px; background: var(--soft); }
+  .steps span.now { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+</style>
+<style>
+  /* ===== ĐƠN HÀNG ===== */
+  .ohead { margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
+  .ohead h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; }
+  .ohead p { margin-top: 6px; color: var(--smoke); font-size: 14px; }
+  .toggles { display: flex; gap: 8px; }
+  .toggles button { height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--border); font-weight: 600; font-size: 13.5px; display: inline-flex; align-items: center; gap: 8px; }
+  .toggles button:hover { border-color: var(--ink); }
+  .toggles button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .toggles button small { font-size: 12px; font-weight: 600; opacity: .6; }
+  .ogroup { margin-top: 30px; }
+  .ogroup h2 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--smoke); margin-bottom: 10px; }
+  .olist { display: grid; gap: 10px; }
+  .orow { display: grid; grid-template-columns: 92px minmax(0,1fr) auto; gap: 18px; align-items: center; padding: 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); cursor: pointer; text-align: left; transition: background .15s, border-color .15s; }
+  .orow:hover { background: var(--soft); }
+  .orow .th { width: 92px; height: 76px; border-radius: 12px; overflow: hidden; background: var(--soft); display: grid; place-items: center; text-align: center; }
+  .orow .th img { width: 100%; height: 100%; object-fit: cover; }
+  .orow .th svg { width: 26px; height: 26px; color: var(--ink); }
+  .orow .th small { display: block; margin-top: 2px; font-size: 11px; font-weight: 600; color: var(--smoke); }
+  .orow .otag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 700; border: 1px solid var(--border); color: var(--smoke); }
+  .orow .otag.rcv { border-color: var(--ink); color: var(--ink); }
+  .orow h3 { margin-top: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .orow .sub { margin-top: 3px; color: var(--smoke); font-size: 13px; }
+  .orow .end { text-align: right; display: grid; gap: 8px; justify-items: end; }
+  .orow .end b { font-size: 16px; }
+  .stat { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; }
+  .stat::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .stat.act { color: var(--accent); }
+  .stat.wait { color: #A86A12; } .stat.go { color: #2E7D4F; } .stat.done { color: var(--smoke); } .stat.off { color: var(--fog); }
+  .need { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12.5px; font-weight: 700; }
+  .need svg { width: 14px; height: 14px; }
+  .orow.ended { opacity: .72; }
+  .toggles .tsep { width: 1px; height: 24px; background: var(--border); align-self: center; margin: 0 4px; }
+  .toggles button svg { width: 15px; height: 15px; }
+  .ogroup .nhint { margin: -4px 0 12px; font-size: 13px; color: var(--smoke); }
+  .histlink { margin-top: 26px; width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 16px; border: 1px dashed var(--border); text-align: left; color: var(--smoke); }
+  .histlink:hover { background: var(--soft); }
+  .histlink > svg { width: 20px; height: 20px; }
+  .histlink > svg:last-child { margin-left: auto; width: 16px; height: 16px; }
+  .histlink b { display: block; color: var(--ink); font-size: 15px; }
+  .needgroup { margin-top: 26px; padding: 18px 18px 20px; border-radius: 18px; background: #FFF6F1; border: 1px solid #F6DACB; }
+  .needgroup h2 { display: flex; align-items: center; gap: 6px; color: var(--accent); }
+  .needgroup h2 svg { width: 15px; height: 15px; }
+  .needgroup .nhint { margin: -4px 0 12px; font-size: 13px; color: var(--smoke); }
+  .needgroup .orow { border-color: #F2D5C5; }
+
+  /* chi tiết */
+  .dhead { margin-top: 18px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; padding: 26px 30px; border-radius: 22px; background: var(--soft); }
+  .dhead .chips { display: flex; gap: 8px; align-items: center; }
+  .dhead .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; background: #fff; font-size: 12.5px; font-weight: 600; }
+  .dhead .chip svg { width: 15px; height: 15px; color: var(--accent); }
+  .dhead .code { font-size: 12.5px; color: var(--smoke); }
+  .dhead h1 { margin-top: 12px; font-size: 28px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
+  .dhead .meta { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--smoke); font-size: 14px; }
+  .dhead .meta span { display: inline-flex; align-items: center; gap: 6px; }
+  .dhead .meta svg { width: 16px; height: 16px; }
+  .dhead .pay { text-align: right; }
+  .dhead .pay small { display: block; color: var(--smoke); font-size: 12.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .dhead .pay b { display: block; font-size: 34px; font-weight: 700; letter-spacing: -.03em; line-height: 1.15; }
+  .dhead .pay span { color: var(--smoke); font-size: 14px; }
+
+  .stepper { margin-top: 22px; display: grid; grid-template-columns: repeat(5, 1fr); }
+  .stepper .s { position: relative; display: grid; align-content: start; justify-items: center; text-align: center; gap: 6px; font-size: 13px; color: var(--fog); }
+  .stepper .s::before { content: ""; position: absolute; top: 14px; left: -50%; width: 100%; height: 2px; background: var(--border); z-index: 0; }
+  .stepper .s:first-child::before { display: none; }
+  .stepper .s.ok::before, .stepper .s.cur::before { background: var(--ink); }
+  .stepper .dot { position: relative; z-index: 1; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #fff; border: 2px solid var(--border); font-weight: 700; font-size: 13px; }
+  .stepper .dot svg { width: 16px; height: 16px; }
+  .stepper .s.ok { color: var(--ink); } .stepper .s.ok .dot { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .stepper .s.cur { color: var(--ink); font-weight: 700; } .stepper .s.cur .dot { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); }
+  .stepper .s.cut .dot { border-color: var(--fog); color: var(--fog); }
+  .stepper small { font-size: 12px; font-weight: 400; color: var(--smoke); }
+
+  .blk { padding: 26px 0; border-top: 1px solid var(--border); }
+  .blk:first-child { border-top: 0; padding-top: 0; }
+  .blk h2 { font-size: 19px; font-weight: 700; letter-spacing: -.01em; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+  .blk h2 button { font-size: 13.5px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .blk p { line-height: 1.6; color: #3C4660; }
+  .kfacts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .kfacts div { display: flex; gap: 10px; padding: 14px; border-radius: 14px; border: 1px solid var(--border); font-size: 13px; color: var(--smoke); }
+  .kfacts svg { width: 20px; height: 20px; color: var(--ink); flex: none; }
+  .kfacts b { display: block; color: var(--ink); font-size: 14px; margin-top: 2px; }
+  .kfacts .lock b { color: var(--smoke); font-weight: 500; }
+  .kfacts .new { box-shadow: inset 0 0 0 1px #2E7D4F; background: #F3F9F4; }
+  .info { border: 1px solid var(--border); border-radius: 14px; }
+  .info .ir { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 16px; padding: 14px 18px; border-top: 1px solid var(--border); align-items: start; }
+  .info .ir:first-child { border-top: 0; }
+  .info .il { display: flex; align-items: center; gap: 9px; color: var(--smoke); font-size: 14px; }
+  .info .il svg { width: 18px; height: 18px; color: var(--ink); }
+  .info .iv { font-size: 14.5px; font-weight: 600; color: var(--ink); line-height: 1.45; }
+  .info .iv.plain { font-weight: 400; color: #3C4660; line-height: 1.6; }
+  .info .iv em { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-style: normal; font-size: 13.5px; font-weight: 500; color: var(--ink); }
+  .info .iv em svg { width: 15px; height: 15px; color: #2E7D4F; }
+  .info .iv em.new { color: #2C5A3B; font-weight: 600; }
+  .info .iv em.lock { color: var(--smoke); }
+  .info .iv em.lock svg { color: var(--smoke); }
+  .kfacts em { display: flex; align-items: flex-start; gap: 5px; margin-top: 6px; font-style: normal; font-size: 12.5px; font-weight: 600; color: var(--ink); line-height: 1.4; }
+  .kfacts em svg { width: 14px; height: 14px; margin-top: 1px; color: #2E7D4F; }
+  .kfacts em.lock { font-weight: 500; color: var(--smoke); }
+  .kfacts em.lock svg { color: var(--smoke); }
+  .dhead .meta.who { align-items: center; gap: 6px 12px; }
+  .dhead .meta.who img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; margin-right: -4px; }
+  .dhead .meta.who b { color: var(--ink); font-weight: 600; }
+  .dhead .meta.who .rt { color: var(--ink); font-weight: 600; }
+  .dhead .meta.who .rt svg { color: #E39B1A; }
+  .quote { padding: 16px; border-radius: 14px; background: var(--soft); }
+  .quote .w { font-size: 13px; color: var(--smoke); display: flex; align-items: center; gap: 6px; }
+  .quote .w svg { width: 15px; height: 15px; }
+  .quote p { margin-top: 8px; }
+  .photos { margin-top: 12px; display: flex; gap: 8px; }
+  .photos img { width: 96px; height: 76px; border-radius: 10px; object-fit: cover; }
+  .tl { list-style: none; display: grid; gap: 0; }
+  .tl li { position: relative; padding: 0 0 18px 26px; font-size: 14px; }
+  .tl li::before { content: ""; position: absolute; left: 5px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+  .tl li::after { content: ""; position: absolute; left: 8.5px; top: 18px; bottom: 2px; width: 1px; background: var(--border); }
+  .tl li:last-child { padding-bottom: 0; } .tl li:last-child::after { display: none; }
+  .tl li:first-child::before { background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .tl small { display: block; color: var(--smoke); font-size: 12.5px; margin-top: 2px; }
+  .myrev .stars { color: #E2A33B; display: flex; gap: 2px; } .myrev .stars svg { width: 16px; height: 16px; }
+
+  .apanel { position: sticky; top: 92px; border: 1px solid var(--border); border-radius: 18px; padding: 22px; background: var(--card); box-shadow: 0 18px 40px -22px rgba(34,48,74,.35); }
+  .apanel .stat { font-size: 13.5px; }
+  .apanel h3 { margin-top: 8px; font-size: 21px; font-weight: 700; letter-spacing: -.01em; line-height: 1.25; }
+  .apanel .why { margin-top: 8px; color: var(--smoke); line-height: 1.55; font-size: 14px; }
+  .apanel .why b { color: var(--ink); }
+  .apanel .cd { margin-top: 12px; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--soft); font-size: 13px; }
+  .apanel .cd svg { width: 16px; height: 16px; color: var(--smoke); }
+  .pbtn { margin-top: 16px; width: 100%; height: 52px; border-radius: 14px; background: var(--accent); color: #fff; font-weight: 700; font-size: 15.5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .pbtn svg { width: 18px; height: 18px; }
+  .pbtn:hover { filter: brightness(.95); }
+  .gbtn { margin-top: 10px; width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--border); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .gbtn:hover { background: var(--soft); }
+  .gbtn svg { width: 16px; height: 16px; }
+  .arow2 { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .arow2 .gbtn { margin-top: 0; }
+  .gbtn { white-space: nowrap; }
+  .gbtn.warn { color: #B4441C; }
+  .gbtn.warn:hover { background: #FFF4EE; border-color: #F2CDB9; }
+  .pcard span { flex: 1; min-width: 0; line-height: 1.4; }
+  .pcard button { flex: none; white-space: nowrap; }
+  .apanel > .lbtn:last-child { display: block; margin-top: 14px; text-align: center; }
+  .lbtn { margin-top: 12px; width: 100%; font-size: 13px; color: var(--smoke); text-decoration: underline; text-underline-offset: 3px; }
+  .lbtn:hover { color: var(--ink); }
+  .pcard { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .pcard img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+  .pcard b { display: block; } .pcard small { color: var(--smoke); font-size: 12.5px; }
+  .pcard button { margin-left: auto; height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--border); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+  .pcard button svg { width: 16px; height: 16px; }
+  .note2 { margin-top: 14px; padding: 12px; border-radius: 12px; background: var(--soft); font-size: 12.5px; line-height: 1.55; color: var(--smoke); }
+  .note2 b { color: var(--ink); }
+  .demo2 { margin-top: 40px; padding: 10px 12px; border-radius: 10px; background: var(--soft); font-size: 12.5px; color: var(--fog); line-height: 1.7; }
+  .demo2 a { color: var(--smoke); text-decoration: underline; margin-right: 10px; }
+
+  .modal .fld { margin-top: 16px; }
+  .modal .fld label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--smoke); margin-bottom: 6px; }
+  .modal textarea { width: 100%; min-height: 96px; border: 1px solid var(--border); border-radius: 12px; padding: 11px 13px; font: inherit; font-size: 14px; color: var(--ink); resize: none; outline: none; }
+  .modal textarea:focus { border-color: var(--ink); }
+  .modal .cnt2 { text-align: right; font-size: 12px; color: var(--fog); margin-top: 4px; }
+  .modal .p { margin-top: 8px; color: var(--smoke); line-height: 1.55; font-size: 14px; }
+  .modal .reasons { display: grid; gap: 6px; }
+  .modal .reasons button { min-height: 42px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); text-align: left; font-size: 13.5px; font-weight: 500; }
+  .modal .reasons button.on { border-color: var(--ink); background: var(--ink); color: #fff; }
+  .modal .addph { display: flex; gap: 8px; }
+  .modal .addph img, .modal .addph button { width: 72px; height: 60px; border-radius: 10px; object-fit: cover; }
+  .modal .addph button { border: 1px dashed var(--fog); color: var(--smoke); display: grid; place-items: center; }
+  .modal .addph button svg { width: 20px; height: 20px; }
+  .modal .rate { display: flex; gap: 6px; } .modal .rate button { color: var(--border); } .modal .rate button.on { color: #E2A33B; } .modal .rate svg { width: 32px; height: 32px; }
+  .modal .err2 { margin-top: 6px; color: #C24A1A; font-size: 12.5px; display: none; } .modal .bad .err2 { display: block; } .modal .bad textarea, .modal .bad .reasons { outline: 2px solid #E8693A; outline-offset: 2px; border-radius: 12px; }
+  .modal .btns.one { grid-template-columns: 1fr; }
+  .modal .go.dark { background: var(--ink); }
+  .toast2 { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); opacity: 0; z-index: 90; padding: 12px 18px; border-radius: 12px; background: var(--ink); color: #fff; font-size: 14px; font-weight: 500; transition: .25s; pointer-events: none; display: flex; align-items: center; gap: 8px; }
+  .toast2.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast2 svg { width: 18px; height: 18px; color: #8FD3A6; }
+  .empty2 { padding: 50px 0; text-align: center; color: var(--smoke); }
+  .empty2 img { width: 150px; display: block; margin: 0 auto 10px; }
+  .placed .stepper { grid-template-columns: repeat(5, 1fr); }
+  .placed .orderphoto { width: 100%; max-width: 220px; aspect-ratio: 4/3; object-fit: cover; border-radius: 12px; }
+  .placed .details { display: grid; grid-template-columns: 155px minmax(0, 1fr); gap: 10px 16px; line-height: 1.5; }
+  .placed .details dt { color: var(--smoke); }
+  .placed .details dd { font-weight: 600; overflow-wrap: anywhere; }
+  .placed .bill { display: grid; grid-template-columns: 1fr auto; gap: 9px 16px; }
+  .placed .bill span { color: var(--smoke); }
+  .placed .bill b { text-align: right; }
+  .placed .bill .total { padding-top: 12px; border-top: 1px solid var(--border); font-size: 17px; color: var(--ink); }
+  .placed .request-note { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--soft); color: var(--ink); font-size: 13px; line-height: 1.5; }
+  @media (max-width: 700px) { .placed .details { grid-template-columns: 1fr; gap: 2px; } .placed .details dd { margin-bottom: 8px; } }
+</style>
+
+</head>
+<body class="t-warm">
+<svg style="display:none">
+  <symbol id="coin" viewBox="0 0 256 256"><path d="M207.58,63.84C186.85,53.48,159.33,48,128,48S69.15,53.48,48.42,63.84,16,88.78,16,104v48c0,15.22,11.82,29.85,32.42,40.16S96.67,208,128,208s58.85-5.48,79.58-15.84S240,167.22,240,152V104C240,88.78,228.18,74.15,207.58,63.84Zm-87.58,96v32c-19-.62-35-3.42-48-7.49V153.05A203.43,203.43,0,0,0,120,159.86Zm16,0a203.43,203.43,0,0,0,48-6.81v31.31c-13,4.07-29,6.87-48,7.49ZM32,152V133.53a82.88,82.88,0,0,0,16.42,10.63c2.43,1.21,5,2.35,7.58,3.43V178C40.17,170.16,32,160.29,32,152Zm168,26V147.59c2.61-1.08,5.15-2.22,7.58-3.43A82.88,82.88,0,0,0,224,133.53V152C224,160.29,215.83,170.16,200,178Z"/></symbol>
+  <symbol id="mic" viewBox="0 0 256 256"><path d="M128,176a48.05,48.05,0,0,0,48-48V64a48,48,0,0,0-96,0v64A48.05,48.05,0,0,0,128,176ZM96,64a32,32,0,0,1,64,0v64a32,32,0,0,1-64,0Zm40,143.6V240a8,8,0,0,1-16,0V207.6A80.11,80.11,0,0,1,48,128a8,8,0,0,1,16,0,64,64,0,0,0,128,0,8,8,0,0,1,16,0A80.11,80.11,0,0,1,136,207.6Z"/></symbol>
+  <symbol id="camera" viewBox="0 0 256 256"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></symbol>
+  <symbol id="xmark" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></symbol>
+  <symbol id="users" viewBox="0 0 256 256"><path d="M244.8,150.4a8,8,0,0,1-11.2-1.6A51.6,51.6,0,0,0,192,128a8,8,0,0,1-7.37-4.89,8,8,0,0,1,0-6.22A8,8,0,0,1,192,112a24,24,0,1,0-23.24-30,8,8,0,1,1-15.5-4A40,40,0,1,1,219,117.51a67.94,67.94,0,0,1,27.43,21.68A8,8,0,0,1,244.8,150.4ZM190.92,212a8,8,0,1,1-13.84,8,57,57,0,0,0-98.16,0,8,8,0,1,1-13.84-8,72.06,72.06,0,0,1,33.74-29.92,48,48,0,1,1,58.36,0A72.06,72.06,0,0,1,190.92,212ZM128,176a32,32,0,1,0-32-32A32,32,0,0,0,128,176ZM72,120a8,8,0,0,0-8-8A24,24,0,1,1,87.24,82a8,8,0,1,0,15.5-4A40,40,0,1,0,37,117.51,67.94,67.94,0,0,0,9.6,139.19a8,8,0,1,0,12.8,9.61A51.6,51.6,0,0,1,64,128,8,8,0,0,0,72,120Z"/></symbol>
+  <symbol id="shield" viewBox="0 0 256 256"><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/></symbol>
+  <symbol id="bolt" viewBox="0 0 256 256"><path d="M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z"/></symbol>
+  <symbol id="tap" viewBox="0 0 256 256"><path d="M56,76a60,60,0,0,1,120,0,8,8,0,0,1-16,0,44,44,0,0,0-88,0,8,8,0,1,1-16,0Zm140,44a27.9,27.9,0,0,0-13.36,3.39A28,28,0,0,0,144,106.7V76a28,28,0,0,0-56,0v80l-3.82-6.13a28,28,0,0,0-48.41,28.17l29.32,50A8,8,0,1,0,78.89,220L49.6,170a12,12,0,1,1,20.78-12l.14.23,18.68,30A8,8,0,0,0,104,184V76a12,12,0,0,1,24,0v68a8,8,0,1,0,16,0V132a12,12,0,0,1,24,0v20a8,8,0,0,0,16,0v-4a12,12,0,0,1,24,0v36c0,21.61-7.1,36.3-7.16,36.42a8,8,0,0,0,3.58,10.73A7.9,7.9,0,0,0,208,232a8,8,0,0,0,7.16-4.42c.37-.73,8.85-18,8.85-43.58V148A28,28,0,0,0,196,120Z"/></symbol>
+  <symbol id="heartFill" viewBox="0 0 256 256"><path d="M240,102c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,228.66,16,172,16,102A62.07,62.07,0,0,1,78,40c20.65,0,38.73,8.88,50,23.89C139.27,48.88,157.35,40,178,40A62.07,62.07,0,0,1,240,102Z"/></symbol>
+  <symbol id="ticket" viewBox="0 0 256 256"><path d="M232,104a8,8,0,0,0,8-8V64a16,16,0,0,0-16-16H32A16,16,0,0,0,16,64V96a8,8,0,0,0,8,8,24,24,0,0,1,0,48,8,8,0,0,0-8,8v32a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V160a8,8,0,0,0-8-8,24,24,0,0,1,0-48ZM32,167.2a40,40,0,0,0,0-78.4V64H88V192H32Zm192,0V192H104V64H224V88.8a40,40,0,0,0,0,78.4Z"/></symbol>
+  <symbol id="clock" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z"/></symbol>
+  <symbol id="home" viewBox="0 0 256 256"><path d="M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z"/></symbol>
+  <symbol id="receipt" viewBox="0 0 256 256"><path d="M72,104a8,8,0,0,1,8-8h96a8,8,0,0,1,0,16H80A8,8,0,0,1,72,104Zm8,40h96a8,8,0,0,0,0-16H80a8,8,0,0,0,0,16ZM232,56V208a8,8,0,0,1-11.58,7.15L192,200.94l-28.42,14.21a8,8,0,0,1-7.16,0L128,200.94,99.58,215.15a8,8,0,0,1-7.16,0L64,200.94,35.58,215.15A8,8,0,0,1,24,208V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56Zm-16,0H40V195.06l20.42-10.22a8,8,0,0,1,7.16,0L96,199.06l28.42-14.22a8,8,0,0,1,7.16,0L160,199.06l28.42-14.22a8,8,0,0,1,7.16,0L216,195.06Z"/></symbol>
+  <symbol id="chat" viewBox="0 0 256 256"><path d="M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z"/></symbol>
+  <symbol id="chev" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></symbol>
+  <symbol id="right" viewBox="0 0 256 256"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></symbol>
+  <symbol id="search" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></symbol>
+  <symbol id="bell" viewBox="0 0 256 256"><path d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z"/></symbol>
+  <symbol id="pin" viewBox="0 0 256 256"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/></symbol>
+  <symbol id="check" viewBox="0 0 256 256"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></symbol>
+  <symbol id="heart" viewBox="0 0 256 256"><path d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z"/></symbol>
+  <symbol id="star" viewBox="0 0 256 256"><path d="M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z"/></symbol>
+  <symbol id="dots" viewBox="0 0 256 256"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM128,72a12,12,0,1,0-12-12A12,12,0,0,0,128,72Zm0,112a12,12,0,1,0,12,12A12,12,0,0,0,128,184Z"/></symbol>
+  <symbol id="bag" viewBox="0 0 256 256"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,160H40V56H216V200ZM176,88a48,48,0,0,1-96,0,8,8,0,0,1,16,0,32,32,0,0,0,64,0,8,8,0,0,1,16,0Z"/></symbol>
+  <symbol id="bellhop" viewBox="0 0 256 256"><path d="M168,224a8,8,0,0,1-8,8H96a8,8,0,1,1,0-16h64A8,8,0,0,1,168,224Zm53.85-32A15.8,15.8,0,0,1,208,200H48a16,16,0,0,1-13.8-24.06C39.75,166.38,48,139.34,48,104a80,80,0,1,1,160,0c0,35.33,8.26,62.38,13.81,71.94A15.89,15.89,0,0,1,221.84,192ZM208,184c-7.73-13.27-16-43.95-16-80a64,64,0,1,0-128,0c0,36.06-8.28,66.74-16,80Z"/></symbol>
+  <symbol id="hand" viewBox="0 0 256 256"><path d="M188,48a27.75,27.75,0,0,0-12,2.71V44a28,28,0,0,0-54.65-8.6A28,28,0,0,0,80,60v64l-3.82-6.13a28,28,0,0,0-48.6,27.82c16,33.77,28.93,57.72,43.72,72.69C86.24,233.54,103.2,240,128,240a88.1,88.1,0,0,0,88-88V76A28,28,0,0,0,188,48Zm12,104a72.08,72.08,0,0,1-72,72c-20.38,0-33.51-4.88-45.33-16.85C69.44,193.74,57.26,171,41.9,138.58a6.36,6.36,0,0,0-.3-.58,12,12,0,0,1,20.79-12,1.76,1.76,0,0,0,.14.23l18.67,30A8,8,0,0,0,96,152V60a12,12,0,0,1,24,0v60a8,8,0,0,0,16,0V44a12,12,0,0,1,24,0v76a8,8,0,0,0,16,0V76a12,12,0,0,1,24,0Z"/></symbol>
+  <symbol id="play" viewBox="0 0 256 256"><path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/></symbol>
+  <symbol id="flag" viewBox="0 0 256 256"><path d="M232,56V176a8,8,0,0,1-2.76,6c-15.28,13.23-29.89,18-43.82,18-18.91,0-36.57-8.74-53-16.85C105.87,170,82.79,158.61,56,179.77V224a8,8,0,0,1-16,0V56a8,8,0,0,1,2.77-6h0c36-31.18,68.31-15.21,96.79-1.12C167,62.46,190.79,74.2,218.76,50A8,8,0,0,1,232,56Z"/></symbol>
+  <symbol id="okc" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></symbol>
+  <symbol id="xc" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></symbol>
+  <symbol id="hourglass" viewBox="0 0 256 256"><path d="M200,75.64V40a16,16,0,0,0-16-16H72A16,16,0,0,0,56,40V76a16.08,16.08,0,0,0,6.41,12.8L114.67,128,62.4,167.2A16.07,16.07,0,0,0,56,180v36a16,16,0,0,0,16,16H184a16,16,0,0,0,16-16V180.36a16,16,0,0,0-6.36-12.77L141.26,128l52.38-39.59A16.05,16.05,0,0,0,200,75.64Z"/></symbol>
+  <symbol id="money" viewBox="0 0 256 256"><path d="M168,128a40,40,0,1,1-40-40A40,40,0,0,1,168,128Zm80-64V192a8,8,0,0,1-8,8H16a8,8,0,0,1-8-8V64a8,8,0,0,1,8-8H240A8,8,0,0,1,248,64Zm-16,46.35A56.78,56.78,0,0,1,193.65,72H62.35A56.78,56.78,0,0,1,24,110.35v35.3A56.78,56.78,0,0,1,62.35,184h131.3A56.78,56.78,0,0,1,232,145.65Z"/></symbol>
+  <symbol id="pencil" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM192,108.68,147.31,64l24-24L216,84.68Z"/></symbol>
+  <symbol id="warn" viewBox="0 0 256 256"><path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"/></symbol>
+  <symbol id="undo" viewBox="0 0 256 256"><path d="M232,144a64.07,64.07,0,0,1-64,64H80a8,8,0,0,1,0-16h88a48,48,0,0,0,0-96H88v40a8,8,0,0,1-13.66,5.66l-48-48a8,8,0,0,1,0-11.32l48-48A8,8,0,0,1,88,40V80h80A64.07,64.07,0,0,1,232,144Z"/></symbol>
+  <symbol id="cal" viewBox="0 0 256 256"><path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM112,184a8,8,0,0,1-16,0V132.94l-4.42,2.22a8,8,0,0,1-7.16-14.32l16-8A8,8,0,0,1,112,120Zm56-8a8,8,0,0,1,0,16H136a8,8,0,0,1-6.4-12.8l28.78-38.37A8,8,0,1,0,145.07,132a8,8,0,1,1-13.85-8A24,24,0,0,1,176,136a23.76,23.76,0,0,1-4.84,14.45L152,176ZM48,80V48H72v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80Z"/></symbol>
+  <symbol id="img" viewBox="0 0 256 256"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM156,88a12,12,0,1,1-12,12A12,12,0,0,1,156,88Zm60,112H40V160.69l46.34-46.35a8,8,0,0,1,11.32,0h0L165,181.66a8,8,0,0,0,11.32-11.32l-17.66-17.65L173,138.34a8,8,0,0,1,11.31,0L216,170.07V200Z"/></symbol>
+</svg>
+
+<header>
+  <div class="wrap bar">
+    <div class="left">
+      <span class="logo">Ant<span>Go</span></span>
+      <nav>
+        <a title="Trang chủ" href="home-v5.html"><svg class="i"><use href="#home"/></svg><span class="t">Trang chủ</span></a>
+        <a class="on" title="Đơn hàng" href="orders.html"><svg class="i"><use href="#receipt"/></svg><span class="t">Đơn hàng</span></a>
+        <a title="Messenger"><svg class="i"><use href="#chat"/></svg><span class="t">Messenger</span><span class="n">3</span></a>
+      </nav>
+    </div>
+    <div class="hsearch"><svg class="i lead"><use href="#search"/></svg><input id="hq" placeholder="Tìm món ăn, đồ dùng, dịch vụ hoặc việc làm"><button class="sbtn" data-voice title="Tìm bằng giọng nói"><svg class="i"><use href="#mic"/></svg></button><button class="sbtn" data-image title="Tìm bằng hình ảnh"><svg class="i"><use href="#camera"/></svg></button><button class="go" aria-label="Tìm"><svg class="i"><use href="#search"/></svg></button></div>
+    <div class="right">
+      <div class="role" data-role title="Đổi vai trò"><button class="on" data-v="buy">Mua</button><button data-v="sell">Bán</button></div>
+      <button class="hbtn" title="Khu vực đang xem"><svg class="i"><use href="#pin"/></svg><span class="t">Block B</span><svg class="i chev"><use href="#chev"/></svg></button>
+      <span class="sep"></span>
+      <button class="xubtn" id="xuBtn" title="AntXu của bạn"><img class="coin" src="assets/clean/antxu.png?v=2" alt="">120 Xu</button>
+      <button class="iconbtn" id="savedBtn" title="Đã lưu"><svg class="i"><use href="#heart"/></svg><span class="cnt" id="savedCnt"></span></button>
+      <button class="iconbtn" title="Thông báo"><svg class="i"><use href="#bell"/></svg><span class="d"></span></button>
+      <span class="av" title="Tài khoản"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70" alt="Tài khoản"></span>
+    </div>
+  </div>
+</header>
+
+
+<main class="wrap" id="page"></main>
+
+<footer>
+  <img class="peek" src="assets/clean/peek.png" alt="">
+  <div class="wrap top">
+    <div class="brand">
+      <span class="logo">Ant<span>Go</span></span>
+      <p>Ứng dụng kết nối hàng xóm trong khu — mua bán, đặt dịch vụ và giúp nhau ngay gần nhà.</p>
+    </div>
+    <div><h4>Khám phá</h4><ul><li><a href="search.html?type=food">Đồ ăn &amp; thức uống</a></li><li><a href="search.html?type=goods">Đồ dùng</a></li><li><a>Dịch vụ</a></li><li><a>Việc làm</a></li><li><a>Đã lưu</a></li></ul></div>
+    <div><h4>Bán &amp; Đăng việc</h4><ul><li><a>Đăng bài bán</a></li><li><a>Đăng việc cần người</a></li><li><a class="xu"><img class="coin" src="assets/clean/antxu.png?v=2" alt="Xu">Quảng bá bằng AntXu</a></li><li><a>Hướng dẫn người bán</a></li></ul></div>
+    <div><h4>Hỗ trợ</h4><ul><li><a>Trung tâm trợ giúp</a></li><li><a>An toàn giao dịch</a></li><li><a>Báo cáo vi phạm</a></li><li><a>Liên hệ AntGo</a></li></ul></div>
+  </div>
+  <div class="bottom"><div class="wrap">
+    <span>© 2026 AntGo</span><a>Điều khoản</a><a>Quyền riêng tư</a>
+    <span class="end"><svg class="i"><use href="#pin"/></svg>Đang xem: Block B · Tiếng Việt</span>
+  </div></div>
+</footer>
+<div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+
+<script>
+  const U = (id, w = 500, h = 375) => `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&q=70`;
+  const low = s => s.replace(/^(Chị|Anh|Cô|Chú) /, m => m.toLowerCase());   // "Chị Hoa" giữa câu → "chị Hoa"
+  const ICON = n => `<svg class="i"><use href="#${n}"/></svg>`;
+  const fmt = n => n.toLocaleString("vi-VN") + "đ";
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const $ = id => document.getElementById(id);
+
+  /* ===== Dữ liệu mẫu =====
+     Đơn đã nhận (việc làm): offered → chosen → working → reported → done; nhánh phụ: rejected · withdrawn · cancelled */
+  const STEPS = ["Đã gửi đề nghị", "Được chọn", "Đang làm", "Đã báo xong", "Hoàn thành"];
+  const IDX = { offered: 0, chosen: 1, working: 2, reported: 3, done: 4, rejected: 0, withdrawn: 0, cancelled: 1 };
+  const JOBS = {
+    j1: { st: "offered", cat: "Mua hộ", ic: "bag", title: "Mua đồ chợ sáng giúp nhà mình", code: "AG-J2041",
+      who: { name: "Chị Hoa", av: "1494790108377-be9c29b29330", at: "Block A, tầng 9", reply: "Thường trả lời trong 20 phút" },
+      pay: 50000, unit: "/ lần", when: "6:30 – 8:00, thứ Bảy 17/10", place: "Chợ Tân Mỹ → Block A", addr: "Căn A-0912, Block A", payHow: "Tiền mặt", others: 2,
+      desc: "Mua giúp rau, thịt và trái cây theo danh sách chị gửi qua tin nhắn tối thứ Sáu. Chị ứng tiền trước, giữ hóa đơn giúp chị.",
+      mine: { win: "6:30 – 8:00, thứ Bảy", intro: "Em ở Block B, sáng nào cũng đi chợ Tân Mỹ nên tiện mua giúp chị luôn. Em sẽ chụp hóa đơn gửi chị khi mua xong." },
+      hist: [["Bạn gửi đề nghị nhận việc", "Hôm nay, 9:12"]] },
+    j2: { st: "chosen", cat: "Việc nhà", ic: "home", title: "Dọn phòng cuối tuần", code: "AG-J2017",
+      who: { name: "Quốc Anh", av: "1500648767791-00dcc994a43e", at: "Block B, tầng 5", reply: "Thường trả lời trong 1 giờ" },
+      pay: 80000, unit: "/ buổi", when: "9:00 – 11:00, Chủ nhật 18/10", place: "Tại nhà Quốc Anh · Block B", addr: "Căn B-0507, Block B (bấm chuông 2 lần)", payHow: "Chuyển khoản",
+      desc: "Dọn phòng ngủ và phòng khách khoảng 40m², lau sàn, lau kính cửa sổ. Dụng cụ có sẵn.",
+      mine: { win: "9:00 – 11:00, Chủ nhật", intro: "Mình từng dọn nhà theo giờ cho 3 hộ ở Block B, làm kỹ và đúng giờ." },
+      hist: [["Quốc Anh chọn bạn", "Hôm qua, 8:30"], ["Bạn gửi đề nghị nhận việc", "13/10, 20:05"]] },
+    j3: { st: "working", cat: "Thú cưng", ic: "heart", title: "Cho mèo ăn 3 ngày khi đi vắng", code: "AG-J1998",
+      who: { name: "Chị Ngân", av: "1507003211169-0a1dd7228f2d", at: "Block B, tầng 11", reply: "Thường trả lời trong 30 phút" },
+      pay: 150000, unit: "/ 3 ngày", when: "Sáng & tối, 14 – 16/10", place: "Tại nhà chị Ngân · Block B", addr: "Căn B-1103 (chìa gửi ở lễ tân)", payHow: "Chuyển khoản",
+      desc: "Cho 2 bé mèo ăn hạt sáng 7h và tối 19h, thay nước, dọn cát một lần mỗi ngày. Gửi chị 1 tấm ảnh mỗi lần ghé.",
+      mine: { win: "Sáng 7:00 và tối 19:00", intro: "Em có nuôi mèo, ở ngay tầng 8 cùng block nên ghé tiện." },
+      hist: [["Bạn bắt đầu làm", "Hôm qua, 7:05"], ["Chị Ngân chọn bạn", "12/10, 21:40"], ["Bạn gửi đề nghị nhận việc", "11/10, 18:22"]] },
+    j4: { st: "reported", cat: "Mua hộ", ic: "bag", title: "Lấy giúp phần cơm ở cổng sau", code: "AG-J2033",
+      who: { name: "Thu Hà", av: "1438761681033-6461ffad8d80", at: "Block B, tầng 2", reply: "Thường trả lời trong 10 phút" },
+      pay: 30000, unit: "/ lần", when: "11:30 – 12:00, hôm nay", place: "Cổng sau → Block B", addr: "Căn B-0204, Block B", payHow: "Tiền mặt",
+      desc: "Shipper để phần cơm ở cổng sau, lấy giúp mang lên tận cửa.",
+      mine: { win: "11:30 – 12:00, hôm nay", intro: "Mình đang ở nhà, xuống lấy liền được." },
+      report: { note: "Đã để phần cơm trước cửa và bấm chuông, có chụp ảnh lúc giao.", photos: ["1546069901-ba9599a7e63c"] },
+      left: "23 giờ",
+      hist: [["Bạn báo hoàn thành", "Hôm nay, 11:52"], ["Bạn bắt đầu làm", "Hôm nay, 11:35"], ["Thu Hà chọn bạn", "Hôm nay, 10:10"], ["Bạn gửi đề nghị nhận việc", "Hôm nay, 9:58"]] },
+    j5: { st: "done", cat: "Khuân vác", ic: "users", title: "Phụ khiêng tủ lên tầng 12", code: "AG-J1975",
+      who: { name: "Anh Tuấn", av: "1506794778202-cad84cf45f1d", at: "Block C, tầng 12", reply: "Thường trả lời trong 1 giờ" },
+      pay: 120000, unit: "/ lần", when: "19:00, thứ Ba 13/10", place: "Sảnh → Block C, tầng 12", addr: "Căn C-1206, Block C", payHow: "Tiền mặt",
+      desc: "Khiêng tủ quần áo 2 cánh từ sảnh lên căn hộ, có thang máy chở hàng.",
+      mine: { win: "Tối thứ Ba từ 18:30", intro: "Em khỏe, rảnh tối thứ Ba." },
+      report: { note: "Đã đưa tủ vào phòng ngủ, không trầy xước.", photos: [] },
+      hist: [["Anh Tuấn xác nhận hoàn thành", "13/10, 20:10"], ["Bạn báo hoàn thành", "13/10, 19:40"], ["Bạn bắt đầu làm", "13/10, 19:02"], ["Anh Tuấn chọn bạn", "12/10, 9:15"], ["Bạn gửi đề nghị nhận việc", "11/10, 22:01"]] },
+    j6: { st: "rejected", cat: "Trông trẻ", ic: "users", title: "Trông bé 2 tiếng tối thứ Sáu", code: "AG-J2010",
+      who: { name: "Chị Mai", av: "1544005313-94ddf0286df2", at: "Block D, tầng 6", reply: "Thường trả lời trong 2 giờ" },
+      pay: 100000, unit: "/ buổi", when: "18:00 – 20:00, thứ Sáu 16/10", place: "Tại nhà chị Mai · Block D", addr: "", payHow: "Tiền mặt",
+      desc: "Trông bé 5 tuổi, chơi cùng và cho bé ăn tối (đồ ăn có sẵn).",
+      mine: { win: "18:00 – 20:00, thứ Sáu", intro: "Em là sinh viên sư phạm mầm non năm 3." },
+      hist: [["Chị Mai đã chọn người khác", "Hôm qua, 16:20"], ["Bạn gửi đề nghị nhận việc", "12/10, 14:45"]] },
+  };
+  // Dữ liệu minh họa cho phía người mua; đơn gửi từ detail.html được thêm từ localStorage.
+  const PLACED = [
+    { id: "o1", code: "AG-O3012", kind: "food", cat: "Đồ ăn", post: "food", title: "Cơm nhà làm — cơm gà xé ×2", who: "Bếp Cô Lan", img: "1504674900247-0877df9cc836", sellerAv: "1494790108377-be9c29b29330", total: 90000, when: "Giao 11:30 hôm nay", state: "preparing", details: [["Số lượng", "2 phần"], ["Cách nhận", "Giao tận cửa"], ["Thời gian", "11:30 hôm nay"]], hist: [["Bếp Cô Lan xác nhận", "Hôm nay, 9:50"], ["Bạn gửi yêu cầu", "Hôm nay, 9:40"]] },
+    { id: "o2", code: "AG-O3009", kind: "service", cat: "Dịch vụ", post: null, title: "Giặt sấy gấp 5kg", who: "Giặt sấy Mỹ Linh", img: "1582735689369-4fe89db7114c", sellerAv: "1438761681033-6461ffad8d80", total: 75000, when: "Lấy đồ 18:00 hôm nay", state: "waiting", estimate: true, details: [["Khối lượng dự kiến", "5kg"], ["Lấy và trả đồ", "Tận cửa · Block B"], ["Lấy đồ lúc", "18:00 hôm nay"], ["Câu trả lời", "Có đồ trắng cần giặt riêng"]], hist: [["Bạn gửi yêu cầu", "Hôm nay, 8:20"]] },
+    { id: "o3", code: "AG-O2987", kind: "food", cat: "Đồ ăn", post: null, title: "Phở bò tái ×2", who: "Quán Phở Bà Tư", img: "1569718212165-3a8278d5f624", sellerAv: "1500648767791-00dcc994a43e", total: 90000, when: "Đã nhận 10/10", state: "done", details: [["Số lượng", "2 tô"], ["Cách nhận", "Tự đến lấy"], ["Đã nhận", "10/10"]], hist: [["Bạn nhận món", "10/10, 11:45"], ["Quán xác nhận", "10/10, 10:05"], ["Bạn gửi yêu cầu", "10/10, 9:58"]] },
+  ];
+
+  /* trạng thái đã đổi khi bấm thử được giữ lại (localStorage) để danh sách khớp với chi tiết */
+  const OKEY = "antgo_orders";
+  const saved = (() => { try { return JSON.parse(localStorage.getItem(OKEY)) || {}; } catch (e) { return {}; } })();
+  Object.entries(saved).forEach(([id, v]) => {
+    if (JOBS[id]) Object.assign(JOBS[id], v);
+    else if (v._type === "placed") {
+      const sample = PLACED.find(o => o.id === id);
+      if (sample) Object.assign(sample, v);
+      else PLACED.push(v);
+    }
+  });
+  const persist = (id, patch) => { Object.assign(JOBS[id], patch); saved[id] = Object.assign(saved[id] || {}, patch); try { localStorage.setItem(OKEY, JSON.stringify(saved)); } catch (e) {} };
+  const persistPlaced = (o, patch) => { Object.assign(o, patch); saved[o.id] = Object.assign(saved[o.id] || {}, { _type: "placed" }, patch); try { localStorage.setItem(OKEY, JSON.stringify(saved)); } catch (e) {} };
+  const now = () => { const d = new Date(); return "Vừa xong, " + d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0"); };
+
+  // Trạng thái hiển thị: [loại chấm, nhãn ngắn, việc cần làm (nếu có)]
+  const status = o => ({
+    // tên trạng thái cố định = tên bước trên thanh tiến trình (không cá nhân hóa); cột 3 = việc người dùng cần làm
+    offered: ["wait", "Đã gửi đề nghị", null],
+    chosen: ["go", "Được chọn", "Bắt đầu làm"],
+    working: ["go", "Đang làm", "Báo hoàn thành"],
+    reported: ["wait", "Đã báo xong", null],
+    done: ["done", "Hoàn thành", !o.paid ? "Xác nhận tiền công" : !o.rated ? "Đánh giá" : null],
+    rejected: ["off", "Không được chọn", null],
+    withdrawn: ["off", "Đã rút đề nghị", null],
+    cancelled: ["off", "Đã hủy", null],
+  })[o.st];
+  // uy tín người đăng / người bán cho dòng phụ dưới tiêu đề (dữ liệu mẫu, khớp các trang khác)
+  const PREP = { "Chị Hoa": ["4,9", 6], "Quốc Anh": ["4,8", 3], "Chị Ngân": ["5,0", 4], "Thu Hà": ["4,9", 9], "Anh Tuấn": ["4,7", 2], "Chị Mai": ["4,8", 5] };
+  const SREP = { "Bếp Cô Lan": ["4,3", 10], "Giặt sấy Mỹ Linh": ["4,8", 18], "Quán Phở Bà Tư": ["4,9", 32] };
+  const isEnded = o => ["rejected", "withdrawn", "cancelled"].includes(o.st) || (o.st === "done" && o.paid && o.rated);
+  const placedStatus = o => ({ waiting: ["wait", "Chờ xác nhận"], confirmed: ["go", "Đã xác nhận"], preparing: ["go", o.kind === "service" ? "Đang làm" : "Đang chuẩn bị"], delivering: ["go", o.kind === "service" ? "Đang trả đồ" : "Đang giao"], ready: ["go", "Sẵn sàng lấy"], done: ["done", "Hoàn thành"], cancelled: ["off", "Đã hủy"], declined: ["off", "Người bán từ chối"] })[o.state] || ["wait", "Chờ xác nhận"];
+  const placedEnded = o => ["done", "cancelled", "declined"].includes(o.state);
+
+  const page = $("page"), q = new URLSearchParams(location.search);
+  const id = q.get("id");
+  if (id && JOBS[id]) renderDetail(id);
+  else if (id && PLACED.some(o => o.id === id)) renderPlaced(id);
+  else renderList(q.get("f"));
+
+  /* ================= DANH SÁCH ================= */
+  function renderList(f) {
+    document.title = "AntGo — Đơn hàng";
+    const jobs = Object.entries(JOBS).map(([k, o]) => ({ k, o, rcv: true, end: isEnded(o) }));
+    const placed = PLACED.map(o => ({ k: o.id, o, rcv: false, end: placedEnded(o) }));
+    const hist = f === "hist";                  // Lịch sử: đơn đã hoàn thành / đã hủy / không được chọn
+    const all = [...jobs, ...placed].filter(x => !f || hist || (f === "rcv") === x.rcv);
+    const row = x => {
+      if (x.rcv) {
+        const o = x.o, [cls, lab, next] = status(o);
+        return `<button class="orow${x.end ? " ended" : ""}" data-id="${x.k}">
+          <span class="th"><span>${ICON(o.ic)}<small>${o.cat}</small></span></span>
+          <span><span class="otag rcv">Việc đã nhận</span><h3>${o.title}</h3><div class="sub">${o.who.name} · ${o.when}</div></span>
+          <span class="end"><b>${fmt(o.pay)}</b><span class="stat ${next ? "act" : cls}">${lab}</span></span></button>`;
+      }
+      const o = x.o, [cls, lab] = placedStatus(o);
+      return `<button class="orow${x.end ? " ended" : ""}" data-placed="${o.id}">
+        <span class="th"><img src="${U(o.img, 200, 160)}" alt=""></span>
+        <span><span class="otag">Đơn đã đặt</span><h3>${o.title}</h3><div class="sub">${o.who} · ${o.when}</div></span>
+        <span class="end"><b>${fmt(o.total)}</b><span class="stat ${cls}">${lab}</span></span></button>`;
+    };
+    const isNeed = x => x.rcv && !x.end && status(x.o)[2];
+    const need = all.filter(isNeed), act = all.filter(x => !x.end && !isNeed(x)), old = all.filter(x => x.end);
+    const nRcv = jobs.filter(x => !x.end).length, nPl = placed.filter(x => !x.end).length, nHist = jobs.concat(placed).filter(x => x.end).length;
+    page.innerHTML = `
+      <div class="ohead"><div><h1>Đơn hàng</h1><p>Những thứ bạn đã đặt của hàng xóm và những việc bạn nhận làm.</p></div>
+        <div class="toggles"><button data-f="all" class="${!f ? "on" : ""}">Tất cả <small>${nPl + nRcv}</small></button><button data-f="placed" class="${f === "placed" ? "on" : ""}">Đơn đã đặt <small>${nPl}</small></button><button data-f="rcv" class="${f === "rcv" ? "on" : ""}">Việc đã nhận <small>${nRcv}</small></button><span class="tsep"></span><button data-f="hist" class="${hist ? "on" : ""}">${ICON("clock")}Lịch sử <small>${nHist}</small></button></div></div>
+      ${hist ? `<section class="ogroup"><h2>Lịch sử đơn · ${old.length}</h2><p class="nhint">Đơn đã hoàn thành, đã hủy hoặc không được chọn. Bấm để xem lại chi tiết, đánh giá hoặc báo cáo vấn đề.</p><div class="olist">${old.map(row).join("")}</div></section>` : ""}
+      ${!hist && need.length ? `<section class="ogroup needgroup"><h2>${ICON("bolt")}Cần bạn xử lý · ${need.length}</h2><p class="nhint">Những đơn đang chờ bạn bấm bước tiếp theo.</p><div class="olist">${need.map(row).join("")}</div></section>` : ""}
+      ${!hist && act.length ? `<section class="ogroup"><h2>Đang diễn ra · ${act.length}</h2><div class="olist">${act.map(row).join("")}</div></section>` : ""}
+      ${!hist && old.length ? `<button class="histlink" data-f="hist">${ICON("clock")}<span><b>Lịch sử đơn</b>${old.length} đơn đã hoàn thành hoặc đã hủy</span>${ICON("right")}</button>` : ""}
+      ${!(hist ? old : need.concat(act)).length ? `<div class="empty2"><img src="assets/clean/peek.png" alt="">Không có đơn nào ở đây.</div>` : ""}`;
+    page.querySelectorAll("[data-f]").forEach(b => b.onclick = () => {
+      const nf = b.dataset.f === "all" || f === b.dataset.f ? null : b.dataset.f;       // nút Tất cả, hoặc bấm lại nút đang bật → về tất cả
+      history.replaceState(null, "", nf ? "?f=" + nf : location.pathname); renderList(nf);
+    });
+    page.querySelectorAll("[data-id]").forEach(b => b.onclick = () => location.href = "?id=" + b.dataset.id);
+    page.querySelectorAll("[data-placed]").forEach(b => b.onclick = () => location.href = "?id=" + b.dataset.placed);
+  }
+
+  /* ================= CHI TIẾT ĐƠN ĐÃ NHẬN ================= */
+  function renderDetail(id) {
+    const o = JOBS[id], [cls, lab] = status(o), cur = IDX[o.st];
+    const side = ["rejected", "withdrawn", "cancelled"].includes(o.st);
+    const chosenYet = ["chosen", "working", "reported", "done"].includes(o.st);
+    document.title = "AntGo — " + o.title;
+    const stepDate = i => { const m = { 0: "gửi đề nghị", 1: "chọn bạn", 2: "bắt đầu", 3: "báo hoàn thành", 4: "xác nhận hoàn thành" }[i];
+      const h = o.hist.find(x => x[0].includes(m)); return h ? h[1].replace("Hôm nay, ", "").replace("Hôm qua, ", "Hôm qua ") : ""; };
+    const stepper = STEPS.map((s, i) => {
+      let c = i < cur ? "ok" : i === cur ? (side ? "cut" : o.st === "done" ? "ok" : "cur") : "";
+      const d = c === "ok" || (c === "cur" && i === 0) ? stepDate(i) : "";
+      const label = side && i === cur ? lab : s;
+      return `<div class="s ${c}"><span class="dot">${c === "ok" ? ICON("check") : c === "cut" ? ICON("xmark") : i + 1}</span>${label}${d ? `<small>${d}</small>` : ""}</div>`;
+    }).join("");
+
+    // Bảng hành động bên phải: đúng việc người nhận việc làm được ở bước này
+    const n = o.who.name, nn = low(n);
+    const P = {
+      offered: { h: `Chờ ${nn} chọn người`, why: `Có <b>${o.others + 1} người</b> đề nghị cho việc này, kể cả bạn. Bạn sẽ được báo ngay khi ${nn} chọn. <b>Gửi đề nghị chưa phải là đã nhận việc.</b>`,
+        btns: `<div class="arow2"><button class="gbtn" data-a="edit">${ICON("pencil")}Sửa giới thiệu</button><button class="gbtn warn" data-a="withdraw">${ICON("undo")}Rút đề nghị</button></div>` },
+      chosen: { h: "Bạn đã được chọn!", why: `Địa chỉ chính xác đã hiện bên trái. Đến giờ làm, bấm <b>Bắt đầu làm</b> để ${nn} biết bạn đã tới.`,
+        btns: `<button class="pbtn" data-a="start">${ICON("play")}Bắt đầu làm</button><button class="gbtn" data-a="cancel">${ICON("xc")}Xin hủy việc</button>` },
+      working: { h: "Đang làm", why: `Làm xong thì bấm <b>Báo hoàn thành</b>, kèm ảnh nếu có để ${nn} dễ kiểm tra.`,
+        btns: `<button class="pbtn" data-a="report">${ICON("flag")}Báo hoàn thành</button><button class="gbtn" data-a="cancel">${ICON("xc")}Gặp sự cố, xin hủy</button>` },
+      reported: { h: `Chờ ${nn} xác nhận`, why: `${n} sẽ kiểm tra rồi xác nhận hoàn thành. Nếu ${nn} không phản hồi, đơn <b>tự hoàn thành sau 24 giờ</b>.`,
+        btns: `<div class="cd">${ICON("hourglass")}Tự hoàn thành sau <b>${o.left || "24 giờ"}</b></div>` },
+      done: !o.paid
+        ? { h: "Hoàn thành — bạn đã nhận tiền công chưa?", why: `${n} trả bằng <b>${o.payHow.toLowerCase()}</b>. Nhận đủ <b>${fmt(o.pay)}</b> rồi thì bấm xác nhận. AntGo không giữ tiền, hai bên trả trực tiếp cho nhau.`,
+            btns: `<button class="pbtn" data-a="paid">${ICON("money")}Đã nhận ${fmt(o.pay)}</button><button class="gbtn" data-a="unpaid">${ICON("warn")}Chưa nhận được tiền công</button>` }
+        : !o.rated
+        ? { h: "Đánh giá " + nn, why: `Bạn đã nhận đủ tiền công. Một vài dòng đánh giá giúp hàng xóm khác biết ${nn} có dễ hợp tác không.`,
+            btns: `<button class="pbtn" data-a="rate">${ICON("star")}Đánh giá ${nn}</button>` }
+        : { h: "Xong việc rồi!", why: `Đã nhận tiền công và đánh giá. Cảm ơn bạn đã giúp hàng xóm.`,
+            btns: `<button class="gbtn" data-a="more">${ICON("search")}Tìm việc khác gần nhà</button>` },
+      rejected: { h: "Chưa được chọn lần này", why: `${n} đã chọn người khác. Đề nghị của bạn không ảnh hưởng gì tới hồ sơ.`,
+        btns: `<button class="pbtn" data-a="more">${ICON("search")}Tìm việc tương tự</button>` },
+      withdrawn: { h: "Bạn đã rút đề nghị", why: `${n} không còn thấy đề nghị của bạn.`,
+        btns: `<button class="gbtn" data-a="job">Xem lại bài việc làm</button>` },
+      cancelled: { h: "Đơn đã hủy", why: `Lý do: <b>${esc(o.cancelWhy || "")}</b>. ${n} đã được báo để tìm người khác.`,
+        btns: `<button class="gbtn" data-a="more">${ICON("search")}Tìm việc khác gần nhà</button>` },
+    }[o.st];
+
+    // bảng thông tin dạng hàng: nhãn một cột, nội dung một cột — dài ngắn không làm lệch
+    const placeRow = `<div class="ir"><span class="il">${ICON("pin")}Địa điểm</span><span class="iv">${o.place}${chosenYet
+      ? `<em class="${o.st === "chosen" ? "new" : ""}">${ICON("home")}${o.addr}</em>` : `<em class="lock">${ICON("shield")}Địa chỉ chính xác hiện khi bạn được chọn</em>`}</span></div>`;
+    const addr = chosenYet ? `<div class="${o.st === "chosen" ? "new" : ""}">${ICON("home")}<span>Địa chỉ chính xác<b>${o.addr}</b></span></div>`
+                           : `<div class="lock">${ICON("shield")}<span>Địa chỉ chính xác<b>Hiện khi bạn được chọn</b></span></div>`;
+    const rep = o.report && ["reported", "done"].includes(o.st) ? `
+      <div class="blk"><h2>Bạn đã báo hoàn thành</h2><div class="quote"><div class="w">${ICON("flag")}${(o.hist.find(x => x[0].includes("báo hoàn thành")) || ["", ""])[1]}</div><p>${esc(o.report.note)}</p>
+        ${o.report.photos.length ? `<div class="photos">${o.report.photos.map(p => `<img src="${p.startsWith("blob:") ? p : U(p, 240, 190)}" alt="">`).join("")}</div>` : ""}</div></div>` : "";
+    const myRev = o.rated ? `<div class="blk myrev"><h2>Bạn đánh giá ${n}</h2><div class="quote"><div class="stars">${ICON("star").repeat(o.rated.s)}</div>${o.rated.t ? `<p>${esc(o.rated.t)}</p>` : ""}</div></div>` : "";
+
+    page.innerHTML = `
+      <div class="crumb"><a class="back" href="orders.html">${ICON("right")}Đơn hàng</a><span>/</span><span>Việc đã nhận</span></div>
+      <div class="dhead"><div>
+          <div class="chips"><span class="chip">${ICON(o.ic)}${o.cat}</span><span class="chip">Việc đã nhận</span><span class="code">Mã đơn ${o.code}</span></div>
+          <h1>${o.title}</h1>
+          <div class="meta who"><img src="${U(o.who.av, 60, 60)}" alt=""><b>${n}</b>${PREP[n] ? `<span class="rt">${ICON("star")}${PREP[n][0]}</span><span>${PREP[n][1]} việc đã đăng</span>` : ""}<span>${o.who.at}</span></div></div>
+        <div class="pay"><small>Tiền công</small><b>${fmt(o.pay)}</b><span>${o.unit}</span></div></div>
+      <div class="stepper">${stepper}</div>
+      <div class="cols">
+        <div>
+          <div class="blk"><h2>Thông tin việc <button data-a="job">Xem bài gốc</button></h2>
+            <div class="info">
+              <div class="ir"><span class="il">${ICON("clock")}Thời gian làm</span><span class="iv">${o.when}</span></div>
+              ${placeRow}
+              <div class="ir"><span class="il">${ICON("money")}Hình thức thanh toán</span><span class="iv">${o.payHow}</span></div>
+              <div class="ir"><span class="il">${ICON("hand")}Việc cần làm</span><span class="iv plain">${o.desc}</span></div>
+            </div></div>
+          ${rep}${myRev}
+          <div class="blk"><h2>Đề nghị của bạn ${o.st === "offered" ? `<button data-a="edit">Sửa</button>` : ""}</h2>
+            <div class="quote"><div class="w">${ICON("cal")}Làm được: ${o.mine.win}</div><p>${esc(o.mine.intro)}</p></div></div>
+        </div>
+        <aside><div class="apanel">
+          <span class="stat ${cls}">${lab}</span>
+          <h3>${P.h}</h3><p class="why">${P.why}</p>
+          ${P.btns}
+          <div class="pcard"><a href="shop.html?name=${encodeURIComponent(n)}"><img src="${U(o.who.av, 100, 100)}" alt=""></a><span><a href="shop.html?name=${encodeURIComponent(n)}"><b>${n}</b></a><small>${o.who.at}<br>${o.who.reply}</small></span><button data-a="chat">${ICON("chat")}Nhắn</button></div>
+          ${!side && o.st !== "done" ? `<button class="lbtn" data-a="issue" style="margin-top:16px">${"Báo cáo vấn đề với đơn này"}</button>` : ""}
+        </div></aside>
+      </div>
+      <div class="demo2">Bản mẫu — xem từng bước: ${Object.keys(JOBS).map(k => `<a href="?id=${k}">${k} · ${status(JOBS[k])[1]}</a>`).join("")}
+        ${o.st === "reported" ? `<br><a data-a="sim-confirm">Mô phỏng: ${n} xác nhận hoàn thành</a>` : ""}${o.st === "offered" ? `<br><a data-a="sim-pick">Mô phỏng: ${n} chọn bạn</a> <a data-a="sim-reject">Mô phỏng: ${n} chọn người khác</a>` : ""}
+        <br><a data-a="reset">Đặt lại dữ liệu mẫu</a></div>`;
+    page.querySelectorAll("[data-a]").forEach(b => b.onclick = () => act(id, b.dataset.a));
+    window.scrollTo(0, 0);
+  }
+
+  /* ================= CHI TIẾT ĐƠN ĐÃ ĐẶT ================= */
+  function renderPlaced(id) {
+    const o = PLACED.find(x => x.id === id), [cls, lab] = placedStatus(o);
+    const seller = esc(o.who), ended = placedEnded(o);
+    const names = ["Đã gửi", "Đã xác nhận", o.kind === "service" ? "Đang làm" : "Đang chuẩn bị", o.kind === "service" ? "Trả đồ" : "Giao / nhận", "Hoàn thành"];
+    const pos = ({ waiting: 0, confirmed: 1, preparing: 2, delivering: 3, ready: 3, done: 4 })[o.state] ?? 0;
+    const stopped = ["cancelled", "declined"].includes(o.state);
+    const when = [...(o.hist || [])].reverse().map(h => String(h[1]).replace("Hôm nay, ", "").replace("Hôm qua, ", "Hôm qua "));
+    if (stopped) names[1] = lab;
+    const steps = names.map((name, i) => {
+      const c = stopped ? (i === 0 ? "ok" : i === 1 ? "cut" : "") : i < pos ? "ok" : i === pos ? "cur" : "";
+      const d = c === "ok" || c === "cur" ? (when[i] || "") : "";          // ngày giờ ngay dưới bước — thay cho khối "Lịch sử"
+      return `<div class="s ${c}"><span class="dot">${c === "ok" ? ICON("check") : c === "cut" ? ICON("xmark") : i + 1}</span>${name}${d ? `<small>${esc(d)}</small>` : ""}</div>`;
+    }).join("");
+    const details = (o.details || []).map(([a, b]) => `<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join("");
+    const req = o.cancelRequested ? `<div class="request-note">Đã gửi yêu cầu hủy cho ${seller}. Đơn vẫn ở trạng thái ${lab.toLowerCase()} cho tới khi bên bán phản hồi.</div>` : "";
+    const ret = o.returnRequested ? `<div class="request-note">Đã gửi yêu cầu trả hàng. Hai bên cần trao đổi điều kiện nhận lại hàng và tiền trước khi xử lý.</div>` : "";
+    const doneButtons = !o.rated ? `<button class="pbtn" data-pa="rate">${ICON("star")}Đánh giá ${seller}</button>` : "<p class=\"why\">Bạn đã đánh giá đơn này.</p>";
+    const statePanel = ({
+      waiting: ["Chờ bên bán xác nhận", `Yêu cầu đã gửi tới ${seller}. Bạn sẽ thấy bước tiếp theo khi bên bán phản hồi.`, !o.cancelRequested ? `<button class="gbtn" data-pa="cancel">Yêu cầu hủy</button>` : ""],
+      confirmed: ["Đơn đã được nhận", `${seller} đã xác nhận. Theo dõi thời gian và cách giao nhận ở bên trái.`, !o.cancelRequested ? `<button class="gbtn" data-pa="cancel">Yêu cầu hủy</button>` : ""],
+      preparing: [o.kind === "service" ? "Dịch vụ đang thực hiện" : "Bên bán đang chuẩn bị", "Bạn có thể nhắn để làm rõ thời gian hoặc thay đổi cần thiết.", !o.cancelRequested ? `<button class="gbtn" data-pa="cancel">Yêu cầu hủy</button>` : ""],
+      delivering: [o.kind === "service" ? "Đang trả đồ" : "Đang giao", "Khi đã nhận đủ, hãy xác nhận để đóng đơn.", `<button class="pbtn" data-pa="received">${ICON("check")}Tôi đã nhận đủ</button>`],
+      ready: ["Sẵn sàng nhận", "Kiểm tra hàng hoặc kết quả dịch vụ khi nhận.", `<button class="pbtn" data-pa="received">${ICON("check")}Tôi đã nhận đủ</button>`],
+      done: ["Đơn đã hoàn thành", "Bạn có thể đánh giá trải nghiệm với bên bán.", doneButtons + (o.kind === "goods" && o.returnEligible && !o.returnRequested ? `<button class="gbtn" data-pa="return">Yêu cầu trả hàng</button>` : "")],
+      cancelled: ["Đơn đã hủy", "Đơn đã dừng. Bạn có thể tìm lựa chọn khác trong khu.", `<button class="gbtn" data-pa="more">Khám phá quanh khu</button>`],
+      declined: ["Bên bán không nhận đơn", "Bạn có thể tìm lựa chọn khác trong khu.", `<button class="gbtn" data-pa="more">Khám phá quanh khu</button>`],
+    })[o.state] || ["Chờ xác nhận", "Đang chờ bên bán phản hồi.", ""];
+    document.title = "AntGo — " + o.title;
+    page.classList.add("placed");
+    page.innerHTML = `
+      <div class="crumb"><a class="back" href="orders.html">${ICON("right")}Đơn hàng</a><span>/</span><span>Đơn đã đặt</span></div>
+      <div class="dhead"><div><div class="chips"><span class="chip">${ICON(o.kind === "service" ? "bolt" : "bag")}${esc(o.cat || "Đồ dùng")}</span><span class="chip">Đơn đã đặt</span><span class="code">Mã đơn ${esc(o.code || o.id.toUpperCase())}</span></div>
+        <h1>${esc(o.title)}</h1><div class="meta who">${o.sellerAv ? `<img src="${U(o.sellerAv, 60, 60)}" alt="">` : ""}<b>${seller}</b>${SREP[o.who] ? `<span class="rt">${ICON("star")}${SREP[o.who][0]}</span><span>${SREP[o.who][1]} đánh giá</span>` : ""}</div></div>
+        <div class="pay"><small>${o.quote ? "Phí kiểm tra" : o.estimate ? "Tạm tính" : "Tổng đơn"}</small><b>${fmt(o.total)}</b>${o.estimate ? "<span>Giá cuối cần được xác nhận</span>" : ""}</div></div>
+      <div class="stepper">${steps}</div>
+      <div class="cols"><div>
+        <div class="blk"><h2>Nội dung đơn ${o.post ? `<button data-pa="post">Xem bài gốc</button>` : ""}</h2>
+          <div style="display:flex;gap:18px;align-items:flex-start"><img class="orderphoto" src="${U(o.img, 440, 320)}" alt=""><dl class="details">${details}</dl></div>
+          ${o.note ? `<p class="request-note">Ghi chú: ${esc(o.note)}</p>` : ""}
+        </div>
+        <div class="blk"><h2>Chi phí</h2><div class="bill"><span>${o.quote ? "Phí kiểm tra và khoản đã chọn" : o.estimate ? "Tạm tính theo thông tin bạn gửi" : "Giá trị đơn"}</span><b>${fmt(o.total + (o.voucher?.amount || 0))}</b>
+          ${o.voucher?.amount ? `<span>Voucher · ${o.voucher.xu} Xu</span><b>−${fmt(o.voucher.amount)}</b>` : ""}<span class="total">${o.quote ? "Trước khi báo giá" : o.estimate ? "Tạm tính" : "Tổng"}</span><b class="total">${fmt(o.total)}</b></div>
+          ${o.estimate ? `<p style="margin-top:10px">Bên cung cấp cần xác nhận giá cuối trước khi làm.</p>` : ""}</div>
+        ${o.rated ? `<div class="blk myrev"><h2>Đánh giá của bạn</h2><div class="quote"><div class="stars">${ICON("star").repeat(o.rated.s)}</div>${o.rated.t ? `<p>${esc(o.rated.t)}</p>` : ""}</div></div>` : ""}
+
+      </div><aside><div class="apanel"><span class="stat ${cls}">${lab}</span><h3>${statePanel[0]}</h3><p class="why">${statePanel[1]}</p>${statePanel[2]}${req}${ret}
+        <div class="pcard"><img src="${U(o.sellerAv || "1500648767791-00dcc994a43e", 100, 100)}" alt=""><span><b>${seller}</b><small>Bên cung cấp</small></span><button data-pa="chat">${ICON("chat")}Nhắn</button></div>
+        ${!ended ? `<button class="lbtn" data-pa="issue" style="margin-top:16px">Báo cáo vấn đề với đơn này</button>` : ""}
+      </div></aside></div>
+      <div class="demo2">Bản mẫu — trạng thái và quy tắc hủy/trả hàng đang chờ chốt. ${o.state === "waiting" ? `<a data-pa="sim-confirm">Mô phỏng bên bán xác nhận</a> <a data-pa="sim-decline">Mô phỏng bên bán từ chối</a>` : ""}${o.state === "confirmed" ? `<a data-pa="sim-prepare">Mô phỏng bắt đầu thực hiện</a>` : ""}${o.state === "preparing" ? `<a data-pa="sim-deliver">Mô phỏng giao/nhận</a>` : ""}<br><a data-pa="reset">Đặt lại dữ liệu mẫu</a></div>`;
+    page.querySelectorAll("[data-pa]").forEach(b => b.onclick = () => actPlaced(o, b.dataset.pa));
+    window.scrollTo(0, 0);
+  }
+
+  /* ===== Hành động ===== */
+  const scrim = $("scrim"), modal = $("modal");
+  const close = () => scrim.classList.remove("show");
+  scrim.addEventListener("click", e => { if (e.target === scrim) close(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+  const openM = html => { modal.innerHTML = html; scrim.classList.add("show"); const b = $("mBack"); if (b) b.onclick = close; };
+  const step = (id, patch, histLine, msg) => { const o = JOBS[id]; persist(id, Object.assign(patch, { hist: [[histLine, now()], ...o.hist] })); close(); renderDetail(id); if (msg) toast(msg); };
+  function toast(t) { let el = $("toast2"); if (!el) { el = document.createElement("div"); el.id = "toast2"; el.className = "toast2"; document.body.appendChild(el); }
+    el.innerHTML = ICON("okc") + t; el.classList.add("show"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 2400); }
+
+  function act(id, a) {
+    const o = JOBS[id], n = o.who.name;
+    if (a === "job") location.href = "job.html";
+    else if (a === "qa") location.href = "job.html#qa";
+    else if (a === "more") location.href = "home-v5.html";
+    else if (a === "chat") location.href = "messenger.html?to=" + encodeURIComponent(n) + "&order=" + id;
+    else if (a === "issue") location.href = "support.html?order=" + encodeURIComponent(id);
+    else if (a === "reset") { try { localStorage.removeItem(OKEY); } catch (e) {} location.reload(); }
+    else if (a === "edit") {
+      openM(`<h3>Sửa lời giới thiệu</h3><p class="p">${n} sẽ thấy bản mới nhất.</p>
+        <div class="fld" id="fI"><label>Giới thiệu ngắn</label><textarea id="tI" maxlength="300">${esc(o.mine.intro)}</textarea><div class="cnt2"><span id="cI">0</span>/300</div><div class="err2">Viết vài dòng để ${n} biết bạn hợp việc này.</div></div>
+        <div class="btns"><button class="ghost" id="mBack">Hủy</button><button class="go" id="mOk">Lưu</button></div>`);
+      const t = $("tI"), c = () => $("cI").textContent = t.value.length; c(); t.oninput = () => { c(); $("fI").classList.remove("bad"); };
+      $("mOk").onclick = () => { if (!t.value.trim()) return $("fI").classList.add("bad"); persist(id, { mine: Object.assign({}, o.mine, { intro: t.value.trim() }) }); close(); renderDetail(id); toast("Đã cập nhật lời giới thiệu"); };
+    }
+    else if (a === "withdraw") openM(`<h3>Rút đề nghị?</h3><p class="p">${n} sẽ không còn thấy đề nghị của bạn. Nếu việc vẫn còn mở, bạn có thể gửi lại sau.</p>
+        <div class="btns"><button class="ghost" id="mBack">Giữ đề nghị</button><button class="go dark" id="mOk">Rút đề nghị</button></div>`),
+      $("mOk").onclick = () => step(id, { st: "withdrawn" }, "Bạn rút đề nghị", "Đã rút đề nghị");
+    else if (a === "start") openM(`<h3>Bắt đầu làm?</h3><p class="p">${n} sẽ nhận thông báo bạn đã bắt đầu. Làm xong nhớ bấm <b>Báo hoàn thành</b>.</p>
+        <div class="btns"><button class="ghost" id="mBack">Chưa</button><button class="go" id="mOk">Bắt đầu</button></div>`),
+      $("mOk").onclick = () => step(id, { st: "working" }, "Bạn bắt đầu làm", "Đã báo " + n + " là bạn bắt đầu");
+    else if (a === "report") {
+      const ph = [];
+      openM(`<h3>Báo hoàn thành</h3><p class="p">${n} sẽ kiểm tra và xác nhận. Không phản hồi trong 24 giờ thì đơn tự hoàn thành.</p>
+        <div class="fld" id="fR"><label>Ghi chú cho ${n}</label><textarea id="tR" maxlength="300" placeholder="Ví dụ: Đã để đồ trước cửa, hóa đơn kẹp trong túi."></textarea><div class="err2">Ghi một dòng ngắn về việc đã làm.</div></div>
+        <div class="fld"><label>Ảnh (không bắt buộc)</label><div class="addph" id="phs"><button id="addP" title="Thêm ảnh">${ICON("camera")}</button></div><input type="file" id="fP" accept="image/*" multiple hidden></div>
+        <div class="btns"><button class="ghost" id="mBack">Để sau</button><button class="go" id="mOk">Gửi báo hoàn thành</button></div>`);
+      $("addP").onclick = () => $("fP").click();
+      $("fP").onchange = e => { [...e.target.files].slice(0, 4 - ph.length).forEach(f => { const u = URL.createObjectURL(f); ph.push(u); $("addP").insertAdjacentHTML("beforebegin", `<img src="${u}" alt="">`); }); if (ph.length >= 4) $("addP").remove(); };
+      $("tR").oninput = () => $("fR").classList.remove("bad");
+      $("mOk").onclick = () => { const t = $("tR").value.trim(); if (!t) return $("fR").classList.add("bad");
+        step(id, { st: "reported", left: "24 giờ", report: { note: t, photos: ph } }, "Bạn báo hoàn thành", "Đã gửi báo hoàn thành cho " + n); };
+    }
+    else if (a === "cancel") {
+      const R = ["Tôi bận đột xuất", "Không liên lạc được người đăng", "Việc khác với mô tả", "Lý do khác"]; let pick = -1;
+      openM(`<h3>Xin hủy việc này?</h3><p class="p">${n} sẽ được báo ngay để tìm người khác. Hủy sát giờ làm sẽ hiện trong hồ sơ của bạn.</p>
+        <div class="fld" id="fC"><label>Lý do</label><div class="reasons">${R.map((r, i) => `<button data-r="${i}">${r}</button>`).join("")}</div><div class="err2">Chọn một lý do.</div></div>
+        <div class="btns"><button class="ghost" id="mBack">Không hủy</button><button class="go dark" id="mOk">Hủy việc</button></div>`);
+      modal.querySelectorAll("[data-r]").forEach(b => b.onclick = () => { pick = +b.dataset.r; modal.querySelectorAll("[data-r]").forEach(x => x.classList.toggle("on", x === b)); $("fC").classList.remove("bad"); });
+      $("mOk").onclick = () => { if (pick < 0) return $("fC").classList.add("bad"); step(id, { st: "cancelled", cancelWhy: R[pick] }, "Bạn hủy việc — " + R[pick].toLowerCase(), "Đã hủy và báo cho " + n); };
+    }
+    else if (a === "paid") step(id, { paid: true }, `Bạn xác nhận đã nhận ${fmt(o.pay)} tiền công`, "Đã xác nhận tiền công");
+    else if (a === "unpaid") openM(`<h3>Chưa nhận được tiền công?</h3><p class="p">Nhắn ${n} trước — đa số trường hợp chỉ là quên. Sau 3 ngày vẫn chưa nhận được, bạn có thể báo AntGo hỗ trợ.</p>
+        <div class="btns"><button class="ghost" id="mBack">Đóng</button><button class="go" id="mOk">Nhắn ${n}</button></div>`), $("mOk").onclick = () => { close(); act(id, "chat"); };
+    else if (a === "rate") {
+      let s = 0;
+      openM(`<h3>Đánh giá ${n}</h3><p class="p">${o.title}</p>
+        <div class="fld" id="fS"><label>Mức độ hài lòng</label><div class="rate">${[1, 2, 3, 4, 5].map(i => `<button data-s="${i}">${ICON("star")}</button>`).join("")}</div><div class="err2">Chọn số sao.</div></div>
+        <div class="fld"><label>Nhận xét (không bắt buộc)</label><textarea id="tS" maxlength="300" placeholder="Hướng dẫn rõ ràng, trả công đúng hẹn…"></textarea></div>
+        <div class="btns"><button class="ghost" id="mBack">Để sau</button><button class="go" id="mOk">Gửi đánh giá</button></div>`);
+      modal.querySelectorAll("[data-s]").forEach(b => b.onclick = () => { s = +b.dataset.s; modal.querySelectorAll("[data-s]").forEach(x => x.classList.toggle("on", +x.dataset.s <= s)); $("fS").classList.remove("bad"); });
+      $("mOk").onclick = () => { if (!s) return $("fS").classList.add("bad"); step(id, { rated: { s, t: $("tS").value.trim() } }, `Bạn đánh giá ${n} ${s} sao`, "Cảm ơn bạn đã đánh giá"); };
+    }
+    else if (a === "sim-confirm") step(id, { st: "done" }, n + " xác nhận hoàn thành", null);
+    else if (a === "sim-pick") step(id, { st: "chosen" }, n + " chọn bạn", "Bạn đã được chọn!");
+    else if (a === "sim-reject") step(id, { st: "rejected" }, n + " đã chọn người khác", null);
+  }
+
+  function actPlaced(o, a) {
+    const move = (patch, line, msg) => {
+      persistPlaced(o, Object.assign(patch, { hist: [[line, now()], ...(o.hist || [])] }));
+      close(); renderPlaced(o.id); if (msg) toast(msg);
+    };
+    if (a === "post" && o.post) location.href = "detail.html?p=" + o.post;
+    else if (a === "more") location.href = "home-v5.html";
+    else if (a === "chat") location.href = "messenger.html?to=" + encodeURIComponent(o.who) + "&order=" + o.id;
+    else if (a === "issue") location.href = "support.html?order=" + encodeURIComponent(o.id);
+    else if (a === "reset") { try { localStorage.removeItem(OKEY); } catch (e) {} location.reload(); }
+    else if (a === "cancel") {
+      openM(`<h3>Gửi yêu cầu hủy?</h3><p class="p">${esc(o.who)} sẽ nhận yêu cầu. Đơn chưa được xem là đã hủy cho tới khi có phản hồi; điều kiện hủy cụ thể cần được chốt sau.</p>
+        <div class="fld" id="fPC"><label>Lý do</label><textarea id="tPC" maxlength="300" placeholder="Cho bên bán biết vì sao bạn muốn hủy"></textarea><div class="err2">Vui lòng ghi lý do.</div></div>
+        <div class="btns"><button class="ghost" id="mBack">Giữ đơn</button><button class="go dark" id="mOk">Gửi yêu cầu</button></div>`);
+      $("mOk").onclick = () => { const why = $("tPC").value.trim(); if (!why) return $("fPC").classList.add("bad");
+        move({ cancelRequested: why }, "Bạn yêu cầu hủy: " + why, "Đã gửi yêu cầu hủy"); };
+    }
+    else if (a === "received") openM(`<h3>Xác nhận đã nhận đủ?</h3><p class="p">Kiểm tra hàng hoặc kết quả dịch vụ trước khi xác nhận hoàn thành.</p>
+        <div class="btns"><button class="ghost" id="mBack">Để sau</button><button class="go" id="mOk">Đã nhận đủ</button></div>`),
+      $("mOk").onclick = () => move({ state: "done" }, "Bạn xác nhận đã nhận đủ", "Đơn đã hoàn thành");
+    else if (a === "return" && o.kind === "goods" && o.returnEligible) {
+      openM(`<h3>Yêu cầu trả hàng</h3><p class="p">Yêu cầu sẽ được gửi cho ${esc(o.who)}. Việc nhận lại hàng và hoàn tiền cần được hai bên xác nhận theo điều kiện của bài đăng.</p>
+        <div class="fld" id="fPR"><label>Lý do</label><textarea id="tPR" maxlength="300" placeholder="Mô tả vấn đề của sản phẩm"></textarea><div class="err2">Vui lòng ghi lý do.</div></div>
+        <div class="btns"><button class="ghost" id="mBack">Để sau</button><button class="go dark" id="mOk">Gửi yêu cầu</button></div>`);
+      $("mOk").onclick = () => { const why = $("tPR").value.trim(); if (!why) return $("fPR").classList.add("bad");
+        move({ returnRequested: why }, "Bạn yêu cầu trả hàng: " + why, "Đã gửi yêu cầu trả hàng"); };
+    }
+    else if (a === "rate") {
+      let s = 0;
+      openM(`<h3>Đánh giá ${esc(o.who)}</h3><p class="p">${esc(o.title)}</p>
+        <div class="fld" id="fPS"><label>Mức độ hài lòng</label><div class="rate">${[1, 2, 3, 4, 5].map(i => `<button data-s="${i}">${ICON("star")}</button>`).join("")}</div><div class="err2">Chọn số sao.</div></div>
+        <div class="fld"><label>Nhận xét (không bắt buộc)</label><textarea id="tPS" maxlength="300"></textarea></div>
+        <div class="btns"><button class="ghost" id="mBack">Để sau</button><button class="go" id="mOk">Gửi đánh giá</button></div>`);
+      modal.querySelectorAll("[data-s]").forEach(b => b.onclick = () => { s = +b.dataset.s; modal.querySelectorAll("[data-s]").forEach(x => x.classList.toggle("on", +x.dataset.s <= s)); $("fPS").classList.remove("bad"); });
+      $("mOk").onclick = () => { if (!s) return $("fPS").classList.add("bad"); move({ rated: { s, t: $("tPS").value.trim() } }, `Bạn đánh giá ${o.who} ${s} sao`, "Cảm ơn bạn đã đánh giá"); };
+    }
+    else if (a === "sim-confirm") move({ state: "confirmed" }, o.who + " xác nhận yêu cầu", null);
+    else if (a === "sim-decline") move({ state: "declined" }, o.who + " từ chối yêu cầu", null);
+    else if (a === "sim-prepare") move({ state: "preparing" }, o.who + " bắt đầu thực hiện", null);
+    else if (a === "sim-deliver") move({ state: o.kind === "goods" && o.details?.some(([k, v]) => k === "Cách nhận" && v.includes("Tự")) ? "ready" : "delivering" }, o.who + " báo sẵn sàng giao/nhận", null);
+  }
+</script>
+<script src="shared/drawers.js"></script>
+<script src="shared/common.js"></script>
+</body>
+</html>

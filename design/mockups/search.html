@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AntGo — Tìm kiếm</title><link rel="stylesheet" href="shared/base.css"><style>
+  .query{display:flex;align-items:center;gap:10px;max-width:680px;padding:5px 5px 5px 16px;border:1px solid var(--border);border-radius:12px;background:var(--soft)}.query svg{width:20px;height:20px}.query input{border:0;outline:0;background:none;flex:1;min-width:0;font-size:15px}.query button{border:0;background:var(--accent);color:#fff;border-radius:9px;padding:10px 18px;font-weight:700}
+  .tabs{display:flex;gap:22px;border-bottom:1px solid var(--border);margin-top:26px;overflow:auto}.tabs button{border:0;background:none;padding:0 0 13px;white-space:nowrap;color:var(--smoke);font-weight:600;position:relative}.tabs button.on{color:var(--ink)}.tabs button.on::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--ink)}.tabs small{font-size:11px;color:var(--fog);margin-left:4px}
+  .results{display:grid;grid-template-columns:220px minmax(0,1fr);gap:38px;padding-top:24px}.filters{align-self:start;position:sticky;top:90px}.filters h2{font-size:16px;margin:0 0 14px}.filters label{font-weight:600;display:block;margin:17px 0 7px;font-size:13px}.filters select,.filters input[type=number]{width:100%}.filters .checks{display:flex;align-items:center;gap:7px;margin-top:16px}.filters .checks label{margin:0;font-weight:500}.filters .reset{border:0;background:none;text-decoration:underline;color:var(--smoke);padding:14px 0}
+  .result-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.result-top h2{font-size:17px;margin:0}.result-top select{min-width:160px}.card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 18px}.result-card{position:relative;min-width:0}.result-card>a{display:block}.result-card .photo{height:175px;border-radius:10px;overflow:hidden;background:var(--soft)}.result-card .photo img{width:100%;height:100%;object-fit:cover}.result-card .jobphoto{height:175px;border-radius:10px;background:var(--soft);padding:17px;display:flex;flex-direction:column;justify-content:space-between}.result-card .jobphoto{justify-content:flex-start;gap:10px;padding:14px 16px}.result-card .jobphoto .jc-top{padding-right:34px;display:flex;align-items:center;gap:8px;min-width:0}.result-card .jobphoto .jc-top img{width:30px;height:30px;border-radius:50%;object-fit:cover}.result-card .jobphoto .jc-top span{min-width:0;font-size:11.5px;color:var(--smoke);line-height:1.25}.result-card .jobphoto .jc-top span b{display:block;font-size:13px;color:var(--ink)}.result-card .jobphoto em{margin-left:auto;font-style:normal;font-size:11px;font-weight:600;background:#fff;padding:3px 8px;border-radius:6px}.result-card .jobphoto p{margin:0;font-size:14px;line-height:1.45;color:#3C4660;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.result-card .jobphoto .jc-foot{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}.result-card .jobphoto .jc-foot b{font-size:21px;letter-spacing:-.02em}.result-card .jobphoto .jc-foot small{font-size:12px;font-weight:500;color:var(--smoke)}.result-card .jobphoto .due{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:#fff;font-size:11.5px;font-weight:600;white-space:nowrap}.result-card .jobphoto .due svg{width:13px;height:13px;color:var(--accent)}.result-card .kind{font-size:12px;color:var(--smoke);display:block;margin-top:10px}.result-card h3{font-size:15px;line-height:1.35;margin:5px 0;font-weight:600;min-height:40px}.result-card .price{font-weight:700}.result-card .price small{font-weight:400;color:var(--smoke)}.result-card .area{color:var(--smoke);font-size:12px;margin-top:6px}.result-card .save{position:absolute;right:9px;top:9px;border:0;background:#fff;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}.result-card .save.on{color:var(--accent)}.result-card .save svg{width:16px;height:16px}.result-card .ad{position:absolute;left:9px;top:9px;background:rgba(34,48,74,.88);color:#fff;padding:3px 7px;border-radius:5px;font-size:10px;font-weight:700}.near-title{font-size:16px;margin:35px 0 13px;padding-top:20px;border-top:1px solid var(--border)}.near-title.first{margin-top:0;padding-top:0;border-top:0}.near-title .none{display:flex;align-items:center;gap:8px;margin-bottom:22px;padding:14px 16px;border-radius:12px;background:var(--soft);font-size:14px;font-weight:500;color:var(--smoke)}.near-title .none svg{width:16px;height:16px}
+  .filters .chips{display:flex;flex-wrap:wrap;gap:6px}.filters .chip{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:13px;font-weight:600;color:var(--ink)}.filters .chip:hover{border-color:var(--ink)}.filters .chip.on{background:var(--ink);border-color:var(--ink);color:#fff}.filters .chip img{width:18px;height:18px}
+  .filters .range{display:flex;align-items:center;gap:6px}.filters .range input{width:100%;min-width:0}.filters .range span{color:var(--fog)}.result-top select{border-radius:999px;padding:9px 14px;font-weight:600}
+  @media(max-width:950px){.results{grid-template-columns:180px 1fr;gap:22px}.card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.results{grid-template-columns:1fr}.filters{position:static}.card-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}.result-card .photo,.result-card .jobphoto{height:130px}.result-card h3{font-size:14px}}
+
+  .jst { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #2E7D4F; }
+  .jst::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #3BAA6A; }
+  .jst.closed { color: var(--smoke); } .jst.closed::before { background: var(--fog); }
+  .result-card .jst { margin-top: 6px; }
+</style></head><body><div id="siteHeader" data-active="home"></div><main class="wrap"><div class="pagehead"><h1 id="title">Khám phá quanh khu</h1><p id="subtitle">Tìm hàng hóa, dịch vụ và việc làm gần bạn.</p></div>
+<div class="tabs" id="tabs"></div><div class="results"><aside class="filters"><h2>Lọc kết quả</h2><button class="btn" data-area-open id="areaFilter">Khu vực: <span data-area-label>Block B</span></button><label>Danh mục</label><div class="chips" id="catChips"></div><label id="priceLabel">Khoảng giá</label><div class="range"><input id="minPrice" class="input" type="number" min="0" step="10000" placeholder="Từ"><span>–</span><input id="maxPrice" class="input" type="number" min="0" step="10000" placeholder="Đến"></div><div id="xuWrap"><label>Ưu đãi</label><button type="button" class="chip" id="xuOnly"><img src="assets/clean/antxu.png?v=2" alt="">Dùng được Xu</button></div><button class="reset" id="clear" type="button">Xóa bộ lọc</button></aside>
+<div><div class="result-top"><h2 id="count"></h2><select id="sort" class="input"></select></div><div class="card-grid" id="local"></div><h2 class="near-title" id="nearTitle">Ở khu gần đó</h2><div class="card-grid" id="near"></div><div id="noResults"></div><p class="demo-note">Bài đăng và số kết quả ở đây là dữ liệu mẫu hiện có trong dự án; tìm kiếm ảnh cần máy chủ để nhận dạng.</p></div></div></main>
+<script src="shared/icons.js"></script><script src="shared/common.js"></script><script src="shared/catalog.js"></script><script>
+(() => {
+  const $ = id => document.getElementById(id), esc = AntGo.esc, icon = AntGo.icon, params = new URLSearchParams(location.search);
+  const data = ANTGO_CATALOG.map((x,i) => ({...x, kind: x.kind === "goods" && /Đồ ăn|Đồ uống/.test(x.cat) ? "food" : x.kind, index:i}));
+  const groups = [["all","Tất cả"],["food","Đồ ăn & uống"],["goods","Đồ dùng"],["service","Dịch vụ"],["jobs","Việc làm"]];
+  const norm = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("vi-VN");
+  let type = groups.some(([k]) => k === params.get("type")) ? params.get("type") : "all";
+  let term = params.get("q") || "", cat = "";
+  const money = n => n.toLocaleString("vi-VN") + "đ";
+  const dest = x => x.kind === "jobs" ? "job.html" : "detail.html?p=" + x.post;
+  const saveKey = x => x.img || "job-" + norm(x.title).replace(/\s+/g,"-");
+  let saved; try { saved = new Map(JSON.parse(localStorage.getItem("antgo_saved")) || []); } catch(e) { saved = new Map(); }
+  const persist = () => { try { localStorage.setItem("antgo_saved",JSON.stringify([...saved])); } catch(e) {} };
+  function base() { return data.filter(x => (!term || norm(x.title + " " + x.cat + " " + x.area).includes(norm(term))) && (type === "all" || x.kind === type)); }
+  function tabCounts() { return groups.map(([k,t]) => `<button class="${type === k ? "on" : ""}" data-type="${k}">${t}<small>${data.filter(x => (!term || norm(x.title + " " + x.cat + " " + x.area).includes(norm(term))) && (k === "all" || x.kind === k)).length}</small></button>`).join(""); }
+  function categories() {
+    const arr = [...new Set(base().map(x => x.cat))]; if (!arr.includes(cat)) cat = "";
+    $("catChips").innerHTML = ["", ...arr].map(c => `<button type="button" class="chip${c === cat ? " on" : ""}" data-cat="${esc(c)}">${c ? esc(c) : "Tất cả"}</button>`).join("");
+    $("catChips").querySelectorAll("[data-cat]").forEach(b => b.onclick = () => { cat = b.dataset.cat; render(); });
+  }
+  function sorting() {
+    const old = $("sort").value; $("sort").innerHTML = `<option value="near">Gần nhất</option>${type === "jobs" ? `<option value="high">Tiền công cao nhất</option>` : `<option value="low">Giá thấp đến cao</option><option value="high">Giá cao đến thấp</option>`}`;
+    if ([...$("sort").options].some(o => o.value === old)) $("sort").value = old;
+  }
+  function card(x) {
+    const key = saveKey(x), on = saved.has(key);
+    return `<article class="result-card"><a href="${dest(x)}">${x.kind === "jobs" ? `<div class="jobphoto"><div class="jc-top">${x.av ? `<img src="https://images.unsplash.com/photo-${x.av}?w=60&h=60&fit=crop&q=70" alt="">` : ""}<span><b>${esc(x.who || "Hàng xóm")}</b>${esc(x.when || "")}</span></div>${x.desc ? `<p>${esc(x.desc)}</p>` : ""}<div class="jc-foot"><b>${money(x.price)}<small> / ${esc(x.unit)}</small></b>${x.due ? `<span class="due">${icon("clock")}${esc(x.due)}</span>` : ""}</div></div>` : `<div class="photo"><img src="https://images.unsplash.com/photo-${x.img}?w=480&h=360&fit=crop&q=70" alt="" loading="lazy"></div>`}
+      <span class="kind">${esc(x.cat)}</span><h3>${esc(x.title)}</h3>${x.kind === "jobs" ? "" : `<div class="price">${money(x.price)} <small>/ ${esc(x.unit)}</small></div>`}<div class="area">${icon("pin")}${esc(x.area)} · ${x.distance}m</div>${x.kind === "jobs" && x.offers != null ? `<div class="jst">Đang mở · ${x.offers ? x.offers + " đề nghị" : "chưa có đề nghị"}</div>` : ""}</a>
+      ${x.ad ? `<span class="ad">QUẢNG BÁ</span>` : ""}<button class="save ${on ? "on" : ""}" data-save="${esc(key)}" title="${on ? "Bỏ lưu" : "Lưu bài"}">${icon(on ? "heartFill" : "heart")}</button></article>`;
+  }
+  function render() {
+    $("title").textContent = term ? `Kết quả cho “${term}”` : "Khám phá quanh khu";
+    $("subtitle").textContent = `Đang xem ${AntGo.getArea()} · có thể đổi khu vực ở bộ lọc.`;
+    $("tabs").innerHTML = tabCounts(); categories(); sorting();
+    $("xuWrap").style.display = type === "jobs" ? "none" : ""; $("priceLabel").textContent = type === "jobs" ? "Tiền công" : "Khoảng giá";
+    const lo = +$("minPrice").value || 0, hi = +$("maxPrice").value || Infinity, xu = $("xuOnly").classList.contains("on") && type !== "jobs";
+    const match = base().filter(x => x.price >= lo && x.price <= hi && (!cat || x.cat === cat) && (!xu || x.xu));
+    const sort = $("sort").value; match.sort((a,b) => sort === "low" ? a.price-b.price : sort === "high" ? b.price-a.price : a.distance-b.distance);
+    const local = match.filter(x => x.area === AntGo.getArea()), near = match.filter(x => x.area !== AntGo.getArea());
+    const area = AntGo.getArea();
+    $("count").textContent = match.length ? `${match.length} bài phù hợp` : "";
+    $("local").innerHTML = local.map(card).join(""); $("local").hidden = !local.length; $("near").innerHTML = near.map(card).join("");
+    $("nearTitle").hidden = !near.length; $("nearTitle").classList.toggle("first", !local.length);
+    $("nearTitle").innerHTML = local.length ? "Ở khu gần đó" : `<span class="none">${icon("pin")}Chưa có bài phù hợp trong ${esc(area)}</span>Ở khu gần đó`;
+    $("noResults").innerHTML = match.length ? "" : `<div class="empty"><img src="assets/clean/peek.png" alt=""><h2>Chưa thấy bài phù hợp</h2><p>Thử từ khóa khác, xóa bớt bộ lọc hoặc đổi khu vực.</p><button class="btn" id="emptyClear">Xóa bộ lọc</button></div>`;
+    $("emptyClear")?.addEventListener("click",clear);
+    $("tabs").querySelectorAll("[data-type]").forEach(b => b.onclick = () => { type = b.dataset.type; cat = ""; updateUrl(); render(); });
+    document.querySelectorAll("[data-save]").forEach(b => b.onclick = () => { const x = data.find(x => saveKey(x) === b.dataset.save); if (!x) return; if (saved.has(b.dataset.save)) saved.delete(b.dataset.save); else saved.set(b.dataset.save,{k:x.kind === "service" ? "svc" : x.kind,id:x.img || "",t:x.title,p:money(x.price),u:"/ "+x.unit,a:x.area}); persist(); render(); });
+  }
+  function updateUrl() { const p = new URLSearchParams(); if (term) p.set("q",term); if (type !== "all") p.set("type",type); history.replaceState(null,"",location.pathname + (p.size ? "?" + p : "")); }
+  function clear() { cat = ""; $("minPrice").value = ""; $("maxPrice").value = ""; $("xuOnly").classList.remove("on"); render(); }
+  ["minPrice","maxPrice"].forEach(id => $(id).addEventListener("input",render)); $("sort").addEventListener("change",render);
+  $("xuOnly").onclick = () => { $("xuOnly").classList.toggle("on"); render(); };
+  $("clear").onclick = clear; window.addEventListener("antgo:area",render); render();
+})();
+</script></body></html>

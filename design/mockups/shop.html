@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AntGo — Gian hàng</title><link rel="stylesheet" href="shared/base.css"><style>
+  /* Gian hàng / trang cá nhân công khai của một hàng xóm: thông tin, bài đang bán, việc đang cần người, đánh giá */
+  .crumb2{display:flex;align-items:center;gap:8px;padding-top:22px;font-size:13px;color:var(--smoke)}.crumb2 a{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink)}.crumb2 svg{width:16px;height:16px;transform:rotate(180deg)}
+  .shophead{margin-top:16px;border:1px solid var(--border);border-radius:20px;overflow:hidden}
+  .sh-top{display:flex;align-items:center;gap:20px;padding:26px 28px;background:var(--soft)}
+  .sh-top img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:4px solid #fff;flex:none}
+  .sh-top .nm{flex:1;min-width:0}.sh-top h1{font-size:28px;line-height:1.2;letter-spacing:-.02em;margin:0}
+  .sh-top .kd{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:12px;font-weight:700}
+  .sh-top p{margin:8px 0 0;color:var(--smoke);font-size:14px;display:flex;flex-wrap:wrap;gap:4px 14px}.sh-top p span{display:inline-flex;align-items:center;gap:5px}.sh-top p svg{width:15px;height:15px}
+  .sh-acts{display:flex;gap:8px;flex:none}.sh-acts a,.sh-acts button{height:44px;padding:0 18px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;font-weight:600}
+  .sh-acts .msg{background:var(--ink);color:#fff}.sh-acts .msg:hover{filter:brightness(1.15)}.sh-acts .fl{border:1px solid var(--border);background:#fff}.sh-acts .fl.on{border-color:var(--ink)}.sh-acts svg{width:18px;height:18px}
+  .sh-stats{display:grid;grid-template-columns:repeat(3,1fr)}.sh-stats div{padding:16px 28px;border-left:1px solid var(--border)}.sh-stats div:first-child{border-left:0}
+  .sh-stats b{display:flex;align-items:center;gap:6px;font-size:20px}.sh-stats b svg{width:18px;height:18px;color:#E39B1A}.sh-stats span{font-size:13px;color:var(--smoke)}
+  .bio{margin-top:22px;max-width:760px;line-height:1.65;color:#3C4660}
+  .tabs{display:flex;gap:26px;border-bottom:1px solid var(--border);margin-top:28px}.tabs button{border:0;background:none;padding:0 0 13px;color:var(--smoke);font-weight:600;font-size:15px;position:relative}.tabs button.on{color:var(--ink)}.tabs button.on::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--ink)}.tabs small{font-size:12px;color:var(--fog);margin-left:4px}
+  .grid4{margin-top:22px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 18px}
+  .pc{display:block;min-width:0}.pc .ph{aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--soft)}.pc .ph img{width:100%;height:100%;object-fit:cover}
+  .pc .k{display:block;margin-top:10px;font-size:12px;color:var(--smoke)}.pc h3{font-size:15px;line-height:1.35;margin:4px 0 6px;font-weight:600}.pc .pr{font-weight:700}.pc .pr small{font-weight:400;color:var(--smoke)}
+  .jc .ph{display:flex;flex-direction:column;justify-content:space-between;padding:16px}.jc .ph p{margin:0;font-size:14px;line-height:1.45;color:#3C4660}.jc .ph b{font-size:22px;letter-spacing:-.02em}.jc .ph b small{font-size:12px;font-weight:500;color:var(--smoke)}
+  .jst{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#2E7D4F;margin-top:6px}.jst::before{content:'';width:7px;height:7px;border-radius:50%;background:#3BAA6A}.jst.closed{color:var(--smoke)}.jst.closed::before{background:var(--fog)}
+  .revs{margin-top:10px}.rv{display:flex;gap:12px;padding:18px 0;border-bottom:1px solid var(--border)}.rv img{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none}.rv b{font-size:14px}.rv small{margin-left:8px;color:var(--fog);font-size:12.5px}.rv .st{color:#E39B1A;letter-spacing:1px;font-size:13px;margin-top:2px}.rv p{margin:4px 0 0;line-height:1.55;color:#3C4660}.rv .on{display:inline-block;margin-top:6px;font-size:12px;color:var(--smoke);background:var(--soft);padding:2px 8px;border-radius:6px}
+  .empty3{padding:40px 0;text-align:center;color:var(--smoke)}
+  @media(max-width:900px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}.sh-top{flex-wrap:wrap}}
+</style></head><body><div id="siteHeader"></div><main class="wrap" id="page"></main>
+<script src="shared/icons.js"></script><script src="shared/common.js"></script><script>
+(() => {
+  const esc = AntGo.esc, icon = AntGo.icon, $ = id => document.getElementById(id);
+  const U = (id, w = 480, h = 360) => `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&q=70`;
+  const money = n => n.toLocaleString("vi-VN") + "đ";
+  // Dữ liệu mẫu — cùng người đăng / người bán đang xuất hiện ở các trang khác
+  const SHOPS = {
+    "Quán Nhà Mây": { av: "1438761681033-6461ffad8d80", kind: "Quán nước trong khu", since: "Quán mở từ 2022", at: "Shop 5, tầng trệt", reply: "Thường trả lời trong 5 phút", rate: "4,4", done: 320,
+      bio: "Trà sữa, cà phê, trà trái cây pha khi có đơn. Trân châu nấu theo mẻ nhỏ mỗi ngày, có ly giấy cho ai không dùng ly nhựa.",
+      posts: [["drink", "1558857563-b371033873b8", "Đồ uống", "Trà sữa trân châu đường đen", 30000, "ly"], ["drink", "1509042239860-f550ce710b93", "Đồ uống", "Cà phê sữa đá", 25000, "ly"], ["drink", "1556679343-c7306c1976bc", "Đồ uống", "Trà chanh đá", 20000, "ly"], ["drink", "1622597467836-f3285f2131b8", "Đồ uống", "Sinh tố trái cây", 35000, "ly"]],
+      revs: [["Chị Mai", "1544005313-94ddf0286df2", 5, "3 ngày trước", "Trân châu mềm, đường đen thơm mà không bị gắt.", "Trà sữa trân châu đường đen"], ["Quốc Anh", "1500648767791-00dcc994a43e", 5, "1 tuần trước", "Đặt 4 ly cho cả phòng, ly dán kín không đổ.", "Trà sữa trân châu đường đen"]] },
+    "Quốc Anh": { av: "1500648767791-00dcc994a43e", kind: "Hàng xóm", since: "Hàng xóm từ 2023", at: "Block B, tầng 5", reply: "Thường trả lời trong 1 giờ", rate: "4,8", done: 3,
+      bio: "Mình đi làm cả tuần nên hay nhờ hàng xóm dọn nhà, lấy đồ cuối tuần. Dụng cụ có sẵn, trả công bằng chuyển khoản ngay khi xong.",
+      jobs: [["Việc nhà", "Dọn phòng cuối tuần", "Phòng ngủ và phòng khách khoảng 40m², dụng cụ có sẵn.", 80000, "buổi", 3, true]],
+      revs: [["Ngọc Thủy", "1494790108377-be9c29b29330", 5, "2 tuần trước", "Anh Quốc Anh dặn việc rõ, trả công đúng hẹn.", "Dọn phòng cuối tuần"]] },
+    "Thu Hà": { av: "1438761681033-6461ffad8d80", kind: "Hàng xóm", since: "Hàng xóm từ 2021", at: "Block B, tầng 2", reply: "Thường trả lời trong 10 phút", rate: "4,9", done: 9,
+      bio: "Mình làm ca nên hay nhờ lấy cơm, nhận hàng giúp. Việc nhỏ, gần, trả tiền mặt luôn.",
+      jobs: [["Mua hộ", "Lấy giúp phần cơm ở cổng sau", "Shipper để ở cổng sau, mang lên giúp tận cửa tầng 2.", 30000, "lần", 1, true]],
+      revs: [["Minh", "1507003211169-0a1dd7228f2d", 5, "1 tuần trước", "Chị Hà nhắn rõ tên trên túi, dễ lấy đúng đồ.", "Lấy giúp phần cơm"]] },
+    "Chị Ngân": { av: "1507003211169-0a1dd7228f2d", kind: "Hàng xóm", since: "Hàng xóm từ 2020", at: "Block B, tầng 11", reply: "Thường trả lời trong 30 phút", rate: "5,0", done: 4,
+      bio: "Nhà có 2 bé mèo. Mỗi lần đi công tác mình cần người ghé cho ăn và dọn cát giúp.",
+      jobs: [["Thú cưng", "Cho mèo ăn 3 ngày khi đi vắng", "2 bé mèo, cho ăn sáng tối và dọn cát mỗi ngày.", 150000, "3 ngày", 2, true]],
+      revs: [["Ngọc Thủy", "1494790108377-be9c29b29330", 5, "1 tháng trước", "Chị Ngân gửi hướng dẫn rất kỹ, chìa khóa để sẵn ở lễ tân.", "Cho mèo ăn"]] },
+    "Anh Tuấn": { av: "1506794778202-cad84cf45f1d", kind: "Hàng xóm", since: "Hàng xóm từ 2022", at: "Block C, tầng 12", reply: "Thường trả lời trong 1 giờ", rate: "4,7", done: 2,
+      bio: "Mới chuyển về Block C, đang cần người phụ khuân đồ vài buổi tối.",
+      jobs: [["Vận chuyển", "Chuyển 2 thùng đồ sang Block A", "Thùng sách và đồ bếp, có xe đẩy sẵn ở sảnh.", 80000, "lần", 1, true], ["Khuân vác", "Phụ khiêng tủ lên tầng 12", "Khiêng tủ quần áo 2 cánh, có thang máy chở hàng.", 120000, "lần", 0, false]],
+      revs: [["Ngọc Thủy", "1494790108377-be9c29b29330", 5, "3 ngày trước", "Anh Tuấn chuẩn bị xe đẩy sẵn, làm nhanh gọn.", "Phụ khiêng tủ"]] },
+    "Chị Mai": { av: "1544005313-94ddf0286df2", kind: "Hàng xóm", since: "Hàng xóm từ 2021", at: "Block D, tầng 6", reply: "Thường trả lời trong 2 giờ", rate: "4,8", done: 5,
+      bio: "Hai vợ chồng đi làm về muộn, đôi khi cần người trông bé một buổi tối.",
+      jobs: [["Trông trẻ", "Trông bé 2 tiếng tối thứ Sáu", "Trông bé 5 tuổi, chơi cùng và cho bé ăn tối (đồ ăn có sẵn).", 100000, "buổi", 0, false]], revs: [] },
+    "Minh Khoa": { av: "1438761681033-6461ffad8d80", kind: "Phụ huynh", since: "Hàng xóm từ 2022", at: "Block D", reply: "Thường trả lời trong 1 giờ", rate: "4,9", done: 6,
+      bio: "Tìm gia sư trong khu cho bé lớp 8, học tại nhà buổi tối.",
+      jobs: [["Gia sư", "Kèm Toán lớp 8, 2 buổi mỗi tuần", "Bé cần ôn hình học, học tại nhà, mỗi buổi 90 phút.", 100000, "buổi", 2, true]], revs: [] },
+    "Phương": { av: "1507003211169-0a1dd7228f2d", kind: "Hàng xóm", since: "Hàng xóm từ 2023", at: "Sảnh A", reply: "Thường trả lời trong 1 giờ", rate: "4,7", done: 3,
+      bio: "Mình tổ chức workshop thủ công nhỏ ở sảnh, thỉnh thoảng cần người chụp ảnh.",
+      jobs: [["Sự kiện", "Chụp ảnh buổi workshop nhỏ", "Workshop làm nến 2 tiếng, cần khoảng 30–50 ảnh đẹp.", 150000, "buổi", 0, true]], revs: [] },
+    "Giặt sấy Mỹ Linh": { av: "1438761681033-6461ffad8d80", kind: "Cửa hàng trong khu", since: "Cửa hàng từ 2019", at: "Shop 2", reply: "Thường trả lời trong 20 phút", rate: "4,6", done: 180,
+      bio: "Giặt sấy theo ký, giặt hấp đồ vest, có lấy và trả trong khu.",
+      posts: [["svc", "1610557892470-55d9e80c0bce", "Dịch vụ", "Giặt sấy gấp 5kg", 75000, "lần"]], revs: [] },
+    "Quán Phở Bà Tư": { av: "1500648767791-00dcc994a43e", kind: "Quán ăn trong khu", since: "Quán mở từ 2018", at: "Shop 9", reply: "Thường trả lời trong 15 phút", rate: "4,9", done: 540,
+      bio: "Phở bò nước dùng hầm xương 8 tiếng, bán sáng 6:00 – 10:00 và tối 17:00 – 21:00.",
+      posts: [["food", "1569718212165-3a8278d5f624", "Đồ ăn", "Phở bò tái, nước dùng hầm xương", 45000, "tô"]],
+      revs: [["Bác Sơn", "1506794778202-cad84cf45f1d", 5, "1 tuần trước", "Nước dùng ngọt thanh, bánh phở mềm. Giao tới vẫn còn nóng.", "Phở bò tái"]] },
+    "Bếp Cô Lan": { av: "1494790108377-be9c29b29330", kind: "Bếp nhà làm", since: "Hàng xóm từ 2023", at: "Block B, tầng 5", reply: "Thường trả lời trong 10 phút", rate: "4,3", done: 86,
+      bio: "Cô nấu cơm nhà mỗi ngày cho mấy cháu đi làm trong khu: ít dầu, nêm vừa, rau luộc theo mùa. Thực đơn ngày mai cô đăng vào buổi tối, đặt trước 10:30 là kịp trưa.",
+      posts: [["food", "1504674900247-0877df9cc836", "Đồ ăn", "Cơm nhà làm, thực đơn đổi mỗi ngày", 35000, "phần"], ["food", "1585032226651-759b368d7246", "Đồ ăn", "Mì xào hải sản", 40000, "phần"], ["food", "1604908176997-125f25cc6f3d", "Đồ ăn", "Đậu sốt cà chua", 30000, "phần"], ["food", "1540189549336-e6e99c3679fe", "Đồ ăn", "Salad ức gà", 45000, "hộp"]],
+      revs: [["Quốc Anh", "1500648767791-00dcc994a43e", 5, "2 tuần trước", "Đồ ăn vừa miệng, giao đúng giờ. Cô Lan còn nhắn hỏi mình ăn cay được không.", "Cơm nhà làm"], ["Bác Sơn", "1506794778202-cad84cf45f1d", 5, "1 tháng trước", "Phần ăn đầy đặn, giá hợp lý. Mình đặt cho cả nhà mấy lần rồi.", "Cơm nhà làm"], ["Minh Khoa", "1438761681033-6461ffad8d80", 4, "1 tháng trước", "Rau tươi, canh ngọt. Hôm nào món mặn hết sớm thì cô nhắn đổi món khác.", "Mì xào hải sản"]] },
+    "Chị Hoa": { av: "1494790108377-be9c29b29330", kind: "Hàng xóm", since: "Hàng xóm từ 2022", at: "Block A, tầng 9", reply: "Thường trả lời trong 20 phút", rate: "4,9", done: 5,
+      bio: "Mình làm văn phòng, hay cần người phụ việc vặt cuối tuần: đi chợ, đón đồ, trông nhà. Mình dặn kỹ và trả công ngay khi xong.",
+      jobs: [["Mua hộ", "Mua đồ chợ sáng giúp nhà mình", "Mua rau, thịt, trái cây theo danh sách gửi qua tin nhắn.", 50000, "lần", 2, true], ["Mua hộ", "Lấy đơn hàng ở tủ đồ cổng chính", "2 hộp nhỏ, mang lên tầng 9 giúp mình.", 20000, "lần", 0, false]],
+      revs: [["Minh", "1507003211169-0a1dd7228f2d", 5, "1 tuần trước", "Chị Hoa dặn rõ ràng, gửi danh sách sớm, trả công ngay khi mình giao đồ.", "Mua đồ chợ sáng"], ["Thu Hà", "1438761681033-6461ffad8d80", 5, "3 tuần trước", "Việc đúng như mô tả, chị dễ thương lắm.", "Lấy đơn hàng ở tủ đồ"]] },
+    "Tiệm Sạch Thơm": { av: "1438761681033-6461ffad8d80", kind: "Cửa hàng trong khu", since: "Cửa hàng từ 2021", at: "Shop 12, tầng trệt", reply: "Thường trả lời trong 15 phút", rate: "4,8", done: 214,
+      bio: "Giặt sấy, gấp gọn, lấy và trả tận cửa trong khu. Đồ trắng và đồ màu giặt riêng, có báo giá trước khi giặt.",
+      posts: [["svc", "1582735689369-4fe89db7114c", "Dịch vụ", "Giặt sấy gấp, lấy và trả tận cửa", 18000, "kg"], ["svc", "1545173168-9f1947eebb7f", "Dịch vụ", "Giặt chăn mền, rèm cửa", 60000, "cái"]],
+      revs: [["Quốc Anh", "1500648767791-00dcc994a43e", 5, "5 ngày trước", "Đồ thơm, gấp gọn, trả đúng hẹn.", "Giặt sấy gấp"]] },
+    "Anh Tùng": { av: "1507003211169-0a1dd7228f2d", kind: "Thợ sửa máy", since: "Thợ trong khu từ 2020", at: "Shop 7", reply: "Thường trả lời trong 30 phút", rate: "4,7", done: 132,
+      bio: "Sửa laptop, điện thoại, máy lạnh tại tiệm hoặc tận nhà. Kiểm tra trước, báo giá rồi mới sửa.",
+      posts: [["fix", "1581092918056-0c4c3acd3789", "Dịch vụ", "Sửa laptop, điện thoại — kiểm tra tận nơi", 50000, "lần kiểm tra"]], revs: [] },
+    "Cô Ba": { av: "1438761681033-6461ffad8d80", kind: "Hàng xóm", since: "Hàng xóm từ 2021", at: "Block A", reply: "Thường trả lời trong 1 giờ", rate: "4,8", done: 57,
+      bio: "Nhận dọn nhà theo giờ, có thể đặt lịch hằng tuần. Làm kỹ bếp và nhà tắm.",
+      posts: [["clean", "1581578731548-c64695cc6952", "Dịch vụ", "Dọn nhà theo giờ, có thể đặt hằng tuần", 120000, "giờ"]], revs: [] },
+    "Minh": { av: "1500648767791-00dcc994a43e", kind: "Sinh viên trong khu", since: "Hàng xóm từ 2024", at: "Block B", reply: "Thường trả lời trong 5 phút", rate: "4,9", done: 41,
+      bio: "Mình là sinh viên, nhận lấy đồ hộ trong khu: hàng ship ở cổng, đồ ăn ở quầy, gửi đồ sang block khác.",
+      posts: [["trip", "1617347454431-f49d7ff5c3b1", "Dịch vụ", "Lấy đồ hộ, giao nhận trong khu", 15000, "lượt"]], revs: [] },
+    "Anh Quân": { av: "1500648767791-00dcc994a43e", kind: "Hàng xóm", since: "Hàng xóm từ 2022", at: "Block A", reply: "Thường trả lời trong 1 giờ", rate: "4,6", done: 9,
+      bio: "Dọn nhà nên pass lại vài món đồ gia dụng còn tốt.",
+      posts: [["goods", "1556909114-f6e7ad7d3136", "Đồ dùng", "Nồi chiên không dầu 5L, dùng 6 tháng", 650000, "cái"]], revs: [] },
+  };
+  const name = new URLSearchParams(location.search).get("name") || "Bếp Cô Lan";
+  const S = SHOPS[name] || { av: "", kind: "Hàng xóm", since: "Hàng xóm trong khu", at: AntGo.getArea(), reply: "", rate: "–", done: 0, bio: "", posts: [], jobs: [], revs: [] };
+  S.posts = S.posts || []; S.jobs = S.jobs || []; S.revs = S.revs || [];
+  document.title = "AntGo — " + name;
+  const tabs = [["posts", "Đang bán", S.posts.length], ["jobs", "Việc đang cần người", S.jobs.length], ["revs", "Đánh giá", S.revs.length]].filter(t => t[2] || t[0] === "revs");
+  let tab = tabs[0][0];
+  const SKEY = "antgo_follow";
+  let fol; try { fol = JSON.parse(localStorage.getItem(SKEY)) || []; } catch (e) { fol = []; }
+
+  function render() {
+    const following = fol.includes(name);
+    $("page").innerHTML = `
+      <div class="crumb2"><a href="javascript:history.back()">${icon("right")}Quay lại</a><span>·</span><span>Gian hàng</span></div>
+      <section class="shophead">
+        <div class="sh-top">${S.av ? `<img src="${U(S.av, 200, 200)}" alt="">` : ""}<div class="nm"><h1>${esc(name)}</h1><span class="kd">${esc(S.kind)}</span>
+          <p><span>${icon("pin")}${esc(S.at)}</span><span>${icon("home")}${esc(S.since)}</span>${S.reply ? `<span>${icon("chat")}${esc(S.reply)}</span>` : ""}</p></div>
+          <div class="sh-acts"><button class="fl${following ? " on" : ""}" id="fol">${icon(following ? "heartFill" : "heart")}${following ? "Đang theo dõi" : "Theo dõi"}</button><a class="msg" href="messenger.html?to=${encodeURIComponent(name)}">${icon("chat")}Nhắn tin</a></div></div>
+        <div class="sh-stats"><div><b>${icon("star")}${S.rate}</b><span>${S.revs.length ? S.revs.length + " đánh giá" : "chưa có đánh giá"}</span></div><div><b>${S.posts.length + S.jobs.length}</b><span>bài đang đăng</span></div><div><b>${S.done}</b><span>${S.jobs.length && !S.posts.length ? "việc đã hoàn thành" : "đơn đã hoàn thành"}</span></div></div>
+      </section>
+      ${S.bio ? `<p class="bio">${esc(S.bio)}</p>` : ""}
+      <div class="tabs">${tabs.map(([k, t, n]) => `<button class="${k === tab ? "on" : ""}" data-t="${k}">${t}<small>${n}</small></button>`).join("")}</div>
+      ${tab === "posts" ? `<div class="grid4">${S.posts.map(([p, img, k, t, pr, u]) => `<a class="pc" href="detail.html?p=${p}"><div class="ph"><img src="${U(img)}" alt="" loading="lazy"></div><span class="k">${k}</span><h3>${esc(t)}</h3><div class="pr">${money(pr)} <small>/ ${u}</small></div></a>`).join("")}</div>` : ""}
+      ${tab === "jobs" ? `<div class="grid4">${S.jobs.map(([c, t, d, pr, u, n, open]) => `<a class="pc jc" href="job.html"><div class="ph"><p>${esc(d)}</p><b>${money(pr)}<small> / ${u}</small></b></div><span class="k">${c}</span><h3>${esc(t)}</h3>${open ? `<span class="jst">Đang mở · ${n ? n + " đề nghị" : "chưa có đề nghị"}</span>` : `<span class="jst closed">Đã có người nhận</span>`}</a>`).join("")}</div>` : ""}
+      ${tab === "revs" ? (S.revs.length ? `<div class="revs">${S.revs.map(([w, av, st, t, txt, on]) => `<div class="rv"><img src="${U(av, 80, 80)}" alt=""><div><b>${w}</b><small>${t}</small><div class="st">${"★".repeat(st)}${"☆".repeat(5 - st)}</div><p>${esc(txt)}</p><span class="on">${esc(on)}</span></div></div>`).join("")}</div>` : `<div class="empty3">Chưa có đánh giá nào.</div>`) : ""}
+      <p class="demo-note">Gian hàng mẫu — thông tin và số liệu là dữ liệu minh họa của bản mẫu.</p>`;
+    document.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+    $("fol").onclick = () => { fol = following ? fol.filter(x => x !== name) : [...fol, name]; try { localStorage.setItem(SKEY, JSON.stringify(fol)); } catch (e) {} render(); };
+  }
+  render();
+})();
+</script></body></html>

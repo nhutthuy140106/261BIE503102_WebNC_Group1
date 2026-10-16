@@ -1,0 +1,44 @@
+# file tạm khi chụp kiểm tra
+mockups/_*.html
+# hệ thống
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# máy cá nhân / bí mật
+.mcp.json
+
+# ảnh/video gốc khi thiết kế (không đưa lên repo)
+design/assets-goc/
+
+# mockup: ảnh chụp màn hình & bản thử cũ không còn dùng
+design/mockups/*.png
+design/mockups/wireframes/
+design/mockups/image
+design/mockups/airbnb-style-web.html
+design/mockups/font-compare.html
+design/mockups/home-clean.html
+design/mockups/home-styles.html
+design/mockups/home-v3.html
+design/mockups/home-v4.html
+design/mockups/logo-options.html
+design/mockups/style-desktop.html
+design/mockups/style-directions.html
+design/mockups/swiggy-style-web.html
+design/mockups/welcome.html
+design/mockups/wireframes.html
+
+# mockup: chỉ giữ ảnh đang dùng (assets/clean + hero-bg); bỏ ảnh nguồn và ảnh bản quyền (trajectory.ai: sky, cloud)
+design/mockups/assets/*
+!design/mockups/assets/clean/
+!design/mockups/assets/hero-bg.png
+
+# script dựng trang cũ
+tools/build-history/
+
+# công cụ xử lý ảnh/icon dùng một lần, ảnh linh vật không dùng
+tools/icons/
+tools/image/
+design/mockups/assets/clean/ride_point.png
+design/mockups/assets/clean/run_*.png
+design/mockups/assets/clean/Kiến cam phấn khích*.png

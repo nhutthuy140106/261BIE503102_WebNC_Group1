@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AntGo — Tôi</title><link rel="stylesheet" href="shared/base.css"><style>
+  .profile-grid{display:grid;grid-template-columns:250px minmax(0,1fr);gap:48px;padding-bottom:50px}.profile-side{align-self:start;position:sticky;top:88px}.identity{display:flex;align-items:center;gap:12px;padding-bottom:20px;border-bottom:1px solid var(--border)}.identity img{width:52px;height:52px;border-radius:50%;object-fit:cover}.identity b{display:block;font-size:16px}.identity small{color:var(--smoke)}
+  .profile-side nav{display:grid;gap:4px;padding-top:16px}.profile-side nav a{padding:11px 12px;border-radius:9px;font-weight:600}.profile-side nav a:hover{background:var(--soft)}
+  .profile-main section{padding:0 0 28px;margin-bottom:28px;border-bottom:1px solid var(--border)}.profile-main h2{font-size:21px;margin:0 0 14px}.profile-main .intro{color:var(--smoke);margin:-8px 0 17px}.saved-filter{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.saved-filter button{border:1px solid var(--border);border-radius:999px;background:#fff;padding:7px 12px;font-size:13px;font-weight:600}.saved-filter button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .saved-row{display:grid;grid-template-columns:72px 1fr auto;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid var(--border)}.saved-row img,.saved-row .job{width:72px;height:60px;border-radius:9px;object-fit:cover}.saved-row .job{background:var(--soft);display:grid;place-items:center;font-weight:600}.saved-row b{display:block}.saved-row small{color:var(--smoke)}.saved-row .price{display:block;margin-top:3px;font-weight:700}.saved-row .actions{display:flex;gap:8px}.saved-row .actions button{border:0;background:none;text-decoration:underline;color:var(--smoke);font-size:12px}
+  .quick{display:flex;gap:9px;flex-wrap:wrap}.pref{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-top:1px solid var(--border)}.pref b{display:block}.pref small{display:block;color:var(--smoke)}
+  @media(max-width:760px){.profile-grid{grid-template-columns:1fr;gap:24px}.profile-side{position:static}.profile-side nav{display:flex;overflow:auto}.saved-row{grid-template-columns:58px 1fr}.saved-row img,.saved-row .job{width:58px;height:54px}.saved-row .actions{grid-column:2}}
+  .addr-h{display:flex;align-items:center;justify-content:space-between;gap:12px}.addr-h .btn{font-size:13.5px}
+  .arow{display:flex;gap:14px;align-items:flex-start;padding:15px 0;border-bottom:1px solid var(--border)}.arow:first-child{border-top:1px solid var(--border)}
+  .arow>svg{width:20px;height:20px;color:var(--accent);margin-top:2px;flex:none}.arow .t{flex:1;min-width:0;line-height:1.5}.arow .t b{font-weight:700}.arow .t i{font-style:normal;color:var(--smoke);margin-left:8px;padding-left:8px;border-left:1px solid var(--border)}
+  .arow .t small{display:block;color:#3C4660;font-size:13.5px}.arow .t small.n{color:var(--smoke)}
+  .arow .t em{display:inline-block;margin:5px 6px 0 0;padding:1px 7px;border-radius:5px;border:1px solid var(--accent);color:var(--accent);font-style:normal;font-size:11px;font-weight:600}.arow .t em.for{border-color:var(--ink);color:var(--ink)}
+  .arow .acts{display:grid;justify-items:end;gap:8px;flex:none}.arow .acts div{display:flex;gap:14px}.arow .acts button{border:0;background:none;padding:0;font-weight:600;font-size:13px;color:#2563A8}.arow .acts button.del{color:var(--smoke)}
+  .arow .acts .mk{border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--ink);font-weight:600;font-size:12.5px}.arow .acts .mk:disabled{color:var(--fog);cursor:default}
+</style></head><body><div id="siteHeader"></div><main class="wrap"><div class="pagehead"><h1>Tôi</h1><p>Hồ sơ và những thứ bạn theo dõi trong AntGo.</p></div>
+<div class="profile-grid"><aside class="profile-side"><div class="identity"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&q=70" alt=""><span><b>Tài khoản của bạn</b><small>Dùng chung cả hai không gian</small></span></div><nav><a href="#saved">Bài đã lưu</a><a href="#addresses">Địa chỉ của tôi</a><a href="#activity">Hoạt động</a><a href="#preferences">Khu vực & AntXu</a></nav></aside>
+<div class="profile-main"><section id="saved"><h2>Bài đã lưu</h2><p class="intro">Món ăn, đồ dùng, dịch vụ và việc làm bạn muốn xem lại.</p><div class="saved-filter" id="savedFilter"><button class="on" data-kind="all">Tất cả</button><button data-kind="food">Đồ ăn &amp; uống</button><button data-kind="goods">Đồ dùng</button><button data-kind="svc">Dịch vụ</button><button data-kind="jobs">Việc làm</button></div><div id="pfSaved"></div></section>
+<section id="addresses"><h2 class="addr-h">Địa chỉ của tôi<button class="btn primary" id="addAddr" type="button">+ Thêm địa chỉ mới</button></h2><p class="intro">Dùng khi đặt món giao tận cửa, gọi thợ đến nhà hoặc đặt hộ người thân.</p><div id="addrList"></div></section>
+<section id="activity"><h2>Hoạt động của bạn</h2><div class="quick"><a class="btn" href="orders.html">Đơn đã đặt &amp; việc đã nhận</a><a class="btn" href="messenger.html">Messenger</a><a class="btn" href="notifications.html">Thông báo</a></div></section>
+<section id="preferences"><h2>Khu vực & AntXu</h2><div class="pref"><span><b>Khu vực đang xem</b><small data-area-label>Block B</small></span><button class="btn" data-area-open>Đổi khu vực</button></div><div class="pref"><span><b>AntXu</b><small>Đổi voucher trong ngăn kéo Xu ở trang chủ; cơ chế Xu vẫn là bản mẫu.</small></span><a class="btn" href="home-v5.html">Về Trang chủ</a></div></section>
+<p class="demo-note">Thông tin cá nhân, xác minh và phương thức thanh toán chưa được chốt nên chưa hiển thị dữ liệu giả ở đây.</p></div></div></main>
+<script src="shared/icons.js"></script><script src="shared/common.js"></script><script src="shared/catalog.js"></script><script src="shared/addresses.js"></script><script>
+(() => {
+  const key = "antgo_saved", esc = AntGo.esc, $ = id => document.getElementById(id);
+  let saved; try { saved = new Map(JSON.parse(localStorage.getItem(key)) || []); } catch(e) { saved = new Map(); }
+  let filter = "all";
+  const U = (id,w=160,h=130) => `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&q=70`;
+  const href = v => {
+    if (v.k === "jobs") return "job.html";
+    const article = ANTGO_CATALOG.find(x => x.img === v.id || x.title === v.t);
+    return "detail.html?p=" + (article?.post || (v.k === "svc" ? "svc" : "food"));
+  };
+  function render() {
+    const entries = [...saved.entries()].filter(([,v]) => filter === "all" || v.k === filter);
+    $("pfSaved").innerHTML = entries.length ? entries.map(([k,v]) => `<div class="saved-row"><a href="${href(v)}">${v.id ? `<img src="${U(v.id)}" alt="">` : `<span class="job">Việc</span>`}</a><span><a href="${href(v)}"><b>${esc(v.t)}</b></a><small>${esc(v.a || "")}${v.off ? " · " + esc(v.off) : ""}</small><span class="price">${esc(v.p || "")} ${esc(v.u || "")}</span></span><span class="actions"><button data-remove="${esc(k)}">Bỏ lưu</button></span></div>`).join("") : `<div class="empty"><img src="assets/clean/peek.png" alt="">Chưa có bài nào trong mục này.</div>`;
+    $("pfSaved").querySelectorAll("[data-remove]").forEach(b => b.onclick = () => { saved.delete(b.dataset.remove); try { localStorage.setItem(key, JSON.stringify([...saved])); } catch(e) {} render(); });
+  }
+  $("savedFilter").querySelectorAll("button").forEach(b => b.onclick = () => { filter = b.dataset.kind; $("savedFilter").querySelectorAll("button").forEach(x => x.classList.toggle("on",x === b)); render(); });
+  render();
+  /* Địa chỉ của tôi — cùng sổ địa chỉ với khung đặt hàng */
+  function renderAddr() {
+    $("addrList").innerHTML = AntAddr.all().map(a => `<div class="arow">${AntGo.icon("pin")}<span class="t"><b>${esc(a.name)}</b><i>${esc(a.phone)}</i><small>${esc(AntAddr.line(a))}</small>${a.note ? `<small class="n">${esc(a.note)}</small>` : ""}${a.def ? "<em>Mặc định</em>" : ""}${a.me ? "" : `<em class="for">${esc(a.tag || "Người khác")}</em>`}</span>
+      <span class="acts"><div><button data-ed="${a.id}">Sửa</button>${a.def || a.me ? "" : `<button class="del" data-rm="${a.id}">Xóa</button>`}</div><button class="mk" data-df="${a.id}" ${a.def ? "disabled" : ""}>Thiết lập mặc định</button></span></div>`).join("");
+    $("addrList").querySelectorAll("[data-ed]").forEach(b => b.onclick = () => AntAddr.edit(b.dataset.ed, renderAddr));
+    $("addrList").querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { if (confirm("Xóa địa chỉ này?")) { AntAddr.remove(b.dataset.rm); renderAddr(); } });
+    $("addrList").querySelectorAll("[data-df]").forEach(b => b.onclick = () => { AntAddr.setDefault(b.dataset.df); renderAddr(); });
+  }
+  $("addAddr").onclick = () => AntAddr.edit(null, renderAddr);
+  renderAddr();
+})();
+</script></body></html>

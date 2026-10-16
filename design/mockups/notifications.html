@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AntGo — Thông báo</title><link rel="stylesheet" href="shared/base.css"><style>
+  .nbar{display:flex;align-items:center;gap:8px;margin-bottom:18px}.nbar button{border:1px solid var(--border);background:#fff;border-radius:999px;padding:7px 15px;font-weight:600}.nbar button.on{background:var(--ink);border-color:var(--ink);color:#fff}.nbar .readall{margin-left:auto;border:0;text-decoration:underline;text-underline-offset:3px}
+  .nlist{border-top:1px solid var(--border)}.nrow{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:15px;align-items:start;padding:20px 10px;border-bottom:1px solid var(--border);cursor:pointer}.nrow:hover{background:var(--soft)}
+  .nrow .mark{width:40px;height:40px;border-radius:11px;background:var(--soft);display:grid;place-items:center}.nrow .mark svg{width:20px;height:20px}.nrow b{font-size:15px}.nrow p{margin:4px 0 0;color:var(--smoke)}.nrow small{color:var(--smoke)}.nrow .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:6px}.nrow.read .dot{visibility:hidden}.nrow.read{opacity:.72}
+  @media(max-width:700px){.nrow{grid-template-columns:40px 1fr;gap:10px}.nrow .dot{display:none}.nbar .readall{font-size:12px}}
+</style></head><body><div id="siteHeader"></div><main class="wrap"><div class="pagehead"><h1>Thông báo</h1><p>Hoạt động từ đơn hàng và việc làm của bạn, gom trong một nơi.</p></div>
+<div class="nbar"><button data-filter="all" class="on">Tất cả</button><button data-filter="unread">Chưa đọc</button><button class="readall" id="readAll">Đánh dấu tất cả đã đọc</button></div><div class="nlist" id="nlist"></div>
+<p class="demo-note">Thông báo mẫu giúp bấm thử đường dẫn; đơn bạn vừa đặt cũng hiện tại đây. Đồng bộ giữa các tài khoản cần máy chủ.</p></main>
+<script src="shared/icons.js"></script><script src="shared/common.js"></script><script>
+(() => {
+  const $ = id => document.getElementById(id), esc = AntGo.esc, icon = AntGo.icon, key = "antgo_notification_read";
+  const examples = [
+    { id:"pick-j2", title:"Bạn đã được chọn nhận việc", body:"Quốc Anh đã chọn bạn cho việc Dọn phòng cuối tuần.", href:"orders.html?id=j2", ic:"check" },
+    { id:"confirm-o1", title:"Đơn món ăn đã được xác nhận", body:"Bếp Cô Lan đang chuẩn bị đơn cơm nhà của bạn.", href:"orders.html?id=o1", ic:"receipt" },
+    { id:"report-j4", title:"Báo hoàn thành đã được gửi", body:"Thu Hà đang kiểm tra việc Lấy giúp phần cơm ở cổng sau.", href:"orders.html?id=j4", ic:"receipt" },
+  ];
+  let orders = {}; try { orders = JSON.parse(localStorage.getItem("antgo_orders")) || {}; } catch (e) {}
+  const created = Object.values(orders).filter(o => o && o._type === "placed" && o.id && o.title && !["o1","o2","o3"].includes(o.id)).map(o => ({ id:"placed-" + o.id, title:"Đã gửi yêu cầu đặt hàng", body:o.title + " · mở đơn để xem trạng thái.", href:"orders.html?id=" + encodeURIComponent(o.id), ic:"receipt" }));
+  const notices = [...created, ...examples];
+  let seen; try { seen = JSON.parse(localStorage.getItem(key)) || {}; } catch (e) { seen = {}; }
+  const save = () => { try { localStorage.setItem(key, JSON.stringify(seen)); } catch (e) {} AntGo.refreshBell(); };
+  let filter = "all";
+  function render() {
+    const list = notices.filter(n => filter === "all" || !seen[n.id]);
+    $("nlist").innerHTML = list.length ? list.map(n => `<a class="nrow ${seen[n.id] ? "read" : ""}" href="${n.href}" data-id="${n.id}"><span class="mark">${icon(n.ic)}</span><span><b>${esc(n.title)}</b><p>${esc(n.body)}</p><small>Mở chi tiết liên quan</small></span><span class="dot"></span></a>`).join("") : `<div class="empty"><img src="assets/clean/peek.png" alt="">Bạn đã xem hết thông báo.</div>`;
+    $("nlist").querySelectorAll("[data-id]").forEach(a => a.onclick = () => { seen[a.dataset.id] = true; save(); });
+  }
+  document.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { filter = b.dataset.filter; document.querySelectorAll("[data-filter]").forEach(x => x.classList.toggle("on", x === b)); render(); });
+  $("readAll").onclick = () => { notices.forEach(n => seen[n.id] = true); save(); render(); };
+  render();
+})();
+</script></body></html>
