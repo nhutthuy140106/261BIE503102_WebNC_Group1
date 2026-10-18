@@ -1,0 +1,9 @@
+.job { background: var(--cream); padding: 14px; display: grid; gap: 6px; }
+.top { display: flex; justify-content: space-between; font-size: 13px; }
+.state.open { color: #1f7a4d; font-weight: 600; }
+h3 { font-size: 16px; margin: 0; }
+.desc { margin: 0; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.row { display: flex; justify-content: space-between; align-items: flex-end; }
+.pay { font-size: 22px; font-weight: 800; }
+.save { border: 0; background: transparent; font-size: 20px; cursor: pointer; color: var(--muted); }
+.save.on { color: var(--accent); }

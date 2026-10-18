@@ -1,0 +1,18 @@
+<a routerLink="/orders" class="btn ghost">← Đơn hàng</a>
+
+@if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else if (order(); as o) {
+  <h1>{{ o.postTitle }}</h1>
+  <p class="muted">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }} · {{ o.code }}</p>
+  <dl class="info">
+    <dt>Trạng thái</dt><dd>{{ o.status }}</dd>
+    <dt>{{ o.type === 'placed' ? 'Người bán' : 'Người đăng' }}</dt><dd>{{ o.counterpartName }}</dd>
+    <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
+    <dt>Tổng cộng</dt><dd class="price">{{ o.total | number }}đ</dd>
+    @if (o.note) { <dt>Ghi chú</dt><dd>{{ o.note }}</dd> }
+  </dl>
+  <a [routerLink]="['/messenger']" class="btn">Nhắn tin</a>
+} @else {
+  <div class="empty"><h1>Không tìm thấy đơn</h1></div>
+}

@@ -1,0 +1,51 @@
+/* Bảng màu lấy từ mockup (design/mockups): xanh đen + kem hồng + cam kiến. */
+:root {
+  --ink: #22304a;
+  --accent: #d85a1c;
+  --cream: #fbf4f1;
+  --line: #f0e2dc;
+  --muted: #6b7486;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: 'Mona Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--ink);
+  background: #fff;
+  line-height: 1.5;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+h1, h2, h3 { margin: 0 0 12px; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.page { padding-top: 24px; min-height: 60vh; }
+
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+
+.card { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; overflow: hidden; }
+.muted { color: var(--muted); }
+.price { font-weight: 700; }
+
+input, select, textarea {
+  font: inherit; color: inherit; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff;
+}
+.btn {
+  display: inline-block; font: inherit; font-weight: 600; cursor: pointer;
+  padding: 10px 16px; border: 0; border-radius: 10px; background: var(--accent); color: #fff;
+}
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.field { display: grid; gap: 4px; margin-bottom: 14px; }
+.field label { font-weight: 600; }
+.is-invalid { border-color: #c0392b; }
+.error { color: #c0392b; font-size: 13px; }
+
+.empty { text-align: center; padding: 64px 0; background: var(--cream); border-radius: var(--radius); }
+.notice { background: var(--cream); border-radius: var(--radius); padding: 16px; }

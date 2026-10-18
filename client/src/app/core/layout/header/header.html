@@ -1,0 +1,26 @@
+<header class="bar">
+  <div class="container bar-in">
+    <a routerLink="/" class="logo">AntGo</a>
+
+    <nav class="nav" aria-label="Điều hướng chính">
+      <a routerLink="/" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: true }">Trang chủ</a>
+      <a routerLink="/orders" routerLinkActive="on">Đơn hàng</a>
+      <a routerLink="/messenger" routerLinkActive="on">Messenger</a>
+    </nav>
+
+    <form class="search" (submit)="$event.preventDefault(); onSearch(q.value)">
+      <input #q type="search" placeholder="Tìm món ăn, đồ dùng, dịch vụ, việc làm…" aria-label="Tìm kiếm" />
+    </form>
+
+    <div class="side">
+      <a routerLink="/seller" routerLinkActive="on" class="seller">Bán &amp; Đăng việc</a>
+      <a routerLink="/notifications" aria-label="Thông báo">Thông báo</a>
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/profile">{{ auth.currentUser()?.fullName }}</a>
+        <button type="button" class="btn ghost" (click)="logout()">Đăng xuất</button>
+      } @else {
+        <a routerLink="/auth/login" class="btn">Đăng nhập</a>
+      }
+    </div>
+  </div>
+</header>

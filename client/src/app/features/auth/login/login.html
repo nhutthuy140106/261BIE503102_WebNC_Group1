@@ -1,0 +1,27 @@
+<section class="box">
+  <h1>Đăng nhập</h1>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="field">
+      <label for="username">Tên đăng nhập</label>
+      <input id="username" formControlName="username" autocomplete="username"
+             [class.is-invalid]="form.controls.username.invalid && form.controls.username.touched" />
+      @if (form.controls.username.invalid && form.controls.username.touched) {
+        <small class="error">Bạn chưa nhập tên đăng nhập.</small>
+      }
+    </div>
+    <div class="field">
+      <label for="password">Mật khẩu</label>
+      <input id="password" type="password" formControlName="password" autocomplete="current-password"
+             [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched" />
+      @if (form.controls.password.invalid && form.controls.password.touched) {
+        <small class="error">Mật khẩu tối thiểu 6 ký tự.</small>
+      }
+    </div>
+    <label class="remember"><input type="checkbox" formControlName="rememberMe" /> Nhớ tên đăng nhập</label>
+
+    @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+
+    <button type="submit" class="btn" [disabled]="form.invalid || submitting()">Đăng nhập</button>
+  </form>
+  <p class="muted">Chưa có tài khoản? <a routerLink="/auth/register"><u>Đăng ký</u></a></p>
+</section>

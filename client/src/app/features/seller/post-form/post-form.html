@@ -1,0 +1,24 @@
+<h1>Đăng bài</h1>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="form">
+  <div class="field">
+    <label for="kind">Loại bài</label>
+    <select id="kind" formControlName="kind">
+      @for (k of kinds; track k[0]) { <option [value]="k[0]">{{ k[1] }}</option> }
+    </select>
+  </div>
+  <div class="field">
+    <label for="title">Tiêu đề</label>
+    <input id="title" formControlName="title"
+           [class.is-invalid]="form.controls.title.invalid && form.controls.title.touched" />
+    @if (form.controls.title.invalid && form.controls.title.touched) { <small class="error">Tiêu đề tối thiểu 5 ký tự.</small> }
+  </div>
+  <div class="field">
+    <label for="description">Mô tả</label>
+    <textarea id="description" rows="5" formControlName="description"></textarea>
+  </div>
+  <div class="field">
+    <label for="price">Giá (đ)</label>
+    <input id="price" type="number" min="0" formControlName="price" />
+  </div>
+  <button type="submit" class="btn" [disabled]="form.invalid">Đăng bài</button>
+</form>

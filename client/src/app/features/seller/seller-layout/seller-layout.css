@@ -1,0 +1,5 @@
+.seller { display: grid; grid-template-columns: 200px 1fr; gap: 24px; }
+@media (max-width: 800px) { .seller { grid-template-columns: 1fr; } }
+.side { display: grid; align-content: start; gap: 4px; }
+.side a { padding: 8px 12px; border-radius: 10px; }
+.side a.on { background: var(--cream); color: var(--accent); font-weight: 600; }

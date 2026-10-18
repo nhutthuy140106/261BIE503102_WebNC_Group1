@@ -5,6 +5,13 @@
 
 > **Cấu trúc repo mới (đồ án Angular + Express + MongoDB):** `client/` (Angular), `server/` (Express + MongoDB), `docs/`, `design/mockups/` (HTML thuần — bản mẫu giao diện, mọi `mockups/…` trong file này nay nằm ở `design/mockups/…`), `design/assets-goc/` (ảnh/video gốc). Đồ án thật dựng trong `client/` và `server/` theo mockup.
 
+## 0. Chuyển sang Angular (18/10)
+
+- `client/` đã dựng bằng Angular CLI (NgModule, `--no-standalone`): module tải lười cho từng nhóm trang, `authGuard`/`pendingChangesGuard`, `slug-helper` (đã sửa chữ "đ"), service có `retry`+`catchError`, form Reactive. Dữ liệu mẫu ở `client/public/datasets/` (`USE_MOCK = true` trong `core/config/api.config.ts`). Chi tiết: `client/README.md`.
+- Giao diện hiện chỉ là **khung chức năng đơn giản**; việc tiếp theo là chuyển từng màn hình từ `design/mockups/` sang component (mockup vẫn là chuẩn thiết kế).
+- `server/` **chưa làm — chờ hướng dẫn của thầy** (Express + MongoDB).
+- Git: nhánh mặc định `dev`, `main` ổn định, tính năng ở `feature/*` — xem `docs/git-workflow.md`. Tri thức môn học: `docs/tham-khao/kien-thuc-mon-hoc-angular-express-mongodb.md`.
+
 ## 1. Cách làm việc với người dùng (bắt buộc)
 
 - **Trao đổi trước, làm sau.** Đề xuất ngắn → chờ "ok" → mới làm. Không tự cài công cụ khi chưa hỏi.

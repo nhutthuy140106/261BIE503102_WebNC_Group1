@@ -18,5 +18,13 @@ Angular (client) · Express (server) · MongoDB (database)
 
 ## Quy tắc làm việc nhóm
 
-- Nhánh `main` chỉ chứa bản chạy được. Mỗi người làm trên nhánh `ten/tinh-nang`, xong gộp lại bằng Pull Request.
+- Nhánh mặc định là `dev`; `main` chỉ chứa bản ổn định. Mỗi người làm trên nhánh `feature/ten-tinh-nang`, xong gộp vào `dev` bằng Pull Request. Chi tiết: `docs/git-workflow.md`.
 - Ghi chú làm việc chi tiết: xem `CLAUDE.md`.
+
+## Chạy thử client
+
+```bash
+cd client && npm install && npm start   # http://localhost:4200
+```
+
+Backend (Express + MongoDB) chưa khởi tạo — client đang dùng dữ liệu mẫu trong `client/public/datasets/`.

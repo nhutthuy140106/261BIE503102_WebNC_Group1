@@ -1,0 +1,11 @@
+<div class="seller">
+  <nav class="side" aria-label="Không gian Bán và Đăng việc">
+    <a routerLink="/seller" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: true }">Tổng quan</a>
+    <a routerLink="/seller/posts" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: true }">Bài đăng</a>
+    <a routerLink="/seller/posts/new" routerLinkActive="on">Đăng bài mới</a>
+    <a routerLink="/seller/transactions" routerLinkActive="on">Giao dịch</a>
+  </nav>
+  <section class="content">
+    <router-outlet />
+  </section>
+</div>

@@ -1,0 +1,4 @@
+.hero { background: var(--cream); border-radius: var(--radius); padding: 48px 32px; margin-bottom: 32px; }
+.hero h1 { font-size: 40px; }
+.cta { display: flex; gap: 12px; margin-top: 16px; }
+section { margin-bottom: 32px; }

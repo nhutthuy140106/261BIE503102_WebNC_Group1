@@ -1,0 +1,30 @@
+<h1>Đơn hàng</h1>
+
+<div class="tabs">
+  <button type="button" class="btn ghost" [class.active]="tab() === 'all'" (click)="setTab('all')">Tất cả</button>
+  <button type="button" class="btn ghost" [class.active]="tab() === 'placed'" (click)="setTab('placed')">Đơn đã đặt</button>
+  <button type="button" class="btn ghost" [class.active]="tab() === 'received'" (click)="setTab('received')">Việc đã nhận</button>
+  <button type="button" class="btn ghost" [class.active]="tab() === 'history'" (click)="setTab('history')">Lịch sử</button>
+</div>
+
+@if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else if (error()) {
+  <div class="notice">Không tải được đơn hàng: {{ error() }}</div>
+} @else {
+  <ul class="list">
+    @for (o of visible(); track o._id) {
+      <li class="card row">
+        <a [routerLink]="['/orders', o._id]">
+          <span class="muted">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }} · {{ o.code }}</span>
+          <strong>{{ o.postTitle }}</strong>
+          <span class="muted">{{ o.counterpartName }}</span>
+        </a>
+        <span class="price">{{ o.total | number }}đ</span>
+        <span class="status">{{ o.status }}</span>
+      </li>
+    } @empty {
+      <li class="empty">Chưa có đơn nào ở mục này.</li>
+    }
+  </ul>
+}

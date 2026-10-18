@@ -1,0 +1,51 @@
+[
+  {
+    "_id": "640b187e71d9faa9039f00c9",
+    "code": "AG-O3012",
+    "type": "placed",
+    "postId": "640b187e71d9faa9039f0001",
+    "postTitle": "Cơm nhà làm, thực đơn đổi mỗi ngày",
+    "counterpartName": "Bếp Cô Lan",
+    "status": "preparing",
+    "total": 70000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-10-16T10:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f00ca",
+    "code": "AG-O3009",
+    "type": "placed",
+    "postId": "640b187e71d9faa9039f0008",
+    "postTitle": "Giặt sấy lấy tận nhà",
+    "counterpartName": "Giặt sấy Mỹ Linh",
+    "status": "pending",
+    "total": 60000,
+    "paymentMethod": "transfer",
+    "createdAt": "2026-10-16T11:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f00cb",
+    "code": "AG-O2987",
+    "type": "placed",
+    "postId": "640b187e71d9faa9039f0002",
+    "postTitle": "Phở bò tái, nước dùng hầm xương",
+    "counterpartName": "Quán Phở Bà Tư",
+    "status": "done",
+    "total": 45000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-10-10T07:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f00cc",
+    "code": "AG-J1998",
+    "type": "received",
+    "postId": "640b187e71d9faa9039f000a",
+    "postTitle": "Cho mèo ăn 2 buổi/ngày trong 3 ngày",
+    "counterpartName": "Chị Hoa",
+    "status": "chosen",
+    "total": 150000,
+    "paymentMethod": "cash",
+    "note": "Nhận chìa khóa ở bảo vệ.",
+    "createdAt": "2026-10-15T09:00:00.000Z"
+  }
+]

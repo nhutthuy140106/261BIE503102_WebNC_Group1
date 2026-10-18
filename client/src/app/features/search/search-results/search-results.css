@@ -1,0 +1,4 @@
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.filters .active { background: var(--ink); color: #fff; }
+.price-filter { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+.price-filter input { width: 90px; }

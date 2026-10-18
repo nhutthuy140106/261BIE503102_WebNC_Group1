@@ -1,0 +1,11 @@
+.thumb { position: relative; display: block; aspect-ratio: 4 / 3; background: var(--cream); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.badge { position: absolute; top: 8px; left: 8px; font-size: 11px; font-weight: 700; background: #fff; color: var(--accent); padding: 2px 8px; border-radius: 999px; }
+.body { padding: 12px; display: grid; gap: 4px; }
+.body h3 { font-size: 16px; margin: 0; }
+.kind, .seller, .xu { font-size: 13px; }
+.xu { color: var(--accent); }
+.row { display: flex; justify-content: space-between; align-items: center; }
+.row small { font-weight: 400; color: var(--muted); }
+.save { border: 0; background: transparent; font-size: 20px; cursor: pointer; color: var(--muted); }
+.save.on { color: var(--accent); }

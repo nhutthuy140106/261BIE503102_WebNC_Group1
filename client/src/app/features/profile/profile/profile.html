@@ -1,0 +1,9 @@
+<h1>Tôi</h1>
+@if (auth.currentUser(); as u) {
+  <dl>
+    <dt>Họ tên</dt><dd>{{ u.fullName }}</dd>
+    <dt>Khu vực</dt><dd>{{ u.block }}</dd>
+    <dt>AntXu</dt><dd>{{ u.xu }}</dd>
+  </dl>
+}
+<p class="muted">Bài đã lưu, sổ địa chỉ và hoạt động sẽ bổ sung tiếp theo mockup <code>profile.html</code>.</p>

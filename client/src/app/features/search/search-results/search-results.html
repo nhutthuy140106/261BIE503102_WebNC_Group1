@@ -1,0 +1,40 @@
+<h1>
+  @if (filter.q) { Kết quả cho “{{ filter.q }}” } @else { Tìm quanh khu }
+</h1>
+
+<div class="filters">
+  <button type="button" class="btn ghost" [class.active]="!filter.kind" (click)="setKind(null)">Tất cả</button>
+  @for (k of kinds; track k) {
+    <button type="button" class="btn ghost" [class.active]="filter.kind === k" (click)="setKind(k)">
+      {{ kindLabel[k] }}
+    </button>
+  }
+  <span class="price-filter">
+    <input #min type="number" min="0" placeholder="Từ" [value]="filter.min ?? ''" />
+    –
+    <input #max type="number" min="0" placeholder="Đến" [value]="filter.max ?? ''" />
+    <button type="button" class="btn ghost" (click)="applyPrice(min.value, max.value)">Lọc giá</button>
+  </span>
+</div>
+
+@if (loading()) {
+  <p class="muted">Đang tìm…</p>
+} @else if (error()) {
+  <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
+} @else {
+  <p class="muted">{{ results().length }} bài</p>
+  <div class="grid">
+    @for (p of results(); track p._id) {
+      @if (p.kind === 'job') {
+        <app-job-card [job]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+      } @else {
+        <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+      }
+    } @empty {
+      <div class="empty" style="grid-column: 1 / -1">
+        <h2>Chưa có bài phù hợp</h2>
+        <p>Thử bỏ bớt bộ lọc hoặc đổi từ khóa.</p>
+      </div>
+    }
+  </div>
+}

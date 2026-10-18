@@ -1,0 +1,47 @@
+<section class="hero">
+  <h1>Một khu, một nhà.</h1>
+  <p>Mua bán, đặt dịch vụ, nhận việc vặt với hàng xóm trong khu.</p>
+  <div class="cta">
+    <button type="button" class="btn" (click)="goSearch()">Tìm quanh khu</button>
+    <button type="button" class="btn ghost" (click)="goSearch('job')">Tìm việc gần nhà</button>
+  </div>
+</section>
+
+@if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else if (error()) {
+  <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
+} @else {
+  <section>
+    <h2>Nổi bật trong khu</h2>
+    <div class="grid">
+      @for (p of featured(); track p._id) {
+        <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+      } @empty {
+        <p class="muted">Chưa có bài quảng bá.</p>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Gần bạn</h2>
+    <div class="grid">
+      @for (p of nearby(); track p._id) {
+        <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+      } @empty {
+        <p class="muted">Chưa có bài trong khu của bạn.</p>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Việc mới quanh bạn</h2>
+    <div class="grid">
+      @for (j of jobs(); track j._id) {
+        <app-job-card [job]="j" [saved]="saved.has(j._id)" (toggleSave)="toggleSave($event)" />
+      } @empty {
+        <p class="muted">Chưa có việc mới.</p>
+      }
+    </div>
+  </section>
+}

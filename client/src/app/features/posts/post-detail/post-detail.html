@@ -1,0 +1,36 @@
+<button type="button" class="btn ghost" (click)="back()">← Quay lại</button>
+
+@if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else if (error()) {
+  <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
+} @else if (post(); as p) {
+  <article class="detail">
+    <div class="gallery">
+      @for (img of p.images; track img) {
+        <img [src]="img" [alt]="p.title" />
+      }
+    </div>
+    <div class="info">
+      <span class="muted">{{ kindLabel[p.kind] }} · {{ p.block }}</span>
+      <h1>{{ p.title }}</h1>
+      <p class="muted">Đăng bởi {{ p.sellerName }}</p>
+      <p class="price big">{{ p.price | number }}đ@if (p.priceUnit) {<small>/{{ p.priceUnit }}</small>}</p>
+      <p>{{ p.description }}</p>
+
+      <div class="qty">
+        <label for="qty">Số lượng</label>
+        <input id="qty" type="number" min="1" max="99" [(ngModel)]="quantity" />
+      </div>
+      <button type="button" class="btn" [disabled]="quantity < 1" (click)="addToCart(p)">
+        Tiếp tục · {{ p.price * quantity | number }}đ
+      </button>
+    </div>
+  </article>
+} @else {
+  <div class="empty">
+    <h1>Bài đăng không tồn tại</h1>
+    <p>Bài có thể đã bị xóa hoặc đường dẫn không đúng.</p>
+    <a routerLink="/search" class="btn">Xem các bài khác</a>
+  </div>
+}

@@ -1,0 +1,37 @@
+@if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else if (job(); as j) {
+  <article class="job">
+    <span class="muted">Việc làm · {{ j.sellerName }} đang cần người</span>
+    <h1>{{ j.title }}</h1>
+    <p class="pay">{{ j.price | number }}đ</p>
+    <p class="muted">{{ j.job?.due }} · {{ j.block }}</p>
+    <p>{{ j.description }}</p>
+
+    @if (j.job?.status === 'open') {
+      @if (sent()) {
+        <div class="notice">Đã gửi đề nghị. Gửi đề nghị chưa phải là đã nhận việc — chờ {{ j.sellerName }} chọn người.</div>
+      } @else {
+        <form [formGroup]="offerForm" (ngSubmit)="submitOffer()" class="offer">
+          <h2>Đề nghị nhận việc</h2>
+          <div class="field">
+            <label for="intro">Giới thiệu ngắn</label>
+            <textarea id="intro" rows="4" formControlName="intro"
+                      [class.is-invalid]="offerForm.controls.intro.invalid && offerForm.controls.intro.touched"></textarea>
+            @if (offerForm.controls.intro.invalid && offerForm.controls.intro.touched) {
+              <small class="error">Hãy viết ít nhất 10 ký tự để người đăng biết bạn là ai.</small>
+            }
+          </div>
+          <button type="submit" class="btn" [disabled]="offerForm.invalid">Gửi đề nghị</button>
+        </form>
+      }
+    } @else {
+      <div class="notice">Việc này đã có người nhận.</div>
+    }
+  </article>
+} @else {
+  <div class="empty">
+    <h1>Việc không tồn tại</h1>
+    <a routerLink="/search" [queryParams]="{ kind: 'job' }" class="btn">Xem việc khác</a>
+  </div>
+}

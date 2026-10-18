@@ -1,0 +1,23 @@
+<article class="card">
+  <a [routerLink]="['/posts', slug]" class="thumb">
+    @if (post.images.length) {
+      <img [src]="post.images[0]" [alt]="post.title" loading="lazy" />
+    }
+    @if (post.promoted) {
+      <span class="badge">QUẢNG BÁ</span>
+    }
+  </a>
+  <div class="body">
+    <span class="kind muted">{{ kindLabel[post.kind] }}</span>
+    <h3><a [routerLink]="['/posts', slug]">{{ post.title }}</a></h3>
+    <span class="seller muted">{{ post.sellerName }} · {{ post.block }}</span>
+    <div class="row">
+      <span class="price">{{ post.price | number }}đ@if (post.priceUnit) {<small>/{{ post.priceUnit }}</small>}</span>
+      <button type="button" class="save" [class.on]="saved" (click)="toggleSave.emit(post)"
+              [attr.aria-pressed]="saved" aria-label="Lưu bài">♡</button>
+    </div>
+    @if (post.acceptsXu) {
+      <span class="xu">Dùng được Xu</span>
+    }
+  </div>
+</article>

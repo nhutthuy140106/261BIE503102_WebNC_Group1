@@ -1,0 +1,8 @@
+.detail { display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; margin-top: 16px; }
+@media (max-width: 800px) { .detail { grid-template-columns: 1fr; } }
+.gallery { display: grid; gap: 8px; }
+.gallery img { border-radius: var(--radius); width: 100%; }
+.big { font-size: 28px; }
+.big small { font-size: 16px; font-weight: 400; color: var(--muted); }
+.qty { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+.qty input { width: 80px; }
