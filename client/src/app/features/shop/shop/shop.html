@@ -1,0 +1,57 @@
+@if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else if (error()) {
+  <div class="notice">Không tải được gian hàng: {{ error() }}</div>
+} @else if (posts().length === 0) {
+  <div class="empty">
+    <h1>Chưa có gian hàng này</h1>
+    <p>Người này chưa đăng bài nào.</p>
+    <a routerLink="/search" class="btn">Xem các bài khác</a>
+  </div>
+} @else {
+  <header class="head">
+    <span class="avatar">{{ name().charAt(0).toUpperCase() }}</span>
+    <div class="who">
+      <h1>{{ name() }}</h1>
+      <p class="muted">{{ block() }}</p>
+    </div>
+    <div class="cta">
+      <button type="button" class="btn ghost" [class.on]="following()" (click)="toggleFollow()">
+        {{ following() ? 'Đang theo dõi' : 'Theo dõi' }}
+      </button>
+      <a routerLink="/messenger" class="btn">Nhắn tin</a>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div>
+      @if (rating(); as r) {
+        <strong>★ {{ r.avg }}</strong><span>{{ r.count }} đánh giá</span>
+      } @else {
+        <strong>—</strong><span>Chưa có đánh giá</span>
+      }
+    </div>
+    <div><strong>{{ posts().length }}</strong><span>Bài đang đăng</span></div>
+  </div>
+
+  <div class="tabs">
+    <button type="button" class="btn ghost" [class.active]="tab() === 'selling'" (click)="tab.set('selling')">Đang bán ({{ selling().length }})</button>
+    <button type="button" class="btn ghost" [class.active]="tab() === 'jobs'" (click)="tab.set('jobs')">Việc đang cần người ({{ jobs().length }})</button>
+  </div>
+
+  <div class="grid">
+    @if (tab() === 'selling') {
+      @for (p of selling(); track p._id) {
+        <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+      } @empty {
+        <p class="muted" style="grid-column: 1 / -1">Chưa có bài nào đang bán.</p>
+      }
+    } @else {
+      @for (j of jobs(); track j._id) {
+        <app-job-card [job]="j" [saved]="saved.has(j._id)" (toggleSave)="toggleSave($event)" />
+      } @empty {
+        <p class="muted" style="grid-column: 1 / -1">Hiện không có việc nào cần người.</p>
+      }
+    }
+  </div>
+}

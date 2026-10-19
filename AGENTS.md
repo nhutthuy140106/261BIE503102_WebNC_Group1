@@ -7,7 +7,7 @@ Tóm tắt những luật quan trọng nhất (chi tiết ở `CLAUDE.md` mục 
 - **Đề xuất ngắn trước, chờ người dùng đồng ý rồi mới làm.** Đánh giá như người dùng thật, không chiều theo; hỏi "đồng ý không".
 - **Đổi từng thứ một**, sao lưu file trước khi sửa lớn, chụp ảnh kiểm tra (xem `tools/README.md`).
 - **Mỗi màn hình chỉ một file HTML** trong `design/mockups/` — không tạo bản v2, v3…
-- Không làm kiểu "AI", không số liệu giả.
+- Không làm kiểu "AI". Dữ liệu mẫu để demo được phép.
 - Công cụ phụ ở `tools/`.
 
 **Cuối mỗi phiên: cập nhật `CLAUDE.md`** (trạng thái, quyết định + lý do, việc tiếp theo) và lưu một mốc git (`git add -A && git commit -m "..."`) để người khác (hoặc trợ lý khác) làm tiếp được và có thể quay lại bản trước.

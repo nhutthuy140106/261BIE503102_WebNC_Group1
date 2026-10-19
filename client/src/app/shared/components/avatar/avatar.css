@@ -1,0 +1,3 @@
+:host { display: inline-block; line-height: 0; flex: none; }
+.av { display: inline-grid; place-items: center; border-radius: 50%; overflow: hidden; background: var(--ink); color: #fff; font-weight: 700; line-height: 1; vertical-align: middle; }
+img { width: 100%; height: 100%; object-fit: cover; display: block; }

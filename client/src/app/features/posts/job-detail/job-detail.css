@@ -1,4 +1,31 @@
-.job { max-width: 720px; }
-.pay { font-size: 32px; font-weight: 800; margin: 4px 0; }
-.offer { margin-top: 24px; }
-.offer textarea { width: 100%; }
+.job { max-width: 760px; display: grid; gap: 8px; }
+.job > .muted:first-child { font-size: 13px; font-weight: 600; }
+.job h1 { font-size: 28px; line-height: 1.2; letter-spacing: -.02em; margin-bottom: 4px; }
+.status { font-size: 13px; font-weight: 600; color: #2f7d4f; }
+.status.closed { color: var(--smoke); }
+.pay { font-size: 34px; font-weight: 800; color: var(--accent); letter-spacing: -.02em; }
+.facts { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 8px; }
+.facts span { background: var(--soft); border-radius: 999px; padding: 4px 12px; font-size: 13px; }
+
+.offer, .qa, .mine { border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; margin-top: 16px; background: #fff; }
+.offer h2, .qa h2 { font-size: 18px; }
+.offer fieldset { border: 0; margin-bottom: 14px; }
+.offer legend { font-weight: 600; margin-bottom: 8px; }
+.offer fieldset div { display: flex; gap: 8px; flex-wrap: wrap; }
+.offer fieldset label { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; cursor: pointer; }
+.offer fieldset input { accent-color: var(--accent); padding: 0; }
+.offer textarea, .qa textarea { width: 100%; resize: vertical; }
+.offer .btn { width: 100%; justify-content: center; padding: 13px; }
+
+.mine { background: var(--soft); display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.mine a { font-weight: 600; color: var(--accent); }
+
+.q { padding: 12px 0; border-top: 1px solid var(--border); }
+.q:first-of-type { border-top: 0; }
+.q p { margin: 0; }
+.q .a { margin-top: 4px; padding: 8px 12px; background: var(--soft); border-radius: 10px; }
+.qa form { display: grid; gap: 8px; margin: 14px 0; }
+.qa form .btn { justify-self: start; }
+.qa > a.btn { margin-top: 4px; }
+.seller { font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.by { display: flex; align-items: center; gap: 8px; }

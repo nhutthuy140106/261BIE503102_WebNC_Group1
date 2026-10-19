@@ -1,0 +1,91 @@
+[
+  {
+    "_id": "640b187e71d9faa9039f00cc",
+    "code": "AG-J1998",
+    "jobId": "640b187e71d9faa9039f000a",
+    "jobTitle": "Cho mèo ăn 2 buổi/ngày trong 3 ngày",
+    "posterName": "Chị Hoa",
+    "pay": 150000,
+    "block": "Block C",
+    "intro": "Mình ở cùng block, rảnh cả cuối tuần và có kinh nghiệm chăm mèo.",
+    "slots": [
+      "Sáng",
+      "Chiều"
+    ],
+    "state": "chosen",
+    "exactAddress": "Căn C-0912, Block C — nhận chìa khóa ở bảo vệ",
+    "history": [
+      {
+        "state": "offered",
+        "at": "2026-10-15T09:00:00.000Z"
+      },
+      {
+        "state": "chosen",
+        "at": "2026-10-15T11:30:00.000Z"
+      }
+    ],
+    "posterAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces&q=70",
+    "posterId": "640b187e71d9faa9039f006e"
+  },
+  {
+    "_id": "640b187e71d9faa9039f00cd",
+    "code": "AG-J2010",
+    "jobId": "640b187e71d9faa9039f000c",
+    "jobTitle": "Dắt chó đi dạo buổi sáng",
+    "posterName": "Anh Tuấn",
+    "pay": 60000,
+    "block": "Block A",
+    "intro": "Mình dậy sớm, quen dắt chó nhỏ.",
+    "slots": [
+      "Sáng"
+    ],
+    "state": "offered",
+    "history": [
+      {
+        "state": "offered",
+        "at": "2026-10-17T07:00:00.000Z"
+      }
+    ],
+    "posterAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=faces&q=70",
+    "posterId": "640b187e71d9faa9039f0070"
+  },
+  {
+    "_id": "640b187e71d9faa9039f00ce",
+    "code": "AG-J1950",
+    "jobId": "640b187e71d9faa9039f000b",
+    "jobTitle": "Khiêng giúp tủ lạnh lên tầng 5",
+    "posterName": "Chị Mai",
+    "pay": 120000,
+    "block": "Block D",
+    "intro": "Mình có người đi cùng, khiêng được.",
+    "slots": [
+      "Chiều"
+    ],
+    "state": "done",
+    "exactAddress": "Căn D-0503, Block D",
+    "history": [
+      {
+        "state": "offered",
+        "at": "2026-10-10T09:00:00.000Z"
+      },
+      {
+        "state": "chosen",
+        "at": "2026-10-10T10:00:00.000Z"
+      },
+      {
+        "state": "working",
+        "at": "2026-10-11T14:00:00.000Z"
+      },
+      {
+        "state": "reported",
+        "at": "2026-10-11T15:10:00.000Z"
+      },
+      {
+        "state": "done",
+        "at": "2026-10-11T16:00:00.000Z"
+      }
+    ],
+    "posterAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&crop=faces&q=70",
+    "posterId": "640b187e71d9faa9039f006f"
+  }
+]

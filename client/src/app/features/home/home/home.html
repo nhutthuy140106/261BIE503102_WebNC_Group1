@@ -1,19 +1,52 @@
 <section class="hero">
-  <h1>Một khu, một nhà.</h1>
-  <p>Mua bán, đặt dịch vụ, nhận việc vặt với hàng xóm trong khu.</p>
-  <div class="cta">
-    <button type="button" class="btn" (click)="goSearch()">Tìm quanh khu</button>
-    <button type="button" class="btn ghost" (click)="goSearch('job')">Tìm việc gần nhà</button>
+  <div class="shot">
+    <div class="grain"></div>
+    <svg class="arc" viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid slice" aria-label="AntGo">
+      <defs><path id="arcPath" d="M60,410 Q560,250 1060,410" /></defs>
+      <text text-anchor="middle"><textPath href="#arcPath" startOffset="50%">AntGo</textPath></text>
+    </svg>
+    <img class="ant" src="assets/clean/ride_wave.png" alt="Linh vật AntGo" />
+    <div class="heroText">
+      <p>Mua bán, đặt dịch vụ, nhận việc vặt với AntGo.</p>
+      <div class="ctas">
+        <button type="button" class="c1" (click)="s.scrollIntoView({ behavior: 'smooth' })">
+          Tìm quanh khu <svg class="i"><use href="#right" /></svg>
+        </button>
+        <button type="button" class="c2" (click)="goSearch('job')">Tìm việc gần nhà</button>
+      </div>
+      <div class="trust">
+        <span><svg class="i"><use href="#bolt" /></svg>Nhanh chóng</span>
+        <span><svg class="i"><use href="#tap" /></svg>Tiện lợi</span>
+        <span><svg class="i"><use href="#users" /></svg>Gần gũi</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="explore" #s>
+  <form class="bigsearch" (submit)="$event.preventDefault(); search(q.value)" role="search">
+    <svg class="i lead"><use href="#search" /></svg>
+    <input #q placeholder="Tìm món ăn, đồ dùng, dịch vụ hoặc việc làm" aria-label="Tìm kiếm" />
+    <button type="submit" class="go" aria-label="Tìm"><svg class="i"><use href="#search" /></svg></button>
+  </form>
+  <div class="popline">
+    <b>Phổ biến:</b>
+    @for (w of popular; track w) {
+      <button type="button" (click)="search(w)">{{ w }}</button>
+    }
   </div>
 </section>
 
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <p class="muted sec">Đang tải…</p>
 } @else if (error()) {
-  <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
+  <div class="notice sec">Không tải được dữ liệu: {{ error() }}</div>
 } @else {
-  <section>
-    <h2>Nổi bật trong khu</h2>
+  <section class="sec">
+    <div class="sh">
+      <h2>Nổi bật trong khu</h2><span class="info">Bài được người bán quảng bá</span>
+      <a class="more" routerLink="/search">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+    </div>
     <div class="grid">
       @for (p of featured(); track p._id) {
         <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
@@ -23,8 +56,22 @@
     </div>
   </section>
 
-  <section>
-    <h2>Gần bạn</h2>
+  @if (forYou().length) {
+    <section class="sec">
+      <div class="sh"><h2>Gợi ý cho bạn</h2><p>Dựa trên bài bạn đã lưu và đã đặt</p></div>
+      <div class="grid">
+        @for (p of forYou(); track p._id) {
+          <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+        }
+      </div>
+    </section>
+  }
+
+  <section class="sec">
+    <div class="sh">
+      <h2>Gần bạn</h2><p>Món đồ và dịch vụ trong khu của bạn</p>
+      <a class="more" routerLink="/search">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+    </div>
     <div class="grid">
       @for (p of nearby(); track p._id) {
         <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
@@ -34,13 +81,59 @@
     </div>
   </section>
 
-  <section>
-    <h2>Việc mới quanh bạn</h2>
+  <!-- Kiếm thêm gần nhà: dải xanh đen khác nhịp, giới thiệu nhận việc vặt -->
+  <section class="kband">
+    <img class="earn-ant" src="assets/clean/point.png" alt="" />
+    <div>
+      <span class="earn-kick">Kiếm thêm gần nhà</span>
+      <h2>Rảnh tay? Giúp hàng xóm,<br />nhận tiền công ngay trong khu.</h2>
+      <div class="earn-btns">
+        <a class="earn-go" routerLink="/search" [queryParams]="{ kind: 'job' }">Xem việc gần nhà <svg class="i"><use href="#right" /></svg></a>
+        <a class="earn-ghost" routerLink="/seller/posts/new">Đăng việc cần người</a>
+      </div>
+    </div>
+    <ol class="earn-steps">
+      <li><b>1</b><span><strong>Chọn việc vừa sức</strong>Mua hộ, dọn nhà, trông thú cưng, kèm học… ngay trong khu bạn ở.</span></li>
+      <li><b>2</b><span><strong>Gửi đề nghị, chờ được chọn</strong>Giới thiệu ngắn và giờ bạn rảnh. Người đăng chọn một người phù hợp.</span></li>
+      <li><b>3</b><span><strong>Làm xong, nhận tiền trực tiếp</strong>Báo hoàn thành kèm ảnh, người đăng trả công tận tay hoặc chuyển khoản.</span></li>
+    </ol>
+  </section>
+
+  <section class="sec">
+    <div class="sh">
+      <h2>Việc mới quanh bạn</h2><p>Yêu cầu mới nhất từ hàng xóm trong khu</p>
+      <a class="more" routerLink="/search" [queryParams]="{ kind: 'job' }">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+    </div>
     <div class="grid">
       @for (j of jobs(); track j._id) {
         <app-job-card [job]="j" [saved]="saved.has(j._id)" (toggleSave)="toggleSave($event)" />
       } @empty {
         <p class="muted">Chưa có việc mới.</p>
+      }
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sh"><h2>Khám phá quanh khu</h2><p>Lướt thêm món đồ, dịch vụ và việc trong khu</p></div>
+    <div class="ffilter">
+      @for (f of feedFilters; track f.key) {
+        <button type="button" [class.on]="feedFilter() === f.key" (click)="feedFilter.set(f.key)">{{ f.label }}</button>
+      }
+      <label class="sortbox">Sắp xếp:
+        <select [value]="feedSort()" (change)="feedSort.set($any($event.target).value)" aria-label="Sắp xếp">
+          @for (o of feedSorts; track o.key) { <option [value]="o.key">{{ o.label }}</option> }
+        </select>
+      </label>
+    </div>
+    <div class="grid">
+      @for (p of feed(); track p._id) {
+        @if (p.kind === 'job') {
+          <app-job-card [job]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+        } @else {
+          <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+        }
+      } @empty {
+        <p class="muted">Chưa có bài ở nhóm này.</p>
       }
     </div>
   </section>

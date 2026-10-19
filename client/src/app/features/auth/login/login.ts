@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
+import { phoneValidator } from '../../../core/utils/validators';
 
 @Component({
   selector: 'app-login',
@@ -18,15 +19,15 @@ export class Login implements OnInit {
   protected readonly submitting = signal(false);
 
   protected readonly form = new FormGroup({
-    username: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    phone: new FormControl('', { nonNullable: true, validators: [Validators.required, phoneValidator] }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] }),
     rememberMe: new FormControl(false, { nonNullable: true }),
   });
 
   ngOnInit(): void {
-    // Điền sẵn tên đăng nhập đã nhớ (cookie thường, không dùng để xác thực)
+    // Điền sẵn số điện thoại đã nhớ (cookie thường, không dùng để xác thực)
     const remembered = this.auth.getRememberedUsername();
-    if (remembered) this.form.patchValue({ username: remembered, rememberMe: true });
+    if (remembered) this.form.patchValue({ phone: remembered, rememberMe: true });
   }
 
   onSubmit(): void {
@@ -42,8 +43,8 @@ export class Login implements OnInit {
         // Chỉ chấp nhận đường dẫn nội bộ để tránh chuyển hướng ra site khác
         this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/');
       },
-      error: () => {
-        this.error.set('Tên đăng nhập hoặc mật khẩu không đúng.');
+      error: (e: Error) => {
+        this.error.set(e.message || 'Số điện thoại hoặc mật khẩu không đúng.');
         this.submitting.set(false);
       },
     });

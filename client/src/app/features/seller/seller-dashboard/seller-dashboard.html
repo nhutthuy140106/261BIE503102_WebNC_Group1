@@ -1,2 +1,19 @@
 <h1>Tổng quan</h1>
-<p class="notice">Phần Bán &amp; Đăng việc do nhóm phía Bán dựng. Tổng quan sẽ hiện số bài đang mở, đơn cần xử lý và đề nghị nhận việc — xem <code>docs/handoff.md</code>.</p>
+@if (error()) {
+  <div class="notice" role="alert">{{ error() }}</div>
+} @else if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else {
+  <div class="stats">
+    @for (s of stats(); track s.label) {
+      <a class="stat card" [class.hot]="s.hot" [routerLink]="s.link" [queryParams]="s.query">
+        <strong>{{ s.value }}</strong>
+        <span>{{ s.label }}</span>
+      </a>
+    }
+  </div>
+  <div class="quick">
+    <a routerLink="/seller/posts/new" class="btn">Đăng bài mới</a>
+    <a routerLink="/seller/transactions" class="btn ghost">Xem giao dịch</a>
+  </div>
+}

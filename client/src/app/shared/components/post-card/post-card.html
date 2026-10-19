@@ -1,23 +1,32 @@
-<article class="card">
-  <a [routerLink]="['/posts', slug]" class="thumb">
-    @if (post.images.length) {
-      <img [src]="post.images[0]" [alt]="post.title" loading="lazy" />
-    }
+<article class="item" [class.promo]="post.promoted">
+  <div class="ph">
+    <a [routerLink]="['/posts', slug]" class="link" [attr.aria-label]="post.title">
+      @if (post.images.length) {
+        <img [src]="post.images[0]" [alt]="post.title" loading="lazy" />
+      }
+    </a>
     @if (post.promoted) {
-      <span class="badge">QUẢNG BÁ</span>
+      <span class="kind ad">QUẢNG BÁ</span>
+    } @else {
+      <span class="kind">{{ kindLabel[post.kind] }}</span>
     }
-  </a>
+    <button type="button" class="save" (click)="toggleSave.emit(post)" [attr.aria-pressed]="saved"
+            [attr.aria-label]="saved ? 'Bỏ lưu' : 'Lưu bài'">
+      <svg class="i"><use [attr.href]="saved ? '#heartFill' : '#heart'" /></svg>
+    </button>
+  </div>
   <div class="body">
-    <span class="kind muted">{{ kindLabel[post.kind] }}</span>
     <h3><a [routerLink]="['/posts', slug]">{{ post.title }}</a></h3>
-    <span class="seller muted">{{ post.sellerName }} · {{ post.block }}</span>
-    <div class="row">
-      <span class="price">{{ post.price | number }}đ@if (post.priceUnit) {<small>/{{ post.priceUnit }}</small>}</span>
-      <button type="button" class="save" [class.on]="saved" (click)="toggleSave.emit(post)"
-              [attr.aria-pressed]="saved" aria-label="Lưu bài">♡</button>
-    </div>
+    <div class="pr">{{ post.price | number }}đ@if (post.priceUnit) {<span> /{{ post.priceUnit }}</span>}</div>
     @if (post.acceptsXu) {
-      <span class="xu">Dùng được Xu</span>
+      <div class="xu"><img class="coin" src="assets/clean/antxu.png" alt="" />Dùng được Xu</div>
     }
+    <div class="meta">
+      <span>{{ post.sellerName }}</span>
+      <span>
+        @if (post.rating) { <svg class="i star"><use href="#star" /></svg>{{ post.rating }} · }
+        {{ post.block }}
+      </span>
+    </div>
   </div>
 </article>

@@ -22,19 +22,39 @@
 } @else if (error()) {
   <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
 } @else {
-  <p class="muted">{{ results().length }} bài</p>
+  <p class="muted">{{ results().length }} bài@if (myBlock()) { · ưu tiên {{ myBlock() }} }</p>
+
+  @if (myBlock() && inArea().length === 0 && results().length > 0) {
+    <div class="notice">Chưa có bài phù hợp trong {{ myBlock() }}. Xem bài ở khu gần đó bên dưới.</div>
+  }
+
   <div class="grid">
-    @for (p of results(); track p._id) {
+    @for (p of inArea(); track p._id) {
       @if (p.kind === 'job') {
         <app-job-card [job]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
       } @else {
         <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
       }
     } @empty {
-      <div class="empty" style="grid-column: 1 / -1">
-        <h2>Chưa có bài phù hợp</h2>
-        <p>Thử bỏ bớt bộ lọc hoặc đổi từ khóa.</p>
-      </div>
+      @if (results().length === 0) {
+        <div class="empty" style="grid-column: 1 / -1">
+          <h2>Chưa có bài phù hợp</h2>
+          <p>Thử bỏ bớt bộ lọc hoặc đổi từ khóa.</p>
+        </div>
+      }
     }
   </div>
+
+  @if (nearby().length) {
+    <h2>Ở khu gần đó</h2>
+    <div class="grid">
+      @for (p of nearby(); track p._id) {
+        @if (p.kind === 'job') {
+          <app-job-card [job]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+        } @else {
+          <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+        }
+      }
+    </div>
+  }
 }

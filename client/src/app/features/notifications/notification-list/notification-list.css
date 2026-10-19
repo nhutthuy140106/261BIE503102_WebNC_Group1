@@ -1,0 +1,9 @@
+:host { display: block; max-width: 760px; }
+h1 { font-size: 28px; letter-spacing: -.02em; }
+.list { display: grid; gap: 10px; margin: 16px 0 0; }
+.list .card { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 18px; position: relative; }
+.list .unread { background: var(--soft); }
+.list .unread::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+.list .unread .link { font-weight: 700; }
+.link { background: none; border: 0; padding: 0; text-align: left; cursor: pointer; font: inherit; color: inherit; flex: 1; }
+.list small { white-space: nowrap; }

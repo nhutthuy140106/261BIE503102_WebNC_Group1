@@ -1,20 +1,27 @@
-<article class="card job">
-  <div class="top">
-    <span class="who muted">{{ job.sellerName }} · {{ job.block }}</span>
-    @if (job.job?.status === 'open') {
-      <span class="state open">Đang mở · {{ job.job?.offers }} đề nghị</span>
-    } @else {
-      <span class="state">Đã có người nhận</span>
-    }
-  </div>
-  <h3><a [routerLink]="['/posts/job', slug]">{{ job.title }}</a></h3>
-  <p class="desc muted">{{ job.description }}</p>
-  <div class="row">
-    <div>
-      <div class="pay">{{ job.price | number }}đ</div>
-      <small class="muted">{{ job.job?.due }}</small>
+<article class="item">
+  <div class="ph">
+    <div class="top">
+      <app-avatar [src]="job.sellerAvatar" [name]="job.sellerName" [size]="30" />
+      <span class="who"><b>{{ job.sellerName }}</b>{{ job.block }}</span>
+      <button type="button" class="save" (click)="toggleSave.emit(job)" [attr.aria-pressed]="saved"
+              [attr.aria-label]="saved ? 'Bỏ lưu' : 'Lưu việc'">
+        <svg class="i"><use [attr.href]="saved ? '#heartFill' : '#heart'" /></svg>
+      </button>
     </div>
-    <button type="button" class="save" [class.on]="saved" (click)="toggleSave.emit(job)"
-            [attr.aria-pressed]="saved" aria-label="Lưu việc">♡</button>
+    <a [routerLink]="['/posts/job', slug]" class="desc">{{ job.title }}</a>
+    <p class="detail">{{ job.description }}</p>
+    <div class="foot">
+      <span class="jpay">{{ job.price | number }}đ</span>
+      @if (job.job?.due) {
+        <span class="due"><svg class="i"><use href="#clock" /></svg>{{ job.job?.due }}</span>
+      }
+    </div>
+  </div>
+  <div class="body">
+    @if (job.job?.status === 'open') {
+      <span class="jst">Đang mở · {{ job.job?.offers }} đề nghị</span>
+    } @else {
+      <span class="jst closed">Đã có người nhận</span>
+    }
   </div>
 </article>

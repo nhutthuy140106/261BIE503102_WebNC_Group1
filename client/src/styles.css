@@ -1,45 +1,48 @@
-/* Bảng màu lấy từ mockup (design/mockups): xanh đen + kem hồng + cam kiến. */
+/* AntGo — nền chung lấy từ design/mockups (home-v5.html, theme "Trắng ấm"):
+   chữ xanh đen, mảng phụ kem ngả hồng, MỘT màu nhấn cam con kiến. */
 :root {
-  --ink: #22304a;
-  --accent: #d85a1c;
-  --cream: #fbf4f1;
-  --line: #f0e2dc;
-  --muted: #6b7486;
-  --radius: 12px;
+  --bg: #ffffff; --card: #ffffff; --soft: #fbf4f1; --border: #f0e2dc;
+  --ink: #22304a; --smoke: #6a6879; --fog: #a3a0b0;
+  --accent: #d85a1c; --accent-soft: #fde8dd; --frame: #f7ece8;
+  /* tên cũ đang dùng ở các trang khác — giữ để không vỡ */
+  --cream: var(--soft); --line: var(--border); --muted: var(--smoke); --radius: 12px;
 }
 
-* { box-sizing: border-box; }
-html, body { margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Mona Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: var(--ink);
-  background: #fff;
-  line-height: 1.5;
+  color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased;
+  font-size: 14px; line-height: 1.5;
 }
-a { color: inherit; text-decoration: none; }
+svg.i { width: 18px; height: 18px; fill: currentColor; stroke: none; flex: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; cursor: pointer; }
 img { max-width: 100%; display: block; }
 h1, h2, h3 { margin: 0 0 12px; }
+ul, ol { list-style: none; }
 
-.container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.wrap, .container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+@media (max-width: 1240px) { .wrap, .container { padding: 0 24px; } }
 .page { padding-top: 24px; min-height: 60vh; }
 
-.grid { display: grid; gap: 16px; grid-template-columns: repeat(4, 1fr); }
-@media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+/* lưới 4 cột cho mọi khối bài */
+.grid { display: grid; gap: 20px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
 
-.card { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; overflow: hidden; }
-.muted { color: var(--muted); }
+.card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+.muted { color: var(--smoke); }
 .price { font-weight: 700; }
 
 input, select, textarea {
   font: inherit; color: inherit; padding: 10px 12px;
-  border: 1px solid var(--line); border-radius: 10px; background: #fff;
+  border: 1px solid var(--border); border-radius: 10px; background: #fff;
 }
 .btn {
-  display: inline-block; font: inherit; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; font: inherit; font-weight: 600; cursor: pointer;
   padding: 10px 16px; border: 0; border-radius: 10px; background: var(--accent); color: #fff;
 }
-.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--border); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .field { display: grid; gap: 4px; margin-bottom: 14px; }
@@ -47,5 +50,22 @@ input, select, textarea {
 .is-invalid { border-color: #c0392b; }
 .error { color: #c0392b; font-size: 13px; }
 
-.empty { text-align: center; padding: 64px 0; background: var(--cream); border-radius: var(--radius); }
-.notice { background: var(--cream); border-radius: var(--radius); padding: 16px; }
+.empty { text-align: center; padding: 64px 0; background: var(--soft); border-radius: var(--radius); }
+.notice { background: var(--soft); border-radius: var(--radius); padding: 16px; }
+
+/* tiêu đề khối (dùng ở trang chủ, tìm kiếm…) */
+.sec { margin-top: 52px; }
+.sh { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; }
+.sh h2 { font-size: 22px; font-weight: 700; letter-spacing: -.015em; margin: 0; }
+.sh p, .sh .info { color: var(--smoke); }
+.sh .more { margin-left: auto; font-weight: 600; font-size: 13px; display: inline-flex; gap: 4px; align-items: center; }
+.sh .more svg { width: 14px; height: 14px; }
+
+/* Điện thoại: chừa chỗ cho thanh điều hướng dưới, bảng/lưới co về một cột */
+@media (max-width: 700px) {
+  body { padding-bottom: 56px; }
+  .wrap, .container { padding: 0 16px; }
+  .page { padding-top: 16px; }
+  .sh { flex-wrap: wrap; gap: 4px 12px; }
+  .sh h2 { font-size: 20px; }
+}

@@ -5,14 +5,145 @@
 } @else if (order(); as o) {
   <h1>{{ o.postTitle }}</h1>
   <p class="muted">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }} · {{ o.code }}</p>
+
+  @if (error()) {
+    <div class="notice" role="alert">{{ error() }}</div>
+  }
+
+  @if (o.type === 'received' && offer(); as of) {
+    <ol class="steps">
+      @for (s of steps; track s) {
+        <li [class.reached]="stepReached(s)" [class.current]="of.state === s">
+          <span>{{ stateLabel[s] }}</span>
+          <small class="muted">{{ stepTime(s) }}</small>
+        </li>
+      }
+    </ol>
+    @if (of.state === 'rejected' || of.state === 'withdrawn' || of.state === 'cancelled') {
+      <div class="notice">{{ stateLabel[of.state] }} · {{ stepTime(of.state) }}</div>
+    }
+  }
+
   <dl class="info">
-    <dt>Trạng thái</dt><dd>{{ o.status }}</dd>
-    <dt>{{ o.type === 'placed' ? 'Người bán' : 'Người đăng' }}</dt><dd>{{ o.counterpartName }}</dd>
-    <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
-    <dt>Tổng cộng</dt><dd class="price">{{ o.total | number }}đ</dd>
+    <dt>Trạng thái</dt><dd>{{ label(o) }}</dd>
+    <dt>{{ o.type === 'placed' ? 'Người bán' : 'Người đăng' }}</dt><dd class="who"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="28" />{{ o.counterpartName }}</dd>
+    <dt>{{ o.type === 'placed' ? 'Thanh toán' : 'Trả công' }}</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
+    <dt>{{ o.type === 'placed' ? 'Tổng cộng' : 'Tiền công' }}</dt><dd class="price">{{ o.total | number }}đ</dd>
     @if (o.note) { <dt>Ghi chú</dt><dd>{{ o.note }}</dd> }
+    @if (offer(); as of) {
+      <dt>Lời giới thiệu của bạn</dt><dd>{{ of.intro }}</dd>
+      <dt>Địa chỉ</dt>
+      <dd>
+        @if (showAddress()) { {{ of.exactAddress }} } @else { Địa chỉ chính xác hiện khi bạn được chọn. }
+      </dd>
+      @if (of.reportNote) { <dt>Bạn đã báo</dt><dd>{{ of.reportNote }}</dd> }
+    }
   </dl>
-  <a [routerLink]="['/messenger']" class="btn">Nhắn tin</a>
+
+  @if (o.surcharge; as s) {
+    <div class="notice surcharge" [class.pending]="s.state === 'pending'">
+      @if (s.state === 'pending') {
+        <strong>Người bán báo phụ thu {{ s.amount | number }}đ</strong>
+        <span>{{ s.reason }}. Bạn đồng ý thì người bán mới làm tiếp.</span>
+        <div class="actions">
+          <button type="button" class="btn" (click)="answerSurcharge(true)">Đồng ý phụ thu</button>
+          @if (canDeclineSurcharge) { <button type="button" class="btn ghost" (click)="answerSurcharge(false)">Không đồng ý</button> }
+        </div>
+      } @else if (s.state === 'approved') {
+        Bạn đã đồng ý phụ thu {{ s.amount | number }}đ ({{ s.reason }}).
+      } @else {
+        Bạn đã từ chối phụ thu {{ s.amount | number }}đ. Hãy nhắn người bán để thống nhất lại hoặc hủy đơn.
+      }
+    </div>
+  }
+
+  <a class="seller-card" [routerLink]="o.counterpartId ? ['/shop', o.counterpartId] : null">
+    <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="48" />
+    <span class="who-info">
+      <span class="muted">{{ o.type === 'placed' ? 'Người bán' : 'Người đăng việc' }}</span>
+      <strong>{{ o.counterpartName }}</strong>
+    </span>
+    @if (o.counterpartId) { <span class="go">Xem gian hàng ›</span> }
+  </a>
+
+  @if (o.cancelRequested) {
+    <div class="notice">Đã gửi yêu cầu hủy. Người bán sẽ xác nhận — đơn chưa tự hủy.</div>
+  }
+
+  <!-- Hành động hợp lệ theo bước hiện tại của việc đã nhận -->
+  @if (offer(); as of) {
+    @if (of.state === 'reported') {
+      <p class="muted">Đã báo xong. Chờ người đăng xác nhận (tự hoàn thành sau 24 giờ).</p>
+    }
+    <div class="actions">
+      @for (a of actions(); track a) {
+        <button type="button" class="btn" [class.ghost]="a === 'withdraw' || a === 'cancelRequest'" (click)="run(a)">
+          {{ actionLabel[a] }}
+        </button>
+      }
+    </div>
+
+    @if (openPanel === 'report') {
+      <form [formGroup]="doneForm" (ngSubmit)="run('reportDone')" class="panel">
+        <label for="note">Ghi chú hoàn thành (bắt buộc)</label>
+        <textarea id="note" rows="3" formControlName="note"></textarea>
+        @if (doneForm.controls.note.invalid && doneForm.controls.note.touched) {
+          <small class="error">Hãy ghi ít nhất 5 ký tự về việc đã làm.</small>
+        }
+        <button type="submit" class="btn">Gửi báo hoàn thành</button>
+      </form>
+    }
+    @if (openPanel === 'cancel') {
+      <form [formGroup]="cancelForm" (ngSubmit)="run('cancelRequest')" class="panel">
+        <label for="reason">Lý do xin hủy</label>
+        <select id="reason" formControlName="reason">
+          <option value="">— Chọn lý do —</option>
+          @for (r of cancelReasons; track r.value) { <option [value]="r.value">{{ r.label }}</option> }
+        </select>
+        @if (cancelForm.controls.reason.invalid && cancelForm.controls.reason.touched) {
+          <small class="error">Hãy chọn lý do.</small>
+        }
+        <button type="submit" class="btn">Xác nhận xin hủy</button>
+      </form>
+    }
+  }
+
+  @if (canCancelPlaced(o)) {
+    <button type="button" class="btn ghost" (click)="requestCancelPlaced()">Yêu cầu hủy đơn</button>
+    @if (openPanel === 'placedCancel') {
+      <form [formGroup]="placedCancelForm" (ngSubmit)="requestCancelPlaced()" class="panel">
+        <label for="pc">Lý do hủy</label>
+        <textarea id="pc" rows="2" formControlName="reason"></textarea>
+        @if (placedCancelForm.controls.reason.invalid && placedCancelForm.controls.reason.touched) {
+          <small class="error">Hãy nhập lý do (ít nhất 5 ký tự).</small>
+        }
+        <button type="submit" class="btn">Gửi yêu cầu hủy</button>
+      </form>
+    }
+  }
+
+  @if (canReview(o)) {
+    <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="panel">
+      <h2>Đánh giá {{ o.counterpartName }}</h2>
+      <div class="stars" role="radiogroup" aria-label="Số sao">
+        @for (n of [1, 2, 3, 4, 5]; track n) {
+          <button type="button" class="star" [class.on]="reviewForm.controls.rating.value >= n" (click)="setRating(n)" [attr.aria-label]="n + ' sao'">★</button>
+        }
+      </div>
+      @if (reviewForm.controls.rating.invalid && reviewForm.touched) { <small class="error">Chọn số sao.</small> }
+      <textarea rows="3" formControlName="comment" placeholder="Nhận xét (không bắt buộc)"></textarea>
+      <button type="submit" class="btn">Gửi đánh giá</button>
+    </form>
+  } @else if (reviewed()) {
+    <div class="notice">Cảm ơn bạn đã đánh giá.</div>
+  }
+
+  <div class="actions">
+    <a routerLink="/messenger" class="btn ghost">Nhắn tin</a>
+    <a [routerLink]="['/orders', o._id, 'report']" class="btn ghost">Báo cáo vấn đề với đơn này</a>
+  </div>
 } @else {
-  <div class="empty"><h1>Không tìm thấy đơn</h1></div>
+  <div class="empty"><h1>Không tìm thấy đơn</h1>
+    @if (error()) { <p>{{ error() }}</p> }
+  </div>
 }

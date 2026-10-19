@@ -16,7 +16,8 @@
     "promoted": true,
     "acceptsXu": true,
     "rating": 4.8,
-    "reviewCount": 32
+    "reviewCount": 32,
+    "sellerAvatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f0002",
@@ -52,7 +53,8 @@
     "createdAt": "2026-10-13T08:00:00.000Z",
     "priceUnit": "phần",
     "rating": 4.5,
-    "reviewCount": 9
+    "reviewCount": 9,
+    "sellerAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f0004",
@@ -69,7 +71,8 @@
     "createdAt": "2026-10-14T08:00:00.000Z",
     "priceUnit": "hộp",
     "rating": 4.6,
-    "reviewCount": 12
+    "reviewCount": 12,
+    "sellerAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f0005",
@@ -85,7 +88,8 @@
     "price": 650000,
     "createdAt": "2026-10-15T08:00:00.000Z",
     "priceUnit": "cái",
-    "acceptsXu": true
+    "acceptsXu": true,
+    "sellerAvatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f0006",
@@ -100,7 +104,8 @@
     "block": "Block A",
     "price": 2500000,
     "createdAt": "2026-10-16T08:00:00.000Z",
-    "priceUnit": "cái"
+    "priceUnit": "cái",
+    "sellerAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f0007",
@@ -115,7 +120,8 @@
     "block": "Block D",
     "price": 1800000,
     "createdAt": "2026-10-17T08:00:00.000Z",
-    "priceUnit": "chiếc"
+    "priceUnit": "chiếc",
+    "sellerAvatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f0008",
@@ -133,7 +139,8 @@
     "priceUnit": "kg",
     "acceptsXu": true,
     "rating": 4.9,
-    "reviewCount": 41
+    "reviewCount": 41,
+    "sellerAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f0009",
@@ -150,7 +157,8 @@
     "createdAt": "2026-10-11T08:00:00.000Z",
     "priceUnit": "lần",
     "rating": 4.7,
-    "reviewCount": 15
+    "reviewCount": 15,
+    "sellerAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f000a",
@@ -167,7 +175,8 @@
       "due": "Thứ 6 – Chủ nhật",
       "offers": 2,
       "status": "open"
-    }
+    },
+    "sellerAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f000b",
@@ -184,7 +193,8 @@
       "due": "Sáng thứ 7",
       "offers": 0,
       "status": "open"
-    }
+    },
+    "sellerAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f000c",
@@ -201,6 +211,42 @@
       "due": "Mỗi tối tuần này",
       "offers": 4,
       "status": "taken"
-    }
+    },
+    "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&crop=faces&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0101",
+    "kind": "food",
+    "title": "Bánh mì que pate nhà làm",
+    "description": "Nướng tại chỗ, nhận đặt trước giờ trưa.",
+    "images": [
+      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=70"
+    ],
+    "sellerId": "000000000000000000000001",
+    "sellerName": "Gian hàng của tôi",
+    "block": "Block B",
+    "price": 15000,
+    "priceUnit": "ổ",
+    "acceptsXu": true,
+    "createdAt": "2026-10-17T08:00:00.000Z",
+    "sellerAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=faces&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0102",
+    "kind": "job",
+    "title": "Tìm người tưới cây ban công 3 ngày",
+    "description": "Đi công tác 3 ngày, cần người tưới cây mỗi sáng.",
+    "images": [],
+    "sellerId": "000000000000000000000001",
+    "sellerName": "Gian hàng của tôi",
+    "block": "Block B",
+    "price": 90000,
+    "createdAt": "2026-10-17T09:00:00.000Z",
+    "job": {
+      "due": "Thứ 4 – Thứ 6",
+      "offers": 2,
+      "status": "open"
+    },
+    "sellerAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=faces&q=70"
   }
 ]

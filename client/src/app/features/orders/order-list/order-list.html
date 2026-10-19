@@ -7,24 +7,44 @@
   <button type="button" class="btn ghost" [class.active]="tab() === 'history'" (click)="setTab('history')">Lịch sử</button>
 </div>
 
+<ng-template #rowTpl let-o>
+  <li class="orow" [class.ended]="false">
+    <a class="orow-in" [routerLink]="['/orders', o._id]">
+      <app-order-thumb [image]="o.image" [category]="o.category" />
+      <span class="main">
+        <span class="otag" [class.rcv]="o.type === 'received'">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span>
+        <span class="code muted">{{ o.code }}</span>
+        <h3>{{ o.postTitle }}</h3>
+        <span class="sub who"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="20" />{{ o.counterpartName }} · {{ fmt(o.createdAt) }}</span>
+      </span>
+      <span class="end"><b>{{ o.total | number }}đ</b><span class="status">{{ label(o) }}</span></span>
+    </a>
+  </li>
+</ng-template>
+
 @if (loading()) {
   <p class="muted">Đang tải…</p>
 } @else if (error()) {
   <div class="notice">Không tải được đơn hàng: {{ error() }}</div>
 } @else {
-  <ul class="list">
-    @for (o of visible(); track o._id) {
-      <li class="card row">
-        <a [routerLink]="['/orders', o._id]">
-          <span class="muted">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }} · {{ o.code }}</span>
-          <strong>{{ o.postTitle }}</strong>
-          <span class="muted">{{ o.counterpartName }}</span>
-        </a>
-        <span class="price">{{ o.total | number }}đ</span>
-        <span class="status">{{ o.status }}</span>
-      </li>
-    } @empty {
-      <li class="empty">Chưa có đơn nào ở mục này.</li>
-    }
-  </ul>
+  @if (needsAction().length) {
+    <section class="todo">
+      <h2>Cần bạn xử lý</h2>
+      <ul class="list">
+        @for (o of needsAction(); track o._id) {
+          <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: o }" />
+        }
+      </ul>
+    </section>
+  }
+  <section>
+    @if (needsAction().length && ongoing().length) { <h2>Đang diễn ra</h2> }
+    <ul class="list">
+      @for (o of ongoing(); track o._id) {
+        <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: o }" />
+      } @empty {
+        @if (!needsAction().length) { <li class="empty">Chưa có đơn nào ở mục này.</li> }
+      }
+    </ul>
+  </section>
 }

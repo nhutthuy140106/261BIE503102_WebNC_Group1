@@ -1,5 +1,8 @@
-.seller { display: grid; grid-template-columns: 200px 1fr; gap: 24px; }
-@media (max-width: 800px) { .seller { grid-template-columns: 1fr; } }
-.side { display: grid; align-content: start; gap: 4px; }
-.side a { padding: 8px 12px; border-radius: 10px; }
-.side a.on { background: var(--cream); color: var(--accent); font-weight: 600; }
+.seller { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; align-items: start; }
+@media (max-width: 800px) { .seller { grid-template-columns: 1fr; gap: 16px; } }
+.side { display: grid; align-content: start; gap: 4px; position: sticky; top: 88px; }
+.side h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--fog); margin: 0 12px 8px; }
+.side a { padding: 10px 14px; border-radius: 10px; font-weight: 500; }
+.side a:hover { background: var(--soft); }
+.side a.on { background: var(--ink); color: #fff; font-weight: 600; }
+@media (max-width: 800px) { .side { display: flex; flex-wrap: wrap; position: static; } .side h2 { display: none; } }

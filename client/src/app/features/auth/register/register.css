@@ -1,2 +1,8 @@
-.box { max-width: 420px; margin: 32px auto; }
-.field input { width: 100%; }
+.box { max-width: 420px; margin: 40px auto 56px; padding: 32px; border: 1px solid var(--border); border-radius: 20px; background: #fff; box-shadow: 0 12px 40px rgba(34, 48, 74, .06); }
+h1 { font-size: 28px; letter-spacing: -.02em; margin-bottom: 4px; }
+.sub { color: var(--smoke); margin-bottom: 24px; }
+.field input { width: 100%; padding: 12px 14px; }
+form .btn { width: 100%; justify-content: center; padding: 13px; font-size: 15px; margin-top: 4px; }
+.error[role='alert'] { background: #fdecea; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; }
+.alt { margin-top: 20px; text-align: center; }
+.alt a { color: var(--accent); font-weight: 600; }

@@ -2,10 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
-
-/** Custom validator: tên đăng nhập chỉ gồm chữ, số, dấu gạch dưới. */
-const usernameValidator: ValidatorFn = (c: AbstractControl): ValidationErrors | null =>
-  /^[a-zA-Z0-9_]*$/.test(c.value ?? '') ? null : { badChars: true };
+import { phoneValidator } from '../../../core/utils/validators';
 
 /** Cross-field validator gắn ở FormGroup: xác nhận mật khẩu phải khớp. */
 const passwordMatchValidator: ValidatorFn = (g: AbstractControl): ValidationErrors | null =>
@@ -25,18 +22,15 @@ export class Register {
 
   protected readonly form = new FormGroup(
     {
-      fullName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
-      username: new FormControl('', {
-        nonNullable: true,
-        validators: [Validators.required, Validators.minLength(4), usernameValidator],
-      }),
+      name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2), Validators.maxLength(60)] }),
+      phone: new FormControl('', { nonNullable: true, validators: [Validators.required, phoneValidator] }),
       password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] }),
       confirmPass: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     },
     { validators: passwordMatchValidator },
   );
 
-  protected invalid(name: 'fullName' | 'username' | 'password' | 'confirmPass'): boolean {
+  protected invalid(name: 'name' | 'phone' | 'password' | 'confirmPass'): boolean {
     const c = this.form.controls[name];
     return c.invalid && c.touched;
   }
@@ -46,10 +40,10 @@ export class Register {
       this.form.markAllAsTouched();
       return;
     }
-    const { fullName, username, password } = this.form.getRawValue();
-    this.auth.register({ fullName, username, password }).subscribe({
+    const { name, phone, password } = this.form.getRawValue();
+    this.auth.register({ name, phone, password }).subscribe({
       next: () => this.router.navigate(['/auth/login']),
-      error: () => this.error.set('Không đăng ký được. Tên đăng nhập có thể đã tồn tại.'),
+      error: (e: Error) => this.error.set(e.message || 'Không đăng ký được. Số điện thoại có thể đã được dùng.'),
     });
   }
 }

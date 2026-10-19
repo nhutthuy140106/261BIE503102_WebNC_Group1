@@ -1,6 +1,41 @@
 <footer class="foot">
-  <div class="container foot-in">
-    <strong>AntGo</strong>
-    <span>Một khu, một nhà. Đồ án môn Web (261BIE503102) — Nhóm 1.</span>
+  <img class="peek" src="assets/clean/peek.png" alt="" />
+  <div class="wrap top">
+    <div class="brand">
+      <span class="logo">Ant<span>Go</span></span>
+      <p>Ứng dụng kết nối hàng xóm trong khu — mua bán, đặt dịch vụ và giúp nhau ngay gần nhà.</p>
+    </div>
+    <div>
+      <h4>Khám phá</h4>
+      <ul>
+        <li><a routerLink="/search" [queryParams]="{ kind: 'food' }">Đồ ăn &amp; thức uống</a></li>
+        <li><a routerLink="/search" [queryParams]="{ kind: 'goods' }">Đồ dùng</a></li>
+        <li><a routerLink="/search" [queryParams]="{ kind: 'service' }">Dịch vụ</a></li>
+        <li><a routerLink="/search" [queryParams]="{ kind: 'job' }">Việc làm</a></li>
+        <li><a routerLink="/profile" fragment="saved">Đã lưu</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Bán &amp; Đăng việc</h4>
+      <ul>
+        <li><a routerLink="/seller/posts/new">Đăng bài bán</a></li>
+        <li><a routerLink="/seller/posts/new">Đăng việc cần người</a></li>
+        <li><a class="xu"><img class="coin" src="assets/clean/antxu.png" alt="Xu" />Quảng bá bằng AntXu</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Hỗ trợ</h4>
+      <ul>
+        <li><a>An toàn giao dịch</a></li>
+        <li><a>Báo cáo vi phạm</a></li>
+        <li><a>Liên hệ AntGo</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="bottom">
+    <div class="wrap">
+      <span>© 2026 AntGo</span>
+      <span class="end"><svg class="i"><use href="#pin" /></svg>Đang xem: Block B · Tiếng Việt</span>
+    </div>
   </div>
 </footer>

@@ -1,0 +1,7 @@
+<span class="th">
+  @if (showImage) {
+    <img [src]="image" alt="" loading="lazy" (error)="onError()" />
+  } @else {
+    <span class="ph"><svg class="i"><use [attr.href]="'#' + icon" /></svg><small>{{ label }}</small></span>
+  }
+</span>

@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
+import { sellerMatchGuard } from './core/guards/seller-match-guard';
 import { NotFound } from './core/not-found/not-found';
 
 /**
@@ -12,6 +13,7 @@ const routes: Routes = [
   { path: '', loadChildren: () => import('./features/home/home-module').then((m) => m.HomeModule), pathMatch: 'full' },
   { path: 'search', loadChildren: () => import('./features/search/search-module').then((m) => m.SearchModule) },
   { path: 'posts', loadChildren: () => import('./features/posts/posts-module').then((m) => m.PostsModule) },
+  { path: 'shop', loadChildren: () => import('./features/shop/shop-module').then((m) => m.ShopModule) },
   { path: 'auth', loadChildren: () => import('./features/auth/auth-module').then((m) => m.AuthModule) },
   {
     path: 'orders',
@@ -36,6 +38,7 @@ const routes: Routes = [
   },
   {
     path: 'seller',
+    canMatch: [sellerMatchGuard],
     canActivate: [authGuard],
     loadChildren: () => import('./features/seller/seller-module').then((m) => m.SellerModule),
   },
@@ -43,7 +46,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled' })],
+  imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' })],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

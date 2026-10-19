@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { KIND_LABEL, Post, PostKind } from '../../../core/models/post';
+import { AuthService } from '../../../core/services/auth';
 import { PostFilter, PostService } from '../../../core/services/post';
 import { SavedService } from '../../../core/services/saved';
 
@@ -18,6 +19,7 @@ export class SearchResults implements OnInit {
   private readonly router = inject(Router);
   private readonly postService = inject(PostService);
   protected readonly saved = inject(SavedService);
+  private readonly auth = inject(AuthService);
 
   protected readonly kinds = KINDS;
   protected readonly kindLabel = KIND_LABEL;
@@ -25,6 +27,17 @@ export class SearchResults implements OnInit {
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected filter: PostFilter = {};
+
+  /** Khu của tôi (nếu đã đăng nhập) — bài cùng khu xếp trước, khu khác gom vào "Ở khu gần đó". */
+  protected readonly myBlock = computed(() => this.auth.currentUser()?.block ?? null);
+  protected readonly inArea = computed(() => {
+    const b = this.myBlock();
+    return b ? this.results().filter((p) => p.block === b) : this.results();
+  });
+  protected readonly nearby = computed(() => {
+    const b = this.myBlock();
+    return b ? this.results().filter((p) => p.block !== b) : [];
+  });
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {

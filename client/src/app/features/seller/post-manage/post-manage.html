@@ -1,3 +1,35 @@
-<h1>Bài đăng của tôi</h1>
-<a routerLink="/seller/posts/new" class="btn">Đăng bài mới</a>
-<p class="muted">Danh sách bài đăng (GET /api/posts?sellerId=…) sẽ hiện ở đây khi có backend.</p>
+<div class="head">
+  <h1>Bài đăng của tôi</h1>
+  <a routerLink="/seller/posts/new" class="btn">Đăng bài mới</a>
+</div>
+
+@if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
+@if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else {
+  <ul class="list">
+    @for (p of posts(); track p._id) {
+      <li class="card row" [class.closed]="p.closed">
+        <div class="thumb">
+          @if (p.images.length) { <img [src]="p.images[0]" [alt]="p.title" /> } @else { <span>{{ kindLabel[p.kind] }}</span> }
+        </div>
+        <div class="main">
+          <span class="muted">{{ kindLabel[p.kind] }} · {{ p.block }} @if (p.closed) { · Đã ẩn }</span>
+          <strong>{{ p.title }}</strong>
+          <span class="price">{{ p.price | number }}đ@if (p.priceUnit) {<small>/{{ p.priceUnit }}</small>}</span>
+        </div>
+        <div class="acts">
+          <a [routerLink]="[p.kind === 'job' ? '/posts/job' : '/posts', slugOf(p)]" class="btn ghost">Xem</a>
+          <a [routerLink]="['/seller/posts', p._id, 'edit']" class="btn ghost">Sửa</a>
+          <button type="button" class="btn ghost" (click)="toggleClosed(p)">{{ p.closed ? 'Mở lại' : 'Ẩn bài' }}</button>
+          <button type="button" class="btn ghost danger" (click)="remove(p)">{{ confirmId() === p._id ? 'Bấm lần nữa để xóa' : 'Xóa' }}</button>
+        </div>
+      </li>
+    } @empty {
+      <li class="empty">
+        <h2>Bạn chưa đăng bài nào</h2>
+        <a routerLink="/seller/posts/new" class="btn">Đăng bài đầu tiên</a>
+      </li>
+    }
+  </ul>
+}

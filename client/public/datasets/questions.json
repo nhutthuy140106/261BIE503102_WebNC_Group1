@@ -1,0 +1,18 @@
+[
+  {
+    "_id": "640b187e71d9faa9039f0101",
+    "jobId": "640b187e71d9faa9039f000a",
+    "text": "Mèo có hay cào người không ạ?",
+    "authorName": "Minh",
+    "answer": "Bé rất hiền, bạn yên tâm nhé.",
+    "createdAt": "2026-10-13T09:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0102",
+    "jobId": "640b187e71d9faa9039f000a",
+    "text": "Thức ăn và cát để sẵn ở đâu?",
+    "authorName": "Phương",
+    "answer": null,
+    "createdAt": "2026-10-14T08:30:00.000Z"
+  }
+]

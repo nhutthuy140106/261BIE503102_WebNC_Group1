@@ -1,0 +1,7 @@
+:host { display: block; max-width: 860px; }
+h1 { font-size: 28px; letter-spacing: -.02em; }
+.me { display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--soft); margin: 16px 0 32px; }
+.avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 22px; font-weight: 700; }
+.me dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; margin: 0; }
+.me dt { color: var(--smoke); }
+.me dd { margin: 0; font-weight: 600; }

@@ -1,0 +1,7 @@
+<span class="av" [style.width.px]="size" [style.height.px]="size" [style.fontSize.px]="size * 0.42" [attr.aria-label]="name || null" role="img">
+  @if (showImage) {
+    <img [src]="src" alt="" loading="lazy" (error)="onError()" />
+  } @else {
+    {{ initial }}
+  }
+</span>

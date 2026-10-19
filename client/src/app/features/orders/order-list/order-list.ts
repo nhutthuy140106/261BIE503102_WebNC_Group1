@@ -2,10 +2,13 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Order } from '../../../core/models/order';
 import { OrderService } from '../../../core/services/order';
+import { formatDateTime, statusLabel } from '../../../core/utils/status-label';
 
 type Tab = 'all' | 'placed' | 'received' | 'history';
 
 const FINISHED = ['done', 'cancelled', 'rejected', 'withdrawn'];
+/** Việc đã nhận đang chờ chính người dùng bấm (Bắt đầu làm / Báo hoàn thành) */
+const NEEDS_ACTION = ['chosen', 'working'];
 
 /** Đơn hàng: Tất cả · Đơn đã đặt · Việc đã nhận · Lịch sử (đơn đã kết thúc). */
 @Component({
@@ -23,8 +26,15 @@ export class OrderList implements OnInit {
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly tab = signal<Tab>('all');
+  protected readonly label = statusLabel;
+  protected readonly fmt = formatDateTime;
 
-  protected readonly visible = computed(() => {
+  protected readonly needsAction = computed(() =>
+    this.tab() === 'history' ? [] : this.base().filter((o) => o.type === 'received' && NEEDS_ACTION.includes(o.status)),
+  );
+  protected readonly ongoing = computed(() => this.base().filter((o) => !this.needsAction().includes(o)));
+
+  private readonly base = computed(() => {
     const t = this.tab();
     return this.orders().filter((o) => {
       const finished = FINISHED.includes(o.status);

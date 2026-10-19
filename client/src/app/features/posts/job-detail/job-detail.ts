@@ -1,28 +1,49 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { of, switchMap } from 'rxjs';
+import { of, switchMap, forkJoin } from 'rxjs';
+import { CanComponentDeactivate } from '../../../core/guards/pending-changes-guard';
+import { AppError } from '../../../core/models/api';
+import { OFFER_STATE_LABEL, Offer } from '../../../core/models/offer';
 import { Post } from '../../../core/models/post';
+import { Question } from '../../../core/models/social';
+import { JobOfferService } from '../../../core/services/job-offer';
 import { PostService } from '../../../core/services/post';
+import { QuestionService } from '../../../core/services/question';
 import { resolveId } from '../../../core/utils/slug-helper';
+import { formatDateTime } from '../../../core/utils/status-label';
+import { noPhoneValidator } from '../../../core/utils/validators';
 
-/** Chi tiết việc làm + Đề nghị nhận việc (gửi đề nghị ≠ đã nhận việc). */
+const SLOTS = ['Sáng', 'Chiều', 'Tối'];
+
+/** Chi tiết việc làm + Đề nghị nhận việc + Hỏi đáp công khai (gửi đề nghị ≠ đã nhận việc). */
 @Component({
   selector: 'app-job-detail',
   standalone: false,
   templateUrl: './job-detail.html',
   styleUrl: './job-detail.css',
 })
-export class JobDetail implements OnInit {
+export class JobDetail implements OnInit, CanComponentDeactivate {
   private readonly route = inject(ActivatedRoute);
   private readonly postService = inject(PostService);
+  private readonly offers = inject(JobOfferService);
+  private readonly questions = inject(QuestionService);
 
   protected readonly job = signal<Post | null>(null);
+  protected readonly myOffer = signal<Offer | null>(null);
+  protected readonly qa = signal<Question[]>([]);
   protected readonly loading = signal(true);
-  protected readonly sent = signal(false);
+  protected readonly error = signal<string | null>(null);
+  protected readonly submitting = signal(false);
+  protected readonly stateLabel = OFFER_STATE_LABEL;
+  protected readonly slotOptions = signal<{ value: string; label: string }[]>(SLOTS.map((s) => ({ value: s, label: s })));
 
   protected readonly offerForm = new FormGroup({
-    intro: new FormControl('', [Validators.required, Validators.minLength(10), Validators.maxLength(300)]),
+    slots: new FormArray<FormControl<boolean>>(SLOTS.map(() => new FormControl(false, { nonNullable: true }))),
+    intro: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(10), Validators.maxLength(300)] }),
+  });
+  protected readonly askForm = new FormGroup({
+    text: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(5), Validators.maxLength(500), noPhoneValidator] }),
   });
 
   ngOnInit(): void {
@@ -30,24 +51,92 @@ export class JobDetail implements OnInit {
       .pipe(
         switchMap((params) => {
           const id = resolveId(params.get('slug') ?? '');
-          return id ? this.postService.getPostById(id) : of(undefined);
+          this.loading.set(true);
+          if (!id) return of(null);
+          return forkJoin({
+            job: this.postService.getPostById(id),
+            offer: this.offers.findActiveForJob(id),
+            qa: this.questions.list(id),
+          });
         }),
       )
       .subscribe({
-        next: (p) => {
-          this.job.set(p ?? null);
+        next: (r) => {
+          this.job.set(r?.job ?? null);
+          this.setSlotOptions(r?.job?.job?.windows ?? []);
+          this.myOffer.set(r?.offer ?? null);
+          this.qa.set(r?.qa ?? []);
           this.loading.set(false);
         },
-        error: () => this.loading.set(false),
+        error: (e: Error) => {
+          this.error.set(e.message);
+          this.loading.set(false);
+        },
       });
   }
 
+  /** Việc có khung giờ cụ thể (ISO) thì chỉ cho chọn trong đó; không thì 3 buổi chung. */
+  private setSlotOptions(windows: string[]): void {
+    const opts = windows.length
+      ? windows.map((w) => ({ value: w, label: formatDateTime(w) }))
+      : SLOTS.map((s) => ({ value: s, label: s }));
+    this.slotOptions.set(opts);
+    const arr = this.offerForm.controls.slots;
+    arr.clear();
+    opts.forEach(() => arr.push(new FormControl(false, { nonNullable: true })));
+  }
+
+  hasUnsavedChanges(): boolean {
+    return !this.myOffer() && this.offerForm.dirty;
+  }
+
   submitOffer(): void {
-    if (this.offerForm.invalid) {
-      this.offerForm.markAllAsTouched();
-      return;
-    }
-    // TODO(backend): POST /api/offers { jobId, intro }
-    this.sent.set(true);
+    const j = this.job();
+    if (!j) return;
+    if (this.offerForm.invalid) return this.offerForm.markAllAsTouched();
+    const v = this.offerForm.getRawValue();
+    const slots = this.slotOptions().filter((_, i) => v.slots[i]).map((o) => o.value);
+    this.submitting.set(true);
+    this.error.set(null);
+    this.offers.create(j._id, { intro: v.intro.trim(), slots }).subscribe({
+      next: (o) => {
+        this.myOffer.set(o);
+        this.offerForm.markAsPristine();
+        this.submitting.set(false);
+      },
+      error: (e: Error) => {
+        this.applyServerErrors(e, this.offerForm);
+        this.error.set(e.message);
+        this.submitting.set(false);
+      },
+    });
+  }
+
+  withdraw(): void {
+    const o = this.myOffer();
+    if (!o) return;
+    this.offers.act(o._id, 'withdraw').subscribe({
+      next: () => this.myOffer.set(null),
+      error: (e: Error) => this.error.set(e.message),
+    });
+  }
+
+  ask(): void {
+    const j = this.job();
+    if (!j) return;
+    if (this.askForm.invalid) return this.askForm.markAllAsTouched();
+    this.questions.ask(j._id, this.askForm.getRawValue().text).subscribe({
+      next: (q) => {
+        this.qa.update((l) => [...l, q]);
+        this.askForm.reset();
+      },
+      error: (e: Error) => this.applyServerErrors(e, this.askForm),
+    });
+  }
+
+  /** Server trả 422 kèm field → hiện đúng chỗ (server vẫn là nơi validate bắt buộc). */
+  private applyServerErrors(e: Error, form: FormGroup): void {
+    if (!(e instanceof AppError)) return;
+    for (const d of e.details) form.get(d.field)?.setErrors({ server: d.message });
   }
 }

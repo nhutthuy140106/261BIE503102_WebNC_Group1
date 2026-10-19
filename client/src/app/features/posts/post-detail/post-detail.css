@@ -1,8 +1,53 @@
-.detail { display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; margin-top: 16px; }
-@media (max-width: 800px) { .detail { grid-template-columns: 1fr; } }
-.gallery { display: grid; gap: 8px; }
-.gallery img { border-radius: var(--radius); width: 100%; }
-.big { font-size: 28px; }
-.big small { font-size: 16px; font-weight: 400; color: var(--muted); }
-.qty { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
-.qty input { width: 80px; }
+.back { margin-bottom: 16px; }
+.detail { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+@media (max-width: 900px) { .detail { grid-template-columns: 1fr; gap: 24px; } }
+
+.gallery { display: grid; gap: 10px; }
+.gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; background: var(--soft); }
+.gallery img:not(:first-child) { aspect-ratio: 16 / 9; }
+
+.info { display: grid; gap: 6px; align-content: start; position: sticky; top: 88px; }
+.info h1 { font-size: 28px; line-height: 1.2; letter-spacing: -.02em; margin: 2px 0 4px; }
+.kindline { font-size: 13px; font-weight: 600; color: var(--smoke); }
+.big { font-size: 28px; color: var(--accent); margin: 8px 0; }
+.big small { font-size: 15px; font-weight: 500; color: var(--smoke); }
+.desc { margin-bottom: 8px; }
+
+.qty { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 8px 0 16px; }
+.qty label { font-weight: 600; }
+.qty input { width: 84px; text-align: center; }
+.info > .btn { justify-content: center; width: 100%; padding: 14px; font-size: 15px; }
+
+/* Bước 2 — hộp "Xác nhận đơn hàng" */
+.confirm { display: grid; gap: 0; border: 1px solid var(--border); border-radius: 16px; background: #fff; margin-top: 8px; }
+.confirm > * { padding: 14px 18px; border-bottom: 1px solid var(--border); margin: 0; }
+.confirm > *:last-child { border-bottom: 0; }
+.confirm h2 { font-size: 18px; }
+.confirm .line { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.confirm .switch { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; }
+.confirm .switch input { width: 18px; height: 18px; accent-color: var(--accent); padding: 0; }
+.confirm .field { margin: 0; }
+.confirm .field input, .confirm .field select { width: 100%; }
+.confirm .field a { font-size: 13px; font-weight: 600; color: var(--accent); }
+.confirm fieldset { border: 0; display: grid; gap: 8px; }
+.confirm legend { font-weight: 600; margin-bottom: 6px; }
+.confirm fieldset label { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
+.confirm fieldset input { accent-color: var(--accent); padding: 0; }
+.sum { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; }
+.sum dd { text-align: right; margin: 0; }
+.sum .price { color: var(--accent); font-size: 20px; }
+.confirm > .btn { border-radius: 0 0 15px 15px; justify-content: center; padding: 16px; font-size: 15px; }
+
+.similar { margin-top: 56px; }
+.similar h2 { font-size: 22px; letter-spacing: -.015em; }
+.seller { font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.by { display: flex; align-items: center; gap: 8px; }
+
+/* Bước 1: nhóm tùy chọn dạng hàng danh sách */
+.group { border: 0; display: grid; gap: 0; margin: 4px 0 12px; }
+.group legend { font-weight: 700; padding: 6px 0; }
+.group legend small { font-weight: 500; color: var(--smoke); margin-left: 6px; }
+.choice { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-top: 1px solid var(--border); cursor: pointer; }
+.choice span { flex: 1; }
+.choice small { color: var(--smoke); }
+.choice input { width: 20px; height: 20px; accent-color: var(--accent); padding: 0; }

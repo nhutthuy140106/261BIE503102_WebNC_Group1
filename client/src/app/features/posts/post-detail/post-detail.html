@@ -1,9 +1,7 @@
-<button type="button" class="btn ghost" (click)="back()">← Quay lại</button>
+<button type="button" class="btn ghost back" (click)="back()">← Quay lại</button>
 
 @if (loading()) {
   <p class="muted">Đang tải…</p>
-} @else if (error()) {
-  <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
 } @else if (post(); as p) {
   <article class="detail">
     <div class="gallery">
@@ -12,25 +10,130 @@
       }
     </div>
     <div class="info">
-      <span class="muted">{{ kindLabel[p.kind] }} · {{ p.block }}</span>
+      <span class="kindline">{{ kindLabel[p.kind] }} · {{ p.block }}</span>
       <h1>{{ p.title }}</h1>
-      <p class="muted">Đăng bởi {{ p.sellerName }}</p>
+      <p class="muted by"><app-avatar [src]="p.sellerAvatar" [name]="p.sellerName" [size]="28" /><span>Đăng bởi <a class="seller" [routerLink]="['/shop', p.sellerId]">{{ p.sellerName }}</a></span></p>
       <p class="price big">{{ p.price | number }}đ@if (p.priceUnit) {<small>/{{ p.priceUnit }}</small>}</p>
-      <p>{{ p.description }}</p>
+      <p class="desc">{{ p.description }}</p>
 
-      <div class="qty">
-        <label for="qty">Số lượng</label>
-        <input id="qty" type="number" min="1" max="99" [(ngModel)]="quantity" />
-      </div>
-      <button type="button" class="btn" [disabled]="quantity < 1" (click)="addToCart(p)">
-        Tiếp tục · {{ p.price * quantity | number }}đ
-      </button>
+      @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
+
+      @if (step() === 1) {
+        <!-- Bước 1: chọn món (tùy chọn) + số lượng -->
+        @for (g of p.optionGroups ?? []; track g.name) {
+          <fieldset class="group">
+            <legend>{{ g.name }} <small>{{ g.multi ? 'Chọn nhiều' : 'Chọn 1' }}{{ g.required ? ' · bắt buộc' : '' }}</small></legend>
+            @for (c of g.choices; track c.label) {
+              <label class="choice">
+                <span>{{ c.label }}</span>
+                @if (c.price) { <small>+{{ c.price | number }}đ</small> }
+                <input [type]="g.multi ? 'checkbox' : 'radio'" [name]="g.name" [checked]="isChosen(g.name, c.label)" (change)="toggleChoice(g.name, c.label, g.multi)" />
+              </label>
+            }
+          </fieldset>
+        }
+        <div class="qty">
+          <label for="qty">Số lượng</label>
+          <input id="qty" type="number" min="1" max="99" [ngModel]="quantity()" (ngModelChange)="setQuantity($event)" />
+        </div>
+        @if (!step1Valid(p)) { <small class="muted">Hãy chọn các mục bắt buộc để tiếp tục.</small> }
+        <button type="button" class="btn" [disabled]="!step1Valid(p)" (click)="next()">Tiếp tục · {{ subtotal() | number }}đ</button>
+      } @else {
+        <!-- Bước 2: Xác nhận đơn hàng -->
+        <form [formGroup]="form" (ngSubmit)="submit(p)" class="confirm">
+          <h2>Xác nhận đơn hàng</h2>
+          <p>{{ p.title }} × {{ quantity() }} — {{ subtotal() | number }}đ
+            <button type="button" class="btn ghost" (click)="step.set(1)">Sửa</button></p>
+
+          @if (canToggleDelivery(p)) {
+            <label class="switch">
+              <input type="checkbox" [checked]="delivery()" (change)="toggleDelivery($any($event.target).checked)" />
+              Giao tận cửa (+{{ deliveryFee() | number }}đ)
+            </label>
+          } @else {
+            <p class="muted">{{ delivery() ? 'Người bán giao tận cửa (+' + (deliveryFee() | number) + 'đ)' : 'Chỉ nhận tại chỗ người bán' }}</p>
+          }
+
+          @for (q of p.questions ?? []; track q.label) {
+            <div class="field">
+              <label [for]="'q-' + $index">{{ q.label }}{{ q.required ? ' (bắt buộc)' : '' }}</label>
+              <input [id]="'q-' + $index" [value]="answers()[q.label] ?? ''" (input)="setAnswer(q.label, $any($event.target).value)" maxlength="200" />
+            </div>
+          }
+
+          @if (delivery()) {
+            <div class="field">
+              <label for="addr">Địa chỉ nhận hàng</label>
+              <select id="addr" formControlName="addressId">
+                <option value="">— Chọn địa chỉ —</option>
+                @for (a of addresses(); track a._id) {
+                  <option [value]="a._id">{{ a.name }} · {{ a.phone }} · {{ a.unit }}, Block {{ a.block }}{{ a.isDefault ? ' (mặc định)' : '' }}</option>
+                }
+              </select>
+              @if (!form.controls.addressId.value && form.touched) { <small class="error">Chọn địa chỉ nhận hàng.</small> }
+              <a routerLink="/profile">Thêm địa chỉ mới</a>
+            </div>
+          } @else {
+            <p class="muted">Bạn tự đến lấy — địa chỉ lấy hàng được gửi sau khi người bán xác nhận.</p>
+          }
+
+          <div class="field">
+            <label for="when">Ngày & giờ @if (needsSchedule(p)) { (bắt buộc) } @else { (không bắt buộc) }</label>
+            <input id="when" type="datetime-local" formControlName="scheduledAt" />
+            @if (needsSchedule(p) && !form.controls.scheduledAt.value && form.touched) { <small class="error">Dịch vụ cần chọn ngày giờ.</small> }
+          </div>
+
+          @if (p.kind === 'food') {
+            <label class="switch"><input type="checkbox" formControlName="utensils" /> Lấy dụng cụ ăn uống</label>
+          }
+
+          <div class="field">
+            <label for="note">Ghi chú cho người bán</label>
+            <input id="note" type="text" formControlName="note" maxlength="200" />
+          </div>
+
+          @if (p.acceptsXu) {
+            <div class="field">
+              <label for="voucher">Voucher AntXu (không bắt buộc)</label>
+              <input id="voucher" formControlName="voucher" placeholder="Nhập mã voucher" maxlength="20" />
+              @if (form.controls.voucher.invalid) { <small class="error">Mã chỉ gồm chữ và số.</small> }
+              <small class="muted">Máy chủ kiểm tra mã và tính giảm giá khi tạo đơn.</small>
+            </div>
+          }
+
+          <fieldset>
+            <legend>Phương thức thanh toán</legend>
+            <label><input type="radio" value="cash" formControlName="payment" /> Tiền mặt</label>
+            <label><input type="radio" value="transfer" formControlName="payment" /> Chuyển khoản</label>
+          </fieldset>
+
+          <dl class="sum">
+            <dt>Tiền hàng</dt><dd>{{ subtotal() | number }}đ</dd>
+            @if (delivery()) { <dt>Phí giao</dt><dd>{{ deliveryFee() | number }}đ</dd> }
+            <dt>Tổng cộng</dt><dd class="price">{{ total() | number }}đ</dd>
+          </dl>
+          <p class="muted">Tổng tiền cuối cùng do máy chủ tính lại khi tạo đơn.</p>
+
+          <button type="submit" class="btn" [disabled]="!canSubmit(p)">{{ p.kind === 'service' ? 'Đặt lịch' : 'Đặt đơn' }}</button>
+        </form>
+      }
     </div>
   </article>
+
+  @if (similar().length) {
+    <section class="similar">
+      <h2>Tương tự trong khu</h2>
+      <div class="grid">
+        @for (s of similar(); track s._id) {
+          <app-post-card [post]="s" [saved]="saved.has(s._id)" (toggleSave)="toggleSave($event)" />
+        }
+      </div>
+    </section>
+  }
 } @else {
   <div class="empty">
     <h1>Bài đăng không tồn tại</h1>
-    <p>Bài có thể đã bị xóa hoặc đường dẫn không đúng.</p>
+    @if (error()) { <p>{{ error() }}</p> } @else { <p>Bài có thể đã bị xóa hoặc đường dẫn không đúng.</p> }
     <a routerLink="/search" class="btn">Xem các bài khác</a>
   </div>
 }

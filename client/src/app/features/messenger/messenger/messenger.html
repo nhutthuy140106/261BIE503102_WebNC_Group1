@@ -1,2 +1,36 @@
 <h1>Messenger</h1>
-<p class="muted">Tin nhắn giữa người mua, người bán và người đăng việc. Cần backend để gửi/nhận thật (collection <code>messages</code>).</p>
+@if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
+@if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else {
+  <div class="chat">
+    <ul class="threads">
+      @for (c of conversations(); track c._id) {
+        <li>
+          <button type="button" class="btn ghost" [class.active]="c._id === selectedId()" (click)="select(c)">
+            <span class="who"><app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="36" /><span>{{ c.withName }}</span></span>
+            @if (c.unread) { <span class="badge">{{ c.unread }}</span> }
+            @if (c.context) { <small class="muted">{{ c.context.label }}</small> }
+          </button>
+        </li>
+      } @empty {
+        <li class="muted">Chưa có cuộc trò chuyện nào.</li>
+      }
+    </ul>
+    @if (selected(); as c) {
+      <section class="thread">
+        <h2 class="who"><app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="32" /> {{ c.withName }}</h2>
+        @if (c.context) { <p class="muted">{{ c.context.label }} · nhắn tin không tự đổi trạng thái đơn</p> }
+        <ul class="messages">
+          @for (m of c.messages; track m._id) {
+            <li [class.mine]="m.mine">{{ m.text }} <small class="muted">{{ fmt(m.createdAt) }}</small></li>
+          }
+        </ul>
+        <form (ngSubmit)="send()">
+          <input [formControl]="input" placeholder="Nhập tin nhắn…" maxlength="2000" />
+          <button type="submit" class="btn" [disabled]="input.invalid">Gửi</button>
+        </form>
+      </section>
+    }
+  </div>
+}

@@ -1,0 +1,316 @@
+### Bộ request mẫu (VS Code "REST Client"; cookie phiên tự được giữ giữa các request). Chạy: npm run seed && npm run dev
+### Tài khoản seed (mật khẩu = SEED_PASSWORD trong .env): 0900000001 Ngọc Thủy (người mua) · 0900000002 Bếp Cô Lan · 0900000004 Chị Hoa · 0900000005 Quốc Anh · 0900000099 admin
+@base = http://localhost:3000/api
+@id = dán-id-vào-đây
+
+### Health
+GET {{base}}/health
+
+### ===== Auth =====
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{ "name": "Minh", "phone": "0911111111", "password": "123456" }
+
+###
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "phone": "0900000001", "password": "dán-SEED_PASSWORD-vào-đây" }
+
+###
+GET {{base}}/auth/profile
+
+###
+POST {{base}}/auth/logout
+
+### ===== Địa chỉ =====
+GET {{base}}/me/addresses
+
+###
+POST {{base}}/me/addresses
+Content-Type: application/json
+
+{ "name": "Ngọc Thủy", "phone": "0901234567", "block": "B", "unit": "B-1204", "note": "Gọi trước khi tới", "label": "home" }
+
+###
+PUT {{base}}/me/addresses/{{id}}
+Content-Type: application/json
+
+{ "unit": "B-1205" }
+
+###
+PATCH {{base}}/me/addresses/{{id}}/default
+
+###
+DELETE {{base}}/me/addresses/{{id}}
+
+### ===== Đã lưu =====
+GET {{base}}/me/saved?type=food
+
+###
+PUT {{base}}/me/saved/{{id}}
+
+###
+DELETE {{base}}/me/saved/{{id}}
+
+### ===== Khám phá =====
+GET {{base}}/posts?type=food&area=B&sort=nearest&page=1&limit=10
+
+###
+GET {{base}}/posts?q=trà&minPrice=10000&maxPrice=50000&acceptsXu=true
+
+###
+GET {{base}}/posts/{{id}}
+
+###
+GET {{base}}/jobs?sort=-pay&minPay=50000
+
+###
+GET {{base}}/jobs/{{id}}
+
+###
+GET {{base}}/search?q=cơm
+
+### ===== Đơn đã đặt =====
+POST {{base}}/orders
+Content-Type: application/json
+
+{
+  "postId": "{{id}}",
+  "quantity": 2,
+  "selections": [{ "group": "Món mặn", "choices": ["Sườn rim"] }],
+  "answers": [],
+  "fulfillment": "pickup",
+  "utensils": true,
+  "note": "Ít cay",
+  "voucherCode": "XU10",
+  "payment": "cash"
+}
+
+###
+GET {{base}}/orders?role=placed&state=active
+
+###
+GET {{base}}/orders/{{id}}
+
+###
+POST {{base}}/orders/{{id}}/cancel-request
+Content-Type: application/json
+
+{ "reason": "Đặt nhầm món" }
+
+###
+POST {{base}}/orders/{{id}}/return-request
+Content-Type: application/json
+
+{ "reason": "Hàng không đúng mô tả" }
+
+###
+POST {{base}}/orders/{{id}}/approve-surcharge
+
+### ===== Đề nghị nhận việc =====
+POST {{base}}/jobs/{{id}}/offers
+Content-Type: application/json
+
+{ "intro": "Mình ở cùng block, rảnh sáng mai.", "slots": [] }
+
+###
+GET {{base}}/offers?state=active
+
+###
+GET {{base}}/offers/{{id}}
+
+###
+PATCH {{base}}/offers/{{id}}
+Content-Type: application/json
+
+{ "intro": "Mình rảnh cả buổi sáng." }
+
+###
+POST {{base}}/offers/{{id}}/withdraw
+
+###
+POST {{base}}/offers/{{id}}/start
+
+###
+POST {{base}}/offers/{{id}}/report-done
+Content-Type: application/json
+
+{ "note": "Đã cho ăn và dọn khay", "images": [] }
+
+###
+POST {{base}}/offers/{{id}}/confirm-paid
+
+###
+POST {{base}}/offers/{{id}}/cancel-request
+Content-Type: application/json
+
+{ "reason": "busy" }
+
+### ===== Hỏi đáp =====
+GET {{base}}/jobs/{{id}}/questions
+
+###
+POST {{base}}/jobs/{{id}}/questions
+Content-Type: application/json
+
+{ "text": "Cổng sau có bảo vệ không?" }
+
+### ===== Giỏ nháp (khách chưa đăng nhập vẫn thêm được) =====
+GET {{base}}/cart
+
+###
+POST {{base}}/cart
+Content-Type: application/json
+
+{ "postId": "{{id}}", "quantity": 2, "selections": [{ "group": "Món mặn", "choices": ["Sườn rim"] }] }
+
+###
+DELETE {{base}}/cart/{{id}}
+
+###
+POST {{base}}/cart/checkout
+Content-Type: application/json
+
+{ "fulfillment": "pickup", "payment": "cash", "voucherCode": "XU10" }
+
+### ===== Upload ảnh (multipart; REST Client: dùng file thật) =====
+POST {{base}}/uploads
+Content-Type: multipart/form-data; boundary=----antgo
+
+------antgo
+Content-Disposition: form-data; name="images"; filename="anh.png"
+Content-Type: image/png
+
+< ./anh-mau.png
+------antgo--
+
+### ===== Gợi ý =====
+GET {{base}}/posts/{{id}}/similar?limit=6
+
+###
+GET {{base}}/me/recommendations?limit=8
+
+### ===== Đánh giá =====
+POST {{base}}/reviews
+Content-Type: application/json
+
+{ "targetType": "order", "targetId": "{{id}}", "rating": 5, "comment": "Giao nhanh", "images": [] }
+
+###
+GET {{base}}/reviews?postId={{id}}&sort=newest
+
+### ===== Hội thoại & thông báo =====
+GET {{base}}/conversations
+
+###
+POST {{base}}/conversations
+Content-Type: application/json
+
+{ "withUser": "{{id}}", "context": { "type": "order", "id": "{{id}}" } }
+
+###
+GET {{base}}/conversations/{{id}}/messages
+
+###
+POST {{base}}/conversations/{{id}}/messages
+Content-Type: application/json
+
+{ "text": "Chào cô ạ" }
+
+###
+POST {{base}}/conversations/{{id}}/read
+
+###
+GET {{base}}/notifications?unread=true
+
+###
+GET {{base}}/notifications/unread-count
+
+###
+POST {{base}}/notifications/read
+Content-Type: application/json
+
+{}
+
+### ===== Báo cáo =====
+POST {{base}}/reports
+Content-Type: application/json
+
+{ "targetType": "order", "targetId": "{{id}}", "reason": "quality", "detail": "Món bị nguội khi tới nơi", "images": [] }
+
+###
+GET {{base}}/reports?mine=true
+
+### ===== Admin (đăng nhập 0900000099) =====
+GET {{base}}/admin/stats
+
+###
+GET {{base}}/admin/users?role=enduser&status=active&q=Lan
+
+###
+POST {{base}}/admin/users/{{id}}/lock
+Content-Type: application/json
+
+{ "reason": "Vi phạm quy định cộng đồng" }
+
+###
+POST {{base}}/admin/users/{{id}}/unlock
+
+###
+PATCH {{base}}/admin/users/{{id}}/role
+Content-Type: application/json
+
+{ "role": "admin" }
+
+###
+GET {{base}}/admin/posts?status=hidden
+
+###
+POST {{base}}/admin/posts/{{id}}/hide
+Content-Type: application/json
+
+{ "reason": "Bài có dấu hiệu lừa đảo" }
+
+###
+POST {{base}}/admin/posts/{{id}}/unhide
+
+###
+GET {{base}}/admin/reports?state=open
+
+###
+POST {{base}}/admin/reports/{{id}}/transition
+Content-Type: application/json
+
+{ "to": "reviewing" }
+
+###
+POST {{base}}/admin/reports/{{id}}/transition
+Content-Type: application/json
+
+{ "to": "resolved", "note": "Đã liên hệ người bán hoàn tiền" }
+
+### ===== Dev (tạm, thay phía Bán / Đăng việc; không có ở production) =====
+POST {{base}}/dev/orders/{{id}}/advance
+Content-Type: application/json
+
+{}
+
+###
+POST {{base}}/dev/orders/{{id}}/surcharge
+Content-Type: application/json
+
+{ "amount": 20000, "reason": "Đồ lớn hơn đã chọn" }
+
+###
+POST {{base}}/dev/jobs/{{id}}/offers/{{id}}/choose
+
+###
+POST {{base}}/dev/offers/{{id}}/confirm-done
+
+###
+POST {{base}}/dev/questions/{{id}}/answer
+Content-Type: application/json
+
+{ "text": "Có nhé" }

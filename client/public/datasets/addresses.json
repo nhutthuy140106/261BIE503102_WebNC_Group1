@@ -1,0 +1,21 @@
+[
+  {
+    "_id": "640b187e71d9faa9039f0201",
+    "name": "Ngọc Thủy",
+    "phone": "0901234567",
+    "block": "B",
+    "unit": "B-1204",
+    "note": "Gọi trước khi tới",
+    "label": "home",
+    "isDefault": true
+  },
+  {
+    "_id": "640b187e71d9faa9039f0202",
+    "name": "Cô Lan Anh",
+    "phone": "0912345678",
+    "block": "A",
+    "unit": "A-0305",
+    "label": "family",
+    "isDefault": false
+  }
+]

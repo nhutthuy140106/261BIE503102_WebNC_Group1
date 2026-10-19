@@ -1,0 +1,23 @@
+[
+  {
+    "_id": "640b187e71d9faa9039f0501",
+    "text": "Chị Hoa đã chọn bạn cho việc \"Cho mèo ăn 2 buổi/ngày trong 3 ngày\".",
+    "link": "/orders/640b187e71d9faa9039f00cc",
+    "read": false,
+    "createdAt": "2026-10-15T11:30:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0502",
+    "text": "Bếp Cô Lan đang chuẩn bị đơn AG-O3012.",
+    "link": "/orders/640b187e71d9faa9039f00c9",
+    "read": false,
+    "createdAt": "2026-10-16T10:10:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0503",
+    "text": "Bếp Cô Lan: \"Ok con, cô nhớ rồi.\"",
+    "link": "/messenger",
+    "read": true,
+    "createdAt": "2026-10-16T10:08:00.000Z"
+  }
+]

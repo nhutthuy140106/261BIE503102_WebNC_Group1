@@ -1,9 +1,14 @@
 <h1>Tôi</h1>
 @if (auth.currentUser(); as u) {
-  <dl>
-    <dt>Họ tên</dt><dd>{{ u.fullName }}</dd>
-    <dt>Khu vực</dt><dd>{{ u.block }}</dd>
-    <dt>AntXu</dt><dd>{{ u.xu }}</dd>
-  </dl>
+  <div class="me">
+    <span class="avatar">{{ u.fullName.charAt(0).toUpperCase() }}</span>
+    <dl>
+      <dt>Họ tên</dt><dd>{{ u.fullName }}</dd>
+      <dt>Khu vực</dt><dd>{{ u.block }}</dd>
+      <dt>AntXu</dt><dd>{{ u.xu }}</dd>
+    </dl>
+  </div>
 }
-<p class="muted">Bài đã lưu, sổ địa chỉ và hoạt động sẽ bổ sung tiếp theo mockup <code>profile.html</code>.</p>
+<app-saved-list id="saved" />
+<app-address-book />
+<p class="muted">Bài đã lưu và hoạt động sẽ bổ sung tiếp theo mockup <code>profile.html</code>.</p>

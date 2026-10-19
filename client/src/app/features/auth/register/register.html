@@ -1,20 +1,16 @@
 <section class="box">
   <h1>Đăng ký</h1>
+  <p class="sub">Tạo tài khoản để mua, bán và nhận việc trong khu.</p>
   <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
     <div class="field">
-      <label for="fullName">Họ và tên</label>
-      <input id="fullName" formControlName="fullName" [class.is-invalid]="invalid('fullName')" />
-      @if (invalid('fullName')) { <small class="error">Bạn chưa nhập họ tên.</small> }
+      <label for="name">Họ và tên</label>
+      <input id="name" formControlName="name" [class.is-invalid]="invalid('name')" />
+      @if (invalid('name')) { <small class="error">Bạn chưa nhập họ tên.</small> }
     </div>
     <div class="field">
-      <label for="username">Tên đăng nhập</label>
-      <input id="username" formControlName="username" autocomplete="username" [class.is-invalid]="invalid('username')" />
-      @if (invalid('username')) {
-        <small class="error">
-          @if (form.controls.username.errors?.['badChars']) { Chỉ dùng chữ, số và dấu gạch dưới. }
-          @else { Tối thiểu 4 ký tự. }
-        </small>
-      }
+      <label for="phone">Số điện thoại</label>
+      <input id="phone" formControlName="phone" autocomplete="tel" inputmode="numeric" maxlength="10" [class.is-invalid]="invalid('phone')" />
+      @if (invalid('phone')) { <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small> }
     </div>
     <div class="field">
       <label for="password">Mật khẩu</label>
@@ -33,5 +29,5 @@
     @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
     <button type="submit" class="btn" [disabled]="form.invalid">Tạo tài khoản</button>
   </form>
-  <p class="muted">Đã có tài khoản? <a routerLink="/auth/login"><u>Đăng nhập</u></a></p>
+  <p class="muted alt">Đã có tài khoản? <a routerLink="/auth/login">Đăng nhập</a></p>
 </section>

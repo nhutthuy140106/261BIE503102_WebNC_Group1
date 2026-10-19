@@ -1,0 +1,22 @@
+h1 { font-size: 28px; letter-spacing: -.02em; }
+.tabs { display: flex; gap: 8px; margin: 12px 0 20px; }
+.tabs .btn { border-radius: 999px; padding: 8px 18px; }
+.tabs .active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.dot { background: var(--accent); color: #fff; border-radius: 999px; padding: 0 8px; font-size: 12px; }
+.tabs .active .dot { background: #fff; color: var(--ink); }
+.list { display: grid; gap: 12px; }
+.row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px 20px; align-items: center; padding: 16px 20px; }
+.main { display: grid; gap: 2px; min-width: 0; }
+.main strong { font-size: 16px; }
+.warn { color: var(--accent); font-weight: 600; }
+.status { font-size: 13px; font-weight: 600; background: var(--soft); padding: 4px 12px; border-radius: 999px; white-space: nowrap; }
+.acts { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+.acts:empty { display: none; }
+.acts .btn { padding: 7px 14px; font-size: 13px; }
+.empty { padding: 40px 0; }
+@media (max-width: 700px) {
+  .tabs { flex-wrap: wrap; }
+  .tabs .btn { padding: 8px 14px; flex: 1; justify-content: center; }
+  .row { grid-template-columns: 1fr auto; padding: 14px 16px; }
+  .main { grid-column: 1 / -1; }
+}

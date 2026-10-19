@@ -1,0 +1,11 @@
+[
+  {
+    "_id": "640b187e71d9faa9039f0301",
+    "targetType": "order",
+    "targetId": "640b187e71d9faa9039f00cb",
+    "authorName": "Ngọc Thủy",
+    "rating": 5,
+    "comment": "Giao đúng giờ, món còn nóng.",
+    "createdAt": "2026-10-12T12:00:00.000Z"
+  }
+]

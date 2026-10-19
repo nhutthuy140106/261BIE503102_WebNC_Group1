@@ -1,0 +1,25 @@
+<section>
+  <h2>Bài đã lưu</h2>
+  <div class="filters">
+    @for (f of filters; track f.key) {
+      <button type="button" class="btn ghost" [class.active]="filter() === f.key" (click)="filter.set(f.key)">{{ f.label }}</button>
+    }
+  </div>
+  @if (loading()) {
+    <p class="muted">Đang tải…</p>
+  } @else if (error()) {
+    <div class="notice">Không tải được bài đã lưu: {{ error() }}</div>
+  } @else {
+    <div class="grid">
+      @for (p of items(); track p._id) {
+        @if (p.kind === 'job') {
+          <app-job-card [job]="p" [saved]="true" (toggleSave)="toggle($event)" />
+        } @else {
+          <app-post-card [post]="p" [saved]="true" (toggleSave)="toggle($event)" />
+        }
+      } @empty {
+        <p class="muted" style="grid-column: 1 / -1">Chưa có bài nào ở mục này. Bấm ♡ trên thẻ bài để lưu.</p>
+      }
+    </div>
+  }
+</section>

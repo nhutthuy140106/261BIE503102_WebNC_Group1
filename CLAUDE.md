@@ -19,7 +19,7 @@
 - **Đổi từng thứ một.** Từng đổi 6 thứ một lúc → người dùng thấy xấu hơn và phải khôi phục. Mỗi thay đổi lớn: lưu bản sao trước, sửa, chụp ảnh kiểm tra, báo lại.
 - **Sửa trên một file duy nhất cho mỗi màn hình**, không tạo `home-v6`, `home-v7`… Biến thể đặt trong cùng file (ví dụ `?theme=`).
 - **Không làm kiểu "AI":** tránh font bo tròn, chữ chuyển màu, hình vẽ nguệch ngoạc, emoji làm ảnh, quá nhiều màu nhấn, khuôn hero "nút viên + tiêu đề tô 1 chữ + 3 dấu ✓ + ảnh trong khung".
-- **Không dùng số liệu giả** ("1M+ khách", "vừa nhận 3 đơn", "bán chạy") — đúng quy định user flow.
+- **Dữ liệu mẫu được phép** (đồ án demo): seed `server/` và mock ở `client/` có thể dùng tên, đơn, tin nhắn mô phỏng để minh họa luồng. (Quy tắc cũ "không số liệu giả" đã bỏ theo yêu cầu của Khải, 18/10.)
 - Luôn chụp ảnh kiểm tra bằng Edge headless trước khi báo xong; nói rõ phần nào chưa kiểm chứng được (chuyển động thật).
 - Trả lời bằng tiếng Việt, dễ hiểu, không quá kỹ thuật.
 - **Người dùng khó hình dung qua chữ** → luôn cho xem ảnh chụp trang thật; khi ý tưởng khó giải thích, "làm thử cho xem" rồi hỏi.
@@ -168,7 +168,7 @@ Codex dựng các trang mới nhưng chưa xem được giao diện. Phiên này
 | Chia nội dung theo **ngữ cảnh** (Nổi bật / Gần bạn / Việc mới / Khám phá) | Người dùng chọn; lướt tự nhiên hơn chia theo loại. |
 | **AntXu dùng cho cả hai phía, nhưng đặt đúng chỗ** (tối 14/10, thay quyết định "chỉ người bán" trước đó): người mua thấy số dư trên header, **đổi voucher trong ngăn kéo Xu**, **áp voucher ở bước đặt hàng**; trên thẻ chỉ có nhãn nhỏ "Dùng được Xu"; người bán dùng Xu để quảng bá | Người mua cần Xu để áp voucher (khớp user flow F11). Lần trước ô ưu đãi Xu trên mọi thẻ + ô mời quảng bá làm trang rối, nên chỉ giữ ở header/ngăn kéo/bước đặt hàng. |
 | Giữ nhãn **"QUẢNG BÁ"** trên bài trả phí | Minh bạch, theo user flow F04. |
-| Bỏ thẻ "Bếp Cô Lan vừa nhận 3 đơn" và mọi số liệu giả | User flow cấm dữ liệu giả. |
+| Bỏ thẻ "Bếp Cô Lan vừa nhận 3 đơn" (lịch sử) | Quy tắc cấm số liệu giả đã bỏ 18/10; dữ liệu mẫu được dùng để demo. |
 | Khối mở đầu đổi sang **chữ AntGo uốn cong trên nền trời** (cảm hứng Airtasker) | Khuôn hero 2 cột cũ bị thấy "mùi AI". Nền trời (không phải nền cam) vì kiến cam chìm trên nền cam và để nối liền với landing. |
 | Đổi dáng kiến: **dừng hẳn rồi mới đổi**, hạt bung trước nửa nhịp, hiệu ứng nảy ở lớp riêng | Người dùng nhiều lần phản hồi "khựng"; mờ chồng 2 ảnh lộ "2 con kiến". |
 | Icon dùng **bộ có sẵn (Phosphor)**, không tự vẽ | Icon tự vẽ không đều nét; người dùng muốn dùng bộ sẵn. |

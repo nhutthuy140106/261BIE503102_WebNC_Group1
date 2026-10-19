@@ -1,2 +1,19 @@
 <h1>Thông báo</h1>
-<p class="muted">Thông báo từ đơn hàng, tin nhắn và đề nghị nhận việc sẽ hiện ở đây khi có backend.</p>
+@if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
+@if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else {
+  @if (unread() > 0) {
+    <button type="button" class="btn ghost" (click)="readAll()">Đánh dấu đã đọc tất cả ({{ unread() }})</button>
+  }
+  <ul class="list">
+    @for (n of items(); track n._id) {
+      <li class="card" [class.unread]="!n.read">
+        <button type="button" class="link" (click)="open(n)">{{ n.text }}</button>
+        <small class="muted">{{ fmt(n.createdAt) }}</small>
+      </li>
+    } @empty {
+      <li class="empty">Chưa có thông báo nào.</li>
+    }
+  </ul>
+}

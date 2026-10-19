@@ -12,7 +12,7 @@ npm test -- --no-watch
 npm run build
 ```
 
-Hiện **chưa có backend**: `src/app/core/config/api.config.ts` đặt `USE_MOCK = true`, dữ liệu đọc từ `public/datasets/*.json`. Khi API Express + MongoDB xong: đổi `USE_MOCK = false` (API chạy ở `http://localhost:3000`, `proxy.conf.json` chuyển `/api` sang đó, tránh CORS).
+**Nguồn dữ liệu** do `src/app/core/config/api.config.ts` quyết định: `USE_MOCK = false` (mặc định) gọi API Express qua `proxy.conf.json` (`/api` → `http://localhost:3000`, cần bật `server/` + MongoDB); `USE_MOCK = true` đọc `public/datasets/*.json` và lưu thao tác trong trình duyệt. Có thể bật riêng từng service bằng `MOCK_OVERRIDES`. Dữ liệu API được đổi sang model của FE ở `core/utils/api-mappers.ts`. Hướng dẫn đầy đủ (thứ tự bật, tài khoản mẫu, lỗi thường gặp): xem `README.md` ở thư mục gốc.
 
 ## Cấu trúc `src/app/`
 

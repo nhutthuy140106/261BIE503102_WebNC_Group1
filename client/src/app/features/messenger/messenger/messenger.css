@@ -1,0 +1,23 @@
+h1 { font-size: 28px; letter-spacing: -.02em; }
+.chat { display: grid; grid-template-columns: 300px 1fr; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; min-height: 520px; background: #fff; }
+.threads { border-right: 1px solid var(--border); display: block; }
+.threads li { border-bottom: 1px solid var(--border); }
+.threads button { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2px 8px; width: 100%; text-align: left; padding: 14px 16px; font-weight: 600; border: 0; border-radius: 0; background: transparent; }
+.threads button small { flex-basis: 100%; font-weight: 400; }
+.threads button.active { background: var(--soft); color: var(--ink); }
+.who { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+.thread h2.who { display: flex; }
+.badge { background: var(--accent); color: #fff; border-radius: 999px; padding: 0 8px; font-size: 12px; }
+.threads .muted { padding: 16px; }
+
+.thread { display: flex; flex-direction: column; min-width: 0; }
+.thread h2 { font-size: 17px; margin: 0; padding: 16px 20px 0; }
+.thread > p { padding: 0 20px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.messages { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 16px 20px; overflow-y: auto; max-height: 420px; }
+.messages li { max-width: 70%; padding: 9px 14px; border-radius: 14px 14px 14px 4px; background: #fff; border: 1px solid var(--border); align-self: flex-start; }
+.messages li small { display: block; font-size: 11px; margin-top: 2px; }
+.messages li.mine { align-self: flex-end; background: var(--ink); color: #fff; border-color: var(--ink); border-radius: 14px 14px 4px 14px; }
+.messages li.mine small { color: rgba(255, 255, 255, .6); }
+.thread form { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.thread form input { flex: 1; }
+@media (max-width: 800px) { .chat { grid-template-columns: 1fr; } .threads { border-right: 0; border-bottom: 1px solid var(--border); } }

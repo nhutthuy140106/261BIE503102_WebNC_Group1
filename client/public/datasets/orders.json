@@ -9,7 +9,11 @@
     "status": "preparing",
     "total": 70000,
     "paymentMethod": "cash",
-    "createdAt": "2026-10-16T10:00:00.000Z"
+    "createdAt": "2026-10-16T10:00:00.000Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70",
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=70",
+    "counterpartId": "640b187e71d9faa9039f0065",
+    "category": "food"
   },
   {
     "_id": "640b187e71d9faa9039f00ca",
@@ -21,7 +25,16 @@
     "status": "pending",
     "total": 60000,
     "paymentMethod": "transfer",
-    "createdAt": "2026-10-16T11:00:00.000Z"
+    "createdAt": "2026-10-16T11:00:00.000Z",
+    "surcharge": {
+      "amount": 20000,
+      "reason": "Số đồ giặt nhiều hơn 5kg đã chọn",
+      "state": "pending"
+    },
+    "counterpartAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&crop=faces&q=70",
+    "image": "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=800&q=70",
+    "counterpartId": "640b187e71d9faa9039f006c",
+    "category": "service"
   },
   {
     "_id": "640b187e71d9faa9039f00cb",
@@ -33,7 +46,10 @@
     "status": "done",
     "total": 45000,
     "paymentMethod": "cash",
-    "createdAt": "2026-10-10T07:00:00.000Z"
+    "createdAt": "2026-10-10T07:00:00.000Z",
+    "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&q=70",
+    "counterpartId": "640b187e71d9faa9039f0066",
+    "category": "food"
   },
   {
     "_id": "640b187e71d9faa9039f00cc",
@@ -46,6 +62,9 @@
     "total": 150000,
     "paymentMethod": "cash",
     "note": "Nhận chìa khóa ở bảo vệ.",
-    "createdAt": "2026-10-15T09:00:00.000Z"
+    "createdAt": "2026-10-15T09:00:00.000Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces&q=70",
+    "category": "job",
+    "counterpartId": "640b187e71d9faa9039f006e"
   }
 ]

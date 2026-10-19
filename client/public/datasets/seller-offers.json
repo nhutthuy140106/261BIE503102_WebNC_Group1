@@ -1,0 +1,49 @@
+[
+  {
+    "_id": "640b187e71d9faa9039f0401",
+    "code": "AG-J2101",
+    "jobId": "640b187e71d9faa9039f0102",
+    "jobTitle": "Tìm người tưới cây ban công 3 ngày",
+    "posterName": "Gian hàng của tôi",
+    "workerName": "Minh Khoa",
+    "pay": 90000,
+    "block": "Block B",
+    "intro": "Mình ở Block B, sáng nào cũng rảnh, quen chăm cây.",
+    "slots": [
+      "Sáng"
+    ],
+    "state": "offered",
+    "history": [
+      {
+        "state": "offered",
+        "at": "2026-10-17T10:00:00.000Z"
+      }
+    ],
+    "workerAvatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=160&h=160&fit=crop&crop=faces&q=70",
+    "posterAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=faces&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0402",
+    "code": "AG-J2102",
+    "jobId": "640b187e71d9faa9039f0102",
+    "jobTitle": "Tìm người tưới cây ban công 3 ngày",
+    "posterName": "Gian hàng của tôi",
+    "workerName": "Phương",
+    "pay": 90000,
+    "block": "Block A",
+    "intro": "Mình nhận được cả 3 ngày, có thể tới sớm.",
+    "slots": [
+      "Sáng",
+      "Chiều"
+    ],
+    "state": "offered",
+    "history": [
+      {
+        "state": "offered",
+        "at": "2026-10-17T11:30:00.000Z"
+      }
+    ],
+    "workerAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&h=160&fit=crop&crop=faces&q=70",
+    "posterAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=faces&q=70"
+  }
+]

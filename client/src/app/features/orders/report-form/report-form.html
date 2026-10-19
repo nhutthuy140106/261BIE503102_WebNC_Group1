@@ -1,0 +1,29 @@
+<a [routerLink]="['/orders', orderId()]" class="btn ghost">← Về đơn</a>
+<h1>Báo cáo vấn đề</h1>
+<p class="muted">{{ title() }}</p>
+
+@if (sent()) {
+  <div class="notice">Đã gửi báo cáo. Đội hỗ trợ sẽ xem xét — bạn có thể theo dõi trong mục Tôi.</div>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label for="reason">Vấn đề bạn gặp</label>
+      <select id="reason" formControlName="reason">
+        <option value="">— Chọn —</option>
+        @for (r of reasons; track r[0]) { <option [value]="r[0]">{{ r[1] }}</option> }
+      </select>
+      @if (form.controls.reason.invalid && form.controls.reason.touched) { <small class="error">Hãy chọn vấn đề.</small> }
+    </div>
+    <div class="field">
+      <label for="detail">Mô tả</label>
+      <textarea id="detail" rows="5" formControlName="detail"></textarea>
+      @if (form.controls.detail.errors?.['server']; as msg) {
+        <small class="error">{{ msg }}</small>
+      } @else if (form.controls.detail.invalid && form.controls.detail.touched) {
+        <small class="error">Mô tả ít nhất 10 ký tự.</small>
+      }
+    </div>
+    @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
+    <button type="submit" class="btn" [disabled]="form.invalid">Gửi báo cáo</button>
+  </form>
+}
