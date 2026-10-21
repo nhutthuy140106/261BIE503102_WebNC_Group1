@@ -3,8 +3,8 @@
 .bar { display: flex; align-items: center; gap: 20px; height: 64px; }
 .bar > * { flex: none; white-space: nowrap; }
 .left { display: flex; align-items: center; gap: 28px; }
-.logo { font-weight: 700; font-size: 21px; letter-spacing: -.02em; }
-.logo span { color: var(--accent); }
+.logo { display: flex; align-items: center; }
+.logo img { display: block; height: 30px; width: auto; }
 nav { display: flex; gap: 4px; }
 nav a { display: inline-flex; align-items: center; gap: 7px; height: 64px; padding: 0 10px; font-weight: 500; color: var(--smoke); position: relative; }
 nav a:hover { color: var(--ink); }

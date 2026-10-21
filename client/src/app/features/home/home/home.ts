@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Post, PostKind } from '../../../core/models/post';
 import { PostService } from '../../../core/services/post';
@@ -14,7 +14,7 @@ type FeedSort = 'newest' | 'priceAsc' | 'priceDesc';
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home implements OnInit {
+export class Home implements OnInit, OnDestroy {
   private readonly postService = inject(PostService);
   private readonly router = inject(Router);
   protected readonly saved = inject(SavedService);
@@ -27,9 +27,23 @@ export class Home implements OnInit {
 
   protected readonly popular = ['cơm trưa', 'trà sữa', 'giặt sấy', 'dọn nhà', 'sửa điện nước', 'mua hộ', 'trông thú cưng'];
 
-  protected readonly featured = computed(() => this.posts().filter((p) => p.promoted));
-  protected readonly nearby = computed(() => this.posts().filter((p) => p.kind !== 'job' && !p.promoted));
-  protected readonly jobs = computed(() => this.posts().filter((p) => p.kind === 'job'));
+  /**
+   * Các khối trên trang chủ chọn bài theo thứ tự Nổi bật → Gợi ý → Gần bạn → Việc mới → Khám phá,
+   * mỗi khối bỏ những bài khối trước đã hiện, nên một bài chỉ xuất hiện một lần.
+   */
+  protected readonly featured = computed(() => this.posts().filter((p) => p.promoted).slice(0, 4));
+  protected readonly forYouShown = computed(() => {
+    const taken = new Set(this.featured().map((p) => p._id));
+    return this.forYou().filter((p) => !taken.has(p._id)).slice(0, 4);
+  });
+  protected readonly nearby = computed(() => {
+    const taken = new Set([...this.featured(), ...this.forYouShown()].map((p) => p._id));
+    return this.posts().filter((p) => p.kind !== 'job' && !p.promoted && !taken.has(p._id)).slice(0, 4);
+  });
+  protected readonly jobs = computed(() => {
+    const taken = new Set([...this.featured(), ...this.forYouShown()].map((p) => p._id));
+    return this.posts().filter((p) => p.kind === 'job' && !taken.has(p._id)).slice(0, 4);
+  });
 
   /** Khối Khám phá: lọc theo nhóm + sắp xếp, bài ở các khối trên không lặp lại. */
   protected readonly feedFilters: { key: FeedFilter; label: string }[] = [
@@ -47,17 +61,43 @@ export class Home implements OnInit {
   protected readonly feedFilter = signal<FeedFilter>('all');
   protected readonly feedSort = signal<FeedSort>('newest');
   protected readonly feed = computed(() => {
-    const shown = new Set([...this.featured(), ...this.nearby().slice(0, 4), ...this.jobs().slice(0, 4)].map((p) => p._id));
+    const shown = new Set([...this.featured(), ...this.forYouShown(), ...this.nearby(), ...this.jobs()].map((p) => p._id));
     const f = this.feedFilter();
-    const list = this.posts().filter((p) => (f === 'all' || p.kind === f) && !shown.has(p._id));
-    const pool = list.length ? list : this.posts().filter((p) => f === 'all' || p.kind === f);
+    // hết bài chưa hiện thì để trống (có thông báo), không lấy lại bài đã hiện ở trên
+    const pool = this.posts().filter((p) => (f === 'all' || p.kind === f) && !shown.has(p._id));
     const by = this.feedSort();
     return [...pool].sort((a, b) =>
       by === 'priceAsc' ? a.price - b.price : by === 'priceDesc' ? b.price - a.price : b.createdAt.localeCompare(a.createdAt),
     );
   });
 
+  /** Kiến người nhện chào hàng xóm: các câu đổi dần, bấm vào kiến để nghe câu khác (giống kiến ở trang giới thiệu). */
+  protected readonly greeting = signal('');
+  protected readonly greetingShown = signal(false);
+  private readonly chat = ['Chào <i>hàng xóm</i>!', 'Cần gì <i>cứ gọi</i>!', 'Có <i>mình</i> đây!', 'Ghé chơi <i>nha</i>!'];
+  private chatIndex = 0;
+  private timers: ReturnType<typeof setTimeout>[] = [];
+
+  /** Nói một câu rồi tự ẩn sau vài giây. */
+  protected say(html: string, ms = 2600): void {
+    this.greeting.set(html);
+    this.greetingShown.set(true);
+    this.timers.push(setTimeout(() => this.greetingShown.set(false), ms));
+  }
+
+  protected nextGreeting(): void {
+    this.say(this.chat[this.chatIndex++ % this.chat.length]);
+  }
+
+  ngOnDestroy(): void {
+    this.timers.forEach(clearTimeout);
+  }
+
   ngOnInit(): void {
+    // kiến thả xuống xong (~2,6 giây) mới chào, rồi cứ 10 giây nói thêm một câu
+    this.timers.push(setTimeout(() => this.nextGreeting(), 2800));
+    const loop = setInterval(() => !document.hidden && this.nextGreeting(), 10000);
+    this.timers.push(loop as unknown as ReturnType<typeof setTimeout>);
     // Gợi ý theo bài đã lưu/đã đặt; chưa có dữ liệu thì khối tự ẩn
     this.recommend.forYou().subscribe({ next: (l) => this.forYou.set(l), error: () => this.forYou.set([]) });
     this.postService.getPosts().subscribe({

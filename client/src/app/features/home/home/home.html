@@ -1,18 +1,24 @@
 <section class="hero">
   <div class="shot">
     <div class="grain"></div>
+    <img class="cloud cl1" src="assets/cloud.png" alt="" />
+    <img class="cloud cl2" src="assets/cloud.png" alt="" />
+    <img class="cloud sm s1" src="assets/cloud.png" alt="" />
+    <img class="cloud sm s2" src="assets/cloud.png" alt="" />
+    <img class="cloud sm s3" src="assets/cloud.png" alt="" />
+    <img class="cloud sm s4" src="assets/cloud.png" alt="" />
     <svg class="arc" viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid slice" aria-label="AntGo">
       <defs><path id="arcPath" d="M60,410 Q560,250 1060,410" /></defs>
       <text text-anchor="middle"><textPath href="#arcPath" startOffset="50%">AntGo</textPath></text>
     </svg>
-    <img class="ant" src="assets/clean/ride_wave.png" alt="Linh vật AntGo" />
+    <div class="hang" (click)="nextGreeting()" title="Bấm vào mình nè!"><img src="assets/clean/spider.png" alt="Linh vật AntGo đu tơ" /></div>
+    <div class="bubble" [class.show]="greetingShown()" [innerHTML]="greeting()"></div>
     <div class="heroText">
-      <p>Mua bán, đặt dịch vụ, nhận việc vặt với AntGo.</p>
+      <p>Mua bán, đặt dịch vụ, nhận việc vặt — ngay trong khu bạn sống.</p>
       <div class="ctas">
         <button type="button" class="c1" (click)="s.scrollIntoView({ behavior: 'smooth' })">
-          Tìm quanh khu <svg class="i"><use href="#right" /></svg>
+          Khám phá ngay <svg class="i"><use href="#right" /></svg>
         </button>
-        <button type="button" class="c2" (click)="goSearch('job')">Tìm việc gần nhà</button>
       </div>
       <div class="trust">
         <span><svg class="i"><use href="#bolt" /></svg>Nhanh chóng</span>
@@ -56,11 +62,11 @@
     </div>
   </section>
 
-  @if (forYou().length) {
+  @if (forYouShown().length) {
     <section class="sec">
       <div class="sh"><h2>Gợi ý cho bạn</h2><p>Dựa trên bài bạn đã lưu và đã đặt</p></div>
       <div class="grid">
-        @for (p of forYou(); track p._id) {
+        @for (p of forYouShown(); track p._id) {
           <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
         }
       </div>
@@ -133,7 +139,7 @@
           <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
         }
       } @empty {
-        <p class="muted">Chưa có bài ở nhóm này.</p>
+        <p class="muted">Không còn bài nào khác ở nhóm này.</p>
       }
     </div>
   </section>
