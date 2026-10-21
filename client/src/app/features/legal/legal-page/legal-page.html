@@ -1,0 +1,12 @@
+<article class="legal">
+  <h1>{{ doc.title }}</h1>
+  <p class="meta">Phiên bản {{ version }}</p>
+  <p class="draft" role="note">Bản nháp: nội dung này chưa được luật sư rà soát và sẽ được cập nhật trước khi AntGo hoạt động chính thức.</p>
+  <p class="intro">{{ doc.intro }}</p>
+  @for (s of doc.sections; track s.heading) {
+    <section>
+      <h2>{{ s.heading }}</h2>
+      @for (p of s.body; track p) { <p>{{ p }}</p> }
+    </section>
+  }
+</article>

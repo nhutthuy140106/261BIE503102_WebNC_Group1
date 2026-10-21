@@ -1,0 +1,18 @@
+:host { position: relative; display: block; }
+.trigger { width: 100%; height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 14px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font: 500 15px 'Mona Sans', sans-serif; color: var(--ink); text-align: left; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.trigger:hover { border-color: #e2cfc6; }
+.trigger:focus-visible, .trigger.open { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--soft); }
+.trigger.invalid { border-color: #c2451a; }
+.trigger.empty .text { color: var(--fog); }
+.trigger:disabled { opacity: .5; cursor: not-allowed; }
+.chev { width: 14px; height: 14px; flex: none; fill: var(--smoke); transition: transform .2s; }
+.trigger.open .chev { transform: rotate(180deg); }
+
+.menu { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 6px); max-height: 248px; overflow-y: auto; margin: 0; padding: 6px; list-style: none;
+  border: 1px solid var(--border); border-radius: 14px; background: #fff; box-shadow: 0 16px 40px -12px rgba(34, 48, 74, .28); animation: pop .14s ease-out; }
+.menu li { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 42px; padding: 0 12px; border-radius: 9px; font-size: 14.5px; cursor: pointer; }
+.menu li.act { background: var(--soft); }
+.menu li.sel { font-weight: 700; color: var(--accent); }
+.menu li b { font-size: 13px; }
+@keyframes pop { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .menu { animation: none; } .chev { transition: none; } }

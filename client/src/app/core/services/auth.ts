@@ -60,7 +60,8 @@ export class AuthService {
     );
   }
 
-  register(body: { phone: string; name: string; password: string }): Observable<void> {
+  /** areaId + building + unit (khu, tòa, phòng) dùng làm địa chỉ mặc định — server chưa nhận thì bỏ qua. */
+  register(body: { phone: string; name: string; password: string; areaId?: string; building?: string; unit?: string; termsVersion?: string; marketing?: boolean }): Observable<void> {
     if (useMock('auth')) return of(void 0);
     return this.http.post<void>(`${API_BASE}/auth/register`, body, { withCredentials: true }).pipe(catchError(toAppError));
   }

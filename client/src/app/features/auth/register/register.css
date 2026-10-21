@@ -1,8 +1,60 @@
-.box { max-width: 420px; margin: 40px auto 56px; padding: 32px; border: 1px solid var(--border); border-radius: 20px; background: #fff; box-shadow: 0 12px 40px rgba(34, 48, 74, .06); }
-h1 { font-size: 28px; letter-spacing: -.02em; margin-bottom: 4px; }
-.sub { color: var(--smoke); margin-bottom: 24px; }
-.field input { width: 100%; padding: 12px 14px; }
-form .btn { width: 100%; justify-content: center; padding: 13px; font-size: 15px; margin-top: 4px; }
-.error[role='alert'] { background: #fdecea; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; }
-.alt { margin-top: 20px; text-align: center; }
-.alt a { color: var(--accent); font-weight: 600; }
+/* Riêng cho đăng ký 3 bước (kiểu form chung ở ../auth-form.css) */
+/* thanh bước: 3 chấm tròn nối bằng đường kẻ; bước đã qua tô cam và hiện dấu ✓ */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); width: min(100%, 460px); margin: 0 auto 26px; padding: 0; list-style: none; }
+.steps li { position: relative; display: grid; justify-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--fog); }
+.steps li::before { content: ''; position: absolute; top: 14px; right: 50%; width: 100%; height: 2px; background: var(--border); }
+.steps li:first-child::before { display: none; }
+.steps li.on::before { background: var(--accent); }
+.dot { position: relative; z-index: 1; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border); background: #fff; font-size: 13px; font-weight: 700; color: var(--fog); }
+.steps li.on .dot { border-color: var(--accent); color: var(--accent); }
+.steps li.now .dot { background: var(--accent); color: #fff; box-shadow: 0 0 0 4px var(--accent-soft); }
+.steps li.done .dot { background: var(--accent); color: #fff; }
+.steps li.now .lbl { color: var(--ink); }
+.steps li.done .lbl { color: var(--smoke); }
+
+/* tiêu đề + mô tả mỗi bước căn giữa */
+h1, .why, label[for='otp'] { text-align: center; }
+
+.tx.otp { height: 56px; text-align: center; font: 700 24px 'Mona Sans', sans-serif; letter-spacing: .5em; text-indent: .5em; }
+.resend { display: flex; justify-content: space-between; margin-top: 12px; font-size: 13px; color: var(--smoke); }
+.lnk { border: 0; background: none; padding: 0; font: 600 13px 'Mona Sans', sans-serif; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.lnk.plain { text-decoration: none; }
+.back-step { display: block; margin: 14px auto 0; color: var(--smoke); text-decoration: none; }
+.demo { margin: 14px 0 0; padding: 9px 12px; border-radius: 10px; background: var(--soft); font-size: 12px; color: var(--smoke); line-height: 1.5; }
+.fine { margin: 10px 0 0; font-size: 12px; color: var(--fog); line-height: 1.5; }
+.opt { font-weight: 400; color: var(--fog); }
+
+/* bước 3: chia nhóm, mỗi nhóm là các hàng ô nhập thẳng cột */
+.grp { margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--fog); }
+.grp:first-of-type { margin-top: 24px; padding-top: 0; border-top: 0; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+.row.three { grid-template-columns: repeat(3, 1fr); gap: 0 14px; }
+.cell.full { grid-column: 1 / -1; }
+@media (max-width: 640px) { .row, .row.three { grid-template-columns: 1fr; } }
+.cell label { margin-top: 14px; }
+
+/* độ mạnh mật khẩu: 3 vạch + nhãn + 4 điều kiện tick */
+.meter { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 12px; }
+.meter i { height: 5px; border-radius: 3px; background: var(--border); }
+.meter[data-level='1'] i:nth-child(-n + 1) { background: #c2451a; }
+.meter[data-level='2'] i:nth-child(-n + 2) { background: #e0a021; }
+.meter[data-level='3'] i { background: #2e9e5e; }
+.meter-label { margin: 6px 0 0; font-size: 12.5px; color: var(--smoke); }
+.meter-label[data-level='1'] b { color: #c2451a; }
+.meter-label[data-level='2'] b { color: #b9801a; }
+.meter-label[data-level='3'] b { color: #2e7d4f; }
+.rules { display: grid; grid-template-columns: repeat(4, auto); justify-content: space-between; gap: 4px 10px; margin: 8px 0 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--fog); }
+.rules li::before { content: '○ '; }
+.rules li.ok { color: #2e7d4f; }
+.rules li.ok::before { content: '✓ '; font-weight: 700; }
+@media (max-width: 640px) { .rules { grid-template-columns: 1fr 1fr; } }
+
+/* bước 1–2: thẻ vừa khít nội dung, form chiếm trọn bề ngang thẻ */
+.narrow { width: 100%; display: block; }
+.terms { text-align: left; display: grid; gap: 10px; margin: 22px 0 4px; }
+.check { display: flex; align-items: flex-start; gap: 10px; margin: 0; font-size: 13px; font-weight: 400; line-height: 1.55; color: var(--smoke); cursor: pointer; }
+.check input { margin-top: 3px; flex: none; accent-color: var(--accent); }
+.check a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.check em { color: var(--fog); font-style: normal; }
+.go.narrow { display: block; width: min(100%, 380px); margin-left: auto; margin-right: auto; }
+.check.all { margin-top: 2px; color: var(--ink); }

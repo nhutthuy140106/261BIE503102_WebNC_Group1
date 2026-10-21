@@ -8,7 +8,7 @@ import { phoneValidator } from '../../../core/utils/validators';
   selector: 'app-login',
   standalone: false,
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrl: '../auth-form.css',
 })
 export class Login implements OnInit {
   private readonly auth = inject(AuthService);

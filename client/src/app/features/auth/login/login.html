@@ -1,28 +1,26 @@
-<section class="box">
+<app-auth-shell>
   <h1>Đăng nhập</h1>
-  <p class="sub">Chào mừng quay lại AntGo.</p>
+  <p class="why">Chào mừng quay lại AntGo.</p>
   <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-    <div class="field">
-      <label for="phone">Số điện thoại</label>
-      <input id="phone" formControlName="phone" autocomplete="tel" inputmode="numeric" maxlength="10"
-             [class.is-invalid]="form.controls.phone.invalid && form.controls.phone.touched" />
-      @if (form.controls.phone.invalid && form.controls.phone.touched) {
-        <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small>
-      }
-    </div>
-    <div class="field">
-      <label for="password">Mật khẩu</label>
-      <input id="password" type="password" formControlName="password" autocomplete="current-password"
-             [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched" />
-      @if (form.controls.password.invalid && form.controls.password.touched) {
-        <small class="error">Mật khẩu tối thiểu 6 ký tự.</small>
-      }
-    </div>
-    <label class="remember"><input type="checkbox" formControlName="rememberMe" /> Nhớ số điện thoại</label>
+    <label for="phone">Số điện thoại</label>
+    <input id="phone" class="tx" formControlName="phone" autocomplete="tel" inputmode="numeric" maxlength="10"
+           [class.is-invalid]="form.controls.phone.invalid && form.controls.phone.touched" />
+    @if (form.controls.phone.invalid && form.controls.phone.touched) {
+      <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small>
+    }
+
+    <label for="password">Mật khẩu</label>
+    <app-password-input inputId="password" autocomplete="current-password" formControlName="password"
+                        [invalid]="form.controls.password.invalid && form.controls.password.touched" />
+    @if (form.controls.password.invalid && form.controls.password.touched) {
+      <small class="error">Mật khẩu tối thiểu 6 ký tự.</small>
+    }
+
+    <label class="remember"><input type="checkbox" formControlName="rememberMe" /> Ghi nhớ đăng nhập</label>
 
     @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
 
-    <button type="submit" class="btn" [disabled]="form.invalid || submitting()">Đăng nhập</button>
+    <button type="submit" class="go" [disabled]="form.invalid || submitting()">Đăng nhập</button>
   </form>
-  <p class="muted alt">Chưa có tài khoản? <a routerLink="/auth/register">Đăng ký</a></p>
-</section>
+  <p class="alt" foot>Chưa có tài khoản? <a routerLink="/auth/register">Đăng ký</a></p>
+</app-auth-shell>
