@@ -78,7 +78,7 @@ export function matches(p: Post, f: PostFilter): boolean {
   if (f.max != null && p.price > f.max) return false;
   if (f.q) {
     const q = stripAccents(f.q);
-    if (!stripAccents(p.title).includes(q) && !stripAccents(p.description).includes(q)) {
+    if (!stripAccents(`${p.title} ${p.description} ${p.category ?? ''} ${p.block}`).includes(q)) {
       return false;
     }
   }

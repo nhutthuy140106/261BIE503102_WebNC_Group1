@@ -1,9 +1,31 @@
-h1 { font-size: 28px; letter-spacing: -.02em; }
-h2 { font-size: 22px; letter-spacing: -.015em; margin: 40px 0 16px; }
-.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0 20px; }
-.filters .btn { border-radius: 999px; padding: 8px 16px; }
-.filters .active { background: var(--ink); color: #fff; border-color: var(--ink); }
-.price-filter { display: flex; gap: 6px; align-items: center; margin-left: auto; }
-.price-filter input { width: 96px; padding: 8px 10px; }
-.price-filter .btn { border-radius: 10px; padding: 8px 14px; }
-.notice { margin-bottom: 16px; }
+/* Kết quả tìm kiếm — bê từ design/mockups/search.html */
+.tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--border); margin-top: 6px; overflow-x: auto; overflow-y: hidden; }
+.tabs button { padding: 0 0 13px; white-space: nowrap; color: var(--smoke); font-weight: 600; position: relative; }
+.tabs button.on { color: var(--ink); }
+.tabs button.on::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--ink); }
+.tabs small { font-size: 11px; color: var(--fog); margin-left: 4px; }
+.results { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 38px; padding-top: 24px; }
+.filters { align-self: start; position: sticky; top: 90px; }
+.filters h2 { font-size: 16px; margin: 0 0 14px; }
+.filters label { font-weight: 600; display: block; margin: 17px 0 7px; font-size: 13px; }
+.areabtn { border: 1px solid var(--border); background: #fff; border-radius: 10px; padding: 9px 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
+.areabtn:hover { background: var(--soft); }
+.range { display: flex; align-items: center; gap: 6px; }
+.range input { width: 100%; min-width: 0; }
+.range span { color: var(--fog); }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: #fff; font-size: 13px; font-weight: 600; color: var(--ink); }
+.chip:hover { border-color: var(--ink); }
+.chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.chip img { width: 18px; height: 18px; }
+.reset { background: none; text-decoration: underline; color: var(--smoke); padding: 14px 0; }
+.result-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+.result-top h2 { font-size: 17px; margin: 0; }
+.result-top select { min-width: 160px; border-radius: 999px; padding: 9px 14px; font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 18px; }
+.near-title { font-size: 16px; margin: 35px 0 13px; padding-top: 20px; border-top: 1px solid var(--border); }
+.near-title.first { margin-top: 0; padding-top: 0; border-top: 0; }
+.near-title .none { display: flex; align-items: center; gap: 8px; margin-bottom: 22px; padding: 14px 16px; border-radius: 12px; background: var(--soft); font-size: 14px; font-weight: 500; color: var(--smoke); }
+.near-title .none svg { width: 16px; height: 16px; }
+.empty .btn { background: #fff; color: var(--ink); border: 1px solid var(--border); }
+@media (max-width: 950px) { .results { grid-template-columns: 180px 1fr; gap: 22px; } .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 650px) { .results { grid-template-columns: 1fr; } .filters { position: static; } .card-grid { gap: 18px 12px; } }

@@ -1,0 +1,30 @@
+/* Thẻ kết quả tìm kiếm — bê từ design/mockups/search.html (.result-card) */
+.result-card { position: relative; min-width: 0; }
+.result-card > a { display: block; }
+.photo { height: 175px; border-radius: 10px; overflow: hidden; background: var(--soft); }
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.jobphoto { height: 175px; border-radius: 10px; background: var(--soft); display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; padding: 14px 16px; }
+.jc-top { padding-right: 34px; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.jc-top span { min-width: 0; font-size: 11.5px; color: var(--smoke); line-height: 1.25; }
+.jc-top span b { display: block; font-size: 13px; color: var(--ink); }
+.jobphoto p { margin: 0; font-size: 14px; line-height: 1.45; color: #3c4660; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.jc-foot { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.jc-foot b { font-size: 21px; letter-spacing: -.02em; }
+.jc-foot small { font-size: 12px; font-weight: 500; color: var(--smoke); }
+.due { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px; background: #fff; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+.due svg { width: 13px; height: 13px; color: var(--accent); }
+.kind { font-size: 12px; color: var(--smoke); display: block; margin-top: 10px; }
+h3 { font-size: 15px; line-height: 1.35; margin: 5px 0; font-weight: 600; min-height: 40px; }
+.price { font-weight: 700; }
+.price small { font-weight: 400; color: var(--smoke); }
+.area { color: var(--smoke); font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+.area svg { width: 13px; height: 13px; }
+.save { position: absolute; right: 9px; top: 9px; background: #fff; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); }
+.save.on { color: var(--accent); }
+.save svg { width: 16px; height: 16px; }
+.ad { position: absolute; left: 9px; top: 9px; background: rgba(34, 48, 74, .88); color: #fff; padding: 3px 7px; border-radius: 5px; font-size: 10px; font-weight: 700; }
+.jst { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12px; font-weight: 600; color: #2e7d4f; }
+.jst::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #3baa6a; }
+.jst.closed { color: var(--smoke); }
+.jst.closed::before { background: var(--fog); }
+@media (max-width: 650px) { .photo, .jobphoto { height: 130px; } h3 { font-size: 14px; } }

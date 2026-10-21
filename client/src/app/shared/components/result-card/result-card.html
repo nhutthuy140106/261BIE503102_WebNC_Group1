@@ -1,0 +1,36 @@
+<article class="result-card">
+  <a [routerLink]="link">
+    @if (isJob) {
+      <div class="jobphoto">
+        <div class="jc-top">
+          <app-avatar [src]="post.sellerAvatar" [name]="post.sellerName" [size]="30" />
+          <span><b>{{ post.sellerName || 'Hàng xóm' }}</b>{{ post.createdAt | ago }}</span>
+        </div>
+        @if (post.description) { <p>{{ post.description }}</p> }
+        <div class="jc-foot">
+          <b>{{ post.price | vnd }}@if (post.priceUnit) { <small> / {{ post.priceUnit }}</small> }</b>
+          @if (post.job?.due) { <span class="due"><svg class="i"><use href="#clock" /></svg>{{ post.job?.due }}</span> }
+        </div>
+      </div>
+    } @else {
+      <div class="photo">
+        @if (post.images.length) { <img [src]="post.images[0]" alt="" loading="lazy" /> }
+      </div>
+    }
+    <span class="kind">{{ kindText }}</span>
+    <h3>{{ post.title }}</h3>
+    @if (!isJob) {
+      <div class="price">{{ post.price | vnd }} @if (post.priceUnit) { <small>/ {{ post.priceUnit }}</small> }</div>
+    }
+    <div class="area"><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</div>
+    @if (isJob && post.job) {
+      <div class="jst" [class.closed]="post.job.status === 'taken'">
+        @if (post.job.status === 'taken') { Đã có người nhận } @else { Đang mở · {{ post.job.offers ? post.job.offers + ' đề nghị' : 'chưa có đề nghị' }} }
+      </div>
+    }
+  </a>
+  @if (post.promoted) { <span class="ad">QUẢNG BÁ</span> }
+  <button type="button" class="save" [class.on]="saved" (click)="onSave($event)" [attr.aria-label]="saved ? 'Bỏ lưu' : 'Lưu bài'">
+    <svg class="i"><use [attr.href]="saved ? '#heartFill' : '#heart'" /></svg>
+  </button>
+</article>
