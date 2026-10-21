@@ -28,9 +28,9 @@
         @if (invalid(otp)) { <small class="error">Mã gồm 6 chữ số.</small> }
         @if (error()) { <small class="error" role="alert">{{ error() }}</small> }
         <button type="submit" class="go" [disabled]="otp.invalid">Xác nhận</button>
-        <p class="demo">Bản mẫu: chưa gửi SMS thật, nhập 6 số bất kỳ.</p>
+        <p class="demo">Bản mẫu: chưa gửi SMS thật, bạn nhập 6 số bất kỳ để tiếp tục.</p>
         <div class="resend">
-          <button type="button" class="lnk plain" (click)="back()">← Quay lại</button>
+          <button type="button" class="lnk plain" (click)="back()">Quay lại</button>
           @if (countdown() > 0) {
             <span>Mã hết hạn sau {{ countdown() }} giây</span>
           } @else {
@@ -121,7 +121,7 @@
   }
 
   @if (step() === 3) {
-    <button type="button" class="lnk back-step" (click)="back()">← Quay lại bước trước</button>
+    <button type="button" class="lnk back-step" (click)="back()">Quay lại bước trước</button>
   }
   <p class="alt" foot>Đã có tài khoản? <a routerLink="/auth/login">Đăng nhập</a></p>
 </app-auth-shell>

@@ -42,7 +42,7 @@ a { color: inherit; text-decoration: none; }
 .nav img { height: 34px; display: block; }
 .nav .links { display: flex; gap: 10px; font-weight: 600; font-size: 14.5px; }
 /* nút kính mờ cùng kiểu với nhãn "Block A – D" */
-.nav .links a { padding: 9px 16px; border-radius: 8px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35); backdrop-filter: blur(6px); transition: background .2s, transform .2s; }
+.nav .links a { padding: 9px 20px; border-radius: 999px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35); backdrop-filter: blur(6px); transition: background .2s, transform .2s; }
 .nav .links a:hover { background: rgba(255,255,255,.32); transform: translateY(-1px); }
 
 .hc { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 20px; will-change: transform, opacity; }
@@ -51,7 +51,7 @@ a { color: inherit; text-decoration: none; }
 .hc > :nth-child(2) { transition-delay: .12s; }
 .hc > :nth-child(3) { transition-delay: .24s; }
 .hc > :nth-child(4) { transition-delay: .36s; }
-.chip { padding: 7px 12px; border-radius: 8px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35); backdrop-filter: blur(6px); }
+.chip { padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35); backdrop-filter: blur(6px); }
 h1 { margin: 22px 0 0; font: 700 clamp(46px, 7.2vw, 96px)/1.02 'Bricolage Grotesque', sans-serif; letter-spacing: -.035em; text-shadow: 0 2px 30px rgba(150,70,60,.18); }
 /* ô kiến: kiến ló đầu trong khung, bập bềnh nhẹ, rê chuột thì nghiêng + nảy */
 h1 .ico { position: relative; display: inline-block; width: 1.2em; height: .95em; vertical-align: -.1em; margin: 0 .04em; }

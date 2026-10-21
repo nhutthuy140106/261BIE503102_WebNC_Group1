@@ -9,7 +9,6 @@
 .logo img { height: 46px; display: block; }
 .back { grid-column: 3; justify-self: end; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 999px; background: rgba(255,255,255,.72); backdrop-filter: blur(8px); font-weight: 600; color: var(--ink); }
 .back:hover { background: #fff; }
-.back svg { width: 16px; height: 16px; transform: rotate(180deg); }
 
 .stage { min-height: 100vh; display: flex; align-items: center; justify-content: flex-start; padding: 96px 9vw 72px; box-sizing: border-box; }
 .scene { --s: .45; position: relative; }
