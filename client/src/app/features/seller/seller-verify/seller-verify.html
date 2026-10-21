@@ -1,0 +1,120 @@
+<div class="wrap-verify">
+  @if (loading()) {
+    <p class="muted">Đang tải…</p>
+  } @else {
+    @switch (verify.current().status) {
+      @case ('approved') {
+        <section class="state ok">
+          <span class="badge">Đã xác minh</span>
+          <h1>Bạn đã được xác minh</h1>
+          <p>Gian hàng <b>{{ verify.current().body?.shopName }}</b> đã sẵn sàng. Bạn có thể đăng bài bán và đăng việc.</p>
+          <button type="button" class="btn" (click)="goSell()">Vào không gian Bán</button>
+        </section>
+      }
+      @case ('pending') {
+        <section class="state wait">
+          <span class="badge">Đang chờ duyệt</span>
+          <h1>AntGo đã nhận hồ sơ của bạn</h1>
+          <p>Chúng mình đối chiếu giấy tờ với thông tin bạn nhập, thường xong trong 24 giờ. Có kết quả, bạn sẽ thấy ngay ở trang này.</p>
+          <dl class="sum">
+            <div><dt>Họ tên</dt><dd>{{ verify.current().body?.fullName }}</dd></div>
+            <div><dt>Gian hàng</dt><dd>{{ verify.current().body?.shopName }}</dd></div>
+            <div><dt>Giấy tờ</dt><dd>3 ảnh đã gửi (chỉ đội AntGo xem)</dd></div>
+          </dl>
+        </section>
+      }
+      @default {
+        <header class="head">
+          <h1>Xác minh để mở gian hàng</h1>
+          <p class="muted">Mua hàng thì không cần. Muốn bán hoặc đăng việc, bạn cần xác minh danh tính để hàng xóm tin tưởng.</p>
+        </header>
+
+        @if (verify.current().status === 'rejected') {
+          <div class="reject" role="alert">
+            <b>Hồ sơ chưa được duyệt.</b>
+            <span>{{ verify.current().rejectReason }}</span>
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="vform">
+          <section class="block">
+            <h2><i>1</i> Thông tin cá nhân</h2>
+            <div class="field">
+              <label for="fullName">Họ và tên (đúng như trên CCCD)</label>
+              <input id="fullName" formControlName="fullName" autocomplete="name" [class.is-invalid]="invalid('fullName')" />
+              @if (invalid('fullName')) { <small class="error">Bạn chưa nhập họ tên.</small> }
+            </div>
+            <div class="field">
+              <label for="idNumber">Số CCCD</label>
+              <input id="idNumber" formControlName="idNumber" inputmode="numeric" maxlength="12" [class.is-invalid]="invalid('idNumber')" />
+              @if (invalid('idNumber')) { <small class="error">Số CCCD gồm đúng 12 chữ số.</small> }
+            </div>
+          </section>
+
+          <section class="block">
+            <h2><i>2</i> Giấy tờ</h2>
+            <p class="muted small">Ảnh PNG, JPG hoặc WebP, tối đa 2 MB. Chỉ đội AntGo xem để xác minh, không hiện công khai.</p>
+            <div class="slots">
+              @for (s of slots; track s.key) {
+                <div class="slot" [class.has]="photos()[s.key]" [class.miss]="triedSubmit() && !photos()[s.key]">
+                  @if (photos()[s.key]; as ph) {
+                    <img [src]="ph.url" [alt]="s.label" />
+                    <button type="button" class="x" (click)="removePhoto(s.key)" aria-label="Bỏ ảnh">×</button>
+                  } @else {
+                    <label class="drop">
+                      <input type="file" accept="image/png,image/jpeg,image/webp" (change)="pick(s.key, $event)" />
+                      <b>+ Chọn ảnh</b>
+                    </label>
+                  }
+                  <p class="cap"><b>{{ s.label }}</b><span>{{ s.hint }}</span></p>
+                  @if (photoError()[s.key]; as pe) { <small class="error">{{ pe }}</small> }
+                </div>
+              }
+            </div>
+            @if (triedSubmit() && missingPhoto()) { <small class="error">Bạn cần nộp đủ 3 ảnh.</small> }
+          </section>
+
+          <section class="block">
+            <h2><i>3</i> Gian hàng của bạn</h2>
+            <div class="field">
+              <label for="shopName">Tên gian hàng</label>
+              <input id="shopName" formControlName="shopName" maxlength="40" [class.is-invalid]="invalid('shopName')" />
+              @if (invalid('shopName')) { <small class="error">Tên gian hàng 3–40 ký tự.</small> }
+            </div>
+            <div class="field">
+              <label>Bạn chủ yếu bán gì?</label>
+              <div class="types" role="radiogroup" aria-label="Loại hàng chính">
+                @for (t of shopTypes; track t.key) {
+                  <button type="button" role="radio" [attr.aria-checked]="form.controls.shopType.value === t.key"
+                          [class.on]="form.controls.shopType.value === t.key" (click)="form.controls.shopType.setValue(t.key)">{{ t.label }}</button>
+                }
+              </div>
+            </div>
+            <div class="field">
+              <label for="intro">Giới thiệu ngắn <span class="muted">(không bắt buộc)</span></label>
+              <textarea id="intro" formControlName="intro" rows="3" maxlength="200" placeholder="Ví dụ: Nấu ăn gia đình, giao tận cửa trong Block B."></textarea>
+            </div>
+          </section>
+
+          <label class="agree">
+            <input type="checkbox" formControlName="agree" />
+            <span>Tôi cam kết thông tin và giấy tờ là của chính tôi. AntGo chỉ dùng giấy tờ để xác minh và không chia sẻ cho người khác.</span>
+          </label>
+          @if (invalid('agree')) { <small class="error">Bạn cần đồng ý cam kết để gửi hồ sơ.</small> }
+
+          @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+          <button type="submit" class="btn big" [disabled]="submitting()">Gửi hồ sơ xác minh</button>
+        </form>
+      }
+    }
+
+    <aside class="demo" aria-label="Bản mẫu">
+      <b>Bản mẫu — giả lập phía AntGo duyệt hồ sơ</b>
+      <div>
+        <button type="button" class="btn ghost" [disabled]="verify.current().status !== 'pending'" (click)="simApprove()">Duyệt</button>
+        <button type="button" class="btn ghost" [disabled]="verify.current().status !== 'pending'" (click)="simReject()">Từ chối</button>
+        <button type="button" class="btn ghost" (click)="simReset()">Làm lại từ đầu</button>
+      </div>
+    </aside>
+  }
+</div>
