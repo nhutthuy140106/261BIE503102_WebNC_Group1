@@ -28,7 +28,7 @@
     <dt>Trạng thái</dt><dd>{{ label(o) }}</dd>
     <dt>{{ o.type === 'placed' ? 'Người bán' : 'Người đăng' }}</dt><dd class="who"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="28" />{{ o.counterpartName }}</dd>
     <dt>{{ o.type === 'placed' ? 'Thanh toán' : 'Trả công' }}</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
-    <dt>{{ o.type === 'placed' ? 'Tổng cộng' : 'Tiền công' }}</dt><dd class="price">{{ o.total | number }}đ</dd>
+    <dt>{{ o.type === 'placed' ? 'Tổng cộng' : 'Tiền công' }}</dt><dd class="price">{{ o.total | vnd }}</dd>
     @if (o.note) { <dt>Ghi chú</dt><dd>{{ o.note }}</dd> }
     @if (offer(); as of) {
       <dt>Lời giới thiệu của bạn</dt><dd>{{ of.intro }}</dd>
@@ -43,16 +43,16 @@
   @if (o.surcharge; as s) {
     <div class="notice surcharge" [class.pending]="s.state === 'pending'">
       @if (s.state === 'pending') {
-        <strong>Người bán báo phụ thu {{ s.amount | number }}đ</strong>
+        <strong>Người bán báo phụ thu {{ s.amount | vnd }}</strong>
         <span>{{ s.reason }}. Bạn đồng ý thì người bán mới làm tiếp.</span>
         <div class="actions">
           <button type="button" class="btn" (click)="answerSurcharge(true)">Đồng ý phụ thu</button>
           @if (canDeclineSurcharge) { <button type="button" class="btn ghost" (click)="answerSurcharge(false)">Không đồng ý</button> }
         </div>
       } @else if (s.state === 'approved') {
-        Bạn đã đồng ý phụ thu {{ s.amount | number }}đ ({{ s.reason }}).
+        Bạn đã đồng ý phụ thu {{ s.amount | vnd }} ({{ s.reason }}).
       } @else {
-        Bạn đã từ chối phụ thu {{ s.amount | number }}đ. Hãy nhắn người bán để thống nhất lại hoặc hủy đơn.
+        Bạn đã từ chối phụ thu {{ s.amount | vnd }}. Hãy nhắn người bán để thống nhất lại hoặc hủy đơn.
       }
     </div>
   }

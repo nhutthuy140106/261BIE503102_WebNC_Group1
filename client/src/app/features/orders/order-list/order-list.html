@@ -17,7 +17,7 @@
         <h3>{{ o.postTitle }}</h3>
         <span class="sub who"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="20" />{{ o.counterpartName }} · {{ fmt(o.createdAt) }}</span>
       </span>
-      <span class="end"><b>{{ o.total | number }}đ</b><span class="status">{{ label(o) }}</span></span>
+      <span class="end"><b>{{ o.total | vnd }}</b><span class="status">{{ label(o) }}</span></span>
     </a>
   </li>
 </ng-template>

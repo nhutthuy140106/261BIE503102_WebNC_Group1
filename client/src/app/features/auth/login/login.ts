@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
+import { PROMPT_TEXT, PromptReason } from '../../../core/services/auth-prompt';
 import { phoneValidator } from '../../../core/utils/validators';
 
 @Component({
@@ -15,6 +16,8 @@ export class Login implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
+  /** Câu giải thích vì sao cần đăng nhập (theo ?reason=… từ nút khách bấm) */
+  protected readonly why = PROMPT_TEXT[(this.route.snapshot.queryParamMap.get('reason') as PromptReason) ?? 'login'] ?? 'Chào mừng quay lại AntGo.';
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
 

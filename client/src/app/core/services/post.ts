@@ -24,7 +24,7 @@ export class PostService {
 
   /** Mock: kho `posts` (nạp từ datasets/posts.json, phía Bán ghi thêm vào đây). Bài đã đóng không hiện. */
   getPosts(): Observable<Post[]> {
-    if (useMock('post')) return this.db.list<Post>('posts').pipe(map((l) => l.filter((p) => !p.closed)));
+    if (useMock('post')) return this.db.list<Post>('posts').pipe(map((l) => l.filter((p) => !p.closed).map(freshen)));
     // API thật: bài (đồ ăn/đồ dùng/dịch vụ) và việc làm ở hai endpoint riêng → gộp lại
     return forkJoin([
       this.api.get<unknown[]>('/posts', { limit: 100 }),
@@ -44,6 +44,13 @@ export class PostService {
     return this.getPosts().pipe(map((list) => list.find((p) => p._id === id)));
   }
 
+  /** Các bài theo danh sách id, kể cả bài đã đóng (ngăn kéo Đã lưu cần hiện "Tạm ngưng nhận"). */
+  getByIds(ids: string[]): Observable<Post[]> {
+    if (!ids.length) return of([]);
+    if (useMock('post')) return this.db.list<Post>('posts').pipe(map((l) => ids.map((id) => l.find((p) => p._id === id)).filter((p): p is Post => !!p)));
+    return forkJoin(ids.map((id) => this.getPostById(id))).pipe(map((l) => l.filter((p): p is Post => !!p)));
+  }
+
   /** Bài của một người bán/người đăng việc (gian hàng). Thật: GET /posts?seller=<id>. */
   getBySeller(sellerId: string): Observable<Post[]> {
     return this.getPosts().pipe(map((list) => list.filter((p) => p.sellerId === sellerId)));
@@ -57,6 +64,11 @@ export class PostService {
   private handleError(error: HttpErrorResponse) {
     return throwError(() => new Error(error.message));
   }
+}
+
+/** Mock: đổi `agoMin` thành createdAt thật để "đăng 2 giờ trước" đúng theo thời điểm đang xem. */
+function freshen(p: Post): Post {
+  return p.agoMin == null ? p : { ...p, createdAt: new Date(Date.now() - p.agoMin * 60_000).toISOString() };
 }
 
 export function matches(p: Post, f: PostFilter): boolean {

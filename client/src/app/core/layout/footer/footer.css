@@ -14,3 +14,4 @@ ul a:hover { color: #fff6ea; }
 .end { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .end svg { width: 14px; height: 14px; }
 @media (max-width: 800px) { .top { grid-template-columns: 1fr 1fr; } }
+.bottom a:hover { color: #fff6ea; }

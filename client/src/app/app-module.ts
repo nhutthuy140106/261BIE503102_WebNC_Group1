@@ -6,12 +6,14 @@ import { App } from './app';
 import { Header } from './core/layout/header/header';
 import { apiInterceptor } from './core/interceptors/api-interceptor';
 import { Footer } from './core/layout/footer/footer';
-import { XuDrawer } from './core/layout/xu-drawer/xu-drawer';
+import { Drawers } from './core/layout/drawers/drawers';
+import { AreaDialog } from './core/layout/area-dialog/area-dialog';
+import { Toast } from './core/layout/toast/toast';
 import { NotFound } from './core/not-found/not-found';
 import { SharedModule } from './shared/shared-module';
 
 @NgModule({
-  declarations: [App, Header, Footer, NotFound, XuDrawer],
+  declarations: [App, Header, Footer, NotFound, Drawers, AreaDialog, Toast],
   imports: [BrowserModule, AppRoutingModule, SharedModule],
   providers: [provideBrowserGlobalErrorListeners(), provideHttpClient(withInterceptors([apiInterceptor]), withInterceptorsFromDi())],
   bootstrap: [App],

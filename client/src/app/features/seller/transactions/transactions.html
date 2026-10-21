@@ -21,7 +21,7 @@
           @if (o.note) { <span class="muted">“{{ o.note }}”</span> }
           @if (o.cancelRequested) { <span class="warn">Khách xin hủy đơn</span> }
         </div>
-        <span class="price">{{ o.total | number }}đ</span>
+        <span class="price">{{ o.total | vnd }}</span>
         <span class="status">{{ orderLabel(o) }}</span>
         <div class="acts">
           @for (a of orderActions(o); track a) {
@@ -43,7 +43,7 @@
           <span>“{{ o.intro }}”</span>
           <span class="muted">Làm được: {{ o.slots.join(', ') }}</span>
         </div>
-        <span class="price">{{ o.pay | number }}đ</span>
+        <span class="price">{{ o.pay | vnd }}</span>
         <span class="status">{{ offerLabel(o) }}</span>
         <div class="acts">
           @for (a of offerActions(o); track a) {

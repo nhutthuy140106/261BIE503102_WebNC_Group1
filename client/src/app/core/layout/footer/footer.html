@@ -20,22 +20,26 @@
       <ul>
         <li><a routerLink="/seller/posts/new">Đăng bài bán</a></li>
         <li><a routerLink="/seller/posts/new">Đăng việc cần người</a></li>
-        <li><a class="xu"><img class="coin" src="assets/clean/antxu.png" alt="Xu" />Quảng bá bằng AntXu</a></li>
+        <li><a class="xu" routerLink="/seller/posts"><img class="coin" src="assets/clean/antxu.png" alt="Xu" />Quảng bá bằng AntXu</a></li>
+        <li><a routerLink="/seller">Hướng dẫn người bán</a></li>
       </ul>
     </div>
     <div>
       <h4>Hỗ trợ</h4>
       <ul>
-        <li><a>An toàn giao dịch</a></li>
-        <li><a>Báo cáo vi phạm</a></li>
-        <li><a>Liên hệ AntGo</a></li>
+        <li><a routerLink="/support">Trung tâm trợ giúp</a></li>
+        <li><a routerLink="/support">An toàn giao dịch</a></li>
+        <li><a routerLink="/support">Báo cáo vi phạm</a></li>
+        <li><a routerLink="/support">Liên hệ AntGo</a></li>
       </ul>
     </div>
   </div>
   <div class="bottom">
     <div class="wrap">
       <span>© 2026 AntGo</span>
-      <span class="end"><svg class="i"><use href="#pin" /></svg>Đang xem: Block B · Tiếng Việt</span>
+      <a routerLink="/legal/terms">Điều khoản</a>
+      <a routerLink="/legal/privacy">Quyền riêng tư</a>
+      <span class="end"><svg class="i"><use href="#pin" /></svg>Đang xem: {{ area.current() }} · Tiếng Việt</span>
     </div>
   </div>
 </footer>

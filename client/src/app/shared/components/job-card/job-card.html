@@ -1,27 +1,27 @@
-<article class="item">
-  <div class="ph">
-    <div class="top">
+<article class="item jobc">
+  <a [routerLink]="['/posts/job', slug]" class="ph" [attr.aria-label]="job.title">
+    <div class="jc-top">
       <app-avatar [src]="job.sellerAvatar" [name]="job.sellerName" [size]="30" />
-      <span class="who"><b>{{ job.sellerName }}</b>{{ job.block }}</span>
-      <button type="button" class="save" (click)="toggleSave.emit(job)" [attr.aria-pressed]="saved"
-              [attr.aria-label]="saved ? 'Bỏ lưu' : 'Lưu việc'">
-        <svg class="i"><use [attr.href]="saved ? '#heartFill' : '#heart'" /></svg>
-      </button>
+      <span><b>{{ job.sellerName }}</b>{{ job.createdAt | ago }}</span>
+      @if (job.category) { <span class="jcat">{{ job.category }}</span> }
     </div>
-    <a [routerLink]="['/posts/job', slug]" class="desc">{{ job.title }}</a>
-    <p class="detail">{{ job.description }}</p>
-    <div class="foot">
-      <span class="jpay">{{ job.price | number }}đ</span>
+    @if (job.description) { <p class="jc-desc">{{ job.description }}</p> }
+    <div class="jc-foot">
+      <div class="jpay">{{ job.price | vnd }}@if (job.priceUnit) { <small>/ {{ job.priceUnit }}</small> }</div>
       @if (job.job?.due) {
-        <span class="due"><svg class="i"><use href="#clock" /></svg>{{ job.job?.due }}</span>
+        <span class="jc-due"><svg class="i"><use href="#clock" /></svg>{{ job.job?.due }}</span>
       }
     </div>
-  </div>
+  </a>
   <div class="body">
-    @if (job.job?.status === 'open') {
-      <span class="jst">Đang mở · {{ job.job?.offers }} đề nghị</span>
-    } @else {
-      <span class="jst closed">Đã có người nhận</span>
-    }
+    <h3><a [routerLink]="['/posts/job', slug]">{{ job.title }}</a></h3>
+    <div class="meta">
+      <span><svg class="i"><use href="#pin" /></svg>{{ job.block }}@if (job.distance != null) { · {{ job.distance | distance }} }</span>
+      @if (job.job?.status === 'taken') {
+        <span class="jst closed">Đã có người nhận</span>
+      } @else if (job.job) {
+        <span class="jst">Đang mở · {{ job.job?.offers ? job.job?.offers + ' đề nghị' : 'chưa có đề nghị' }}</span>
+      }
+    </div>
   </div>
 </article>

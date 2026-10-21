@@ -48,7 +48,7 @@
       }
     } @else {
       @for (j of jobs(); track j._id) {
-        <app-job-card [job]="j" [saved]="saved.has(j._id)" (toggleSave)="toggleSave($event)" />
+        <app-job-card [job]="j" />
       } @empty {
         <p class="muted" style="grid-column: 1 / -1">Hiện không có việc nào cần người.</p>
       }

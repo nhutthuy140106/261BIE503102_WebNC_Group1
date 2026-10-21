@@ -1,0 +1,14 @@
+@if (area.dialogOpen()) {
+  <div class="backdrop" (click)="area.close()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-label="Chọn khu vực" (click)="$event.stopPropagation()">
+      <h2>Chọn khu vực đang xem</h2>
+      <p>Bài trong khu bạn chọn được ưu tiên khi tìm kiếm.</p>
+      <div class="choices">
+        @for (n of area.names; track n) {
+          <button type="button" [class.on]="n === area.current()" (click)="pick(n)">{{ n }}</button>
+        }
+      </div>
+      <div class="foot"><button type="button" (click)="area.close()">Đóng</button></div>
+    </div>
+  </div>
+}

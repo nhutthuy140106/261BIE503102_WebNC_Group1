@@ -28,6 +28,16 @@ export interface Post {
   sellerAvatar?: string;
   /** Block/khu vực của người đăng, ví dụ "Block B" */
   block: string;
+  /** Khu (KTX, chung cư…) của người đăng — để ưu tiên bài cùng khu khi tìm kiếm */
+  area?: string;
+  /** Khoảng cách tới người xem, tính bằng mét (server tính; mock là số mẫu) */
+  distance?: number;
+  /** Danh mục con hiển thị trên thẻ việc (Mua hộ, Gia sư…) hoặc nhãn loại (Đồ uống…) */
+  category?: string;
+  /** Mẫu chi tiết 7 khối của bản mẫu (mock): food, drink, goods, svc, fix, clean, trip */
+  template?: string;
+  /** Mock: đăng cách đây bao nhiêu phút (để "2 giờ trước" luôn tươi theo giờ hiện tại) */
+  agoMin?: number;
   /** Giá bán (đồ ăn, đồ dùng, dịch vụ) hoặc tiền công (việc làm), đơn vị VND */
   price: number;
   /** "phần", "giờ", "lần"… — bỏ trống nếu giá cố định */

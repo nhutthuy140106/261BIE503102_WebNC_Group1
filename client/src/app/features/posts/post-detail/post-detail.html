@@ -13,7 +13,7 @@
       <span class="kindline">{{ kindLabel[p.kind] }} · {{ p.block }}</span>
       <h1>{{ p.title }}</h1>
       <p class="muted by"><app-avatar [src]="p.sellerAvatar" [name]="p.sellerName" [size]="28" /><span>Đăng bởi <a class="seller" [routerLink]="['/shop', p.sellerId]">{{ p.sellerName }}</a></span></p>
-      <p class="price big">{{ p.price | number }}đ@if (p.priceUnit) {<small>/{{ p.priceUnit }}</small>}</p>
+      <p class="price big">{{ p.price | vnd }}@if (p.priceUnit) {<small>/{{ p.priceUnit }}</small>}</p>
       <p class="desc">{{ p.description }}</p>
 
       @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
@@ -26,7 +26,7 @@
             @for (c of g.choices; track c.label) {
               <label class="choice">
                 <span>{{ c.label }}</span>
-                @if (c.price) { <small>+{{ c.price | number }}đ</small> }
+                @if (c.price) { <small>+{{ c.price | vnd }}</small> }
                 <input [type]="g.multi ? 'checkbox' : 'radio'" [name]="g.name" [checked]="isChosen(g.name, c.label)" (change)="toggleChoice(g.name, c.label, g.multi)" />
               </label>
             }
@@ -37,21 +37,21 @@
           <input id="qty" type="number" min="1" max="99" [ngModel]="quantity()" (ngModelChange)="setQuantity($event)" />
         </div>
         @if (!step1Valid(p)) { <small class="muted">Hãy chọn các mục bắt buộc để tiếp tục.</small> }
-        <button type="button" class="btn" [disabled]="!step1Valid(p)" (click)="next()">Tiếp tục · {{ subtotal() | number }}đ</button>
+        <button type="button" class="btn" [disabled]="!step1Valid(p)" (click)="next()">Tiếp tục · {{ subtotal() | vnd }}</button>
       } @else {
         <!-- Bước 2: Xác nhận đơn hàng -->
         <form [formGroup]="form" (ngSubmit)="submit(p)" class="confirm">
           <h2>Xác nhận đơn hàng</h2>
-          <p>{{ p.title }} × {{ quantity() }} — {{ subtotal() | number }}đ
+          <p>{{ p.title }} × {{ quantity() }} — {{ subtotal() | vnd }}
             <button type="button" class="btn ghost" (click)="step.set(1)">Sửa</button></p>
 
           @if (canToggleDelivery(p)) {
             <label class="switch">
               <input type="checkbox" [checked]="delivery()" (change)="toggleDelivery($any($event.target).checked)" />
-              Giao tận cửa (+{{ deliveryFee() | number }}đ)
+              Giao tận cửa (+{{ deliveryFee() | vnd }})
             </label>
           } @else {
-            <p class="muted">{{ delivery() ? 'Người bán giao tận cửa (+' + (deliveryFee() | number) + 'đ)' : 'Chỉ nhận tại chỗ người bán' }}</p>
+            <p class="muted">{{ delivery() ? 'Người bán giao tận cửa (+' + (deliveryFee() | vnd) + ')' : 'Chỉ nhận tại chỗ người bán' }}</p>
           }
 
           @for (q of p.questions ?? []; track q.label) {
@@ -108,9 +108,9 @@
           </fieldset>
 
           <dl class="sum">
-            <dt>Tiền hàng</dt><dd>{{ subtotal() | number }}đ</dd>
-            @if (delivery()) { <dt>Phí giao</dt><dd>{{ deliveryFee() | number }}đ</dd> }
-            <dt>Tổng cộng</dt><dd class="price">{{ total() | number }}đ</dd>
+            <dt>Tiền hàng</dt><dd>{{ subtotal() | vnd }}</dd>
+            @if (delivery()) { <dt>Phí giao</dt><dd>{{ deliveryFee() | vnd }}</dd> }
+            <dt>Tổng cộng</dt><dd class="price">{{ total() | vnd }}</dd>
           </dl>
           <p class="muted">Tổng tiền cuối cùng do máy chủ tính lại khi tạo đơn.</p>
 

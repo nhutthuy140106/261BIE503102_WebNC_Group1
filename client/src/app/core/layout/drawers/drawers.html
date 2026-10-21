@@ -1,0 +1,93 @@
+<div class="scrim" [class.show]="drawer.open()" (click)="drawer.close()"></div>
+
+<aside class="drawer" [class.show]="drawer.open() === 'saved'" aria-label="Đã lưu">
+  <header>
+    <svg class="i" style="color: var(--accent)"><use href="#heartFill" /></svg>
+    <h3>Đã lưu</h3>
+    <button type="button" class="x" (click)="drawer.close()" aria-label="Đóng"><svg class="i"><use href="#xmark" /></svg></button>
+  </header>
+  <div class="dbody">
+    <div class="dchips">
+      @for (f of filters; track f.key) {
+        <button type="button" [class.on]="filter() === f.key" (click)="filter.set(f.key)">{{ f.label }}</button>
+      }
+    </div>
+    @for (p of rows(); track p._id) {
+      <div class="srow" [class.off]="p.closed" [style.cursor]="p.closed ? 'default' : 'pointer'" (click)="open(p)">
+        @if (p.images.length) {
+          <img [src]="p.images[0]" alt="" />
+        } @else {
+          <span class="jb">Việc</span>
+        }
+        <div class="t">
+          <b>{{ p.title }}</b>
+          <span class="pr">{{ p.price | vnd }}</span>
+          <small>@if (p.priceUnit) { /{{ p.priceUnit }} · } {{ p.block }}</small>
+          @if (p.closed) { <span class="offtag">· Tạm ngưng nhận</span> }
+        </div>
+        <button type="button" class="un" title="Bỏ lưu" (click)="$event.stopPropagation(); saved.remove(p._id)">
+          <svg class="i"><use href="#heartFill" /></svg>
+        </button>
+      </div>
+    } @empty {
+      <div class="dempty">
+        <img src="assets/clean/empty.png" alt="" />Chưa lưu gì ở mục này.<br />Bấm ♡ trên bài để lưu lại xem sau nhé.
+      </div>
+    }
+  </div>
+  <div class="dfoot">
+    <a routerLink="/profile" fragment="saved" (click)="goAll()">Xem tất cả bài đã lưu <svg class="i" style="width: 16px; height: 16px"><use href="#right" /></svg></a>
+  </div>
+</aside>
+
+<aside class="drawer" [class.show]="drawer.open() === 'xu'" aria-label="AntXu">
+  <header>
+    <img src="assets/clean/antxu.png" alt="" style="width: 24px; height: 24px" />
+    <h3>AntXu của bạn</h3>
+    <button type="button" class="x" (click)="drawer.close()" aria-label="Đóng"><svg class="i"><use href="#xmark" /></svg></button>
+  </header>
+  <div class="dbody">
+    <div class="xubal">
+      <img src="assets/clean/antxu.png" alt="" />
+      <div>
+        <b>{{ xu.balance() }}</b> <span style="font-weight: 600">Xu</span>
+        <small>Đổi Xu lấy voucher, chọn voucher ở bước Xác nhận đơn hàng</small>
+      </div>
+    </div>
+    @if (xu.expiring(); as ex) {
+      <div class="xuexp"><svg class="i"><use href="#clock" /></svg>{{ ex.amount }} Xu hết hạn ngày {{ ex.date | date: 'dd/MM/yyyy' }} — đổi voucher trước nhé</div>
+    }
+    <div class="dsec">Đổi voucher</div>
+    <div>
+      @for (c of xu.catalog; track c.cid) {
+        <div class="vch">
+          <span class="ic"><svg class="i"><use href="#ticket" /></svg></span>
+          <div class="t"><b>{{ c.title }}</b><small>{{ c.cond }} · {{ c.cost }} Xu</small></div>
+          <button type="button" [disabled]="xu.balance() < c.cost" (click)="redeem(c.cid, c.title, c.cost)">Đổi</button>
+        </div>
+      }
+    </div>
+    <div class="dsec">Voucher của bạn@if (xu.vouchers().length) { · {{ xu.vouchers().length }} }</div>
+    <div>
+      @for (v of xu.vouchers(); track v.id) {
+        <div class="vch">
+          <span class="ic"><svg class="i"><use href="#ticket" /></svg></span>
+          <div class="t"><b>{{ v.title }}</b><small>{{ v.cond }} · hạn {{ day(v.exp) }} · chọn ở bước đặt hàng</small></div>
+        </div>
+      } @empty {
+        <p class="dnote" style="margin-top: 8px">Chưa có voucher. Đổi ở trên rồi chọn khi đặt hàng nhé.</p>
+      }
+    </div>
+    <div class="dsec">Cách nhận thêm Xu</div>
+    <ul class="earn">
+      @for (e of earnState(); track e.key) {
+        <li [class.ok]="e.done">
+          <span>{{ e.t }}<small>{{ e.done ? 'Đã nhận' : e.note }}@if (!e.once && e.n) { · đã nhận {{ e.n }} lần }</small></span>
+          <b>@if (e.done) { ✓ }+{{ e.d }} Xu</b>
+        </li>
+      }
+    </ul>
+    <p class="dnote">Xu hết hạn sau 6 tháng kể từ ngày nhận. Xu không mua bằng tiền và không đổi ra tiền. Voucher dùng được ở bài có nhãn "Dùng được Xu" — người bán tự chọn tham gia.</p>
+    <a class="xuhist" routerLink="/profile" fragment="xu" (click)="goAll()">Lịch sử Xu<svg class="i"><use href="#right" /></svg></a>
+  </div>
+</aside>

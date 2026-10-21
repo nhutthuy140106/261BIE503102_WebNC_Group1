@@ -7,7 +7,7 @@
     <p class="status" [class.closed]="j.job?.status !== 'open'">
       @if (j.job?.status === 'open') { ● Đang mở · {{ j.job?.offers }} đề nghị } @else { Đã có người nhận }
     </p>
-    <p class="pay">{{ j.price | number }}đ</p>
+    <p class="pay">{{ j.price | vnd }}</p>
     <div class="facts"><span>{{ j.job?.due }}</span><span>{{ j.block }}</span></div>
     <p>{{ j.description }}</p>
 

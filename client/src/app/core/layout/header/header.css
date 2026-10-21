@@ -16,6 +16,14 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
 .hsearch .lead { color: var(--fog); width: 17px; height: 17px; }
 .hsearch input { flex: 1; min-width: 0; border: 0; background: none; padding: 0; font-size: 14px; outline: none; text-overflow: ellipsis; }
 .hsearch input::placeholder { color: var(--smoke); }
+.hsearch .sbtn { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); flex: none; }
+.hsearch .sbtn:hover { background: #fff; }
+.hsearch .sbtn svg { width: 17px; height: 17px; }
+.hsearch .sbtn.rec { color: var(--accent); background: #fde3d6; animation: recPulse 1.2s ease-in-out infinite; }
+@keyframes recPulse { 50% { box-shadow: 0 0 0 5px rgba(216, 90, 28, .14); } }
+/* trang chủ: ô lớn còn thấy thì ô gọn ẩn, cuộn qua mới trượt lên giữa header */
+.hsearch { transition: opacity .3s, transform .3s; }
+.hsearch.away { visibility: hidden; opacity: 0; transform: translateY(16px) scale(.97); }
 .hsearch .go { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; flex: none; }
 .hsearch .go svg { width: 15px; height: 15px; }
 
@@ -31,9 +39,13 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
 .coin { width: 20px; height: 20px; object-fit: contain; }
 .iconbtn { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: var(--smoke); position: relative; }
 .iconbtn:hover { background: var(--soft); }
+.iconbtn .d { position: absolute; top: 8px; right: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); border: 1.5px solid var(--bg); }
+.iconbtn.bump { animation: bump .45s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes bump { 40% { transform: scale(1.25); } }
 .iconbtn .cnt { position: absolute; top: 3px; right: 1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; }
 .av { margin-left: 6px; display: inline-flex; }
-.login { margin-left: 6px; height: 36px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 600; display: inline-flex; align-items: center; }
+.login { margin-left: 6px; height: 38px; padding: 0 16px; border-radius: 999px; background: var(--ink); color: #fff; font-weight: 600; font-size: 13.5px; display: inline-flex; align-items: center; white-space: nowrap; }
+.login:hover { filter: brightness(1.15); }
 
 @media (max-width: 1240px) {
   .left { gap: 16px; }

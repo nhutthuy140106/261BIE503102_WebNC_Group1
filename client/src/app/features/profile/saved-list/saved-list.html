@@ -13,7 +13,7 @@
     <div class="grid">
       @for (p of items(); track p._id) {
         @if (p.kind === 'job') {
-          <app-job-card [job]="p" [saved]="true" (toggleSave)="toggle($event)" />
+          <app-job-card [job]="p" />
         } @else {
           <app-post-card [post]="p" [saved]="true" (toggleSave)="toggle($event)" />
         }

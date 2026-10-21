@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Post } from '../../../core/models/post';
 import { createSlug } from '../../../core/utils/slug-helper';
 
-/** Thẻ việc làm: mảng màu be, tiền công in to, trạng thái "Đang mở · n đề nghị". */
+/** Thẻ việc làm: mảng màu be, người đăng + thời gian, tiền công in to, trạng thái "Đang mở · n đề nghị". */
 @Component({
   selector: 'app-job-card',
   standalone: false,
@@ -11,8 +11,6 @@ import { createSlug } from '../../../core/utils/slug-helper';
 })
 export class JobCard {
   @Input({ required: true }) job!: Post;
-  @Input() saved = false;
-  @Output() toggleSave = new EventEmitter<Post>();
 
   get slug(): string {
     return createSlug(this.job.title, this.job._id);

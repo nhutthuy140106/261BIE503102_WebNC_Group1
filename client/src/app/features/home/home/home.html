@@ -16,7 +16,7 @@
     <div class="heroText">
       <p>Mua bán, đặt dịch vụ, nhận việc vặt — ngay trong khu bạn sống.</p>
       <div class="ctas">
-        <button type="button" class="c1" (click)="s.scrollIntoView({ behavior: 'smooth' })">
+        <button type="button" class="c1" (click)="scrollTo(explore)">
           Khám phá ngay <svg class="i"><use href="#right" /></svg>
         </button>
       </div>
@@ -29,16 +29,27 @@
   </div>
 </section>
 
-<section class="explore" #s>
-  <form class="bigsearch" (submit)="$event.preventDefault(); search(q.value)" role="search">
+<section class="explore" #explore>
+  <form #bigSearch class="bigsearch" [class.drag]="dragging()" (submit)="$event.preventDefault(); submitSearch()" role="search"
+        (dragenter)="$event.preventDefault(); dragging.set(true)" (dragover)="$event.preventDefault(); dragging.set(true)"
+        (dragleave)="dragging.set(false)" (drop)="onDrop($event)">
     <svg class="i lead"><use href="#search" /></svg>
-    <input #q placeholder="Tìm món ăn, đồ dùng, dịch vụ hoặc việc làm" aria-label="Tìm kiếm" />
+    @if (search.imageUrl(); as img) {
+      <span class="imgchip">
+        <img [src]="img" alt="" /><span>Tìm theo ảnh</span>
+        <button type="button" (click)="search.clearImage()" aria-label="Bỏ ảnh"><svg class="i"><use href="#xmark" /></svg></button>
+      </span>
+    }
+    <input #q [value]="search.text()" (input)="search.text.set($any($event.target).value)" [placeholder]="search.placeholder()" aria-label="Tìm kiếm" />
+    <button type="button" class="sbtn" [class.rec]="search.recording()" title="Tìm bằng giọng nói" (click)="search.voice()"><svg class="i"><use href="#mic" /></svg></button>
+    <button type="button" class="sbtn" title="Tìm bằng hình ảnh" (click)="onPickImage()"><svg class="i"><use href="#camera" /></svg></button>
+    <span class="sdiv"></span>
     <button type="submit" class="go" aria-label="Tìm"><svg class="i"><use href="#search" /></svg></button>
   </form>
   <div class="popline">
     <b>Phổ biến:</b>
     @for (w of popular; track w) {
-      <button type="button" (click)="search(w)">{{ w }}</button>
+      <button type="button" (click)="fill(w, q)">{{ w }}</button>
     }
   </div>
 </section>
@@ -62,7 +73,7 @@
     </div>
   </section>
 
-  @if (forYouShown().length) {
+  @if (auth.isLoggedIn() && forYouShown().length) {
     <section class="sec">
       <div class="sh"><h2>Gợi ý cho bạn</h2><p>Dựa trên bài bạn đã lưu và đã đặt</p></div>
       <div class="grid">
@@ -87,7 +98,7 @@
     </div>
   </section>
 
-  <!-- Kiếm thêm gần nhà: dải xanh đen khác nhịp, giới thiệu nhận việc vặt -->
+  <!-- Kiếm thêm gần nhà: dải xanh đen khác nhịp, giới thiệu nhận việc vặt (điểm khác biệt của AntGo) -->
   <section class="kband">
     <img class="earn-ant" src="assets/clean/point.png" alt="" />
     <div>
@@ -95,7 +106,7 @@
       <h2>Rảnh tay? Giúp hàng xóm,<br />nhận tiền công ngay trong khu.</h2>
       <div class="earn-btns">
         <a class="earn-go" routerLink="/search" [queryParams]="{ kind: 'job' }">Xem việc gần nhà <svg class="i"><use href="#right" /></svg></a>
-        <a class="earn-ghost" routerLink="/seller/posts/new">Đăng việc cần người</a>
+        <button type="button" class="earn-ghost" (click)="postJob()">Đăng việc cần người</button>
       </div>
     </div>
     <ol class="earn-steps">
@@ -112,35 +123,49 @@
     </div>
     <div class="grid">
       @for (j of jobs(); track j._id) {
-        <app-job-card [job]="j" [saved]="saved.has(j._id)" (toggleSave)="toggleSave($event)" />
+        <app-job-card [job]="j" />
       } @empty {
         <p class="muted">Chưa có việc mới.</p>
       }
     </div>
   </section>
 
-  <section class="sec">
+  <section class="sec" #feedSec>
     <div class="sh"><h2>Khám phá quanh khu</h2><p>Lướt thêm món đồ, dịch vụ và việc trong khu</p></div>
     <div class="ffilter">
       @for (f of feedFilters; track f.key) {
-        <button type="button" [class.on]="feedFilter() === f.key" (click)="feedFilter.set(f.key)">{{ f.label }}</button>
+        <button type="button" [class.on]="feedFilter() === f.key" (click)="setFilter(f.key)">{{ f.label }}</button>
       }
-      <label class="sortbox">Sắp xếp:
-        <select [value]="feedSort()" (change)="feedSort.set($any($event.target).value)" aria-label="Sắp xếp">
-          @for (o of feedSorts; track o.key) { <option [value]="o.key">{{ o.label }}</option> }
-        </select>
-      </label>
+      <div class="sortbox" [class.open]="sortMenuOpen()">
+        <button type="button" class="sortbtn" (click)="$event.stopPropagation(); sortMenuOpen.set(!sortMenuOpen())">
+          Sắp xếp: <b>{{ sortLabel() }}</b><svg class="i"><use href="#chev" /></svg>
+        </button>
+        <div class="sortmenu" (click)="$event.stopPropagation()">
+          @for (o of sortMenu(); track o.key) {
+            <button type="button" [class.on]="feedSort() === o.key" (click)="setSort(o.key)">{{ o.label }}</button>
+          }
+        </div>
+      </div>
     </div>
     <div class="grid">
       @for (p of feed(); track p._id) {
         @if (p.kind === 'job') {
-          <app-job-card [job]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+          <app-job-card class="rise" [job]="p" />
         } @else {
-          <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+          <app-post-card class="rise" [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
         }
-      } @empty {
-        <p class="muted">Không còn bài nào khác ở nhóm này.</p>
+      }
+      @if (loadingMore()) {
+        @for (n of [1, 2, 3, 4]; track n) { <div class="skel"></div> }
       }
     </div>
+    @if (!feed().length && !loadingMore()) {
+      <p class="muted">Không còn bài nào khác ở nhóm này.</p>
+    }
+    @if (showMoreButton()) {
+      <div class="feedmore"><button type="button" (click)="loadMoreClick()">Xem thêm</button></div>
+    }
   </section>
 }
+<!-- mốc để biết đã cuộn gần tới cuối khối Khám phá -->
+<div #sentinel></div>

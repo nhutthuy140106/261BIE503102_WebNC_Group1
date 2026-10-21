@@ -25,7 +25,7 @@ export const DATASET_BASE = '/datasets';
 
 export type ServiceName =
   | 'auth' | 'post' | 'order' | 'offer' | 'address' | 'saved' | 'question'
-  | 'review' | 'chat' | 'seller' | 'notification' | 'report' | 'upload' | 'recommend';
+  | 'review' | 'chat' | 'seller' | 'notification' | 'report' | 'upload' | 'recommend' | 'xu';
 
 /** `false` = service đó gọi API thật dù USE_MOCK còn bật; `true` = ép mock. */
 export const MOCK_OVERRIDES: Partial<Record<ServiceName, boolean>> = {

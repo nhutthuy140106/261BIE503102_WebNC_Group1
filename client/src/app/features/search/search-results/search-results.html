@@ -31,7 +31,7 @@
   <div class="grid">
     @for (p of inArea(); track p._id) {
       @if (p.kind === 'job') {
-        <app-job-card [job]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+        <app-job-card [job]="p" />
       } @else {
         <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
       }
@@ -50,7 +50,7 @@
     <div class="grid">
       @for (p of nearby(); track p._id) {
         @if (p.kind === 'job') {
-          <app-job-card [job]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+          <app-job-card [job]="p" />
         } @else {
           <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
         }

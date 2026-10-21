@@ -1,6 +1,6 @@
 <app-auth-shell>
   <h1>Đăng nhập</h1>
-  <p class="why">Chào mừng quay lại AntGo.</p>
+  <p class="why">{{ why }}</p>
   <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
     <label for="phone">Số điện thoại</label>
     <input id="phone" class="tx" formControlName="phone" autocomplete="tel" inputmode="numeric" maxlength="10"
