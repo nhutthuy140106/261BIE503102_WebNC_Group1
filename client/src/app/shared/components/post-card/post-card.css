@@ -29,6 +29,6 @@ h3 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.35; display: -
 .star i { font-style: normal; color: var(--smoke); margin-left: 3px; font-size: 12px; }
 .star { display: inline-flex; align-items: center; gap: 3px; }
 
-/* Dùng được Xu: một dòng chữ nhỏ dưới giá, không dùng viên màu */
-.xuline { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: #8A5A10; }
-.xuline img { width: 16px; height: 16px; }
+
+/* Dùng được Xu: chỉ một icon đồng xu cạnh giá */
+.xuico { display: inline-block; width: 17px; height: 17px; margin-left: 6px; vertical-align: -3px; border-radius: 0; }

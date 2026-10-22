@@ -52,7 +52,7 @@ h3 { font-size: 15px; line-height: 1.35; margin: 5px 0; font-weight: 600; min-he
 .sold { font-size: 12px; color: var(--smoke); white-space: nowrap; }
 .area .rate i { font-style: normal; color: var(--smoke); font-weight: 400; font-size: 12px; }
 
-/* Dùng được Xu: một dòng chữ nhỏ dưới giá */
-.xuline { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 12px; font-weight: 600; color: #8A5A10; }
-.xuline img { width: 16px; height: 16px; border-radius: 0; }
 .photo { position: relative; }
+
+/* Dùng được Xu: chỉ một icon đồng xu cạnh giá */
+.xuico { display: inline-block; width: 17px; height: 17px; margin-left: 6px; vertical-align: -3px; border-radius: 0; }

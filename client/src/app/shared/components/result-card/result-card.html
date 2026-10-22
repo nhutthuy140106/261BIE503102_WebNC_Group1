@@ -20,9 +20,8 @@
     <span class="kind">{{ kindText }}</span>
     <h3>{{ post.title }}</h3>
     @if (true) {
-      <div class="prrow"><div class="price">{{ post.price | vnd }} @if (post | unit; as u) { <small>/ {{ u }}</small> }</div>@if (post.sold) { <span class="sold">{{ post.kind === 'service' ? 'Đã đặt' : 'Đã bán' }} {{ post.sold | count }}</span> }</div>
+      <div class="prrow"><div class="price">{{ post.price | vnd }} @if (post | unit; as u) { <small>/ {{ u }}</small> } @if (post.acceptsXu) { <img class="xuico" src="assets/clean/antxu.png" alt="Dùng được Xu" title="Dùng được Xu" /> }</div>@if (post.sold) { <span class="sold">{{ post.kind === 'service' ? 'Đã đặt' : 'Đã bán' }} {{ post.sold | count }}</span> }</div>
     }
-    @if (post.acceptsXu) { <span class="xuline"><img src="assets/clean/antxu.png" alt="" />Dùng được Xu</span> }
     <div class="area">
       <span class="loc"><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</span>
       @if (isJob && post.job) {
