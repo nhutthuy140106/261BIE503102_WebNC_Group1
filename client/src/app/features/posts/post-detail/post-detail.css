@@ -121,14 +121,6 @@
 .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .seg button { height: 42px; border-radius: 10px; border: 1px solid var(--border); font-weight: 600; font-size: 13.5px; background: none; }
 .seg button.on { border-color: var(--ink); background: var(--ink); color: #fff; }
-.xurow { display: flex; align-items: center; gap: 10px; text-align: left; background: none; }
-.xurow img { width: 22px; height: 22px; }
-.xurow b { display: block; }
-.xurow small { font-weight: 400; }
-.vlist { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-.vlist button { width: 100%; display: flex; justify-content: space-between; padding: 10px 12px; font-size: 13.5px; text-align: left; border-top: 1px solid var(--border); background: none; }
-.vlist button:first-child { border-top: 0; }
-.vlist button:hover { background: var(--soft); }
 .sum { color: var(--smoke); gap: 8px; }
 .sum div { display: flex; justify-content: space-between; }
 .sum .disc { color: #2E7D4F; }
@@ -293,3 +285,33 @@
 
 /* khối chỉ chứa ô nhập (ngày giờ, ghi chú): bỏ khung ngoài để không bị hai khung lồng nhau */
 .mbody .card:has(> .input), .mbody .card:has(> .when), .mbody .card:has(> .seg2) { border: 0; padding: 4px 2px 0; border-radius: 0; background: none; }
+
+/* dòng Voucher trong hộp xác nhận (một dòng, bấm mở hộp chọn voucher như Shopee) */
+.vrow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: #fff; text-align: left; font: inherit; }
+.vrow:hover { border-color: #B9BEC8; }
+.vrow img { width: 26px; height: 26px; flex: none; }
+.vrow .vt { flex: 1; display: grid; gap: 1px; }
+.vrow b { font-size: 14px; }
+.vrow small { color: var(--smoke); font-size: 12.5px; }
+.vrow small.ok { color: #2E7D4F; font-weight: 600; }
+.vrow i { font-style: normal; font-size: 22px; color: var(--fog); }
+
+/* hộp chọn voucher */
+.vsheet h4 { margin: 6px 0 0; font-size: 14px; display: flex; justify-content: space-between; align-items: baseline; }
+.vsheet h4 small { font-weight: 500; color: var(--smoke); }
+.vch { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border: 1px dashed #C9CDD5; border-radius: 12px; background: #fff; text-align: left; font: inherit; }
+.vch:disabled { opacity: .55; cursor: not-allowed; }
+.vch:not(:disabled):not(.redeem):hover { border-color: var(--ink); }
+.vch.on { border: 1px solid var(--ink); }
+.vi { width: 44px; height: 44px; border-radius: 10px; background: #FDF1DB; display: grid; place-items: center; flex: none; }
+.vi img { width: 28px; height: 28px; }
+.vb { flex: 1; display: grid; gap: 1px; min-width: 0; }
+.vb b { font-size: 14.5px; }
+.vb small { color: var(--smoke); font-size: 12.5px; }
+.vb em { font-style: normal; font-size: 12px; color: #B4441C; }
+.vb em.ok { color: var(--fog); }
+.vch .rd { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #B9BEC8; flex: none; }
+.vch.on .rd { border-color: var(--ink); background: radial-gradient(var(--ink) 42%, transparent 46%); }
+.rbtn { height: 34px; padding: 0 14px; border-radius: 999px; background: var(--ink); color: #fff; font: inherit; font-size: 13px; font-weight: 600; }
+.rbtn:disabled { background: #D9D3CF; }
+.modal footer .ghostbtn { height: 44px; padding: 0 14px; background: none; color: var(--smoke); text-decoration: underline; text-underline-offset: 3px; font: inherit; }

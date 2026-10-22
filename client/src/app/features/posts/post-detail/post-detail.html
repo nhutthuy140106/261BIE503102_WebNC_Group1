@@ -289,19 +289,14 @@
             </div>
 
             @if (v.tpl.xuOk) {
-              <div class="card">
-                <button type="button" class="xurow" (click)="voucherOpen.set(!voucherOpen())">
-                  <img src="assets/clean/antxu.png" alt="" />
-                  <span><b>{{ d.voucher() ? d.voucher()!.title : 'Voucher AntGo' }}</b><small>{{ d.voucher() ? 'Đang áp dụng' : usable().length ? usable().length + ' voucher dùng được' : 'Chưa có voucher phù hợp' }}</small></span>
-                </button>
-                @if (voucherOpen()) {
-                  <div class="vlist">
-                    @for (x of usable(); track x.id) { <button type="button" (click)="pickVoucher(d, x)"><span>{{ x.title }}</span><small>{{ x.cond }}</small></button> }
-                    @if (d.voucher()) { <button type="button" (click)="pickVoucher(d, null)">Bỏ voucher</button> }
-                    @if (!usable().length) { <button type="button" (click)="voucherOpen.set(false); drawer.show('xu')">Đổi voucher bằng Xu</button> }
-                  </div>
-                }
-              </div>
+              <button type="button" class="vrow" (click)="voucherOpen.set(true)">
+                <img src="assets/clean/antxu.png" alt="" />
+                <span class="vt"><b>Voucher AntGo</b>
+                  @if (d.voucher(); as vv) { <small class="ok">{{ vv.title }} · giảm {{ fmt(d.discount()) }}</small> }
+                  @else { <small>{{ usable().length ? usable().length + ' voucher dùng được' : 'Chưa có voucher phù hợp' }}</small> }
+                </span>
+                <i aria-hidden="true">›</i>
+              </button>
             }
 
             <div class="card">
@@ -326,6 +321,39 @@
             <button type="button" class="primary" [disabled]="submitting()" (click)="submit()">{{ actionLabel() === 'Mua' ? 'Đặt đơn' : actionLabel() }}</button>
           </footer>
         }
+      </div>
+    </div>
+  }
+
+  @if (voucherOpen() && draft(); as d) {
+    <div class="scrim top" (click)="voucherOpen.set(false)">
+      <div class="modal small" role="dialog" aria-label="Chọn voucher" (click)="$event.stopPropagation()">
+        <header><h2>Chọn voucher</h2><button type="button" class="x" (click)="voucherOpen.set(false)" aria-label="Đóng">✕</button></header>
+        <div class="mbody vsheet">
+          <h4>Voucher của bạn</h4>
+          @for (x of xu.vouchers(); track x.id) {
+            <button type="button" class="vch" [class.on]="d.voucher()?.id === x.id" [disabled]="!voucherOk(x, d)" (click)="chooseVoucher(d, x)">
+              <span class="vi"><img src="assets/clean/antxu.png" alt="" /></span>
+              <span class="vb"><b>{{ x.title }}</b><small>{{ x.cond }}</small>
+                @if (!voucherOk(x, d)) { <em>{{ voucherWhy(x, d) }}</em> } @else { <em class="ok">Hạn {{ dayOf(x.exp) }}</em> }</span>
+              <i class="rd"></i>
+            </button>
+          } @empty { <p class="muted">Bạn chưa có voucher nào. Đổi bằng Xu ở bên dưới.</p> }
+
+          <h4>Đổi thêm bằng Xu <small>Bạn có {{ xu.balance() }} Xu</small></h4>
+          @for (c of xu.catalog; track c.cid) {
+            <div class="vch redeem">
+              <span class="vi"><img src="assets/clean/antxu.png" alt="" /></span>
+              <span class="vb"><b>{{ c.title }}</b><small>{{ c.cond }}</small></span>
+              <button type="button" class="rbtn" [disabled]="xu.balance() < c.cost" (click)="redeem(d, c.cid)">{{ c.cost }} Xu</button>
+            </div>
+          }
+        </div>
+        <footer>
+          <div><small>Giảm</small><b>{{ d.discount() ? '−' + fmt(d.discount()) : '0đ' }}</b></div>
+          @if (d.voucher()) { <button type="button" class="ghostbtn" (click)="pickVoucher(d, null)">Bỏ voucher</button> }
+          <button type="button" class="primary" (click)="voucherOpen.set(false)">Đồng ý</button>
+        </footer>
       </div>
     </div>
   }

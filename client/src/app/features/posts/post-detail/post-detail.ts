@@ -326,6 +326,29 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     return d.subtotal() >= v.min;
   }
 
+  /** Chọn voucher trong hộp: áp ngay, tổng tiền cập nhật liền. Bấm lại voucher đang áp thì bỏ. */
+  protected chooseVoucher(d: OrderDraft, v: Voucher): void {
+    d.voucher.set(d.voucher()?.id === v.id ? null : v);
+  }
+
+  protected voucherWhy(v: Voucher, d: OrderDraft): string {
+    if (v.ship) return d.needsAddress() ? 'Chỉ áp dụng khi có phí giao' : 'Chỉ áp dụng khi chọn giao tận nơi';
+    return 'Cần đơn từ ' + this.fmt(v.min) + ' (đơn này ' + this.fmt(d.subtotal()) + ')';
+  }
+
+  protected dayOf(ms: number): string {
+    return new Date(ms).toLocaleDateString('vi-VN');
+  }
+
+  /** Đổi Xu lấy voucher ngay trong hộp rồi tự chọn voucher vừa đổi nếu dùng được */
+  protected redeem(d: OrderDraft, cid: string): void {
+    const before = new Set(this.xu.vouchers().map((x) => x.id));
+    if (!this.xu.redeem(cid)) return void this.toast.show('Bạn chưa đủ Xu');
+    const fresh = this.xu.vouchers().find((x) => !before.has(x.id));
+    if (fresh && this.voucherOk(fresh, d)) d.voucher.set(fresh);
+    this.toast.show('Đã đổi voucher');
+  }
+
   protected pickVoucher(d: OrderDraft, v: Voucher | null): void {
     d.voucher.set(v);
     this.voucherOpen.set(false);
