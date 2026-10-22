@@ -2,9 +2,10 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Order } from '../../../core/models/order';
 import { OrderService } from '../../../core/services/order';
+import { stripAccents } from '../../../core/utils/slug-helper';
 import { formatDateTime, statusLabel } from '../../../core/utils/status-label';
 
-type Tab = 'all' | 'placed' | 'received' | 'history';
+type Tab = 'all' | 'todo' | 'placed' | 'received' | 'history';
 
 /** Việc đã nhận đã xong hẳn: bị loại / rút / hủy, hoặc hoàn thành + đã nhận tiền + đã đánh giá */
 function receivedEnded(o: Order): boolean {
@@ -53,22 +54,33 @@ export class OrderList implements OnInit {
     const run = l.filter((o) => !isEnded(o));
     return {
       all: run.length,
+      todo: run.filter(needsAction).length,
       placed: run.filter((o) => o.type === 'placed').length,
       received: run.filter((o) => o.type === 'received').length,
       history: l.filter(isEnded).length,
     };
   });
 
-  private readonly base = computed(() => {
+  protected readonly query = signal('');
+
+  /** Đơn của tab đang chọn (+ ô tìm theo tên đơn, người bán/người đăng, mã đơn), đơn cần bạn xử lý xếp trước */
+  protected readonly shown = computed(() => {
     const t = this.tab();
-    return this.orders().filter((o) => {
-      if (t === 'history') return isEnded(o);
-      if (isEnded(o)) return false;
-      return t === 'all' || (t === 'placed' ? o.type === 'placed' : o.type === 'received');
-    });
+    const q = stripAccents(this.query().trim());
+    return this.orders()
+      .filter((o) => {
+        if (t === 'history') return isEnded(o);
+        if (isEnded(o)) return false;
+        if (t === 'todo') return needsAction(o);
+        return t === 'all' || (t === 'placed' ? o.type === 'placed' : o.type === 'received');
+      })
+      .filter((o) => !q || stripAccents(o.postTitle + ' ' + o.counterpartName + ' ' + o.code).includes(q))
+      .sort((a, b) => Number(needsAction(b)) - Number(needsAction(a)));
   });
-  protected readonly todo = computed(() => (this.tab() === 'history' ? [] : this.base().filter(needsAction)));
-  protected readonly ongoing = computed(() => (this.tab() === 'history' ? this.base() : this.base().filter((o) => !needsAction(o))));
+
+  protected isEnded(o: Order): boolean {
+    return isEnded(o);
+  }
 
   protected isTodo(o: Order): boolean {
     return needsAction(o);
@@ -88,6 +100,13 @@ export class OrderList implements OnInit {
     if (o.status === 'pricing') return 'Xem giá & trả lời';
     if (o.resched?.by === 'seller') return 'Duyệt giờ mới';
     return 'Xem phản hồi';
+  }
+
+  /** Nút chính khi đơn đã xong: đặt lại món/dịch vụ, hoặc tìm việc khác */
+  protected side(o: Order): { label: string; link: unknown[]; params?: Record<string, string | undefined> } {
+    return o.type === 'received'
+      ? { label: 'Tìm việc khác', link: ['/search'], params: { kind: 'job' } }
+      : { label: 'Đặt lại', link: ['/posts', o.postId] };
   }
 
   /** Một câu nói rõ đơn đang ở đâu và ai đang chờ ai */
@@ -133,7 +152,7 @@ export class OrderList implements OnInit {
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((p) => {
       const f = p.get('f');
-      this.tab.set(f === 'placed' || f === 'received' || f === 'history' ? f : 'all');
+      this.tab.set(f === 'todo' || f === 'placed' || f === 'received' || f === 'history' ? f : 'all');
     });
     this.orderService.getOrders().subscribe({
       next: (list) => {
