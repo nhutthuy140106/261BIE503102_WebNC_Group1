@@ -1,0 +1,20 @@
+:host { display: inline-block; }
+.sortbox { position: relative; }
+.sortbtn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); font: inherit; font-size: 13px; color: var(--smoke); }
+.sortbtn b { color: var(--ink); font-weight: 600; }
+.sortbtn svg { width: 14px; height: 14px; transition: transform .2s; }
+.sortbox.open .sortbtn svg { transform: rotate(180deg); }
+.sortmenu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; min-width: 200px; padding: 6px; border-radius: 12px; background: var(--card); border: 1px solid var(--border); box-shadow: 0 16px 36px -14px rgba(34, 48, 74, .3); display: none; }
+.sortbox.open .sortmenu { display: block; }
+.sortmenu button { width: 100%; display: flex; justify-content: space-between; align-items: center; height: 36px; padding: 0 10px; border-radius: 8px; font: inherit; font-size: 13px; text-align: left; background: none; color: var(--ink); }
+.sortmenu button:hover { background: var(--soft); }
+.sortmenu button.on { font-weight: 600; }
+.sortmenu button.on::after { content: '✓'; }
+
+/* bản trong thanh sắp xếp của trang tìm kiếm */
+.sortbox.bar .sortbtn { height: 34px; min-width: 190px; justify-content: space-between; padding: 0 14px; border: 0; border-radius: 3px; font-size: 14px; background: #fff; }
+.sortbox.bar .sortbtn b { font-weight: 400; color: var(--ink); }
+.sortbox.bar.on .sortbtn { background: var(--accent); }
+.sortbox.bar.on .sortbtn b, .sortbox.bar.on .sortbtn svg { color: #fff; }
+.sortbox.bar .sortmenu { left: 0; right: auto; min-width: 100%; border-radius: 4px; }
+.sortbox.bar .sortmenu button { border-radius: 3px; }

@@ -61,13 +61,7 @@
       <button type="button" [class.on]="sort() === 'near'" (click)="setSort('near')">Gần nhất</button>
       <button type="button" [class.on]="sort() === 'new'" (click)="setSort('new')">Mới nhất</button>
       @if (!isJobs()) { <button type="button" [class.on]="sort() === 'sold'" (click)="setSort('sold')">Bán chạy</button> }
-      <label class="price" [class.on]="sort() === 'low' || sort() === 'high'">
-        <select [value]="sort() === 'low' || sort() === 'high' ? sort() : ''" (change)="setSort($any($event.target).value || 'near')" aria-label="Sắp xếp theo giá">
-          <option value="" [selected]="sort() !== 'low' && sort() !== 'high'">{{ isJobs() ? 'Tiền công' : 'Giá' }}</option>
-          <option value="low" [selected]="sort() === 'low'">{{ isJobs() ? 'Tiền công: Thấp đến cao' : 'Giá: Thấp đến cao' }}</option>
-          <option value="high" [selected]="sort() === 'high'">{{ isJobs() ? 'Tiền công: Cao đến thấp' : 'Giá: Cao đến thấp' }}</option>
-        </select>
-      </label>
+      <app-sort-menu [bar]="true" [options]="priceOptions()" [value]="sort()" [placeholder]="isJobs() ? 'Tiền công' : 'Giá'" (valueChange)="setSort($any($event))" />
       <span class="count">{{ matched().length }} kết quả</span>
     </div>
 

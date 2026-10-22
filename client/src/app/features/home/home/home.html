@@ -74,7 +74,10 @@
 
   @if (auth.isLoggedIn() && forYouShown().length) {
     <section class="sec">
-      <div class="sh"><h2>Gợi ý cho bạn</h2></div>
+      <div class="sh">
+        <h2>Gợi ý cho bạn</h2>
+        <a class="more" routerLink="/search/section/foryou">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+      </div>
       <div class="grid">
         @for (p of forYouShown(); track p._id) {
           <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />

@@ -4,15 +4,7 @@
 
 <div class="head">
   <h1>{{ title() }}</h1>
-  <label class="sort">
-    <span>Sắp xếp</span>
-    <select [value]="sort()" (change)="sort.set($any($event.target).value)">
-      <option value="near">Gần nhất</option>
-      <option value="new">Mới nhất</option>
-      @if (!isJobs()) { <option value="low">Giá thấp đến cao</option><option value="high">Giá cao đến thấp</option> }
-      @else { <option value="high">Tiền công cao nhất</option> }
-    </select>
-  </label>
+  <app-sort-menu [options]="sortOptions()" [value]="sort()" (valueChange)="setSort($event)" />
 </div>
 
 @if (loading()) {

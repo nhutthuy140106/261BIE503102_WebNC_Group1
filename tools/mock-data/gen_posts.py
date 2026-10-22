@@ -125,15 +125,15 @@ TPL_STATS = {"food": (10, 4.3), "drink": (5, 4.4), "goods": (5, 4.4), "svc": (5,
 # Việc làm: (loại việc, tên, số đề nghị, mô tả, thời gian làm, giá, đơn vị, ảnh người đăng, người đăng, đăng cách đây (phút), block, khoảng cách)
 JOBS = [
     ("Mua hộ", "Lấy giúp phần cơm ở cổng sau", 1, "Shipper để ở cổng sau, mang lên giúp tận cửa tầng 2.", "Hôm nay · 11:30", "30.000đ", "lần", "Thu Hà", 120, "Block B", "200m"),
-    ("Việc nhà", "Dọn phòng cuối tuần", 3, "Phòng ngủ và phòng khách khoảng 40m², dụng cụ có sẵn.", "CN 18/10 · 9:00", "80.000đ", "buổi", "Quốc Anh", 300, "Block B", "300m"),
-    ("Sự kiện", "Chụp ảnh buổi workshop nhỏ", 0, "Workshop làm nến 2 tiếng, cần khoảng 30–50 ảnh đẹp.", "T7 17/10 · 14:00", "150.000đ", "buổi", "Phương", 1440, "Sảnh A", "400m"),
+    ("Việc nhà", "Dọn phòng cuối tuần", 3, "Phòng ngủ và phòng khách khoảng 40m², dụng cụ có sẵn.", "CN 25/10 · 9:00", "80.000đ", "buổi", "Quốc Anh", 300, "Block B", "300m"),
+    ("Sự kiện", "Chụp ảnh buổi workshop nhỏ", 0, "Workshop làm nến 2 tiếng, cần khoảng 30–50 ảnh đẹp.", "T7 24/10 · 14:00", "150.000đ", "buổi", "Phương", 1440, "Sảnh A", "400m"),
     ("Gia sư", "Kèm Toán lớp 8, 2 buổi mỗi tuần", 2, "Bé cần ôn hình học, học tại nhà, mỗi buổi 90 phút.", "Tối T3 & T5", "100.000đ", "buổi", "Minh Khoa", 1500, "Block D", "500m"),
-    ("Thú cưng", "Cho mèo ăn 3 ngày khi đi vắng", 2, "2 bé mèo, cho ăn sáng tối và dọn cát mỗi ngày.", "14 – 16/10", "150.000đ", "3 ngày", "Chị Ngân", 1560, "Block B", "150m"),
-    ("Mua hộ", "Mua đồ chợ sáng giúp nhà mình", 2, "Mua rau, thịt, trái cây theo danh sách gửi qua tin nhắn.", "T7 17/10 · 6:30", "50.000đ", "lần", "Chị Hoa", 1700, "Block A", "350m"),
+    ("Thú cưng", "Cho mèo ăn 3 ngày khi đi vắng", 2, "2 bé mèo, cho ăn sáng tối và dọn cát mỗi ngày.", "28 – 30/10", "150.000đ", "3 ngày", "Chị Ngân", 1560, "Block B", "150m"),
+    ("Mua hộ", "Mua đồ chợ sáng giúp nhà mình", 2, "Mua rau, thịt, trái cây theo danh sách gửi qua tin nhắn.", "T7 24/10 · 6:30", "50.000đ", "lần", "Chị Hoa", 1700, "Block A", "350m"),
     ("Vận chuyển", "Chuyển 2 thùng đồ sang Block A", 1, "Thùng sách và đồ bếp, có xe đẩy sẵn ở sảnh.", "Tối nay · 19:00", "80.000đ", "lần", "Anh Tuấn", 180, "Block D", "500m"),
     ("Phụ bán hàng", "Phụ đứng quầy bánh mì buổi sáng", 0, "Bán và thu tiền giúp quầy, có người hướng dẫn buổi đầu.", "6:00 – 9:00 · T2–T6", "150.000đ", "ca", "Bác Sơn", 2000, "B.512", "300m"),
     ("Gia sư", "Kèm Tiếng Anh lớp 5", 3, "Ôn ngữ pháp và luyện nói, học tại nhà bé.", "Tối T2 & T4", "120.000đ", "buổi", "Bạn Linh", 2200, "Block A", "400m"),
-    ("Việc nhà", "Phơi và gấp đồ cuối tuần", 1, "Khoảng 2 giỏ đồ, phơi sáng và gấp lúc chiều.", "T7 17/10", "100.000đ", "buổi", "Chị Hoa", 2500, "Block D", "500m"),
+    ("Việc nhà", "Phơi và gấp đồ cuối tuần", 1, "Khoảng 2 giỏ đồ, phơi sáng và gấp lúc chiều.", "T7 24/10", "100.000đ", "buổi", "Chị Hoa", 2500, "Block D", "500m"),
 ]
 
 # các bài ở khu khác (khu gần đó) — để trang Tìm kiếm có phần "Ở khu gần đó"
@@ -175,7 +175,7 @@ def build():
             **({"rating": TPL_STATS[template_of(label, title)][1], "reviewCount": TPL_STATS[template_of(label, title)][0]} if rate else {}),
             "sold": (TPL_STATS[template_of(label, title)][0] * 6 + (i * 11) % 45) if rate else 3 + (i * 13) % 22,
             **({"promoted": True} if ad else {}),
-            **({"acceptsXu": True} if xu else {}),
+            **({"acceptsXu": True} if (xu or ad or (KIND[label] in ("food", "service") and i % 4 != 3)) else {}),
             "template": template_of(label, title),
             "agoMin": 3000 + i * 240,
             "createdAt": "2026-10-10T08:00:00.000Z",

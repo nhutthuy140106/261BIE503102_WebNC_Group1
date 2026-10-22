@@ -59,6 +59,10 @@ export class SearchResults implements OnInit {
     return Object.fromEntries(TABS.map((t) => [t.key, t.key === 'all' ? list.length : list.filter((p) => p.kind === t.key).length])) as Record<Tab, number>;
   });
   protected readonly isJobs = computed(() => this.kind() === 'job');
+  protected readonly priceOptions = computed(() => {
+    const w = this.isJobs() ? 'Tiền công' : 'Giá';
+    return [{ key: 'low', label: w + ': Thấp đến cao' }, { key: 'high', label: w + ': Cao đến thấp' }];
+  });
 
   protected readonly matched = computed(() => {
     const lo = this.min() ?? 0;

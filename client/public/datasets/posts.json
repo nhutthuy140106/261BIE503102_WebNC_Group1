@@ -98,6 +98,7 @@
     "reviewCount": 10,
     "sold": 93,
     "promoted": true,
+    "acceptsXu": true,
     "template": "food",
     "agoMin": 3720,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -172,6 +173,7 @@
     "rating": 4.3,
     "reviewCount": 10,
     "sold": 81,
+    "acceptsXu": true,
     "template": "food",
     "agoMin": 4440,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -218,6 +220,7 @@
     "price": 25000,
     "priceUnit": "ly",
     "sold": 19,
+    "acceptsXu": true,
     "template": "drink",
     "agoMin": 4920,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -240,6 +243,7 @@
     "price": 50000,
     "priceUnit": "lượt",
     "sold": 10,
+    "acceptsXu": true,
     "template": "clean",
     "agoMin": 5160,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -264,6 +268,7 @@
     "rating": 4.3,
     "reviewCount": 10,
     "sold": 80,
+    "acceptsXu": true,
     "template": "food",
     "agoMin": 5400,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -308,6 +313,7 @@
     "price": 30000,
     "priceUnit": "phần",
     "sold": 5,
+    "acceptsXu": true,
     "template": "food",
     "agoMin": 5880,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -353,6 +359,7 @@
     "price": 120000,
     "priceUnit": "250g",
     "sold": 9,
+    "acceptsXu": true,
     "template": "drink",
     "agoMin": 6360,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -486,6 +493,7 @@
     "price": 120000,
     "priceUnit": "cái",
     "sold": 21,
+    "acceptsXu": true,
     "template": "food",
     "agoMin": 7800,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -508,6 +516,7 @@
     "price": 300000,
     "priceUnit": "buổi",
     "sold": 12,
+    "acceptsXu": true,
     "template": "clean",
     "agoMin": 8040,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -532,6 +541,7 @@
     "rating": 4.3,
     "reviewCount": 10,
     "sold": 77,
+    "acceptsXu": true,
     "template": "food",
     "agoMin": 8280,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -576,6 +586,7 @@
     "price": 35000,
     "priceUnit": "phần",
     "sold": 7,
+    "acceptsXu": true,
     "template": "food",
     "agoMin": 8760,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -598,6 +609,7 @@
     "price": 60000,
     "priceUnit": "phần",
     "sold": 20,
+    "acceptsXu": true,
     "template": "food",
     "agoMin": 9000,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -620,6 +632,7 @@
     "price": 30000,
     "priceUnit": "lần",
     "sold": 11,
+    "acceptsXu": true,
     "template": "trip",
     "agoMin": 9240,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -664,6 +677,7 @@
     "price": 50000,
     "priceUnit": "kiểm tra",
     "sold": 15,
+    "acceptsXu": true,
     "template": "fix",
     "agoMin": 9720,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -686,6 +700,7 @@
     "price": 15000,
     "priceUnit": "lượt",
     "sold": 6,
+    "acceptsXu": true,
     "template": "trip",
     "agoMin": 9960,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -810,6 +825,7 @@
     "rating": 4.6,
     "reviewCount": 5,
     "sold": 44,
+    "acceptsXu": true,
     "template": "clean",
     "agoMin": 11160,
     "createdAt": "2026-10-10T08:00:00.000Z"
@@ -877,7 +893,7 @@
     "agoMin": 300,
     "createdAt": "2026-10-16T08:00:00.000Z",
     "job": {
-      "due": "CN 18/10 · 9:00",
+      "due": "CN 25/10 · 9:00",
       "offers": 3,
       "status": "open"
     }
@@ -900,7 +916,7 @@
     "agoMin": 1440,
     "createdAt": "2026-10-16T08:00:00.000Z",
     "job": {
-      "due": "T7 17/10 · 14:00",
+      "due": "T7 24/10 · 14:00",
       "offers": 0,
       "status": "open"
     }
@@ -946,7 +962,7 @@
     "agoMin": 1560,
     "createdAt": "2026-10-16T08:00:00.000Z",
     "job": {
-      "due": "14 – 16/10",
+      "due": "28 – 30/10",
       "offers": 2,
       "status": "open"
     }
@@ -969,7 +985,7 @@
     "agoMin": 1700,
     "createdAt": "2026-10-16T08:00:00.000Z",
     "job": {
-      "due": "T7 17/10 · 6:30",
+      "due": "T7 24/10 · 6:30",
       "offers": 2,
       "status": "open"
     }
@@ -1061,7 +1077,7 @@
     "agoMin": 2500,
     "createdAt": "2026-10-16T08:00:00.000Z",
     "job": {
-      "due": "T7 17/10",
+      "due": "T7 24/10",
       "offers": 1,
       "status": "taken"
     }
