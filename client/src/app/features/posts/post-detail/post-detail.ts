@@ -19,7 +19,6 @@ import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
 import { placedStepNames } from '../../../core/utils/placed-steps';
-import { formatTime } from '../../../core/utils/status-label';
 import { resolveId } from '../../../core/utils/slug-helper';
 import { PostView, viewOf } from '../../../core/utils/template-for';
 
@@ -394,9 +393,6 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     return placedStepNames(o.kind, !!o.priceCheck);
   }
 
-  protected nowLabel(): string {
-    return formatTime(new Date().toISOString());
-  }
 
   protected submit(): void {
     const p = this.post();

@@ -195,7 +195,7 @@
             </dl>
             <div class="stepper mini">
               @for (n of doneSteps(o); track $index) {
-                <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span>{{ n }}@if ($index === 0) { <small>{{ nowLabel() }}</small> }</div>
+                <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span>{{ n }}</div>
               }
             </div>
             <div class="donebtns">
