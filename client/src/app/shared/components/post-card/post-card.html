@@ -10,6 +10,7 @@
     } @else {
       <span class="kind">{{ post.category ?? kindLabel[post.kind] }}</span>
     }
+    @if (post.acceptsXu) { <span class="xuico" title="Dùng được Xu"><img src="assets/clean/antxu.png" alt="Dùng được Xu" /></span> }
     <button type="button" class="save" [class.on]="saved" (click)="onSave($event)" [attr.aria-pressed]="saved"
             [attr.aria-label]="saved ? 'Bỏ lưu' : 'Lưu bài'">
       <svg class="i"><use [attr.href]="saved ? '#heartFill' : '#heart'" /></svg>
@@ -17,7 +18,7 @@
   </div>
   <div class="body">
     <h3><a [routerLink]="['/posts', slug]">{{ post.title }}</a></h3>
-    <div class="prrow"><div class="pr">{{ post.price | vnd }} @if (post | unit; as u) { <span>/ {{ u }}</span> } @if (post.acceptsXu) { <img class="xuico" src="assets/clean/antxu.png" alt="Dùng được Xu" title="Dùng được Xu" /> }</div>@if (post.sold) { <span class="sold">{{ post.kind === 'service' ? 'Đã đặt' : 'Đã bán' }} {{ post.sold | count }}</span> }</div>
+    <div class="prrow"><div class="pr">{{ post.price | vnd }} @if (post | unit; as u) { <span>/ {{ u }}</span> }</div>@if (post.sold) { <span class="sold">{{ post.kind === 'service' ? 'Đã đặt' : 'Đã bán' }} {{ post.sold | count }}</span> }</div>
     <div class="meta">
       <span><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</span>
       @if (post.rating) {
