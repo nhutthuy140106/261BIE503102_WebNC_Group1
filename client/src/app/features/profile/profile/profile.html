@@ -1,49 +1,88 @@
-<h1>Tôi</h1>
 @if (auth.currentUser(); as u) {
-  <div class="me">
-    <span class="avatar">{{ u.fullName.charAt(0).toUpperCase() }}</span>
-    <div class="meinfo">
-      <strong>{{ u.fullName }}</strong>
-      <span class="muted">{{ area.current() }}</span>
-    </div>
-    <button type="button" class="btn ghost" (click)="logout()">Đăng xuất</button>
+  <div class="shell">
+    <aside class="side">
+      <div class="me">
+        <app-avatar [src]="u.avatar" [name]="u.fullName" [size]="52" />
+        <span><b>{{ u.fullName }}</b><small>{{ area.current() }}</small></span>
+      </div>
+      <nav aria-label="Tài khoản">
+        @for (m of menu; track m.key) {
+          <button type="button" [class.on]="tab() === m.key" (click)="go(m.key)">
+            {{ m.label }}
+            @if (badge(m.key)) { <small>{{ badge(m.key) }}</small> }
+          </button>
+        }
+      </nav>
+      <button type="button" class="out" (click)="logout()">Đăng xuất</button>
+    </aside>
+
+    <section class="panel">
+      @switch (tab()) {
+        @case ('overview') {
+          <h1>Tổng quan</h1>
+          <p class="lead">Xin chào {{ u.fullName }}. Đây là nơi quản lý tài khoản, địa chỉ nhận hàng và AntXu của bạn.</p>
+
+          <h2>Đơn hàng của bạn</h2>
+          <div class="tiles">
+            <a routerLink="/orders" [queryParams]="{ f: 'placed' }"><b>{{ stats().placed }}</b><span>Đơn đã đặt đang chạy</span></a>
+            <a routerLink="/orders" [queryParams]="{ f: 'received' }"><b>{{ stats().received }}</b><span>Việc đã nhận đang chạy</span></a>
+            <a routerLink="/orders" [queryParams]="{ f: 'history' }"><b>{{ stats().history }}</b><span>Trong lịch sử</span></a>
+          </div>
+
+          <h2>AntXu</h2>
+          <button type="button" class="xurow" (click)="go('xu')">
+            <img src="assets/clean/antxu.png" alt="" />
+            <span><b>{{ xu.balance() }} Xu</b>
+              @if (xu.expiring(); as ex) { <small>{{ ex.amount }} Xu hết hạn ngày {{ date(ex.date.getTime()) }}</small> } @else { <small>Dùng Xu đổi voucher giảm giá khi đặt hàng</small> }</span>
+            <i aria-hidden="true">›</i>
+          </button>
+
+          <h2>Lối tắt</h2>
+          <ul class="links">
+            <li><button type="button" (click)="go('saved')">Bài đã lưu <small>{{ saved.ids().length }}</small></button></li>
+            <li><button type="button" (click)="go('addresses')">Địa chỉ của tôi</button></li>
+            <li><a routerLink="/notifications">Thông báo</a></li>
+            <li><a routerLink="/messenger">Tin nhắn</a></li>
+          </ul>
+        }
+        @case ('saved') { <app-saved-list id="saved" /> }
+        @case ('addresses') { <app-address-book id="addresses" /> }
+        @case ('xu') {
+          <h1>AntXu & voucher</h1>
+          <div class="balance">
+            <img src="assets/clean/antxu.png" alt="" />
+            <span><b>{{ xu.balance() }} Xu</b>
+              @if (xu.expiring(); as ex) { <small>{{ ex.amount }} Xu hết hạn ngày {{ date(ex.date.getTime()) }}</small> }</span>
+          </div>
+
+          <h2>Voucher của bạn</h2>
+          @if (xu.vouchers().length) {
+            <ul class="vlist">
+              @for (v of xu.vouchers(); track v.id) {
+                <li><b>{{ v.title }}</b><span>{{ v.cond }}</span><small>Hạn {{ date(v.exp) }}</small></li>
+              }
+            </ul>
+          } @else { <p class="muted">Bạn chưa có voucher nào. Đổi voucher bằng Xu ở ngăn AntXu trên thanh nav.</p> }
+
+          <h2>Lịch sử AntXu</h2>
+          <ul class="ledger">
+            @for (e of ledger(); track e.key) {
+              <li><span>{{ e.t }}<small>{{ date(e.at) }}</small></span><b [class.neg]="e.d < 0">{{ e.d > 0 ? '+' : '' }}{{ e.d }}</b></li>
+            } @empty { <li class="muted">Chưa có giao dịch Xu nào.</li> }
+          </ul>
+          @if (xu.ledger().length > 6 && !showAllXu()) { <button type="button" class="more" (click)="showAllXu.set(true)">Xem tất cả</button> }
+          <p class="note">Xu nhận khi hoàn thành đơn, đánh giá, hoàn thành việc; hết hạn sau 6 tháng. Không mua bằng tiền, không đổi ra tiền.</p>
+        }
+        @case ('area') {
+          <h1>Khu vực</h1>
+          <p class="lead">Bài đăng trong khu bạn chọn được xếp lên trước khi tìm kiếm.</p>
+          <ul class="areas">
+            @for (n of area.names; track n) {
+              <li><button type="button" [class.on]="area.current() === n" (click)="area.set(n)"><i></i>{{ n }}</button></li>
+            }
+          </ul>
+        }
+      }
+    </section>
   </div>
 }
-
-<section class="blk">
-  <h2>Hoạt động</h2>
-  <div class="acts">
-    <a routerLink="/orders" [queryParams]="{ f: 'placed' }"><b>{{ stats().placed }}</b><span>Đơn đã đặt đang chạy</span></a>
-    <a routerLink="/orders" [queryParams]="{ f: 'received' }"><b>{{ stats().received }}</b><span>Việc đã nhận đang chạy</span></a>
-    <a routerLink="/orders" [queryParams]="{ f: 'history' }"><b>{{ stats().history }}</b><span>Trong lịch sử</span></a>
-    <a routerLink="/notifications"><b>→</b><span>Thông báo</span></a>
-  </div>
-</section>
-
-<app-saved-list id="saved" />
-<app-address-book id="addresses" />
-
-<section class="blk" id="xu">
-  <h2>Khu vực &amp; AntXu</h2>
-  <div class="two">
-    <div class="box">
-      <small>Khu vực đang xem</small>
-      <b>{{ area.current() }}</b>
-      <button type="button" class="btn ghost" (click)="area.open()">Đổi khu vực</button>
-    </div>
-    <div class="box">
-      <small>Số dư AntXu</small>
-      <b class="coin"><img src="assets/clean/antxu.png" alt="" />{{ xu.balance() }} Xu</b>
-      @if (xu.expiring(); as ex) { <span class="muted">{{ ex.amount }} Xu hết hạn ngày {{ date(ex.date.getTime()) }}</span> }
-      <button type="button" class="btn ghost" (click)="drawer.show('xu')">Đổi voucher</button>
-    </div>
-  </div>
-  <h3>Lịch sử AntXu</h3>
-  <ul class="ledger">
-    @for (e of (showAllXu() ? xu.ledger() : xu.ledger().slice(0, 5)); track e.key) {
-      <li><span>{{ e.t }}<small class="muted">{{ date(e.at) }}</small></span><b [class.neg]="e.d < 0">{{ e.d > 0 ? '+' : '' }}{{ e.d }}</b></li>
-    } @empty { <li class="muted">Chưa có giao dịch Xu nào.</li> }
-  </ul>
-  @if (xu.ledger().length > 5 && !showAllXu()) { <button type="button" class="btn ghost" (click)="showAllXu.set(true)">Xem tất cả</button> }
-  <p class="muted note">Xu nhận khi hoàn thành đơn, đánh giá, hoàn thành việc; hết hạn sau 6 tháng. Không mua bằng tiền, không đổi ra tiền.</p>
-</section>
