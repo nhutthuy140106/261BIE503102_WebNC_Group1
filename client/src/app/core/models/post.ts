@@ -15,6 +15,27 @@ export interface OptionGroup {
   choices: { label: string; price: number }[];
 }
 
+/**
+ * Một câu hỏi người bán đặt cho người mua. Chỉ có 4 loại (người bán chọn loại, không tự vẽ ô nhập):
+ * text = ô nhập chữ · choice = chọn 1 · multi = chọn nhiều · photo = ảnh.
+ * Lựa chọn viết "Tên" hoặc "Tên|+5.000đ" (có phụ phí). Chi tiết ở docs/handoff.md mục "Câu hỏi riêng".
+ */
+export interface PostQuestion {
+  type?: 'text' | 'choice' | 'multi' | 'photo';
+  label: string;
+  required?: boolean;
+  /** choice / multi: các lựa chọn */
+  opts?: string[];
+  /** text: chữ gợi ý trong ô, ví dụ "1 thùng hàng Shopee tên Thu Hà" */
+  ph?: string;
+  /** text: ô nhiều dòng */
+  long?: boolean;
+  /** dòng giải thích nhỏ dưới câu hỏi */
+  hint?: string;
+  /** câu "Cần trả tiền giùm?": chọn "Có" thì hỏi thêm số tiền */
+  pay?: boolean;
+}
+
 export interface Post {
   /** ObjectId (24 ký tự hex) của MongoDB */
   _id: string;
@@ -54,7 +75,8 @@ export interface Post {
   /** Nhóm tùy chọn cộng giá (size, topping…) — người mua chọn ở bước 1 */
   optionGroups?: OptionGroup[];
   /** Câu hỏi riêng người bán đặt ra cho người mua */
-  questions?: { label: string; required: boolean }[];
+  /** Câu hỏi riêng người bán đặt cho người mua — form đăng bài (phía Bán) soạn ra, khung đặt hàng (phía Mua) vẽ lại đúng như vậy */
+  questions?: PostQuestion[];
   fulfillmentModes?: ('delivery' | 'pickup')[];
   deliveryFee?: number;
   needSchedule?: boolean;

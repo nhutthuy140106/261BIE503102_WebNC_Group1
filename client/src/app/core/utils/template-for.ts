@@ -47,7 +47,7 @@ export function viewOf(post: Post): PostView {
         : [post.title + ' — bài đăng của ' + post.sellerName + ' tại ' + post.block + '.', 'Nhắn người bán nếu cần hỏi thêm trước khi đặt.'],
     list: same ? base.list : [],
     opts: own ?? (same ? base.opts : base.opts.slice(0, 1)),
-    qs: post.questions?.length ? post.questions.map((q) => ({ type: 'text' as const, label: q.label, req: q.required })) : base.qs,
+    qs: post.questions?.length ? post.questions.map((q) => ({ type: q.type ?? ('text' as const), label: q.label, opts: q.opts, ph: q.ph, req: q.required, long: q.long, hint: q.hint, pay: q.pay })) : base.qs,
     xuOk: post.acceptsXu ?? base.xuOk,
   };
   // Đơn vị chỉ có MỘT nguồn: đơn vị của giá (ổ, phần, ly, kg, giờ…). Nhãn số lượng lấy lại đúng đơn vị đó để giá và số lượng không lệch nhau.

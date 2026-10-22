@@ -62,3 +62,24 @@ Tài liệu `docs/project-context.md` ghi kiến trúc nghiệp vụ rộng hơn
 - **Trạng thái việc** hiển thị cho người mua: Đang mở · số đề nghị / Đã có người nhận. Phía Bán cập nhật số đề nghị và đóng việc khi đã chọn.
 - **Chưa chốt:** cho người nhận việc **đề xuất tiền công khác** (Airtasker bắt buộc ghi giá khi đề nghị). Nếu làm, đề nghị cần thêm trường `price`, người đăng thấy giá khi chọn người, và tiền công trong Đơn hàng lấy theo giá được chấp nhận.
 
+
+## Bổ sung 23/10 — Câu hỏi riêng của bài (hai phía dùng chung một kiểu dữ liệu)
+
+Khung đặt hàng phía Mua (`client/src/app/features/posts/post-detail`) **không còn đọc câu hỏi cố định theo loại bài** mà vẽ đúng danh sách `Post.questions` do người bán soạn ở form đăng bài. Kiểu dữ liệu nằm ở `client/src/app/core/models/post.ts` (`PostQuestion`).
+
+**4 loại câu hỏi (người bán chọn loại, không tự vẽ ô nhập):**
+
+| `type` | Hiện cho người mua | Trường cần có |
+|---|---|---|
+| `text` | Nhãn + ô nhập chữ (1 dòng; `long: true` thì nhiều dòng) | `label`, `ph` (chữ gợi ý, ví dụ "1 thùng hàng Shopee tên Thu Hà"), `required` |
+| `choice` | Chọn 1 trong danh sách | `label`, `opts` |
+| `multi` | Chọn nhiều | `label`, `opts` |
+| `photo` | Nút thêm ảnh | `label`, `required` |
+
+- Lựa chọn viết `"Tên"` hoặc `"Tên|+5.000đ"` (có phụ phí, tự cộng vào tiền đơn). Mỗi câu có thể có `hint` (dòng giải thích nhỏ).
+- Câu `pay: true` ("Cần trả tiền giùm?"): người mua chọn "Có" thì hiện ô nhập số tiền, ghi vào đơn.
+- Câu `required: true` hiện dấu `*` đỏ sau nhãn và chặn bấm Tiếp tục nếu chưa điền.
+
+**Form đăng bài cần có (phía Bán):** khối "Thông tin cần hỏi người mua": nút **Thêm câu hỏi** → chọn loại → đặt tên → (chọn 1/nhiều) thêm lựa chọn + phụ phí → bật/tắt bắt buộc → kéo để đổi thứ tự. Kèm **thư viện câu hỏi gợi ý bấm một lần**: `client/src/app/core/config/question-presets.ts` (`questionPresets(loạiBài)` và `GENERIC_QUESTIONS`). Không có câu nào thì người mua chỉ thấy ô "Ghi chú" ở bước xác nhận.
+
+**Đơn vị giá/số lượng:** nên cho người bán **chọn từ danh sách cố định** (phần, ly, cái, combo, kg, giờ, lần, buổi…) thay vì gõ tự do. Phía Mua chuẩn hóa hiển thị ở `client/src/app/core/utils/unit.ts`; khi form có danh sách cố định thì bỏ bước chuẩn hóa đó.

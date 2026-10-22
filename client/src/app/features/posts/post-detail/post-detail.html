@@ -100,36 +100,52 @@
       }
 
       @for (q of v.tpl.qs; track q.label) {
-        <div class="rows">
-          <h4>{{ q.label }} <small>{{ q.type === 'multi' ? 'Chọn nhiều' : q.type === 'choice' ? 'Chọn 1' : q.req ? 'Bắt buộc' : 'Không bắt buộc' }}</small></h4>
-          @switch (q.type) {
-            @case ('choice') {
+        @switch (q.type) {
+          @case ('choice') {
+            <div class="rows">
+              <h4>{{ q.label }}@if (q.req) { <em class="rq">*</em> } <small>Chọn 1</small></h4>
               @for (c of q.opts ?? []; track c) {
                 <button type="button" class="row" [class.on]="d.ans()[q.label] === c" (click)="d.setAns(q.label, c)">
                   <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
                 </button>
               }
               @if (q.hint) { <p class="hint">{{ q.hint }}</p> }
-            }
-            @case ('multi') {
+              @if (q.pay && d.ans()[q.label] === 'Có') {
+                <div class="qfield pay">
+                  <label>Số tiền cần trả giùm</label>
+                  <input class="input" inputmode="numeric" placeholder="Ví dụ: 120000" [value]="d.payBack()" (input)="d.payBack.set($any($event.target).value.replace(/\D/g, ''))" />
+                  <p class="hint">Bạn trả lại số tiền này khi nhận đồ.</p>
+                </div>
+              }
+            </div>
+          }
+          @case ('multi') {
+            <div class="rows">
+              <h4>{{ q.label }}@if (q.req) { <em class="rq">*</em> } <small>Chọn nhiều</small></h4>
               @for (c of q.opts ?? []; track c) {
                 <button type="button" class="row" [class.on]="d.picks(q.label).includes(c)" (click)="d.togglePick(q.label, c)">
                   <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="check"></i>
                 </button>
               }
-            }
-            @case ('photo') {
-              <input type="file" accept="image/*" (change)="onPhoto(d, q.label, $event)" />
-            }
-            @default {
+            </div>
+          }
+          @case ('photo') {
+            <div class="qfield">
+              <label>{{ q.label }}@if (q.req) { <em class="rq">*</em> }</label>
+              <label class="upload"><input type="file" accept="image/*" hidden (change)="onPhoto(d, q.label, $event)" />{{ d.ans()[q.label] ? 'Đã chọn: ' + d.ans()[q.label] : 'Thêm ảnh' }}</label>
+            </div>
+          }
+          @default {
+            <div class="qfield">
+              <label>{{ q.label }}@if (q.req) { <em class="rq">*</em> }</label>
               @if (q.long) {
                 <textarea class="input" rows="2" [placeholder]="q.ph ?? ''" [value]="d.ans()[q.label] ?? ''" (input)="d.setAns(q.label, $any($event.target).value)"></textarea>
               } @else {
                 <input class="input" [placeholder]="q.ph ?? ''" [value]="d.ans()[q.label] ?? ''" (input)="d.setAns(q.label, $any($event.target).value)" />
               }
-            }
+            </div>
           }
-        </div>
+        }
       }
 
       @if (v.tpl.qty; as q) {

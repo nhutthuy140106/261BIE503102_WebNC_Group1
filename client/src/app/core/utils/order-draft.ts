@@ -31,6 +31,8 @@ export class OrderDraft {
   readonly pay = signal<PayMethod>('cash');
   readonly addressId = signal('');
   readonly voucher = signal<Voucher | null>(null);
+  /** Số tiền người làm ứng trước, người mua trả lại khi nhận (câu hỏi "Cần trả tiền giùm?" = Có) */
+  readonly payBack = signal('');
 
   constructor(readonly tpl: PostTemplate, private readonly stock: number | null = null) {
     this.qty.set(tpl.qty?.min ?? 1);
@@ -104,14 +106,21 @@ export class OrderDraft {
       const v = q.type === 'multi' ? this.picks(q.label).map((x) => parseChoice(x).name).join(', ') : q.type === 'choice' ? parseChoice(a).name : a;
       if (v) out.push(q.label + ': ' + v);
     }
+    if (this.paying() && this.payBack()) out.push('Số tiền cần trả giùm: ' + Number(this.payBack()).toLocaleString('vi-VN') + 'đ');
     return out;
   });
+
+  /** Đã chọn "Có" ở câu hỏi trả tiền giùm */
+  paying(): boolean {
+    return this.tpl.qs.some((q) => q.pay && this.ans()[q.label] === 'Có');
+  }
 
   /** Thiếu gì để sang bước tiếp / đặt đơn (rỗng = đủ) */
   missing(checkout: boolean): string {
     for (const q of this.tpl.qs) {
       if (q.req && !(this.ans()[q.label] ?? '').trim()) return 'Hãy điền “' + q.label + '”.';
     }
+    if (this.paying() && !this.payBack()) return 'Hãy nhập số tiền cần trả giùm.';
     if (!checkout) return '';
     if (this.tpl.time.mode === 'datedur' && !this.date()) return 'Hãy chọn ngày giờ.';
     if (this.tpl.price.type !== 'quote' && this.tpl.time.mode === 'slot' && !this.time()) return 'Hãy chọn giờ.';
