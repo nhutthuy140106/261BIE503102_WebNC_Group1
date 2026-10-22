@@ -168,9 +168,9 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const t = new Date();
     const tm = new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1);
     const dm = String(day).padStart(2, '0') + '/' + String(m).padStart(2, '0');
-    if (iso === this.todayIso()) return 'Hôm nay · ' + dm;
-    if (iso === this.iso(tm)) return 'Ngày mai · ' + dm;
-    return dows[new Date(y, m - 1, day).getDay()] + ', ' + String(day).padStart(2, '0') + '/' + String(m).padStart(2, '0');
+    if (iso === this.todayIso()) return 'Hôm nay (' + dm + ')';
+    if (iso === this.iso(tm)) return 'Ngày mai (' + dm + ')';
+    return dows[new Date(y, m - 1, day).getDay()] + ' (' + dm + ')';
   }
 
   protected readonly address = computed(() => {
