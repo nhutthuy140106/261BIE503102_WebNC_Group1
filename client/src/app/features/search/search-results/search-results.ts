@@ -59,23 +59,10 @@ export class SearchResults implements OnInit {
     return Object.fromEntries(TABS.map((t) => [t.key, t.key === 'all' ? list.length : list.filter((p) => p.kind === t.key).length])) as Record<Tab, number>;
   });
   protected readonly isJobs = computed(() => this.kind() === 'job');
-  /** Một menu sắp xếp duy nhất (giống trang chủ): việc làm không có "Bán chạy", giá gọi là tiền công */
-  protected readonly sortOptions = computed(() => {
+  protected readonly priceOptions = computed(() => {
     const w = this.isJobs() ? 'Tiền công' : 'Giá';
-    return [
-      { key: 'near', label: 'Gần nhất' },
-      { key: 'new', label: 'Mới nhất' },
-      ...(this.isJobs() ? [] : [{ key: 'sold', label: 'Bán chạy' }]),
-      { key: 'low', label: w + ' thấp đến cao' },
-      { key: 'high', label: w + ' cao đến thấp' },
-    ];
+    return [{ key: 'low', label: w + ': Thấp đến cao' }, { key: 'high', label: w + ': Cao đến thấp' }];
   });
-  /** Mức giá chọn nhanh (người dùng không phải gõ số) */
-  protected readonly presets = computed<{ label: string; min: number | null; max: number | null }[]>(() =>
-    this.isJobs()
-      ? [{ label: 'Dưới 50k', min: null, max: 50000 }, { label: '50k – 100k', min: 50000, max: 100000 }, { label: 'Trên 100k', min: 100000, max: null }]
-      : [{ label: 'Dưới 50k', min: null, max: 50000 }, { label: '50k – 150k', min: 50000, max: 150000 }, { label: '150k – 300k', min: 150000, max: 300000 }, { label: 'Trên 300k', min: 300000, max: null }],
-  );
 
   protected readonly matched = computed(() => {
     const lo = this.min() ?? 0;
@@ -136,14 +123,6 @@ export class SearchResults implements OnInit {
 
   protected setKind(k: Tab): void {
     this.navigate({ kind: k === 'all' ? null : k, sort: this.sort() === 'sold' && k === 'job' ? null : this.sortParam() });
-  }
-
-  protected isPreset(p: { min: number | null; max: number | null }): boolean {
-    return this.min() === p.min && this.max() === p.max;
-  }
-
-  protected setPreset(p: { min: number | null; max: number | null }): void {
-    this.navigate({ min: this.isPreset(p) ? null : p.min != null ? String(p.min) : null, max: this.isPreset(p) ? null : p.max != null ? String(p.max) : null });
   }
 
   protected applyPrice(): void {

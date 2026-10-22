@@ -6,13 +6,13 @@
 
 <div class="layout">
   <aside class="filters">
-    <div class="fhead"><h2>Bộ lọc</h2>@if (hasFilter()) { <button type="button" class="clear" (click)="clear()">Xóa lọc</button> }</div>
+    <div class="fhead"><h2>Bộ lọc</h2>@if (hasFilter()) { <button type="button" class="clear" (click)="clear()">Xóa</button> }</div>
 
     <section>
       <h3>Danh mục</h3>
       <ul class="cats">
         @for (t of tabs; track t.key) {
-          <li><button type="button" [class.on]="kind() === t.key" (click)="setKind(t.key)"><span>{{ t.label }}</span><small>{{ counts()[t.key] }}</small></button></li>
+          <li><button type="button" [class.on]="kind() === t.key" (click)="setKind(t.key)"><i></i><span>{{ t.label }}</span><small>{{ counts()[t.key] }}</small></button></li>
         }
       </ul>
     </section>
@@ -24,35 +24,42 @@
 
     <section>
       <h3>{{ isJobs() ? 'Tiền công' : 'Khoảng giá' }}</h3>
-      <div class="chips">
-        @for (p of presets(); track p.label) { <button type="button" [class.on]="isPreset(p)" (click)="setPreset(p)">{{ p.label }}</button> }
-      </div>
       <div class="range">
-        <input type="number" min="0" step="10000" placeholder="Từ" [value]="draftMin()" (input)="draftMin.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Thấp nhất" />
-        <span>–</span>
-        <input type="number" min="0" step="10000" placeholder="Đến" [value]="draftMax()" (input)="draftMax.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Cao nhất" />
-        <button type="button" class="go" (click)="applyPrice()" aria-label="Áp dụng khoảng giá">OK</button>
+        <input type="number" min="0" step="10000" placeholder="Từ" [value]="draftMin()" (input)="draftMin.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá thấp nhất" />
+        <i></i>
+        <input type="number" min="0" step="10000" placeholder="Đến" [value]="draftMax()" (input)="draftMax.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá cao nhất" />
       </div>
+      <button type="button" class="apply" (click)="applyPrice()">Áp dụng</button>
     </section>
 
     @if (!isJobs()) {
       <section>
         <h3>Đánh giá</h3>
-        <div class="chips">
-          @for (r of [5, 4, 3]; track r) { <button type="button" [class.on]="rate() === r" (click)="setRate(r)">{{ r }}★@if (r < 5) { trở lên }</button> }
-        </div>
+        <ul class="rates">
+          @for (r of [5, 4, 3]; track r) {
+            <li>
+              <button type="button" [class.on]="rate() === r" (click)="setRate(r)">
+                <i></i><span class="st">@for (s of stars(r); track $index) { <b [class.off]="!s">★</b> }</span>@if (r < 5) { <span class="up">trở lên</span> }
+              </button>
+            </li>
+          }
+        </ul>
       </section>
 
       <section>
-        <button type="button" class="opt" [class.on]="xuOnly()" (click)="toggleXu()"><i class="box"></i><span>Dùng được Xu</span><img src="assets/clean/antxu.png" alt="" /></button>
+        <h3>Ưu đãi</h3>
+        <button type="button" class="opt" [class.on]="xuOnly()" (click)="toggleXu()"><i class="box"></i><img src="assets/clean/antxu.png" alt="" /><span>Dùng được Xu</span></button>
       </section>
     }
   </aside>
 
   <div class="main">
     <div class="sortbar">
-      <span class="count"><b>{{ matched().length }}</b> bài phù hợp</span>
-      <app-sort-menu [options]="sortOptions()" [value]="sort()" (valueChange)="setSort($any($event))" />
+      <span class="lab">Sắp xếp theo:</span>
+      <button type="button" [class.on]="sort() === 'near'" (click)="setSort('near')">Gần nhất</button>
+      <button type="button" [class.on]="sort() === 'new'" (click)="setSort('new')">Mới nhất</button>
+      @if (!isJobs()) { <button type="button" [class.on]="sort() === 'sold'" (click)="setSort('sold')">Bán chạy</button> }
+      <app-sort-menu [bar]="true" [options]="priceOptions()" [value]="sort()" [placeholder]="isJobs() ? 'Tiền công' : 'Giá'" (valueChange)="setSort($any($event))" />
     </div>
 
     @if (loading()) {
