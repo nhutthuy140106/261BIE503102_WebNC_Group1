@@ -64,3 +64,9 @@
   .sortbar .lab { display: none; }
 }
 @media (max-width: 560px) { .card-grid { gap: 18px 12px; } }
+
+/* mức giá gợi ý: các nút có cùng chiều rộng, xếp 2 cột cho đều */
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.presets button { height: 34px; border: 1px solid #E3E5EA; border-radius: 999px; background: #fff; font: inherit; font-size: 13px; color: var(--ink); white-space: nowrap; }
+.presets button:hover { border-color: #B9BEC8; }
+.presets button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
