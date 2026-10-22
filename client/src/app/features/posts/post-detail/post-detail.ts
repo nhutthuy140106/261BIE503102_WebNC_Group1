@@ -19,7 +19,7 @@ import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
 import { placedStepNames } from '../../../core/utils/placed-steps';
-import { formatDateTime } from '../../../core/utils/status-label';
+import { formatTime } from '../../../core/utils/status-label';
 import { resolveId } from '../../../core/utils/slug-helper';
 import { PostView, viewOf } from '../../../core/utils/template-for';
 
@@ -163,16 +163,17 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     this.calOpen.set(false);
   }
 
-  protected dateLabel(iso: string): string {
+  protected dateLabel(iso: string, withYear = false): string {
     if (!iso) return 'Chọn ngày';
     const [y, m, day] = iso.split('-').map(Number);
     const dows = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
     const t = new Date();
     const tm = new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1);
     const dm = String(day).padStart(2, '0') + '/' + String(m).padStart(2, '0');
-    if (iso === this.todayIso()) return 'Hôm nay (' + dm + ')';
-    if (iso === this.iso(tm)) return 'Ngày mai (' + dm + ')';
-    return dows[new Date(y, m - 1, day).getDay()] + ' (' + dm + ')';
+    const dmy = withYear ? dm + '/' + y : dm;
+    if (iso === this.todayIso()) return 'Hôm nay (' + dmy + ')';
+    if (iso === this.iso(tm)) return 'Ngày mai (' + dmy + ')';
+    return dows[new Date(y, m - 1, day).getDay()] + ' (' + dmy + ')';
   }
 
   protected readonly address = computed(() => {
@@ -384,7 +385,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   /** "Hôm nay (23/10) · 11:00", thêm thời lượng với dịch vụ tính theo giờ */
   protected whenLabel(d: OrderDraft): string {
     const t = d.tpl.time;
-    const day = this.dateLabel(d.date() || this.todayIso());
+    const day = this.dateLabel(d.date() || this.todayIso(), true);
     if (t.mode === 'datedur') return day + ' · ' + d.time() + ' · ' + d.hours() + ' giờ' + (d.repeat() ? ' · lặp hằng tuần' : '');
     return day + ' · ' + d.time();
   }
@@ -394,7 +395,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   protected nowLabel(): string {
-    return formatDateTime(new Date().toISOString());
+    return formatTime(new Date().toISOString());
   }
 
   protected submit(): void {

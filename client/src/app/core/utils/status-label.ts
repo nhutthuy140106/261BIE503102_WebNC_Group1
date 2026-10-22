@@ -8,6 +8,12 @@ export function statusLabel(o: Pick<Order, 'type' | 'status'>): string {
     : PLACED_STATUS_LABEL[o.status as PlacedStatus];
 }
 
+/** Chỉ giờ: "01:33" (dưới từng bước của thanh tiến trình; ngày đã có ở chỗ khác) */
+export function formatTime(iso: string): string {
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? '' : String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
 /** "Hôm nay, 01:33" · "Hôm qua, 20:10" · "23/10, 01:33" (thêm năm nếu khác năm nay) */
 export function formatDateTime(iso: string): string {
   const d = new Date(iso);

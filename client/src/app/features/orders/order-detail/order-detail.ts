@@ -13,7 +13,7 @@ import { ToastService } from '../../../core/services/toast';
 import { XuService } from '../../../core/services/xu';
 import { placedStepNames } from '../../../core/utils/placed-steps';
 import { canSeeExactAddress } from '../../../core/utils/offer-state';
-import { formatDateTime, statusLabel } from '../../../core/utils/status-label';
+import { formatDateTime, formatTime, statusLabel } from '../../../core/utils/status-label';
 
 /** Một nút trong bảng hành động bên phải: `main` = nút cam chính, `warn` = nút viền đỏ cam, còn lại = nút viền. */
 interface Btn {
@@ -187,13 +187,16 @@ export class OrderDetail implements OnInit {
     const ps = this.priceStep(o);
     const names = placedStepNames(o.kind, ps);
     const sh = ps ? 1 : 0;
-    const posMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: 2 + sh, delivering: 3 + sh, ready: 3 + sh, done: 4 + sh };
+    const svc = this.kind(o) === 'service';
+    // đồ ăn / đồ dùng chỉ có 4 bước: chuẩn bị và giao gộp vào "Đang giao"
+    const mid = svc ? 2 + sh : 2;
+    const posMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: mid, delivering: svc ? 3 + sh : 2, ready: svc ? 3 + sh : 2, done: svc ? 4 + sh : 3 };
     const pos = posMap[o.status as string] ?? 0;
     const stopped = ['cancelled', 'declined'].includes(o.status as string);
-    const cutMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: 2 + sh, delivering: 3 + sh, ready: 3 + sh };
+    const cutMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: mid, delivering: svc ? 3 + sh : 2, ready: svc ? 3 + sh : 2 };
     const cutAt = o.priceRejected ? 2 : o.cancelFrom ? Math.min(names.length - 1, (cutMap[o.cancelFrom] ?? 0) + 1) : 1;
     if (stopped) names[cutAt] = o.priceRejected ? 'Đã từ chối giá' : this.label(o);
-    const times = (o.history ?? []).map((h) => formatDateTime(h.at));
+    const times = (o.history ?? []).map((h) => formatTime(h.at));
     return names.map((label, i) => {
       const cls = stopped ? (i < cutAt ? 'ok' : i === cutAt ? 'cut' : '') : i < pos ? 'ok' : i === pos ? 'cur' : '';
       return { label, cls, time: cls === 'ok' || cls === 'cur' ? times[i] ?? '' : '', n: i + 1 };
@@ -475,7 +478,7 @@ export class OrderDetail implements OnInit {
       const cut = side && i === cur;
       const cls = cut ? 'cut' : of.state === 'done' ? 'ok' : i < cur ? 'ok' : i === cur ? 'cur' : '';
       const h = of.history.find((x) => x.state === s);
-      const time = cls === 'ok' || (cls === 'cur' && i === 0) ? (h ? formatDateTime(h.at) : '') : '';
+      const time = cls === 'ok' || (cls === 'cur' && i === 0) ? (h ? formatTime(h.at) : '') : '';
       return { label: cut ? OFFER_STATE_LABEL[of.state] : OFFER_STATE_LABEL[s], cls, time, n: i + 1 };
     });
   }
