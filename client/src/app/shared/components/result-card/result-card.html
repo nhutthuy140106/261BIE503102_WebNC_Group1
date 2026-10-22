@@ -22,12 +22,14 @@
     @if (true) {
       <div class="price">{{ post.price | vnd }} @if (post.priceUnit) { <small>/ {{ post.priceUnit }}</small> }</div>
     }
-    <div class="area"><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</div>
-    @if (isJob && post.job) {
-      <div class="jst" [class.closed]="post.job.status === 'taken'">
-        @if (post.job.status === 'taken') { Đã có người nhận } @else { Đang mở · {{ post.job.offers ? post.job.offers + ' đề nghị' : 'chưa có đề nghị' }} }
-      </div>
-    }
+    <div class="area">
+      <span class="loc"><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</span>
+      @if (isJob && post.job) {
+        <span class="jst" [class.closed]="post.job.status === 'taken'">@if (post.job.status === 'taken') { Đã có người nhận } @else { Đang mở · {{ post.job.offers ? post.job.offers + ' đề nghị' : 'chưa có' }} }</span>
+      } @else if (post.rating) {
+        <span class="rate"><svg class="i"><use href="#star" /></svg>{{ post.rating }}</span>
+      }
+    </div>
     </div>
   </a>
   @if (post.promoted) { <span class="ad">QUẢNG BÁ</span> }

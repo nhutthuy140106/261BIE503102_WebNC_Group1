@@ -1,4 +1,4 @@
-:host { display: block; min-width: 0; }
+:host { display: block; min-width: 0; height: 100%; }
 /* Thẻ kết quả tìm kiếm — bê từ design/mockups/search.html (.result-card) */
 .result-card { position: relative; min-width: 0; }
 .result-card > a { display: block; }
@@ -40,3 +40,10 @@ h3 { font-size: 15px; line-height: 1.35; margin: 5px 0; font-weight: 600; min-he
 .body { padding: 10px 12px 12px; display: flex; flex-direction: column; flex: 1; }
 .body .kind { margin-top: 0; }
 .body .area { margin-top: auto; padding-top: 6px; }
+
+.result-card { height: 100%; }
+.area { justify-content: space-between; gap: 8px; }
+.area .loc { display: inline-flex; align-items: center; gap: 4px; }
+.area .jst { margin: 0; }
+.area .rate { display: inline-flex; align-items: center; gap: 4px; color: var(--ink); font-weight: 500; }
+.area .rate svg { color: #e39b1a; }
