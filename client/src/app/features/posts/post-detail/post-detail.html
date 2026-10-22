@@ -184,10 +184,22 @@
       <div class="modal" role="dialog" aria-label="Xác nhận đơn hàng" (click)="$event.stopPropagation()">
         @if (placed(); as o) {
           <div class="done">
+            <img class="mascot" src="assets/clean/wave.png" alt="" />
             <h2>Đã gửi đơn!</h2>
-            <p>Mã đơn <b>{{ o.code }}</b>. {{ p.sellerName }} sẽ xác nhận sớm — bạn theo dõi ở mục Đơn hàng.</p>
-            <button type="button" class="primary" (click)="goOrder(o)">Xem đơn hàng</button>
-            <button type="button" class="btn ghost" (click)="closeCheckout()">Ở lại bài này</button>
+            <p class="sub2">{{ p.sellerName }} sẽ xác nhận sớm. Bạn sẽ nhận thông báo khi có phản hồi.</p>
+            <dl class="recap">
+              <div><dt>Mã đơn</dt><dd>{{ o.code }}</dd></div>
+              <div><dt>{{ v.tpl.title }}</dt><dd>{{ o.total | vnd }}</dd></div>
+              @if (o.detail?.when) { <div><dt>Thời gian</dt><dd>{{ o.detail?.when }}</dd></div> }
+              <div><dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd></div>
+            </dl>
+            <ol class="mini">
+              <li class="now"><i></i>Đã gửi</li><li><i></i>Chờ xác nhận</li><li><i></i>{{ o.detail?.steps?.[2] ?? 'Đang chuẩn bị' }}</li><li><i></i>Hoàn thành</li>
+            </ol>
+            <div class="donebtns">
+              <button type="button" class="ghostbtn" (click)="closeCheckout()">Tiếp tục xem bài</button>
+              <button type="button" class="primary" (click)="goOrder(o)">Xem đơn hàng</button>
+            </div>
           </div>
         } @else {
           <header><h2>Xác nhận đơn hàng</h2><button type="button" class="x" (click)="closeCheckout()" aria-label="Đóng">✕</button></header>

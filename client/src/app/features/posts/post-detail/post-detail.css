@@ -129,8 +129,6 @@
 .modal footer b { color: var(--accent); font-size: 22px; }
 .modal footer .primary { width: auto; margin: 0; padding: 0 28px; }
 .more { font-weight: 600; color: var(--accent); padding: 6px 0; }
-.done { padding: 40px 30px; display: grid; gap: 12px; text-align: center; }
-.done .primary { width: 100%; }
 
 /* xem ảnh lớn */
 .lb { position: fixed; inset: 0; z-index: 95; background: rgba(18,22,34,.94); display: flex; flex-direction: column; color: #fff; }
@@ -315,3 +313,24 @@
 .rbtn { height: 34px; padding: 0 14px; border-radius: 999px; background: var(--ink); color: #fff; font: inherit; font-size: 13px; font-weight: 600; }
 .rbtn:disabled { background: #D9D3CF; }
 .modal footer .ghostbtn { height: 44px; padding: 0 14px; background: none; color: var(--smoke); text-decoration: underline; text-underline-offset: 3px; font: inherit; }
+
+.done { padding: 28px 28px 26px; display: grid; justify-items: center; gap: 10px; text-align: center; }
+.done .mascot { width: 92px; margin-bottom: 2px; }
+.done h2 { margin: 0; font-size: 22px; }
+.done .sub2 { margin: 0; color: var(--smoke); line-height: 1.5; max-width: 340px; }
+.recap { width: 100%; margin: 12px 0 0; border: 1px solid #E6E8EC; border-radius: 12px; text-align: left; }
+.recap div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 14px; border-top: 1px solid #E6E8EC; font-size: 14px; }
+.recap div:first-child { border-top: 0; }
+.recap dt { color: var(--smoke); min-width: 0; }
+.recap dd { margin: 0; font-weight: 600; text-align: right; }
+.mini { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); margin: 10px 0 4px; font-size: 12px; color: var(--fog); }
+.mini li { position: relative; display: grid; justify-items: center; gap: 6px; }
+.mini li::before { content: ''; position: absolute; top: 5px; left: -50%; width: 100%; height: 2px; background: #E6E8EC; }
+.mini li:first-child::before { display: none; }
+.mini i { position: relative; z-index: 1; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2px solid #D5D8DE; }
+.mini .now { color: var(--ink); font-weight: 700; }
+.mini .now i { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.mini .now::before { background: #E6E8EC; }
+.donebtns { width: 100%; display: grid; grid-template-columns: 1fr 1.3fr; gap: 10px; margin-top: 8px; }
+.donebtns .primary { margin: 0; height: 48px; }
+.donebtns .ghostbtn { height: 48px; border-radius: 12px; border: 1px solid #DADDE3; background: none; font: inherit; font-weight: 600; }
