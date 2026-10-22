@@ -33,7 +33,6 @@
   <form #bigSearch class="bigsearch" [class.drag]="dragging()" (submit)="$event.preventDefault(); submitSearch()" role="search"
         (dragenter)="$event.preventDefault(); dragging.set(true)" (dragover)="$event.preventDefault(); dragging.set(true)"
         (dragleave)="dragging.set(false)" (drop)="onDrop($event)">
-    <svg class="i lead"><use href="#search" /></svg>
     @if (search.imageUrl(); as img) {
       <span class="imgchip">
         <img [src]="img" alt="" /><span>Tìm theo ảnh</span>
@@ -61,7 +60,7 @@
 } @else {
   <section class="sec">
     <div class="sh">
-      <h2>Nổi bật trong khu</h2><span class="info">Bài được người bán quảng bá</span>
+      <h2>Nổi bật trong khu</h2>
       <a class="more" routerLink="/search">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
     </div>
     <div class="grid">
@@ -106,7 +105,6 @@
       <h2>Rảnh tay? Giúp hàng xóm,<br />nhận tiền công ngay trong khu.</h2>
       <div class="earn-btns">
         <a class="earn-go" routerLink="/search" [queryParams]="{ kind: 'job' }">Xem việc gần nhà <svg class="i"><use href="#right" /></svg></a>
-        <button type="button" class="earn-ghost" (click)="postJob()">Đăng việc cần người</button>
       </div>
     </div>
     <ol class="earn-steps">

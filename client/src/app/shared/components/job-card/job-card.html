@@ -3,7 +3,6 @@
     <div class="jc-top">
       <app-avatar [src]="job.sellerAvatar" [name]="job.sellerName" [size]="30" />
       <span><b>{{ job.sellerName }}</b>{{ job.createdAt | ago }}</span>
-      @if (job.category) { <span class="jcat">{{ job.category }}</span> }
     </div>
     @if (job.description) { <p class="jc-desc">{{ job.description }}</p> }
     <div class="jc-foot">

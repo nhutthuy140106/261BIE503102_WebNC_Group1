@@ -18,9 +18,6 @@
   <div class="body">
     <h3><a [routerLink]="['/posts', slug]">{{ post.title }}</a></h3>
     <div class="pr">{{ post.price | vnd }} @if (post.priceUnit) { <span>/ {{ post.priceUnit }}</span> }</div>
-    @if (post.acceptsXu) {
-      <span class="xuok"><img src="assets/clean/antxu.png" alt="" />Dùng được Xu</span>
-    }
     <div class="meta">
       <span><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</span>
       @if (post.rating) {
