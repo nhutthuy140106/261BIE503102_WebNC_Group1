@@ -9,7 +9,7 @@
 
   <div class="titlerow">
     <div>
-      <div class="kindline"><span class="kindchip">{{ v.tpl.kind }}</span><span>{{ v.tpl.explain ?? (p.sellerName + ' đăng bài này — bạn đặt, ' + p.sellerName + ' thực hiện.') }}</span></div>
+      <div class="kindline"><span class="kindchip">{{ v.tpl.kind }}</span></div>
       <h1>{{ p.title }}</h1>
       <div class="sub">
         <span class="st"><svg class="i"><use href="#star" /></svg>{{ rate() }} · {{ reviews().length }} đánh giá</span>
@@ -18,7 +18,7 @@
       </div>
     </div>
     <div class="acts">
-      <button type="button" (click)="share()">Chia sẻ</button>
+      <button type="button" (click)="share()"><svg class="i"><use href="#right" /></svg>Chia sẻ</button>
       <button type="button" [class.on]="saved.has(p._id)" (click)="toggleSave(p)">
         <svg class="i"><use [attr.href]="saved.has(p._id) ? '#heartFill' : '#heart'" /></svg>{{ saved.has(p._id) ? 'Đã lưu' : 'Lưu' }}
       </button>
@@ -39,7 +39,7 @@
       <section class="block seller">
         <a class="shoplink" [routerLink]="['/shop', p.sellerId]">
           <app-avatar [src]="p.sellerAvatar ?? img(v.tpl.seller.av, 120, 120)" [name]="p.sellerName" [size]="56" />
-          <span><b>{{ p.sellerName }}</b><small>{{ v.tpl.seller.since }} · {{ v.tpl.seller.reply }}</small></span>
+          <span><b>{{ p.sellerName }}</b><small>{{ v.tpl.seller.reply }}</small></span>
         </a>
         <button type="button" class="msg" (click)="message(p)">Nhắn tin</button>
       </section>
@@ -67,7 +67,7 @@
             @for (r of reviews().slice(0, 4); track $index) {
               <article class="rev">
                 <div class="who"><img [src]="img(r[0], 80, 80)" alt="" /><span><b>{{ r[1] }}</b><small>{{ r[2] }} · {{ r[3] }}</small></span></div>
-                <div class="stars">@for (s of stars(r[4]); track $index) { <span [class.off]="!s">★</span> } <i class="ok">· {{ doneTag() }}</i></div>
+                <div class="stars">@for (s of stars(r[4]); track $index) { <span [class.off]="!s">★</span> }</div>
                 <p>{{ r[5] }}</p>
               </article>
             }
@@ -337,7 +337,7 @@
             @for (r of rvShown(); track $index) {
               <article class="rev">
                 <div class="who"><img [src]="img(r[0], 80, 80)" alt="" /><span><b>{{ r[1] }}</b><small>{{ r[2] }} · {{ r[3] }}</small></span></div>
-                <div class="stars">@for (s of stars(r[4]); track $index) { <span [class.off]="!s">★</span> } <i class="ok">· {{ doneTag() }}</i></div>
+                <div class="stars">@for (s of stars(r[4]); track $index) { <span [class.off]="!s">★</span> }</div>
                 <p>{{ r[5] }}</p>
                 @if (r[6].length) { <div class="rimgs">@for (im of r[6]; track im) { <img [src]="img(im, 150, 110)" alt="" /> }</div> }
                 @if (r[7]) { <div class="reply"><b>Phản hồi của {{ p.sellerName }}</b>{{ r[7] }}</div> }

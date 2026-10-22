@@ -89,10 +89,6 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const s = this.rvSort();
     return s === 'new' ? list : [...list].sort((a, b) => (s === 'high' ? b[4] - a[4] : a[4] - b[4]));
   });
-  protected readonly doneTag = computed(() => {
-    const k = this.view()?.tpl.kind ?? '';
-    return /Đồ ăn|Đồ uống/.test(k) ? 'Đã đặt món' : k === 'Hàng hóa' ? 'Đã mua' : 'Đã dùng dịch vụ';
-  });
 
   /** Khung giờ chọn được, bước 30 phút */
   protected readonly slots = computed(() => {

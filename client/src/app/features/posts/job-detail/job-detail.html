@@ -8,7 +8,6 @@
       <div class="kindline">
         <span class="cat">Việc làm@if (j.category) { · {{ j.category }} }</span>
         @if (j.job?.status === 'open') { <span class="jst">Đang mở · {{ j.job?.offers }} đề nghị</span> } @else { <span class="jst closed">Đã có người nhận</span> }
-        <span>{{ j.sellerName }} đang cần người — bạn gửi đề nghị để nhận làm và được trả công.</span>
       </div>
       <h1>{{ j.title }}</h1>
       <div class="meta">

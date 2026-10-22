@@ -12,9 +12,10 @@
 .sub .st { color: var(--ink); font-weight: 600; }
 .sub .st svg { color: #E39B1A; }
 .acts { margin-left: auto; display: flex; gap: 8px; flex: none; }
-.acts button { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 10px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; background: none; }
-.acts button:hover { background: var(--soft); }
-.acts button.on { color: var(--accent); }
+.acts button { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 16px; border-radius: 999px; border: 1px solid #DADDE3; background: #fff; font-weight: 600; font-size: 13.5px; transition: background .15s, border-color .15s; }
+.acts button:hover { background: #F7F8FA; border-color: #B9BEC8; }
+.acts button svg { width: 17px; height: 17px; }
+.acts button.on { color: var(--accent); border-color: var(--accent); }
 
 .gallery { margin-top: 22px; display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 210px 210px; gap: 8px; border-radius: 18px; overflow: hidden; position: relative; }
 .gallery.one { grid-template-columns: 1fr; grid-template-rows: 380px; }
