@@ -6,28 +6,28 @@
 
 <div class="layout">
   <aside class="filters">
-    <h2>Bộ lọc</h2>
+    <div class="fhead"><h2>Bộ lọc</h2>@if (hasFilter()) { <button type="button" class="clear" (click)="clear()">Xóa</button> }</div>
 
     <section>
-      <h3>Theo danh mục</h3>
+      <h3>Danh mục</h3>
       <ul class="cats">
         @for (t of tabs; track t.key) {
-          <li><button type="button" [class.on]="kind() === t.key" (click)="setKind(t.key)">{{ t.label }} <small>({{ counts()[t.key] }})</small></button></li>
+          <li><button type="button" [class.on]="kind() === t.key" (click)="setKind(t.key)"><i></i><span>{{ t.label }}</span><small>{{ counts()[t.key] }}</small></button></li>
         }
       </ul>
     </section>
 
     <section>
       <h3>Khu vực</h3>
-      <button type="button" class="areabtn" (click)="area.open()">{{ area.current() }}<svg class="i"><use href="#chev" /></svg></button>
+      <button type="button" class="areabtn" (click)="area.open()"><span>{{ area.current() }}</span><svg class="i"><use href="#chev" /></svg></button>
     </section>
 
     <section>
       <h3>{{ isJobs() ? 'Tiền công' : 'Khoảng giá' }}</h3>
       <div class="range">
-        <input type="number" min="0" step="10000" placeholder="đ TỪ" [value]="draftMin()" (input)="draftMin.set($any($event.target).value)" (keydown.enter)="applyPrice()" />
+        <input type="number" min="0" step="10000" placeholder="Từ" [value]="draftMin()" (input)="draftMin.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá thấp nhất" />
         <i></i>
-        <input type="number" min="0" step="10000" placeholder="đ ĐẾN" [value]="draftMax()" (input)="draftMax.set($any($event.target).value)" (keydown.enter)="applyPrice()" />
+        <input type="number" min="0" step="10000" placeholder="Đến" [value]="draftMax()" (input)="draftMax.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá cao nhất" />
       </div>
       <button type="button" class="apply" (click)="applyPrice()">Áp dụng</button>
     </section>
@@ -39,7 +39,7 @@
           @for (r of [5, 4, 3]; track r) {
             <li>
               <button type="button" [class.on]="rate() === r" (click)="setRate(r)">
-                <span class="st">@for (s of stars(r); track $index) { <b [class.off]="!s">★</b> }</span>@if (r < 5) { <span>trở lên</span> }
+                <i></i><span class="st">@for (s of stars(r); track $index) { <b [class.off]="!s">★</b> }</span>@if (r < 5) { <span class="up">trở lên</span> }
               </button>
             </li>
           }
@@ -48,16 +48,14 @@
 
       <section>
         <h3>Ưu đãi</h3>
-        <label class="check"><input type="checkbox" [checked]="xuOnly()" (change)="toggleXu()" /><img src="assets/clean/antxu.png" alt="" />Dùng được Xu</label>
+        <button type="button" class="opt" [class.on]="xuOnly()" (click)="toggleXu()"><i class="box"></i><img src="assets/clean/antxu.png" alt="" /><span>Dùng được Xu</span></button>
       </section>
     }
-
-    <button type="button" class="clear" [disabled]="!hasFilter()" (click)="clear()">Xóa tất cả</button>
   </aside>
 
   <div class="main">
     <div class="sortbar">
-      <span class="lab">Sắp xếp theo</span>
+      <span class="lab">Sắp xếp theo:</span>
       <button type="button" [class.on]="sort() === 'near'" (click)="setSort('near')">Gần nhất</button>
       <button type="button" [class.on]="sort() === 'new'" (click)="setSort('new')">Mới nhất</button>
       @if (!isJobs()) { <button type="button" [class.on]="sort() === 'sold'" (click)="setSort('sold')">Bán chạy</button> }
@@ -93,7 +91,7 @@
 
       @if (!matched().length) {
         <div class="empty">
-          <img src="assets/clean/empty.png" alt="" />
+          <img src="assets/clean/idle.png" alt="" />
           <h2>Chưa thấy bài phù hợp</h2>
           <p>Thử từ khóa khác, xóa bớt bộ lọc hoặc đổi khu vực.</p>
           <button type="button" class="btn" (click)="clear()">Xóa bộ lọc</button>
