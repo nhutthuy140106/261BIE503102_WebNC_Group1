@@ -6,7 +6,7 @@
   <div class="dhead">
     <div>
       <div class="chips">
-        <span class="chip">{{ job()?.category ?? (o.type === 'placed' ? 'Đơn hàng' : 'Việc làm') }}</span>
+        @if (job()?.category; as c) { <span class="chip">{{ c }}</span> }
         <span class="chip">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span>
         <span class="code">Mã đơn {{ o.code }}</span>
       </div>
@@ -200,7 +200,7 @@
     </aside>
   </div>
 
-  @if (isMock) {
+  @if (isMock && (o.type === 'placed' ? placedSims(o).length : receivedSims(o, offer()!).length)) {
     <div class="demo2">
       Bản mẫu — giả lập phía {{ o.type === 'placed' ? 'người bán' : 'người đăng việc' }}:
       @if (o.type === 'placed') {
