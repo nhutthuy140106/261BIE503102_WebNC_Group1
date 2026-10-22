@@ -39,19 +39,19 @@
         </a>
 
         <div class="of">
-          <span class="hint">{{ hint(o) }}</span>
-          <div class="right">
-            <span class="total">{{ o.type === 'placed' ? 'Thành tiền' : 'Tiền công' }}: <b>{{ o.total | vnd }}</b></span>
-            <div class="btns">
-              <a class="btn2" routerLink="/messenger" [queryParams]="{ to: o.counterpartName, av: o.counterpartAvatar }">Nhắn tin</a>
-              @if (next(o); as n) {
-                <a class="btn2 main" [routerLink]="['/orders', o._id]">{{ n }}</a>
-              } @else if (isEnded(o)) {
-                <a class="btn2 main" [routerLink]="side(o).link" [queryParams]="side(o).params">{{ side(o).label }}</a>
-              } @else {
-                <a class="btn2" [routerLink]="['/orders', o._id]">Xem chi tiết</a>
-              }
-            </div>
+          <div class="info">
+            <span class="total">{{ o.type === 'placed' ? 'Thành tiền' : 'Tiền công' }} <b>{{ o.total | vnd }}</b></span>
+            <span class="hint">{{ hint(o) }}</span>
+          </div>
+          <div class="btns">
+            <a class="btn2" routerLink="/messenger" [queryParams]="{ to: o.counterpartName, av: o.counterpartAvatar }">Nhắn tin</a>
+            @if (next(o); as n) {
+              <a class="btn2 main" [routerLink]="['/orders', o._id]">{{ n }}</a>
+            } @else if (isEnded(o)) {
+              <a class="btn2 main" [routerLink]="side(o).link" [queryParams]="side(o).params">{{ side(o).label }}</a>
+            } @else {
+              <a class="btn2" [routerLink]="['/orders', o._id]">Xem chi tiết</a>
+            }
           </div>
         </div>
       </li>
