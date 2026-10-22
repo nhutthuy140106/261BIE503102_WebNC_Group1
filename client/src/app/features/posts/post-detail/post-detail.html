@@ -213,11 +213,13 @@
 
             @if (v.tpl.place.mode === 'choice') {
               <div class="card">
-                <label class="switch">
-                  <span>{{ v.tpl.place.choices![0][0] }} @if (v.tpl.place.choices![0][1]) { <small>+{{ fmt(v.tpl.place.choices![0][1]) }}</small> }</span>
-                  <input type="checkbox" [checked]="d.place() === 0" (change)="d.place.set($any($event.target).checked ? 0 : 1)" />
-                </label>
-                <span class="sub">{{ d.place() === 0 ? 'Tắt nếu bạn muốn ' + v.tpl.place.choices![1][0].toLowerCase() : 'Bạn sẽ ' + v.tpl.place.choices![1][0].toLowerCase() + ' — địa chỉ lấy hàng gửi sau khi người bán xác nhận' }}</span>
+                <small>{{ v.tpl.place.label }}</small>
+                <div class="seg2">
+                  @for (c of v.tpl.place.choices!; track c[0]; let i = $index) {
+                    <button type="button" [class.on]="d.place() === i" (click)="d.place.set(i)"><b>{{ c[0] }}</b>@if (c[1]) { <span>+{{ fmt(c[1]) }}</span> } @else { <span>Miễn phí</span> }</button>
+                  }
+                </div>
+                @if (d.place() !== 0 && d.needsAddress() === false && v.tpl.place.choices![0][1]) { <span class="sub">Địa chỉ lấy hàng gửi sau khi người bán xác nhận.</span> }
               </div>
             }
 

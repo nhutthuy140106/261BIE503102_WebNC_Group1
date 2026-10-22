@@ -75,7 +75,7 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
       label: 'Cách nhận',
       choices: [
         [
-          'Giao tận cửa',
+          'Giao tận nơi',
           5000
         ],
         [
@@ -184,7 +184,7 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
       label: 'Cách nhận',
       choices: [
         [
-          'Giao tận cửa',
+          'Giao tận nơi',
           5000
         ],
         [
