@@ -110,6 +110,13 @@ ITEMS = [
     ("1556909114-f6e7ad7d3136", "Đồ dùng", "Nồi chiên không dầu 5L, dùng 6 tháng", "650.000đ", "cái", "Block A", "450m", None, 0, 0, "Anh Quân"),
     ("1581092918056-0c4c3acd3789", "Dịch vụ", "Sửa laptop, điện thoại — kiểm tra tận nơi", "50.000đ", "kiểm tra", "C.207", "600m", None, 0, 0, "Anh Tùng"),
     ("1617347454431-f49d7ff5c3b1", "Dịch vụ", "Lấy đồ hộ, giao nhận trong khu", "15.000đ", "lượt", "Block B", "200m", None, 0, 0, "Minh"),
+    # Combo (bán trọn gói, giá rẻ hơn mua lẻ)
+    ("1504674900247-0877df9cc836", "Đồ ăn", "Combo cơm trưa 5 ngày, đặt cả tuần", "150.000đ", "combo", "Block B", "150m", 4.9, 0, 1, "Bếp Cô Lan"),
+    ("1512621776951-a57141f2eefd", "Đồ ăn", "Combo bữa tối gia đình: 3 món + canh", "120.000đ", "combo", "Block A", "200m", 4.8, 0, 1, "Bếp Cô Lan"),
+    ("1558857563-b371033873b8", "Đồ uống", "Combo 2 trà sữa + 1 bánh ngọt", "85.000đ", "combo", "A.304", "200m", 4.7, 0, 1, "Quán Nhà Mây"),
+    ("1582735689369-4fe89db7114c", "Dịch vụ", "Combo giặt sấy 4 lần trong tháng", "220.000đ", "combo", "D.302", "300m", 4.8, 0, 1, "Tiệm Sạch Thơm"),
+    ("1581578731548-c64695cc6952", "Dịch vụ", "Combo dọn nhà 3 buổi, giảm 15%", "315.000đ", "combo", "Block A", "450m", 4.9, 0, 0, "Cô Ba"),
+    ("1556911220-bff31c812dba", "Đồ dùng", "Combo đồ bếp: nồi, chảo, dao, thớt", "450.000đ", "combo", "Block A", "450m", None, 0, 0, "Anh Quân"),
 ]
 
 # Việc làm: (loại việc, tên, số đề nghị, mô tả, thời gian làm, giá, đơn vị, ảnh người đăng, người đăng, đăng cách đây (phút), block, khoảng cách)
