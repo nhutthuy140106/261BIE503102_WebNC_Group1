@@ -28,6 +28,6 @@ h3 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.35; display: -
 .sold { font-size: 12px; color: var(--smoke); white-space: nowrap; }
 .star i { font-style: normal; color: var(--smoke); margin-left: 3px; font-size: 12px; }
 .star { display: inline-flex; align-items: center; gap: 3px; }
-/* Dùng được Xu: một đồng xu tròn nằm bên trái trái tim */
-.xuico { position: absolute; right: 42px; top: 8px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255, 255, 255, .92); display: grid; place-items: center; }
-.xuico img { width: 18px; height: 18px; border-radius: 0; }
+/* Dùng được Xu: chỉ một đồng xu, nằm bên trái trái tim (không viền, không nền) */
+.xuico { position: absolute; right: 40px; top: 8px; width: 28px; height: 28px; display: grid; place-items: center; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .45)); }
+.xuico img { width: 100%; height: 100%; border-radius: 0; }

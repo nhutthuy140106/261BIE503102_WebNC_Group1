@@ -53,6 +53,6 @@ h3 { font-size: 15px; line-height: 1.35; margin: 5px 0; font-weight: 600; min-he
 .area .rate i { font-style: normal; color: var(--smoke); font-weight: 400; font-size: 12px; }
 
 .photo { position: relative; }
-/* Dùng được Xu: một đồng xu tròn nằm bên trái trái tim */
-.xuico { position: absolute; right: 45px; top: 9px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, .92); display: grid; place-items: center; }
-.xuico img { width: 20px; height: 20px; border-radius: 0; }
+/* Dùng được Xu: chỉ một đồng xu, nằm bên trái trái tim (không viền, không nền) */
+.xuico { position: absolute; right: 43px; top: 9px; width: 30px; height: 30px; display: grid; place-items: center; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .45)); }
+.xuico img { width: 100%; height: 100%; border-radius: 0; }
