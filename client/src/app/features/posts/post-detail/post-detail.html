@@ -13,7 +13,8 @@
     <div>
       <h1>{{ p.title }}</h1>
       <div class="sub">
-        <span class="st"><svg class="i"><use href="#star" /></svg>{{ rate() }} · {{ reviews().length }} đánh giá</span>
+        @if (reviews().length) { <span class="st"><svg class="i"><use href="#star" /></svg>{{ rate() }} · {{ reviews().length }} đánh giá</span> } @else { <span>Chưa có đánh giá</span> }
+        @if (p.sold) { <span>{{ p.kind === 'service' ? 'Đã đặt' : 'Đã bán' }} {{ p.sold | count }}</span> }
         <span><svg class="i"><use href="#pin" /></svg>@if (p.area) { {{ p.area }} · }{{ p.block }}@if (p.distance != null) { · {{ p.distance | distance }} }</span>
       </div>
     </div>

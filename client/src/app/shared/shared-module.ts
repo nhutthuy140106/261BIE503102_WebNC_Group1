@@ -12,10 +12,11 @@ import { VndPipe } from './pipes/vnd';
 import { AgoPipe } from './pipes/ago';
 import { DistancePipe } from './pipes/distance';
 import { UnitPipe } from './pipes/unit';
+import { CountPipe } from './pipes/count';
 
 @NgModule({
-  declarations: [PostCard, JobCard, ResultCard, Avatar, Select, PasswordInput, VndPipe, AgoPipe, DistancePipe, UnitPipe],
+  declarations: [PostCard, JobCard, ResultCard, Avatar, Select, PasswordInput, VndPipe, AgoPipe, DistancePipe, UnitPipe, CountPipe],
   imports: [CommonModule, RouterModule],
-  exports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, PostCard, JobCard, ResultCard, Avatar, Select, PasswordInput, VndPipe, AgoPipe, DistancePipe, UnitPipe],
+  exports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, PostCard, JobCard, ResultCard, Avatar, Select, PasswordInput, VndPipe, AgoPipe, DistancePipe, UnitPipe, CountPipe],
 })
 export class SharedModule {}

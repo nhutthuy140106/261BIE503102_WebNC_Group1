@@ -56,5 +56,5 @@ export function viewOf(post: Post): PostView {
   }
   const mine = post.images.map((i) => unsplash(i, 800, 600));
   const images = same ? [...mine, ...base.imgs.map((i) => unsplash(i, 800, 600))] : mine;
-  return { tpl, key, images: [...new Set(images)].slice(0, 5), reviews: REVIEW_SAMPLES[key] ?? [] };
+  return { tpl, key, images: [...new Set(images)].slice(0, 5), reviews: post.reviewCount ? REVIEW_SAMPLES[key] ?? [] : [] };
 }

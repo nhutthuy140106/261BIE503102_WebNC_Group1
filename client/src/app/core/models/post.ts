@@ -44,6 +44,8 @@ export interface Post {
   priceUnit?: string;
   rating?: number;
   reviewCount?: number;
+  /** Số lượt đã bán / đã đặt (chỉ bài bán, không có ở việc làm) */
+  sold?: number;
   /** Bài quảng bá bằng AntXu — hiện nhãn "QUẢNG BÁ" */
   promoted?: boolean;
   acceptsXu?: boolean;

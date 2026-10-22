@@ -47,3 +47,7 @@ h3 { font-size: 15px; line-height: 1.35; margin: 5px 0; font-weight: 600; min-he
 .area .jst { margin: 0; }
 .area .rate { display: inline-flex; align-items: center; gap: 4px; color: var(--ink); font-weight: 500; }
 .area .rate svg { color: #e39b1a; }
+
+.prrow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.sold { font-size: 12px; color: var(--smoke); white-space: nowrap; }
+.area .rate i { font-style: normal; color: var(--smoke); font-weight: 400; font-size: 12px; }

@@ -119,6 +119,9 @@ ITEMS = [
     ("1556911220-bff31c812dba", "Đồ dùng", "Combo đồ bếp: nồi, chảo, dao, thớt", "450.000đ", "combo", "Block A", "450m", None, 0, 0, "Anh Quân"),
 ]
 
+# (số đánh giá mẫu, điểm trung bình) của từng mẫu chi tiết — lấy từ client/src/app/core/config/review-samples.ts
+TPL_STATS = {"food": (10, 4.3), "drink": (5, 4.4), "goods": (5, 4.4), "svc": (5, 4.4), "fix": (5, 4.4), "clean": (5, 4.6), "trip": (5, 4.8)}
+
 # Việc làm: (loại việc, tên, số đề nghị, mô tả, thời gian làm, giá, đơn vị, ảnh người đăng, người đăng, đăng cách đây (phút), block, khoảng cách)
 JOBS = [
     ("Mua hộ", "Lấy giúp phần cơm ở cổng sau", 1, "Shipper để ở cổng sau, mang lên giúp tận cửa tầng 2.", "Hôm nay · 11:30", "30.000đ", "lần", "Thu Hà", 120, "Block B", "200m"),
@@ -168,7 +171,9 @@ def build():
             "category": label,
             "price": money(price),
             "priceUnit": unit,
-            **({"rating": rate, "reviewCount": 6 + (i * 7) % 40} if rate else {}),
+            # điểm + số đánh giá khớp với bộ đánh giá mẫu của mẫu chi tiết (hiện ở trang chi tiết); chưa có điểm thì chỉ có ít lượt bán
+            **({"rating": TPL_STATS[template_of(label, title)][1], "reviewCount": TPL_STATS[template_of(label, title)][0]} if rate else {}),
+            "sold": (TPL_STATS[template_of(label, title)][0] * 6 + (i * 11) % 45) if rate else 3 + (i * 13) % 22,
             **({"promoted": True} if ad else {}),
             **({"acceptsXu": True} if xu else {}),
             "template": template_of(label, title),
