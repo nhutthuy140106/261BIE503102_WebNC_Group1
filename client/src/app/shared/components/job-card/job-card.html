@@ -13,13 +13,13 @@
   </a>
   <div class="body">
     <h3><a [routerLink]="['/posts/job', slug]">{{ job.title }}</a></h3>
-    <div class="pr">{{ job.price | vnd }} @if (job.priceUnit) { <span>/ {{ job.priceUnit }}</span> }</div>
+    <div class="pr">{{ job.price | vnd }} @if (job | unit; as u) { <span>/ {{ u }}</span> }</div>
     <div class="meta">
       <span><svg class="i"><use href="#pin" /></svg>{{ job.block }}@if (job.distance != null) { · {{ job.distance | distance }} }</span>
       @if (job.job?.status === 'taken') {
         <span class="jst closed">Đã có người nhận</span>
       } @else if (job.job) {
-        <span class="jst">Đang mở · {{ job.job?.offers ? job.job?.offers + ' đề nghị' : 'chưa có đề nghị' }}</span>
+        <span class="jst">{{ job.job?.offers ? job.job?.offers + ' đề nghị' : 'Chưa có đề nghị' }}</span>
       }
     </div>
   </div>

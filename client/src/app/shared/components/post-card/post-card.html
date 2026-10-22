@@ -17,7 +17,7 @@
   </div>
   <div class="body">
     <h3><a [routerLink]="['/posts', slug]">{{ post.title }}</a></h3>
-    <div class="pr">{{ post.price | vnd }} @if (post.priceUnit) { <span>/ {{ post.priceUnit }}</span> }</div>
+    <div class="pr">{{ post.price | vnd }} @if (post | unit; as u) { <span>/ {{ u }}</span> }</div>
     <div class="meta">
       <span><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</span>
       @if (post.rating) {

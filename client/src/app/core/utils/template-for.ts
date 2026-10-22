@@ -1,6 +1,7 @@
 import { POST_TEMPLATES, unsplash } from '../config/post-templates';
 import { REVIEW_SAMPLES } from '../config/review-samples';
 import { Post } from '../models/post';
+import { displayUnit } from './unit';
 import { PostTemplate, SampleReview, TemplateKey } from '../models/post-template';
 
 const FALLBACK: Record<string, TemplateKey> = { food: 'food', goods: 'goods', service: 'svc', job: 'svc' };
@@ -32,7 +33,7 @@ export function viewOf(post: Post): PostView {
   const tpl: PostTemplate = {
     ...base,
     title: post.title,
-    price: base.price.type === 'quote' ? base.price : { ...base.price, amount: post.price, unit: post.priceUnit ?? base.price.unit },
+    price: base.price.type === 'quote' ? base.price : { ...base.price, amount: post.price, unit: displayUnit(post) || undefined },
     seller: {
       ...base.seller,
       name: post.sellerName,

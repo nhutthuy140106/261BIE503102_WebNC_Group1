@@ -25,3 +25,7 @@ h3 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.35; display: -
 .pr { font-size: 15px; font-weight: 700; color: var(--ink); }
 .pr span { font-size: 12px; font-weight: 400; color: var(--smoke); }
 .jc-foot { justify-content: flex-end; }
+
+.meta { flex-wrap: nowrap; align-items: center; }
+.meta > span:first-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.jst { flex: none; white-space: nowrap; }

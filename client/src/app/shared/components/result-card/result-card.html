@@ -20,12 +20,12 @@
     <span class="kind">{{ kindText }}</span>
     <h3>{{ post.title }}</h3>
     @if (true) {
-      <div class="price">{{ post.price | vnd }} @if (post.priceUnit) { <small>/ {{ post.priceUnit }}</small> }</div>
+      <div class="price">{{ post.price | vnd }} @if (post | unit; as u) { <small>/ {{ u }}</small> }</div>
     }
     <div class="area">
       <span class="loc"><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</span>
       @if (isJob && post.job) {
-        <span class="jst" [class.closed]="post.job.status === 'taken'">@if (post.job.status === 'taken') { Đã có người nhận } @else { Đang mở · {{ post.job.offers ? post.job.offers + ' đề nghị' : 'chưa có' }} }</span>
+        <span class="jst" [class.closed]="post.job.status === 'taken'">@if (post.job.status === 'taken') { Đã có người nhận } @else { {{ post.job.offers ? post.job.offers + ' đề nghị' : 'Chưa có đề nghị' }} }</span>
       } @else if (post.rating) {
         <span class="rate"><svg class="i"><use href="#star" /></svg>{{ post.rating }}</span>
       }

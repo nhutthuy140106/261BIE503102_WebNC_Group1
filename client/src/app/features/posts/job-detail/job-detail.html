@@ -16,7 +16,7 @@
         <span>Hạn: {{ j.job?.due }}</span>
       </div>
     </div>
-    <div class="pay"><small>Tiền công</small><b>{{ j.price | vnd }}</b><span>/ {{ j.priceUnit ?? 'lần' }}</span>
+    <div class="pay"><small>Tiền công</small><b>{{ j.price | vnd }}</b><span>/ {{ j | unit }}</span>
       <div class="acts">
         <button type="button" (click)="share()">Chia sẻ</button>
         <button type="button" [class.on]="saved.has(j._id)" (click)="toggleSave()">
@@ -93,7 +93,7 @@
 
     <!-- ===== Khung đề nghị nhận việc ===== -->
     <aside class="order offerbox">
-      <div class="price">{{ j.price | vnd }} <span>/ {{ j.priceUnit ?? 'lần' }}</span></div>
+      <div class="price">{{ j.price | vnd }} <span>/ {{ j | unit }}</span></div>
       <div class="who">{{ j.job?.offers }} người đã đề nghị · cần 1 người</div>
 
       @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
@@ -157,7 +157,7 @@
         } @else {
           <h3>Gửi đề nghị nhận việc</h3>
           <div class="line"><span class="jb">Việc</span><span><b>{{ j.title }}</b><small>{{ j.sellerName }} · {{ j.block }}</small></span></div>
-          <dl><dt>Tiền công</dt><dd>{{ j.price | vnd }} / {{ j.priceUnit ?? 'lần' }}</dd><dt>Bạn làm được</dt><dd>{{ chosenSlots() }}</dd><dt>Giới thiệu</dt><dd>{{ offerForm.controls.intro.value }}</dd></dl>
+          <dl><dt>Tiền công</dt><dd>{{ j.price | vnd }} / {{ j | unit }}</dd><dt>Bạn làm được</dt><dd>{{ chosenSlots() }}</dd><dt>Giới thiệu</dt><dd>{{ offerForm.controls.intro.value }}</dd></dl>
           <div class="btns"><button type="button" class="ghost" (click)="confirm.set(false)">Sửa lại</button><button type="button" class="go" [disabled]="submitting()" (click)="submitOffer()">Gửi đề nghị</button></div>
         }
       </div>
