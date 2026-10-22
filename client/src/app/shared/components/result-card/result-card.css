@@ -1,3 +1,4 @@
+:host { display: block; min-width: 0; }
 /* Thẻ kết quả tìm kiếm — bê từ design/mockups/search.html (.result-card) */
 .result-card { position: relative; min-width: 0; }
 .result-card > a { display: block; }
