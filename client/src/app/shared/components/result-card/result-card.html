@@ -16,6 +16,7 @@
         @if (post.images.length) { <img [src]="post.images[0]" alt="" loading="lazy" /> }
       </div>
     }
+    <div class="body">
     <span class="kind">{{ kindText }}</span>
     <h3>{{ post.title }}</h3>
     @if (true) {
@@ -27,6 +28,7 @@
         @if (post.job.status === 'taken') { Đã có người nhận } @else { Đang mở · {{ post.job.offers ? post.job.offers + ' đề nghị' : 'chưa có đề nghị' }} }
       </div>
     }
+    </div>
   </a>
   @if (post.promoted) { <span class="ad">QUẢNG BÁ</span> }
   <button type="button" class="save" [class.on]="saved" (click)="onSave($event)" [attr.aria-label]="saved ? 'Bỏ lưu' : 'Lưu bài'">
