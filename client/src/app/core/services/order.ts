@@ -50,7 +50,7 @@ export class OrderService {
         this.placed().pipe(
           map((rows) => {
             if (!post || post.kind === 'job') throw new AppError('Không tìm thấy bài.', 404, 'NOT_FOUND');
-            if (body.fulfillment === 'delivery' && !body.addressId) {
+            if (body.fulfillment === 'delivery' && !body.addressId && !body.detail) {
               throw new AppError('Dữ liệu chưa hợp lệ.', 422, 'VALIDATION_ERROR', [
                 { field: 'addressId', message: 'Chọn địa chỉ nhận hàng.' },
               ]);
@@ -67,7 +67,8 @@ export class OrderService {
               image: post.images[0],
               category: post.kind,
               status: 'pending',
-              total: post.price * body.quantity + (body.fulfillment === 'delivery' ? MOCK_DELIVERY_FEE : 0),
+              total: body.total ?? post.price * body.quantity + (body.fulfillment === 'delivery' ? MOCK_DELIVERY_FEE : 0),
+              detail: body.detail,
               paymentMethod: body.payment,
               note: body.note,
               createdAt: new Date().toISOString(),

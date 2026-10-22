@@ -1,26 +1,31 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of, switchMap, forkJoin } from 'rxjs';
+import { forkJoin, of, switchMap } from 'rxjs';
 import { CanComponentDeactivate } from '../../../core/guards/pending-changes-guard';
 import { AppError } from '../../../core/models/api';
-import { CreateOrderBody } from '../../../core/models/order';
-import { KIND_LABEL, Post } from '../../../core/models/post';
+import { CreateOrderBody, Order } from '../../../core/models/order';
+import { Post } from '../../../core/models/post';
 import { Address } from '../../../core/models/user';
+import { unsplash } from '../../../core/config/post-templates';
 import { AddressService } from '../../../core/services/address';
+import { AuthPromptService } from '../../../core/services/auth-prompt';
+import { DrawerService } from '../../../core/services/drawer';
 import { OrderService } from '../../../core/services/order';
 import { PostService } from '../../../core/services/post';
 import { RecommendService } from '../../../core/services/recommend';
 import { SavedService } from '../../../core/services/saved';
-import { calcOrderTotal } from '../../../core/utils/order-math';
+import { ToastService } from '../../../core/services/toast';
+import { Voucher, XuService } from '../../../core/services/xu';
+import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
 import { resolveId } from '../../../core/utils/slug-helper';
+import { PostView, viewOf } from '../../../core/utils/template-for';
 
-/** Phí giao hiển thị tạm ở mock; server tính phí thật và tổng tiền khi tạo đơn. */
-const DELIVERY_FEE = 7000;
+type RvFilter = 'all' | 'photo' | '5' | '4' | 'low';
+type RvSort = 'new' | 'high' | 'low';
 
 /**
- * Chi tiết đồ ăn / đồ dùng / dịch vụ + đặt hàng 2 bước:
- * Bước 1 chọn số lượng → Bước 2 "Xác nhận đơn hàng" (địa chỉ, cách nhận, giờ, ghi chú, thanh toán).
+ * Chi tiết đồ ăn / đồ dùng / dịch vụ — bê từ design/mockups/detail.html.
+ * Bài = ghép từ 7 khối (viewOf). Đặt 2 bước kiểu ShopeeFood: khung phải chỉ chọn món → hộp "Xác nhận đơn hàng".
  */
 @Component({
   selector: 'app-post-detail',
@@ -35,48 +40,78 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   private readonly orderService = inject(OrderService);
   private readonly addressService = inject(AddressService);
   private readonly recommend = inject(RecommendService);
+  private readonly prompt = inject(AuthPromptService);
+  private readonly toast = inject(ToastService);
+  protected readonly xu = inject(XuService);
+  protected readonly drawer = inject(DrawerService);
   protected readonly saved = inject(SavedService);
-  protected readonly similar = signal<Post[]>([]);
 
-  protected readonly kindLabel = KIND_LABEL;
+  protected readonly parse = parseChoice;
+  protected readonly img = unsplash;
   protected readonly post = signal<Post | null>(null);
+  protected readonly view = signal<PostView | null>(null);
+  protected readonly draft = signal<OrderDraft | null>(null);
+  protected readonly similar = signal<Post[]>([]);
   protected readonly addresses = signal<Address[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
-  protected readonly step = signal<1 | 2>(1);
+
+  // hộp thoại
+  protected readonly checkout = signal(false);
+  protected readonly placed = signal<Order | null>(null);
   protected readonly submitting = signal(false);
-  protected readonly quantity = signal(1);
-  protected readonly delivery = signal(true);
-  /** Lựa chọn đã chọn: tên nhóm → các nhãn đã chọn */
-  protected readonly selections = signal<Record<string, string[]>>({});
-  /** Trả lời câu hỏi riêng: nhãn câu hỏi → nội dung */
-  protected readonly answers = signal<Record<string, string>>({});
+  protected readonly addrOpen = signal(false);
+  protected readonly voucherOpen = signal(false);
+  protected readonly lightbox = signal<number | null>(null);
+  protected readonly reviewsOpen = signal(false);
+  protected readonly rvFilter = signal<RvFilter>('all');
+  protected readonly rvSort = signal<RvSort>('new');
+  protected readonly rvQuery = signal('');
+  protected readonly tried = signal(false);
 
-  protected readonly form = new FormGroup({
-    addressId: new FormControl('', { nonNullable: true }),
-    scheduledAt: new FormControl('', { nonNullable: true }),
-    utensils: new FormControl(true, { nonNullable: true }),
-    note: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(200)] }),
-    voucher: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^[A-Za-z0-9]{0,20}$/)] }),
-    payment: new FormControl<'cash' | 'transfer'>('cash', { nonNullable: true }),
+  // ----- đánh giá (điểm và số lượt tính từ dữ liệu) -----
+  protected readonly reviews = computed(() => this.view()?.reviews ?? []);
+  protected readonly rate = computed(() => {
+    const r = this.reviews();
+    return r.length ? (r.reduce((s, x) => s + x[4], 0) / r.length).toFixed(1).replace('.', ',') : 'Mới';
+  });
+  protected readonly bars = computed(() => [5, 4, 3, 2, 1].map((n) => ({ n, c: this.reviews().filter((r) => r[4] === n).length })));
+  protected readonly rvShown = computed(() => {
+    const q = this.rvQuery().trim().toLowerCase();
+    const f = this.rvFilter();
+    const list = this.reviews().filter((r) => {
+      if (f === 'photo' && !r[6].length) return false;
+      if (f === '5' && r[4] !== 5) return false;
+      if (f === '4' && r[4] !== 4) return false;
+      if (f === 'low' && r[4] > 3) return false;
+      return !q || (r[5] + r[1]).toLowerCase().includes(q);
+    });
+    const s = this.rvSort();
+    return s === 'new' ? list : [...list].sort((a, b) => (s === 'high' ? b[4] - a[4] : a[4] - b[4]));
+  });
+  protected readonly doneTag = computed(() => {
+    const k = this.view()?.tpl.kind ?? '';
+    return /Đồ ăn|Đồ uống/.test(k) ? 'Đã đặt món' : k === 'Hàng hóa' ? 'Đã mua' : 'Đã dùng dịch vụ';
   });
 
-  /** Phụ phí của các lựa chọn đang chọn */
-  protected readonly extras = computed(() => {
-    const p = this.post();
-    const sel = this.selections();
-    return (p?.optionGroups ?? []).flatMap((g) => g.choices.filter((c) => (sel[g.name] ?? []).includes(c.label)));
+  /** Khung giờ chọn được, bước 30 phút */
+  protected readonly slots = computed(() => {
+    const t = this.view()?.tpl;
+    if (!t) return [];
+    const [a, b] = t.time.win.map((x) => Number(x.slice(0, 2)) * 60 + Number(x.slice(3)));
+    const out: string[] = [];
+    for (let m = a; m <= b; m += 30) out.push(String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'));
+    return out;
   });
-  protected readonly deliveryFee = computed(() => this.post()?.deliveryFee ?? DELIVERY_FEE);
-  protected readonly total = computed(() => {
-    const p = this.post();
-    return p
-      ? calcOrderTotal({ unitPrice: p.price, quantity: this.quantity(), extras: this.extras(), deliveryFee: this.delivery() ? this.deliveryFee() : 0 })
-      : 0;
+  protected readonly today = new Date().toISOString().slice(0, 10);
+
+  protected readonly address = computed(() => {
+    const d = this.draft();
+    return this.addresses().find((a) => a._id === d?.addressId()) ?? null;
   });
-  protected readonly subtotal = computed(() => {
-    const p = this.post();
-    return p ? calcOrderTotal({ unitPrice: p.price, quantity: this.quantity(), extras: this.extras() }) : 0;
+  protected readonly usable = computed(() => {
+    const d = this.draft();
+    return d ? this.xu.vouchers().filter((v) => this.voucherOk(v, d)) : [];
   });
 
   ngOnInit(): void {
@@ -90,17 +125,22 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
       )
       .subscribe({
         next: (r) => {
-          this.post.set(r?.post ?? null);
-          this.similar.set([]);
-          if (r?.post) this.recommend.similar(r.post._id).subscribe({ next: (l) => this.similar.set(l), error: () => this.similar.set([]) });
+          const p = r?.post ?? null;
+          this.post.set(p);
           this.addresses.set(r?.addresses ?? []);
-          this.selections.set({});
-          this.answers.set({});
-          // Bài chỉ có một cách nhận thì khóa theo đó
-          const modes = r?.post?.fulfillmentModes ?? [];
-          if (modes.length === 1) this.delivery.set(modes[0] === 'delivery');
-          const def = r?.addresses.find((a) => a.isDefault);
-          if (def) this.form.patchValue({ addressId: def._id });
+          this.similar.set([]);
+          this.checkout.set(false);
+          this.placed.set(null);
+          if (p) {
+            const v = viewOf(p);
+            this.view.set(v);
+            const d = new OrderDraft(v.tpl, v.tpl.stock.mode === 'limit' ? v.tpl.stock.left ?? null : null);
+            const def = r?.addresses.find((a) => a.isDefault);
+            if (def) d.addressId.set(def._id);
+            this.draft.set(d);
+            this.recommend.similar(p._id).subscribe({ next: (l) => this.similar.set(l), error: () => this.similar.set([]) });
+            this.restore(d);
+          }
           this.loading.set(false);
         },
         error: (e: Error) => {
@@ -111,100 +151,206 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.step() === 2 && this.form.dirty;
+    return this.checkout() && !this.placed();
   }
 
-  setQuantity(n: number): void {
-    this.quantity.set(Math.min(99, Math.max(1, Math.floor(n) || 1)));
+  /** Khách đăng nhập xong quay lại: điền lại những gì đã chọn và mở tiếp hộp xác nhận. */
+  private restore(d: OrderDraft): void {
+    const r = this.prompt.takeResume<{ postId: string; qty: number; opt: Record<string, string>; ans: Record<string, string> }>('order');
+    if (!r || r.postId !== this.post()?._id) return;
+    d.qty.set(r.qty);
+    d.opt.set(r.opt);
+    d.ans.set(r.ans);
+    this.openCheckout();
   }
 
-  isChosen(group: string, label: string): boolean {
-    return (this.selections()[group] ?? []).includes(label);
+  // ----- bước 1: khung phải -----
+  protected stockLine(): { text: string; sub: string; off: boolean } {
+    const s = this.view()!.tpl.stock;
+    if (this.post()?.closed) return { text: 'Tạm ngưng nhận', sub: 'Người bán đang tạm dừng bài này.', off: true };
+    if (s.mode === 'once') return { text: 'Còn hàng', sub: 'Bán một lần — ai đặt trước được trước.', off: false };
+    if (s.mode === 'limit') return { text: 'Còn ' + s.left + ' phần hôm nay', sub: s.sched ?? '', off: false };
+    return { text: 'Đang nhận đặt', sub: s.sched ?? '', off: false };
   }
 
-  /** Nhóm chọn 1: thay lựa chọn; chọn nhiều: bật/tắt. */
-  toggleChoice(group: string, label: string, multi: boolean): void {
-    this.selections.update((s) => {
-      const cur = s[group] ?? [];
-      const next = multi ? (cur.includes(label) ? cur.filter((x) => x !== label) : [...cur, label]) : [label];
-      return { ...s, [group]: next };
-    });
+  protected priceLabel(): string {
+    const p = this.view()!.tpl.price;
+    if (p.type === 'quote') return 'Báo giá sau';
+    return (p.type === 'from' ? 'từ ' : '') + this.fmt(p.amount ?? 0);
   }
 
-  setAnswer(question: string, value: string): void {
-    this.answers.update((a) => ({ ...a, [question]: value }));
+  protected priceSub(): string {
+    const p = this.view()!.tpl.price;
+    if (p.type === 'quote') return 'Phí kiểm tra ' + this.fmt(p.inspect ?? 0) + ' · trừ vào tiền sửa nếu đồng ý';
+    return p.estimate ? 'Giá ước tính — tính theo ' + (p.unit ?? 'đơn vị') + ' thực tế' : '';
   }
 
-  /** Bước 1 hợp lệ khi mọi nhóm bắt buộc đã chọn. */
-  step1Valid(p: Post): boolean {
-    return (p.optionGroups ?? []).every((g) => !g.required || (this.selections()[g.name] ?? []).length > 0);
+  protected fmt(n: number): string {
+    return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
   }
 
-  canToggleDelivery(p: Post): boolean {
-    const m = p.fulfillmentModes ?? [];
-    return m.length === 0 || m.length > 1;
+  protected actionLabel(): string {
+    return this.view()!.tpl.action;
   }
 
-  answersValid(p: Post): boolean {
-    return (p.questions ?? []).every((q) => !q.required || (this.answers()[q.label] ?? '').trim().length > 0);
+  protected setQty(d: OrderDraft, n: number): void {
+    d.qty.set(Math.min(d.maxQty(), Math.max(d.tpl.qty?.min ?? 1, n)));
   }
 
-  next(): void {
-    this.step.set(2);
+  protected onPhoto(d: OrderDraft, label: string, e: Event): void {
+    const f = (e.target as HTMLInputElement).files?.[0];
+    d.setAns(label, f ? f.name : '');
   }
 
-  toggleDelivery(on: boolean): void {
-    this.delivery.set(on);
+  protected next(d: OrderDraft): void {
+    this.tried.set(true);
+    if (d.missing(false)) return;
+    if (this.post()?.closed) return;
+    const p = this.post()!;
+    if (!this.prompt.require('order', { type: 'order', payload: { postId: p._id, qty: d.qty(), opt: d.opt(), ans: d.ans() } })) return;
+    this.openCheckout();
   }
 
-  /** Dịch vụ cần chọn ngày giờ trước khi đặt. */
-  needsSchedule(p: Post): boolean {
-    return p.needSchedule ?? p.kind === 'service';
+  protected openCheckout(): void {
+    this.checkout.set(true);
+    this.tried.set(false);
+    this.error.set(null);
   }
 
-  canSubmit(p: Post): boolean {
-    if (this.form.invalid || this.submitting()) return false;
-    if (this.delivery() && !this.form.controls.addressId.value) return false;
-    if (this.needsSchedule(p) && !this.form.controls.scheduledAt.value) return false;
-    if (!this.step1Valid(p) || !this.answersValid(p)) return false;
-    return true;
+  protected closeCheckout(): void {
+    this.checkout.set(false);
+    this.placed.set(null);
   }
 
-  submit(p: Post): void {
-    if (!this.canSubmit(p)) return void this.form.markAllAsTouched();
-    const v = this.form.getRawValue();
+  // ----- bước 2: xác nhận -----
+  protected voucherOk(v: Voucher, d: OrderDraft): boolean {
+    if (!d.tpl.xuOk) return false;
+    if (v.ship) return d.needsAddress() && d.placeFee() > 0;
+    return d.subtotal() >= v.min;
+  }
+
+  protected pickVoucher(d: OrderDraft, v: Voucher | null): void {
+    d.voucher.set(v);
+    this.voucherOpen.set(false);
+  }
+
+  protected addressText(a: Address): string {
+    return a.unit + ', ' + (a.block.length === 1 ? 'Block ' + a.block : a.block);
+  }
+
+  protected pickAddress(d: OrderDraft, a: Address): void {
+    d.addressId.set(a._id);
+    this.addrOpen.set(false);
+  }
+
+  protected whenLabel(d: OrderDraft): string {
+    const t = d.tpl.time;
+    if (t.mode === 'datedur') return d.date() ? d.date().split('-').reverse().join('/') + ' · ' + d.time() + ' · ' + d.hours() + ' giờ' + (d.repeat() ? ' · lặp hằng tuần' : '') : '';
+    return (d.date() ? d.date().split('-').reverse().join('/') : 'Hôm nay') + ' · ' + d.time();
+  }
+
+  protected submit(): void {
+    const p = this.post();
+    const d = this.draft();
+    if (!p || !d || this.submitting()) return;
+    this.tried.set(true);
+    if (d.missing(true)) return;
+    const a = this.address();
+    const place = d.tpl.place;
+    const placeText = place.mode === 'choice' ? place.choices?.[d.place()]?.[0] : place.mode === 'seller' ? place.where : place.label;
     const body: CreateOrderBody = {
       postId: p._id,
-      quantity: this.quantity(),
-      selections: Object.entries(this.selections()).filter(([, c]) => c.length).map(([group, choices]) => ({ group, choices })),
-      answers: Object.entries(this.answers()).filter(([, v]) => v.trim()).map(([question, value]) => ({ question, value: value.trim() })),
-      fulfillment: this.delivery() ? 'delivery' : 'pickup',
-      addressId: this.delivery() ? v.addressId : undefined,
-      scheduledAt: v.scheduledAt ? new Date(v.scheduledAt).toISOString() : undefined,
-      utensils: p.kind === 'food' ? v.utensils : false,
-      note: v.note.trim() || undefined,
-      voucherCode: p.acceptsXu && v.voucher ? v.voucher.trim().toUpperCase() : undefined,
-      payment: v.payment,
+      quantity: d.qty(),
+      selections: d.tpl.opts.map((g) => ({ group: g.name, choices: [parseChoice(d.opt()[g.name] ?? '').name] })),
+      answers: d.tpl.qs.map((q) => ({ question: q.label, value: d.lines().find((l) => l.startsWith(q.label + ': '))?.slice(q.label.length + 2) ?? '' })).filter((x) => x.value),
+      fulfillment: d.needsAddress() ? 'delivery' : 'pickup',
+      addressId: d.needsAddress() ? d.addressId() : undefined,
+      scheduledAt: d.date() ? new Date(d.date() + 'T' + d.time()).toISOString() : undefined,
+      utensils: d.tpl.key === 'food' && d.utensils(),
+      note: d.note().trim() || undefined,
+      voucherCode: d.voucher()?.id,
+      payment: d.pay(),
+      total: d.grand(),
+      detail: {
+        lines: d.lines(),
+        quantity: d.tpl.qty ? d.qty() : undefined,
+        address: a ? a.name + ' · ' + a.phone + ' — ' + this.addressText(a) : undefined,
+        place: placeText,
+        when: this.whenLabel(d),
+        utensils: d.tpl.key === 'food' ? d.utensils() : undefined,
+        voucher: d.voucher()?.title,
+        subtotal: d.subtotal(),
+        fee: d.placeFee(),
+        discount: d.discount(),
+        steps: d.tpl.steps,
+        template: d.tpl.key,
+      },
     };
     this.submitting.set(true);
     this.error.set(null);
     this.orderService.create(body).subscribe({
       next: (o) => {
-        this.form.markAsPristine();
-        this.router.navigate(['/orders', o._id]);
+        const v = d.voucher();
+        if (v) this.xu.useVoucher(v.id, o.code);
+        this.placed.set(o);
+        this.submitting.set(false);
       },
       error: (e: Error) => {
-        this.error.set(e instanceof AppError && e.details.length ? e.details.map((d) => d.message).join(' ') : e.message);
+        this.error.set(e instanceof AppError && e.details.length ? e.details.map((x) => x.message).join(' ') : e.message);
         this.submitting.set(false);
       },
     });
   }
 
-  toggleSave(p: Post): void {
+  protected goOrder(o: Order): void {
+    this.checkout.set(false);
+    this.router.navigate(['/orders', o._id]);
+  }
+
+  // ----- khác -----
+  protected toggleSave(p: Post): void {
     this.saved.toggle(p._id);
   }
 
+  protected share(): void {
+    navigator.clipboard?.writeText(location.href).then(
+      () => this.toast.show('Đã chép liên kết bài'),
+      () => this.toast.show('Không chép được liên kết'),
+    );
+  }
+
+  protected message(p: Post): void {
+    if (this.prompt.require('chat')) this.router.navigate(['/messenger'], { queryParams: { with: p.sellerId } });
+  }
+
+  protected stars(n: number): number[] {
+    return [1, 2, 3, 4, 5].map((i) => (i <= n ? 1 : 0));
+  }
+
+  protected openLightbox(i: number): void {
+    this.lightbox.set(i);
+  }
+
+  protected step(n: number): void {
+    const len = this.view()?.images.length ?? 1;
+    this.lightbox.update((i) => (i === null ? null : (i + n + len) % len));
+  }
+
   back(): void {
-    this.router.navigate(['/search']);
+    history.length > 1 ? history.back() : this.router.navigate(['/search']);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKey(e: KeyboardEvent): void {
+    if (e.key === 'Escape') {
+      if (this.lightbox() !== null) this.lightbox.set(null);
+      else if (this.addrOpen() || this.voucherOpen()) {
+        this.addrOpen.set(false);
+        this.voucherOpen.set(false);
+      } else if (this.reviewsOpen()) this.reviewsOpen.set(false);
+      else if (this.checkout()) this.closeCheckout();
+    }
+    if (this.lightbox() !== null && e.key === 'ArrowRight') this.step(1);
+    if (this.lightbox() !== null && e.key === 'ArrowLeft') this.step(-1);
   }
 }

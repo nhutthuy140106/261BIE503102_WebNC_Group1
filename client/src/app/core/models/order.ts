@@ -35,6 +35,24 @@ export interface Order {
   cancelRequested?: boolean;
   /** Phụ thu do người bán báo (vd. đồ to hơn đã chọn) — người mua phải đồng ý trước khi làm tiếp */
   surcharge?: Surcharge;
+  /** Nội dung đã đặt (snapshot lúc đặt) — hiện ở chi tiết đơn */
+  detail?: OrderDetail;
+}
+
+export interface OrderDetail {
+  lines: string[];
+  quantity?: number;
+  address?: string;
+  place?: string;
+  when?: string;
+  utensils?: boolean;
+  voucher?: string;
+  subtotal: number;
+  fee: number;
+  discount: number;
+  /** Các bước theo dõi của loại bài này (đồ ăn khác dịch vụ giặt khác sửa máy…) */
+  steps: string[];
+  template?: string;
 }
 
 export interface Surcharge {
@@ -57,6 +75,9 @@ export interface CreateOrderBody {
   /** Mã voucher AntXu (chỉ với bài có nhãn "Dùng được Xu"); server kiểm tra và tính giảm giá */
   voucherCode?: string;
   payment: PaymentMethod;
+  /** Mock: FE gửi kèm nội dung và tổng ước tính để đơn mẫu hiện đúng như người dùng đã chọn (server bỏ qua, tự tính lại) */
+  detail?: OrderDetail;
+  total?: number;
 }
 
 export const PLACED_STATUS_LABEL: Record<PlacedStatus, string> = {
