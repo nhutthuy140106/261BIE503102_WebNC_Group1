@@ -10,16 +10,16 @@
   </div>
 } @else {
   <header class="head">
-    <span class="avatar">{{ name().charAt(0).toUpperCase() }}</span>
+    <app-avatar [src]="posts()[0].sellerAvatar" [name]="name()" [size]="72" />
     <div class="who">
       <h1>{{ name() }}</h1>
-      <p class="muted">{{ block() }}</p>
+      <p class="muted">Hàng xóm trong khu · {{ block() }}</p>
     </div>
     <div class="cta">
       <button type="button" class="btn ghost" [class.on]="following()" (click)="toggleFollow()">
         {{ following() ? 'Đang theo dõi' : 'Theo dõi' }}
       </button>
-      <a routerLink="/messenger" class="btn">Nhắn tin</a>
+      <button type="button" class="btn" (click)="message()">Nhắn tin</button>
     </div>
   </header>
 
@@ -32,13 +32,27 @@
       }
     </div>
     <div><strong>{{ posts().length }}</strong><span>Bài đang đăng</span></div>
+    <div><strong>{{ done() }}</strong><span>Đơn / việc hoàn thành</span></div>
   </div>
 
   <div class="tabs">
     <button type="button" class="btn ghost" [class.active]="tab() === 'selling'" (click)="tab.set('selling')">Đang bán ({{ selling().length }})</button>
     <button type="button" class="btn ghost" [class.active]="tab() === 'jobs'" (click)="tab.set('jobs')">Việc đang cần người ({{ jobs().length }})</button>
+    <button type="button" class="btn ghost" [class.active]="tab() === 'reviews'" (click)="tab.set('reviews')">Đánh giá ({{ reviews().length }})</button>
   </div>
 
+  @if (tab() === 'reviews') {
+    <div class="revs">
+      @for (r of reviews(); track $index) {
+        <article class="rev">
+          <div class="rwho"><img [src]="img(r[0], 80, 80)" alt="" /><span><b>{{ r[1] }}</b><small>{{ r[2] }} · {{ r[3] }}</small></span></div>
+          <div class="rstars">@for (s of stars(r[4]); track $index) { <span [class.off]="!s">★</span> }</div>
+          <p>{{ r[5] }}</p>
+          @if (r[7]) { <div class="reply"><b>Phản hồi của {{ name() }}</b>{{ r[7] }}</div> }
+        </article>
+      }
+    </div>
+  } @else {
   <div class="grid">
     @if (tab() === 'selling') {
       @for (p of selling(); track p._id) {
@@ -54,4 +68,5 @@
       }
     }
   </div>
+  }
 }

@@ -12,6 +12,13 @@
 - `server/` **chưa làm — chờ hướng dẫn của thầy** (Express + MongoDB).
 - Git: nhánh mặc định `dev`, `main` ổn định, tính năng ở `feature/*` — xem `docs/git-workflow.md`. Tri thức môn học: `docs/tham-khao/kien-thuc-mon-hoc-angular-express-mongodb.md`.
 
+## 0b. Tiến độ FE không gian Mua theo mockup (22/10, nhánh dev)
+
+- **Xong (theo `design/mockups/` nhánh main):** landing, đăng nhập/đăng ký, trang chủ, tìm kiếm, **chi tiết bài** (mô hình 7 khối: `core/models/post-template.ts`, `core/config/post-templates.ts`, `review-samples.ts`; ghép bài+mẫu ở `core/utils/template-for.ts`; trạng thái đơn đang chọn ở `core/utils/order-draft.ts`; đặt 2 bước + hộp Xác nhận + voucher AntXu + xem ảnh lớn + tất cả đánh giá), **chi tiết việc làm** (hỏi đáp công khai, thẻ người đăng, đề nghị + hộp xác nhận), chi tiết đơn (thanh bước đơn đã đặt, nội dung đã đặt `Order.detail`, cộng Xu khi xong việc/đánh giá), gian hàng (tab Đánh giá, theo dõi cần đăng nhập), Messenger (`?to=<tên>` mở/tạo cuộc trò chuyện), trang Tôi (hoạt động, khu vực & AntXu, lịch sử Xu, đăng xuất).
+- **Chưa kiểm chứng trong trình duyệt:** chỉ chạy `ngc --noEmit` (biên dịch sạch), chưa chụp ảnh so với mockup; hoạt ảnh chưa kiểm.
+- **Còn thiếu / lệch mockup:** hộp chọn địa chỉ chỉ chọn (thêm/sửa ở trang Tôi); mô tả + đánh giá mẫu của bài mock lấy theo mẫu loại bài nên có thể lệch tên; chưa có trang Hỗ trợ riêng (chỉ có Báo cáo vấn đề theo đơn); đề nghị kèm giá, báo phụ thu phía bán, trả lời hỏi đáp phía người đăng chờ phía Bán; Xu +10 khi đơn đã đặt hoàn thành cần phía bán đổi trạng thái.
+- Mock bật bằng `?mock=1`; server thật thiếu: sổ Xu, đánh giá theo người bán, hội thoại theo id người nhận.
+
 ## 1. Cách làm việc với người dùng (bắt buộc)
 
 - **Trao đổi trước, làm sau.** Đề xuất ngắn → chờ "ok" → mới làm. Không tự cài công cụ khi chưa hỏi.

@@ -320,7 +320,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   protected message(p: Post): void {
-    if (this.prompt.require('chat')) this.router.navigate(['/messenger'], { queryParams: { with: p.sellerId } });
+    if (this.prompt.require('chat')) this.router.navigate(['/messenger'], { queryParams: { to: p.sellerName, av: p.sellerAvatar } });
   }
 
   protected stars(n: number): number[] {

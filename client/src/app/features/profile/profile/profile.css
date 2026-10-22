@@ -5,3 +5,24 @@ h1 { font-size: 28px; letter-spacing: -.02em; }
 .me dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; margin: 0; }
 .me dt { color: var(--smoke); }
 .me dd { margin: 0; font-weight: 600; }
+.meinfo { flex: 1; display: grid; }
+.blk { margin-top: 32px; }
+.blk h2 { font-size: 19px; margin-bottom: 14px; }
+.blk h3 { font-size: 15px; margin: 22px 0 8px; }
+.acts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.acts a { display: grid; gap: 2px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; }
+.acts a:hover { background: var(--soft); }
+.acts b { font-size: 22px; }
+.acts span { color: var(--smoke); font-size: 13px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.box { display: grid; gap: 6px; justify-items: start; padding: 16px; border: 1px solid var(--border); border-radius: 12px; }
+.box small { color: var(--smoke); }
+.box b { font-size: 20px; }
+.box .coin { display: inline-flex; align-items: center; gap: 8px; }
+.box img { width: 24px; height: 24px; }
+.ledger { display: grid; }
+.ledger li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+.ledger small { display: block; font-size: 12px; }
+.ledger .neg { color: var(--smoke); }
+.note { margin-top: 14px; font-size: 12.5px; }
+@media (max-width: 700px) { .acts { grid-template-columns: 1fr 1fr; } .two { grid-template-columns: 1fr; } }

@@ -52,6 +52,19 @@ export class ChatService {
     );
   }
 
+  /** Mở cuộc trò chuyện mới với một người (mock). Có rồi thì trả lại cuộc cũ. API thật: tạo theo id người nhận ở bước nối server. */
+  start(withName: string, withAvatar?: string): Observable<Conversation> {
+    return this.db.list<Conversation>(COLLECTION).pipe(
+      map((rows) => {
+        const cur = rows.find((c) => c.withName === withName);
+        if (cur) return cur;
+        const c: Conversation = { _id: this.db.newId(), withName, withAvatar, unread: 0, messages: [] };
+        this.db.save(COLLECTION, [c, ...rows]);
+        return c;
+      }),
+    );
+  }
+
   markRead(conversationId: string): Observable<void> {
     if (!useMock('chat')) return this.api.post<void>(`/conversations/${conversationId}/read`);
     return this.db.list<Conversation>(COLLECTION).pipe(

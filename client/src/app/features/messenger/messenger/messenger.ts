@@ -32,6 +32,14 @@ export class Messenger implements OnInit {
         this.conversations.set(rows);
         this.loading.set(false);
         // /messenger/:chatId mở đúng hội thoại; id lạ hoặc không có thì mở hội thoại đầu
+        const to = this.route.snapshot.queryParamMap.get('to');
+        if (to) {
+          this.chat.start(to, this.route.snapshot.queryParamMap.get('av') ?? undefined).subscribe((c) => {
+            this.conversations.set(rows.some((x) => x._id === c._id) ? rows : [c, ...rows]);
+            this.select(c);
+          });
+          return;
+        }
         const wanted = rows.find((c) => c._id === this.route.snapshot.paramMap.get('chatId'));
         const first = wanted ?? rows[0];
         if (first) this.select(first, !!wanted);

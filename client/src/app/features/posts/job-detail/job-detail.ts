@@ -150,7 +150,7 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
 
   protected message(): void {
     const j = this.job();
-    if (j && this.prompt.require('chat')) this.router.navigate(['/messenger'], { queryParams: { with: j.sellerId } });
+    if (j && this.prompt.require('chat')) this.router.navigate(['/messenger'], { queryParams: { to: j.sellerName, av: j.sellerAvatar } });
   }
 
   protected openOrder(): void {

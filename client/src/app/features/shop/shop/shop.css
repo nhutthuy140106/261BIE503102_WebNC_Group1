@@ -12,3 +12,15 @@
 .tabs .btn { border-radius: 999px; padding: 8px 18px; }
 .tabs .active { background: var(--ink); color: #fff; border-color: var(--ink); }
 @media (max-width: 700px) { .head { flex-wrap: wrap; } }
+
+.revs { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 36px; }
+.rwho { display: flex; align-items: center; gap: 10px; }
+.rwho img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+.rwho b { display: block; font-size: 14px; }
+.rwho small { color: var(--smoke); font-size: 12px; }
+.rstars { margin-top: 8px; color: #E39B1A; font-size: 12px; letter-spacing: 1px; }
+.rstars .off { color: #E5DED6; }
+.rev p { margin-top: 4px; line-height: 1.55; color: #3C4660; }
+.reply { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: var(--soft); font-size: 13.5px; line-height: 1.5; }
+.reply b { display: block; font-size: 12px; margin-bottom: 2px; }
+@media (max-width: 700px) { .revs { grid-template-columns: 1fr; } }
