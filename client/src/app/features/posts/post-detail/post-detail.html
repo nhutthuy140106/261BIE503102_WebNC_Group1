@@ -308,7 +308,29 @@
               @if (a.isDefault) { <em>Mặc định</em> }
             </button>
           }
-          <a routerLink="/profile" class="more">+ Thêm địa chỉ mới (ở trang Tôi)</a>
+          @if (!addrNew()) {
+            <button type="button" class="more" (click)="addrNew.set(true)">+ Thêm địa chỉ mới</button>
+          } @else {
+            <form class="addrform" [formGroup]="addrForm" (ngSubmit)="saveAddress(d)">
+              <p class="hint">Đặt cho người khác? Thêm địa chỉ của người đó rồi chọn.</p>
+              <div class="two">
+                <label>Họ tên<input class="input" formControlName="name" placeholder="Người nhận" /></label>
+                <label>Số điện thoại<input class="input" formControlName="phone" inputmode="numeric" maxlength="10" placeholder="10 số" /></label>
+              </div>
+              @if (addrForm.controls.phone.invalid && addrForm.controls.phone.touched) { <small class="err">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small> }
+              <div class="two">
+                <label>Block
+                  <select class="input" formControlName="block">@for (b of blocks; track b) { <option [value]="b">Block {{ b }}</option> }</select>
+                </label>
+                <label>Căn / tầng<input class="input" formControlName="unit" placeholder="Ví dụ: B-1204" /></label>
+              </div>
+              <label>Ghi chú cho người giao<input class="input" formControlName="note" placeholder="Ví dụ: gọi trước khi tới" /></label>
+              <label>Đây là địa chỉ của
+                <select class="input" formControlName="label"><option value="home">Nhà riêng</option><option value="family">Người thân</option><option value="other">Khác</option></select>
+              </label>
+              <div class="btnrow"><button type="button" class="ghost" (click)="addrNew.set(false)">Hủy</button><button type="submit" class="go" [disabled]="addrForm.invalid">Lưu và dùng địa chỉ này</button></div>
+            </form>
+          }
         </div>
       </div>
     </div>

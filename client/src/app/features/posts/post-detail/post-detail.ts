@@ -1,11 +1,12 @@
 import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { CanComponentDeactivate } from '../../../core/guards/pending-changes-guard';
 import { AppError } from '../../../core/models/api';
 import { CreateOrderBody, Order } from '../../../core/models/order';
 import { KIND_LABEL, Post } from '../../../core/models/post';
-import { Address } from '../../../core/models/user';
+import { Address, BLOCKS } from '../../../core/models/user';
 import { unsplash } from '../../../core/config/post-templates';
 import { AddressService } from '../../../core/services/address';
 import { AuthPromptService } from '../../../core/services/auth-prompt';
@@ -61,6 +62,17 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected readonly placed = signal<Order | null>(null);
   protected readonly submitting = signal(false);
   protected readonly addrOpen = signal(false);
+  protected readonly addrNew = signal(false);
+  protected readonly blocks = BLOCKS;
+  /** Thêm địa chỉ mới ngay trong hộp chọn địa chỉ (đặt cho người khác = thêm địa chỉ người đó) */
+  protected readonly addrForm = new FormGroup({
+    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(60)] }),
+    phone: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^0\d{9}$/)] }),
+    block: new FormControl<(typeof BLOCKS)[number]>('B', { nonNullable: true }),
+    unit: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(30)] }),
+    note: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
+    label: new FormControl<'home' | 'family' | 'other'>('family', { nonNullable: true }),
+  });
   protected readonly voucherOpen = signal(false);
   protected readonly lightbox = signal<number | null>(null);
   protected readonly reviewsOpen = signal(false);
@@ -233,6 +245,22 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
 
   protected addressText(a: Address): string {
     return a.unit + ', ' + (a.block.length === 1 ? 'Block ' + a.block : a.block);
+  }
+
+  protected saveAddress(d: OrderDraft): void {
+    if (this.addrForm.invalid) return this.addrForm.markAllAsTouched();
+    const v = this.addrForm.getRawValue();
+    this.addressService.create({ ...v, note: v.note.trim() || undefined }).subscribe({
+      next: (a) => {
+        this.addresses.update((l) => [...l, a]);
+        d.addressId.set(a._id);
+        this.addrForm.reset({ name: '', phone: '', block: 'B', unit: '', note: '', label: 'family' });
+        this.addrNew.set(false);
+        this.addrOpen.set(false);
+        this.toast.show('Đã thêm địa chỉ');
+      },
+      error: (e: Error) => this.error.set(e.message),
+    });
   }
 
   protected pickAddress(d: OrderDraft, a: Address): void {

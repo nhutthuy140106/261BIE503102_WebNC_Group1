@@ -224,3 +224,16 @@
 .qfield.pay { margin-top: 10px; padding-top: 10px; border-top: 0; }
 .upload { display: flex; align-items: center; justify-content: center; height: 42px; border: 1px dashed #B9BEC8; border-radius: 10px; font-size: 14px; color: var(--smoke); cursor: pointer; font-weight: 500 !important; }
 .upload:hover { border-color: var(--ink); color: var(--ink); }
+
+.more { background: none; text-align: left; }
+.addrform { display: grid; gap: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.addrform label { display: grid; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--smoke); }
+.addrform .input { width: 100%; height: 40px; padding: 0 10px; border: 1px solid #DADDE3; border-radius: 10px; background: #fff; font: inherit; font-size: 14px; color: var(--ink); }
+.addrform .input:focus { outline: none; border-color: var(--ink); }
+.addrform .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.addrform .err { color: #B4441C; font-size: 12.5px; }
+.addrform .btnrow { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-top: 4px; }
+.addrform .btnrow button { height: 42px; border-radius: 10px; font-weight: 600; }
+.addrform .btnrow .ghost { border: 1px solid #DADDE3; background: none; }
+.addrform .btnrow .go { background: var(--accent); color: #fff; }
+.addrform .btnrow .go:disabled { background: #D9D3CF; }
