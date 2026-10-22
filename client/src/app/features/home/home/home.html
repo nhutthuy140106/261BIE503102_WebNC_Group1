@@ -74,7 +74,7 @@
 
   @if (auth.isLoggedIn() && forYouShown().length) {
     <section class="sec">
-      <div class="sh"><h2>Gợi ý cho bạn</h2><p>Dựa trên bài bạn đã lưu và đã đặt</p></div>
+      <div class="sh"><h2>Gợi ý cho bạn</h2></div>
       <div class="grid">
         @for (p of forYouShown(); track p._id) {
           <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
@@ -85,7 +85,7 @@
 
   <section class="sec">
     <div class="sh">
-      <h2>Gần bạn</h2><p>Món đồ và dịch vụ trong khu của bạn</p>
+      <h2>Gần bạn</h2>
       <a class="more" routerLink="/search">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
     </div>
     <div class="grid">
@@ -116,7 +116,7 @@
 
   <section class="sec">
     <div class="sh">
-      <h2>Việc mới quanh bạn</h2><p>Yêu cầu mới nhất từ hàng xóm trong khu</p>
+      <h2>Việc mới quanh bạn</h2>
       <a class="more" routerLink="/search" [queryParams]="{ kind: 'job' }">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
     </div>
     <div class="grid">
@@ -129,7 +129,7 @@
   </section>
 
   <section class="sec" #feedSec>
-    <div class="sh"><h2>Khám phá quanh khu</h2><p>Lướt thêm món đồ, dịch vụ và việc trong khu</p></div>
+    <div class="sh"><h2>Khám phá quanh khu</h2></div>
     <div class="ffilter">
       @for (f of feedFilters; track f.key) {
         <button type="button" [class.on]="feedFilter() === f.key" (click)="setFilter(f.key)">{{ f.label }}</button>
