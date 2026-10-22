@@ -16,7 +16,6 @@
     </div>
 
     <form class="hsearch" [class.away]="onHome() && search.hideCompact()" (submit)="$event.preventDefault(); onSearch()" role="search">
-      <svg class="i lead"><use href="#search" /></svg>
       <input type="search" [value]="search.text()" (input)="search.text.set($any($event.target).value)" [placeholder]="search.placeholder()" aria-label="Tìm kiếm" />
       <button type="button" class="sbtn" [class.rec]="search.recording()" title="Tìm bằng giọng nói" (click)="search.voice()"><svg class="i"><use href="#mic" /></svg></button>
       <button type="button" class="sbtn" title="Tìm bằng hình ảnh" (click)="search.pickImage()"><svg class="i"><use href="#camera" /></svg></button>
