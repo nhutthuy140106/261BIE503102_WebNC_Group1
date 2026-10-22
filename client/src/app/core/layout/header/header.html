@@ -52,7 +52,6 @@
         <a routerLink="/profile" class="av" [title]="auth.currentUser()?.fullName ?? 'Tài khoản'">
           <app-avatar [src]="auth.currentUser()?.avatar" [name]="auth.currentUser()?.fullName" [size]="34" />
         </a>
-        <button type="button" class="hbtn" (click)="logout()">Đăng xuất</button>
       } @else {
         <a routerLink="/auth/login" class="login">Đăng nhập</a>
       }

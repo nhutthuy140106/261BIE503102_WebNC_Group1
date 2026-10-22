@@ -66,8 +66,4 @@ export class Header {
   openXu(): void {
     if (this.prompt.require('xu')) this.drawer.show('xu');
   }
-
-  logout(): void {
-    this.auth.logout().subscribe(() => this.router.navigate(['/']));
-  }
 }
