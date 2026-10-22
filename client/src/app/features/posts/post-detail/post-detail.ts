@@ -419,7 +419,8 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
       detail: {
         lines: d.lines(),
         quantity: d.tpl.qty ? d.qty() : undefined,
-        address: a ? a.name + ' · ' + a.phone + ' — ' + this.addressText(a) : undefined,
+        address: a ? a.name + ' · ' + a.phone + '
+' + this.addressText(a) : undefined,
         place: placeText,
         when: this.whenLabel(d),
         utensils: d.tpl.key === 'food' ? d.utensils() : undefined,
