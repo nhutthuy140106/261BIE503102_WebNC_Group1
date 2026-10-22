@@ -1,0 +1,7 @@
+.crumb { margin-top: 6px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--smoke); }
+.crumb a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.crumb .cur { color: var(--fog); }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 14px 0 22px; flex-wrap: wrap; }
+.head h1 { font-size: 28px; letter-spacing: -.02em; margin: 0; }
+.sort { display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--smoke); }
+.sort select { height: 38px; padding: 0 12px; border: 1px solid #DADDE3; border-radius: 8px; background: #fff; font: inherit; color: var(--ink); }

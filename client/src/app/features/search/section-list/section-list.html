@@ -1,0 +1,30 @@
+<nav class="crumb" aria-label="Vị trí">
+  <a routerLink="/">Trang chủ</a><span>/</span><span class="cur">{{ title() }}</span>
+</nav>
+
+<div class="head">
+  <h1>{{ title() }}</h1>
+  <label class="sort">
+    <span>Sắp xếp</span>
+    <select [value]="sort()" (change)="sort.set($any($event.target).value)">
+      <option value="near">Gần nhất</option>
+      <option value="new">Mới nhất</option>
+      @if (!isJobs()) { <option value="low">Giá thấp đến cao</option><option value="high">Giá cao đến thấp</option> }
+      @else { <option value="high">Tiền công cao nhất</option> }
+    </select>
+  </label>
+</div>
+
+@if (loading()) {
+  <p class="muted">Đang tải…</p>
+} @else if (error()) {
+  <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
+} @else {
+  <div class="grid">
+    @for (p of items(); track p._id) {
+      @if (p.kind === 'job') { <app-job-card [job]="p" /> } @else { <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" /> }
+    } @empty {
+      <p class="muted">Chưa có bài nào ở mục này.</p>
+    }
+  </div>
+}

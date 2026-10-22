@@ -1,46 +1,81 @@
-<div class="pagehead">
-  <h1>@if (term()) { Kết quả cho “{{ term() }}” } @else { Khám phá quanh khu }</h1>
-  <p>Đang xem {{ area.current() }} · có thể đổi khu vực ở bộ lọc.</p>
-</div>
+@if (term()) {
+  <p class="srhead">Kết quả tìm kiếm cho “<b>{{ term() }}</b>”</p>
+} @else {
+  <p class="srhead">Khám phá quanh khu</p>
+}
 
-<div class="tabs">
-  @for (t of tabs; track t.key) {
-    <button type="button" [class.on]="kind() === t.key" (click)="setKind(t.key)">{{ t.label }}<small>{{ counts()[t.key] }}</small></button>
-  }
-</div>
-
-<div class="results">
+<div class="layout">
   <aside class="filters">
-    <h2>Lọc kết quả</h2>
-    <button type="button" class="areabtn" (click)="area.open()">Khu vực: <span>{{ area.current() }}</span></button>
-    <label>{{ isJobs() ? 'Tiền công' : 'Khoảng giá' }}</label>
-    <div class="range">
-      <input class="input" type="number" min="0" step="10000" placeholder="Từ" [value]="min() ?? ''" (input)="setPrice('min', $any($event.target).value)" />
-      <span>–</span>
-      <input class="input" type="number" min="0" step="10000" placeholder="Đến" [value]="max() ?? ''" (input)="setPrice('max', $any($event.target).value)" />
-    </div>
-    @if (!isJobs()) {
-      <div>
-        <label>Ưu đãi</label>
-        <button type="button" class="chip" [class.on]="xuOnly()" (click)="toggleXu()"><img src="assets/clean/antxu.png" alt="" />Dùng được Xu</button>
+    <h2><svg class="i"><use href="#search" /></svg>Bộ lọc tìm kiếm</h2>
+
+    <section>
+      <h3>Theo danh mục</h3>
+      <ul class="cats">
+        @for (t of tabs; track t.key) {
+          <li><button type="button" [class.on]="kind() === t.key" (click)="setKind(t.key)">{{ t.label }} <small>({{ counts()[t.key] }})</small></button></li>
+        }
+      </ul>
+    </section>
+
+    <section>
+      <h3>Khu vực</h3>
+      <button type="button" class="areabtn" (click)="area.open()">{{ area.current() }}<svg class="i"><use href="#chev" /></svg></button>
+    </section>
+
+    <section>
+      <h3>{{ isJobs() ? 'Tiền công' : 'Khoảng giá' }}</h3>
+      <div class="range">
+        <input type="number" min="0" step="10000" placeholder="đ TỪ" [value]="draftMin()" (input)="draftMin.set($any($event.target).value)" (keydown.enter)="applyPrice()" />
+        <i></i>
+        <input type="number" min="0" step="10000" placeholder="đ ĐẾN" [value]="draftMax()" (input)="draftMax.set($any($event.target).value)" (keydown.enter)="applyPrice()" />
       </div>
+      <button type="button" class="apply" (click)="applyPrice()">Áp dụng</button>
+    </section>
+
+    @if (!isJobs()) {
+      <section>
+        <h3>Đánh giá</h3>
+        <ul class="rates">
+          @for (r of [5, 4, 3]; track r) {
+            <li>
+              <button type="button" [class.on]="rate() === r" (click)="setRate(r)">
+                <span class="st">@for (s of stars(r); track $index) { <b [class.off]="!s">★</b> }</span>@if (r < 5) { <span>trở lên</span> }
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section>
+        <h3>Ưu đãi</h3>
+        <label class="check"><input type="checkbox" [checked]="xuOnly()" (change)="toggleXu()" /><img src="assets/clean/antxu.png" alt="" />Dùng được Xu</label>
+      </section>
     }
-    <button type="button" class="reset" (click)="clear()">Xóa bộ lọc</button>
+
+    <button type="button" class="clear" [disabled]="!hasFilter()" (click)="clear()">Xóa tất cả</button>
   </aside>
 
-  <div>
+  <div class="main">
+    <div class="sortbar">
+      <span class="lab">Sắp xếp theo</span>
+      <button type="button" [class.on]="sort() === 'near'" (click)="setSort('near')">Gần nhất</button>
+      <button type="button" [class.on]="sort() === 'new'" (click)="setSort('new')">Mới nhất</button>
+      @if (!isJobs()) { <button type="button" [class.on]="sort() === 'sold'" (click)="setSort('sold')">Bán chạy</button> }
+      <label class="price" [class.on]="sort() === 'low' || sort() === 'high'">
+        <select [value]="sort() === 'low' || sort() === 'high' ? sort() : ''" (change)="setSort($any($event.target).value || 'near')" aria-label="Sắp xếp theo giá">
+          <option value="" [selected]="sort() !== 'low' && sort() !== 'high'">{{ isJobs() ? 'Tiền công' : 'Giá' }}</option>
+          <option value="low" [selected]="sort() === 'low'">{{ isJobs() ? 'Tiền công: Thấp đến cao' : 'Giá: Thấp đến cao' }}</option>
+          <option value="high" [selected]="sort() === 'high'">{{ isJobs() ? 'Tiền công: Cao đến thấp' : 'Giá: Cao đến thấp' }}</option>
+        </select>
+      </label>
+      <span class="count">{{ matched().length }} kết quả</span>
+    </div>
+
     @if (loading()) {
       <p class="muted">Đang tìm…</p>
     } @else if (error()) {
       <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
     } @else {
-      <div class="result-top">
-        <h2>@if (matched().length) { {{ matched().length }} bài phù hợp }</h2>
-        <select class="input" [value]="sort()" (change)="setSort($any($event.target).value)" aria-label="Sắp xếp">
-          @for (o of sortOptions(); track o.key) { <option [value]="o.key" [selected]="sort() === o.key">{{ o.label }}</option> }
-        </select>
-      </div>
-
       @if (local().length) {
         <div class="card-grid">
           @for (p of local(); track p._id) {

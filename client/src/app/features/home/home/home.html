@@ -61,7 +61,7 @@
   <section class="sec">
     <div class="sh">
       <h2>Nổi bật trong khu</h2>
-      <a class="more" routerLink="/search">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+      <a class="more" routerLink="/search/section/featured">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
     </div>
     <div class="grid">
       @for (p of featured(); track p._id) {
@@ -86,7 +86,7 @@
   <section class="sec">
     <div class="sh">
       <h2>Gần bạn</h2>
-      <a class="more" routerLink="/search">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+      <a class="more" routerLink="/search/section/nearby">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
     </div>
     <div class="grid">
       @for (p of nearby(); track p._id) {
@@ -117,7 +117,7 @@
   <section class="sec">
     <div class="sh">
       <h2>Việc mới quanh bạn</h2>
-      <a class="more" routerLink="/search" [queryParams]="{ kind: 'job' }">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+      <a class="more" routerLink="/search/section/jobs">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
     </div>
     <div class="grid">
       @for (j of jobs(); track j._id) {

@@ -7,7 +7,7 @@ import { PostService, matches } from '../../../core/services/post';
 import { SavedService } from '../../../core/services/saved';
 
 type Tab = 'all' | PostKind;
-type Sort = 'near' | 'low' | 'high';
+type Sort = 'near' | 'new' | 'sold' | 'low' | 'high';
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'all', label: 'Tất cả' },
@@ -18,9 +18,9 @@ const TABS: { key: Tab; label: string }[] = [
 ];
 
 /**
- * Kết quả tìm kiếm — bê từ design/mockups/search.html. Bộ lọc nằm trên query params
- * (q, kind, min, max, xu, sort) nên copy URL là giữ nguyên kết quả. Bài trong khu đang xem xếp trước,
- * bài khu khác gom vào "Ở khu gần đó".
+ * Kết quả tìm kiếm — bố cục kiểu Shopee: cột "Bộ lọc tìm kiếm" bên trái (danh mục, khu vực, khoảng giá, đánh giá, ưu đãi),
+ * thanh "Sắp xếp theo" phía trên danh sách. Mọi bộ lọc nằm trên query params (q, kind, min, max, rate, xu, sort)
+ * nên copy URL là giữ nguyên kết quả. Bài trong khu đang xem xếp trước, bài khu khác gom vào "Ở khu gần đó".
  */
 @Component({
   selector: 'app-search-results',
@@ -46,8 +46,12 @@ export class SearchResults implements OnInit {
   protected readonly kind = signal<Tab>('all');
   protected readonly min = signal<number | null>(null);
   protected readonly max = signal<number | null>(null);
+  protected readonly rate = signal(0);
   protected readonly xuOnly = signal(false);
   protected readonly sort = signal<Sort>('near');
+  /** Ô nhập khoảng giá (chỉ áp dụng khi bấm "Áp dụng", như Shopee) */
+  protected readonly draftMin = signal('');
+  protected readonly draftMax = signal('');
 
   private readonly byTerm = computed(() => this.all().filter((p) => matches(p, { q: this.term() || undefined })));
   protected readonly counts = computed(() => {
@@ -55,24 +59,36 @@ export class SearchResults implements OnInit {
     return Object.fromEntries(TABS.map((t) => [t.key, t.key === 'all' ? list.length : list.filter((p) => p.kind === t.key).length])) as Record<Tab, number>;
   });
   protected readonly isJobs = computed(() => this.kind() === 'job');
-  protected readonly sortOptions = computed<{ key: Sort; label: string }[]>(() =>
-    this.isJobs()
-      ? [{ key: 'near', label: 'Gần nhất' }, { key: 'high', label: 'Tiền công cao nhất' }]
-      : [{ key: 'near', label: 'Gần nhất' }, { key: 'low', label: 'Giá thấp đến cao' }, { key: 'high', label: 'Giá cao đến thấp' }],
-  );
 
   protected readonly matched = computed(() => {
     const lo = this.min() ?? 0;
     const hi = this.max() ?? Infinity;
     const k = this.kind();
     const xu = this.xuOnly() && !this.isJobs();
+    const r = this.rate();
     const far = Number.MAX_SAFE_INTEGER;
-    const list = this.byTerm().filter((p) => (k === 'all' || p.kind === k) && p.price >= lo && p.price <= hi && (!xu || p.acceptsXu));
+    const list = this.byTerm().filter(
+      (p) => (k === 'all' || p.kind === k) && p.price >= lo && p.price <= hi && (!xu || p.acceptsXu) && (!r || (p.rating ?? 0) >= r),
+    );
     const s = this.sort();
-    return [...list].sort((a, b) => (s === 'low' ? a.price - b.price : s === 'high' ? b.price - a.price : (a.distance ?? far) - (b.distance ?? far)));
+    return [...list].sort((a, b) => {
+      switch (s) {
+        case 'low':
+          return a.price - b.price;
+        case 'high':
+          return b.price - a.price;
+        case 'new':
+          return b.createdAt.localeCompare(a.createdAt);
+        case 'sold':
+          return (b.sold ?? 0) - (a.sold ?? 0);
+        default:
+          return (a.distance ?? far) - (b.distance ?? far);
+      }
+    });
   });
   protected readonly local = computed(() => this.matched().filter((p) => p.area === this.area.current()));
   protected readonly nearby = computed(() => this.matched().filter((p) => p.area !== this.area.current()));
+  protected readonly hasFilter = computed(() => this.min() != null || this.max() != null || this.rate() > 0 || this.xuOnly() || this.kind() !== 'all');
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
@@ -82,9 +98,12 @@ export class SearchResults implements OnInit {
       this.kind.set(kind && TABS.some((t) => t.key === kind) ? kind : 'all');
       this.min.set(num('min'));
       this.max.set(num('max'));
+      this.draftMin.set(params.get('min') ?? '');
+      this.draftMax.set(params.get('max') ?? '');
+      this.rate.set(num('rate') ?? 0);
       this.xuOnly.set(params.get('xu') === '1');
       const sort = params.get('sort') as Sort | null;
-      this.sort.set(sort && ['near', 'low', 'high'].includes(sort) ? sort : 'near');
+      this.sort.set(sort && ['near', 'new', 'sold', 'low', 'high'].includes(sort) ? sort : 'near');
     });
     this.postService.getPosts().subscribe({
       next: (list) => {
@@ -99,30 +118,42 @@ export class SearchResults implements OnInit {
   }
 
   protected setKind(k: Tab): void {
-    this.navigate({ kind: k === 'all' ? null : k, sort: null });
+    this.navigate({ kind: k === 'all' ? null : k, sort: this.sort() === 'sold' && k === 'job' ? null : this.sortParam() });
   }
 
-  protected setPrice(which: 'min' | 'max', value: string): void {
-    this.navigate({ [which]: value || null }, true);
+  protected applyPrice(): void {
+    this.navigate({ min: this.draftMin().trim() || null, max: this.draftMax().trim() || null });
+  }
+
+  protected setRate(r: number): void {
+    this.navigate({ rate: this.rate() === r ? null : String(r) });
   }
 
   protected toggleXu(): void {
     this.navigate({ xu: this.xuOnly() ? null : '1' });
   }
 
-  protected setSort(s: string): void {
+  protected setSort(s: Sort): void {
     this.navigate({ sort: s === 'near' ? null : s });
   }
 
   protected clear(): void {
-    this.navigate({ min: null, max: null, xu: null, sort: null });
+    this.navigate({ kind: null, min: null, max: null, rate: null, xu: null, sort: null });
   }
 
   protected toggleSave(p: Post): void {
     this.saved.toggle(p._id);
   }
 
-  private navigate(queryParams: Record<string, string | null>, replace = false): void {
-    this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge', replaceUrl: replace });
+  protected stars(n: number): number[] {
+    return [1, 2, 3, 4, 5].map((i) => (i <= n ? 1 : 0));
+  }
+
+  private sortParam(): string | null {
+    return this.sort() === 'near' ? null : this.sort();
+  }
+
+  private navigate(queryParams: Record<string, string | null>): void {
+    this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
   }
 }
