@@ -7,7 +7,8 @@ import { PostService, matches } from '../../../core/services/post';
 import { SavedService } from '../../../core/services/saved';
 
 type Tab = 'all' | PostKind;
-type Sort = 'all' | 'near' | 'new' | 'sold' | 'low' | 'high';
+type Sort = 'near' | 'new' | 'sold' | 'low' | 'high';
+const SORTS: Sort[] = ['near', 'new', 'sold', 'low', 'high'];
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'all', label: 'Tất cả' },
@@ -48,7 +49,8 @@ export class SearchResults implements OnInit {
   protected readonly max = signal<number | null>(null);
   protected readonly rate = signal(0);
   protected readonly xuOnly = signal(false);
-  protected readonly sort = signal<Sort>('all');
+  /** Các kiểu sắp xếp đang bật (chọn được nhiều nút cùng lúc, nút bật trước ưu tiên trước). Rỗng = không sắp xếp. */
+  protected readonly sorts = signal<Sort[]>([]);
   /** Ô nhập khoảng giá (chỉ áp dụng khi bấm "Áp dụng", như Shopee) */
   protected readonly draftMin = signal('');
   protected readonly draftMax = signal('');
@@ -80,22 +82,21 @@ export class SearchResults implements OnInit {
     const list = this.byTerm().filter(
       (p) => (k === 'all' || p.kind === k) && p.price >= lo && p.price <= hi && (!xu || p.acceptsXu) && (!r || (p.rating ?? 0) >= r),
     );
-    const s = this.sort();
+    const cmp: Record<Sort, (a: Post, b: Post) => number> = {
+      near: (a, b) => (a.distance ?? far) - (b.distance ?? far),
+      new: (a, b) => b.createdAt.localeCompare(a.createdAt),
+      sold: (a, b) => (b.sold ?? 0) - (a.sold ?? 0),
+      low: (a, b) => a.price - b.price,
+      high: (a, b) => b.price - a.price,
+    };
+    const chain = this.sorts();
+    if (!chain.length) return list; // chưa chọn gì: giữ thứ tự gốc
     return [...list].sort((a, b) => {
-      switch (s) {
-        case 'low':
-          return a.price - b.price;
-        case 'high':
-          return b.price - a.price;
-        case 'new':
-          return b.createdAt.localeCompare(a.createdAt);
-        case 'sold':
-          return (b.sold ?? 0) - (a.sold ?? 0);
-        case 'near':
-          return (a.distance ?? far) - (b.distance ?? far);
-        default:
-          return 0; // Tất cả: giữ thứ tự gốc, không sắp xếp thêm
+      for (const k of chain) {
+        const r = cmp[k](a, b);
+        if (r) return r;
       }
+      return 0;
     });
   });
   protected readonly local = computed(() => this.matched().filter((p) => p.area === this.area.current()));
@@ -117,8 +118,7 @@ export class SearchResults implements OnInit {
       if ((this.min() != null || this.max() != null) && !this.presets().some((p) => this.isPreset(p))) this.manual.set(true);
       this.rate.set(num('rate') ?? 0);
       this.xuOnly.set(params.get('xu') === '1');
-      const sort = params.get('sort') as Sort | null;
-      this.sort.set(sort && ['near', 'new', 'sold', 'low', 'high'].includes(sort) ? sort : 'all');
+      this.sorts.set((params.get('sort') ?? '').split(',').filter((k): k is Sort => SORTS.includes(k as Sort)));
     });
     this.postService.getPosts().subscribe({
       next: (list) => {
@@ -133,7 +133,8 @@ export class SearchResults implements OnInit {
   }
 
   protected setKind(k: Tab): void {
-    this.navigate({ kind: k === 'all' ? null : k, sort: this.sort() === 'sold' && k === 'job' ? null : this.sortParam() });
+    const keep = this.sorts().filter((x) => !(k === 'job' && x === 'sold'));
+    this.navigate({ kind: k === 'all' ? null : k, sort: keep.length ? keep.join(',') : null });
   }
 
   protected isPreset(p: { min: number | null; max: number | null }): boolean {
@@ -157,9 +158,18 @@ export class SearchResults implements OnInit {
     this.navigate({ xu: this.xuOnly() ? null : '1' });
   }
 
-  /** Bấm lại nút đang chọn thì bỏ chọn (về "Tất cả") */
-  protected setSort(s: Sort): void {
-    this.navigate({ sort: s === 'all' || s === this.sort() ? null : s });
+  protected isOn(k: Sort): boolean {
+    return this.sorts().includes(k);
+  }
+
+  /** Giá đang chọn (thấp đến cao / cao đến thấp) cho menu Giá; rỗng nếu chưa chọn */
+  protected readonly priceValue = computed(() => this.sorts().find((k) => k === 'low' || k === 'high') ?? '');
+
+  /** Bấm một nút = bật; bấm lần nữa = bỏ. Bật nhiều nút được; "thấp đến cao" và "cao đến thấp" loại trừ nhau. */
+  protected toggleSort(k: Sort): void {
+    let list = this.sorts().includes(k) ? this.sorts().filter((x) => x !== k) : [...this.sorts().filter((x) => !((k === 'low' || k === 'high') && (x === 'low' || x === 'high'))), k];
+    if (this.isJobs()) list = list.filter((x) => x !== 'sold');
+    this.navigate({ sort: list.length ? list.join(',') : null });
   }
 
   protected clear(): void {
@@ -172,10 +182,6 @@ export class SearchResults implements OnInit {
 
   protected stars(n: number): number[] {
     return [1, 2, 3, 4, 5].map((i) => (i <= n ? 1 : 0));
-  }
-
-  private sortParam(): string | null {
-    return this.sort() === 'all' ? null : this.sort();
   }
 
   private navigate(queryParams: Record<string, string | null>): void {

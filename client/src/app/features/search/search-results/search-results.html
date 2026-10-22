@@ -63,11 +63,10 @@
   <div class="main">
     <div class="sortbar">
       <span class="lab">Sắp xếp theo:</span>
-      <button type="button" [class.on]="sort() === 'all'" (click)="setSort('all')">Tất cả</button>
-      <button type="button" [class.on]="sort() === 'near'" (click)="setSort('near')">Gần nhất</button>
-      <button type="button" [class.on]="sort() === 'new'" (click)="setSort('new')">Mới nhất</button>
-      @if (!isJobs()) { <button type="button" [class.on]="sort() === 'sold'" (click)="setSort('sold')">Bán chạy</button> }
-      <app-sort-menu [bar]="true" [options]="priceOptions()" [value]="sort()" [placeholder]="isJobs() ? 'Tiền công' : 'Giá'" (valueChange)="setSort($any($event))" />
+      <button type="button" [class.on]="isOn('near')" (click)="toggleSort('near')">Gần nhất</button>
+      <button type="button" [class.on]="isOn('new')" (click)="toggleSort('new')">Mới nhất</button>
+      @if (!isJobs()) { <button type="button" [class.on]="isOn('sold')" (click)="toggleSort('sold')">Bán chạy</button> }
+      <app-sort-menu [bar]="true" [options]="priceOptions()" [value]="priceValue()" [placeholder]="isJobs() ? 'Tiền công' : 'Giá'" (valueChange)="toggleSort($any($event))" />
     </div>
 
     @if (loading()) {
