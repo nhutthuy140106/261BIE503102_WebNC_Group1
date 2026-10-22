@@ -24,11 +24,31 @@
     }
   }
 
+  @if (o.type === 'placed') {
+    <ol class="steps">
+      @for (st of placedSteps(o); track st.label) {
+        <li [class.reached]="st.done" [class.current]="st.current"><span>{{ st.label }}</span></li>
+      }
+    </ol>
+    @if (o.status === 'cancelled') { <div class="notice">Đơn đã hủy.</div> }
+  }
+
   <dl class="info">
     <dt>Trạng thái</dt><dd>{{ label(o) }}</dd>
     <dt>{{ o.type === 'placed' ? 'Người bán' : 'Người đăng' }}</dt><dd class="who"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="28" />{{ o.counterpartName }}</dd>
     <dt>{{ o.type === 'placed' ? 'Thanh toán' : 'Trả công' }}</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
     <dt>{{ o.type === 'placed' ? 'Tổng cộng' : 'Tiền công' }}</dt><dd class="price">{{ o.total | vnd }}</dd>
+    @if (o.detail; as d) {
+      @for (l of d.lines; track l) { <dt>{{ l.split(': ')[0] }}</dt><dd>{{ l.split(': ').slice(1).join(': ') }}</dd> }
+      @if (d.quantity) { <dt>Số lượng</dt><dd>{{ d.quantity }}</dd> }
+      @if (d.when) { <dt>Thời gian</dt><dd>{{ d.when }}</dd> }
+      @if (d.place) { <dt>Cách nhận</dt><dd>{{ d.place }}</dd> }
+      @if (d.address) { <dt>Giao tới</dt><dd>{{ d.address }}</dd> }
+      @if (d.utensils !== undefined) { <dt>Dụng cụ / ống hút</dt><dd>{{ d.utensils ? 'Có lấy' : 'Không lấy' }}</dd> }
+      <dt>Tiền hàng</dt><dd>{{ d.subtotal | vnd }}</dd>
+      @if (d.fee) { <dt>Phí giao / đến nhà</dt><dd>{{ d.fee | vnd }}</dd> }
+      @if (d.discount) { <dt>Voucher {{ d.voucher }}</dt><dd>−{{ d.discount | vnd }}</dd> }
+    }
     @if (o.note) { <dt>Ghi chú</dt><dd>{{ o.note }}</dd> }
     @if (offer(); as of) {
       <dt>Lời giới thiệu của bạn</dt><dd>{{ of.intro }}</dd>

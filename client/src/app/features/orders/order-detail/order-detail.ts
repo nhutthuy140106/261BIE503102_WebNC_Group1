@@ -7,6 +7,7 @@ import { useMock } from '../../../core/config/api.config';
 import { Order } from '../../../core/models/order';
 import { JobOfferService } from '../../../core/services/job-offer';
 import { OrderService } from '../../../core/services/order';
+import { XuService } from '../../../core/services/xu';
 import { ReviewService } from '../../../core/services/review';
 import { availableActions, canSeeExactAddress } from '../../../core/utils/offer-state';
 import { formatDateTime, statusLabel } from '../../../core/utils/status-label';
@@ -29,6 +30,7 @@ export class OrderDetail implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly offerService = inject(JobOfferService);
   private readonly reviewService = inject(ReviewService);
+  private readonly xu = inject(XuService);
 
   protected readonly order = signal<Order | null>(null);
   protected readonly offer = signal<Offer | null>(null);
@@ -88,6 +90,14 @@ export class OrderDetail implements OnInit {
     return h ? formatDateTime(h.at) : '';
   }
 
+  /** Các bước theo dõi đơn đã đặt (theo loại bài lúc đặt) kèm bước đang ở */
+  placedSteps(o: Order): { label: string; done: boolean; current: boolean }[] {
+    const steps = o.detail?.steps ?? ['Đã gửi', 'Chờ xác nhận', 'Đang chuẩn bị', 'Hoàn thành'];
+    const last = steps.length - 1;
+    const at = o.status === 'done' ? last : o.status === 'cancelled' ? -1 : Math.min(last - 1, { pending: 1, confirmed: 1, preparing: 2, delivering: Math.max(2, last - 1) }[o.status as string] ?? 1);
+    return steps.map((label, i) => ({ label, done: i <= at, current: i === at }));
+  }
+
   stepReached(state: OfferState): boolean {
     return this.offer()?.history.some((h) => h.state === state) ?? false;
   }
@@ -105,6 +115,7 @@ export class OrderDetail implements OnInit {
       .subscribe({
         next: (next) => {
           this.offer.set(next);
+          if (action === 'confirmPaid') this.xu.earn(15, 'Hoàn thành việc đã nhận', 'job:' + next._id);
           this.order.update((cur) => (cur ? { ...cur, status: next.state, history: next.history } : cur));
           this.openPanel = null;
         },
@@ -136,7 +147,10 @@ export class OrderDetail implements OnInit {
     this.reviewService
       .create({ targetType: o.type === 'received' ? 'offer' : 'order', targetId: o._id, ...this.reviewForm.getRawValue() })
       .subscribe({
-        next: () => this.reviewed.set(true),
+        next: () => {
+          this.reviewed.set(true);
+          if (this.reviewForm.getRawValue().comment.trim()) this.xu.earn(5, 'Đánh giá có nhận xét', 'review:' + o._id);
+        },
         error: (e: Error) => this.error.set(e.message),
       });
   }
