@@ -1,7 +1,5 @@
 /* Chi tiết bài — bê từ design/mockups/detail.html */
 .titlerow { margin-top: 10px; display: flex; align-items: flex-end; gap: 20px; }
-.kindline { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13.5px; color: var(--smoke); }
-.kindchip { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--soft); border: 1px solid var(--border); color: var(--ink); font-size: 12px; font-weight: 700; flex: none; }
 .titlerow h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
 .sub { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--smoke); font-size: 14px; }
 .sub span { display: inline-flex; align-items: center; gap: 5px; }
@@ -174,18 +172,6 @@
 .rvhead { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; border-bottom: 1px solid #E6E8EC; }
 .rvhead h2 { margin: 0; font-size: 18px; }
 .rvbody { overflow: auto; }
-.rvsum { display: flex; gap: 36px; align-items: center; padding: 22px; margin: 22px; border: 1px solid #E6E8EC; border-radius: 10px; flex-wrap: wrap; }
-.score { text-align: center; flex: none; min-width: 120px; }
-.score .num b { font-size: 38px; color: var(--accent); letter-spacing: -.02em; }
-.score .num span { margin-left: 6px; font-size: 16px; color: var(--accent); }
-.big-stars { color: #E39B1A; font-size: 18px; letter-spacing: 2px; }
-.big-stars .off { color: #E3E5EA; }
-.rvfilters { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; min-width: 280px; }
-.rvfilters button { min-width: 96px; padding: 8px 14px; border: 1px solid #DADDE3; border-radius: 4px; background: #fff; font-size: 14px; }
-.rvfilters button small { color: var(--smoke); }
-.rvfilters button:hover { border-color: var(--accent); }
-.rvfilters button.on { border-color: var(--accent); color: var(--accent); }
-.rvfilters button.on small { color: var(--accent); }
 .rvlist { padding: 0 22px 22px; }
 .rvlist .rev { display: flex; gap: 12px; padding: 18px 0; border-top: 1px solid #E6E8EC; }
 .rvlist .rev .av { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex: none; }
@@ -196,3 +182,26 @@
 .rvlist .stars { margin: 0; }
 .rvempty { padding: 40px 0; text-align: center; color: var(--smoke); }
 @media (max-width: 700px) { .rvsum { gap: 16px; margin: 14px; padding: 14px; } .rvlist { padding: 0 14px 14px; } }
+
+.rvsum { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 32px; align-items: center; padding: 22px 22px 8px; }
+.score { text-align: center; }
+.score .num b { font-size: 44px; color: var(--ink); letter-spacing: -.03em; }
+.score .num span { margin-left: 4px; font-size: 16px; color: var(--smoke); }
+.big-stars { color: #E39B1A; font-size: 18px; letter-spacing: 2px; margin-top: 2px; }
+.big-stars .off { color: #E3E5EA; }
+.score small { display: block; margin-top: 4px; color: var(--smoke); font-size: 13px; }
+.dist { display: grid; gap: 4px; }
+.dist button { display: grid; grid-template-columns: 34px minmax(0, 1fr) 28px; align-items: center; gap: 12px; padding: 5px 8px; border-radius: 6px; background: none; font-size: 13px; color: var(--smoke); text-align: left; }
+.dist button:hover { background: #F4F5F7; }
+.dist button.on { background: #F1F2F5; color: var(--ink); font-weight: 700; }
+.dist .lv i { font-style: normal; color: #E39B1A; }
+.dist .bar { height: 6px; border-radius: 3px; background: #ECEEF2; overflow: hidden; }
+.dist .bar em { display: block; height: 100%; background: #E39B1A; border-radius: 3px; }
+.dist .ct { text-align: right; }
+.rvtabs { display: flex; gap: 22px; margin: 6px 22px 0; border-bottom: 1px solid #E6E8EC; }
+.rvtabs button { position: relative; padding: 12px 0; background: none; font-weight: 600; color: var(--smoke); }
+.rvtabs button small { margin-left: 4px; font-weight: 500; color: var(--fog); }
+.rvtabs button.on { color: var(--ink); }
+.rvtabs button.on::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--ink); }
+.rvlist .rev:first-child { border-top: 0; }
+@media (max-width: 700px) { .rvsum { grid-template-columns: 1fr; gap: 14px; } }
