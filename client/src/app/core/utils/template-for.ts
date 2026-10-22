@@ -46,7 +46,8 @@ export function viewOf(post: Post): PostView {
         ? base.desc
         : [post.title + ' — bài đăng của ' + post.sellerName + ' tại ' + post.block + '.', 'Nhắn người bán nếu cần hỏi thêm trước khi đặt.'],
     list: same ? base.list : [],
-    opts: own ?? (same ? base.opts : base.opts.slice(0, 1)),
+    stock: same ? base.stock : { mode: 'open', sched: base.stock.sched },
+    opts: own ?? (same ? base.opts : []),
     qs: post.questions?.length ? post.questions.map((q) => ({ type: q.type ?? ('text' as const), label: q.label, opts: q.opts, ph: q.ph, req: q.required, long: q.long, hint: q.hint, pay: q.pay })) : base.qs,
     xuOk: post.acceptsXu ?? base.xuOk,
   };
