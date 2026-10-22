@@ -81,23 +81,53 @@ export class OrderList implements OnInit {
     return ['chosen', 'working', 'confirmed', 'preparing', 'delivering', 'ready'].includes(o.status as string) ? 'go' : 'wait';
   }
 
-  /** Việc bạn cần làm tiếp (nút đầu thẻ, màu cam); null = không có */
+  /** Nút nhỏ trên thanh trạng thái: ghi rõ việc bạn cần làm tiếp (null = không cần làm gì) */
   protected next(o: Order): string | null {
     if (!needsAction(o)) return null;
-    if (o.type === 'received') return o.status === 'chosen' ? 'Bắt đầu làm' : o.status === 'working' ? 'Báo hoàn thành' : !o.paid ? 'Xác nhận tiền công' : 'Đánh giá';
-    if (o.status === 'pricing') return 'Duyệt giá';
+    if (o.type === 'received') return o.status === 'chosen' ? 'Bắt đầu làm' : o.status === 'working' ? 'Báo hoàn thành' : !o.paid ? 'Xác nhận đã nhận tiền' : 'Đánh giá';
+    if (o.status === 'pricing') return 'Xem giá & trả lời';
     if (o.resched?.by === 'seller') return 'Duyệt giờ mới';
     return 'Xem phản hồi';
   }
 
-  /** Nút phụ đầu thẻ khi không có việc cần làm: đơn xong → đặt lại / tìm việc khác, đơn đang chạy → nhắn tin */
-  protected side(o: Order): { label: string; link: unknown[]; params?: Record<string, string | undefined> } {
-    if (isEnded(o)) {
-      return o.type === 'received'
-        ? { label: 'Tìm việc khác', link: ['/search'], params: { kind: 'job' } }
-        : { label: 'Đặt lại', link: ['/posts', o.postId] };
+  /** Một câu nói rõ đơn đang ở đâu và ai đang chờ ai */
+  protected hint(o: Order): string {
+    const n = o.counterpartName;
+    const money = (v: number) => Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
+    const st = o.status as string;
+    if (o.type === 'received') {
+      const m: Record<string, string> = {
+        offered: 'Chờ ' + n + ' chọn người',
+        chosen: 'Bạn được chọn — đến giờ bấm Bắt đầu làm',
+        working: 'Đang làm — xong thì báo hoàn thành',
+        reported: 'Chờ ' + n + ' xác nhận (tự hoàn thành sau 24 giờ)',
+        done: !o.paid ? 'Xong việc — xác nhận đã nhận ' + money(o.total) + ' tiền công' : !o.rated ? 'Đã nhận tiền công — mời bạn đánh giá' : 'Hoàn thành',
+        rejected: n + ' đã chọn người khác',
+        withdrawn: 'Bạn đã rút đề nghị',
+        cancelled: 'Việc đã hủy',
+      };
+      return m[st] ?? '';
     }
-    return { label: 'Nhắn tin', link: ['/messenger'], params: { to: o.counterpartName, av: o.counterpartAvatar } };
+    if (o.issue && o.issue.st !== 'closed') return o.issue.st === 'open' ? 'Đã gửi yêu cầu — chờ ' + n + ' trả lời' : n + ' đã trả lời yêu cầu của bạn';
+    if (o.resched?.by === 'seller') return n + ' xin đổi giờ sang ' + o.resched.to;
+    if (o.resched?.by === 'buyer') return 'Chờ ' + n + ' đồng ý đổi giờ';
+    const m: Record<string, string> = {
+      pending: 'Chờ ' + n + ' xác nhận',
+      confirmed: n + ' đã nhận đơn',
+      pricing: n + ' báo giá cuối ' + money(o.newPrice?.total ?? o.total) + ' (lúc đặt ' + money(o.total) + ') — chờ bạn đồng ý',
+      preparing: o.kind === 'service' ? n + ' đang làm' : n + ' đang chuẩn bị',
+      delivering: 'Đang giao tới bạn',
+      ready: 'Sẵn sàng — bạn qua lấy',
+      done: 'Đã nhận hàng',
+      cancelled: o.cancelBy === 'seller' ? n + ' đã hủy đơn' : 'Đã hủy',
+      declined: n + ' không nhận đơn',
+    };
+    return m[st] ?? '';
+  }
+
+  /** Thời điểm quan trọng nhất của đơn: giờ hẹn/giao với đơn đặt, ngày gửi với việc đã nhận */
+  protected when(o: Order): string {
+    return o.type === 'placed' && o.detail?.when ? o.detail.when : (o.type === 'placed' ? 'Đặt ' : 'Gửi đề nghị ') + new Date(o.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
   }
 
   ngOnInit(): void {

@@ -11,27 +11,23 @@
 </nav>
 
 <ng-template #rowTpl let-o>
-  <li class="ocard">
-    <a class="top" [routerLink]="['/orders', o._id]">
-      <app-order-thumb [image]="o.image" [category]="o.category" />
-      <span class="main">
-        <span class="line1">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }} · {{ o.code }}</span>
-        <h3>{{ o.postTitle }}</h3>
-        <span class="sub">{{ o.counterpartName }} · {{ fmt(o.createdAt) }}</span>
+  <li>
+    <a class="ocard" [routerLink]="['/orders', o._id]">
+      <span class="top">
+        <app-order-thumb [image]="o.image" [category]="o.category" />
+        <span class="main">
+          <h3>{{ o.postTitle }}</h3>
+          <span class="sub">{{ o.counterpartName }} · {{ when(o) }}</span>
+          <span class="kind">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }} · {{ o.code }}</span>
+        </span>
+        <b class="price">{{ o.total | vnd }}</b>
       </span>
-      <span class="end">
-        <b>{{ o.total | vnd }}</b>
-        <span class="stat" [ngClass]="'s-' + dot(o)"><i class="dotc"></i>{{ label(o) }}</span>
+      <span class="strip" [ngClass]="'s-' + dot(o)">
+        <i class="dotc"></i>
+        <span class="msg">{{ hint(o) }}</span>
+        @if (next(o); as n) { <span class="go">{{ n }}</span> } @else { <span class="chev" aria-hidden="true">›</span> }
       </span>
     </a>
-    <div class="acts">
-      @if (next(o); as n) {
-        <a class="act primary" [routerLink]="['/orders', o._id]">{{ n }}</a>
-      } @else {
-        <a class="act" [routerLink]="side(o).link" [queryParams]="side(o).params">{{ side(o).label }}</a>
-      }
-      <a class="act" [routerLink]="['/orders', o._id]">Xem chi tiết</a>
-    </div>
   </li>
 </ng-template>
 
