@@ -4,7 +4,7 @@ import { forkJoin, of, switchMap } from 'rxjs';
 import { CanComponentDeactivate } from '../../../core/guards/pending-changes-guard';
 import { AppError } from '../../../core/models/api';
 import { CreateOrderBody, Order } from '../../../core/models/order';
-import { Post } from '../../../core/models/post';
+import { KIND_LABEL, Post } from '../../../core/models/post';
 import { Address } from '../../../core/models/user';
 import { unsplash } from '../../../core/config/post-templates';
 import { AddressService } from '../../../core/services/address';
@@ -20,8 +20,7 @@ import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
 import { resolveId } from '../../../core/utils/slug-helper';
 import { PostView, viewOf } from '../../../core/utils/template-for';
 
-type RvFilter = 'all' | 'photo' | '5' | '4' | 'low';
-type RvSort = 'new' | 'high' | 'low';
+type RvFilter = 'all' | 'photo' | '5' | '4' | '3' | '2' | '1';
 
 /**
  * Chi tiết đồ ăn / đồ dùng / dịch vụ — bê từ design/mockups/detail.html.
@@ -46,6 +45,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected readonly drawer = inject(DrawerService);
   protected readonly saved = inject(SavedService);
 
+  protected readonly kindLabel = KIND_LABEL;
   protected readonly parse = parseChoice;
   protected readonly img = unsplash;
   protected readonly post = signal<Post | null>(null);
@@ -65,8 +65,6 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected readonly lightbox = signal<number | null>(null);
   protected readonly reviewsOpen = signal(false);
   protected readonly rvFilter = signal<RvFilter>('all');
-  protected readonly rvSort = signal<RvSort>('new');
-  protected readonly rvQuery = signal('');
   protected readonly tried = signal(false);
 
   // ----- đánh giá (điểm và số lượt tính từ dữ liệu) -----
@@ -75,19 +73,22 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const r = this.reviews();
     return r.length ? (r.reduce((s, x) => s + x[4], 0) / r.length).toFixed(1).replace('.', ',') : 'Mới';
   });
-  protected readonly bars = computed(() => [5, 4, 3, 2, 1].map((n) => ({ n, c: this.reviews().filter((r) => r[4] === n).length })));
+  protected readonly avgRound = computed(() => {
+    const r = this.reviews();
+    return r.length ? Math.round(r.reduce((s, x) => s + x[4], 0) / r.length) : 0;
+  });
+  /** Nút lọc kiểu Shopee: Tất cả · 5 sao … 1 sao · Có hình ảnh, kèm số đánh giá */
+  protected readonly rvFilters = computed<{ k: RvFilter; label: string; n: number }[]>(() => {
+    const r = this.reviews();
+    return [
+      { k: 'all', label: 'Tất cả', n: r.length },
+      ...([5, 4, 3, 2, 1] as const).map((s) => ({ k: String(s) as RvFilter, label: s + ' sao', n: r.filter((x) => x[4] === s).length })),
+      { k: 'photo', label: 'Có hình ảnh', n: r.filter((x) => x[6].length).length },
+    ];
+  });
   protected readonly rvShown = computed(() => {
-    const q = this.rvQuery().trim().toLowerCase();
     const f = this.rvFilter();
-    const list = this.reviews().filter((r) => {
-      if (f === 'photo' && !r[6].length) return false;
-      if (f === '5' && r[4] !== 5) return false;
-      if (f === '4' && r[4] !== 4) return false;
-      if (f === 'low' && r[4] > 3) return false;
-      return !q || (r[5] + r[1]).toLowerCase().includes(q);
-    });
-    const s = this.rvSort();
-    return s === 'new' ? list : [...list].sort((a, b) => (s === 'high' ? b[4] - a[4] : a[4] - b[4]));
+    return this.reviews().filter((r) => (f === 'all' ? true : f === 'photo' ? r[6].length > 0 : r[4] === Number(f)));
   });
 
   /** Khung giờ chọn được, bước 30 phút */

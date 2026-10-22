@@ -3,9 +3,11 @@
 } @else if (post(); as p) {
   @if (view(); as v) {
   @if (draft(); as d) {
-  <div class="crumb">
-    <button type="button" class="back" (click)="back()">Quay lại</button>
-  </div>
+  <nav class="crumb" aria-label="Vị trí">
+    <a routerLink="/">Trang chủ</a><span>/</span>
+    <a routerLink="/search" [queryParams]="{ kind: p.kind }">{{ kindLabel[p.kind] }}</a><span>/</span>
+    <span class="cur">{{ p.title }}</span>
+  </nav>
 
   <div class="titlerow">
     <div>
@@ -18,7 +20,7 @@
       </div>
     </div>
     <div class="acts">
-      <button type="button" (click)="share()"><svg class="i"><use href="#right" /></svg>Chia sẻ</button>
+      <button type="button" (click)="share()"><svg class="i"><use href="#share" /></svg>Chia sẻ</button>
       <button type="button" [class.on]="saved.has(p._id)" (click)="toggleSave(p)">
         <svg class="i"><use [attr.href]="saved.has(p._id) ? '#heartFill' : '#heart'" /></svg>{{ saved.has(p._id) ? 'Đã lưu' : 'Lưu' }}
       </button>
@@ -315,34 +317,33 @@
   @if (reviewsOpen()) {
     <div class="scrim" (click)="reviewsOpen.set(false)">
       <div class="rv" (click)="$event.stopPropagation()">
-        <div class="rvside">
-          <div class="rvscore"><svg class="i"><use href="#star" /></svg><b>{{ rate() }}</b></div>
-          <small>{{ reviews().length }} đánh giá</small>
-          <div class="bars">@for (b of bars(); track b.n) { <div><span>{{ b.n }}</span><i><em [style.width.%]="reviews().length ? b.c * 100 / reviews().length : 0"></em></i><span>{{ b.c }}</span></div> }</div>
-        </div>
-        <div class="rvmain">
-          <div class="rvtop">
-            <div class="rvsearch"><input placeholder="Tìm trong đánh giá" [value]="rvQuery()" (input)="rvQuery.set($any($event.target).value)" /></div>
-            <select class="input" [value]="rvSort()" (change)="rvSort.set($any($event.target).value)">
-              <option value="new">Mới nhất</option><option value="high">Sao cao nhất</option><option value="low">Sao thấp nhất</option>
-            </select>
-            <button type="button" class="x" (click)="reviewsOpen.set(false)" aria-label="Đóng">✕</button>
-          </div>
-          <div class="rvchips">
-            @for (f of [['all','Tất cả'],['photo','Có ảnh'],['5','5★'],['4','4★'],['low','≤3★']]; track f[0]) {
-              <button type="button" [class.on]="rvFilter() === f[0]" (click)="rvFilter.set($any(f[0]))">{{ f[1] }}</button>
-            }
+        <header class="rvhead"><h2>Đánh giá</h2><button type="button" class="x" (click)="reviewsOpen.set(false)" aria-label="Đóng">✕</button></header>
+        <div class="rvbody">
+          <div class="rvsum">
+            <div class="score">
+              <div class="num"><b>{{ rate() }}</b><span>trên 5</span></div>
+              <div class="big-stars">@for (s of stars(avgRound()); track $index) { <span [class.off]="!s">★</span> }</div>
+            </div>
+            <div class="rvfilters">
+              @for (f of rvFilters(); track f.k) {
+                <button type="button" [class.on]="rvFilter() === f.k" (click)="rvFilter.set(f.k)">{{ f.label }} <small>({{ f.n }})</small></button>
+              }
+            </div>
           </div>
           <div class="rvlist">
             @for (r of rvShown(); track $index) {
               <article class="rev">
-                <div class="who"><img [src]="img(r[0], 80, 80)" alt="" /><span><b>{{ r[1] }}</b><small>{{ r[2] }} · {{ r[3] }}</small></span></div>
-                <div class="stars">@for (s of stars(r[4]); track $index) { <span [class.off]="!s">★</span> }</div>
-                <p>{{ r[5] }}</p>
-                @if (r[6].length) { <div class="rimgs">@for (im of r[6]; track im) { <img [src]="img(im, 150, 110)" alt="" /> }</div> }
-                @if (r[7]) { <div class="reply"><b>Phản hồi của {{ p.sellerName }}</b>{{ r[7] }}</div> }
+                <img class="av" [src]="img(r[0], 80, 80)" alt="" />
+                <div class="rc">
+                  <b>{{ r[1] }}</b>
+                  <div class="stars">@for (s of stars(r[4]); track $index) { <span [class.off]="!s">★</span> }</div>
+                  <small>{{ r[3] }} · {{ r[2] }}</small>
+                  <p>{{ r[5] }}</p>
+                  @if (r[6].length) { <div class="rimgs">@for (im of r[6]; track im) { <img [src]="img(im, 150, 110)" alt="" /> }</div> }
+                  @if (r[7]) { <div class="reply"><b>Phản hồi của người bán</b>{{ r[7] }}</div> }
+                </div>
               </article>
-            } @empty { <div class="rvempty">Không có đánh giá phù hợp.</div> }
+            } @empty { <div class="rvempty">Chưa có đánh giá nào ở mục này.</div> }
           </div>
         </div>
       </div>
