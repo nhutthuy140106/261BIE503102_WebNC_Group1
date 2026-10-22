@@ -115,8 +115,8 @@
               <span>Giá lúc đặt</span><b class="strike">{{ o.oldTotal | vnd }}</b>
               <span class="total">Giá cuối bạn đã đồng ý</span><b class="total">{{ o.total | vnd }}</b>
             } @else if (o.detail; as d) {
-              <span>{{ o.priceCheck === 'quote' ? 'Phí kiểm tra và khoản đã chọn' : o.priceCheck === 'estimate' ? 'Tạm tính theo thông tin bạn gửi' : 'Tiền hàng' }}</span><b>{{ d.subtotal | vnd }}</b>
-              @if (d.fee) { <span>Phí giao / đến nhà</span><b>{{ d.fee | vnd }}</b> }
+              <span>{{ o.priceCheck === 'quote' ? 'Phí kiểm tra và khoản đã chọn' : o.priceCheck === 'estimate' ? 'Tạm tính theo thông tin bạn gửi' : 'Thành tiền' }}</span><b>{{ d.subtotal | vnd }}</b>
+              @if (d.fee) { <span>Phí vận chuyển</span><b>{{ d.fee | vnd }}</b> }
               @if (d.discount) { <span>Voucher · {{ d.voucher }}</span><b>−{{ d.discount | vnd }}</b> }
               <span class="total">{{ o.status === 'cancelled' || o.status === 'declined' ? 'Đơn đã hủy · bạn không phải trả' : o.priceCheck === 'quote' ? 'Trước khi báo giá' : o.priceCheck === 'estimate' ? 'Tạm tính' : 'Tổng' }}</span>
               <b class="total">{{ (o.status === 'cancelled' || o.status === 'declined') && !o.priceRejected ? '0đ' : (o.total | vnd) }}</b>

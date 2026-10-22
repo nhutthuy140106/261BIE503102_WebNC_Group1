@@ -284,7 +284,7 @@
 .tgrid button.on { background: var(--ink); color: #fff; font-weight: 600; }
 
 /* khối chỉ chứa ô nhập (ngày giờ, ghi chú): bỏ khung ngoài để không bị hai khung lồng nhau */
-.mbody .card:has(> .input), .mbody .card:has(> .when), .mbody .card:has(> .seg2) { border: 0; padding: 4px 2px 0; border-radius: 0; background: none; }
+.mbody .card:has(> .input), .mbody .card:has(> .when), .mbody .card:has(> .seg2), .mbody .card:has(> .seg) { border: 0; padding: 4px 2px 0; border-radius: 0; background: none; }
 
 /* dòng Voucher trong hộp xác nhận (một dòng, bấm mở hộp chọn voucher như Shopee) */
 .vrow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: #fff; text-align: left; font: inherit; }

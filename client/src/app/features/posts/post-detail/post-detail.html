@@ -308,8 +308,8 @@
             </div>
 
             <div class="card sum">
-              <div><span>Tiền hàng</span><span>{{ fmt(d.subtotal()) }}</span></div>
-              @if (d.placeFee()) { <div><span>Phí giao / đến nhà</span><span>{{ fmt(d.placeFee()) }}</span></div> }
+              <div><span>Thành tiền</span><span>{{ fmt(d.subtotal()) }}</span></div>
+              @if (d.placeFee()) { <div><span>Phí vận chuyển</span><span>{{ fmt(d.placeFee()) }}</span></div> }
               @if (d.discount()) { <div class="disc"><span>Voucher</span><span>−{{ fmt(d.discount()) }}</span></div> }
               @if (v.tpl.price.type === 'quote') { <div><span>Tiền sửa</span><span>báo giá sau khi kiểm tra</span></div> }
             </div>
