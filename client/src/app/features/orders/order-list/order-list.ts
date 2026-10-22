@@ -81,6 +81,25 @@ export class OrderList implements OnInit {
     return ['chosen', 'working', 'confirmed', 'preparing', 'delivering', 'ready'].includes(o.status as string) ? 'go' : 'wait';
   }
 
+  /** Việc bạn cần làm tiếp (nút đầu thẻ, màu cam); null = không có */
+  protected next(o: Order): string | null {
+    if (!needsAction(o)) return null;
+    if (o.type === 'received') return o.status === 'chosen' ? 'Bắt đầu làm' : o.status === 'working' ? 'Báo hoàn thành' : !o.paid ? 'Xác nhận tiền công' : 'Đánh giá';
+    if (o.status === 'pricing') return 'Duyệt giá';
+    if (o.resched?.by === 'seller') return 'Duyệt giờ mới';
+    return 'Xem phản hồi';
+  }
+
+  /** Nút phụ đầu thẻ khi không có việc cần làm: đơn xong → đặt lại / tìm việc khác, đơn đang chạy → nhắn tin */
+  protected side(o: Order): { label: string; link: unknown[]; params?: Record<string, string | undefined> } {
+    if (isEnded(o)) {
+      return o.type === 'received'
+        ? { label: 'Tìm việc khác', link: ['/search'], params: { kind: 'job' } }
+        : { label: 'Đặt lại', link: ['/posts', o.postId] };
+    }
+    return { label: 'Nhắn tin', link: ['/messenger'], params: { to: o.counterpartName, av: o.counterpartAvatar } };
+  }
+
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((p) => {
       const f = p.get('f');

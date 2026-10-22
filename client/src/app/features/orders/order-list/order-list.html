@@ -11,19 +11,27 @@
 </nav>
 
 <ng-template #rowTpl let-o>
-  <li>
-    <a class="orow" [routerLink]="['/orders', o._id]">
+  <li class="ocard">
+    <a class="top" [routerLink]="['/orders', o._id]">
       <app-order-thumb [image]="o.image" [category]="o.category" />
       <span class="main">
-        <span class="line1"><span class="otag" [class.rcv]="o.type === 'received'">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span><span class="code">{{ o.code }}</span></span>
+        <span class="line1">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }} · {{ o.code }}</span>
         <h3>{{ o.postTitle }}</h3>
         <span class="sub">{{ o.counterpartName }} · {{ fmt(o.createdAt) }}</span>
       </span>
       <span class="end">
         <b>{{ o.total | vnd }}</b>
-        <span class="stat"><i class="dotc" [ngClass]="dot(o)"></i>{{ label(o) }}</span>
+        <span class="stat" [ngClass]="'s-' + dot(o)"><i class="dotc"></i>{{ label(o) }}</span>
       </span>
     </a>
+    <div class="acts">
+      @if (next(o); as n) {
+        <a class="act primary" [routerLink]="['/orders', o._id]">{{ n }}</a>
+      } @else {
+        <a class="act" [routerLink]="side(o).link" [queryParams]="side(o).params">{{ side(o).label }}</a>
+      }
+      <a class="act" [routerLink]="['/orders', o._id]">Xem chi tiết</a>
+    </div>
   </li>
 </ng-template>
 
