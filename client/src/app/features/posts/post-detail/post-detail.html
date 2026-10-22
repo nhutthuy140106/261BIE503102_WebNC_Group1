@@ -217,7 +217,7 @@
                   <span>{{ v.tpl.place.choices![0][0] }} @if (v.tpl.place.choices![0][1]) { <small>+{{ fmt(v.tpl.place.choices![0][1]) }}</small> }</span>
                   <input type="checkbox" [checked]="d.place() === 0" (change)="d.place.set($any($event.target).checked ? 0 : 1)" />
                 </label>
-                @if (d.place() === 1) { <span>Bạn tự đến lấy: {{ v.tpl.place.choices![1][0] }}</span> }
+                <span class="sub">{{ d.place() === 0 ? 'Tắt nếu bạn muốn ' + v.tpl.place.choices![1][0].toLowerCase() : 'Bạn sẽ ' + v.tpl.place.choices![1][0].toLowerCase() + ' — địa chỉ lấy hàng gửi sau khi người bán xác nhận' }}</span>
               </div>
             }
 
