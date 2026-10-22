@@ -48,5 +48,7 @@ export function offerToOrder(o: Offer): Order {
     paymentMethod: 'cash',
     createdAt: o.history[0]?.at ?? new Date().toISOString(),
     history: o.history,
+    paid: o.paid,
+    rated: o.rated,
   };
 }

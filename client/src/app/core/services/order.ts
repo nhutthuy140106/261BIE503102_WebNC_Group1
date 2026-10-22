@@ -121,8 +121,29 @@ export class OrderService {
     );
   }
 
+  /**
+   * Áp một thay đổi vào đơn đã đặt và ghi một dòng vào `history` (dòng hiện dưới thanh bước).
+   * Dùng cho các bước người mua bấm (hủy, duyệt giá, đổi lịch, báo vấn đề, đánh giá…) và cho nút
+   * "giả lập phía người bán" ở bản mẫu. Máy chủ chưa có endpoint cho các bước này (docs/handoff.md).
+   */
+  update(id: string, patch: Partial<Order>, line?: string): Observable<Order> {
+    if (!useMock('order')) throw new AppError('Bước này cần máy chủ hỗ trợ — chưa có API.', 501, 'NOT_IMPLEMENTED');
+    return this.placed().pipe(
+      map((rows) => {
+        const cur = rows.find((r) => r._id === id);
+        if (!cur) throw new AppError('Không tìm thấy đơn.', 404, 'NOT_FOUND');
+        const history = line ? [...(cur.history ?? []), { state: line, at: new Date().toISOString() }] : cur.history;
+        const next: Order = { ...cur, ...patch, history };
+        this.db.save(COLLECTION, [...(rows.map((r) => (r._id === id ? next : r)))]);
+        return next;
+      }),
+    );
+  }
+
   private placed(): Observable<Order[]> {
     if (!useMock('order')) return this.api.get<unknown[]>('/orders', { role: 'placed', limit: 100 }).pipe(map((l) => l.map(orderFromApi)));
-    return this.db.list<Order>(COLLECTION).pipe(map((rows) => rows.filter((r) => r.type === 'placed')));
+    return this.db.list<Order>(COLLECTION).pipe(
+      map((rows) => rows.filter((r) => r.type === 'placed').map((o) => (o.doneAgoH != null && !o.doneAt ? { ...o, doneAt: Date.now() - o.doneAgoH * 3600e3 } : o))),
+    );
   }
 }

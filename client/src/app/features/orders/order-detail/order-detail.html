@@ -18,9 +18,16 @@
       </div>
     </div>
     <div class="pay">
-      <small>{{ o.type === 'placed' ? 'Tổng đơn' : 'Tiền công' }}</small>
-      <b>{{ o.total | vnd }}</b>
-      <span>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</span>
+      @if (o.type === 'placed' && (o.status === 'cancelled' || o.status === 'declined') && !o.priceRejected) {
+        <small>Đơn đã hủy</small><b class="strike">{{ o.total | vnd }}</b><span>Bạn không phải trả</span>
+      } @else if (o.status === 'pricing' && o.newPrice) {
+        <small>Giá cuối · chờ bạn duyệt</small><b>{{ o.newPrice.total | vnd }}</b><span>Lúc đặt: {{ o.total | vnd }}</span>
+      } @else {
+        <small>{{ o.type === 'placed' ? (o.priceCheck === 'quote' && !o.priceDone ? 'Phí kiểm tra' : o.priceCheck === 'estimate' && !o.priceDone ? 'Tạm tính' : 'Tổng đơn') : 'Tiền công' }}</small>
+        <b>{{ o.total | vnd }}</b>
+        @if (o.oldTotal) { <span>Giá cuối đã duyệt · lúc đặt {{ o.oldTotal | vnd }}</span> }
+        @else { <span>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</span> }
+      }
     </div>
   </div>
 
@@ -28,20 +35,11 @@
 
   <!-- thanh bước -->
   <div class="stepper">
-    @if (o.type === 'received') {
-      @for (s of receivedSteps(); track s.n) {
-        <div class="s" [class.ok]="s.cls === 'ok'" [class.cur]="s.cls === 'cur'" [class.cut]="s.cls === 'cut'">
-          <span class="dot">{{ s.cls === 'ok' ? '✓' : s.cls === 'cut' ? '✕' : s.n }}</span>{{ s.label }}
-          @if (s.time) { <small>{{ s.time }}</small> }
-        </div>
-      }
-    } @else {
-      @for (st of placedSteps(o); track st.label; let i = $index) {
-        <div class="s" [class.ok]="st.done && !st.current" [class.cur]="st.current"
-             [style.--n]="placedSteps(o).length">
-          <span class="dot">{{ st.done && !st.current ? '✓' : i + 1 }}</span>{{ st.label }}
-        </div>
-      }
+    @for (s of (o.type === 'received' ? receivedSteps() : placedSteps(o)); track s.n) {
+      <div class="s" [class.ok]="s.cls === 'ok'" [class.cur]="s.cls === 'cur'" [class.cut]="s.cls === 'cut'">
+        <span class="dot">{{ s.cls === 'ok' ? '✓' : s.cls === 'cut' ? '✕' : s.n }}</span>{{ s.label }}
+        @if (s.time) { <small>{{ s.time }}</small> }
+      </div>
     }
   </div>
 
@@ -67,8 +65,11 @@
           @if (of.reportNote && (of.state === 'reported' || of.state === 'done')) {
             <section class="blk"><h2>Bạn đã báo hoàn thành</h2><div class="quote"><p>{{ of.reportNote }}</p></div></section>
           }
+          @if (of.rated; as r) {
+            <section class="blk"><h2>Bạn đánh giá {{ o.counterpartName }}</h2><div class="quote"><div class="rstars">{{ '★'.repeat(r.s) }}</div>@if (r.t) { <p>{{ r.t }}</p> }</div></section>
+          }
           <section class="blk">
-            <h2>Đề nghị của bạn</h2>
+            <h2>Đề nghị của bạn @if (of.state === 'offered') { <button type="button" class="linkbtn" (click)="actR('edit')">Sửa</button> }</h2>
             <div class="quote"><div class="w">Làm được: {{ of.slots.length ? of.slots.join(', ') : 'Thỏa thuận sau' }}</div><p>{{ of.intro }}</p></div>
           </section>
         }
@@ -91,18 +92,41 @@
             </dl>
           </div>
           @if (o.note) { <p class="request-note">Ghi chú: {{ o.note }}</p> }
+          @if (o.cancelRequested) { <div class="request-note">Đã gửi yêu cầu hủy cho {{ o.counterpartName }} (lý do: {{ o.cancelWhy }}). Đơn vẫn {{ label(o).toLowerCase() }} cho tới khi bên bán đồng ý.</div> }
+          @if (o.cancelDenied) { <div class="request-note">{{ o.counterpartName }} không đồng ý hủy: {{ o.cancelDenied }}</div> }
+          @if (o.resched?.by === 'buyer') { <div class="request-note">Đã gửi đề nghị đổi sang <b>{{ o.resched!.to }}</b>. Chờ {{ o.counterpartName }} đồng ý — đơn vẫn giữ giờ cũ. <button type="button" class="linkbtn" (click)="actP('resched-undo')">Rút đề nghị</button></div> }
         </section>
+
+        @if (o.issue; as iss) {
+          <section class="blk">
+            <h2>Yêu cầu của bạn</h2>
+            <div class="pricebox">
+              <div class="pb"><span>Bạn đã gửi</span><span>{{ iss.type }}</span></div>
+              <p class="pbw">{{ iss.text }}</p>
+              <div class="pbl"><div><span>Mong muốn</span><span>{{ iss.want }}</span></div>@if (iss.photos) { <div><span>Ảnh kèm</span><span>{{ iss.photos }} ảnh</span></div> }</div>
+            </div>
+          </section>
+        }
 
         <section class="blk">
           <h2>Chi phí</h2>
           <div class="bill">
-            @if (o.detail; as d) {
-              <span>Tiền hàng</span><b>{{ d.subtotal | vnd }}</b>
+            @if (o.priceDone && o.oldTotal) {
+              <span>Giá lúc đặt</span><b class="strike">{{ o.oldTotal | vnd }}</b>
+              <span class="total">Giá cuối bạn đã đồng ý</span><b class="total">{{ o.total | vnd }}</b>
+            } @else if (o.detail; as d) {
+              <span>{{ o.priceCheck === 'quote' ? 'Phí kiểm tra và khoản đã chọn' : o.priceCheck === 'estimate' ? 'Tạm tính theo thông tin bạn gửi' : 'Tiền hàng' }}</span><b>{{ d.subtotal | vnd }}</b>
               @if (d.fee) { <span>Phí giao / đến nhà</span><b>{{ d.fee | vnd }}</b> }
               @if (d.discount) { <span>Voucher · {{ d.voucher }}</span><b>−{{ d.discount | vnd }}</b> }
+              <span class="total">{{ o.status === 'cancelled' || o.status === 'declined' ? 'Đơn đã hủy · bạn không phải trả' : o.priceCheck === 'quote' ? 'Trước khi báo giá' : o.priceCheck === 'estimate' ? 'Tạm tính' : 'Tổng' }}</span>
+              <b class="total">{{ (o.status === 'cancelled' || o.status === 'declined') && !o.priceRejected ? '0đ' : (o.total | vnd) }}</b>
+            } @else {
+              <span class="total">Tổng</span><b class="total">{{ o.total | vnd }}</b>
             }
-            <span class="total">Tổng</span><b class="total">{{ o.total | vnd }}</b>
           </div>
+          @if (!o.priceDone && o.priceCheck && o.status !== 'cancelled' && o.status !== 'declined') {
+            <p class="hintp">{{ o.priceCheck === 'quote' ? 'Thợ kiểm tra rồi báo giá sửa' : o.priceCheck === 'surcharge' ? 'Nếu đồ thực tế to/nặng hơn bạn chọn, người làm báo phụ thu để bạn đồng ý trước.' : 'Bên cung cấp cân/đo thực tế rồi báo giá cuối' }}{{ o.priceCheck === 'surcharge' ? '' : '; bạn đồng ý thì mới làm tiếp.' }}</p>
+          }
         </section>
 
         @if (o.surcharge; as s) {
@@ -111,17 +135,13 @@
               @if (s.state === 'pending') {
                 <strong>Người bán báo phụ thu {{ s.amount | vnd }}</strong>
                 <span>{{ s.reason }}. Bạn đồng ý thì người bán mới làm tiếp.</span>
-                <div class="btnrow">
-                  <button type="button" class="pbtn sm" (click)="answerSurcharge(true)">Đồng ý phụ thu</button>
-                  @if (canDeclineSurcharge) { <button type="button" class="gbtn sm" (click)="answerSurcharge(false)">Không đồng ý</button> }
-                </div>
-              } @else if (s.state === 'approved') {
-                Bạn đã đồng ý phụ thu {{ s.amount | vnd }} ({{ s.reason }}).
-              } @else {
-                Bạn đã từ chối phụ thu {{ s.amount | vnd }}. Hãy nhắn người bán để thống nhất lại hoặc hủy đơn.
-              }
+              } @else if (s.state === 'approved') { Bạn đã đồng ý phụ thu {{ s.amount | vnd }} ({{ s.reason }}). }
+              @else { Bạn đã từ chối phụ thu {{ s.amount | vnd }}. }
             </div>
           </section>
+        }
+        @if (o.rated; as r) {
+          <section class="blk"><h2>Đánh giá của bạn</h2><div class="quote"><div class="rstars">{{ '★'.repeat(r.s) }}</div>@if (r.t) { <p>{{ r.t }}</p> }</div></section>
         }
       }
     </div>
@@ -129,91 +149,162 @@
     <!-- ===== bảng hành động bên phải ===== -->
     <aside>
       <div class="apanel">
-        <span class="stat"><i class="dotc" [class.go]="o.status === 'working' || o.status === 'preparing' || o.status === 'delivering'" [class.end]="o.status === 'done' || o.status === 'cancelled' || o.status === 'rejected' || o.status === 'withdrawn'"></i>{{ label(o) }}</span>
-        <h3>{{ panel(o).h }}</h3>
-        <p class="why">{{ panel(o).why }}</p>
+        <span class="stat"><i class="dotc" [class.go]="o.status === 'working' || o.status === 'preparing' || o.status === 'delivering' || o.status === 'confirmed' || o.status === 'chosen' || o.status === 'ready'" [class.act]="o.status === 'pricing'" [class.end]="o.status === 'done' || o.status === 'cancelled' || o.status === 'rejected' || o.status === 'withdrawn' || o.status === 'declined'"></i>{{ label(o) }}</span>
 
         @if (o.type === 'received' && offer(); as of) {
-          @if (of.state === 'reported') { <div class="cd">Tự hoàn thành sau 24 giờ</div> }
-          @for (a of actions(); track a) {
-            @if (a === 'start' || a === 'reportDone' || a === 'confirmPaid') {
-              <button type="button" class="pbtn" (click)="run(a)">{{ a === 'confirmPaid' ? 'Đã nhận ' + (o.total | vnd) : actionLabel[a] }}</button>
+          @if (receivedPanel(o, of); as p) {
+            <h3>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
+            @if (of.state === 'reported') { <div class="cd">Tự hoàn thành sau 24 giờ</div> }
+            @for (b of p.btns; track b.id) {
+              <button type="button" [class.pbtn]="b.kind === 'main'" [class.gbtn]="b.kind !== 'main'" [class.warn]="b.kind === 'warn'" (click)="actR(b.id)">{{ b.label }}</button>
             }
           }
-          @if (actions().includes('withdraw') || actions().includes('cancelRequest')) {
-            <div class="arow2">
-              @for (a of actions(); track a) {
-                @if (a === 'withdraw' || a === 'cancelRequest') { <button type="button" class="gbtn warn" (click)="run(a)">{{ a === 'cancelRequest' ? 'Xin hủy việc' : actionLabel[a] }}</button> }
-              }
-            </div>
-          }
-          @if (of.state === 'rejected' || of.state === 'withdrawn' || of.state === 'cancelled') {
-            <a routerLink="/search" [queryParams]="{ kind: 'job' }" class="pbtn link">Tìm việc tương tự</a>
-          }
-
-          @if (openPanel === 'report') {
-            <form [formGroup]="doneForm" (ngSubmit)="run('reportDone')" class="fpanel">
-              <label for="note">Ghi chú hoàn thành (bắt buộc)</label>
-              <textarea id="note" rows="3" formControlName="note"></textarea>
-              @if (doneForm.controls.note.invalid && doneForm.controls.note.touched) { <small class="error">Hãy ghi ít nhất 5 ký tự về việc đã làm.</small> }
-              <button type="submit" class="pbtn">Gửi báo hoàn thành</button>
-            </form>
-          }
-          @if (openPanel === 'cancel') {
-            <form [formGroup]="cancelForm" (ngSubmit)="run('cancelRequest')" class="fpanel">
-              <label for="reason">Lý do xin hủy</label>
-              <select id="reason" formControlName="reason">
-                <option value="">— Chọn lý do —</option>
-                @for (r of cancelReasons; track r.value) { <option [value]="r.value">{{ r.label }}</option> }
-              </select>
-              @if (cancelForm.controls.reason.invalid && cancelForm.controls.reason.touched) { <small class="error">Hãy chọn lý do.</small> }
-              <button type="submit" class="pbtn">Xác nhận xin hủy</button>
-            </form>
-          }
-        }
-
-        @if (o.type === 'placed') {
-          @if (o.cancelRequested) { <div class="request-note">Đã gửi yêu cầu hủy. Người bán sẽ xác nhận — đơn chưa tự hủy.</div> }
-          @if (canCancelPlaced(o)) {
-            <button type="button" class="gbtn warn" (click)="requestCancelPlaced()">{{ o.status === 'pending' || o.status === 'confirmed' ? 'Hủy đơn' : 'Gửi yêu cầu hủy' }}</button>
-            @if (openPanel === 'placedCancel') {
-              <form [formGroup]="placedCancelForm" (ngSubmit)="requestCancelPlaced()" class="fpanel">
-                <label for="pc">Lý do hủy</label>
-                <textarea id="pc" rows="2" formControlName="reason"></textarea>
-                @if (placedCancelForm.controls.reason.invalid && placedCancelForm.controls.reason.touched) { <small class="error">Hãy nhập lý do (ít nhất 5 ký tự).</small> }
-                <button type="submit" class="pbtn">Gửi yêu cầu hủy</button>
-              </form>
+        } @else {
+          @if (placedPanel(o); as p) {
+            <h3>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
+            @if (o.status === 'pricing' && o.newPrice; as np) {
+              <div class="pricebox">
+                <div class="pb"><span>{{ o.priceCheck === 'quote' ? 'Đã trả lúc đặt (phí kiểm tra)' : 'Giá lúc đặt' }}</span><s>{{ o.total | vnd }}</s></div>
+                <div class="pb new"><span>Giá cuối</span><b>{{ np.total | vnd }}</b></div>
+                <p class="pbw">{{ np.reason }}</p>
+                @if (np.lines) { <div class="pbl">@for (l of np.lines; track l[0]) { <div><span>{{ l[0] }}</span><span>{{ l[1] < 0 ? '−' + vnd(-l[1]) : vnd(l[1]) }}</span></div> }</div> }
+              </div>
             }
+            @if (o.resched?.by === 'seller') {
+              <div class="pricebox">
+                <div class="pb"><span>Giờ cũ</span><s>{{ o.detail?.when }}</s></div>
+                <div class="pb new"><span>Giờ mới</span><b>{{ o.resched!.to }}</b></div>
+                @if (o.resched!.note) { <p class="pbw">{{ o.resched!.note }}</p> }
+              </div>
+            }
+            @for (b of p.btns; track b.id) {
+              <button type="button" [class.pbtn]="b.kind === 'main'" [class.gbtn]="b.kind !== 'main'" [class.warn]="b.kind === 'warn'" (click)="actP(b.id)">{{ b.label }}</button>
+            }
+            @if (o.status === 'done' && !o.issue && o.kind) {
+              <p class="pbnote">@if (issueLeft(o) > 0) { {{ o.kind === 'goods' ? 'Trả hàng khi khác mô tả' : 'Báo vấn đề' }} trong {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận — {{ leftText(issueLeft(o)) }}. }
+                @else { Đã quá {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận nên không còn {{ o.kind === 'goods' ? 'trả hàng' : 'báo vấn đề' }} với bên bán. Có chuyện nghiêm trọng, bạn vẫn <button type="button" class="linkbtn" (click)="go('issue')">báo cáo cho AntGo</button>. }</p>
+            }
+            @if (o.status === 'pricing') { <p class="pbnote">Chưa duyệt thì đơn đứng chờ. Giá không bao giờ tự đổi khi bạn chưa bấm đồng ý.</p> }
           }
-        }
-
-        @if (canReview(o)) {
-          <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="fpanel">
-            <label>Đánh giá {{ o.counterpartName }}</label>
-            <div class="stars" role="radiogroup" aria-label="Số sao">
-              @for (n of [1, 2, 3, 4, 5]; track n) {
-                <button type="button" class="star" [class.on]="reviewForm.controls.rating.value >= n" (click)="setRating(n)" [attr.aria-label]="n + ' sao'">★</button>
-              }
-            </div>
-            @if (reviewForm.controls.rating.invalid && reviewForm.touched) { <small class="error">Chọn số sao.</small> }
-            <textarea rows="3" formControlName="comment" placeholder="Nhận xét (không bắt buộc)"></textarea>
-            <button type="submit" class="pbtn">Gửi đánh giá</button>
-          </form>
-        } @else if (reviewed()) {
-          <div class="note2">Cảm ơn bạn đã đánh giá.</div>
         }
 
         <div class="pcard">
           <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="44" />
           <span><b>{{ o.counterpartName }}</b><small>{{ o.type === 'placed' ? 'Bên cung cấp' : 'Người đăng việc' }}</small></span>
-          <a routerLink="/messenger" [queryParams]="{ to: o.counterpartName, av: o.counterpartAvatar }" class="msgbtn">Nhắn</a>
+          <button type="button" class="msgbtn" (click)="go('chat')">Nhắn</button>
         </div>
-        @if (!['done', 'cancelled', 'rejected', 'withdrawn'].includes(o.status)) {
-          <a [routerLink]="['/orders', o._id, 'report']" class="lbtn">Báo cáo vấn đề với đơn này</a>
+        @if (!['done', 'cancelled', 'rejected', 'withdrawn', 'declined'].includes(o.status)) {
+          <button type="button" class="lbtn" (click)="go('issue')">Báo cáo vấn đề với đơn này</button>
         }
       </div>
     </aside>
   </div>
+
+  @if (isMock) {
+    <div class="demo2">
+      Bản mẫu — giả lập phía {{ o.type === 'placed' ? 'người bán' : 'người đăng việc' }}:
+      @if (o.type === 'placed') {
+        @for (s of placedSims(o); track s.id) { <button type="button" (click)="actP(s.id)">{{ s.label }}</button> }
+      } @else if (offer(); as of) {
+        @for (s of receivedSims(o, of); track s.id) { <button type="button" (click)="actR(s.id)">{{ s.label }}</button> }
+      }
+    </div>
+  }
+
+  <!-- ===== hộp thoại ===== -->
+  @if (dlg(); as d) {
+    <div class="scrim" (click)="close()">
+      <div class="modal" role="dialog" (click)="$event.stopPropagation()">
+        @switch (d) {
+          @case ('edit') {
+            <h3>Sửa lời giới thiệu</h3><p class="p">{{ o.counterpartName }} sẽ thấy bản mới nhất.</p>
+            <div class="fld" [class.bad]="bad()"><label>Giới thiệu ngắn</label><textarea maxlength="300" [value]="text()" (input)="text.set($any($event.target).value); bad.set('')"></textarea><div class="cnt2">{{ text().length }}/300</div></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Hủy</button><button type="button" class="go" (click)="okR()">Lưu</button></div>
+          }
+          @case ('withdraw') {
+            <h3>Rút đề nghị?</h3><p class="p">{{ o.counterpartName }} sẽ không còn thấy đề nghị của bạn. Nếu việc vẫn còn mở, bạn có thể gửi lại sau.</p>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Giữ đề nghị</button><button type="button" class="go dark" (click)="okR()">Rút đề nghị</button></div>
+          }
+          @case ('start') {
+            <h3>Bắt đầu làm?</h3><p class="p">{{ o.counterpartName }} sẽ nhận thông báo bạn đã bắt đầu. Làm xong nhớ bấm <b>Báo hoàn thành</b>.</p>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Chưa</button><button type="button" class="go" (click)="okR()">Bắt đầu</button></div>
+          }
+          @case ('report') {
+            <h3>Báo hoàn thành</h3><p class="p">{{ o.counterpartName }} sẽ kiểm tra và xác nhận. Không phản hồi trong 24 giờ thì đơn tự hoàn thành.</p>
+            <div class="fld" [class.bad]="bad()"><label>Ghi chú cho {{ o.counterpartName }}</label><textarea maxlength="300" placeholder="Ví dụ: Đã để đồ trước cửa, hóa đơn kẹp trong túi." [value]="text()" (input)="text.set($any($event.target).value); bad.set('')"></textarea><div class="err2">{{ bad() }}</div></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Để sau</button><button type="button" class="go" (click)="okR()">Gửi báo hoàn thành</button></div>
+          }
+          @case ('rcancel') {
+            <h3>Xin hủy việc này?</h3><p class="p">{{ o.counterpartName }} sẽ được báo ngay để tìm người khác. Hủy sát giờ làm sẽ hiện trong hồ sơ của bạn.</p>
+            <div class="fld" [class.bad]="bad()"><label>Lý do</label>
+              <div class="reasons">@for (r of rReasons; track r) { <button type="button" [class.on]="pick() === r" (click)="pick.set(r); bad.set('')">{{ r }}</button> }</div>
+              <div class="err2">{{ bad() }}</div></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Không hủy</button><button type="button" class="go dark" (click)="okR()">Hủy việc</button></div>
+          }
+          @case ('unpaid') {
+            <h3>Chưa nhận được tiền công?</h3><p class="p">Nhắn {{ o.counterpartName }} trước — đa số trường hợp chỉ là quên. Sau 3 ngày vẫn chưa nhận được, bạn có thể báo AntGo hỗ trợ.</p>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Đóng</button><button type="button" class="go" (click)="okR()">Nhắn {{ o.counterpartName }}</button></div>
+          }
+          @case ('rate') {
+            <h3>Đánh giá {{ o.counterpartName }}</h3><p class="p">{{ o.postTitle }}</p>
+            <div class="fld" [class.bad]="bad()"><label>Mức độ hài lòng</label>
+              <div class="rate">@for (i of [1, 2, 3, 4, 5]; track i) { <button type="button" [class.on]="stars() >= i" (click)="stars.set(i); bad.set('')" [attr.aria-label]="i + ' sao'">★</button> }</div>
+              <div class="err2">{{ bad() }}</div></div>
+            <div class="fld"><label>Nhận xét (không bắt buộc)</label><textarea maxlength="300" placeholder="Hướng dẫn rõ ràng, trả công đúng hẹn…" [value]="text()" (input)="text.set($any($event.target).value)"></textarea></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Để sau</button><button type="button" class="go" (click)="o.type === 'received' ? okR() : okP()">Gửi đánh giá</button></div>
+          }
+          @case ('pcancel') {
+            <h3>{{ dlgNow() ? 'Hủy đơn này?' : 'Gửi yêu cầu hủy?' }}</h3>
+            <p class="p">{{ dlgNow() ? (o.status === 'pending' ? 'Bên bán chưa xác nhận nên' : 'Bên bán chưa bắt đầu nên') + ' đơn hủy ngay, ' + o.counterpartName + ' nhận thông báo.' : o.counterpartName + ' đã bắt đầu. Đơn chỉ hủy khi ' + o.counterpartName + ' đồng ý.' }}</p>
+            @if (dlgNow() && o.kind === 'service' && o.status === 'confirmed' && o.apptIn != null && o.apptIn < 2) { <p class="request-note warnbox">Còn dưới 2 giờ tới giờ hẹn — hủy sát giờ sẽ hiện trong hồ sơ của bạn.</p> }
+            @if (dlgNow() && canResched(o)) { <p class="p">Chỉ muốn đổi giờ? <button type="button" class="linkbtn" (click)="open('resched')">Đổi lịch</button> thay vì hủy.</p> }
+            <div class="fld" [class.bad]="bad()"><label>Lý do</label>
+              <div class="reasons">@for (r of pReasons(o); track r) { <button type="button" [class.on]="pick() === r" (click)="pick.set(r); bad.set('')">{{ r }}</button> }</div>
+              <textarea maxlength="200" placeholder="Ghi thêm (không bắt buộc)" [value]="text()" (input)="text.set($any($event.target).value)"></textarea>
+              <div class="err2">{{ bad() }}</div></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Giữ đơn</button><button type="button" class="go dark" (click)="okP()">{{ dlgNow() ? 'Hủy đơn' : 'Gửi yêu cầu' }}</button></div>
+          }
+          @case ('received') {
+            <h3>Xác nhận đã nhận đủ?</h3><p class="p">Kiểm tra hàng hoặc kết quả dịch vụ trước khi xác nhận hoàn thành.</p>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Để sau</button><button type="button" class="go" (click)="okP()">Đã nhận đủ</button></div>
+          }
+          @case ('issue') {
+            <h3>{{ issueLabel(o) }}</h3>
+            <p class="p">{{ o.kind === 'goods' ? 'Trả được khi món đồ khác mô tả trong bài. Không áp dụng khi chỉ đổi ý.' : 'Gửi cho ' + o.counterpartName + ' để hai bên xử lý.' }} {{ o.counterpartName }} hoàn tiền (nếu có) trực tiếp cho bạn.</p>
+            <div class="fld" [class.bad]="bad() && !pick()"><label>Vấn đề là gì?</label>
+              <div class="reasons">@for (t of issueTypes(o); track t) { <button type="button" [class.on]="pick() === t" (click)="pick.set(t); bad.set('')">{{ t }}</button> }</div></div>
+            @if (issueWants(o).length > 1) {
+              <div class="fld" [class.bad]="bad() && !pick2()"><label>Bạn mong muốn</label>
+                <div class="reasons two">@for (w of issueWants(o); track w) { <button type="button" [class.on]="pick2() === w" (click)="pick2.set(w); bad.set('')">{{ w }}</button> }</div></div>
+            }
+            <div class="fld"><label>Mô tả</label><textarea maxlength="300" placeholder="Mô tả ngắn chuyện gì xảy ra" [value]="text()" (input)="text.set($any($event.target).value); bad.set('')"></textarea></div>
+            <div class="fld"><label>Ảnh {{ o.kind === 'service' ? '(nếu có)' : '(bắt buộc)' }}</label>
+              <label class="upl"><input type="file" accept="image/*" multiple hidden (change)="sendPhotos($any($event.target).files.length)" />{{ photos() ? photos() + ' ảnh đã chọn' : 'Chọn ảnh (tối đa 4)' }}</label></div>
+            @if (bad()) { <div class="err2 show">{{ bad() }}</div> }
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Thôi</button><button type="button" class="go dark" (click)="okP()">Gửi cho {{ o.counterpartName }}</button></div>
+          }
+          @case ('resched') {
+            <h3>Đổi lịch hẹn</h3>
+            <p class="p">Giờ hiện tại: <b>{{ o.detail?.when }}</b>. {{ o.counterpartName }} cần đồng ý giờ mới; trong lúc chờ, đơn vẫn giữ giờ cũ.</p>
+            <div class="fld" [class.bad]="bad()"><label>Ngày</label><div class="reasons three">@for (x of days; track x) { <button type="button" [class.on]="pick() === x" (click)="pick.set(x); bad.set('')">{{ x }}</button> }</div></div>
+            <div class="fld" [class.bad]="bad()"><label>Giờ</label><div class="reasons five">@for (t of daySlots; track t) { <button type="button" [class.on]="pick2() === t" (click)="pick2.set(t); bad.set('')">{{ t }}</button> }</div><div class="err2">{{ bad() }}</div></div>
+            <div class="fld"><label>Nhắn {{ o.counterpartName }} (không bắt buộc)</label><textarea maxlength="200" placeholder="Ví dụ: tối nay mình về muộn" [value]="text()" (input)="text.set($any($event.target).value)"></textarea></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Thôi</button><button type="button" class="go dark" (click)="okP()">Gửi đề nghị đổi lịch</button></div>
+          }
+          @case ('approve') {
+            <h3>Đồng ý giá {{ o.newPrice?.total | vnd }}?</h3><p class="p">{{ o.counterpartName }} sẽ làm tiếp với giá này. Bạn trả trực tiếp khi nhận, AntGo không giữ tiền.</p>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Xem lại</button><button type="button" class="go" (click)="okP()">Đồng ý</button></div>
+          }
+          @case ('reject') {
+            <h3>Từ chối giá {{ o.newPrice?.total | vnd }}?</h3>
+            <p class="p">{{ o.priceCheck === 'quote' ? 'Bạn chỉ trả phí kiểm tra ' + vnd(o.total) + ', ' + o.counterpartName + ' trả lại máy. Đơn kết thúc.' : o.priceCheck === 'surcharge' ? o.counterpartName + ' không lấy đồ nữa, đơn hủy và bạn không phải trả gì.' : 'Đơn hủy, ' + o.counterpartName + ' trả lại đồ cho bạn và không tính tiền giặt.' }}</p>
+            <div class="fld"><label>Nhắn {{ o.counterpartName }} lý do (không bắt buộc)</label><textarea maxlength="300" placeholder="Ví dụ: giá cao hơn mình dự tính" [value]="text()" (input)="text.set($any($event.target).value)"></textarea></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Xem lại</button><button type="button" class="go dark" (click)="okP()">Từ chối</button></div>
+          }
+        }
+      </div>
+    </div>
+  }
 } @else {
   <div class="empty"><h1>Không tìm thấy đơn</h1>
     @if (error()) { <p>{{ error() }}</p> }

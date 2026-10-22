@@ -1,23 +1,28 @@
-<h1>Đơn hàng</h1>
+<header class="ohead">
+  <h1>Đơn hàng</h1>
+  <p>Những thứ bạn đã đặt của hàng xóm và những việc bạn nhận làm.</p>
+</header>
 
-<div class="tabs">
-  <button type="button" class="btn ghost" [class.active]="tab() === 'all'" (click)="setTab('all')">Tất cả</button>
-  <button type="button" class="btn ghost" [class.active]="tab() === 'placed'" (click)="setTab('placed')">Đơn đã đặt</button>
-  <button type="button" class="btn ghost" [class.active]="tab() === 'received'" (click)="setTab('received')">Việc đã nhận</button>
-  <button type="button" class="btn ghost hist" [class.active]="tab() === 'history'" (click)="setTab('history')">Lịch sử</button>
-</div>
+<nav class="tabs" aria-label="Lọc đơn">
+  <button type="button" [class.on]="tab() === 'all'" (click)="setTab('all')">Tất cả<small>{{ counts().all }}</small></button>
+  <button type="button" [class.on]="tab() === 'placed'" (click)="setTab('placed')">Đơn đã đặt<small>{{ counts().placed }}</small></button>
+  <button type="button" [class.on]="tab() === 'received'" (click)="setTab('received')">Việc đã nhận<small>{{ counts().received }}</small></button>
+  <button type="button" class="hist" [class.on]="tab() === 'history'" (click)="setTab('history')">Lịch sử<small>{{ counts().history }}</small></button>
+</nav>
 
 <ng-template #rowTpl let-o>
-  <li class="orow" [class.ended]="false">
-    <a class="orow-in" [routerLink]="['/orders', o._id]">
+  <li>
+    <a class="orow" [routerLink]="['/orders', o._id]">
       <app-order-thumb [image]="o.image" [category]="o.category" />
       <span class="main">
-        <span class="otag" [class.rcv]="o.type === 'received'">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span>
-        <span class="code muted">{{ o.code }}</span>
+        <span class="line1"><span class="otag" [class.rcv]="o.type === 'received'">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span><span class="code">{{ o.code }}</span></span>
         <h3>{{ o.postTitle }}</h3>
-        <span class="sub who"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="20" />{{ o.counterpartName }} · {{ fmt(o.createdAt) }}</span>
+        <span class="sub">{{ o.counterpartName }} · {{ fmt(o.createdAt) }}</span>
       </span>
-      <span class="end"><b>{{ o.total | vnd }}</b><span class="status">{{ label(o) }}</span></span>
+      <span class="end">
+        <b>{{ o.total | vnd }}</b>
+        <span class="stat"><i class="dotc" [ngClass]="dot(o)"></i>{{ label(o) }}</span>
+      </span>
     </a>
   </li>
 </ng-template>
@@ -27,24 +32,28 @@
 } @else if (error()) {
   <div class="notice">Không tải được đơn hàng: {{ error() }}</div>
 } @else {
-  @if (needsAction().length) {
-    <section class="todo">
-      <h2>Cần bạn xử lý</h2>
+  @if (todo().length) {
+    <section class="group todo">
+      <h2>Cần bạn xử lý <small>{{ todo().length }}</small></h2>
+      <p class="hint">Những đơn đang chờ bạn bấm bước tiếp theo.</p>
       <ul class="list">
-        @for (o of needsAction(); track o._id) {
-          <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: o }" />
-        }
+        @for (o of todo(); track o._id) { <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: o }" /> }
       </ul>
     </section>
   }
-  <section>
-    @if (needsAction().length && ongoing().length) { <h2>Đang diễn ra</h2> }
-    <ul class="list">
-      @for (o of ongoing(); track o._id) {
-        <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: o }" />
-      } @empty {
-        @if (!needsAction().length) { <li class="empty">Chưa có đơn nào ở mục này.</li> }
-      }
-    </ul>
-  </section>
+  @if (ongoing().length) {
+    <section class="group">
+      <h2>{{ tab() === 'history' ? 'Lịch sử đơn' : 'Đang diễn ra' }} <small>{{ ongoing().length }}</small></h2>
+      @if (tab() === 'history') { <p class="hint">Đơn đã hoàn thành, đã hủy hoặc không được chọn. Bấm để xem lại chi tiết, đánh giá hoặc báo cáo vấn đề.</p> }
+      <ul class="list">
+        @for (o of ongoing(); track o._id) { <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: o }" /> }
+      </ul>
+    </section>
+  }
+  @if (!todo().length && !ongoing().length) {
+    <div class="empty"><img src="assets/clean/empty.png" alt="" /><p>Không có đơn nào ở đây.</p></div>
+  }
+  @if (tab() !== 'history' && counts().history) {
+    <button type="button" class="histlink" (click)="setTab('history')"><span><b>Lịch sử đơn</b>{{ counts().history }} đơn đã hoàn thành hoặc đã hủy</span><span aria-hidden="true">›</span></button>
+  }
 }

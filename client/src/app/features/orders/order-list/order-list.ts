@@ -6,11 +6,30 @@ import { formatDateTime, statusLabel } from '../../../core/utils/status-label';
 
 type Tab = 'all' | 'placed' | 'received' | 'history';
 
-const FINISHED = ['done', 'cancelled', 'rejected', 'withdrawn'];
-/** Việc đã nhận đang chờ chính người dùng bấm (Bắt đầu làm / Báo hoàn thành) */
-const NEEDS_ACTION = ['chosen', 'working'];
+/** Việc đã nhận đã xong hẳn: bị loại / rút / hủy, hoặc hoàn thành + đã nhận tiền + đã đánh giá */
+function receivedEnded(o: Order): boolean {
+  return ['rejected', 'withdrawn', 'cancelled'].includes(o.status as string) || (o.status === 'done' && !!o.paid && !!o.rated);
+}
 
-/** Đơn hàng: Tất cả · Đơn đã đặt · Việc đã nhận · Lịch sử (đơn đã kết thúc). */
+/** Đơn đã đặt đã xong hẳn: hoàn thành / hủy / bị từ chối và không còn yêu cầu báo vấn đề đang xử lý */
+function placedEnded(o: Order): boolean {
+  return ['done', 'cancelled', 'declined'].includes(o.status as string) && !(o.issue && o.issue.st !== 'closed');
+}
+
+export function isEnded(o: Order): boolean {
+  return o.type === 'received' ? receivedEnded(o) : placedEnded(o);
+}
+
+/** Đơn đang chờ chính người dùng bấm bước tiếp theo */
+export function needsAction(o: Order): boolean {
+  if (isEnded(o)) return false;
+  if (o.type === 'received') {
+    return ['chosen', 'working'].includes(o.status as string) || (o.status === 'done' && (!o.paid || !o.rated));
+  }
+  return o.status === 'pricing' || o.resched?.by === 'seller' || (!!o.issue && o.issue.st !== 'closed' && o.issue.st !== 'open');
+}
+
+/** Đơn hàng: Tất cả · Đơn đã đặt · Việc đã nhận · Lịch sử. Thanh tab chữ, dòng đơn phẳng. */
 @Component({
   selector: 'app-order-list',
   standalone: false,
@@ -29,20 +48,38 @@ export class OrderList implements OnInit {
   protected readonly label = statusLabel;
   protected readonly fmt = formatDateTime;
 
-  protected readonly needsAction = computed(() =>
-    this.tab() === 'history' ? [] : this.base().filter((o) => o.type === 'received' && NEEDS_ACTION.includes(o.status)),
-  );
-  protected readonly ongoing = computed(() => this.base().filter((o) => !this.needsAction().includes(o)));
+  protected readonly counts = computed(() => {
+    const l = this.orders();
+    const run = l.filter((o) => !isEnded(o));
+    return {
+      all: run.length,
+      placed: run.filter((o) => o.type === 'placed').length,
+      received: run.filter((o) => o.type === 'received').length,
+      history: l.filter(isEnded).length,
+    };
+  });
 
   private readonly base = computed(() => {
     const t = this.tab();
     return this.orders().filter((o) => {
-      const finished = FINISHED.includes(o.status);
-      if (t === 'history') return finished;
-      if (finished) return false;
+      if (t === 'history') return isEnded(o);
+      if (isEnded(o)) return false;
       return t === 'all' || (t === 'placed' ? o.type === 'placed' : o.type === 'received');
     });
   });
+  protected readonly todo = computed(() => (this.tab() === 'history' ? [] : this.base().filter(needsAction)));
+  protected readonly ongoing = computed(() => (this.tab() === 'history' ? this.base() : this.base().filter((o) => !needsAction(o))));
+
+  protected isTodo(o: Order): boolean {
+    return needsAction(o);
+  }
+
+  /** Chấm trạng thái: cam = cần bạn làm, xanh = đang chạy, vàng = chờ người kia, xám = đã xong */
+  protected dot(o: Order): string {
+    if (needsAction(o)) return 'act';
+    if (isEnded(o)) return 'end';
+    return ['chosen', 'working', 'confirmed', 'preparing', 'delivering', 'ready'].includes(o.status as string) ? 'go' : 'wait';
+  }
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((p) => {

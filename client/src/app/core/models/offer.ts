@@ -33,6 +33,9 @@ export interface Offer {
   exactAddress?: string;
   reportNote?: string;
   cancelReason?: string;
+  /** Đã bấm xác nhận nhận tiền công (sau khi người đăng xác nhận hoàn thành) */
+  paid?: boolean;
+  rated?: { s: number; t: string } | null;
 }
 
 export interface CreateOfferBody {

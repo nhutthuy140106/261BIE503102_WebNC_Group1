@@ -4,52 +4,151 @@
     "code": "AG-O3012",
     "type": "placed",
     "postId": "640b187e71d9faa9039f0001",
-    "postTitle": "Cơm nhà làm, thực đơn đổi mỗi ngày",
+    "postTitle": "Cơm nhà làm — cơm gà xé ×2",
     "counterpartName": "Bếp Cô Lan",
     "status": "preparing",
-    "total": 70000,
+    "total": 90000,
     "paymentMethod": "cash",
     "createdAt": "2026-10-16T10:00:00.000Z",
     "counterpartAvatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70",
-    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=70",
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=70",
     "counterpartId": "640b187e71d9faa9039f0065",
-    "category": "food"
+    "category": "food",
+    "kind": "food",
+    "detail": {
+      "lines": [
+        "Số lượng: 2 phần"
+      ],
+      "subtotal": 80000,
+      "fee": 5000,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Chờ xác nhận",
+        "Đang giao",
+        "Hoàn thành"
+      ],
+      "when": "11:30 hôm nay",
+      "place": "Giao tận cửa"
+    },
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-10-16T09:40:00Z"
+      },
+      {
+        "state": "Bếp Cô Lan xác nhận",
+        "at": "2026-10-16T09:50:00Z"
+      }
+    ]
   },
   {
     "_id": "640b187e71d9faa9039f00ca",
     "code": "AG-O3009",
     "type": "placed",
     "postId": "640b187e71d9faa9039f0008",
-    "postTitle": "Giặt sấy lấy tận nhà",
+    "postTitle": "Giặt sấy gấp 5kg",
     "counterpartName": "Giặt sấy Mỹ Linh",
-    "status": "pending",
-    "total": 60000,
+    "status": "pricing",
+    "total": 75000,
     "paymentMethod": "transfer",
     "createdAt": "2026-10-16T11:00:00.000Z",
-    "surcharge": {
-      "amount": 20000,
-      "reason": "Số đồ giặt nhiều hơn 5kg đã chọn",
-      "state": "pending"
-    },
     "counterpartAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&crop=faces&q=70",
-    "image": "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=800&q=70",
+    "image": "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=800&h=600&fit=crop&q=70",
     "counterpartId": "640b187e71d9faa9039f006c",
-    "category": "service"
+    "category": "service",
+    "kind": "service",
+    "priceCheck": "estimate",
+    "newPrice": {
+      "total": 97500,
+      "reason": "Cân thật 6,5kg (bạn ước 5kg) · 15.000đ/kg",
+      "lines": [
+        [
+          "Giặt sấy 6,5kg × 15.000đ",
+          97500
+        ]
+      ]
+    },
+    "detail": {
+      "lines": [
+        "Khối lượng dự kiến: 5kg",
+        "Câu trả lời: Có đồ trắng cần giặt riêng"
+      ],
+      "subtotal": 75000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Đã xác nhận",
+        "Duyệt giá",
+        "Đang làm",
+        "Trả đồ",
+        "Hoàn thành"
+      ],
+      "when": "Lấy đồ 18:00 hôm nay",
+      "place": "Lấy & trả tận cửa · Block B"
+    },
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-10-16T08:20:00Z"
+      },
+      {
+        "state": "Mỹ Linh xác nhận",
+        "at": "2026-10-16T08:35:00Z"
+      },
+      {
+        "state": "Mỹ Linh báo giá cuối",
+        "at": "2026-10-16T18:25:00Z"
+      }
+    ]
   },
   {
     "_id": "640b187e71d9faa9039f00cb",
     "code": "AG-O2987",
     "type": "placed",
     "postId": "640b187e71d9faa9039f0002",
-    "postTitle": "Phở bò tái, nước dùng hầm xương",
+    "postTitle": "Phở bò tái ×2",
     "counterpartName": "Quán Phở Bà Tư",
     "status": "done",
-    "total": 45000,
+    "total": 90000,
     "paymentMethod": "cash",
     "createdAt": "2026-10-10T07:00:00.000Z",
     "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&q=70",
     "counterpartId": "640b187e71d9faa9039f0066",
-    "category": "food"
+    "category": "food",
+    "kind": "food",
+    "doneAgoH": 216,
+    "detail": {
+      "lines": [
+        "Số lượng: 2 tô"
+      ],
+      "subtotal": 90000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Chờ xác nhận",
+        "Đang giao",
+        "Hoàn thành"
+      ],
+      "when": "Đã nhận 10/10",
+      "place": "Tự đến lấy"
+    },
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-10-10T09:58:00Z"
+      },
+      {
+        "state": "Quán xác nhận",
+        "at": "2026-10-10T10:05:00Z"
+      },
+      {
+        "state": "Bạn nhận món",
+        "at": "2026-10-10T11:45:00Z"
+      }
+    ]
   },
   {
     "_id": "640b187e71d9faa9039f00cc",
@@ -66,5 +165,147 @@
     "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces&q=70",
     "category": "job",
     "counterpartId": "640b187e71d9faa9039f006e"
+  },
+  {
+    "_id": "640b187e71d9faa9039f00d1",
+    "code": "AG-O3015",
+    "type": "placed",
+    "postId": "640b187e71d9faa9039f0001",
+    "postTitle": "Sửa laptop — máy không lên nguồn",
+    "counterpartName": "Anh Tùng",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=600&fit=crop&q=70",
+    "kind": "service",
+    "category": "service",
+    "status": "confirmed",
+    "total": 50000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-10-16T09:50:00Z",
+    "priceCheck": "quote",
+    "apptIn": 5,
+    "detail": {
+      "lines": [
+        "Hãng / dòng máy: Dell Inspiron 15",
+        "Máy bị sao: Bấm nguồn đèn sáng nhưng không lên màn hình"
+      ],
+      "subtotal": 50000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Đã xác nhận",
+        "Báo giá",
+        "Bạn đồng ý",
+        "Đang sửa",
+        "Hoàn thành"
+      ],
+      "when": "Hẹn lúc 19:00 hôm nay",
+      "place": "Thợ đến nhà · Block B"
+    },
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu kiểm tra",
+        "at": "2026-10-16T09:50:00Z"
+      },
+      {
+        "state": "Anh Tùng xác nhận",
+        "at": "2026-10-16T10:05:00Z"
+      }
+    ]
+  },
+  {
+    "_id": "640b187e71d9faa9039f00d2",
+    "code": "AG-O3018",
+    "type": "placed",
+    "postId": "640b187e71d9faa9039f0001",
+    "postTitle": "Lấy đồ hộ — thùng hàng ở cổng chính",
+    "counterpartName": "Minh",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&h=600&fit=crop&q=70",
+    "kind": "service",
+    "category": "service",
+    "status": "confirmed",
+    "total": 15000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-10-16T14:10:00Z",
+    "priceCheck": "surcharge",
+    "detail": {
+      "lines": [
+        "Lấy món gì: 1 thùng hàng Shopee tên Ngọc Thủy",
+        "Kích thước bạn chọn: Nhỏ, dưới 10kg"
+      ],
+      "subtotal": 15000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Minh đã nhận đơn",
+        "Đang đi lấy",
+        "Đã giao"
+      ],
+      "when": "Sớm nhất có thể",
+      "place": "Giao tới Ngọc Thủy · Block B · Căn 12.05"
+    },
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-10-16T14:10:00Z"
+      },
+      {
+        "state": "Minh xác nhận",
+        "at": "2026-10-16T14:12:00Z"
+      }
+    ]
+  },
+  {
+    "_id": "640b187e71d9faa9039f00d3",
+    "code": "AG-O3021",
+    "type": "placed",
+    "postId": "640b187e71d9faa9039f0001",
+    "postTitle": "Nồi chiên không dầu 5L, dùng 6 tháng",
+    "counterpartName": "Anh Quân",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=800&h=600&fit=crop&q=70",
+    "kind": "goods",
+    "category": "goods",
+    "status": "done",
+    "total": 650000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-10-16T13:02:00Z",
+    "doneAgoH": 3,
+    "detail": {
+      "lines": [
+        "Tình trạng trong bài: Đã dùng · còn 95%"
+      ],
+      "subtotal": 650000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Chờ xác nhận",
+        "Hẹn lấy hàng",
+        "Hoàn thành"
+      ],
+      "when": "Đã nhận 3 giờ trước",
+      "place": "Tự đến lấy ở Block A"
+    },
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-10-16T13:02:00Z"
+      },
+      {
+        "state": "Anh Quân xác nhận",
+        "at": "2026-10-16T13:10:00Z"
+      },
+      {
+        "state": "Anh Quân báo sẵn sàng lấy",
+        "at": "2026-10-16T15:00:00Z"
+      },
+      {
+        "state": "Bạn xác nhận đã nhận đủ",
+        "at": "2026-10-16T15:40:00Z"
+      }
+    ]
   }
 ]
