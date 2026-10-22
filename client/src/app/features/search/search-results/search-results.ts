@@ -7,7 +7,7 @@ import { PostService, matches } from '../../../core/services/post';
 import { SavedService } from '../../../core/services/saved';
 
 type Tab = 'all' | PostKind;
-type Sort = 'near' | 'new' | 'sold' | 'low' | 'high';
+type Sort = 'all' | 'near' | 'new' | 'sold' | 'low' | 'high';
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'all', label: 'Tất cả' },
@@ -48,7 +48,7 @@ export class SearchResults implements OnInit {
   protected readonly max = signal<number | null>(null);
   protected readonly rate = signal(0);
   protected readonly xuOnly = signal(false);
-  protected readonly sort = signal<Sort>('near');
+  protected readonly sort = signal<Sort>('all');
   /** Ô nhập khoảng giá (chỉ áp dụng khi bấm "Áp dụng", như Shopee) */
   protected readonly draftMin = signal('');
   protected readonly draftMax = signal('');
@@ -91,13 +91,17 @@ export class SearchResults implements OnInit {
           return b.createdAt.localeCompare(a.createdAt);
         case 'sold':
           return (b.sold ?? 0) - (a.sold ?? 0);
-        default:
+        case 'near':
           return (a.distance ?? far) - (b.distance ?? far);
+        default:
+          return 0; // Tất cả: giữ thứ tự gốc, không sắp xếp thêm
       }
     });
   });
   protected readonly local = computed(() => this.matched().filter((p) => p.area === this.area.current()));
   protected readonly nearby = computed(() => this.matched().filter((p) => p.area !== this.area.current()));
+  /** Ô nhập khoảng giá tự gõ: ẩn sau liên kết "Tự nhập" cho đỡ rối */
+  protected readonly manual = signal(false);
   protected readonly hasFilter = computed(() => this.min() != null || this.max() != null || this.rate() > 0 || this.xuOnly() || this.kind() !== 'all');
 
   ngOnInit(): void {
@@ -110,10 +114,11 @@ export class SearchResults implements OnInit {
       this.max.set(num('max'));
       this.draftMin.set(params.get('min') ?? '');
       this.draftMax.set(params.get('max') ?? '');
+      if ((this.min() != null || this.max() != null) && !this.presets().some((p) => this.isPreset(p))) this.manual.set(true);
       this.rate.set(num('rate') ?? 0);
       this.xuOnly.set(params.get('xu') === '1');
       const sort = params.get('sort') as Sort | null;
-      this.sort.set(sort && ['near', 'new', 'sold', 'low', 'high'].includes(sort) ? sort : 'near');
+      this.sort.set(sort && ['near', 'new', 'sold', 'low', 'high'].includes(sort) ? sort : 'all');
     });
     this.postService.getPosts().subscribe({
       next: (list) => {
@@ -152,8 +157,9 @@ export class SearchResults implements OnInit {
     this.navigate({ xu: this.xuOnly() ? null : '1' });
   }
 
+  /** Bấm lại nút đang chọn thì bỏ chọn (về "Tất cả") */
   protected setSort(s: Sort): void {
-    this.navigate({ sort: s === 'near' ? null : s });
+    this.navigate({ sort: s === 'all' || s === this.sort() ? null : s });
   }
 
   protected clear(): void {
@@ -169,7 +175,7 @@ export class SearchResults implements OnInit {
   }
 
   private sortParam(): string | null {
-    return this.sort() === 'near' ? null : this.sort();
+    return this.sort() === 'all' ? null : this.sort();
   }
 
   private navigate(queryParams: Record<string, string | null>): void {

@@ -70,3 +70,6 @@
 .presets button { height: 34px; border: 1px solid #E3E5EA; border-radius: 999px; background: #fff; font: inherit; font-size: 13px; color: var(--ink); white-space: nowrap; }
 .presets button:hover { border-color: #B9BEC8; }
 .presets button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+.manual { background: none; font: inherit; font-size: 13px; color: var(--smoke); text-decoration: underline; text-underline-offset: 3px; }
+.manual:hover { color: var(--ink); }

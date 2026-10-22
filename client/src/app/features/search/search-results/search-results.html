@@ -27,12 +27,16 @@
       <div class="presets">
         @for (p of presets(); track p.label) { <button type="button" [class.on]="isPreset(p)" (click)="setPreset(p)">{{ p.label }}</button> }
       </div>
-      <div class="range">
-        <input type="number" min="0" step="10000" placeholder="Từ" [value]="draftMin()" (input)="draftMin.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá thấp nhất" />
-        <i></i>
-        <input type="number" min="0" step="10000" placeholder="Đến" [value]="draftMax()" (input)="draftMax.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá cao nhất" />
-      </div>
-      <button type="button" class="apply" (click)="applyPrice()">Áp dụng</button>
+      @if (manual()) {
+        <div class="range">
+          <input type="number" min="0" step="10000" placeholder="Từ" [value]="draftMin()" (input)="draftMin.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá thấp nhất" />
+          <i></i>
+          <input type="number" min="0" step="10000" placeholder="Đến" [value]="draftMax()" (input)="draftMax.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá cao nhất" />
+        </div>
+        <button type="button" class="apply" (click)="applyPrice()">Áp dụng</button>
+      } @else {
+        <button type="button" class="manual" (click)="manual.set(true)">Tự nhập khoảng giá</button>
+      }
     </section>
 
     @if (!isJobs()) {
@@ -59,6 +63,7 @@
   <div class="main">
     <div class="sortbar">
       <span class="lab">Sắp xếp theo:</span>
+      <button type="button" [class.on]="sort() === 'all'" (click)="setSort('all')">Tất cả</button>
       <button type="button" [class.on]="sort() === 'near'" (click)="setSort('near')">Gần nhất</button>
       <button type="button" [class.on]="sort() === 'new'" (click)="setSort('new')">Mới nhất</button>
       @if (!isJobs()) { <button type="button" [class.on]="sort() === 'sold'" (click)="setSort('sold')">Bán chạy</button> }
