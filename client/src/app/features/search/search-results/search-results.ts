@@ -141,7 +141,16 @@ export class SearchResults implements OnInit {
     return this.min() === p.min && this.max() === p.max;
   }
 
+  /** "Khoảng khác" chỉ sáng khi không có mức gợi ý nào đang chọn (chọn một trong các mục, không chọn hai) */
+  protected readonly customOn = computed(() => this.manual() && !this.presets().some((p) => this.isPreset(p)));
+
+  protected openCustom(): void {
+    this.manual.set(true);
+    if (this.min() != null || this.max() != null) this.navigate({ min: null, max: null });
+  }
+
   protected setPreset(p: { min: number | null; max: number | null }): void {
+    this.manual.set(false);
     const off = this.isPreset(p);
     this.navigate({ min: off || p.min == null ? null : String(p.min), max: off || p.max == null ? null : String(p.max) });
   }

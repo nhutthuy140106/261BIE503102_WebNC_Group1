@@ -23,9 +23,10 @@
 .rates .st b { font-weight: 400; }
 .rates .st .off { color: #D9DCE2; }
 .rates .up { color: var(--smoke); font-size: 13px; }
-.opt i.box { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid #B9BEC8; flex: none; position: relative; }
-.opt.on i.box { border-color: var(--ink); background: var(--ink); }
-.opt.on i.box::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.opt i.box { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #B9BEC8; flex: none; transition: border-color .15s; }
+.opt:hover i.box { border-color: var(--ink); }
+.opt.on { font-weight: 600; }
+.opt.on i.box { border-color: var(--ink); background: radial-gradient(var(--ink) 42%, transparent 46%); }
 .opt img { width: 18px; height: 18px; }
 
 .areabtn { width: 100%; display: flex; align-items: center; justify-content: space-between; height: 40px; padding: 0 12px; border: 1px solid #DADDE3; border-radius: 8px; background: #fff; font: inherit; }
