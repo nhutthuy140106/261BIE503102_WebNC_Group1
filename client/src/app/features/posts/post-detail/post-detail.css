@@ -181,32 +181,21 @@
 .rvlist .rc p { margin: 4px 0 0; line-height: 1.55; color: #3C4660; }
 .rvlist .stars { margin: 0; }
 .rvempty { padding: 40px 0; text-align: center; color: var(--smoke); }
-@media (max-width: 700px) { .rvsum { gap: 16px; margin: 14px; padding: 14px; } .rvlist { padding: 0 14px 14px; } }
 
-.rvsum { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 32px; align-items: center; padding: 22px 22px 8px; }
-.score { text-align: center; }
-.score .num b { font-size: 44px; color: var(--ink); letter-spacing: -.03em; }
-.score .num span { margin-left: 4px; font-size: 16px; color: var(--smoke); }
-.big-stars { color: #E39B1A; font-size: 18px; letter-spacing: 2px; margin-top: 2px; }
-.big-stars .off { color: #E3E5EA; }
-.score small { display: block; margin-top: 4px; color: var(--smoke); font-size: 13px; }
-.dist { display: grid; gap: 4px; }
-.dist button { display: grid; grid-template-columns: 38px minmax(0, 1fr) 30px; align-items: center; gap: 12px; padding: 5px 8px; border-radius: 6px; background: none; font-size: 13px; color: var(--smoke); text-align: left; }
-.dist button:hover { background: #F4F5F7; }
-.dist button.on { background: #F1F2F5; color: var(--ink); font-weight: 700; }
-.dist .lv { display: inline-flex; align-items: center; gap: 4px; }
-.dist .lv i { font-style: normal; color: #E39B1A; line-height: 1; }
-.dist .bar { height: 6px; border-radius: 3px; background: #ECEEF2; overflow: hidden; }
-.dist .bar em { display: block; height: 100%; background: #E39B1A; border-radius: 3px; }
-.dist .ct { text-align: right; }
-.rvtabs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 340px; max-width: calc(100% - 44px); margin: 12px 22px 6px; padding: 4px; border-radius: 12px; background: #F1F2F5; }
-.rvtabs button { height: 36px; border-radius: 9px; background: transparent; font-weight: 600; color: var(--smoke); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background .15s, color .15s; }
-.rvtabs button small { font-weight: 500; color: var(--fog); }
-.rvtabs button:hover { color: var(--ink); }
-.rvtabs button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(34, 48, 74, .12); }
-.rvlist .rev:first-child { border-top: 0; }
-@media (max-width: 700px) { .rvsum { grid-template-columns: 1fr; gap: 14px; } }
 
 .rv button, .dist button, .rvtabs button { font: inherit; }
-.dist button { font-size: 13px; }
-.rvtabs button { font-weight: 600; font-size: 14px; }
+
+/* Tổng điểm + nút lọc kiểu Shopee: ô số bên trái, các nút cùng một kích thước bên phải */
+.rvsum { display: flex; gap: 40px; align-items: center; margin: 20px 22px 4px; padding: 22px 28px; border: 1px solid #E6E8EC; border-radius: 4px; }
+.score { flex: none; text-align: center; }
+.score .num { display: flex; align-items: baseline; justify-content: center; gap: 6px; color: var(--accent); }
+.score .num b { font-size: 36px; font-weight: 600; letter-spacing: -.02em; }
+.score .num span { font-size: 18px; }
+.big-stars { margin-top: 4px; color: var(--accent); font-size: 20px; letter-spacing: 3px; }
+.big-stars .off { color: #E3E5EA; }
+.rvfilters { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, 118px); gap: 10px 10px; }
+.rvfilters button { height: 34px; border: 1px solid #E1E3E8; border-radius: 3px; background: #fff; color: var(--ink); font-size: 14px; display: inline-flex; align-items: center; justify-content: center; }
+.rvfilters button:hover { border-color: var(--accent); color: var(--accent); }
+.rvfilters button.on { border-color: var(--accent); color: var(--accent); }
+.rvlist .rev:first-child { border-top: 0; }
+@media (max-width: 700px) { .rvsum { flex-direction: column; align-items: stretch; gap: 16px; margin: 14px; padding: 16px; } }

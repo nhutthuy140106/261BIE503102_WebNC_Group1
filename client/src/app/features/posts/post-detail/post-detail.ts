@@ -77,9 +77,15 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const r = this.reviews();
     return r.length ? Math.round(r.reduce((s, x) => s + x[4], 0) / r.length) : 0;
   });
-  /** Cột phân bố sao (bấm một dòng để lọc theo số sao đó) */
-  protected readonly bars = computed(() => [5, 4, 3, 2, 1].map((n) => ({ n, c: this.reviews().filter((r) => r[4] === n).length })));
-  protected readonly photoCount = computed(() => this.reviews().filter((r) => r[6].length).length);
+  /** Nút lọc kiểu Shopee: Tất cả · 5 sao … 1 sao · Có hình ảnh (kèm số đánh giá) */
+  protected readonly rvFilters = computed<{ k: RvFilter; label: string; n: number }[]>(() => {
+    const r = this.reviews();
+    return [
+      { k: 'all', label: 'Tất cả', n: r.length },
+      ...([5, 4, 3, 2, 1] as const).map((s) => ({ k: String(s) as RvFilter, label: s + ' sao', n: r.filter((x) => x[4] === s).length })),
+      { k: 'photo', label: 'Có hình ảnh', n: r.filter((x) => x[6].length).length },
+    ];
+  });
   protected readonly rvShown = computed(() => {
     const f = this.rvFilter();
     return this.reviews().filter((r) => (f === 'all' ? true : f === 'photo' ? r[6].length > 0 : r[4] === Number(f)));

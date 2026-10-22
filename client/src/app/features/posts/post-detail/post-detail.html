@@ -319,23 +319,14 @@
         <div class="rvbody">
           <div class="rvsum">
             <div class="score">
-              <div class="num"><b>{{ rate() }}</b><span>/ 5</span></div>
+              <div class="num"><b>{{ rate() }}</b><span>trên 5</span></div>
               <div class="big-stars">@for (s of stars(avgRound()); track $index) { <span [class.off]="!s">★</span> }</div>
-              <small>{{ reviews().length }} đánh giá</small>
             </div>
-            <div class="dist">
-              @for (b of bars(); track b.n) {
-                <button type="button" [class.on]="rvFilter() === ('' + b.n)" (click)="rvFilter.set(rvFilter() === ('' + b.n) ? 'all' : $any('' + b.n))">
-                  <span class="lv">{{ b.n }} <i>★</i></span>
-                  <span class="bar"><em [style.width.%]="reviews().length ? b.c * 100 / reviews().length : 0"></em></span>
-                  <span class="ct">{{ b.c }}</span>
-                </button>
+            <div class="rvfilters">
+              @for (f of rvFilters(); track f.k) {
+                <button type="button" [class.on]="rvFilter() === f.k" (click)="rvFilter.set(f.k)">{{ f.label }}@if (f.k !== 'all') { ({{ f.n }}) }</button>
               }
             </div>
-          </div>
-          <div class="rvtabs">
-            <button type="button" [class.on]="rvFilter() === 'all'" (click)="rvFilter.set('all')">Tất cả <small>{{ reviews().length }}</small></button>
-            <button type="button" [class.on]="rvFilter() === 'photo'" (click)="rvFilter.set('photo')">Có hình ảnh <small>{{ photoCount() }}</small></button>
           </div>
           <div class="rvlist">
             @for (r of rvShown(); track $index) {
