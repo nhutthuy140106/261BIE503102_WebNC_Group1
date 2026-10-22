@@ -191,17 +191,18 @@
 .big-stars .off { color: #E3E5EA; }
 .score small { display: block; margin-top: 4px; color: var(--smoke); font-size: 13px; }
 .dist { display: grid; gap: 4px; }
-.dist button { display: grid; grid-template-columns: 34px minmax(0, 1fr) 28px; align-items: center; gap: 12px; padding: 5px 8px; border-radius: 6px; background: none; font-size: 13px; color: var(--smoke); text-align: left; }
+.dist button { display: grid; grid-template-columns: 38px minmax(0, 1fr) 30px; align-items: center; gap: 12px; padding: 5px 8px; border-radius: 6px; background: none; font-size: 13px; color: var(--smoke); text-align: left; }
 .dist button:hover { background: #F4F5F7; }
 .dist button.on { background: #F1F2F5; color: var(--ink); font-weight: 700; }
-.dist .lv i { font-style: normal; color: #E39B1A; }
+.dist .lv { display: inline-flex; align-items: center; gap: 4px; }
+.dist .lv i { font-style: normal; color: #E39B1A; line-height: 1; }
 .dist .bar { height: 6px; border-radius: 3px; background: #ECEEF2; overflow: hidden; }
 .dist .bar em { display: block; height: 100%; background: #E39B1A; border-radius: 3px; }
 .dist .ct { text-align: right; }
-.rvtabs { display: flex; gap: 22px; margin: 6px 22px 0; border-bottom: 1px solid #E6E8EC; }
-.rvtabs button { position: relative; padding: 12px 0; background: none; font-weight: 600; color: var(--smoke); }
-.rvtabs button small { margin-left: 4px; font-weight: 500; color: var(--fog); }
-.rvtabs button.on { color: var(--ink); }
-.rvtabs button.on::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--ink); }
+.rvtabs { display: grid; grid-template-columns: repeat(2, 168px); gap: 8px; margin: 10px 22px 6px; }
+.rvtabs button { height: 40px; border: 1px solid #DADDE3; border-radius: 6px; background: #fff; font-weight: 600; color: var(--smoke); display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.rvtabs button small { font-weight: 500; color: var(--fog); }
+.rvtabs button:hover { border-color: #B9BEC8; }
+.rvtabs button.on { border-color: var(--ink); color: var(--ink); }
 .rvlist .rev:first-child { border-top: 0; }
 @media (max-width: 700px) { .rvsum { grid-template-columns: 1fr; gap: 14px; } }
