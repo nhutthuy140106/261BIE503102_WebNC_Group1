@@ -165,8 +165,11 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     if (!iso) return 'Chọn ngày';
     const [y, m, day] = iso.split('-').map(Number);
     const dows = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-    const rel = iso === this.todayIso() ? 'Hôm nay · ' : '';
-    return rel + dows[new Date(y, m - 1, day).getDay()] + ', ' + String(day).padStart(2, '0') + '/' + String(m).padStart(2, '0') + '/' + y;
+    const t = new Date();
+    const tm = new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1);
+    if (iso === this.todayIso()) return 'Hôm nay';
+    if (iso === this.iso(tm)) return 'Ngày mai';
+    return dows[new Date(y, m - 1, day).getDay()] + ', ' + String(day).padStart(2, '0') + '/' + String(m).padStart(2, '0');
   }
 
   protected readonly address = computed(() => {

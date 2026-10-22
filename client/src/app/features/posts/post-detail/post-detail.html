@@ -251,12 +251,13 @@
                 </div>
                 <div class="timebox">
                   <input type="text" class="timein" inputmode="numeric" maxlength="5" placeholder="hh:mm" [value]="customTime() || d.time()"
-                         (focus)="timeOpen.set(true)" (input)="onCustomTime(d, $any($event.target).value)" aria-label="Giờ" />
+                         (focus)="timeOpen.set(true)" (click)="timeOpen.set(true)" (input)="onCustomTime(d, $any($event.target).value)" aria-label="Giờ" />
                   <svg class="i clk"><use href="#clock" /></svg>
                   @if (timeOpen()) {
-                    <ul class="tlist" role="listbox">
-                      @for (t of slots(); track t) { <li><button type="button" [class.on]="d.time() === t" (click)="pickTime(d, t)">{{ t }}</button></li> }
-                    </ul>
+                    <div class="tlist" role="listbox">
+                      <p>Chọn giờ hoặc tự gõ</p>
+                      <div class="tgrid">@for (t of slots(); track t) { <button type="button" [class.on]="d.time() === t" (click)="pickTime(d, t)">{{ t }}</button> }</div>
+                    </div>
                   }
                 </div>
               </div>
