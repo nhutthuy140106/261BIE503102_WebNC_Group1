@@ -149,11 +149,11 @@
     <!-- ===== bảng hành động bên phải ===== -->
     <aside>
       <div class="apanel">
-        <span class="stat"><i class="dotc" [class.go]="o.status === 'working' || o.status === 'preparing' || o.status === 'delivering' || o.status === 'confirmed' || o.status === 'chosen' || o.status === 'ready'" [class.act]="o.status === 'pricing'" [class.end]="o.status === 'done' || o.status === 'cancelled' || o.status === 'rejected' || o.status === 'withdrawn' || o.status === 'declined'"></i>{{ label(o) }}</span>
+
 
         @if (o.type === 'received' && offer(); as of) {
           @if (receivedPanel(o, of); as p) {
-            <h3>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
+            <h3><i class="dotc" [class.go]="o.status === 'working' || o.status === 'preparing' || o.status === 'delivering' || o.status === 'confirmed' || o.status === 'chosen' || o.status === 'ready'" [class.act]="o.status === 'pricing'" [class.end]="o.status === 'done' || o.status === 'cancelled' || o.status === 'rejected' || o.status === 'withdrawn' || o.status === 'declined'"></i>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
             @if (of.state === 'reported') { <div class="cd">Tự hoàn thành sau 24 giờ</div> }
             @for (b of p.btns; track b.id) {
               <button type="button" [class.pbtn]="b.kind === 'main'" [class.gbtn]="b.kind !== 'main'" [class.warn]="b.kind === 'warn'" (click)="actR(b.id)">{{ b.label }}</button>
@@ -161,7 +161,7 @@
           }
         } @else {
           @if (placedPanel(o); as p) {
-            <h3>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
+            <h3><i class="dotc" [class.go]="o.status === 'working' || o.status === 'preparing' || o.status === 'delivering' || o.status === 'confirmed' || o.status === 'chosen' || o.status === 'ready'" [class.act]="o.status === 'pricing'" [class.end]="o.status === 'done' || o.status === 'cancelled' || o.status === 'rejected' || o.status === 'withdrawn' || o.status === 'declined'"></i>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
             @if (o.status === 'pricing' && o.newPrice; as np) {
               <div class="pricebox">
                 <div class="pb"><span>{{ o.priceCheck === 'quote' ? 'Đã trả lúc đặt (phí kiểm tra)' : 'Giá lúc đặt' }}</span><s>{{ o.total | vnd }}</s></div>

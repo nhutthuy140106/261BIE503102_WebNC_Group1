@@ -157,3 +157,14 @@ a.pbtn.link { text-decoration: none; }
 .stepper .s.cur small, .stepper .s.ok small { color: var(--smoke); }
 
 .details dd { white-space: pre-line; }
+
+/* bảng hành động gọn: tiêu đề (có chấm trạng thái) → một câu → nút → người bán → báo cáo, cùng một nhịp khoảng cách */
+.apanel { display: grid; gap: 14px; }
+.apanel h3 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 20px; }
+.apanel h3 .dotc { flex: none; }
+.apanel .why { margin: 0; }
+.apanel > .pbtn, .apanel > .gbtn, .apanel > .arow2, .apanel > .cd, .apanel > .pricebox, .apanel > .fpanel, .apanel > .request-note, .apanel > .pbnote { margin-top: 0; }
+.apanel .pbtn { height: 48px; }
+.apanel .gbtn { height: 44px; }
+.pcard { margin-top: 4px; padding: 16px 0 0; border-top: 1px solid var(--border); align-items: center; }
+.lbtn { margin-top: 0; font-size: 12.5px; }

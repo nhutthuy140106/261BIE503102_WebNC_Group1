@@ -255,7 +255,7 @@ export class OrderDetail implements OnInit {
         };
       }
       case 'pending':
-        return { h: 'Chờ bên bán xác nhận', why: 'Yêu cầu đã gửi tới ' + sl + '. Bạn sẽ thấy bước tiếp theo khi bên bán phản hồi. Chưa xác nhận thì bạn hủy được ngay.', btns: [...reschBtn, { id: 'cancel', label: 'Hủy đơn', kind: 'warn' }] };
+        return { h: 'Chờ bên bán xác nhận', why: sl + ' sẽ phản hồi sớm. Chưa xác nhận thì bạn hủy được ngay.', btns: [...reschBtn, { id: 'cancel', label: 'Hủy đơn', kind: 'warn' }] };
       case 'confirmed':
         return { h: 'Đơn đã được nhận', why: sl + ' đã xác nhận. Theo dõi thời gian và cách giao nhận ở bên trái.' + (k === 'service' && o.apptIn != null ? (o.apptIn >= 2 ? ' Hủy miễn phí tới 2 giờ trước giờ hẹn.' : lateNote) : ''), btns: [...reschBtn, { id: 'cancel', label: 'Hủy đơn', kind: 'warn' }] };
       case 'preparing':
