@@ -39,6 +39,7 @@ export class Shop implements OnInit {
 
   protected readonly name = computed(() => this.posts()[0]?.sellerName ?? '');
   protected readonly block = computed(() => this.posts()[0]?.block ?? '');
+  protected readonly area = computed(() => this.posts()[0]?.area ?? '');
   protected readonly selling = computed(() => this.posts().filter((p) => p.kind !== 'job'));
   protected readonly jobs = computed(() => this.posts().filter((p) => p.kind === 'job'));
   protected readonly rating = computed(() => {

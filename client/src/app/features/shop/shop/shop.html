@@ -13,7 +13,7 @@
     <app-avatar [src]="posts()[0].sellerAvatar" [name]="name()" [size]="72" />
     <div class="who">
       <h1>{{ name() }}</h1>
-      <p class="muted">Hàng xóm trong khu · {{ block() }}</p>
+      <p class="addr"><svg class="i"><use href="#pin" /></svg>{{ block() }}@if (area()) { · {{ area() }} }</p>
     </div>
     <div class="cta">
       <button type="button" class="btn ghost" [class.on]="following()" (click)="toggleFollow()">

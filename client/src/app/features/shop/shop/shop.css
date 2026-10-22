@@ -24,3 +24,6 @@
 .reply { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: var(--soft); font-size: 13.5px; line-height: 1.5; }
 .reply b { display: block; font-size: 12px; margin-bottom: 2px; }
 @media (max-width: 700px) { .revs { grid-template-columns: 1fr; } }
+
+.addr { display: flex; align-items: center; gap: 6px; margin: 2px 0 0; color: var(--smoke); font-size: 14px; }
+.addr svg { width: 15px; height: 15px; }

@@ -199,7 +199,7 @@
                   @if (address(); as a) { <b>{{ a.name }} · {{ a.phone }}</b><span>{{ addressText(a) }}</span> } @else { <span class="warnt">Chọn địa chỉ nhận hàng</span> }
                 </button>
               } @else {
-                <div class="card"><small>Địa chỉ lấy hàng</small><span>Gửi sau khi người bán xác nhận.</span></div>
+                <div class="card"><small>Địa chỉ lấy hàng</small><b>{{ p.sellerName }}</b><span>{{ p.block }}@if (p.area) { · {{ p.area }} }</span></div>
               }
             } @else {
               <div class="card"><small>Nơi nhận hàng</small><b>{{ v.tpl.place.where }}</b></div>
@@ -219,7 +219,6 @@
                     <button type="button" [class.on]="d.place() === i" (click)="d.place.set(i)"><b>{{ c[0] }}</b>@if (c[1]) { <span>+{{ fmt(c[1]) }}</span> } @else { <span>Miễn phí</span> }</button>
                   }
                 </div>
-                @if (d.place() !== 0 && d.needsAddress() === false && v.tpl.place.choices![0][1]) { <span class="sub">Địa chỉ lấy hàng gửi sau khi người bán xác nhận.</span> }
               </div>
             }
 
