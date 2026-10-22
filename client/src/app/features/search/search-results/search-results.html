@@ -24,18 +24,19 @@
 
     <section>
       <h3>{{ isJobs() ? 'Tiền công' : 'Khoảng giá' }}</h3>
-      <div class="presets">
-        @for (p of presets(); track p.label) { <button type="button" [class.on]="isPreset(p)" (click)="setPreset(p)">{{ p.label }}</button> }
-      </div>
+      <ul class="ranges">
+        @for (p of presets(); track p.label) {
+          <li><button type="button" [class.on]="isPreset(p)" (click)="setPreset(p)"><i></i><span>{{ p.label }}</span></button></li>
+        }
+        <li><button type="button" [class.on]="manual()" (click)="manual.set(!manual())"><i></i><span>Khoảng khác</span></button></li>
+      </ul>
       @if (manual()) {
         <div class="range">
           <input type="number" min="0" step="10000" placeholder="Từ" [value]="draftMin()" (input)="draftMin.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá thấp nhất" />
-          <i></i>
+          <span>–</span>
           <input type="number" min="0" step="10000" placeholder="Đến" [value]="draftMax()" (input)="draftMax.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá cao nhất" />
         </div>
         <button type="button" class="apply" (click)="applyPrice()">Áp dụng</button>
-      } @else {
-        <button type="button" class="manual" (click)="manual.set(true)">Tự nhập khoảng giá</button>
       }
     </section>
 

@@ -64,8 +64,8 @@ export class SearchResults implements OnInit {
   /** Mức giá gợi ý (bấm một lần là lọc, không phải gõ số) */
   protected readonly presets = computed<{ label: string; min: number | null; max: number | null }[]>(() =>
     this.isJobs()
-      ? [{ label: 'Dưới 50k', min: null, max: 50000 }, { label: '50k – 100k', min: 50000, max: 100000 }, { label: 'Trên 100k', min: 100000, max: null }]
-      : [{ label: 'Dưới 50k', min: null, max: 50000 }, { label: '50k – 150k', min: 50000, max: 150000 }, { label: '150k – 300k', min: 150000, max: 300000 }, { label: 'Trên 300k', min: 300000, max: null }],
+      ? [{ label: 'Dưới 50.000đ', min: null, max: 50000 }, { label: '50.000đ – 100.000đ', min: 50000, max: 100000 }, { label: 'Trên 100.000đ', min: 100000, max: null }]
+      : [{ label: 'Dưới 50.000đ', min: null, max: 50000 }, { label: '50.000đ – 150.000đ', min: 50000, max: 150000 }, { label: '150.000đ – 300.000đ', min: 150000, max: 300000 }, { label: 'Trên 300.000đ', min: 300000, max: null }],
   );
   protected readonly priceOptions = computed(() => {
     const w = this.isJobs() ? 'Tiền công' : 'Giá';

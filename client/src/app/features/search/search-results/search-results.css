@@ -66,10 +66,12 @@
 @media (max-width: 560px) { .card-grid { gap: 18px 12px; } }
 
 /* mức giá gợi ý: các nút có cùng chiều rộng, xếp 2 cột cho đều */
-.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-.presets button { height: 34px; border: 1px solid #E3E5EA; border-radius: 999px; background: #fff; font: inherit; font-size: 13px; color: var(--ink); white-space: nowrap; }
-.presets button:hover { border-color: #B9BEC8; }
-.presets button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 
-.manual { background: none; font: inherit; font-size: 13px; color: var(--smoke); text-decoration: underline; text-underline-offset: 3px; }
-.manual:hover { color: var(--ink); }
+
+/* mức giá: cùng kiểu hàng chọn tròn như Danh mục và Đánh giá */
+.ranges button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 0; background: none; font: inherit; font-size: 14px; color: var(--ink); text-align: left; }
+.ranges button i { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #B9BEC8; flex: none; transition: border-color .15s; }
+.ranges button:hover i { border-color: var(--ink); }
+.ranges button.on { font-weight: 600; }
+.ranges button.on i { border-color: var(--ink); background: radial-gradient(var(--ink) 42%, transparent 46%); }
+.ranges + .range { margin-top: 10px; }
