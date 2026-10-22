@@ -1,4 +1,10 @@
-<header class="ohead"><h1>Đơn hàng</h1></header>
+<header class="ohead">
+  <h1>Đơn hàng</h1>
+  <label class="search">
+    <svg class="i"><use href="#search" /></svg>
+    <input type="search" placeholder="Tìm đơn, người bán, mã đơn" [value]="query()" (input)="query.set($any($event.target).value)" />
+  </label>
+</header>
 
 <nav class="tabs" aria-label="Lọc đơn">
   <button type="button" [class.on]="tab() === 'all'" (click)="setTab('all')">Tất cả</button>
@@ -8,49 +14,40 @@
   <button type="button" [class.on]="tab() === 'history'" (click)="setTab('history')">Lịch sử</button>
 </nav>
 
-<label class="search">
-  <svg class="i"><use href="#search" /></svg>
-  <input type="search" placeholder="Tìm theo tên đơn, người bán / người đăng việc hoặc mã đơn" [value]="query()" (input)="query.set($any($event.target).value)" />
-</label>
-
 @if (loading()) {
   <p class="muted">Đang tải…</p>
 } @else if (error()) {
   <div class="notice">Không tải được đơn hàng: {{ error() }}</div>
 } @else {
-  <ul class="list">
+  <div class="thead" aria-hidden="true"><span>Đơn</span><span>Tình trạng</span><span class="r">Số tiền</span><span></span></div>
+  <ul class="rows">
     @for (o of shown(); track o._id) {
-      <li class="order">
-        <div class="oh">
-          <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="24" />
-          <b>{{ o.counterpartName }}</b>
-          <span class="kind">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span>
-          @if (o.counterpartId) { <a class="shop" [routerLink]="['/shop', o.counterpartId]">Xem gian hàng ›</a> }
-          <span class="ost" [ngClass]="'s-' + dot(o)">{{ label(o) }}</span>
-        </div>
-
-        <a class="body" [routerLink]="['/orders', o._id]">
+      <li class="row">
+        <a class="item" [routerLink]="['/orders', o._id]">
           <app-order-thumb [image]="o.image" [category]="o.category" />
-          <span class="main">
-            <h3>{{ o.postTitle }}</h3>
-            <span class="sub">{{ when(o) }}</span>
-            <span class="code">Mã đơn {{ o.code }}</span>
+          <span class="txt">
+            <b class="title">{{ o.postTitle }}</b>
+            <span class="meta">{{ o.counterpartName }} · {{ when(o) }}</span>
+            <span class="meta faint">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }} · {{ o.code }}</span>
           </span>
-          <span class="total">{{ o.type === 'placed' ? 'Thành tiền' : 'Tiền công' }}<b>{{ o.total | vnd }}</b></span>
         </a>
 
-        <div class="of">
+        <div class="state" [ngClass]="'s-' + dot(o)">
+          <span class="lab"><i class="dotc"></i>{{ label(o) }}</span>
           <span class="hint">{{ hint(o) }}</span>
-          <div class="btns">
-            <a class="btn2" routerLink="/messenger" [queryParams]="{ to: o.counterpartName, av: o.counterpartAvatar }">Nhắn tin</a>
-            @if (next(o); as n) {
-              <a class="btn2 main" [routerLink]="['/orders', o._id]">{{ n }}</a>
-            } @else if (isEnded(o)) {
-              <a class="btn2 main" [routerLink]="side(o).link" [queryParams]="side(o).params">{{ side(o).label }}</a>
-            } @else {
-              <a class="btn2" [routerLink]="['/orders', o._id]">Xem chi tiết</a>
-            }
-          </div>
+        </div>
+
+        <b class="amount">{{ o.total | vnd }}</b>
+
+        <div class="act">
+          @if (next(o); as n) {
+            <a class="go" [routerLink]="['/orders', o._id]">{{ n }}</a>
+          } @else if (isEnded(o)) {
+            <a class="lnk" [routerLink]="side(o).link" [queryParams]="side(o).params">{{ side(o).label }}</a>
+          } @else {
+            <a class="lnk" [routerLink]="['/orders', o._id]">Xem chi tiết</a>
+          }
+          <a class="lnk faint" routerLink="/messenger" [queryParams]="{ to: o.counterpartName, av: o.counterpartAvatar }">Nhắn tin</a>
         </div>
       </li>
     } @empty {
