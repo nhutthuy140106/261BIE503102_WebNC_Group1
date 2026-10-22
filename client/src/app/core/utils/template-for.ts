@@ -49,6 +49,10 @@ export function viewOf(post: Post): PostView {
     qs: post.questions?.length ? post.questions.map((q) => ({ type: 'text' as const, label: q.label, req: q.required })) : base.qs,
     xuOk: post.acceptsXu ?? base.xuOk,
   };
+  // Đơn vị chỉ có MỘT nguồn: đơn vị của giá (ổ, phần, ly, kg, giờ…). Nhãn số lượng lấy lại đúng đơn vị đó để giá và số lượng không lệch nhau.
+  if (tpl.qty && tpl.price.unit) {
+    tpl.qty = { ...tpl.qty, label: tpl.qty.label.replace(/\s*\(.*\)\s*$/, '') + ' (' + tpl.price.unit + ')' };
+  }
   const mine = post.images.map((i) => unsplash(i, 800, 600));
   const images = same ? [...mine, ...base.imgs.map((i) => unsplash(i, 800, 600))] : mine;
   return { tpl, key, images: [...new Set(images)].slice(0, 5), reviews: REVIEW_SAMPLES[key] ?? [] };
