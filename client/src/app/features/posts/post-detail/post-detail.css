@@ -290,3 +290,6 @@
 .tgrid button { height: 34px; border-radius: 999px; background: #F4F5F7; font: inherit; font-size: 13px; color: var(--ink); }
 .tgrid button:hover { background: #E9EBEF; }
 .tgrid button.on { background: var(--ink); color: #fff; font-weight: 600; }
+
+/* khối chỉ chứa ô nhập (ngày giờ, ghi chú): bỏ khung ngoài để không bị hai khung lồng nhau */
+.mbody .card:has(> .input), .mbody .card:has(> .when), .mbody .card:has(> .seg2) { border: 0; padding: 4px 2px 0; border-radius: 0; background: none; }
