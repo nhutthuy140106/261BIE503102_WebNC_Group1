@@ -199,10 +199,14 @@
 .dist .bar { height: 6px; border-radius: 3px; background: #ECEEF2; overflow: hidden; }
 .dist .bar em { display: block; height: 100%; background: #E39B1A; border-radius: 3px; }
 .dist .ct { text-align: right; }
-.rvtabs { display: grid; grid-template-columns: repeat(2, 168px); gap: 8px; margin: 10px 22px 6px; }
-.rvtabs button { height: 40px; border: 1px solid #DADDE3; border-radius: 6px; background: #fff; font-weight: 600; color: var(--smoke); display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.rvtabs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 340px; max-width: calc(100% - 44px); margin: 12px 22px 6px; padding: 4px; border-radius: 12px; background: #F1F2F5; }
+.rvtabs button { height: 36px; border-radius: 9px; background: transparent; font-weight: 600; color: var(--smoke); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background .15s, color .15s; }
 .rvtabs button small { font-weight: 500; color: var(--fog); }
-.rvtabs button:hover { border-color: #B9BEC8; }
-.rvtabs button.on { border-color: var(--ink); color: var(--ink); }
+.rvtabs button:hover { color: var(--ink); }
+.rvtabs button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(34, 48, 74, .12); }
 .rvlist .rev:first-child { border-top: 0; }
 @media (max-width: 700px) { .rvsum { grid-template-columns: 1fr; gap: 14px; } }
+
+.rv button, .dist button, .rvtabs button { font: inherit; }
+.dist button { font-size: 13px; }
+.rvtabs button { font-weight: 600; font-size: 14px; }
