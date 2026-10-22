@@ -199,3 +199,6 @@
 .rvfilters button.on { border-color: var(--accent); color: var(--accent); }
 .rvlist .rev:first-child { border-top: 0; }
 @media (max-width: 700px) { .rvsum { flex-direction: column; align-items: stretch; gap: 16px; margin: 14px; padding: 16px; } }
+
+.xuline { margin-top: 10px; display: flex; align-items: center; gap: 7px; font-size: 13px; color: #8A5A10; }
+.xuline img { width: 18px; height: 18px; }

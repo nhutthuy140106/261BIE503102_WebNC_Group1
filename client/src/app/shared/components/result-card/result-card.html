@@ -14,6 +14,7 @@
     } @else {
       <div class="photo">
         @if (post.images.length) { <img [src]="post.images[0]" alt="" loading="lazy" /> }
+        @if (post.acceptsXu) { <span class="xutag" title="Dùng được Xu"><img src="assets/clean/antxu.png" alt="" />Xu</span> }
       </div>
     }
     <div class="body">

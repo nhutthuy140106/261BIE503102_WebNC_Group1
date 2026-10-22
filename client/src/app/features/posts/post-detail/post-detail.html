@@ -87,6 +87,7 @@
       @if (stockLine(); as s) {
         <div class="avail" [class.off]="s.off"><i></i>{{ s.text }}<small>{{ s.sub }}</small></div>
       }
+      @if (v.tpl.xuOk) { <div class="xuline"><img src="assets/clean/antxu.png" alt="" />Đơn này dùng được voucher AntXu</div> }
 
       @for (g of v.tpl.opts; track g.name) {
         <div class="rows">

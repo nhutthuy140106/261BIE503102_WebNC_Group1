@@ -5,6 +5,9 @@
         <img [src]="post.images[0]" [alt]="post.title" loading="lazy" />
       }
     </a>
+    @if (post.acceptsXu) {
+      <span class="xutag" title="Dùng được Xu"><img src="assets/clean/antxu.png" alt="" />Xu</span>
+    }
     @if (post.promoted) {
       <span class="kind ad">QUẢNG BÁ</span>
     } @else {
