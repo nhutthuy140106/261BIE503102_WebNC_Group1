@@ -23,3 +23,4 @@ h2 { font-size: 18px; margin: 0 0 12px; }
 .todo .card { border-color: transparent; }
 section + section { margin-top: 4px; }
 .who { display: inline-flex; align-items: center; gap: 6px; }
+.tabs .hist { margin-left: auto; }

@@ -4,7 +4,7 @@
   <button type="button" class="btn ghost" [class.active]="tab() === 'all'" (click)="setTab('all')">Tất cả</button>
   <button type="button" class="btn ghost" [class.active]="tab() === 'placed'" (click)="setTab('placed')">Đơn đã đặt</button>
   <button type="button" class="btn ghost" [class.active]="tab() === 'received'" (click)="setTab('received')">Việc đã nhận</button>
-  <button type="button" class="btn ghost" [class.active]="tab() === 'history'" (click)="setTab('history')">Lịch sử</button>
+  <button type="button" class="btn ghost hist" [class.active]="tab() === 'history'" (click)="setTab('history')">Lịch sử</button>
 </div>
 
 <ng-template #rowTpl let-o>
