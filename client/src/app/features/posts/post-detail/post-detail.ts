@@ -18,6 +18,8 @@ import { SavedService } from '../../../core/services/saved';
 import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
+import { placedStepNames } from '../../../core/utils/placed-steps';
+import { formatDateTime } from '../../../core/utils/status-label';
 import { resolveId } from '../../../core/utils/slug-helper';
 import { PostView, viewOf } from '../../../core/utils/template-for';
 
@@ -379,10 +381,20 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     this.addrOpen.set(false);
   }
 
+  /** "Hôm nay (23/10) · 11:00", thêm thời lượng với dịch vụ tính theo giờ */
   protected whenLabel(d: OrderDraft): string {
     const t = d.tpl.time;
-    if (t.mode === 'datedur') return d.date() ? d.date().split('-').reverse().join('/') + ' · ' + d.time() + ' · ' + d.hours() + ' giờ' + (d.repeat() ? ' · lặp hằng tuần' : '') : '';
-    return (d.date() ? d.date().split('-').reverse().join('/') : 'Hôm nay') + ' · ' + d.time();
+    const day = this.dateLabel(d.date() || this.todayIso());
+    if (t.mode === 'datedur') return day + ' · ' + d.time() + ' · ' + d.hours() + ' giờ' + (d.repeat() ? ' · lặp hằng tuần' : '');
+    return day + ' · ' + d.time();
+  }
+
+  protected doneSteps(o: Order): string[] {
+    return placedStepNames(o.kind, !!o.priceCheck);
+  }
+
+  protected nowLabel(): string {
+    return formatDateTime(new Date().toISOString());
   }
 
   protected submit(): void {

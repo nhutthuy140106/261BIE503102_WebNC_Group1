@@ -8,9 +8,16 @@ export function statusLabel(o: Pick<Order, 'type' | 'status'>): string {
     : PLACED_STATUS_LABEL[o.status as PlacedStatus];
 }
 
+/** "Hôm nay, 01:33" · "Hôm qua, 20:10" · "23/10, 01:33" (thêm năm nếu khác năm nay) */
 export function formatDateTime(iso: string): string {
   const d = new Date(iso);
-  return isNaN(d.getTime())
-    ? ''
-    : d.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  if (isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const time = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  const now = new Date();
+  const days = Math.round((new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() - new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) / 864e5);
+  if (days === 0) return 'Hôm nay, ' + time;
+  if (days === 1) return 'Hôm qua, ' + time;
+  const date = pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + (d.getFullYear() !== now.getFullYear() ? '/' + d.getFullYear() : '');
+  return date + ', ' + time;
 }

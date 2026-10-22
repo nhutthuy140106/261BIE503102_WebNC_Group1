@@ -11,6 +11,7 @@ import { PostService } from '../../../core/services/post';
 import { ReviewService } from '../../../core/services/review';
 import { ToastService } from '../../../core/services/toast';
 import { XuService } from '../../../core/services/xu';
+import { placedStepNames } from '../../../core/utils/placed-steps';
 import { canSeeExactAddress } from '../../../core/utils/offer-state';
 import { formatDateTime, statusLabel } from '../../../core/utils/status-label';
 
@@ -183,10 +184,8 @@ export class OrderDetail implements OnInit {
   }
 
   protected placedSteps(o: Order): { label: string; cls: string; time: string; n: number }[] {
-    const svc = this.kind(o) === 'service';
-    const names = ['Đã gửi', 'Đã xác nhận', svc ? 'Đang làm' : 'Đang chuẩn bị', svc ? 'Trả đồ' : 'Giao / nhận', 'Hoàn thành'];
     const ps = this.priceStep(o);
-    if (ps) names.splice(2, 0, 'Duyệt giá');
+    const names = placedStepNames(o.kind, ps);
     const sh = ps ? 1 : 0;
     const posMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: 2 + sh, delivering: 3 + sh, ready: 3 + sh, done: 4 + sh };
     const pos = posMap[o.status as string] ?? 0;

@@ -151,3 +151,7 @@ a.pbtn.link { text-decoration: none; }
 .btns .ghost { border: 1px solid var(--border); background: none; }
 .btns .go { background: var(--accent); color: #fff; }
 .btns .go.dark { background: var(--ink); }
+
+/* nhãn bước đang ở + bước đã qua dùng màu chữ chính (trước đó bị màu xám của .stepper .s đè lên) */
+.stepper .s.cur, .stepper .s.ok { color: var(--ink); }
+.stepper .s.cur small, .stepper .s.ok small { color: var(--smoke); }

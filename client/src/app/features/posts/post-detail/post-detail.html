@@ -193,9 +193,11 @@
               @if (o.detail?.when) { <div><dt>Thời gian</dt><dd>{{ o.detail?.when }}</dd></div> }
               <div><dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd></div>
             </dl>
-            <ol class="mini">
-              <li class="now"><i></i>Đã gửi</li><li><i></i>Chờ xác nhận</li><li><i></i>{{ o.detail?.steps?.[2] ?? 'Đang chuẩn bị' }}</li><li><i></i>Hoàn thành</li>
-            </ol>
+            <div class="stepper mini">
+              @for (n of doneSteps(o); track $index) {
+                <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span>{{ n }}@if ($index === 0) { <small>{{ nowLabel() }}</small> }</div>
+              }
+            </div>
             <div class="donebtns">
               <button type="button" class="ghostbtn" (click)="closeCheckout()">Tiếp tục xem bài</button>
               <button type="button" class="primary" (click)="goOrder(o)">Xem đơn hàng</button>

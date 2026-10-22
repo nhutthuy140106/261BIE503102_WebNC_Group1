@@ -66,6 +66,7 @@ export class OrderService {
               counterpartId: post.sellerId,
               image: post.images[0],
               category: post.kind,
+              kind: post.kind,
               status: 'pending',
               total: body.total ?? post.price * body.quantity + (body.fulfillment === 'delivery' ? MOCK_DELIVERY_FEE : 0),
               detail: body.detail,
