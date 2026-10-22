@@ -29,3 +29,4 @@ h3 { font-size: 15px; line-height: 1.35; margin: 5px 0; font-weight: 600; min-he
 .jst.closed { color: var(--smoke); }
 .jst.closed::before { background: var(--fog); }
 @media (max-width: 650px) { .photo, .jobphoto { height: 130px; } h3 { font-size: 14px; } }
+.jc-foot { justify-content: flex-end; }

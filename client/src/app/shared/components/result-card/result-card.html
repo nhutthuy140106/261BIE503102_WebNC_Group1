@@ -8,7 +8,6 @@
         </div>
         @if (post.description) { <p>{{ post.description }}</p> }
         <div class="jc-foot">
-          <b>{{ post.price | vnd }}@if (post.priceUnit) { <small> / {{ post.priceUnit }}</small> }</b>
           @if (post.job?.due) { <span class="due"><svg class="i"><use href="#clock" /></svg>{{ post.job?.due }}</span> }
         </div>
       </div>
@@ -19,7 +18,7 @@
     }
     <span class="kind">{{ kindText }}</span>
     <h3>{{ post.title }}</h3>
-    @if (!isJob) {
+    @if (true) {
       <div class="price">{{ post.price | vnd }} @if (post.priceUnit) { <small>/ {{ post.priceUnit }}</small> }</div>
     }
     <div class="area"><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</div>

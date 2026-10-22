@@ -22,3 +22,6 @@ h3 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.35; display: -
 .jst::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #3baa6a; }
 .jst.closed { color: var(--smoke); }
 .jst.closed::before { background: var(--fog); }
+.pr { font-size: 15px; font-weight: 700; color: var(--ink); }
+.pr span { font-size: 12px; font-weight: 400; color: var(--smoke); }
+.jc-foot { justify-content: flex-end; }
