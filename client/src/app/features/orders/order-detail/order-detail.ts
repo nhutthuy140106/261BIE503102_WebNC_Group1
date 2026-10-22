@@ -8,6 +8,8 @@ import { Order } from '../../../core/models/order';
 import { JobOfferService } from '../../../core/services/job-offer';
 import { OrderService } from '../../../core/services/order';
 import { XuService } from '../../../core/services/xu';
+import { Post } from '../../../core/models/post';
+import { PostService } from '../../../core/services/post';
 import { ReviewService } from '../../../core/services/review';
 import { availableActions, canSeeExactAddress } from '../../../core/utils/offer-state';
 import { formatDateTime, statusLabel } from '../../../core/utils/status-label';
@@ -31,6 +33,8 @@ export class OrderDetail implements OnInit {
   private readonly offerService = inject(JobOfferService);
   private readonly reviewService = inject(ReviewService);
   private readonly xu = inject(XuService);
+  private readonly postService = inject(PostService);
+  protected readonly job = signal<Post | null>(null);
 
   protected readonly order = signal<Order | null>(null);
   protected readonly offer = signal<Offer | null>(null);
@@ -74,7 +78,13 @@ export class OrderDetail implements OnInit {
     this.orderService.getOrder(id).subscribe({
       next: (o) => {
         this.order.set(o);
-        if (o.type === 'received') this.offerService.get(id).subscribe((of) => this.offer.set(of));
+        this.job.set(null);
+        if (o.type === 'received') {
+          this.offerService.get(id).subscribe((of) => {
+            this.offer.set(of);
+            this.postService.getPostById(of.jobId).subscribe((p) => this.job.set(p ?? null));
+          });
+        }
         this.loading.set(false);
       },
       error: (e: Error) => {
@@ -83,6 +93,52 @@ export class OrderDetail implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  /** Thanh bước của việc đã nhận: bước đã qua / đang ở / bị cắt (nhánh phụ) kèm ngày giờ */
+  receivedSteps(): { label: string; cls: string; time: string; n: number }[] {
+    const of = this.offer();
+    if (!of) return [];
+    const side = ['rejected', 'withdrawn', 'cancelled'].includes(of.state);
+    const reached = of.history.map((h) => h.state);
+    const last = [...reached].reverse().find((x) => OFFER_STEPS.includes(x)) ?? 'offered';
+    const cur = OFFER_STEPS.indexOf(last) + (side ? 1 : 0);
+    return OFFER_STEPS.map((s, i) => {
+      const cut = side && i === cur;
+      const cls = cut ? 'cut' : of.state === 'done' ? 'ok' : i < cur ? 'ok' : i === cur ? 'cur' : '';
+      const time = cls === 'ok' || (cls === 'cur' && i === 0) ? this.stepTime(s) : '';
+      return { label: cut ? OFFER_STATE_LABEL[of.state] : OFFER_STATE_LABEL[s], cls, time, n: i + 1 };
+    });
+  }
+
+  /** Tiêu đề + lời giải thích trong bảng hành động (đúng bước hiện tại) */
+  panel(o: Order): { h: string; why: string } {
+    const n = o.counterpartName;
+    if (o.type === 'received') {
+      const st = this.offer()?.state ?? (o.status as OfferState);
+      const map: Record<OfferState, { h: string; why: string }> = {
+        offered: { h: 'Chờ ' + n + ' chọn người', why: 'Bạn sẽ được báo ngay khi ' + n + ' chọn. Gửi đề nghị chưa phải là đã nhận việc.' },
+        chosen: { h: 'Bạn đã được chọn!', why: 'Địa chỉ chính xác đã hiện bên trái. Đến giờ làm, bấm Bắt đầu làm để ' + n + ' biết bạn đã tới.' },
+        working: { h: 'Đang làm', why: 'Làm xong thì bấm Báo hoàn thành, kèm ghi chú để ' + n + ' dễ kiểm tra.' },
+        reported: { h: 'Chờ ' + n + ' xác nhận', why: n + ' sẽ kiểm tra rồi xác nhận hoàn thành. Nếu không phản hồi, đơn tự hoàn thành sau 24 giờ.' },
+        done: this.reviewed()
+          ? { h: 'Xong việc rồi!', why: 'Đã nhận tiền công và đánh giá. Cảm ơn bạn đã giúp hàng xóm.' }
+          : { h: 'Hoàn thành — bạn đã nhận tiền công chưa?', why: n + ' trả trực tiếp (' + (o.paymentMethod === 'cash' ? 'tiền mặt' : 'chuyển khoản') + '). Nhận đủ rồi thì bấm xác nhận. AntGo không giữ tiền.' },
+        rejected: { h: 'Chưa được chọn lần này', why: n + ' đã chọn người khác. Đề nghị của bạn không ảnh hưởng gì tới hồ sơ.' },
+        withdrawn: { h: 'Bạn đã rút đề nghị', why: n + ' không còn thấy đề nghị của bạn.' },
+        cancelled: { h: 'Đơn đã hủy', why: 'Lý do: ' + (this.offer()?.cancelReason ?? '—') + '. ' + n + ' đã được báo để tìm người khác.' },
+      };
+      return map[st];
+    }
+    const map: Record<string, { h: string; why: string }> = {
+      pending: { h: 'Chờ bên bán xác nhận', why: 'Yêu cầu đã gửi tới ' + n + '. Chưa xác nhận thì bạn hủy được ngay.' },
+      confirmed: { h: 'Đơn đã được nhận', why: n + ' đã xác nhận. Theo dõi thời gian và cách giao nhận ở bên trái.' },
+      preparing: { h: 'Bên bán đang chuẩn bị', why: n + ' đã bắt đầu nên không tự hủy được nữa. Cần thì gửi yêu cầu hủy — ' + n + ' đồng ý mới hủy.' },
+      delivering: { h: 'Đang giao', why: 'Khi đã nhận đủ, hãy xác nhận để đóng đơn.' },
+      done: { h: 'Đơn đã hoàn thành', why: this.reviewed() ? 'Cảm ơn bạn đã đánh giá.' : 'Đánh giá có viết nhận xét để nhận thêm +5 Xu.' },
+      cancelled: { h: 'Đơn đã hủy', why: 'Đơn đã dừng. Bạn có thể tìm lựa chọn khác trong khu.' },
+    };
+    return map[o.status as string] ?? map['pending'];
   }
 
   stepTime(state: OfferState): string {
