@@ -112,7 +112,62 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     for (let m = a; m <= b; m += 30) out.push(String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'));
     return out;
   });
-  protected readonly today = new Date().toISOString().slice(0, 10);
+  // ----- lịch chọn ngày (tự vẽ, thay lịch gốc của trình duyệt) -----
+  protected readonly calOpen = signal(false);
+  protected readonly calMonth = signal(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+
+  private iso(x: Date): string {
+    return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+  }
+
+  protected todayIso(): string {
+    return this.iso(new Date());
+  }
+
+  protected readonly calCells = computed(() => {
+    const m = this.calMonth();
+    const first = new Date(m.getFullYear(), m.getMonth(), 1);
+    const lead = (first.getDay() + 6) % 7; // tuần bắt đầu từ Thứ Hai
+    const total = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
+    const today = this.todayIso();
+    const out: ({ day: number; iso: string; past: boolean; today: boolean } | null)[] = Array(lead).fill(null);
+    for (let day = 1; day <= total; day++) {
+      const iso = this.iso(new Date(m.getFullYear(), m.getMonth(), day));
+      out.push({ day, iso, past: iso < today, today: iso === today });
+    }
+    return out;
+  });
+
+  protected canPrev(): boolean {
+    const n = new Date();
+    return this.calMonth() > new Date(n.getFullYear(), n.getMonth(), 1);
+  }
+
+  protected moveMonth(n: number): void {
+    const m = this.calMonth();
+    this.calMonth.set(new Date(m.getFullYear(), m.getMonth() + n, 1));
+  }
+
+  protected toggleCal(d: OrderDraft): void {
+    if (!this.calOpen() && d.date()) {
+      const [y, mo] = d.date().split('-').map(Number);
+      this.calMonth.set(new Date(y, mo - 1, 1));
+    }
+    this.calOpen.update((v) => !v);
+  }
+
+  protected pickDate(d: OrderDraft, iso: string): void {
+    d.date.set(iso);
+    this.calOpen.set(false);
+  }
+
+  protected dateLabel(iso: string): string {
+    if (!iso) return 'Chọn ngày';
+    const [y, m, day] = iso.split('-').map(Number);
+    const dows = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const rel = iso === this.todayIso() ? 'Hôm nay · ' : '';
+    return rel + dows[new Date(y, m - 1, day).getDay()] + ', ' + String(day).padStart(2, '0') + '/' + String(m).padStart(2, '0') + '/' + y;
+  }
 
   protected readonly address = computed(() => {
     const d = this.draft();
@@ -220,7 +275,36 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     this.openCheckout();
   }
 
+  protected readonly customTime = signal('');
+  protected readonly timeErr = signal('');
+  protected readonly timeOpen = signal(false);
+
+  protected pickTime(d: OrderDraft, t: string): void {
+    d.time.set(t);
+    this.customTime.set('');
+    this.timeErr.set('');
+    this.timeOpen.set(false);
+  }
+
+  /** Giờ tự gõ: tự thêm dấu ":" và chỉ nhận giờ nằm trong khung nhận đặt của bài */
+  protected onCustomTime(d: OrderDraft, raw: string): void {
+    const digits = raw.replace(/\D/g, '').slice(0, 4);
+    const txt = digits.length > 2 ? digits.slice(0, 2) + ':' + digits.slice(2) : digits;
+    this.customTime.set(txt);
+    this.timeErr.set('');
+    const m = txt.match(/^(\d{2}):(\d{2})$/);
+    if (!m) return;
+    const mins = Number(m[1]) * 60 + Number(m[2]);
+    const [a, b] = d.tpl.time.win.map((x) => Number(x.slice(0, 2)) * 60 + Number(x.slice(3)));
+    if (Number(m[1]) > 23 || Number(m[2]) > 59) return void this.timeErr.set('Giờ không hợp lệ.');
+    if (mins < a || mins > b) return void this.timeErr.set('Chỉ nhận trong khung ' + d.tpl.time.win[0] + ' – ' + d.tpl.time.win[1] + '.');
+    d.time.set(txt);
+    this.timeOpen.set(false);
+  }
+
   protected openCheckout(): void {
+    const d = this.draft();
+    if (d && !d.date()) d.date.set(this.todayIso());
     this.checkout.set(true);
     this.tried.set(false);
     this.error.set(null);
@@ -363,6 +447,13 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
 
   back(): void {
     history.length > 1 ? history.back() : this.router.navigate(['/search']);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocClick(e: Event): void {
+    const t = e.target as HTMLElement;
+    if (!t.closest('.datebox')) this.calOpen.set(false);
+    if (!t.closest('.timebox')) this.timeOpen.set(false);
   }
 
   @HostListener('document:keydown', ['$event'])

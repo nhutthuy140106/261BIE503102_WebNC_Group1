@@ -225,16 +225,47 @@
             <div class="card">
               <small>{{ v.tpl.time.label }}</small>
               <div class="when">
-                <input class="input" type="date" [min]="today" [value]="d.date()" (input)="d.date.set($any($event.target).value)" />
-                <select class="input" [value]="d.time()" (change)="d.time.set($any($event.target).value)">
-                  @for (t of slots(); track t) { <option [value]="t" [selected]="t === d.time()">{{ t }}</option> }
-                </select>
-                @if (v.tpl.time.mode === 'datedur') {
-                  <select class="input" [value]="d.hours()" (change)="d.hours.set(+$any($event.target).value)">
-                    @for (h of [2, 3, 4, 5, 6]; track h) { @if (h >= v.tpl.time.dur![0] && h <= v.tpl.time.dur![1]) { <option [value]="h" [selected]="h === d.hours()">{{ h }} giờ</option> } }
-                  </select>
-                }
+                <div class="datebox">
+                  <button type="button" class="datebtn" [class.open]="calOpen()" (click)="toggleCal(d)">
+                    <svg class="i"><use href="#cal" /></svg>
+                    <span>{{ dateLabel(d.date()) }}</span>
+                  </button>
+                  @if (calOpen()) {
+                    <div class="cal" role="dialog" aria-label="Chọn ngày">
+                      <div class="calhead">
+                        <button type="button" (click)="moveMonth(-1)" [disabled]="!canPrev()" aria-label="Tháng trước">‹</button>
+                        <b>Tháng {{ calMonth().getMonth() + 1 }}, {{ calMonth().getFullYear() }}</b>
+                        <button type="button" (click)="moveMonth(1)" aria-label="Tháng sau">›</button>
+                      </div>
+                      <div class="calgrid dow"><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></div>
+                      <div class="calgrid">
+                        @for (c of calCells(); track $index) {
+                          @if (c) {
+                            <button type="button" [disabled]="c.past" [class.today]="c.today" [class.on]="d.date() === c.iso" (click)="pickDate(d, c.iso)">{{ c.day }}</button>
+                          } @else { <i></i> }
+                        }
+                      </div>
+                      <div class="calfoot"><button type="button" (click)="pickDate(d, todayIso())">Hôm nay</button></div>
+                    </div>
+                  }
+                </div>
+                <div class="timebox">
+                  <input type="text" class="timein" inputmode="numeric" maxlength="5" placeholder="hh:mm" [value]="customTime() || d.time()"
+                         (focus)="timeOpen.set(true)" (input)="onCustomTime(d, $any($event.target).value)" aria-label="Giờ" />
+                  <svg class="i clk"><use href="#clock" /></svg>
+                  @if (timeOpen()) {
+                    <ul class="tlist" role="listbox">
+                      @for (t of slots(); track t) { <li><button type="button" [class.on]="d.time() === t" (click)="pickTime(d, t)">{{ t }}</button></li> }
+                    </ul>
+                  }
+                </div>
               </div>
+              @if (timeErr()) { <small class="err">{{ timeErr() }}</small> }
+              @if (v.tpl.time.mode === 'datedur') {
+                <div class="hrs"><span>Thời lượng</span>
+                  @for (h of [2, 3, 4, 5, 6]; track h) { @if (h >= v.tpl.time.dur![0] && h <= v.tpl.time.dur![1]) { <button type="button" [class.on]="d.hours() === h" (click)="d.hours.set(h)">{{ h }} giờ</button> } }
+                </div>
+              }
               @if (v.tpl.time.repeat) {
                 <label class="switch"><span>Lặp lại hằng tuần</span><input type="checkbox" [checked]="d.repeat()" (change)="d.repeat.set($any($event.target).checked)" /></label>
               }
