@@ -1,12 +1,12 @@
 @if (term()) {
-  <p class="srhead">Kết quả tìm kiếm cho “<b>{{ term() }}</b>”</p>
+  <h1 class="srhead">Kết quả cho “{{ term() }}”<small>{{ matched().length }} bài</small></h1>
 } @else {
-  <p class="srhead">Khám phá quanh khu</p>
+  <h1 class="srhead">Khám phá quanh khu<small>{{ matched().length }} bài</small></h1>
 }
 
 <div class="layout">
   <aside class="filters">
-    <h2><svg class="i"><use href="#search" /></svg>Bộ lọc tìm kiếm</h2>
+    <h2>Bộ lọc</h2>
 
     <section>
       <h3>Theo danh mục</h3>
@@ -62,7 +62,6 @@
       <button type="button" [class.on]="sort() === 'new'" (click)="setSort('new')">Mới nhất</button>
       @if (!isJobs()) { <button type="button" [class.on]="sort() === 'sold'" (click)="setSort('sold')">Bán chạy</button> }
       <app-sort-menu [bar]="true" [options]="priceOptions()" [value]="sort()" [placeholder]="isJobs() ? 'Tiền công' : 'Giá'" (valueChange)="setSort($any($event))" />
-      <span class="count">{{ matched().length }} kết quả</span>
     </div>
 
     @if (loading()) {

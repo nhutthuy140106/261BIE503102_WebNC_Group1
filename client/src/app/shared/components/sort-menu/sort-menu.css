@@ -11,10 +11,11 @@
 .sortmenu button.on { font-weight: 600; }
 .sortmenu button.on::after { content: '✓'; }
 
-/* bản trong thanh sắp xếp của trang tìm kiếm */
-.sortbox.bar .sortbtn { height: 34px; min-width: 190px; justify-content: space-between; padding: 0 14px; border: 0; border-radius: 3px; font-size: 14px; background: #fff; }
-.sortbox.bar .sortbtn b { font-weight: 400; color: var(--ink); }
-.sortbox.bar.on .sortbtn { background: var(--accent); }
+/* bản trong thanh sắp xếp của trang tìm kiếm: nút tròn như các nút bên cạnh, đang chọn thì nền xanh đen */
+.sortbox.bar .sortbtn { height: 36px; min-width: 0; padding: 0 14px 0 16px; border: 0; border-radius: 999px; font-size: 14px; background: none; }
+.sortbox.bar .sortbtn b { font-weight: 400; color: var(--smoke); }
+.sortbox.bar .sortbtn:hover { background: #F4F5F7; }
+.sortbox.bar .sortbtn:hover b { color: var(--ink); }
+.sortbox.bar.on .sortbtn { background: var(--ink); }
 .sortbox.bar.on .sortbtn b, .sortbox.bar.on .sortbtn svg { color: #fff; }
-.sortbox.bar .sortmenu { left: 0; right: auto; min-width: 100%; border-radius: 4px; }
-.sortbox.bar .sortmenu button { border-radius: 3px; }
+.sortbox.bar .sortmenu { left: 0; right: auto; min-width: 190px; }

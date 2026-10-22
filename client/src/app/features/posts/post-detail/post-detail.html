@@ -31,7 +31,7 @@
       <img [src]="src" [alt]="p.title" (click)="openLightbox(i)" />
     }
     @if (v.images.length > 1) {
-      <button type="button" class="all" (click)="openLightbox(0)">Xem tất cả {{ v.images.length }} ảnh</button>
+      <button type="button" class="all" (click)="openLightbox(0)"><svg class="i"><use href="#grid" /></svg>{{ v.images.length }} ảnh</button>
     }
   </div>
 
@@ -82,12 +82,11 @@
 
     <!-- ===== Khung đặt — bước 1: chỉ chọn món ===== -->
     <aside class="order">
-      <div class="price">{{ priceLabel() }} @if (v.tpl.price.type !== 'quote' && v.tpl.price.unit) { <span>/ {{ v.tpl.price.unit }}</span> }</div>
+      <div class="price">{{ priceLabel() }} @if (v.tpl.price.type !== 'quote' && v.tpl.price.unit) { <span>/ {{ v.tpl.price.unit }}</span> }@if (v.tpl.xuOk) { <img class="xuico" src="assets/clean/antxu.png" alt="Dùng được Xu" title="Đơn này dùng được voucher AntXu" /> }</div>
       @if (priceSub()) { <div class="psub">{{ priceSub() }}</div> }
       @if (stockLine(); as s) {
-        <div class="avail" [class.off]="s.off"><i></i>{{ s.text }}<small>{{ s.sub }}</small></div>
+        <div class="avail" [class.off]="s.off"><i></i><b>{{ s.text }}</b>@if (s.sub) { <span>· {{ s.sub }}</span> }</div>
       }
-      @if (v.tpl.xuOk) { <div class="xuline"><img src="assets/clean/antxu.png" alt="" />Đơn này dùng được voucher AntXu</div> }
 
       @for (g of v.tpl.opts; track g.name) {
         <div class="rows">
