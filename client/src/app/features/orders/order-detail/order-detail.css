@@ -52,9 +52,9 @@
 .details { flex: 1; display: grid; grid-template-columns: 130px 1fr; gap: 8px 14px; margin: 0; font-size: 14px; }
 .details dt { color: var(--smoke); }
 .details dd { margin: 0; font-weight: 600; }
-.bill { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; font-size: 14px; color: var(--smoke); }
+.bill { display: grid; grid-template-columns: 1fr auto; gap: 8px 0; font-size: 14px; color: var(--smoke); }
 .bill b { color: var(--ink); text-align: right; }
-.bill .total { padding-top: 10px; border-top: 1px solid var(--border); color: var(--ink); font-weight: 700; }
+.bill .total { margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--border); color: var(--ink); font-weight: 700; }
 .request-note { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--soft); font-size: 13.5px; line-height: 1.55; color: var(--smoke); }
 
 .apanel { position: sticky; top: 92px; border: 1px solid var(--border); border-radius: 18px; padding: 22px; background: #fff; box-shadow: 0 18px 40px -22px rgba(34,48,74,.35); }
