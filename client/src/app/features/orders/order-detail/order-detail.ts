@@ -33,11 +33,12 @@ const P_REASONS = {
   other: ['Đặt nhầm món / số lượng', 'Muốn đổi món khác', 'Muốn đổi địa chỉ nhận hàng', 'Đặt trùng đơn', 'Thủ tục thanh toán rắc rối', 'Chờ lâu quá', 'Không cần nữa', OTHER_REASON],
 };
 const ISSUE_TYPES = {
-  food: ['Sai món', 'Thiếu món / thiếu phần', 'Món bị hỏng, có vấn đề vệ sinh', 'Khác'],
-  goods: ['Có lỗi không được nêu trong bài', 'Không đúng món / mẫu trong ảnh', 'Thiếu phụ kiện đã ghi', 'Khác'],
-  service: ['Làm chưa kỹ / còn sót', 'Không đúng việc đã thỏa thuận', 'Làm hư đồ của mình', 'Khác'],
+  food: ['Sai món', 'Thiếu món / thiếu phần', 'Món bị đổ, vỡ, móp méo', 'Món nguội / không còn tươi', 'Món bị hỏng, có vấn đề vệ sinh', 'Giao quá lâu so với hẹn', 'Khác'],
+  goods: ['Có lỗi không được nêu trong bài', 'Không đúng món / mẫu trong ảnh', 'Thiếu phụ kiện đã ghi', 'Hàng hư hỏng, không dùng được', 'Khác mô tả (màu, kích cỡ, tình trạng)', 'Khác'],
+  service: ['Làm chưa kỹ / còn sót', 'Không đúng việc đã thỏa thuận', 'Làm hư đồ của mình', 'Đến trễ / không đúng giờ hẹn', 'Thái độ chưa tốt', 'Tính thêm tiền ngoài thỏa thuận', 'Khác'],
 };
 const ISSUE_WANTS = { food: ['Làm lại món', 'Hoàn tiền'], goods: ['Trả hàng, nhận lại tiền'], service: ['Làm lại miễn phí', 'Giảm tiền'] };
+const ISSUE_PH = { food: 'Ví dụ: đặt trà sữa ít đá nhưng nhận được nhiều đá', goods: 'Ví dụ: loa không lên nguồn, khác với mô tả “còn mới 95%”', service: 'Ví dụ: còn sót vết bẩn ở góc bếp, chưa lau cửa kính' };
 const ISSUE_LABEL = { food: 'Báo vấn đề với món', goods: 'Yêu cầu trả hàng', service: 'Báo dịch vụ chưa đạt' };
 const DAY_SLOTS = ['8:00', '9:00', '10:00', '13:00', '14:00', '15:00', '17:00', '18:00', '19:00', '20:00'];
 const WEEKDAYS = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
@@ -161,6 +162,7 @@ export class OrderDetail implements OnInit {
   protected open(t: DlgType, init: { text?: string } = {}): void {
     this.pick.set('');
     this.picks.set([]);
+    this.tags.set([]);
     this.pick2.set('');
     this.text.set(init.text ?? '');
     this.photos.set(0);
@@ -352,6 +354,27 @@ export class OrderDetail implements OnInit {
     });
   }
 
+  protected readonly starLabel = ['', 'Tệ', 'Không hài lòng', 'Bình thường', 'Hài lòng', 'Tuyệt vời'];
+  protected readonly tags = signal<string[]>([]);
+
+  /** Gợi ý nhanh khi đánh giá (bấm chọn, giống Shopee): đơn mua khác với việc đã nhận */
+  protected rateTags(o: Order): string[] {
+    return o.type === 'received'
+      ? ['Hướng dẫn rõ ràng', 'Trả công đúng hẹn', 'Thân thiện', 'Đúng giờ']
+      : this.kind(o) === 'service'
+        ? ['Làm kỹ', 'Đúng giờ hẹn', 'Giá hợp lý', 'Nhiệt tình']
+        : ['Đúng mô tả', 'Giao nhanh', 'Đóng gói kỹ', 'Giá hợp lý'];
+  }
+
+  protected toggleTag(t: string): void {
+    this.tags.update((l) => (l.includes(t) ? l.filter((x) => x !== t) : [...l, t]));
+  }
+
+  /** Nhận xét gửi đi = các gợi ý đã chọn + lời viết thêm */
+  private reviewText(): string {
+    return [...this.tags(), this.text().trim()].filter(Boolean).join('. ');
+  }
+
   protected pReasons(o: Order): string[] {
     return this.kind(o) === 'service' ? P_REASONS.service : P_REASONS.other;
   }
@@ -362,6 +385,10 @@ export class OrderDetail implements OnInit {
 
   protected issueWants(o: Order): string[] {
     return ISSUE_WANTS[this.kind(o)];
+  }
+
+  protected issuePh(o: Order): string {
+    return ISSUE_PH[this.kind(o)];
   }
 
   protected issueLabel(o: Order): string {
@@ -452,7 +479,7 @@ export class OrderDetail implements OnInit {
     if (d === 'rate') {
       if (!this.stars()) return void this.bad.set('Chọn số sao.');
       const s = this.stars();
-      const t = this.text().trim();
+      const t = this.reviewText();
       this.reviewService.create({ targetType: 'order', targetId: o._id, rating: s, comment: t }).subscribe({ error: () => undefined });
       return this.move({ rated: { s, t } }, 'Bạn đánh giá ' + n + ' ' + s + ' sao', 'Cảm ơn bạn đã đánh giá');
     }
@@ -460,7 +487,7 @@ export class OrderDetail implements OnInit {
       const needPhoto = this.kind(o) !== 'service';
       if (!this.pick()) return void this.bad.set('Chọn vấn đề.');
       if (!this.pick2()) return void this.bad.set('Chọn điều bạn mong muốn.');
-      if (!this.text().trim()) return void this.bad.set('Mô tả ngắn giúp bên bán hiểu.');
+      if (this.pick() === 'Khác' && !this.text().trim()) return void this.bad.set('Mô tả ngắn giúp bên bán hiểu.');
       if (needPhoto && !this.photos()) return void this.bad.set('Cần ít nhất 1 ảnh để bên bán kiểm tra.');
       return this.move({ issue: { st: 'open', type: this.pick(), want: this.pick2(), text: this.text().trim(), photos: this.photos() } }, (this.kind(o) === 'goods' ? 'Bạn yêu cầu trả hàng: ' : 'Bạn báo vấn đề: ') + this.pick(), 'Đã gửi cho ' + n);
     }
@@ -601,7 +628,7 @@ export class OrderDetail implements OnInit {
     if (d === 'rate') {
       if (!this.stars()) return void this.bad.set('Chọn số sao.');
       const s = this.stars();
-      const t = this.text().trim();
+      const t = this.reviewText();
       this.reviewService.create({ targetType: 'offer', targetId: of._id, rating: s, comment: t }).subscribe({ error: () => undefined });
       return void this.offerService.patch(of._id, { rated: { s, t } }, 'Bạn đánh giá ' + nm + ' ' + s + ' sao').subscribe({
         next: (n) => {

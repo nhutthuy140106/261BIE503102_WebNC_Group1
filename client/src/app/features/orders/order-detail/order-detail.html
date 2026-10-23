@@ -265,12 +265,21 @@
             <div class="btns"><button type="button" class="ghost" (click)="close()">Đóng</button><button type="button" class="go" (click)="okR()">Nhắn {{ o.counterpartName }}</button></div>
           }
           @case ('rate') {
-            <h3>Đánh giá {{ o.counterpartName }}</h3><p class="p">{{ o.postTitle }}</p>
-            <div class="fld" [class.bad]="bad()"><label>Mức độ hài lòng</label>
-              <div class="rate">@for (i of [1, 2, 3, 4, 5]; track i) { <button type="button" [class.on]="stars() >= i" (click)="stars.set(i); bad.set('')" [attr.aria-label]="i + ' sao'">★</button> }</div>
-              <div class="err2">{{ bad() }}</div></div>
-            <div class="fld"><label>Nhận xét (không bắt buộc)</label><textarea maxlength="300" placeholder="Hướng dẫn rõ ràng, trả công đúng hẹn…" [value]="text()" (input)="text.set($any($event.target).value)"></textarea></div>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Để sau</button><button type="button" class="go" (click)="o.type === 'received' ? okR() : okP()">Gửi đánh giá</button></div>
+            <h3>Đánh giá</h3>
+            <div class="rvprod">
+              @if (o.image) { <img [src]="o.image" alt="" /> } @else { <span class="rvph">{{ o.counterpartName.charAt(0) }}</span> }
+              <span><b>{{ o.postTitle }}</b><small>{{ o.counterpartName }}</small></span>
+            </div>
+            <div class="rvstars" [class.bad]="bad()">
+              <span class="rate">@for (i of [1, 2, 3, 4, 5]; track i) { <button type="button" [class.on]="stars() >= i" (click)="stars.set(i); bad.set('')" [attr.aria-label]="i + ' sao'">★</button> }</span>
+              <em class="rlabel">{{ stars() ? starLabel[stars()] : 'Chạm vào sao để chấm' }}</em>
+              <div class="err2">{{ bad() }}</div>
+            </div>
+            <div class="rvtags">
+              @for (t of rateTags(o); track t) { <button type="button" [class.on]="tags().includes(t)" (click)="toggleTag(t)">{{ t }}</button> }
+            </div>
+            <textarea class="rvtext" maxlength="300" placeholder="Hãy chia sẻ nhận xét của bạn nhé!" [value]="text()" (input)="text.set($any($event.target).value)"></textarea>
+            <div class="btns one"><button type="button" class="go" (click)="o.type === 'received' ? okR() : okP()">Gửi đánh giá</button></div>
           }
           @case ('pcancel') {
             <h3>{{ dlgNow() ? 'Hủy đơn này?' : 'Gửi yêu cầu hủy?' }}</h3>
@@ -294,9 +303,9 @@
               <div class="reasons">@for (t of issueTypes(o); track t) { <button type="button" [class.on]="pick() === t" (click)="pick.set(t); bad.set('')">{{ t }}</button> }</div></div>
             @if (issueWants(o).length > 1) {
               <div class="fld" [class.bad]="bad() && !pick2()"><label>Bạn mong muốn</label>
-                <div class="reasons two">@for (w of issueWants(o); track w) { <button type="button" [class.on]="pick2() === w" (click)="pick2.set(w); bad.set('')">{{ w }}</button> }</div></div>
+                <div class="reasons">@for (w of issueWants(o); track w) { <button type="button" [class.on]="pick2() === w" (click)="pick2.set(w); bad.set('')">{{ w }}</button> }</div></div>
             }
-            <div class="fld"><label>Mô tả</label><textarea maxlength="300" placeholder="Mô tả ngắn chuyện gì xảy ra" [value]="text()" (input)="text.set($any($event.target).value); bad.set('')"></textarea></div>
+            <div class="fld"><label>Mô tả {{ pick() === 'Khác' ? '' : '(không bắt buộc)' }}</label><textarea maxlength="300" [placeholder]="issuePh(o)" [value]="text()" (input)="text.set($any($event.target).value); bad.set('')"></textarea></div>
             <div class="fld"><label>Ảnh {{ o.kind === 'service' ? '(nếu có)' : '(bắt buộc)' }}</label>
               <label class="upl"><input type="file" accept="image/*" multiple hidden (change)="sendPhotos($any($event.target).files.length)" />{{ photos() ? photos() + ' ảnh đã chọn' : 'Chọn ảnh (tối đa 4)' }}</label></div>
             @if (bad()) { <div class="err2 show">{{ bad() }}</div> }
