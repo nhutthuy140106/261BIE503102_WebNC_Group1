@@ -26,7 +26,7 @@
   <div class="stats">
     <div>
       @if (rating(); as r) {
-        <strong>★ {{ r.avg }}</strong><span>{{ r.count }} đánh giá</span>
+        <strong><span class="star">★</span> {{ r.avg }}</strong><span>{{ r.count }} đánh giá</span>
       } @else {
         <strong>—</strong><span>Chưa có đánh giá</span>
       }
@@ -47,6 +47,7 @@
         <article class="rev">
           <div class="rwho"><img [src]="img(r[0], 80, 80)" alt="" /><span><b>{{ r[1] }}</b><small>{{ r[2] }} · {{ r[3] }}</small></span></div>
           <div class="rstars">@for (s of stars(r[4]); track $index) { <span [class.off]="!s">★</span> }</div>
+          @if (bought($index); as b) { <div class="bought">{{ b }}</div> }
           <p>{{ r[5] }}</p>
           @if (r[7]) { <div class="reply"><b>Phản hồi của {{ name() }}</b>{{ r[7] }}</div> }
         </article>

@@ -55,6 +55,13 @@ export class Shop implements OnInit {
     const t = (this.selling()[0]?.template ?? (this.jobs().length ? 'trip' : 'food')) as TemplateKey;
     return REVIEW_SAMPLES[t] ?? [];
   });
+  /** Dòng "Đã mua: …" dưới mỗi đánh giá (như Shopee): món/dịch vụ khách đã dùng, lấy từ bài đang bán của gian hàng (mock) */
+  protected bought(i: number): string {
+    const l = this.selling();
+    const p = l[i % (l.length || 1)];
+    if (!p) return '';
+    return (p.kind === 'food' ? 'Đã đặt: ' : p.kind === 'service' ? 'Đã dùng dịch vụ: ' : 'Đã mua: ') + p.title;
+  }
   protected readonly done = computed(() => this.posts().reduce((s, p) => s + (p.reviewCount ?? 0), 0));
   protected readonly stars = (n: number) => [1, 2, 3, 4, 5].map((i) => (i <= n ? 1 : 0));
 
