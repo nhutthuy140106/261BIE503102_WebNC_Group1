@@ -64,6 +64,17 @@ export class Header {
   /** Menu "⋯" của một thông báo (id thông báo đang mở menu) */
   protected readonly nMenu = signal<string | null>(null);
 
+  /** Menu mở lên trên khi nút ⋯ nằm sát đáy danh sách (khỏi bị cắt bởi vùng cuộn và nút Xem tất cả) */
+  protected readonly nUp = signal(false);
+
+  protected toggleNMenu(n: AppNotification, e: Event): void {
+    if (this.nMenu() === n._id) return void this.nMenu.set(null);
+    const btn = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const box = (e.currentTarget as HTMLElement).closest('.nbody')?.getBoundingClientRect();
+    this.nUp.set(!!box && box.bottom - btn.bottom < 70);
+    this.nMenu.set(n._id);
+  }
+
   protected toggleRead(n: AppNotification): void {
     this.nMenu.set(null);
     (n.read ? this.notifications.markUnread(n._id) : this.notifications.markRead([n._id])).subscribe({ error: () => undefined });

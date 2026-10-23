@@ -71,9 +71,9 @@
                         @if (!n.read) { <i class="ndot"></i> }
                       </button>
                       <span class="nmore" [class.open]="nMenu() === n._id">
-                        <button type="button" class="more" aria-label="Tùy chọn" (click)="nMenu.set(nMenu() === n._id ? null : n._id)"><svg class="i"><use href="#dots" /></svg></button>
+                        <button type="button" class="more" aria-label="Tùy chọn" (click)="toggleNMenu(n, $event)"><svg class="i"><use href="#dots" /></svg></button>
                         @if (nMenu() === n._id) {
-                          <span class="nmenu"><button type="button" (click)="toggleRead(n)"><svg class="i"><use [attr.href]="n.read ? '#mail-unread' : '#mail'" /></svg><span>{{ n.read ? 'Đánh dấu là chưa đọc' : 'Đánh dấu là đã đọc' }}</span></button></span>
+                          <span class="nmenu" [class.up]="nUp()"><button type="button" (click)="toggleRead(n)"><svg class="i"><use [attr.href]="n.read ? '#mail-unread' : '#mail'" /></svg><span>{{ n.read ? 'Đánh dấu là chưa đọc' : 'Đánh dấu là đã đọc' }}</span></button></span>
                         }
                       </span>
                     </div>
