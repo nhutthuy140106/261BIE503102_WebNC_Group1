@@ -108,13 +108,16 @@
                 <span><b>{{ auth.currentUser()?.fullName }}</b><small>{{ area.current() }}</small></span>
               </a>
               <div class="usep"></div>
-              <a routerLink="/profile" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#users" /></svg>Tài khoản của tôi</a>
+              <a routerLink="/profile" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#p-user" /></svg>Tài khoản của tôi</a>
+              <a routerLink="/profile" [queryParams]="{ tab: 'edit' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#p-pencil" /></svg>Chỉnh sửa hồ sơ</a>
+              <a routerLink="/profile" [queryParams]="{ tab: 'password' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#p-lock" /></svg>Đổi mật khẩu</a>
               <button type="button" class="uitem" (click)="userOpen.set(false); openSaved()"><svg class="i"><use href="#heart" /></svg>Bài đã lưu</button>
               <a routerLink="/profile" [queryParams]="{ tab: 'addresses' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#home" /></svg>Địa chỉ của tôi</a>
-              <a routerLink="/xu" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#coin" /></svg>AntXu &amp; voucher<em>{{ xu.balance() }} Xu</em></a>
+              <a routerLink="/xu" class="uitem" (click)="userOpen.set(false)"><img class="uxu" src="assets/clean/antxu.png" alt="" />AntXu &amp; voucher<em>{{ xu.balance() }} Xu</em></a>
               <a routerLink="/orders" [queryParams]="{ f: 'history' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#receipt" /></svg>Lịch sử đơn hàng</a>
               <div class="usep"></div>
-              <button type="button" class="uitem" (click)="logout()"><svg class="i"><use href="#logout" /></svg>Đăng xuất</button>
+              <a routerLink="/help" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#p-help" /></svg>Trợ giúp &amp; hỗ trợ</a>
+              <button type="button" class="uitem" (click)="logout()"><svg class="i"><use href="#p-signout" /></svg>Đăng xuất</button>
             </div>
           }
         </span>

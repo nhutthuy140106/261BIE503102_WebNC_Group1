@@ -1,0 +1,21 @@
+<h1>Trợ giúp & hỗ trợ</h1>
+<p class="lead">Những câu hỏi hay gặp khi mua bán, đặt dịch vụ và nhận việc trong khu.</p>
+
+<div class="cta">
+  <a class="card" routerLink="/orders"><svg class="i"><use href="#receipt" /></svg><span><b>Gặp vấn đề với một đơn?</b><small>Mở đơn rồi chọn Trả hàng/Hoàn tiền hoặc Báo cáo vấn đề</small></span></a>
+  <a class="card" routerLink="/messenger" [queryParams]="{ to: 'Hỗ trợ AntGo' }"><svg class="i"><use href="#chat" /></svg><span><b>Nhắn đội hỗ trợ</b><small>Hỏi trực tiếp, chúng tôi trả lời qua Messenger</small></span></a>
+</div>
+
+@for (g of faqs; track g.group) {
+  <section>
+    <h2>{{ g.group }}</h2>
+    @for (f of g.items; track f.q) {
+      <details>
+        <summary>{{ f.q }}<svg class="i chev"><use href="#chev" /></svg></summary>
+        <p>{{ f.a }}</p>
+      </details>
+    }
+  </section>
+}
+
+<p class="foot">Không tìm thấy câu trả lời? <a routerLink="/legal">Xem điều khoản & chính sách</a></p>

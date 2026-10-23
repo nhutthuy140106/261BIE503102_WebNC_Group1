@@ -64,3 +64,16 @@
   .side nav button { white-space: nowrap; }
   .tiles { grid-template-columns: 1fr; }
 }
+
+/* chỉnh sửa hồ sơ + đổi mật khẩu */
+.pform { max-width: 460px; margin-top: 18px; }
+.pform .field { margin-bottom: 18px; }
+.pform .tx { height: 46px; padding: 0 14px; border: 1px solid var(--border); border-radius: 12px; font: inherit; width: 100%; outline: none; }
+.pform .tx:focus { border-color: var(--ink); }
+.pform .tx:disabled { background: #F6F7F9; color: var(--smoke); }
+.pform .hint { color: var(--smoke); font-size: 12.5px; }
+.avrow { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+.photo-add.small { width: auto; height: 42px; padding: 0 16px; flex-direction: row !important; gap: 8px; }
+.photo-add.small svg { width: 18px; height: 18px; }
+.pform .go { height: 48px; padding: 0 28px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 700; font-size: 15px; }
+.pform .go:disabled { background: #D9D3CF; }

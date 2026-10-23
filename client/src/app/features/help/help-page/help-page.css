@@ -1,0 +1,21 @@
+:host { display: block; max-width: 760px; margin: 0 auto; padding-bottom: 48px; }
+h1 { font-size: 28px; letter-spacing: -.02em; margin: 8px 0 6px; }
+.lead { color: var(--smoke); margin: 0 0 22px; }
+.cta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+.card { display: flex; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; }
+.card:hover { background: #F7F8FA; }
+.card > svg { flex: none; width: 28px; height: 28px; color: var(--ink); }
+.card span { display: grid; gap: 2px; }
+.card small { color: var(--smoke); font-size: 13px; line-height: 1.4; }
+section { margin-top: 28px; }
+h2 { font-size: 18px; margin: 0 0 6px; }
+details { border-bottom: 1px solid var(--border); }
+details:first-of-type { border-top: 1px solid var(--border); }
+summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 2px; cursor: pointer; font-weight: 600; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary .chev { flex: none; width: 16px; height: 16px; transform: rotate(90deg); transition: transform .15s; color: var(--smoke); }
+details[open] summary .chev { transform: rotate(-90deg); }
+details p { margin: 0 0 16px; padding: 0 2px; line-height: 1.65; color: var(--smoke); }
+.foot { margin-top: 34px; color: var(--smoke); font-size: 14px; }
+.foot a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) { .cta { grid-template-columns: 1fr; } }

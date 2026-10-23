@@ -75,6 +75,24 @@ export class AuthService {
     return this.http.post<void>(`${API_BASE}/auth/logout`, {}, { withCredentials: true });
   }
 
+  /** Cập nhật hồ sơ (tên, ảnh). Mock lưu trong phiên; API thật chờ máy chủ có điểm cuối. */
+  updateProfile(body: { fullName: string; avatar?: string }): Observable<User> {
+    const cur = this.currentUser();
+    if (!cur) return throwError(() => new AppError('Bạn cần đăng nhập.', 401, 'UNAUTHORIZED'));
+    if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
+    const user: User = { ...cur, ...body };
+    sessionStorage.setItem(MOCK_KEY, JSON.stringify(user));
+    this.currentUser.set(user);
+    return of(user);
+  }
+
+  /** Đổi mật khẩu. Mock luôn thành công; API thật chờ máy chủ có điểm cuối. */
+  changePassword(current: string, next: string): Observable<void> {
+    if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
+    if (!current || next.length < 8) return throwError(() => new AppError('Mật khẩu chưa hợp lệ.', 422, 'VALIDATION_ERROR'));
+    return of(void 0);
+  }
+
   /** Hỏi server phiên còn hiệu lực không (GET /api/auth/profile: 200 hay 401). */
   checkSession(): Observable<boolean> {
     if (useMock('auth')) {

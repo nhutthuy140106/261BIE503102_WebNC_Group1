@@ -16,6 +16,7 @@ const routes: Routes = [
   { path: 'search', loadChildren: () => import('./features/search/search-module').then((m) => m.SearchModule) },
   { path: 'posts', loadChildren: () => import('./features/posts/posts-module').then((m) => m.PostsModule) },
   { path: 'shop', loadChildren: () => import('./features/shop/shop-module').then((m) => m.ShopModule) },
+  { path: 'help', loadChildren: () => import('./features/help/help-module').then((m) => m.HelpModule) },
   { path: 'auth', loadChildren: () => import('./features/auth/auth-module').then((m) => m.AuthModule) },
   {
     path: 'orders',

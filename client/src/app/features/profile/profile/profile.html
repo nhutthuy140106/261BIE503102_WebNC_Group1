@@ -45,6 +45,48 @@
             <li><a routerLink="/messenger">Tin nhắn</a></li>
           </ul>
         }
+        @case ('edit') {
+          <h1>Chỉnh sửa hồ sơ</h1>
+          <form class="pform" [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+            <div class="avrow">
+              <app-avatar [src]="newAvatar() ?? u.avatar" [name]="u.fullName" [size]="96" />
+              <label class="photo-add small"><input type="file" accept="image/*" hidden (change)="pickAvatar($any($event.target))" /><svg class="i"><use href="#photo" /></svg>Đổi ảnh đại diện</label>
+            </div>
+            <div class="field">
+              <label for="fullName">Họ và tên</label>
+              <input id="fullName" class="tx" formControlName="fullName" maxlength="40" />
+              @if (profileForm.controls.fullName.invalid && profileForm.controls.fullName.touched) { <small class="error">Tên dài 2–40 ký tự.</small> }
+            </div>
+            <div class="field">
+              <label for="phone">Số điện thoại</label>
+              <input id="phone" class="tx" [value]="u.username" disabled />
+              <small class="hint">Số điện thoại là tên đăng nhập nên không đổi được ở đây.</small>
+            </div>
+            <button type="submit" class="go" [disabled]="saving()">Lưu thay đổi</button>
+          </form>
+        }
+        @case ('password') {
+          <h1>Đổi mật khẩu</h1>
+          <form class="pform" [formGroup]="passForm" (ngSubmit)="savePassword()" novalidate>
+            <div class="field">
+              <label for="pcur">Mật khẩu hiện tại</label>
+              <app-password-input inputId="pcur" autocomplete="current-password" formControlName="current" [invalid]="passTried() && passForm.controls.current.invalid" />
+              @if (passTried() && passForm.controls.current.invalid) { <small class="error">Nhập mật khẩu hiện tại.</small> }
+            </div>
+            <div class="field">
+              <label for="pnew">Mật khẩu mới</label>
+              <app-password-input inputId="pnew" autocomplete="new-password" formControlName="next" [invalid]="passTried() && passForm.controls.next.invalid" />
+              @if (passTried() && passForm.controls.next.invalid) { <small class="error">Mật khẩu mới tối thiểu 8 ký tự.</small> }
+              @else if (passTried() && passForm.controls.next.value === passForm.controls.current.value) { <small class="error">Mật khẩu mới phải khác mật khẩu hiện tại.</small> }
+            </div>
+            <div class="field">
+              <label for="pagain">Nhập lại mật khẩu mới</label>
+              <app-password-input inputId="pagain" autocomplete="new-password" formControlName="again" [invalid]="passTried() && (passForm.controls.again.invalid || passMismatch())" />
+              @if (passTried() && passMismatch()) { <small class="error">Hai mật khẩu chưa giống nhau.</small> }
+            </div>
+            <button type="submit" class="go" [disabled]="saving()">Đổi mật khẩu</button>
+          </form>
+        }
         @case ('saved') { <app-saved-list id="saved" /> }
         @case ('addresses') { <app-address-book id="addresses" /> }
         @case ('xu') {
