@@ -50,10 +50,10 @@
   .oh .shop { display: none; }
 }
 
-/* Thanh tab nổi bật: thanh trắng liền khối với danh sách, chữ lớn, tab đang chọn có nền cam nhạt + gạch chân dày */
-.tabs { display: flex; margin-top: 18px; border: 1px solid #DADDE3; border-radius: 12px; background: #fff; overflow-x: auto; box-shadow: 0 2px 8px -4px rgba(34, 48, 74, .2); }
-.tabs button { position: relative; flex: 1 0 auto; padding: 18px 20px; white-space: nowrap; font-size: 16px; font-weight: 600; color: var(--smoke); background: none; border-bottom: 3px solid transparent; transition: background .15s, color .15s; }
-.tabs button:hover { background: #FAFAFB; color: var(--ink); }
-.tabs button.on { color: var(--accent); background: #FFF6F0; border-bottom-color: var(--accent); }
+/* Thanh tab dạng viên (giữ như bản đã thấy đẹp): nhóm viên nền xám nhạt, tab đang chọn là viên trắng nổi */
+.tabs { display: inline-flex; margin-top: 18px; padding: 4px; gap: 2px; border: 0; border-radius: 999px; background: #F1F2F5; overflow-x: auto; max-width: 100%; box-shadow: none; }
+.tabs button { flex: none; padding: 10px 22px; border-radius: 999px; border-bottom: 0; font-size: 15px; font-weight: 600; color: var(--smoke); background: none; transition: background .15s, color .15s; }
+.tabs button:hover { background: transparent; color: var(--ink); }
+.tabs button.on { background: #fff; color: var(--ink); border-bottom: 0; box-shadow: 0 1px 3px rgba(34, 48, 74, .16); }
 .tabs em { margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: #fff; font-style: normal; font-size: 12px; font-weight: 700; }
-.list { margin-top: 16px; }
+.list { margin-top: 18px; }
