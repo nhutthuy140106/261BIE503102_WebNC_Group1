@@ -4,6 +4,8 @@ import { Observable, map, of, tap } from 'rxjs';
 import { DATASET_BASE } from '../config/api.config';
 
 const PREFIX = 'antgo_mock_';
+/** Đổi chuỗi này mỗi khi sửa cấu trúc dữ liệu mẫu: dữ liệu cũ lưu trong trình duyệt tự bị xóa để nạp bản mới */
+const DATA_VERSION = '2026-10-23-b';
 
 /**
  * Kho dữ liệu giả cho chế độ USE_MOCK: lần đầu đọc public/datasets/<name>.json,
@@ -14,6 +16,17 @@ const PREFIX = 'antgo_mock_';
 export class MockDb {
   private readonly http = inject(HttpClient);
   private readonly mem = new Map<string, unknown[]>();
+
+  constructor() {
+    try {
+      if (localStorage.getItem('antgo_mock_ver') !== DATA_VERSION) {
+        this.reset();
+        localStorage.setItem('antgo_mock_ver', DATA_VERSION);
+      }
+    } catch {
+      /* bỏ qua */
+    }
+  }
 
   list<T>(name: string): Observable<T[]> {
     const cached = this.mem.get(name) ?? this.readStorage<T>(name);
