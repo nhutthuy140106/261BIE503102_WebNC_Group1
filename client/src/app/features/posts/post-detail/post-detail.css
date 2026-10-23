@@ -336,3 +336,49 @@
 .stepper.mini .s.cur { color: var(--ink); font-weight: 700; }
 .stepper.mini .s.cur .dot { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .stepper.mini small { font-weight: 400; color: var(--smoke); font-size: 11.5px; }
+
+/* ===== Hộp Xác nhận đơn hàng — bản gộp: các mục phẳng, mỗi dòng có icon + nhãn + giá trị, ngăn bằng dải xám như Shopee ===== */
+.modal .mbody.ck { padding: 0; gap: 0; background: #F3F4F6; }
+.ck .cs { background: #fff; margin-bottom: 8px; padding: 4px 22px; }
+.ck .cs:last-child { margin-bottom: 0; }
+.crow { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 0; border-top: 1px solid #ECEEF2; background: none; text-align: left; font: inherit; color: inherit; }
+.crow:first-child { border-top: 0; }
+.crow.col { align-items: flex-start; }
+.crow .ic { width: 22px; height: 22px; flex: none; color: var(--ink); margin-top: 1px; }
+.crow .ic.pin { color: var(--accent); }
+.crow .ct { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.crow .ct b { font-size: 14.5px; font-weight: 600; }
+.crow .ct b i { font-style: normal; font-weight: 400; color: var(--smoke); margin-left: 6px; }
+.crow .ct small { color: var(--smoke); font-size: 12.5px; font-weight: 400; }
+.crow .ct small.okt { color: #2E7D4F; font-weight: 600; }
+.crow .ct > span { color: #3C4660; font-size: 14px; }
+.crow .cv { width: 14px; height: 14px; color: var(--fog); transform: rotate(-90deg); flex: none; }
+.crow.addr { cursor: pointer; }
+.crow.sw { cursor: pointer; }
+.crow input.tg { appearance: none; -webkit-appearance: none; flex: none; position: relative; width: 44px; height: 26px; margin: 0; border-radius: 999px; background: #D5D8DE; cursor: pointer; transition: background .2s; }
+.crow input.tg::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .2s; }
+.crow input.tg:checked { background: var(--accent); }
+.crow input.tg:checked::after { transform: translateX(18px); }
+.noteinp { width: 100%; padding: 6px 0; border: 0; border-bottom: 1px solid #E3E5EA; background: none; font: inherit; font-size: 14px; color: var(--ink); }
+.noteinp:focus { outline: none; border-bottom-color: var(--ink); }
+.crow .ct .seg2, .crow .ct .seg, .crow .ct .when { display: grid; margin-top: 6px; }
+.crow .ct .seg2, .crow .ct .seg { grid-template-columns: 1fr 1fr; gap: 8px; }
+.crow .ct .when { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 8px; }
+.crow .ct .hrs { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+
+.citem { display: flex; gap: 14px; align-items: flex-start; padding: 14px 0; }
+.citem img { width: 62px; height: 62px; border-radius: 10px; object-fit: cover; flex: none; }
+.citem .ct { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.citem .ct b { font-size: 14.5px; line-height: 1.35; }
+.citem .ct small { color: var(--smoke); font-size: 12.5px; }
+.citem strong { font-size: 14.5px; white-space: nowrap; }
+
+.cs.pay { padding: 16px 22px 18px; }
+.cs.pay h4 { margin: 0 0 10px; font-size: 15px; }
+.cs.pay dl { display: grid; gap: 9px; margin: 0; font-size: 14px; color: var(--smoke); }
+.cs.pay dl div { display: flex; justify-content: space-between; gap: 16px; }
+.cs.pay dd { margin: 0; color: var(--ink); }
+.cs.pay .disc dd { color: #2E7D4F; }
+.cs.pay .tot { margin-top: 4px; padding-top: 12px; border-top: 1px solid #ECEEF2; color: var(--ink); font-weight: 700; }
+.cs.pay .tot dd { color: var(--accent); font-size: 17px; font-weight: 700; }
+.cs.pay .warn, .cs.pay .notice { margin: 12px 0 0; }

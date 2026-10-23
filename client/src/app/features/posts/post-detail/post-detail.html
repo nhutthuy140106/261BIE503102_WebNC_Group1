@@ -205,130 +205,156 @@
           </div>
         } @else {
           <header><h2>Xác nhận đơn hàng</h2><button type="button" class="x" (click)="closeCheckout()" aria-label="Đóng">✕</button></header>
-          <div class="mbody">
-            @if (v.tpl.place.mode !== 'seller') {
-              @if (d.needsAddress()) {
-                <button type="button" class="card addr" (click)="addrOpen.set(true)">
-                  <small>Địa chỉ nhận hàng</small>
-                  @if (address(); as a) { <b>{{ a.name }} · {{ a.phone }}</b><span>{{ addressText(a) }}</span> } @else { <span class="warnt">Chọn địa chỉ nhận hàng</span> }
-                </button>
-              } @else {
-                <div class="card"><small>Địa chỉ lấy hàng</small><b>{{ p.sellerName }}</b><span>{{ p.block }}@if (p.area) { · {{ p.area }} }</span></div>
-              }
-            } @else {
-              <div class="card"><small>Nơi nhận hàng</small><b>{{ v.tpl.place.where }}</b></div>
-            }
-
-            <div class="card">
-              <small>{{ v.tpl.title }}</small>
-              <b>{{ v.tpl.qty ? d.qty() + ' × ' : '' }}{{ priceLabel() }}</b>
-              @for (l of d.lines(); track l) { <span>{{ l }}</span> }
-            </div>
-
-            @if (v.tpl.place.mode === 'choice') {
-              <div class="card">
-                <small>{{ v.tpl.place.label }}</small>
-                <div class="seg2">
-                  @for (c of v.tpl.place.choices!; track c[0]; let i = $index) {
-                    <button type="button" [class.on]="d.place() === i" (click)="d.place.set(i)"><b>{{ c[0] }}</b>@if (c[1]) { <span>+{{ fmt(c[1]) }}</span> } @else { <span>Miễn phí</span> }</button>
-                  }
-                </div>
-              </div>
-            }
-
-            <div class="card">
-              <small>{{ v.tpl.time.label }}</small>
-              <div class="when">
-                <div class="datebox">
-                  <button type="button" class="datebtn" [class.open]="calOpen()" (click)="toggleCal(d)">
-                    <svg class="i"><use href="#cal" /></svg>
-                    <span>{{ dateLabel(d.date()) }}</span>
+          <div class="mbody ck">
+            <!-- 1. Địa chỉ -->
+            <section class="cs">
+              @if (v.tpl.place.mode !== 'seller') {
+                @if (d.needsAddress()) {
+                  <button type="button" class="crow addr" (click)="addrOpen.set(true)">
+                    <svg class="i ic pin"><use href="#pin" /></svg>
+                    <span class="ct"><small>Địa chỉ nhận hàng</small>
+                      @if (address(); as a) { <b>{{ a.name }} <i>{{ a.phone }}</i></b><span>{{ addressText(a) }}</span> } @else { <span class="warnt">Chọn địa chỉ nhận hàng</span> }
+                    </span>
+                    <svg class="i cv"><use href="#chev" /></svg>
                   </button>
-                  @if (calOpen()) {
-                    <div class="cal" role="dialog" aria-label="Chọn ngày">
-                      <div class="calhead">
-                        <button type="button" (click)="moveMonth(-1)" [disabled]="!canPrev()" aria-label="Tháng trước">‹</button>
-                        <b>Tháng {{ calMonth().getMonth() + 1 }}, {{ calMonth().getFullYear() }}</b>
-                        <button type="button" (click)="moveMonth(1)" aria-label="Tháng sau">›</button>
-                      </div>
-                      <div class="calgrid dow"><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></div>
-                      <div class="calgrid">
-                        @for (c of calCells(); track $index) {
-                          @if (c) {
-                            <button type="button" [disabled]="c.past" [class.today]="c.today" [class.on]="d.date() === c.iso" (click)="pickDate(d, c.iso)">{{ c.day }}</button>
-                          } @else { <i></i> }
-                        }
-                      </div>
-                      <div class="calfoot"><button type="button" (click)="pickDate(d, todayIso())">Hôm nay</button></div>
-                    </div>
-                  }
-                </div>
-                <div class="timebox">
-                  <input type="text" class="timein" inputmode="numeric" maxlength="5" placeholder="hh:mm" [value]="customTime() || d.time()"
-                         (focus)="timeOpen.set(true)" (click)="timeOpen.set(true)" (input)="onCustomTime(d, $any($event.target).value)" aria-label="Giờ" />
-                  <svg class="i clk"><use href="#clk" /></svg>
-                  @if (timeOpen()) {
-                    <div class="tlist" role="listbox">
-                      <p>Chọn giờ hoặc tự gõ</p>
-                      <div class="tgrid">@for (t of slots(); track t) { <button type="button" [class.on]="d.time() === t" (click)="pickTime(d, t)">{{ t }}</button> }</div>
-                    </div>
-                  }
-                </div>
-              </div>
-              @if (timeErr()) { <small class="err">{{ timeErr() }}</small> }
-              @if (v.tpl.time.mode === 'datedur') {
-                <div class="hrs"><span>Thời lượng</span>
-                  @for (h of [2, 3, 4, 5, 6]; track h) { @if (h >= v.tpl.time.dur![0] && h <= v.tpl.time.dur![1]) { <button type="button" [class.on]="d.hours() === h" (click)="d.hours.set(h)">{{ h }} giờ</button> } }
-                </div>
+                } @else {
+                  <div class="crow"><svg class="i ic pin"><use href="#pin" /></svg><span class="ct"><small>Địa chỉ lấy hàng</small><b>{{ p.sellerName }}</b><span>{{ p.block }}@if (p.area) { · {{ p.area }} }</span></span></div>
+                }
+              } @else {
+                <div class="crow"><svg class="i ic pin"><use href="#pin" /></svg><span class="ct"><small>Nơi nhận hàng</small><b>{{ v.tpl.place.where }}</b></span></div>
               }
-              @if (v.tpl.time.repeat) {
-                <label class="switch"><span>Lặp lại hằng tuần</span><input type="checkbox" [checked]="d.repeat()" (change)="d.repeat.set($any($event.target).checked)" /></label>
-              }
-            </div>
+            </section>
 
-            @if (v.tpl.key === 'food') {
-              <div class="card">
-                <label class="switch"><span>Lấy dụng cụ ăn uống</span><input type="checkbox" [checked]="d.utensils()" (change)="d.utensils.set($any($event.target).checked)" /></label>
-              </div>
-            }
-            @if (v.tpl.key === 'drink') {
-              <div class="card">
-                <label class="switch"><span>Lấy ống hút</span><input type="checkbox" [checked]="d.utensils()" (change)="d.utensils.set($any($event.target).checked)" /></label>
-              </div>
-            }
-
-            <div class="card">
-              <small>Ghi chú</small>
-              <input class="input" [placeholder]="v.tpl.notePh" maxlength="200" [value]="d.note()" (input)="d.note.set($any($event.target).value)" />
-            </div>
-
-            @if (v.tpl.xuOk) {
-              <button type="button" class="vrow" (click)="voucherOpen.set(true)">
-                <img src="assets/clean/antxu.png" alt="" />
-                <span class="vt"><b>Voucher AntGo</b>
-                  @if (d.voucher(); as vv) { <small class="ok">{{ vv.title }} · giảm {{ fmt(d.discount()) }}</small> }
-                  @else { <small>{{ usable().length ? usable().length + ' voucher dùng được' : 'Chưa có voucher phù hợp' }}</small> }
+            <!-- 2. Món -->
+            <section class="cs">
+              <div class="citem">
+                <img [src]="v.images[0]" alt="" />
+                <span class="ct">
+                  <b>{{ v.tpl.qty ? d.qty() + '× ' : '' }}{{ v.tpl.title }}</b>
+                  @if (d.lines().length) { <small>{{ d.lines().join(' · ') }}</small> }
+                  <small class="by">{{ p.sellerName }} · {{ p.block }}</small>
                 </span>
-                <i aria-hidden="true">›</i>
-              </button>
-            }
-
-            <div class="card">
-              <small>Phương thức thanh toán</small>
-              <div class="seg">
-                <button type="button" [class.on]="d.pay() === 'cash'" (click)="d.pay.set('cash')">Tiền mặt</button>
-                <button type="button" [class.on]="d.pay() === 'transfer'" (click)="d.pay.set('transfer')">Chuyển khoản</button>
+                <strong>{{ fmt(d.subtotal()) }}</strong>
               </div>
-            </div>
+            </section>
 
-            <div class="card sum">
-              <div><span>Thành tiền</span><span>{{ fmt(d.subtotal()) }}</span></div>
-              @if (d.placeFee()) { <div><span>Phí vận chuyển</span><span>{{ fmt(d.placeFee()) }}</span></div> }
-              @if (d.discount()) { <div class="disc"><span>Voucher</span><span>−{{ fmt(d.discount()) }}</span></div> }
-              @if (v.tpl.price.type === 'quote') { <div><span>Tiền sửa</span><span>báo giá sau khi kiểm tra</span></div> }
-            </div>
-            @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
-            @if (tried() && d.missing(true); as miss) { <p class="warn">{{ miss }}</p> }
+            <!-- 3. Cách nhận, thời gian, tùy chọn -->
+            <section class="cs">
+              @if (v.tpl.place.mode === 'choice') {
+                <div class="crow col">
+                  <svg class="i ic"><use href="#home" /></svg>
+                  <span class="ct"><b>{{ v.tpl.place.label }}</b>
+                    <span class="seg2">
+                      @for (c of v.tpl.place.choices!; track c[0]; let i = $index) {
+                        <button type="button" [class.on]="d.place() === i" (click)="d.place.set(i)"><b>{{ c[0] }}</b>@if (c[1]) { <span>+{{ fmt(c[1]) }}</span> } @else { <span>Miễn phí</span> }</button>
+                      }
+                    </span>
+                  </span>
+                </div>
+              }
+
+              <div class="crow col">
+                <svg class="i ic"><use href="#clk" /></svg>
+                <span class="ct"><b>{{ v.tpl.time.label }}</b>
+                  <span class="when">
+                    <span class="datebox">
+                      <button type="button" class="datebtn" [class.open]="calOpen()" (click)="toggleCal(d)">
+                        <svg class="i"><use href="#cal" /></svg><span>{{ dateLabel(d.date()) }}</span>
+                      </button>
+                      @if (calOpen()) {
+                        <span class="cal" role="dialog" aria-label="Chọn ngày">
+                          <span class="calhead">
+                            <button type="button" (click)="moveMonth(-1)" [disabled]="!canPrev()" aria-label="Tháng trước">‹</button>
+                            <b>Tháng {{ calMonth().getMonth() + 1 }}, {{ calMonth().getFullYear() }}</b>
+                            <button type="button" (click)="moveMonth(1)" aria-label="Tháng sau">›</button>
+                          </span>
+                          <span class="calgrid dow"><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></span>
+                          <span class="calgrid">
+                            @for (c of calCells(); track $index) {
+                              @if (c) {
+                                <button type="button" [disabled]="c.past" [class.today]="c.today" [class.on]="d.date() === c.iso" (click)="pickDate(d, c.iso)">{{ c.day }}</button>
+                              } @else { <i></i> }
+                            }
+                          </span>
+                          <span class="calfoot"><button type="button" (click)="pickDate(d, todayIso())">Hôm nay</button></span>
+                        </span>
+                      }
+                    </span>
+                    <span class="timebox">
+                      <input type="text" class="timein" inputmode="numeric" maxlength="5" placeholder="hh:mm" [value]="customTime() || d.time()"
+                             (focus)="timeOpen.set(true)" (click)="timeOpen.set(true)" (input)="onCustomTime(d, $any($event.target).value)" aria-label="Giờ" />
+                      <svg class="i clk"><use href="#clk" /></svg>
+                      @if (timeOpen()) {
+                        <span class="tlist" role="listbox">
+                          <p>Chọn giờ hoặc tự gõ</p>
+                          <span class="tgrid">@for (t of slots(); track t) { <button type="button" [class.on]="d.time() === t" (click)="pickTime(d, t)">{{ t }}</button> }</span>
+                        </span>
+                      }
+                    </span>
+                  </span>
+                  @if (timeErr()) { <small class="err">{{ timeErr() }}</small> }
+                  @if (v.tpl.time.mode === 'datedur') {
+                    <span class="hrs"><span>Thời lượng</span>
+                      @for (h of [2, 3, 4, 5, 6]; track h) { @if (h >= v.tpl.time.dur![0] && h <= v.tpl.time.dur![1]) { <button type="button" [class.on]="d.hours() === h" (click)="d.hours.set(h)">{{ h }} giờ</button> } }
+                    </span>
+                  }
+                </span>
+              </div>
+
+              @if (v.tpl.time.repeat) {
+                <label class="crow sw"><svg class="i ic"><use href="#cal" /></svg><span class="ct"><b>Lặp lại hằng tuần</b><small>Giữ cố định khung giờ này mỗi tuần</small></span><input type="checkbox" class="tg" [checked]="d.repeat()" (change)="d.repeat.set($any($event.target).checked)" /></label>
+              }
+              @if (v.tpl.key === 'food') {
+                <label class="crow sw"><svg class="i ic"><use href="#bag" /></svg><span class="ct"><b>Lấy dụng cụ ăn uống</b><small>Muỗng, đũa, khăn giấy — tắt để bớt rác thải</small></span><input type="checkbox" class="tg" [checked]="d.utensils()" (change)="d.utensils.set($any($event.target).checked)" /></label>
+              }
+              @if (v.tpl.key === 'drink') {
+                <label class="crow sw"><svg class="i ic"><use href="#bag" /></svg><span class="ct"><b>Lấy ống hút</b><small>Tắt để bớt rác thải</small></span><input type="checkbox" class="tg" [checked]="d.utensils()" (change)="d.utensils.set($any($event.target).checked)" /></label>
+              }
+
+              <label class="crow">
+                <svg class="i ic"><use href="#receipt" /></svg>
+                <span class="ct"><b>Ghi chú</b>
+                  <input class="noteinp" [placeholder]="v.tpl.notePh" maxlength="200" [value]="d.note()" (input)="d.note.set($any($event.target).value)" />
+                </span>
+              </label>
+            </section>
+
+            <!-- 4. Voucher + thanh toán -->
+            <section class="cs">
+              @if (v.tpl.xuOk) {
+                <button type="button" class="crow" (click)="voucherOpen.set(true)">
+                  <svg class="i ic"><use href="#ticket" /></svg>
+                  <span class="ct"><b>Voucher AntGo</b>
+                    @if (d.voucher(); as vv) { <small class="okt">{{ vv.title }} · giảm {{ fmt(d.discount()) }}</small> }
+                    @else { <small>{{ usable().length ? usable().length + ' voucher dùng được' : 'Chưa có voucher phù hợp' }}</small> }
+                  </span>
+                  <svg class="i cv"><use href="#chev" /></svg>
+                </button>
+              }
+              <div class="crow col">
+                <svg class="i ic"><use href="#coin" /></svg>
+                <span class="ct"><b>Phương thức thanh toán</b>
+                  <span class="seg">
+                    <button type="button" [class.on]="d.pay() === 'cash'" (click)="d.pay.set('cash')">Tiền mặt</button>
+                    <button type="button" [class.on]="d.pay() === 'transfer'" (click)="d.pay.set('transfer')">Chuyển khoản</button>
+                  </span>
+                </span>
+              </div>
+            </section>
+
+            <!-- 5. Chi tiết thanh toán -->
+            <section class="cs pay">
+              <h4>Chi tiết thanh toán</h4>
+              <dl>
+                <div><dt>Thành tiền</dt><dd>{{ fmt(d.subtotal()) }}</dd></div>
+                @if (d.placeFee()) { <div><dt>Phí vận chuyển</dt><dd>{{ fmt(d.placeFee()) }}</dd></div> }
+                @if (d.discount()) { <div class="disc"><dt>Voucher</dt><dd>−{{ fmt(d.discount()) }}</dd></div> }
+                @if (v.tpl.price.type === 'quote') { <div><dt>Tiền sửa</dt><dd>báo giá sau khi kiểm tra</dd></div> }
+                <div class="tot"><dt>Tổng cộng</dt><dd>{{ fmt(d.grand()) }}</dd></div>
+              </dl>
+              @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
+              @if (tried() && d.missing(true); as miss) { <p class="warn">{{ miss }}</p> }
+            </section>
           </div>
           <footer>
             <div><small>Tổng cộng</small><b>{{ fmt(d.grand()) }}</b></div>
