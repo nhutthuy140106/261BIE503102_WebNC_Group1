@@ -99,3 +99,4 @@
 .msg.mine .bb { background: var(--accent); color: #fff; }
 .seen { align-self: flex-end; margin-top: 4px; font-size: 12px; color: #65676B; }
 .msg .av { padding: 0; background: none; border-radius: 0; max-width: none; }
+.msg.mine .bb { background: var(--ink); color: #fff; }
