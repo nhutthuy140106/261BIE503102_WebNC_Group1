@@ -122,3 +122,10 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
 .nmenu button span { line-height: 1; padding-top: 2px; }
 .nrow:has(.nmore.open) { z-index: 7; }
 .nmenu.up { top: auto; bottom: 36px; }
+
+/* bớt cam: khung thông báo dùng xanh đen + xám, cam chỉ còn ở chấm chuông */
+.nall { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.ntabs button.on { background: #F0F2F5; color: var(--ink); }
+.nic { background: #F0F2F5; color: var(--ink); }
+.nitem.unread .ntx small { color: var(--smoke); font-weight: 400; }
+.ndot { background: var(--ink); }
