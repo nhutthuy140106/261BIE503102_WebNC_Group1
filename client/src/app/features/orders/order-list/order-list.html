@@ -1,15 +1,5 @@
 <header class="ohead"><h1>Đơn hàng</h1></header>
 
-@if (counts().todo && tab() !== 'todo') {
-  <button type="button" class="alert" (click)="setTab('todo')">
-    <span class="ai"><svg class="i"><use href="#bolt" /></svg></span>
-    <span class="at"><b>Có {{ counts().todo }} đơn cần bạn xử lý</b><small>Duyệt giá, bắt đầu làm, xác nhận đã nhận… bấm để xem ngay</small></span>
-    <span class="ag">Xem ngay</span>
-  </button>
-} @else if (tab() === 'todo') {
-  <button type="button" class="back" (click)="setTab('all')">← Tất cả đơn</button>
-}
-
 <nav class="tabs" aria-label="Lọc đơn">
   <button type="button" [class.on]="tab() === 'all'" (click)="setTab('all')">Tất cả</button>
   <button type="button" [class.on]="tab() === 'placed'" (click)="setTab('placed')">Đơn đã đặt</button>
@@ -23,7 +13,11 @@
   <div class="notice">Không tải được đơn hàng: {{ error() }}</div>
 } @else {
   @for (g of groups(); track g.key) {
-  @if (g.title) { <h2 class="gh" [class.todo]="g.key === 'todo'">{{ g.title }} <small>{{ g.items.length }}</small></h2> }
+  <section class="grp" [class.need]="g.key === 'todo'">
+  @if (g.title) {
+    <h2 class="gh" [class.todo]="g.key === 'todo'">@if (g.key === 'todo') { <svg class="i"><use href="#bolt" /></svg> }{{ g.title }} <small>· {{ g.items.length }}</small></h2>
+    @if (g.key === 'todo') { <p class="nhint">Những đơn đang chờ bạn bấm bước tiếp theo.</p> }
+  }
   <ul class="list">
     @for (o of g.items; track o._id) {
       <li class="order">
@@ -61,6 +55,7 @@
       </li>
     }
   </ul>
+  </section>
   } @empty {
     <div class="empty"><img src="assets/clean/idle.png" alt="" /><p>Không có đơn nào ở đây.</p></div>
   }
