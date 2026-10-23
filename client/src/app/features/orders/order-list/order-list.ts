@@ -82,6 +82,19 @@ export class OrderList implements OnInit {
     return isEnded(o);
   }
 
+  /** Chia danh sách theo nhóm như bản mẫu: Cần bạn xử lý · Đang diễn ra · Chờ xác nhận (Lịch sử giữ một danh sách phẳng) */
+  protected readonly groups = computed(() => {
+    const list = this.shown();
+    if (this.tab() === 'history') return [{ key: 'history', title: '', items: list }].filter((g) => g.items.length);
+    const need = list.filter(needsAction);
+    const rest = list.filter((o) => !needsAction(o));
+    return [
+      { key: 'todo', title: 'Cần bạn xử lý', items: need },
+      { key: 'go', title: 'Đang diễn ra', items: rest.filter((o) => this.dot(o) === 'go') },
+      { key: 'wait', title: 'Chờ xác nhận', items: rest.filter((o) => this.dot(o) !== 'go') },
+    ].filter((g) => g.items.length);
+  });
+
   protected isTodo(o: Order): boolean {
     return needsAction(o);
   }

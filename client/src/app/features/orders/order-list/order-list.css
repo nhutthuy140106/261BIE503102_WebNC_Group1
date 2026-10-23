@@ -57,3 +57,10 @@
 .tabs button.on { background: #fff; color: var(--ink); border-bottom: 0; box-shadow: 0 1px 3px rgba(34, 48, 74, .16); }
 .tabs em { margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: #fff; font-style: normal; font-size: 12px; font-weight: 700; }
 .list { margin-top: 18px; }
+
+.gh { display: flex; align-items: baseline; gap: 8px; margin: 26px 0 0; font-size: 17px; font-weight: 700; }
+.gh small { font-size: 13px; font-weight: 500; color: var(--smoke); }
+.gh.todo { color: var(--accent); }
+.gh.todo small { color: var(--accent); opacity: .8; }
+.gh + .list { margin-top: 12px; }
+.gh:first-of-type { margin-top: 20px; }
