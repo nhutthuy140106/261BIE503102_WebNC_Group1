@@ -107,3 +107,12 @@
 .threads button.unread .tx b { font-weight: 700; }
 .threads button.unread .tx small .tm { font-weight: 400; color: var(--smoke); }
 .dot { width: 14px; height: 14px; }
+
+/* danh sách đoạn chat sát mẫu Facebook */
+.threads button { padding: 12px 10px; gap: 12px; }
+.tx { gap: 3px; }
+.tx b { font-size: 15.5px; font-weight: 600; color: var(--ink); }
+.tx small { font-size: 14px; color: #65676B; }
+.threads button.unread .tx b { font-weight: 600; }
+.threads button.unread .tx small .pv { color: var(--ink); font-weight: 700; }
+.threads button.unread .tx small .tm { color: #65676B; font-weight: 400; }

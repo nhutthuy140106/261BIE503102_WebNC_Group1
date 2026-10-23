@@ -11,7 +11,7 @@
         @for (c of shown(); track c._id) {
           <li>
             <button type="button" [class.active]="c._id === selectedId()" [class.unread]="c.unread > 0" (click)="select(c)">
-              <app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="52" />
+              <app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="56" />
               <span class="tx">
                 <b>{{ c.withName }}</b>
                 <small><span class="pv">{{ preview(c) }}</span>@if (lastTime(c)) { <span class="tm"> · {{ lastTime(c) }}</span> }</small>
