@@ -404,7 +404,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     if (d.missing(true)) return;
     const a = this.address();
     const place = d.tpl.place;
-    const placeText = place.mode === 'choice' ? place.choices?.[d.place()]?.[0] : place.mode === 'seller' ? place.where : place.label;
+    const placeText = place.mode === 'choice' ? place.choices?.[d.place()]?.[0] : place.mode === 'seller' ? place.where : undefined;
     const body: CreateOrderBody = {
       postId: p._id,
       quantity: d.qty(),
@@ -421,10 +421,13 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
       detail: {
         lines: d.lines(),
         quantity: d.tpl.qty ? d.qty() : undefined,
+        quantityLabel: d.tpl.qty ? d.tpl.qty.label.replace(/\s*\(.*\)/, '') : undefined,
+        unit: d.tpl.qty ? d.tpl.price.unit : undefined,
         address: a ? a.name + ' · ' + a.phone + '\n' + this.addressText(a) : undefined,
         place: placeText,
+        placeLabel: place.label,
         when: this.whenLabel(d),
-        whenLabel: d.tpl.key === 'food' || d.tpl.key === 'goods' ? 'Thời gian dự kiến nhận hàng' : 'Thời gian hẹn',
+        whenLabel: d.tpl.time.label,
         pickup: !d.needsAddress(),
         utensils: d.tpl.key === 'food' ? d.utensils() : undefined,
         voucher: d.voucher()?.title,

@@ -85,10 +85,10 @@
               <dt>{{ o.kind === 'service' ? 'Dịch vụ' : o.kind === 'goods' ? 'Đồ dùng' : 'Món' }}</dt><dd>{{ o.postTitle }}</dd>
               @if (o.detail; as d) {
                 @for (l of d.lines; track l) { <dt>{{ l.split(': ')[0] }}</dt><dd>{{ l.split(': ').slice(1).join(': ') }}</dd> }
-                @if (d.quantity) { <dt>Số lượng</dt><dd>{{ d.quantity }}</dd> }
-                @if (d.when) { <dt>{{ o.kind === 'service' ? 'Thời gian hẹn' : 'Thời gian dự kiến nhận hàng' }}</dt><dd>{{ d.when }}</dd> }
-                @if (d.place) { <dt>{{ o.kind === 'service' ? 'Địa điểm' : 'Cách nhận' }}</dt><dd>{{ d.place }}</dd> }
-                @if (d.address) { <dt>Giao tới</dt><dd>{{ d.address }}</dd> }
+                @if (d.quantity) { <dt>{{ d.quantityLabel ?? 'Số lượng' }}</dt><dd>{{ d.quantity }}{{ d.unit ? ' ' + d.unit : '' }}</dd> }
+                @if (d.when) { <dt>{{ d.whenLabel ?? 'Thời gian' }}</dt><dd>{{ d.when }}</dd> }
+                @if (d.place) { <dt>{{ d.placeLabel ?? 'Cách nhận' }}</dt><dd>{{ d.place }}</dd> }
+                @if (d.address) { <dt>{{ d.place ? 'Giao tới' : (d.placeLabel ?? 'Địa chỉ') }}</dt><dd>{{ d.address }}</dd> }
                 @if (d.utensils !== undefined) { <dt>Dụng cụ / ống hút</dt><dd>{{ d.utensils ? 'Có lấy' : 'Không lấy' }}</dd> }
               }
               <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>

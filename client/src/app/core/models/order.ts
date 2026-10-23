@@ -96,8 +96,14 @@ export const ISSUE_HOURS = { food: 2, goods: 24, service: 24 } as const;
 export interface OrderDetail {
   lines: string[];
   quantity?: number;
+  /** Tên dòng số lượng + đơn vị (lấy từ khối Số lượng của bài): "Khối lượng ước tính" + "kg" */
+  quantityLabel?: string;
+  unit?: string;
   address?: string;
+  /** Cách nhận đã chọn (chỉ khi bài cho chọn / người bán nhận tại chỗ) */
   place?: string;
+  /** Tên dòng địa điểm (lấy từ khối Địa điểm của bài): "Cách nhận", "Lấy & trả tại"… */
+  placeLabel?: string;
   when?: string;
   /** Tên dòng giờ: "Nhận lúc", "Hẹn lấy", "Lấy đồ lúc"… (lấy từ bài) */
   whenLabel?: string;

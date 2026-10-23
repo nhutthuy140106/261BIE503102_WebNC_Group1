@@ -16,7 +16,10 @@
     "category": "food",
     "kind": "food",
     "detail": {
-      "lines": [],
+      "lines": [
+        "Món mặn hôm nay: Sườn ram",
+        "Phần cơm: Vừa"
+      ],
       "subtotal": 80000,
       "fee": 5000,
       "discount": 0,
@@ -26,9 +29,15 @@
         "Đang giao",
         "Hoàn thành"
       ],
-      "when": "Hôm nay · 11:30",
-      "place": "Giao tận cửa",
-      "quantity": "2 phần"
+      "quantity": 2,
+      "quantityLabel": "Số lượng",
+      "unit": "phần",
+      "whenLabel": "Nhận lúc",
+      "when": "16/10/2026 · 11:30",
+      "placeLabel": "Cách nhận",
+      "place": "Giao tận nơi",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05",
+      "utensils": true
     },
     "history": [
       {
@@ -70,8 +79,9 @@
     },
     "detail": {
       "lines": [
-        "Khối lượng dự kiến: 5kg",
-        "Câu trả lời: Có đồ trắng cần giặt riêng"
+        "Nước xả: Hương nhẹ",
+        "Gấp đồ: Gấp gọn",
+        "Có đồ trắng cần giặt riêng?: Có"
       ],
       "subtotal": 75000,
       "fee": 0,
@@ -84,8 +94,13 @@
         "Trả đồ",
         "Hoàn thành"
       ],
-      "when": "Hôm nay · 18:00 (lấy đồ)",
-      "place": "Lấy & trả tận cửa · Block B"
+      "quantity": 5,
+      "quantityLabel": "Khối lượng ước tính",
+      "unit": "kg",
+      "whenLabel": "Lấy đồ lúc",
+      "when": "16/10/2026 · 18:00",
+      "placeLabel": "Lấy & trả tại",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
     },
     "history": [
       {
@@ -119,7 +134,10 @@
     "kind": "food",
     "doneAgoH": 216,
     "detail": {
-      "lines": [],
+      "lines": [
+        "Món mặn hôm nay: Cá kho tộ",
+        "Phần cơm: Nhiều cơm"
+      ],
       "subtotal": 90000,
       "fee": 0,
       "discount": 0,
@@ -129,9 +147,14 @@
         "Đang giao",
         "Hoàn thành"
       ],
+      "quantity": 2,
+      "quantityLabel": "Số lượng",
+      "unit": "phần",
+      "whenLabel": "Nhận lúc",
       "when": "10/10/2026 · 12:00",
+      "placeLabel": "Cách nhận",
       "place": "Tự đến lấy",
-      "quantity": "2 tô"
+      "utensils": false
     },
     "history": [
       {
@@ -184,7 +207,8 @@
     "detail": {
       "lines": [
         "Hãng / dòng máy: Dell Inspiron 15",
-        "Máy bị sao: Bấm nguồn đèn sáng nhưng không lên màn hình"
+        "Máy bị sao?: Bấm nguồn đèn sáng nhưng không lên màn hình",
+        "Cần sao lưu dữ liệu trước?: Không"
       ],
       "subtotal": 50000,
       "fee": 0,
@@ -197,8 +221,11 @@
         "Đang sửa",
         "Hoàn thành"
       ],
-      "when": "Hôm nay · 19:00",
-      "place": "Thợ đến nhà · Block B"
+      "whenLabel": "Hẹn kiểm tra lúc",
+      "when": "16/10/2026 · 19:00",
+      "placeLabel": "Kiểm tra ở đâu",
+      "place": "Thợ đến nhà",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
     },
     "history": [
       {
@@ -229,8 +256,9 @@
     "priceCheck": "surcharge",
     "detail": {
       "lines": [
-        "Lấy món gì: 1 thùng hàng Shopee tên Ngọc Thủy",
-        "Kích thước: Nhỏ, dưới 10kg"
+        "Lấy món gì?: 1 thùng hàng Shopee tên Ngọc Thủy",
+        "Kích thước: Nhỏ, dưới 10kg",
+        "Cần trả tiền giùm?: Không"
       ],
       "subtotal": 15000,
       "fee": 0,
@@ -241,8 +269,10 @@
         "Đang đi lấy",
         "Đã giao"
       ],
-      "when": "Sớm nhất có thể",
-      "place": "Giao tới Ngọc Thủy · Block B · Căn 12.05"
+      "whenLabel": "Lúc nào",
+      "when": "16/10/2026 · 14:30",
+      "placeLabel": "Lấy & giao",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
     },
     "history": [
       {
@@ -272,9 +302,7 @@
     "createdAt": "2026-10-16T13:02:00Z",
     "doneAgoH": 3,
     "detail": {
-      "lines": [
-        "Tình trạng: Đã dùng · còn 95%"
-      ],
+      "lines": [],
       "subtotal": 650000,
       "fee": 0,
       "discount": 0,
@@ -284,9 +312,11 @@
         "Hẹn lấy hàng",
         "Hoàn thành"
       ],
-      "when": "16/10/2026 · 15:00",
-      "place": "Tự đến lấy ở Block A",
-      "quantity": "1"
+      "whenLabel": "Hẹn qua lấy",
+      "when": "16/10/2026 · 17:30",
+      "placeLabel": "Nơi nhận hàng",
+      "place": "Block A · căn 08.11",
+      "pickup": true
     },
     "history": [
       {
