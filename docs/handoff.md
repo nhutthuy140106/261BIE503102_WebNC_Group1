@@ -83,3 +83,21 @@ Khung đặt hàng phía Mua (`client/src/app/features/posts/post-detail`) **kh�
 **Form đăng bài cần có (phía Bán):** khối "Thông tin cần hỏi người mua": nút **Thêm câu hỏi** → chọn loại → đặt tên → (chọn 1/nhiều) thêm lựa chọn + phụ phí → bật/tắt bắt buộc → kéo để đổi thứ tự. Kèm **thư viện câu hỏi gợi ý bấm một lần**: `client/src/app/core/config/question-presets.ts` (`questionPresets(loạiBài)` và `GENERIC_QUESTIONS`). Không có câu nào thì người mua chỉ thấy ô "Ghi chú" ở bước xác nhận.
 
 **Đơn vị giá/số lượng:** nên cho người bán **chọn từ danh sách cố định** (phần, ly, cái, combo, kg, giờ, lần, buổi…) thay vì gõ tự do. Phía Mua chuẩn hóa hiển thị ở `client/src/app/core/utils/unit.ts`; khi form có danh sách cố định thì bỏ bước chuẩn hóa đó.
+
+## Bổ sung 23/10 — Quy tắc hiển thị đơn theo nhóm (đã chốt với người dùng)
+
+**4 nhóm:** Đồ ăn & uống · Đồ dùng · Dịch vụ · Việc làm. (Đồ uống gộp vào Đồ ăn: cùng các bước, cùng cửa sổ báo vấn đề; ống hút / size / đường / đá chỉ là lựa chọn bên trong bài.)
+
+**Bố cục trang đơn (mọi nhóm):** đầu trang (loại, mã đơn, tên, người bán, tổng) → thanh tiến trình → Nội dung đơn → Chi phí (Thành tiền · Phí vận chuyển · Voucher · Tổng) → bảng hành động bên phải (người bán + trạng thái, tiêu đề + một câu, nút, báo cáo). Nội dung đơn chỉ liệt kê điều người mua đã chọn; dòng trống thì ẩn. Phía Bán thấy cùng dữ liệu, khác nút hành động.
+
+| | Đồ ăn & uống | Đồ dùng | Dịch vụ | Việc làm |
+|---|---|---|---|---|
+| Gọi là | Đơn đã đặt | Đơn đã đặt | Đơn đã đặt | Việc đã nhận |
+| Các bước (`core/utils/placed-steps.ts`) | Đã gửi → Đã xác nhận → Đang thực hiện → Đang giao → Hoàn thành | giống; nhận tại chỗ thì bước 4 là "Hẹn lấy hàng" (chưa làm) | Đã gửi → Đã xác nhận → Đang thực hiện → Trả đồ → Hoàn thành (+ "Duyệt giá" nếu giá chưa chốt) | Đã gửi đề nghị → Được chọn → Đang làm → Đã báo xong → Hoàn thành |
+| Giá đổi được | Không (chưa có phụ thu) | Không | Có: ước tính (cân) · báo giá (sửa) · phụ thu; người mua phải duyệt | Không (chưa có mặc cả) |
+| Hủy | Chưa xác nhận: hủy ngay. Sau đó: gửi yêu cầu, người bán đồng ý mới hủy | giống | giống; hủy dưới 2 giờ trước giờ hẹn ghi "hủy sát giờ" | Xin hủy kèm lý do |
+| Báo vấn đề sau khi nhận | 2 giờ | 24 giờ (trả hàng khi khác mô tả) | 24 giờ (làm lại / giảm tiền) | Không |
+| Tiền | Trả khi nhận (tiền mặt / chuyển khoản) | giống | giống | Trả công trực tiếp; người làm bấm "Đã nhận tiền công" |
+| Xu | +10 khi xong (đơn ≥ 30.000đ) | giống | giống | +15 khi xong |
+
+Việc còn mở: bước "Hẹn lấy hàng" cho đồ dùng nhận tại chỗ; phụ thu cho đồ ăn; tách riêng việc làm khỏi trang đơn nếu cần.
