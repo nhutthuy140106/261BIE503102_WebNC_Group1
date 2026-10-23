@@ -34,6 +34,11 @@ const routes: Routes = [
       import('./features/notifications/notifications-module').then((m) => m.NotificationsModule),
   },
   {
+    path: 'xu',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/xu/xu-module').then((m) => m.XuModule),
+  },
+  {
     path: 'profile',
     canActivate: [authGuard],
     loadChildren: () => import('./features/profile/profile-module').then((m) => m.ProfileModule),

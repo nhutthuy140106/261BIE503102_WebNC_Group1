@@ -38,9 +38,9 @@
       </button>
       <span class="sep"></span>
       @if (auth.isLoggedIn()) {
-        <button type="button" class="xubtn" title="AntXu của bạn" (click)="openXu()">
+        <a routerLink="/xu" class="xubtn" title="AntXu của bạn">
           <img class="coin" src="assets/clean/antxu.png" alt="" />{{ xu.balance() }} Xu
-        </button>
+        </a>
       }
       <a routerLink="/search" class="iconbtn msearch" title="Tìm kiếm" aria-label="Tìm kiếm"><svg class="i"><use href="#search" /></svg></a>
       <button type="button" class="iconbtn" id="savedBtn" title="Đã lưu" (click)="openSaved()">
@@ -109,9 +109,9 @@
               </a>
               <div class="usep"></div>
               <a routerLink="/profile" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#users" /></svg>Tài khoản của tôi</a>
-              <a routerLink="/profile" [queryParams]="{ tab: 'saved' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#heart" /></svg>Bài đã lưu</a>
+              <button type="button" class="uitem" (click)="userOpen.set(false); openSaved()"><svg class="i"><use href="#heart" /></svg>Bài đã lưu</button>
               <a routerLink="/profile" [queryParams]="{ tab: 'addresses' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#home" /></svg>Địa chỉ của tôi</a>
-              <a routerLink="/profile" [queryParams]="{ tab: 'xu' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#coin" /></svg>AntXu &amp; voucher<em>{{ xu.balance() }} Xu</em></a>
+              <a routerLink="/xu" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#coin" /></svg>AntXu &amp; voucher<em>{{ xu.balance() }} Xu</em></a>
               <a routerLink="/orders" [queryParams]="{ f: 'history' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#receipt" /></svg>Lịch sử đơn hàng</a>
               <div class="usep"></div>
               <button type="button" class="uitem" (click)="logout()"><svg class="i"><use href="#logout" /></svg>Đăng xuất</button>

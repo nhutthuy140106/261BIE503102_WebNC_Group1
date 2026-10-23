@@ -60,6 +60,7 @@ export class Profile implements OnInit {
   }
 
   protected go(t: Tab): void {
+    if (t === 'xu') return void this.router.navigate(['/xu']);
     this.router.navigate([], { relativeTo: this.route, queryParams: { tab: t === 'overview' ? null : t } });
   }
 
