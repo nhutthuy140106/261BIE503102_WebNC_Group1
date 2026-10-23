@@ -47,3 +47,7 @@ textarea:focus { border-color: var(--ink); }
 .rtip h2 { font-size: 17px; }
 .rtip p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--smoke); }
 .rtip a { margin-top: 4px; font-weight: 600; font-size: 14px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+.rorder { text-decoration: none; color: inherit; }
+.rorder:hover { background: #EFF1F4; }
+.rorder em { margin-left: auto; flex: none; font-style: normal; font-weight: 600; font-size: 13.5px; color: var(--ink); }

@@ -2,10 +2,11 @@
 <h1>Báo cáo vấn đề</h1>
 
 @if (order(); as o) {
-  <div class="rorder">
+  <a class="rorder" [routerLink]="['/orders', o._id]">
     <app-order-thumb [image]="o.image" [category]="o.kind ?? 'job'" />
     <span><b>{{ o.postTitle }}</b><small>{{ o.counterpartName }} · {{ o.code }}</small></span>
-  </div>
+    <em>Xem đơn hàng ›</em>
+  </a>
 }
 
 @if (sent()) {
@@ -21,8 +22,7 @@
       <h2>Trước khi báo cáo</h2>
       <p>Hãy nhắn cho người còn lại trong đơn để trao đổi rõ vấn đề. Nếu liên quan tới tiền công, kiểm tra lại phương thức thanh toán hai bên đã thống nhất.</p>
       <p>Muốn làm lại món, trả hàng hay hoàn tiền thì dùng nút báo vấn đề với bên bán ngay trong đơn. Báo cáo này dùng khi bạn cần AntGo can thiệp.</p>
-      <a [routerLink]="['/orders', orderId()]">Xem Đơn hàng</a>
-    </section>
+          </section>
     <div class="rf" [class.bad]="tried() && !picks().length">
       <label>Vấn đề bạn gặp <span>(chọn được nhiều)</span></label>
       <div class="rlist">
