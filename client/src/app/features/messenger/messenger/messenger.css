@@ -211,3 +211,7 @@
 .thread.blank { flex-direction: column; gap: 6px; }
 .thread.blank img { width: 200px; height: auto; }
 .thread.blank p { margin: 0; }
+/* lời con kiến nói: bong bóng thoại phía trên đầu */
+.thread.blank { gap: 14px; }
+.thread.blank .say { position: relative; margin: 0; padding: 12px 20px; border-radius: 18px; background: #fff; border: 1px solid var(--border); box-shadow: 0 4px 14px rgba(34, 48, 74, .08); font-size: 15px; font-weight: 600; color: var(--ink); }
+.thread.blank .say::after { content: ''; position: absolute; left: calc(50% + 10px); bottom: -8px; width: 14px; height: 14px; background: #fff; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); transform: rotate(45deg); }
