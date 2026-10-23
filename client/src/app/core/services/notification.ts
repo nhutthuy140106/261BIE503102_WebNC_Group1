@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, map, of, tap } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppNotification } from '../models/social';
 import { notificationFromApi } from '../utils/api-mappers';
@@ -36,6 +36,18 @@ export class NotificationService {
       this.db.save(COLLECTION, next);
       this.items.set(next);
     });
+  }
+
+  /** Đánh dấu chưa đọc một thông báo (chỉ phía mình). API thật chưa có điểm cuối riêng nên chỉ lưu ở mock. */
+  markUnread(id: string): Observable<void> {
+    if (!useMock('notification')) return of(undefined);
+    return this.db.list<AppNotification>(COLLECTION).pipe(
+      map((rows) => {
+        const next = rows.map((n) => (n._id === id ? { ...n, read: false } : n));
+        this.db.save(COLLECTION, next);
+        this.items.set(next);
+      }),
+    );
   }
 
   /** Đánh dấu đã đọc: danh sách `ids`, bỏ trống = tất cả. */

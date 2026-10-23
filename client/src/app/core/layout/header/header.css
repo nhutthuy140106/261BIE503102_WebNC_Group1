@@ -107,3 +107,17 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
 .nitem, .nitem .nt { white-space: normal; } .nt { overflow-wrap: anywhere; }
 .nic { background: var(--ink); color: #fff; }
 .nic { background: #FCEEE6; color: var(--accent); }
+
+/* thời gian nhỏ hơn nội dung; nút ⋯ đánh dấu đã đọc / chưa đọc giống Messenger */
+.ntx small { font-size: 12px; }
+.nrow { position: relative; }
+.nmore { position: absolute; right: 30px; top: 50%; transform: translateY(-50%); opacity: 0; }
+.nrow:hover .nmore, .nmore.open { opacity: 1; }
+.nmore .more { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #fff; box-shadow: 0 1px 4px rgba(34, 48, 74, .28); color: var(--ink); padding: 0; }
+.nmore .more svg { width: 16px; height: 16px; }
+.nmenu { position: absolute; right: 0; top: 36px; z-index: 6; min-width: 230px; padding: 6px; border-radius: 12px; background: #fff; box-shadow: 0 8px 28px rgba(34, 48, 74, .22); }
+.nmenu button { display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 12px; border-radius: 8px; background: none; text-align: left; font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.nmenu button:hover { background: #F0F2F5; }
+.nmenu svg { width: 20px; height: 20px; flex: none; }
+.nmenu button span { line-height: 1; padding-top: 2px; }
+.nrow:has(.nmore.open) { z-index: 7; }

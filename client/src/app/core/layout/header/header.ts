@@ -56,8 +56,17 @@ export class Header {
 
   protected openNotif(n: AppNotification): void {
     this.notifOpen.set(false);
+    this.nMenu.set(null);
     if (!n.read) this.notifications.markRead([n._id]).subscribe({ error: () => undefined });
     this.router.navigateByUrl(n.link);
+  }
+
+  /** Menu "⋯" của một thông báo (id thông báo đang mở menu) */
+  protected readonly nMenu = signal<string | null>(null);
+
+  protected toggleRead(n: AppNotification): void {
+    this.nMenu.set(null);
+    (n.read ? this.notifications.markUnread(n._id) : this.notifications.markRead([n._id])).subscribe({ error: () => undefined });
   }
 
   protected readAll(): void {
@@ -66,12 +75,15 @@ export class Header {
 
   @HostListener('document:click', ['$event'])
   onDocClick(e: Event): void {
-    if (this.notifOpen() && !(e.target as HTMLElement).closest('.nwrap')) this.notifOpen.set(false);
+    const el = e.target as HTMLElement;
+    if (this.notifOpen() && !el.closest('.nwrap')) this.notifOpen.set(false);
+    if (this.nMenu() && !el.closest('.nmore')) this.nMenu.set(null);
   }
 
   @HostListener('document:keydown.escape')
   onEsc(): void {
     this.notifOpen.set(false);
+    this.nMenu.set(null);
   }
   /** Đang ở trang chủ: ô gọn ẩn khi ô lớn còn thấy */
   protected readonly onHome = signal(false);
