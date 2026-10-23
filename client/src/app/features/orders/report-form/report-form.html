@@ -26,10 +26,14 @@
         }
       </div>
       @if (needText()) {
-        <textarea id="detail" rows="4" maxlength="1000" formControlName="detail" placeholder="Bạn ghi rõ vấn đề giúp mình nhé"></textarea>
+        <textarea id="detail" rows="2" maxlength="300" formControlName="detail" placeholder="Bạn ghi lý do giúp mình nhé"></textarea>
         @if (tried() && form.controls.detail.value.trim().length < 10) { <small class="error">Mô tả ít nhất 10 ký tự.</small> }
       }
       @if (tried() && !picks().length) { <small class="error">Hãy chọn ít nhất một vấn đề.</small> }
+    </div>
+    <div class="rf">
+      <label for="more">Mô tả chi tiết <span>(không bắt buộc)</span></label>
+      <textarea id="more" rows="4" maxlength="1000" formControlName="more" placeholder="Chuyện gì đã xảy ra? Ghi rõ để AntGo xử lý nhanh hơn."></textarea>
     </div>
     <div class="rf">
       <label>Hình ảnh <span>(không bắt buộc)</span></label>

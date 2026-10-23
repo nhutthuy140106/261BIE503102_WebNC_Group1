@@ -80,6 +80,7 @@ export class OrderDetail implements OnInit {
   protected readonly text = signal('');
   protected readonly photos = signal(0);
   protected readonly rvPics = signal<string[]>([]);
+  protected readonly more = signal('');
   protected readonly stars = signal(0);
   protected readonly bad = signal<string>('');
   protected readonly rReasons = R_REASONS;
@@ -171,6 +172,7 @@ export class OrderDetail implements OnInit {
     this.text.set(init.text ?? '');
     this.photos.set(0);
     this.rvPics.set([]);
+    this.more.set('');
     this.stars.set(0);
     this.bad.set('');
     this.dlg.set(t);
@@ -511,7 +513,7 @@ export class OrderDetail implements OnInit {
       if (!this.pick2()) return void this.bad.set('Chọn điều bạn mong muốn.');
       if (this.picks().includes(OTHER_REASON) && !this.text().trim()) return void this.bad.set('Mô tả ngắn giúp bên bán hiểu.');
       if (needPhoto && !this.rvPics().length) return void this.bad.set('Cần ít nhất 1 ảnh để bên bán kiểm tra.');
-      return this.move({ issue: { st: 'open', type: this.reasonText(), want: this.pick2(), text: this.text().trim(), photos: this.rvPics().length } }, (this.kind(o) === 'goods' ? 'Bạn yêu cầu trả hàng: ' : 'Bạn báo vấn đề: ') + this.reasonText(), 'Đã gửi cho ' + n);
+      return this.move({ issue: { st: 'open', type: this.reasonText(), want: this.pick2(), text: this.more().trim(), photos: this.rvPics().length } }, (this.kind(o) === 'goods' ? 'Bạn yêu cầu trả hàng: ' : 'Bạn báo vấn đề: ') + this.reasonText(), 'Đã gửi cho ' + n);
     }
     if (d === 'resched') {
       if (!this.pick() || !this.pick2()) return void this.bad.set('Chọn ngày và giờ.');

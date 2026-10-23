@@ -28,7 +28,8 @@ export class ReportForm implements OnInit {
   protected readonly sent = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly form = new FormGroup({
-    detail: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
+    detail: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(300)] }),
+    more: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
   });
 
   ngOnInit(): void {
@@ -74,8 +75,9 @@ export class ReportForm implements OnInit {
     const text = this.form.controls.detail.value.trim();
     if (!this.picks().length || (this.needText() && text.length < 10)) return;
     const labels = new Map(this.reasons());
-    const why = this.picks().filter((c) => c !== 'other').map((c) => labels.get(c)).join('; ');
-    const detail = (why + (this.needText() ? (why ? '. ' : '') + text : '')).slice(0, 1000);
+    const why = [...this.picks().filter((c) => c !== 'other').map((c) => labels.get(c)), this.needText() ? text : ''].filter(Boolean).join('; ');
+    const more = this.form.controls.more.value.trim();
+    const detail = (why + (more ? '. ' + more : '')).slice(0, 1000);
     const reason = this.picks().find((c) => c !== 'other') ?? 'other';
     this.reports.create({ targetType: 'order', targetId: this.orderId(), reason, detail }).subscribe({
       next: () => this.sent.set(true),

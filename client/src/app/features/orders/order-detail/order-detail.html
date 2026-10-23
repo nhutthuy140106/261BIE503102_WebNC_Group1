@@ -106,7 +106,7 @@
             <h2>Yêu cầu của bạn</h2>
             <div class="pricebox">
               <div class="pb"><span>Bạn đã gửi</span><span>{{ iss.type }}</span></div>
-              <p class="pbw">{{ iss.text }}</p>
+              @if (iss.text) { <p class="pbw">{{ iss.text }}</p> }
               <div class="pbl"><div><span>Mong muốn</span><span>{{ iss.want }}</span></div>@if (iss.photos) { <div><span>Ảnh kèm</span><span>{{ iss.photos }} ảnh</span></div> }</div>
             </div>
           </section>
@@ -311,6 +311,7 @@
               <div class="fld" [class.bad]="bad() && !pick2()"><label>Bạn mong muốn</label>
                 <div class="reasons">@for (w of issueWants(o); track w) { <button type="button" [class.on]="pick2() === w" (click)="pick2.set(w); bad.set('')">{{ w }}</button> }</div></div>
             }
+            <div class="fld"><label>Mô tả chi tiết <small class="hintl">(không bắt buộc)</small></label><textarea maxlength="500" placeholder="Chuyện gì đã xảy ra? Ghi rõ để bên bán xử lý nhanh hơn." [value]="more()" (input)="more.set($any($event.target).value)"></textarea></div>
             <div class="fld"><label>Hình ảnh {{ o.kind === 'service' ? '(nếu có)' : '(bắt buộc)' }}</label>
               <div class="rvpics">
                 @for (u of rvPics(); track u) { <span class="rvpic"><img [src]="u" alt="" /><button type="button" aria-label="Bỏ ảnh" (click)="dropPic(u)">×</button></span> }
