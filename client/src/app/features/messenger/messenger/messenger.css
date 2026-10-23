@@ -146,3 +146,11 @@
 .stamp { font-size: 12px; }
 .thread form input { height: 40px; font-size: 14px; }
 .threads li { margin-bottom: 2px; }
+
+/* bớt đậm: chữ chưa đọc chỉ đậm vừa, nền rất nhạt, các dòng cách nhau */
+.threads li { margin-bottom: 4px; }
+.threads button.unread { background: #FFF9F5; }
+.threads button.unread:hover { background: #FFF3EA; }
+.threads button.unread.active { background: #F0F2F5; }
+.threads button.unread .tx b { font-weight: 600; }
+.threads button.unread .tx small .pv { color: var(--ink); font-weight: 600; }
