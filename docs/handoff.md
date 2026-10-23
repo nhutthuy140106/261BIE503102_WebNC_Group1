@@ -93,7 +93,7 @@ Khung đặt hàng phía Mua (`client/src/app/features/posts/post-detail`) **kh�
 | | Đồ ăn & uống | Đồ dùng | Dịch vụ | Việc làm |
 |---|---|---|---|---|
 | Gọi là | Đơn đã đặt | Đơn đã đặt | Đơn đã đặt | Việc đã nhận |
-| Các bước (`core/utils/placed-steps.ts`) | Đã gửi → Đã xác nhận → Đang thực hiện → Đang giao → Hoàn thành | giống; tự đến lấy thì bước 4 là "Hẹn lấy hàng" (đã làm, cho cả đồ ăn & uống) | Đã gửi → Đã xác nhận → Đang thực hiện → Trả đồ → Hoàn thành (+ "Duyệt giá" nếu giá chưa chốt) | Đã gửi đề nghị → Được chọn → Đang làm → Đã báo xong → Hoàn thành |
+| Các bước (`core/utils/placed-steps.ts`) | Đã gửi → Đã xác nhận → Đang thực hiện → Đang giao → Hoàn thành (tự đến lấy: "Sẵn sàng lấy") | **bỏ "Đang thực hiện"** (hàng có sẵn): Đã gửi → Đã xác nhận → Đang giao / Sẵn sàng lấy → Hoàn thành | Đã gửi → Đã xác nhận → Đang thực hiện → Trả đồ → Hoàn thành (+ "Duyệt giá" nếu giá chưa chốt) | Đã gửi đề nghị → Được chọn → Đang làm → Đã báo xong → Hoàn thành |
 | Giá đổi được | Không (chưa có phụ thu) | Không | Có: ước tính (cân) · báo giá (sửa) · phụ thu; người mua phải duyệt | Không (chưa có mặc cả) |
 | Hủy | Chưa xác nhận: hủy ngay. Sau đó: gửi yêu cầu, người bán đồng ý mới hủy | giống | giống; hủy dưới 2 giờ trước giờ hẹn ghi "hủy sát giờ" | Xin hủy kèm lý do |
 | Báo vấn đề sau khi nhận | 2 giờ | 24 giờ (trả hàng khi khác mô tả) | 24 giờ (làm lại / giảm tiền) | Không |
