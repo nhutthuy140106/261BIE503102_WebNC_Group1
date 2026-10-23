@@ -58,7 +58,15 @@
         } @else {
           <form (ngSubmit)="send()">
             <button type="button" class="rbtn" aria-label="Ghi âm giọng nói" title="Ghi âm giọng nói" (click)="startRec()"><svg class="i"><use href="#mic" /></svg></button>
-            <label class="rbtn" title="Gửi hình ảnh hoặc video" aria-label="Gửi hình ảnh hoặc video"><input type="file" accept="image/*,video/*" multiple hidden (change)="attach($any($event.target))" /><svg class="i"><use href="#camera" /></svg></label>
+            <span class="picwrap">
+              <button type="button" class="rbtn" title="Gửi hình ảnh" aria-label="Gửi hình ảnh" (click)="picMenu.set(!picMenu())"><svg class="i"><use href="#photo" /></svg></button>
+              @if (picMenu()) {
+                <span class="picmenu">
+                  <button type="button" (click)="startCam()"><svg class="i"><use href="#camera" /></svg>Chụp ảnh</button>
+                  <label (click)="picMenu.set(false)"><input type="file" accept="image/*,video/*" multiple hidden (change)="attach($any($event.target))" /><svg class="i"><use href="#photo" /></svg>Chọn ảnh trong máy</label>
+                </span>
+              }
+            </span>
             <input [formControl]="input" placeholder="Aa" maxlength="2000" autocomplete="off" />
             <button type="submit" class="send" aria-label="Gửi" [disabled]="input.invalid"><svg class="i"><use href="#send" /></svg></button>
           </form>
@@ -67,5 +75,13 @@
     } @else {
       <section class="thread blank"><p>Chọn một đoạn chat để bắt đầu.</p></section>
     }
+  </div>
+}
+@if (camOn()) {
+  <div class="camscrim" (click)="closeCam()">
+    <div class="cambox" (click)="$event.stopPropagation()">
+      <video #cam autoplay playsinline muted></video>
+      <div class="camact"><button type="button" class="ghost" (click)="closeCam()">Hủy</button><button type="button" class="go" (click)="snap(cam)">Chụp</button></div>
+    </div>
   </div>
 }

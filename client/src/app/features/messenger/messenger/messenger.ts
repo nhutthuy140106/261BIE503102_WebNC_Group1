@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Conversation, Message } from '../../../core/models/social';
@@ -156,6 +156,47 @@ export class Messenger implements OnInit, OnDestroy {
     });
   }
 
+  // ----- chọn ảnh: chụp bằng camera hoặc lấy từ máy -----
+  protected readonly picMenu = signal(false);
+  protected readonly camOn = signal(false);
+  private camStream: MediaStream | null = null;
+
+  /** Video xem trước của camera: có phần tử trên màn hình là bật camera ngay */
+  @ViewChild('cam') set camEl(v: ElementRef<HTMLVideoElement> | undefined) {
+    if (v && !this.camStream) void this.openCam(v.nativeElement);
+  }
+
+  async openCam(video: HTMLVideoElement): Promise<void> {
+    try {
+      this.camStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = this.camStream;
+      await video.play();
+    } catch {
+      this.closeCam();
+      this.error.set('Không mở được camera. Bạn hãy cho phép trình duyệt dùng camera rồi thử lại.');
+    }
+  }
+
+  startCam(): void {
+    this.picMenu.set(false);
+    this.camOn.set(true);
+  }
+
+  snap(video: HTMLVideoElement): void {
+    const cv = document.createElement('canvas');
+    cv.width = video.videoWidth || 640;
+    cv.height = video.videoHeight || 480;
+    cv.getContext('2d')?.drawImage(video, 0, 0, cv.width, cv.height);
+    this.sendMedia({ kind: 'image', url: cv.toDataURL('image/jpeg', 0.8) });
+    this.closeCam();
+  }
+
+  closeCam(): void {
+    this.camStream?.getTracks().forEach((t) => t.stop());
+    this.camStream = null;
+    this.camOn.set(false);
+  }
+
   // ----- ghi âm giọng nói -----
   protected readonly recording = signal(false);
   protected readonly recSec = signal(0);
@@ -218,6 +259,7 @@ export class Messenger implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.closeCam();
     document.body.classList.remove('no-footer');
   }
 }

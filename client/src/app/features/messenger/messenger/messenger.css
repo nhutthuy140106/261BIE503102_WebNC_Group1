@@ -159,3 +159,22 @@
 .threads button.unread, .threads button.unread:hover { background: none; }
 .threads button.unread:hover { background: #F5F6F8; }
 .threads button.unread.active { background: #F0F2F5; }
+
+/* nút nhập tin nhỏ gọn hơn */
+.rbtn { width: 36px; height: 36px; }
+.rbtn svg { width: 19px; height: 19px; }
+.thread form button.send, .rec .send { width: 38px; height: 38px; }
+.send svg { width: 17px; height: 17px; }
+.thread form { gap: 6px; }
+.picwrap { position: relative; display: inline-flex; }
+.picmenu { position: absolute; left: 0; bottom: 46px; z-index: 5; width: 220px; padding: 6px; border-radius: 14px; background: #fff; box-shadow: 0 8px 28px rgba(34, 48, 74, .22); display: grid; gap: 2px; }
+.picmenu button, .picmenu label { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 12px; border-radius: 10px; background: none; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; text-align: left; }
+.picmenu button:hover, .picmenu label:hover { background: #F0F2F5; }
+.picmenu svg { width: 19px; height: 19px; color: var(--accent); flex: none; }
+.camscrim { position: fixed; inset: 0; z-index: 90; background: rgba(34, 48, 74, .5); display: grid; place-items: center; padding: 20px; }
+.cambox { width: min(520px, 100%); padding: 14px; border-radius: 18px; background: #fff; display: grid; gap: 12px; }
+.cambox video { width: 100%; border-radius: 12px; background: #000; max-height: 60vh; }
+.camact { display: flex; gap: 10px; }
+.camact button { flex: 1; height: 44px; border-radius: 12px; font-weight: 600; }
+.camact .ghost { border: 1px solid var(--border); background: none; }
+.camact .go { background: var(--accent); color: #fff; }
