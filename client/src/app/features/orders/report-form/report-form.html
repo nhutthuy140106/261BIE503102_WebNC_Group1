@@ -18,23 +18,18 @@
 } @else {
   <form [formGroup]="form" (ngSubmit)="submit()">
     <p class="rnote">Dùng khi bạn cần AntGo can thiệp. Muốn làm lại món, trả hàng hay hoàn tiền thì hãy dùng nút báo vấn đề với bên bán ngay trong đơn.</p>
-    <div class="rf" [class.bad]="form.controls.reason.invalid && form.controls.reason.touched">
-      <label>Vấn đề bạn gặp</label>
+    <div class="rf" [class.bad]="tried() && !picks().length">
+      <label>Vấn đề bạn gặp <span>(chọn được nhiều)</span></label>
       <div class="rlist">
         @for (r of reasons(); track r[0]) {
-          <button type="button" [class.on]="form.controls.reason.value === r[0]" (click)="form.controls.reason.setValue(r[0])">{{ r[1] }}</button>
+          <button type="button" [class.on]="picks().includes(r[0])" (click)="toggle(r[0])">{{ r[1] }}</button>
         }
       </div>
-      @if (form.controls.reason.invalid && form.controls.reason.touched) { <small class="error">Hãy chọn một vấn đề.</small> }
-    </div>
-    <div class="rf">
-      <label for="detail">Mô tả</label>
-      <textarea id="detail" rows="4" maxlength="1000" formControlName="detail" placeholder="Chuyện gì đã xảy ra? Ghi rõ để AntGo xử lý nhanh hơn."></textarea>
-      @if (form.controls.detail.errors?.['server']; as msg) {
-        <small class="error">{{ msg }}</small>
-      } @else if (form.controls.detail.invalid && form.controls.detail.touched) {
-        <small class="error">Mô tả ít nhất 10 ký tự.</small>
+      @if (needText()) {
+        <textarea id="detail" rows="4" maxlength="1000" formControlName="detail" placeholder="Bạn ghi rõ vấn đề giúp mình nhé"></textarea>
+        @if (tried() && form.controls.detail.value.trim().length < 10) { <small class="error">Mô tả ít nhất 10 ký tự.</small> }
       }
+      @if (tried() && !picks().length) { <small class="error">Hãy chọn ít nhất một vấn đề.</small> }
     </div>
     <div class="rf">
       <label>Hình ảnh <span>(không bắt buộc)</span></label>
@@ -44,6 +39,6 @@
       </div>
     </div>
     @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
-    <button type="submit" class="go" [disabled]="form.invalid">Gửi báo cáo</button>
+    <button type="submit" class="go">Gửi báo cáo</button>
   </form>
 }

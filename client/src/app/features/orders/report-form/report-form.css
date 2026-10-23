@@ -38,3 +38,7 @@ textarea:focus { border-color: var(--ink); }
 .rdone h2 { font-size: 20px; }
 .rdone p { color: var(--smoke); line-height: 1.55; max-width: 440px; }
 .rdone .go { max-width: 260px; margin-top: 8px; }
+
+.rlist button::after { border-radius: 6px; }
+.rlist button.on::after { border-color: var(--accent); background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat; }
+.rlist + textarea { margin-top: 6px; }

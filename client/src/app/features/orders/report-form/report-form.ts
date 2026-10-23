@@ -21,13 +21,14 @@ export class ReportForm implements OnInit {
 
   protected readonly order = signal<Order | null>(null);
   protected readonly pics = signal<string[]>([]);
+  protected readonly picks = signal<ReportReason[]>([]);
+  protected readonly tried = signal(false);
   protected readonly orderId = signal('');
   protected readonly title = signal('');
   protected readonly sent = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly form = new FormGroup({
-    reason: new FormControl<ReportReason | ''>('', { nonNullable: true, validators: [Validators.required] }),
-    detail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(10), Validators.maxLength(1000)] }),
+    detail: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
   });
 
   ngOnInit(): void {
@@ -49,6 +50,15 @@ export class ReportForm implements OnInit {
     return Object.entries(m[k] ?? REPORT_REASON_LABEL) as [ReportReason, string][];
   }
 
+  /** Chọn được nhiều lý do; "Khác" loại trừ các lý do còn lại và mở ô mô tả */
+  protected toggle(c: ReportReason): void {
+    this.picks.update((l) => (l.includes(c) ? l.filter((x) => x !== c) : c === 'other' ? [c] : [...l.filter((x) => x !== 'other'), c]));
+  }
+
+  protected needText(): boolean {
+    return this.picks().includes('other');
+  }
+
   protected addPics(input: HTMLInputElement): void {
     const urls = Array.from(input.files ?? []).map((f) => URL.createObjectURL(f));
     this.pics.update((l) => [...l, ...urls].slice(0, 4));
@@ -60,9 +70,14 @@ export class ReportForm implements OnInit {
   }
 
   submit(): void {
-    if (this.form.invalid) return this.form.markAllAsTouched();
-    const v = this.form.getRawValue();
-    this.reports.create({ targetType: 'order', targetId: this.orderId(), reason: v.reason as ReportReason, detail: v.detail }).subscribe({
+    this.tried.set(true);
+    const text = this.form.controls.detail.value.trim();
+    if (!this.picks().length || (this.needText() && text.length < 10)) return;
+    const labels = new Map(this.reasons());
+    const why = this.picks().filter((c) => c !== 'other').map((c) => labels.get(c)).join('; ');
+    const detail = (why + (this.needText() ? (why ? '. ' : '') + text : '')).slice(0, 1000);
+    const reason = this.picks().find((c) => c !== 'other') ?? 'other';
+    this.reports.create({ targetType: 'order', targetId: this.orderId(), reason, detail }).subscribe({
       next: () => this.sent.set(true),
       error: (e: Error) => {
         // 422 từ server: gắn lỗi vào đúng field

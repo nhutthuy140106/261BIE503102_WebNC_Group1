@@ -33,9 +33,9 @@ const P_REASONS = {
   other: ['Đặt nhầm món / số lượng', 'Muốn đổi món khác', 'Muốn đổi địa chỉ nhận hàng', 'Đặt trùng đơn', 'Thủ tục thanh toán rắc rối', 'Chờ lâu quá', 'Không cần nữa', OTHER_REASON],
 };
 const ISSUE_TYPES = {
-  food: ['Sai món', 'Thiếu món / thiếu phần', 'Món bị đổ, vỡ, móp méo', 'Món nguội / không còn tươi', 'Món bị hỏng, có vấn đề vệ sinh', 'Giao quá lâu so với hẹn', 'Khác'],
-  goods: ['Có lỗi không được nêu trong bài', 'Không đúng món / mẫu trong ảnh', 'Thiếu phụ kiện đã ghi', 'Hàng hư hỏng, không dùng được', 'Khác mô tả (màu, kích cỡ, tình trạng)', 'Khác'],
-  service: ['Làm chưa kỹ / còn sót', 'Không đúng việc đã thỏa thuận', 'Làm hư đồ của mình', 'Đến trễ / không đúng giờ hẹn', 'Thái độ chưa tốt', 'Tính thêm tiền ngoài thỏa thuận', 'Khác'],
+  food: ['Sai món', 'Thiếu món / thiếu phần', 'Món bị đổ, vỡ, móp méo', 'Món nguội / không còn tươi', 'Món bị hỏng, có vấn đề vệ sinh', 'Giao quá lâu so với hẹn', OTHER_REASON],
+  goods: ['Có lỗi không được nêu trong bài', 'Không đúng món / mẫu trong ảnh', 'Thiếu phụ kiện đã ghi', 'Hàng hư hỏng, không dùng được', OTHER_REASON],
+  service: ['Làm chưa kỹ / còn sót', 'Không đúng việc đã thỏa thuận', 'Làm hư đồ của mình', 'Đến trễ / không đúng giờ hẹn', 'Thái độ chưa tốt', 'Tính thêm tiền ngoài thỏa thuận', OTHER_REASON],
 };
 const ISSUE_WANTS = { food: ['Làm lại món', 'Hoàn tiền'], goods: ['Trả hàng, nhận lại tiền'], service: ['Làm lại miễn phí', 'Giảm tiền'] };
 const ISSUE_PH = { food: 'Ví dụ: đặt trà sữa ít đá nhưng nhận được nhiều đá', goods: 'Ví dụ: loa không lên nguồn, khác với mô tả “còn mới 95%”', service: 'Ví dụ: còn sót vết bẩn ở góc bếp, chưa lau cửa kính' };
@@ -507,11 +507,11 @@ export class OrderDetail implements OnInit {
     }
     if (d === 'issue') {
       const needPhoto = this.kind(o) !== 'service';
-      if (!this.pick()) return void this.bad.set('Chọn vấn đề.');
+      if (!this.picks().length) return void this.bad.set('Chọn ít nhất một vấn đề.');
       if (!this.pick2()) return void this.bad.set('Chọn điều bạn mong muốn.');
-      if (this.pick() === 'Khác' && !this.text().trim()) return void this.bad.set('Mô tả ngắn giúp bên bán hiểu.');
+      if (this.picks().includes(OTHER_REASON) && !this.text().trim()) return void this.bad.set('Mô tả ngắn giúp bên bán hiểu.');
       if (needPhoto && !this.rvPics().length) return void this.bad.set('Cần ít nhất 1 ảnh để bên bán kiểm tra.');
-      return this.move({ issue: { st: 'open', type: this.pick(), want: this.pick2(), text: this.text().trim(), photos: this.rvPics().length } }, (this.kind(o) === 'goods' ? 'Bạn yêu cầu trả hàng: ' : 'Bạn báo vấn đề: ') + this.pick(), 'Đã gửi cho ' + n);
+      return this.move({ issue: { st: 'open', type: this.reasonText(), want: this.pick2(), text: this.text().trim(), photos: this.rvPics().length } }, (this.kind(o) === 'goods' ? 'Bạn yêu cầu trả hàng: ' : 'Bạn báo vấn đề: ') + this.reasonText(), 'Đã gửi cho ' + n);
     }
     if (d === 'resched') {
       if (!this.pick() || !this.pick2()) return void this.bad.set('Chọn ngày và giờ.');
