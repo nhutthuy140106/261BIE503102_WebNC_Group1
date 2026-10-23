@@ -102,8 +102,8 @@ export class Messenger implements OnInit, OnDestroy {
           return;
         }
         const wanted = rows.find((c) => c._id === this.route.snapshot.paramMap.get('chatId'));
-        const first = wanted ?? rows[0];
-        if (first) this.select(first, !!wanted);
+        // như Facebook: vào trang chưa mở cuộc nào, để các tin chưa đọc còn nổi bật cho tới khi bạn bấm vào
+        if (wanted) this.select(wanted, true);
       },
       error: (e: Error) => {
         this.error.set(e.message);
