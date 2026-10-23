@@ -188,12 +188,15 @@ export class OrderDetail implements OnInit {
     const ps = this.priceStep(o);
     const names = placedStepNames(o.kind, ps, !!o.detail?.pickup || /tự đến lấy|tự lấy/i.test(o.detail?.place ?? ''));
     const sh = ps ? 1 : 0;
-    // đồ dùng không có bước "Đang thực hiện" nên các bước sau dịch lên một
-    const g = this.kind(o) === 'goods' ? 1 : 0;
-    const posMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: 2 + sh - g, delivering: 3 + sh - g, ready: 3 + sh - g, done: 4 + sh - g };
+    // đồ ăn & uống: 5 bước · đồ dùng: bỏ "Đang thực hiện" · dịch vụ: bỏ bước giao/trả (Đang thực hiện → Hoàn thành)
+    const kd = this.kind(o);
+    const mid = 2 + sh; // vị trí bước "Đang thực hiện" (dịch vụ, đồ ăn) hoặc "Đang giao" (đồ dùng)
+    const posMap: Record<string, number> = kd === 'food'
+      ? { pending: 0, confirmed: 1, pricing: 2, preparing: mid, delivering: mid + 1, ready: mid + 1, done: mid + 2 }
+      : { pending: 0, confirmed: 1, pricing: 2, preparing: mid, delivering: mid, ready: mid, done: mid + 1 };
     const pos = posMap[o.status as string] ?? 0;
     const stopped = ['cancelled', 'declined'].includes(o.status as string);
-    const cutMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: 2 + sh - g, delivering: 3 + sh - g, ready: 3 + sh - g };
+    const cutMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: mid, delivering: kd === 'food' ? mid + 1 : mid, ready: kd === 'food' ? mid + 1 : mid };
     const cutAt = o.priceRejected ? 2 : o.cancelFrom ? Math.min(names.length - 1, (cutMap[o.cancelFrom] ?? 0) + 1) : 1;
     if (stopped) names[cutAt] = o.priceRejected ? 'Đã từ chối giá' : this.label(o);
     const times = (o.history ?? []).map((h) => formatTime(h.at));
@@ -261,7 +264,7 @@ export class OrderDetail implements OnInit {
       case 'preparing':
         return { h: k === 'service' ? 'Dịch vụ đang thực hiện' : 'Bên bán đang chuẩn bị', why: sl + ' đã bắt đầu nên không tự hủy được nữa. Cần thì gửi yêu cầu hủy — ' + sl + ' đồng ý mới hủy.', btns: o.cancelRequested ? [] : [{ id: 'cancelreq', label: 'Gửi yêu cầu hủy', kind: 'warn' }] };
       case 'delivering':
-        return { h: k === 'service' ? 'Đang trả đồ' : 'Đang giao', why: 'Khi đã nhận đủ, hãy xác nhận để đóng đơn.', btns: [{ id: 'received', label: 'Tôi đã nhận đủ', kind: 'main' }] };
+        return { h: k === 'service' ? 'Dịch vụ đã hoàn tất' : 'Đang giao', why: k === 'service' ? 'Kiểm tra kết quả rồi xác nhận để đóng đơn.' : 'Khi đã nhận đủ, hãy xác nhận để đóng đơn.', btns: [{ id: 'received', label: 'Tôi đã nhận đủ', kind: 'main' }] };
       case 'ready':
         return { h: 'Sẵn sàng nhận', why: 'Kiểm tra hàng hoặc kết quả dịch vụ khi nhận.', btns: [{ id: 'received', label: 'Tôi đã nhận đủ', kind: 'main' }] };
       case 'done': {
