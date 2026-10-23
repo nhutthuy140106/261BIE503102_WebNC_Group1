@@ -72,7 +72,7 @@
             <section class="blk"><h2>Bạn đánh giá {{ o.counterpartName }}</h2><div class="quote"><div class="rstars">{{ '★'.repeat(r.s) }}</div>@if (r.t) { <p>{{ r.t }}</p> }</div></section>
           }
           <section class="blk">
-            <h2>Đề nghị của bạn @if (of.state === 'offered') { <button type="button" class="editbtn" (click)="actR('edit')">{{ act.editOffer }}</button> }</h2>
+            <h2>Đề nghị của bạn @if (of.state === 'offered') { <button type="button" class="editlink" (click)="actR('edit')">Sửa</button> }</h2>
             <div class="info">
               <div class="ir"><span class="il">Giờ làm được</span><span class="iv">{{ of.slots.length ? of.slots.join(', ') : 'Thỏa thuận sau' }}</span></div>
               <div class="ir"><span class="il">Lời giới thiệu</span><span class="iv plain">{{ of.intro }}</span></div>
