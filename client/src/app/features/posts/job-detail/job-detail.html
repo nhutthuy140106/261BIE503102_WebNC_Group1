@@ -100,7 +100,7 @@
 
       @if (myOffer(); as o) {
         <div class="state"><b>Bạn đã gửi đề nghị</b>Đang chờ {{ j.sellerName }} xem và chọn người. Bạn sẽ nhận thông báo khi có kết quả.</div>
-        <div class="steps"><span>Đã gửi</span><span class="now">Chờ chủ việc chọn</span><span>Đã nhận việc</span><span>Hoàn thành</span></div>
+        <div class="stepper mini">@for (n of stepLabels; track $index) { <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span>{{ n }}</div> }</div>
         <button type="button" class="primary" (click)="openOrder()">Xem trong Đơn hàng</button>
         @if (o.state === 'offered') { <button type="button" class="ghostbtn" (click)="withdraw()">Rút đề nghị</button> }
       } @else if (j.job?.status === 'open') {
@@ -151,7 +151,7 @@
           <div class="done">
             <h3>Đã gửi đề nghị!</h3>
             <p>{{ j.sellerName }} sẽ xem và chọn người. Gửi đề nghị <b>chưa phải là đã nhận việc</b> — bạn sẽ nhận thông báo khi có kết quả.</p>
-            <div class="steps"><span>Đã gửi</span><span class="now">Chờ chủ việc chọn</span><span>Đã nhận việc</span><span>Hoàn thành</span></div>
+            <div class="stepper mini">@for (n of stepLabels; track $index) { <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span>{{ n }}</div> }</div>
             <div class="btns"><button type="button" class="ghost" (click)="confirm.set(false)">Ở lại đây</button><button type="button" class="go" (click)="openOrder()">Xem trong Đơn hàng</button></div>
           </div>
         } @else {

@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { of, switchMap, forkJoin } from 'rxjs';
 import { CanComponentDeactivate } from '../../../core/guards/pending-changes-guard';
 import { AppError } from '../../../core/models/api';
-import { OFFER_STATE_LABEL, Offer } from '../../../core/models/offer';
+import { OFFER_STATE_LABEL, OFFER_STEPS, Offer } from '../../../core/models/offer';
 import { Post } from '../../../core/models/post';
 import { Question } from '../../../core/models/social';
 import { AuthPromptService } from '../../../core/services/auth-prompt';
@@ -37,6 +37,8 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   private readonly toast = inject(ToastService);
   private readonly notifications = inject(NotificationService);
   protected readonly saved = inject(SavedService);
+  /** Các bước của việc đã nhận — cùng bộ tên với thanh tiến trình trong Đơn hàng */
+  protected readonly stepLabels = OFFER_STEPS.map((s) => OFFER_STATE_LABEL[s]);
 
   protected readonly others = signal<Post[]>([]);
   protected readonly posterStats = signal({ posted: 0, done: 0 });
