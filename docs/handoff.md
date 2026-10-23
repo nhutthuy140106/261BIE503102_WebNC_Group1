@@ -93,11 +93,11 @@ Khung đặt hàng phía Mua (`client/src/app/features/posts/post-detail`) **kh�
 | | Đồ ăn & uống | Đồ dùng | Dịch vụ | Việc làm |
 |---|---|---|---|---|
 | Gọi là | Đơn đã đặt | Đơn đã đặt | Đơn đã đặt | Việc đã nhận |
-| Các bước (`core/utils/placed-steps.ts`) | Đã gửi → Đã xác nhận → Đang thực hiện → Đang giao → Hoàn thành | giống; nhận tại chỗ thì bước 4 là "Hẹn lấy hàng" (chưa làm) | Đã gửi → Đã xác nhận → Đang thực hiện → Trả đồ → Hoàn thành (+ "Duyệt giá" nếu giá chưa chốt) | Đã gửi đề nghị → Được chọn → Đang làm → Đã báo xong → Hoàn thành |
+| Các bước (`core/utils/placed-steps.ts`) | Đã gửi → Đã xác nhận → Đang thực hiện → Đang giao → Hoàn thành | giống; tự đến lấy thì bước 4 là "Hẹn lấy hàng" (đã làm, cho cả đồ ăn & uống) | Đã gửi → Đã xác nhận → Đang thực hiện → Trả đồ → Hoàn thành (+ "Duyệt giá" nếu giá chưa chốt) | Đã gửi đề nghị → Được chọn → Đang làm → Đã báo xong → Hoàn thành |
 | Giá đổi được | Không (chưa có phụ thu) | Không | Có: ước tính (cân) · báo giá (sửa) · phụ thu; người mua phải duyệt | Không (chưa có mặc cả) |
 | Hủy | Chưa xác nhận: hủy ngay. Sau đó: gửi yêu cầu, người bán đồng ý mới hủy | giống | giống; hủy dưới 2 giờ trước giờ hẹn ghi "hủy sát giờ" | Xin hủy kèm lý do |
 | Báo vấn đề sau khi nhận | 2 giờ | 24 giờ (trả hàng khi khác mô tả) | 24 giờ (làm lại / giảm tiền) | Không |
 | Tiền | Trả khi nhận (tiền mặt / chuyển khoản) | giống | giống | Trả công trực tiếp; người làm bấm "Đã nhận tiền công" |
 | Xu | +10 khi xong (đơn ≥ 30.000đ) | giống | giống | +15 khi xong |
 
-Việc còn mở: bước "Hẹn lấy hàng" cho đồ dùng nhận tại chỗ; phụ thu cho đồ ăn; tách riêng việc làm khỏi trang đơn nếu cần.
+Việc còn mở: phụ thu cho đồ ăn; tách riêng việc làm khỏi trang đơn nếu cần.

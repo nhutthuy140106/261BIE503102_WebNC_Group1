@@ -390,7 +390,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   protected doneSteps(o: Order): string[] {
-    return placedStepNames(o.kind, !!o.priceCheck);
+    return placedStepNames(o.kind, !!o.priceCheck, !!o.detail?.pickup);
   }
 
 
@@ -423,6 +423,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         place: placeText,
         when: this.whenLabel(d),
         whenLabel: 'Thời gian dự kiến nhận hàng',
+        pickup: !d.needsAddress(),
         utensils: d.tpl.key === 'food' ? d.utensils() : undefined,
         voucher: d.voucher()?.title,
         subtotal: d.subtotal(),

@@ -186,7 +186,7 @@ export class OrderDetail implements OnInit {
 
   protected placedSteps(o: Order): { label: string; cls: string; time: string; n: number }[] {
     const ps = this.priceStep(o);
-    const names = placedStepNames(o.kind, ps);
+    const names = placedStepNames(o.kind, ps, !!o.detail?.pickup || /tự đến lấy|tự lấy/i.test(o.detail?.place ?? ''));
     const sh = ps ? 1 : 0;
     const posMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: 2 + sh, delivering: 3 + sh, ready: 3 + sh, done: 4 + sh };
     const pos = posMap[o.status as string] ?? 0;

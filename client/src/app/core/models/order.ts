@@ -101,6 +101,8 @@ export interface OrderDetail {
   when?: string;
   /** Tên dòng giờ: "Nhận lúc", "Hẹn lấy", "Lấy đồ lúc"… (lấy từ bài) */
   whenLabel?: string;
+  /** Người mua tự đến lấy (không giao): bước 4 ghi "Hẹn lấy hàng" thay cho "Đang giao" */
+  pickup?: boolean;
   utensils?: boolean;
   voucher?: string;
   subtotal: number;
