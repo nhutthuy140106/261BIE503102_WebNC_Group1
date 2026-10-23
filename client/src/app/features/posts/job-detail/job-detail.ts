@@ -9,6 +9,7 @@ import { Post } from '../../../core/models/post';
 import { Question } from '../../../core/models/social';
 import { AuthPromptService } from '../../../core/services/auth-prompt';
 import { SavedService } from '../../../core/services/saved';
+import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { JobOfferService } from '../../../core/services/job-offer';
 import { PostService } from '../../../core/services/post';
@@ -34,6 +35,7 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   private readonly router = inject(Router);
   private readonly prompt = inject(AuthPromptService);
   private readonly toast = inject(ToastService);
+  private readonly notifications = inject(NotificationService);
   protected readonly saved = inject(SavedService);
 
   protected readonly others = signal<Post[]>([]);
@@ -172,6 +174,8 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
         this.offerForm.markAsPristine();
         this.sent.set(true);
         this.submitting.set(false);
+        this.toast.show('Đã gửi đề nghị nhận việc');
+        this.notifications.push('Bạn đã gửi đề nghị nhận việc "' + o.jobTitle + '". Chờ ' + o.posterName + ' chọn người.', '/orders/' + o._id);
       },
       error: (e: Error) => {
         this.applyServerErrors(e, this.offerForm);

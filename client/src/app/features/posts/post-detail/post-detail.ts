@@ -15,6 +15,7 @@ import { OrderService } from '../../../core/services/order';
 import { PostService } from '../../../core/services/post';
 import { RecommendService } from '../../../core/services/recommend';
 import { SavedService } from '../../../core/services/saved';
+import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
@@ -43,6 +44,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   private readonly recommend = inject(RecommendService);
   private readonly prompt = inject(AuthPromptService);
   private readonly toast = inject(ToastService);
+  private readonly notifications = inject(NotificationService);
   protected readonly xu = inject(XuService);
   protected readonly drawer = inject(DrawerService);
   protected readonly saved = inject(SavedService);
@@ -441,6 +443,8 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         if (v) this.xu.useVoucher(v.id, o.code);
         this.placed.set(o);
         this.submitting.set(false);
+        this.toast.show('Đặt đơn thành công · ' + o.code);
+        this.notifications.push('Bạn đã gửi đơn ' + o.code + ' tới ' + o.counterpartName + '. Chờ ' + o.counterpartName + ' xác nhận.', '/orders/' + o._id);
       },
       error: (e: Error) => {
         this.error.set(e instanceof AppError && e.details.length ? e.details.map((x) => x.message).join(' ') : e.message);

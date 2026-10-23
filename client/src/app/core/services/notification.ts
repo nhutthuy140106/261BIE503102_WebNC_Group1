@@ -22,6 +22,20 @@ export class NotificationService {
     return src.pipe(tap((rows) => this.items.set(rows)));
   }
 
+  /**
+   * Thêm một thông báo mới cho chính người dùng (mock). Khi có máy chủ thật, máy chủ tự tạo thông báo khi đặt đơn,
+   * FE chỉ cần gọi lại `list()` — nên hàm này không làm gì ở chế độ API thật.
+   */
+  push(text: string, link: string): void {
+    if (!useMock('notification')) return;
+    this.db.list<AppNotification>(COLLECTION).subscribe((rows) => {
+      const n: AppNotification = { _id: this.db.newId(), text, link, read: false, createdAt: new Date().toISOString() };
+      const next = [n, ...rows];
+      this.db.save(COLLECTION, next);
+      this.items.set(next);
+    });
+  }
+
   /** Đánh dấu đã đọc: danh sách `ids`, bỏ trống = tất cả. */
   markRead(ids?: string[]): Observable<void> {
     if (!useMock('notification')) return this.api.post<void>('/notifications/read', { ids });
