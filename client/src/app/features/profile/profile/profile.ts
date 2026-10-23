@@ -40,13 +40,54 @@ export class Profile implements OnInit {
 
   protected readonly menu: { key: Tab; label: string }[] = [
     { key: 'overview', label: 'Tổng quan' },
-    { key: 'edit', label: 'Chỉnh sửa hồ sơ' },
-    { key: 'password', label: 'Đổi mật khẩu' },
     { key: 'saved', label: 'Bài đã lưu' },
     { key: 'addresses', label: 'Địa chỉ của tôi' },
-    { key: 'xu', label: 'AntXu & voucher' },
     { key: 'area', label: 'Khu vực' },
+    { key: 'edit', label: 'Chỉnh sửa hồ sơ' },
+    { key: 'password', label: 'Đổi mật khẩu' },
   ];
+
+  // ----- ảnh bìa (mock: lưu trong trình duyệt) -----
+  protected readonly cover = signal<string | null>(this.readCover());
+  protected readonly moreMenu = signal(false);
+
+  private readCover(): string | null {
+    try {
+      return localStorage.getItem('antgo_cover');
+    } catch {
+      return null;
+    }
+  }
+
+  protected pickCover(input: HTMLInputElement): void {
+    const f = input.files?.[0];
+    input.value = '';
+    if (!f || !f.type.startsWith('image/')) return;
+    this.shrink(f, 1400, (url) => {
+      this.cover.set(url);
+      try {
+        localStorage.setItem('antgo_cover', url);
+      } catch {
+        /* bộ nhớ trình duyệt đầy: ảnh bìa chỉ còn trong phiên */
+      }
+      this.toast.show('Đã đổi ảnh bìa');
+    });
+  }
+
+  private shrink(f: File, max: number, done: (dataUrl: string) => void): void {
+    const img = new Image();
+    const src = URL.createObjectURL(f);
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * k);
+      cv.height = Math.round(img.height * k);
+      cv.getContext('2d')?.drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(src);
+      done(cv.toDataURL('image/jpeg', 0.85));
+    };
+    img.src = src;
+  }
 
   // ----- chỉnh sửa hồ sơ -----
   protected readonly profileForm = new FormGroup({
@@ -63,13 +104,16 @@ export class Profile implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onDocClick(e: Event): void {
-    if (this.avMenu() && !(e.target as HTMLElement).closest('.avbig')) this.avMenu.set(false);
+    const el = e.target as HTMLElement;
+    if (this.avMenu() && !el.closest('.avbig')) this.avMenu.set(false);
+    if (this.moreMenu() && !el.closest('.nmore2')) this.moreMenu.set(false);
   }
 
   @HostListener('document:keydown.escape')
   onEsc(): void {
     this.avMenu.set(false);
     this.avView.set(false);
+    this.moreMenu.set(false);
   }
   protected readonly saving = signal(false);
 
@@ -77,24 +121,18 @@ export class Profile implements OnInit {
     const f = input.files?.[0];
     input.value = '';
     if (!f || !f.type.startsWith('image/')) return;
-    const img = new Image();
-    const src = URL.createObjectURL(f);
-    img.onload = () => {
-      const k = Math.min(1, 320 / Math.max(img.width, img.height));
-      const cv = document.createElement('canvas');
-      cv.width = Math.round(img.width * k);
-      cv.height = Math.round(img.height * k);
-      cv.getContext('2d')?.drawImage(img, 0, 0, cv.width, cv.height);
-      URL.revokeObjectURL(src);
-      this.newAvatar.set(cv.toDataURL('image/jpeg', 0.85));
-    };
-    img.src = src;
+    this.shrink(f, 360, (url) => {
+      this.auth.updateProfile({ fullName: this.auth.currentUser()?.fullName ?? '', avatar: url }).subscribe({
+        next: () => this.toast.show('Đã đổi ảnh đại diện'),
+        error: (e: Error) => this.toast.show(e.message),
+      });
+    });
   }
 
   protected saveProfile(): void {
     if (this.profileForm.invalid) return this.profileForm.markAllAsTouched();
     this.saving.set(true);
-    this.auth.updateProfile({ fullName: this.profileForm.controls.fullName.value.trim(), avatar: this.newAvatar() ?? this.auth.currentUser()?.avatar }).subscribe({
+    this.auth.updateProfile({ fullName: this.profileForm.controls.fullName.value.trim(), avatar: this.auth.currentUser()?.avatar }).subscribe({
       next: () => {
         this.saving.set(false);
         this.newAvatar.set(null);
