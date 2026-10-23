@@ -38,11 +38,13 @@
             <span class="sub">{{ when(o) }}</span>
             <span class="code">Mã đơn {{ o.code }}</span>
           </span>
-          <span class="total">{{ o.type === 'placed' ? 'Thành tiền' : 'Tiền công' }}<b>{{ o.total | vnd }}</b></span>
+          <span class="total">{{ o.type === 'placed' ? (o.newPrice ? 'Giá cuối' : 'Thành tiền') : 'Tiền công' }}
+            @if (o.newPrice) { <b>{{ o.newPrice.total | vnd }}</b><s>{{ o.total | vnd }}</s> } @else { <b>{{ o.total | vnd }}</b> }
+          </span>
         </a>
 
         <div class="of">
-          <span class="hint">{{ hint(o) }}</span>
+          <span class="hint"></span>
           <div class="btns">
             <a class="btn2" routerLink="/messenger" [queryParams]="{ to: o.counterpartName, av: o.counterpartAvatar }">Nhắn tin</a>
             @if (next(o); as n) {

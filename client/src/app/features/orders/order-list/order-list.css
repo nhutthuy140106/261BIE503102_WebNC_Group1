@@ -82,3 +82,7 @@
 .of { border-top: 0; padding-top: 4px; }
 .who { display: inline-flex; align-items: center; gap: 10px; }
 a.who:hover b { text-decoration: underline; text-underline-offset: 3px; }
+
+.total s { font-size: 13px; color: var(--fog); }
+.of { justify-content: flex-end; }
+.of .hint { display: none; }
