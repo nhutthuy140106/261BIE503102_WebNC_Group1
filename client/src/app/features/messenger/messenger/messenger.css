@@ -145,3 +145,4 @@
 .msg .bb { font-size: 14px; padding: 7px 13px; }
 .stamp { font-size: 12px; }
 .thread form input { height: 40px; font-size: 14px; }
+.threads li { margin-bottom: 2px; }
