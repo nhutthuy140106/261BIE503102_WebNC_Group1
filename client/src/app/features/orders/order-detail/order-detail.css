@@ -296,3 +296,5 @@ a.pbtn.link { text-decoration: none; }
 /* danh sách lý do không có thanh cuộn riêng: để cả hộp cuộn khi quá cao */
 .modal .fld:has(.hintl) .reasons { max-height: none; overflow: visible; }
 .modal .reasons:not(.two):not(.three):not(.five) button { min-height: 48px; }
+
+.details dd .sub { display: block; margin-top: 2px; font-weight: 400; color: var(--smoke); }
