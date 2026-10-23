@@ -76,3 +76,9 @@
 .grp.need { padding: 18px 18px 20px; border-radius: 18px; background: #FFF6F1; border: 1px solid #F6DACB; }
 .grp.need .order { border-color: #F2D5C5; }
 .tabs { margin-top: 18px; }
+
+/* bớt đường kẻ: thẻ chỉ còn viền ngoài, các phần cách nhau bằng khoảng trắng */
+.oh, .order .oh { border-bottom: 0; padding-bottom: 4px; }
+.of { border-top: 0; padding-top: 4px; }
+.who { display: inline-flex; align-items: center; gap: 10px; }
+a.who:hover b { text-decoration: underline; text-underline-offset: 3px; }

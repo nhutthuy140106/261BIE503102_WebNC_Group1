@@ -22,10 +22,12 @@
     @for (o of g.items; track o._id) {
       <li class="order">
         <div class="oh">
-          <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="24" />
-          <b>{{ o.counterpartName }}</b>
+          @if (o.counterpartId) {
+            <a class="who" [routerLink]="['/shop', o.counterpartId]" title="Xem gian hàng"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="26" /><b>{{ o.counterpartName }}</b></a>
+          } @else {
+            <span class="who"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="26" /><b>{{ o.counterpartName }}</b></span>
+          }
           <span class="kind">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span>
-          @if (o.counterpartId) { <a class="shop" [routerLink]="['/shop', o.counterpartId]">Xem gian hàng ›</a> }
           <span class="ost" [ngClass]="'s-' + dot(o)">{{ label(o) }}</span>
         </div>
 
