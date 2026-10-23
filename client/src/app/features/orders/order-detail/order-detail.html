@@ -208,8 +208,14 @@
               }
             </div>
             @if (o.status === 'done' && !o.issue && o.kind) {
-              <p class="pbnote">@if (issueLeft(o) > 0) { {{ o.kind === 'goods' ? 'Trả hàng khi khác mô tả' : 'Báo vấn đề' }} trong {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận — {{ leftText(issueLeft(o)) }}. }
-                @else { Đã quá {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận nên không còn {{ o.kind === 'goods' ? 'trả hàng' : 'báo vấn đề' }} với bên bán. Có chuyện nghiêm trọng, bạn vẫn <button type="button" class="linkbtn" (click)="go('issue')">báo cáo cho AntGo</button>. }</p>
+              <div class="donenote">
+                @if (issueLeft(o) > 0) {
+                  <p><b>{{ o.kind === 'goods' ? 'Trả hàng khi khác mô tả' : 'Báo vấn đề' }}</b> trong {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận — {{ leftText(issueLeft(o)) }}.</p>
+                } @else {
+                  <p>Đã quá {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận nên không còn {{ o.kind === 'goods' ? 'trả hàng' : 'báo vấn đề' }} với bên bán.</p>
+                  <button type="button" class="linkbtn" (click)="go('issue')">Báo cáo cho AntGo</button>
+                }
+              </div>
             }
             @if (o.status === 'pricing') { <p class="pbnote">Chưa duyệt thì đơn đứng chờ. Giá không bao giờ tự đổi khi bạn chưa bấm đồng ý.</p> }
           }
