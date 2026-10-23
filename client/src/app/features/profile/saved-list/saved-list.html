@@ -18,7 +18,7 @@
           <app-post-card [post]="p" [saved]="true" (toggleSave)="toggle($event)" />
         }
       } @empty {
-        <p class="muted" style="grid-column: 1 / -1">Chưa có bài nào ở mục này. Bấm ♡ trên thẻ bài để lưu.</p>
+        <div class="sempty"><img src="assets/clean/ant-empty.png" alt="" /><p>Chưa lưu gì ở mục này.<br />Bấm <svg class="i hrt"><use href="#heart" /></svg> trên bài để lưu lại xem sau nhé.</p></div>
       }
     </div>
   }
