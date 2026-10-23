@@ -105,3 +105,6 @@ input, select, textarea {
 .photo-add svg { width: 26px; height: 26px; }
 .photo-thumb { width: 84px; height: 84px; }
 .photo-add { display: flex !important; flex-direction: column; align-items: center; justify-content: center; height: 96px !important; margin-bottom: 0 !important; }
+
+/* trang Messenger chiếm trọn khung, không hiện chân trang */
+body.no-footer app-footer { display: none; }
