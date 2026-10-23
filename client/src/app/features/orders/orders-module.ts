@@ -5,10 +5,9 @@ import { OrdersRoutingModule } from './orders-routing-module';
 import { OrderList } from './order-list/order-list';
 import { OrderDetail } from './order-detail/order-detail';
 import { ReportForm } from './report-form/report-form';
-import { OrderThumb } from './order-thumb/order-thumb';
 
 @NgModule({
-  declarations: [OrderList, OrderDetail, ReportForm, OrderThumb],
+  declarations: [OrderList, OrderDetail, ReportForm],
   imports: [SharedModule, OrdersRoutingModule],
 })
 export class OrdersModule {}

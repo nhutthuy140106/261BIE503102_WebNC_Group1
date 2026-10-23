@@ -29,17 +29,10 @@
       <section class="thread">
         <header class="top">
           <app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="42" />
-          <span class="tx"><b>{{ c.withName }}</b>@if (c.context) { <small>{{ c.context.label }}</small> }</span>
+          <span class="tx"><b>{{ c.withName }}</b>@if (c.context) { <small>{{ ctxOrder() ? ctxOrder()!.code + ' · ' + ctxOrder()!.postTitle : c.context.label }}</small> }</span>
+          @if (c.context) { <a class="ctxlink" [routerLink]="ctxLink(c)">{{ ctxText(c) }}</a> }
         </header>
         <ul class="messages">
-          @if (c.context) {
-            <li class="ctxcard">
-              <span class="ci"><svg class="i"><use [attr.href]="c.context.type === 'post' || c.context.type === 'job' ? '#bag' : '#receipt'" /></svg></span>
-              <span class="cx"><small>{{ c.context.type === 'post' || c.context.type === 'job' ? 'Bài đăng' : 'Đơn hàng' }}</small><b>{{ c.context.label }}</b></span>
-              <a [routerLink]="ctxLink(c)">{{ ctxText(c) }}</a>
-              <p>Nhắn tin không tự đổi trạng thái đơn.</p>
-            </li>
-          }
           @for (m of c.messages; track m._id; let i = $index) {
             @if (i === 0 || gap(c.messages[i - 1], m)) { <li class="stamp">{{ fmt(m.createdAt) }}</li> }
             <li class="msg" [class.mine]="m.mine">

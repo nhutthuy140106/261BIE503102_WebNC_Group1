@@ -70,3 +70,7 @@
 .ctxcard .cx { display: grid; gap: 1px; min-width: 0; }
 .ctxcard a { border-radius: 999px; padding: 9px 16px; }
 .ctxcard p { grid-column: 1 / -1; margin: 6px 0 0; text-align: center; }
+
+.ctxcard app-order-thumb ::ng-deep .th { width: 64px; height: 56px; border-radius: 10px; }
+.ctxcard app-order-thumb ::ng-deep .ph small { display: none; }
+.ctxcard .cx b { font-size: 15px; }

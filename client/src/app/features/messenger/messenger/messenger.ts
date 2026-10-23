@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Conversation, Message } from '../../../core/models/social';
+import { Order } from '../../../core/models/order';
+import { OrderService } from '../../../core/services/order';
 import { ChatService } from '../../../core/services/chat';
 import { stripAccents } from '../../../core/utils/slug-helper';
 import { formatDateTime } from '../../../core/utils/status-label';
@@ -15,6 +17,7 @@ import { formatDateTime } from '../../../core/utils/status-label';
 })
 export class Messenger implements OnInit, OnDestroy {
   private readonly chat = inject(ChatService);
+  private readonly orders = inject(OrderService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -25,6 +28,8 @@ export class Messenger implements OnInit, OnDestroy {
   protected readonly fmt = formatDateTime;
   protected readonly input = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(2000)] });
 
+  /** Đơn gắn với cuộc trò chuyện đang mở: lấy từ dữ liệu đơn thật để hiện ảnh + tên như trang Đơn hàng */
+  protected readonly ctxOrder = signal<Order | null>(null);
   protected readonly query = signal('');
   protected readonly onlyUnread = signal(false);
   protected readonly unreadCount = computed(() => this.conversations().filter((c) => c.unread > 0).length);
@@ -87,6 +92,10 @@ export class Messenger implements OnInit, OnDestroy {
 
   select(c: Conversation, keepUrl = false): void {
     this.selectedId.set(c._id);
+    this.ctxOrder.set(null);
+    if (c.context && (c.context.type === 'order' || c.context.type === 'offer')) {
+      this.orders.getOrder(c.context.id).subscribe({ next: (o) => this.selectedId() === c._id && this.ctxOrder.set(o), error: () => undefined });
+    }
     if (!keepUrl) this.router.navigate(['/messenger', c._id], { replaceUrl: true });
     // Tin nhắn nạp riêng cho từng hội thoại (API thật); mock trả lại đúng tin đã có
     this.chat.messages(c._id).subscribe((ms) => this.conversations.update((l) => l.map((x) => (x._id === c._id ? { ...x, messages: ms } : x))));
