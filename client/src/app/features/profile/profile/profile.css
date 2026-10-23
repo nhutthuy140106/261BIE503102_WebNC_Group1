@@ -97,3 +97,22 @@
 .avscrim img { max-width: min(520px, 92vw); max-height: 86vh; border-radius: 50%; object-fit: cover; aspect-ratio: 1; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
 .avx { position: absolute; top: 18px; right: 18px; width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, .16); color: #fff; display: grid; place-items: center; }
 .avx:hover { background: rgba(255, 255, 255, .28); }
+
+/* trang chỉnh sửa hồ sơ / đổi mật khẩu: thẻ cài đặt, nhãn bên trái, nội dung bên phải, lấp đầy chiều ngang */
+.lead { margin: 4px 0 0; color: var(--smoke); }
+.scard { margin-top: 22px; border: 1px solid var(--border); border-radius: 16px; background: #fff; }
+.srow2 { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 24px; padding: 22px 26px; border-bottom: 1px solid var(--border); align-items: center; }
+.sl { display: grid; gap: 3px; }
+.sl b { font-size: 15px; }
+.sl small { color: var(--smoke); font-size: 13px; line-height: 1.45; }
+.sr { display: grid; gap: 6px; max-width: 460px; }
+.sr .tx { height: 46px; padding: 0 14px; border: 1px solid var(--border); border-radius: 12px; font: inherit; width: 100%; outline: none; background: #fff; }
+.sr .tx:focus { border-color: var(--ink); }
+.sr .tx:disabled { background: #F6F7F9; color: var(--smoke); }
+.sfoot { display: flex; justify-content: flex-end; padding: 16px 26px; }
+.sfoot .go { height: 46px; padding: 0 28px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 700; font-size: 15px; }
+.sfoot .go:disabled { background: #D9D3CF; }
+.avmenu { transform: translateX(-20%); }
+.avmenu::before { left: 20%; }
+@media (max-width: 760px) { .srow2 { grid-template-columns: 1fr; gap: 10px; } }
+.avbig { width: 112px; height: 112px; }

@@ -47,56 +47,67 @@
         }
         @case ('edit') {
           <h1>Chỉnh sửa hồ sơ</h1>
-          <form class="pform" [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
-            <div class="avedit">
-              <div class="avbig">
-                <app-avatar [src]="newAvatar() ?? u.avatar" [name]="u.fullName" [size]="132" />
-                <button type="button" class="avcam" aria-label="Đổi ảnh đại diện" (click)="avMenu.set(!avMenu())"><svg class="i"><use href="#cam-s" /></svg></button>
-                @if (avMenu()) {
-                  <span class="avmenu">
-                    <button type="button" (click)="viewAvatar()"><svg class="i"><use href="#p-user" /></svg>Xem ảnh đại diện</button>
-                    <label (click)="avMenu.set(false)"><input type="file" accept="image/*" hidden (change)="pickAvatar($any($event.target))" /><svg class="i"><use href="#photo" /></svg>Chọn ảnh đại diện</label>
-                  </span>
-                }
+          <p class="lead">Thông tin này hiện với hàng xóm khi bạn đặt hàng, nhận việc hoặc nhắn tin.</p>
+          <form class="scard" [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+            <div class="srow2">
+              <div class="sl"><b>Ảnh đại diện</b><small>Ảnh rõ mặt giúp người bán tin tưởng hơn</small></div>
+              <div class="sr">
+                <div class="avbig">
+                  <app-avatar [src]="newAvatar() ?? u.avatar" [name]="u.fullName" [size]="112" />
+                  <button type="button" class="avcam" aria-label="Đổi ảnh đại diện" (click)="avMenu.set(!avMenu())"><svg class="i"><use href="#cam-s" /></svg></button>
+                  @if (avMenu()) {
+                    <span class="avmenu">
+                      <button type="button" (click)="viewAvatar()"><svg class="i"><use href="#p-user" /></svg>Xem ảnh đại diện</button>
+                      <label (click)="avMenu.set(false)"><input type="file" accept="image/*" hidden (change)="pickAvatar($any($event.target))" /><svg class="i"><use href="#photo" /></svg>Chọn ảnh đại diện</label>
+                    </span>
+                  }
+                </div>
               </div>
-              <div class="avname"><b>{{ u.fullName }}</b><small>{{ area.current() }}</small></div>
             </div>
-            @if (avView()) {
-              <div class="avscrim" (click)="avView.set(false)"><img [src]="newAvatar() ?? u.avatar" alt="Ảnh đại diện" (click)="$event.stopPropagation()" /><button type="button" class="avx" aria-label="Đóng" (click)="avView.set(false)"><svg class="i"><use href="#xmark" /></svg></button></div>
-            }
-            <div class="field">
-              <label for="fullName">Họ và tên</label>
-              <input id="fullName" class="tx" formControlName="fullName" maxlength="40" />
-              @if (profileForm.controls.fullName.invalid && profileForm.controls.fullName.touched) { <small class="error">Tên dài 2–40 ký tự.</small> }
+            <div class="srow2">
+              <div class="sl"><b>Họ và tên</b><small>2–40 ký tự</small></div>
+              <div class="sr">
+                <input id="fullName" class="tx" formControlName="fullName" maxlength="40" />
+                @if (profileForm.controls.fullName.invalid && profileForm.controls.fullName.touched) { <small class="error">Tên dài 2–40 ký tự.</small> }
+              </div>
             </div>
-            <div class="field">
-              <label for="phone">Số điện thoại</label>
-              <input id="phone" class="tx" [value]="u.username" disabled />
-              <small class="hint">Số điện thoại là tên đăng nhập nên không đổi được ở đây.</small>
+            <div class="srow2">
+              <div class="sl"><b>Số điện thoại</b><small>Dùng để đăng nhập</small></div>
+              <div class="sr"><input id="phone" class="tx" [value]="u.username" disabled /></div>
             </div>
-            <button type="submit" class="go" [disabled]="saving()">Lưu thay đổi</button>
+            <div class="sfoot"><button type="submit" class="go" [disabled]="saving()">Lưu thay đổi</button></div>
           </form>
+          @if (avView()) {
+            <div class="avscrim" (click)="avView.set(false)"><img [src]="newAvatar() ?? u.avatar" alt="Ảnh đại diện" (click)="$event.stopPropagation()" /><button type="button" class="avx" aria-label="Đóng" (click)="avView.set(false)"><svg class="i"><use href="#xmark" /></svg></button></div>
+          }
         }
         @case ('password') {
           <h1>Đổi mật khẩu</h1>
-          <form class="pform" [formGroup]="passForm" (ngSubmit)="savePassword()" novalidate>
-            <div class="field">
-              <label for="pcur">Mật khẩu hiện tại</label>
-              <app-password-input inputId="pcur" autocomplete="current-password" formControlName="current" [invalid]="passTried() && passForm.controls.current.invalid" />
-              @if (passTried() && passForm.controls.current.invalid) { <small class="error">Nhập mật khẩu hiện tại.</small> }
+          <p class="lead">Chọn mật khẩu mạnh, ít nhất 8 ký tự, không dùng lại mật khẩu ở nơi khác.</p>
+          <form class="scard" [formGroup]="passForm" (ngSubmit)="savePassword()" novalidate>
+            <div class="srow2">
+              <div class="sl"><b>Mật khẩu hiện tại</b></div>
+              <div class="sr">
+                <app-password-input inputId="pcur" autocomplete="current-password" formControlName="current" [invalid]="passTried() && passForm.controls.current.invalid" />
+                @if (passTried() && passForm.controls.current.invalid) { <small class="error">Nhập mật khẩu hiện tại.</small> }
+              </div>
             </div>
-            <div class="field">
-              <label for="pnew">Mật khẩu mới</label>
-              <app-password-input inputId="pnew" autocomplete="new-password" formControlName="next" [invalid]="passTried() && passForm.controls.next.invalid" />
-              @if (passTried() && passForm.controls.next.invalid) { <small class="error">Mật khẩu mới tối thiểu 8 ký tự.</small> }
-              @else if (passTried() && passForm.controls.next.value === passForm.controls.current.value) { <small class="error">Mật khẩu mới phải khác mật khẩu hiện tại.</small> }
+            <div class="srow2">
+              <div class="sl"><b>Mật khẩu mới</b><small>Tối thiểu 8 ký tự</small></div>
+              <div class="sr">
+                <app-password-input inputId="pnew" autocomplete="new-password" formControlName="next" [invalid]="passTried() && passForm.controls.next.invalid" />
+                @if (passTried() && passForm.controls.next.invalid) { <small class="error">Mật khẩu mới tối thiểu 8 ký tự.</small> }
+                @else if (passTried() && passForm.controls.next.value === passForm.controls.current.value) { <small class="error">Mật khẩu mới phải khác mật khẩu hiện tại.</small> }
+              </div>
             </div>
-            <div class="field">
-              <label for="pagain">Nhập lại mật khẩu mới</label>
-              <app-password-input inputId="pagain" autocomplete="new-password" formControlName="again" [invalid]="passTried() && (passForm.controls.again.invalid || passMismatch())" />
-              @if (passTried() && passMismatch()) { <small class="error">Hai mật khẩu chưa giống nhau.</small> }
+            <div class="srow2">
+              <div class="sl"><b>Nhập lại mật khẩu mới</b></div>
+              <div class="sr">
+                <app-password-input inputId="pagain" autocomplete="new-password" formControlName="again" [invalid]="passTried() && (passForm.controls.again.invalid || passMismatch())" />
+                @if (passTried() && passMismatch()) { <small class="error">Hai mật khẩu chưa giống nhau.</small> }
+              </div>
             </div>
-            <button type="submit" class="go" [disabled]="saving()">Đổi mật khẩu</button>
+            <div class="sfoot"><button type="submit" class="go" [disabled]="saving()">Đổi mật khẩu</button></div>
           </form>
         }
         @case ('saved') { <app-saved-list id="saved" /> }
