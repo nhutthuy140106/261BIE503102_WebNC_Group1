@@ -82,6 +82,14 @@ export class Header {
 
   protected readonly nTop = signal(false);
 
+  // ----- menu thả xuống ở ảnh đại diện -----
+  protected readonly userOpen = signal(false);
+
+  protected logout(): void {
+    this.userOpen.set(false);
+    this.auth.logout().subscribe({ complete: () => this.router.navigate(['/']), error: () => this.router.navigate(['/']) });
+  }
+
   protected readAll(): void {
     this.nTop.set(false);
     this.notifications.markRead().subscribe({ error: () => undefined });
@@ -91,6 +99,7 @@ export class Header {
   onDocClick(e: Event): void {
     const el = e.target as HTMLElement;
     if (this.notifOpen() && !el.closest('.nwrap')) this.notifOpen.set(false);
+    if (this.userOpen() && !el.closest('.awrap')) this.userOpen.set(false);
     if (!el.closest('.nmore')) {
       this.nMenu.set(null);
       this.nTop.set(false);
@@ -99,6 +108,7 @@ export class Header {
 
   @HostListener('document:keydown.escape')
   onEsc(): void {
+    this.userOpen.set(false);
     this.notifOpen.set(false);
     this.nMenu.set(null);
   }

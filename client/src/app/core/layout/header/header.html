@@ -97,9 +97,27 @@
             </div>
           }
         </span>
-        <a routerLink="/profile" class="av" [title]="auth.currentUser()?.fullName ?? 'Tài khoản'">
-          <app-avatar [src]="auth.currentUser()?.avatar" [name]="auth.currentUser()?.fullName" [size]="34" />
-        </a>
+        <span class="nwrap awrap">
+          <button type="button" class="av" [class.on]="userOpen()" [title]="auth.currentUser()?.fullName ?? 'Tài khoản'" (click)="userOpen.set(!userOpen())">
+            <app-avatar [src]="auth.currentUser()?.avatar" [name]="auth.currentUser()?.fullName" [size]="34" />
+          </button>
+          @if (userOpen()) {
+            <div class="upanel">
+              <a routerLink="/profile" class="ucard" (click)="userOpen.set(false)">
+                <app-avatar [src]="auth.currentUser()?.avatar" [name]="auth.currentUser()?.fullName" [size]="48" />
+                <span><b>{{ auth.currentUser()?.fullName }}</b><small>{{ area.current() }}</small></span>
+              </a>
+              <div class="usep"></div>
+              <a routerLink="/profile" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#users" /></svg>Tài khoản của tôi</a>
+              <a routerLink="/profile" [queryParams]="{ tab: 'saved' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#heart" /></svg>Bài đã lưu</a>
+              <a routerLink="/profile" [queryParams]="{ tab: 'addresses' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#home" /></svg>Địa chỉ của tôi</a>
+              <a routerLink="/profile" [queryParams]="{ tab: 'xu' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#coin" /></svg>AntXu &amp; voucher<em>{{ xu.balance() }} Xu</em></a>
+              <a routerLink="/orders" [queryParams]="{ f: 'history' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#receipt" /></svg>Lịch sử đơn hàng</a>
+              <div class="usep"></div>
+              <button type="button" class="uitem" (click)="logout()"><svg class="i"><use href="#logout" /></svg>Đăng xuất</button>
+            </div>
+          }
+        </span>
       } @else {
         <a routerLink="/auth/login" class="login">Đăng nhập</a>
       }
