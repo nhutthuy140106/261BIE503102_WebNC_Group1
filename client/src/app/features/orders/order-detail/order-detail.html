@@ -109,7 +109,7 @@
             <div class="pricebox">
               <div class="pb"><span>Bạn đã gửi</span><span>{{ iss.type }}</span></div>
               @if (iss.text) { <p class="pbw">{{ iss.text }}</p> }
-              <div class="pbl"><div><span>Mong muốn</span><span>{{ iss.want }}</span></div>@if (iss.photos) { <div><span>Ảnh kèm</span><span>{{ iss.photos }} ảnh</span></div> }</div>
+              <div class="pbl">@if (iss.want) { <div><span>Mong muốn</span><span>{{ iss.want }}</span></div> }@if (iss.photos) { <div><span>Ảnh kèm</span><span>{{ iss.photos }} ảnh</span></div> }</div>
             </div>
           </section>
         }
@@ -319,10 +319,6 @@
             <div class="fld" [class.bad]="bad() && !picks().length"><label>Vấn đề là gì? <small class="hintl">(chọn được nhiều)</small></label>
               <div class="reasons">@for (t of issueTypes(o); track t) { <button type="button" [class.on]="picks().includes(t)" (click)="togglePickReason(t)">{{ t }}</button> }</div>
               @if (picks().includes(otherReason)) { <textarea maxlength="300" [placeholder]="issuePh(o)" [value]="text()" (input)="text.set($any($event.target).value); bad.set('')"></textarea> }</div>
-            @if (issueWants(o).length > 1) {
-              <div class="fld" [class.bad]="bad() && !pick2()"><label>Bạn mong muốn</label>
-                <div class="reasons">@for (w of issueWants(o); track w) { <button type="button" [class.on]="pick2() === w" (click)="pick2.set(w); bad.set('')">{{ w }}</button> }</div></div>
-            }
             <div class="fld"><label>Mô tả chi tiết <small class="hintl">(không bắt buộc)</small></label><textarea maxlength="500" placeholder="Chuyện gì đã xảy ra? Ghi rõ để bên bán xử lý nhanh hơn." [value]="more()" (input)="more.set($any($event.target).value)"></textarea></div>
             <div class="fld"><label>Hình ảnh <small class="hintl">{{ o.kind === 'service' ? '(không bắt buộc)' : '(bắt buộc)' }}</small></label>
               <label class="photo-add" [class.full]="rvPics().length >= 4"><input type="file" accept="image/*" multiple hidden (change)="addPics($any($event.target))" /><svg class="i"><use href="#camera" /></svg>Thêm hình ảnh</label>

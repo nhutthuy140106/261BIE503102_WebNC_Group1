@@ -442,7 +442,6 @@ export class OrderDetail implements OnInit {
     if (a === 'rate') return this.open('rate');
     if (a === 'issue-open') {
       this.open('issue');
-      this.pick2.set(this.issueWants(o).length === 1 ? this.issueWants(o)[0] : '');
       return;
     }
     if (a === 'resched') return this.open('resched');
@@ -515,10 +514,9 @@ export class OrderDetail implements OnInit {
     if (d === 'issue') {
       const needPhoto = this.kind(o) !== 'service';
       if (!this.picks().length) return void this.bad.set('Chọn ít nhất một vấn đề.');
-      if (!this.pick2()) return void this.bad.set('Chọn điều bạn mong muốn.');
       if (this.picks().includes(OTHER_REASON) && !this.text().trim()) return void this.bad.set('Mô tả ngắn giúp bên bán hiểu.');
       if (needPhoto && !this.rvPics().length) return void this.bad.set('Cần ít nhất 1 ảnh để bên bán kiểm tra.');
-      return this.move({ issue: { st: 'open', type: this.reasonText(), want: this.pick2(), text: this.more().trim(), photos: this.rvPics().length } }, (this.kind(o) === 'goods' ? 'Bạn yêu cầu trả hàng: ' : 'Bạn báo vấn đề: ') + this.reasonText(), 'Đã gửi cho ' + n);
+      return this.move({ issue: { st: 'open', type: this.reasonText(), want: '', text: this.more().trim(), photos: this.rvPics().length } }, (this.kind(o) === 'goods' ? 'Bạn yêu cầu trả hàng: ' : 'Bạn báo vấn đề: ') + this.reasonText(), 'Đã gửi cho ' + n);
     }
     if (d === 'resched') {
       if (!this.pick() || !this.pick2()) return void this.bad.set('Chọn ngày và giờ.');
