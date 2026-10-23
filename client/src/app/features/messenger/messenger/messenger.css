@@ -228,3 +228,7 @@
 .thread.blank p { margin: 0; color: var(--smoke); font-size: 14.5px; }
 .thread.blank img { position: relative; left: 58px; }
 .thread.blank img { left: 42px; }
+/* hai nút lọc nổi bật, cùng kiểu với khung thông báo */
+.tabs button { background: #F0F2F5; color: var(--ink); }
+.tabs button:hover { background: #E6E9EE; }
+.tabs button.on { background: var(--ink); color: #fff; }

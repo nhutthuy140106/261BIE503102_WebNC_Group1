@@ -129,3 +129,7 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
 .nic { background: #F0F2F5; color: var(--ink); }
 .nitem.unread .ntx small { color: var(--smoke); font-weight: 400; }
 .ndot { background: var(--ink); }
+/* hai nút lọc nổi bật: nút chưa chọn xám nhạt, nút đang chọn xanh đen chữ trắng */
+.ntabs button { background: #F0F2F5; color: var(--ink); }
+.ntabs button:hover { background: #E6E9EE; }
+.ntabs button.on { background: var(--ink); color: #fff; }
