@@ -99,7 +99,6 @@
             </dl>
           </div>
           @if (o.note) { <p class="request-note">Ghi chú: {{ o.note }}</p> }
-          @if (o.cancelRequested) { <div class="request-note">Đã gửi yêu cầu hủy cho {{ o.counterpartName }} (lý do: {{ o.cancelWhy }}). Đơn vẫn {{ label(o).toLowerCase() }} cho tới khi bên bán đồng ý.</div> }
           @if (o.cancelDenied) { <div class="request-note">{{ o.counterpartName }} không đồng ý hủy: {{ o.cancelDenied }}</div> }
           @if (o.resched?.by === 'buyer') { <div class="request-note">Đã gửi đề nghị đổi sang <b>{{ o.resched!.to }}</b>. Chờ {{ o.counterpartName }} đồng ý — đơn vẫn giữ giờ cũ. <button type="button" class="linkbtn" (click)="actP('resched-undo')">Rút đề nghị</button></div> }
         </section>
@@ -294,6 +293,11 @@
             <label class="photo-add" [class.full]="rvPics().length >= 4"><input type="file" accept="image/*" multiple hidden (change)="addPics($any($event.target))" /><svg class="i"><use href="#camera" /></svg>Thêm hình ảnh</label>
 @if (rvPics().length) { <div class="photo-thumbs">@for (u of rvPics(); track u) { <span class="photo-thumb"><img [src]="u" alt="" /><button type="button" aria-label="Bỏ ảnh" (click)="dropPic(u)">×</button></span> }</div> }
             <div class="btns one"><button type="button" class="go" (click)="o.type === 'received' ? okR() : okP()">Gửi đánh giá</button></div>
+          }
+          @case ('creqdone') {
+            <h3>Đã gửi yêu cầu hủy</h3>
+            <p class="p">{{ o.counterpartName }} sẽ xem yêu cầu của bạn. Đơn vẫn tiếp tục cho tới khi {{ o.counterpartName }} đồng ý hủy, bạn sẽ nhận thông báo khi có phản hồi.</p>
+            <div class="btns one"><button type="button" class="go" (click)="close()">Đã hiểu</button></div>
           }
           @case ('pcancel') {
             <h3>{{ dlgNow() ? 'Hủy đơn này?' : 'Gửi yêu cầu hủy?' }}</h3>

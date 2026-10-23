@@ -25,7 +25,7 @@ interface Btn {
 
 type DlgType =
   | 'edit' | 'withdraw' | 'start' | 'report' | 'rcancel' | 'unpaid' | 'rate'
-  | 'pcancel' | 'received' | 'issue' | 'resched' | 'approve' | 'reject';
+  | 'pcancel' | 'creqdone' | 'received' | 'issue' | 'resched' | 'approve' | 'reject';
 
 const OTHER_REASON = 'Lý do khác';
 const R_REASONS = ['Tôi bận đột xuất', 'Sức khỏe không đảm bảo', 'Địa điểm quá xa', 'Không liên lạc được người đăng', 'Việc khác với mô tả', 'Thời gian không còn phù hợp', OTHER_REASON];
@@ -345,7 +345,7 @@ export class OrderDetail implements OnInit {
   }
 
   /** Cập nhật đơn đã đặt + Xu (cộng khi xong / đánh giá, trả voucher khi hủy, thu lại khi hoàn tiền hết) */
-  private move(patch: Partial<Order>, line: string, msg?: string): void {
+  private move(patch: Partial<Order>, line: string, msg?: string, after?: DlgType): void {
     const o = this.order();
     if (!o) return;
     const before = o;
@@ -353,6 +353,7 @@ export class OrderDetail implements OnInit {
       next: (n) => {
         this.order.set(n);
         this.close();
+        if (after) this.dlg.set(after);
         if (msg) this.toast.show(msg);
         if (patch.status === 'done' && before.status !== 'done' && n.total >= 30000) this.xu.earn(10, 'Hoàn thành đơn ' + n.code, 'order:' + n._id);
         if (patch.rated && patch.rated.t) this.xu.earn(5, 'Đánh giá đơn ' + n.code, 'review:' + n._id);
@@ -501,7 +502,7 @@ export class OrderDetail implements OnInit {
       const now = this.dlgNow();
       const late = now && this.kind(o) === 'service' && o.status === 'confirmed' && o.apptIn != null && o.apptIn < 2;
       if (now) return this.move({ status: 'cancelled', cancelFrom: o.status as string, cancelBy: 'buyer', cancelWhy: why, cancelLate: late }, 'Bạn hủy đơn: ' + why, 'Đã hủy đơn');
-      return this.move({ cancelRequested: true, cancelWhy: why, cancelDenied: null }, 'Bạn gửi yêu cầu hủy: ' + why, 'Đã gửi yêu cầu hủy');
+      return this.move({ cancelRequested: true, cancelWhy: why, cancelDenied: null }, 'Bạn gửi yêu cầu hủy: ' + why, undefined, 'creqdone');
     }
     if (d === 'received') return this.move({ status: 'done', doneAt: Date.now() }, 'Bạn xác nhận đã nhận đủ', 'Đơn đã hoàn thành');
     if (d === 'rate') {
