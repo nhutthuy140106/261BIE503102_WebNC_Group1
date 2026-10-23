@@ -71,16 +71,6 @@
                 <a routerLink="/orders" [queryParams]="{ f: 'history' }"><b>{{ stats().history }}</b><span>Trong lịch sử</span></a>
               </div>
             </section>
-            <section class="fcard">
-              <h2>Lối tắt</h2>
-              <ul class="links">
-                <li><button type="button" (click)="go('saved')">Bài đã lưu</button></li>
-                <li><button type="button" (click)="go('addresses')">Địa chỉ của tôi</button></li>
-                <li><a routerLink="/notifications">Thông báo</a></li>
-                <li><a routerLink="/messenger">Tin nhắn</a></li>
-                <li><a routerLink="/help">Trợ giúp &amp; hỗ trợ</a></li>
-              </ul>
-            </section>
           </div>
         </div>
       }
