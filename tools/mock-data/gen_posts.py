@@ -60,10 +60,10 @@ def template_of(kind_label: str, title: str) -> str:
         return "fix"
     if re.search(r"Dọn|dọn", title):
         return "clean"
-    if re.search(r"Lấy|lấy|Mua hộ|siêu thị|Giao đồ", title):
-        return "trip"
     if re.search(r"Giặt|giặt", title):
         return "svc"
+    if re.search(r"Lấy|lấy|Mua hộ|siêu thị|Giao đồ", title):
+        return "trip"
     if kind_label == "Đồ uống" or re.search(r"cà phê|trà sữa|sinh tố", title, re.I):
         return "drink"
     if kind_label in ("Hàng hóa", "Đồ dùng"):
