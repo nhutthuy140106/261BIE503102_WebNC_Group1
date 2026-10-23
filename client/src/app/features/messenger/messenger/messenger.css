@@ -215,3 +215,10 @@
 .thread.blank { gap: 14px; }
 .thread.blank .say { position: relative; margin: 0; padding: 12px 20px; border-radius: 18px; background: #fff; border: 1px solid var(--border); box-shadow: 0 4px 14px rgba(34, 48, 74, .08); font-size: 15px; font-weight: 600; color: var(--ink); }
 .thread.blank .say::after { content: ''; position: absolute; left: calc(50% + 10px); bottom: -8px; width: 14px; height: 14px; background: #fff; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); transform: rotate(45deg); }
+/* con kiến to hơn, bong bóng thoại giống trang giới thiệu (nền kem, chữ serif nghiêng, góc nhọn phía kiến) */
+.thread.blank .stage { position: relative; display: block; }
+.thread.blank .stage img { width: 280px; display: block; }
+.thread.blank .say { position: absolute; left: 66%; top: -2%; margin: 0; padding: 10px 18px; white-space: nowrap; border: 0; border-radius: 20px 20px 20px 4px; background: #fff8ec; box-shadow: 0 10px 30px -10px rgba(120, 60, 20, .35); font: italic 500 20px 'Newsreader', serif; color: var(--ink); }
+.thread.blank .say::after { display: none; }
+.thread.blank .say i { color: #c25415; }
+.thread.blank .say { left: 74%; top: -4%; }
