@@ -199,3 +199,12 @@ a.pbtn.link { text-decoration: none; }
 .pcard b { display: block; }
 .btn-msg.sm { height: 38px; padding: 0 14px; margin-left: auto; border-color: #DADDE3; }
 .lbtn { display: block; width: 100%; margin-top: 16px; text-align: center; }
+
+/* đầu bảng hành động: ảnh người bán + tên + trạng thái hiện tại */
+.ahead { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.ahead b { display: block; font-size: 16px; }
+.ahead .stat { display: inline-flex; align-items: center; gap: 7px; margin-top: 2px; font-size: 13.5px; font-weight: 500; color: var(--smoke); }
+.apanel h3 { margin-top: 0; }
+.arow2 { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; margin-top: 12px; }
+.arow2 .gbtn { margin-top: 0; display: inline-flex; gap: 7px; }
+.arow2 .gbtn svg { width: 17px; height: 17px; }
