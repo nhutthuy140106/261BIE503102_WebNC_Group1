@@ -18,7 +18,6 @@
           <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="28" /><b>{{ o.counterpartName }}</b>
         }
         @if (job()?.rating; as r) { <span class="rt"><svg class="i"><use href="#star" /></svg><b>{{ ('' + r).replace('.', ',') }}</b>@if (job()?.reviewCount) { <i>{{ job()?.reviewCount }} đánh giá</i> }</span> }
-        <button type="button" class="btn-msg" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
       </div>
     </div>
     <div class="pay">
@@ -152,26 +151,22 @@
 
     <!-- ===== bảng hành động bên phải ===== -->
     <aside>
-      <div class="apanel" [class.light]="lightPanel(o)">
+      <div class="apanel">
 
 
         @if (o.type === 'received' && offer(); as of) {
           @if (receivedPanel(o, of); as p) {
-            <h3><i class="dotc" [class.go]="o.status === 'working' || o.status === 'preparing' || o.status === 'delivering' || o.status === 'confirmed' || o.status === 'chosen' || o.status === 'ready'" [class.act]="o.status === 'pricing'" [class.end]="o.status === 'done' || o.status === 'cancelled' || o.status === 'rejected' || o.status === 'withdrawn' || o.status === 'declined'"></i>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
+            <span class="stat"><i class="dotc" [class.go]="o.status === 'working' || o.status === 'preparing' || o.status === 'delivering' || o.status === 'confirmed' || o.status === 'chosen' || o.status === 'ready'" [class.act]="o.status === 'pricing'" [class.end]="o.status === 'done' || o.status === 'cancelled' || o.status === 'rejected' || o.status === 'withdrawn' || o.status === 'declined'"></i>{{ label(o) }}</span>
+            <h3>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
             @if (of.state === 'reported') { <div class="cd">Tự hoàn thành sau 24 giờ</div> }
             @for (b of p.btns; track b.id) {
-              @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actR(b.id)">{{ b.label }}</button> }
+              <button type="button" [class.pbtn]="b.kind === 'main'" [class.gbtn]="b.kind !== 'main'" [class.warn]="b.kind === 'warn'" (click)="actR(b.id)">{{ b.label }}</button>
             }
-            <div class="alinks">
-              @for (b of p.btns; track b.id) {
-                @if (b.kind !== 'main') { <button type="button" [class.warn]="b.kind === 'warn'" (click)="actR(b.id)">{{ b.label }}</button> }
-              }
-              @if (!['done', 'cancelled', 'rejected', 'withdrawn', 'declined'].includes(o.status)) { <button type="button" (click)="go('issue')">Báo cáo vấn đề</button> }
-            </div>
           }
         } @else {
           @if (placedPanel(o); as p) {
-            <h3><i class="dotc" [class.go]="o.status === 'working' || o.status === 'preparing' || o.status === 'delivering' || o.status === 'confirmed' || o.status === 'chosen' || o.status === 'ready'" [class.act]="o.status === 'pricing'" [class.end]="o.status === 'done' || o.status === 'cancelled' || o.status === 'rejected' || o.status === 'withdrawn' || o.status === 'declined'"></i>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
+            <span class="stat"><i class="dotc" [class.go]="o.status === 'working' || o.status === 'preparing' || o.status === 'delivering' || o.status === 'confirmed' || o.status === 'chosen' || o.status === 'ready'" [class.act]="o.status === 'pricing'" [class.end]="o.status === 'done' || o.status === 'cancelled' || o.status === 'rejected' || o.status === 'withdrawn' || o.status === 'declined'"></i>{{ label(o) }}</span>
+            <h3>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
             @if (o.status === 'pricing' && o.newPrice; as np) {
               <div class="pricebox">
                 <div class="pb"><span>{{ o.priceCheck === 'quote' ? 'Đã trả lúc đặt (phí kiểm tra)' : 'Giá lúc đặt' }}</span><s>{{ o.total | vnd }}</s></div>
@@ -188,14 +183,8 @@
               </div>
             }
             @for (b of p.btns; track b.id) {
-              @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actP(b.id)">{{ b.label }}</button> }
+              <button type="button" [class.pbtn]="b.kind === 'main'" [class.gbtn]="b.kind !== 'main'" [class.warn]="b.kind === 'warn'" (click)="actP(b.id)">{{ b.label }}</button>
             }
-            <div class="alinks">
-              @for (b of p.btns; track b.id) {
-                @if (b.kind !== 'main') { <button type="button" [class.warn]="b.kind === 'warn'" (click)="actP(b.id)">{{ b.label }}</button> }
-              }
-              @if (!['done', 'cancelled', 'rejected', 'withdrawn', 'declined'].includes(o.status)) { <button type="button" (click)="go('issue')">Báo cáo vấn đề</button> }
-            </div>
             @if (o.status === 'done' && !o.issue && o.kind) {
               <p class="pbnote">@if (issueLeft(o) > 0) { {{ o.kind === 'goods' ? 'Trả hàng khi khác mô tả' : 'Báo vấn đề' }} trong {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận — {{ leftText(issueLeft(o)) }}. }
                 @else { Đã quá {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận nên không còn {{ o.kind === 'goods' ? 'trả hàng' : 'báo vấn đề' }} với bên bán. Có chuyện nghiêm trọng, bạn vẫn <button type="button" class="linkbtn" (click)="go('issue')">báo cáo cho AntGo</button>. }</p>
@@ -204,6 +193,16 @@
           }
         }
 
+        <div class="pcard">
+          @if (o.counterpartId) {
+            <a [routerLink]="['/shop', o.counterpartId]"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="44" /></a>
+          } @else { <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="44" /> }
+          <span><b>{{ o.counterpartName }}</b><small>{{ o.type === 'placed' ? 'Bên cung cấp' : 'Người đăng việc' }}</small></span>
+          <button type="button" class="btn-msg sm" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>Nhắn</button>
+        </div>
+        @if (!['done', 'cancelled', 'rejected', 'withdrawn', 'declined'].includes(o.status)) {
+          <button type="button" class="lbtn" (click)="go('issue')">Báo cáo vấn đề với đơn này</button>
+        }
       </div>
     </aside>
   </div>
