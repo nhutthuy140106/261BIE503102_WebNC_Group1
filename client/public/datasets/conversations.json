@@ -7,7 +7,7 @@
       "id": "640b187e71d9faa9039f00c9",
       "label": "AG-O3012 · Cơm nhà làm"
     },
-    "unread": 1,
+    "unread": 4,
     "messages": [
       {
         "_id": "m1",
@@ -20,6 +20,24 @@
         "mine": false,
         "text": "Ok con, cô nhớ rồi.",
         "createdAt": "2026-10-16T10:08:00.000Z"
+      },
+      {
+        "_id": "m1a",
+        "mine": false,
+        "text": "Hôm nay cô có thêm món canh chua, con lấy luôn không?",
+        "createdAt": "2026-10-16T10:30:00.000Z"
+      },
+      {
+        "_id": "m1b",
+        "mine": false,
+        "text": "Cô để phần cho con tới 11:30 nhé.",
+        "createdAt": "2026-10-16T10:31:00.000Z"
+      },
+      {
+        "_id": "m1c",
+        "mine": false,
+        "text": "Con nhắn cô biết sớm nha!",
+        "createdAt": "2026-10-16T10:45:00.000Z"
       }
     ],
     "withAvatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70"
@@ -32,13 +50,25 @@
       "id": "640b187e71d9faa9039f00cc",
       "label": "AG-J1998 · Cho mèo ăn"
     },
-    "unread": 0,
+    "unread": 2,
     "messages": [
       {
         "_id": "m3",
         "mine": false,
         "text": "Mình gửi chìa khóa ở bảo vệ nhé.",
         "createdAt": "2026-10-15T11:40:00.000Z"
+      },
+      {
+        "_id": "m3a",
+        "mine": false,
+        "text": "Mèo nhà chị hay trốn dưới gầm sofa, em gọi tên Mướp là nó ra nha.",
+        "createdAt": "2026-10-16T12:10:00.000Z"
+      },
+      {
+        "_id": "m3b",
+        "mine": false,
+        "text": "Thức ăn để sẵn trong tủ bếp, em nhớ đổ nước sạch giúp chị.",
+        "createdAt": "2026-10-16T12:12:00.000Z"
       }
     ],
     "withAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces&q=70"

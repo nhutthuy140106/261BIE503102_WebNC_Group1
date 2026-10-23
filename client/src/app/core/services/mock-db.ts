@@ -5,7 +5,7 @@ import { DATASET_BASE } from '../config/api.config';
 
 const PREFIX = 'antgo_mock_';
 /** Đổi chuỗi này mỗi khi sửa cấu trúc dữ liệu mẫu: dữ liệu cũ lưu trong trình duyệt tự bị xóa để nạp bản mới */
-const DATA_VERSION = '2026-10-23-d';
+const DATA_VERSION = '2026-10-24-a';
 
 /**
  * Kho dữ liệu giả cho chế độ USE_MOCK: lần đầu đọc public/datasets/<name>.json,
