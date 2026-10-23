@@ -39,8 +39,8 @@ export class Header {
   /** Thông báo đang xem theo tab, chia nhóm Hôm nay / Trước đó */
   protected readonly notifGroups = computed(() => {
     const list = this.notifications.all().filter((n) => this.notifTab() === 'all' || !n.read);
-    const today = new Date().toDateString();
-    const fresh = list.filter((n) => new Date(n.createdAt).toDateString() === today);
+    // "Hôm nay" = trong 12 giờ gần đây (như Facebook: 5 giờ trước vẫn là hôm nay, 23 giờ đã là trước đó)
+    const fresh = list.filter((n) => Date.now() - new Date(n.createdAt).getTime() < 12 * 3600 * 1000);
     const older = list.filter((n) => !fresh.includes(n));
     return [{ title: 'Hôm nay', items: fresh }, { title: 'Trước đó', items: older }].filter((g) => g.items.length);
   });

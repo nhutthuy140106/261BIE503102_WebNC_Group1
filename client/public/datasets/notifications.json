@@ -5,7 +5,8 @@
     "link": "/orders/640b187e71d9faa9039f00ca",
     "read": false,
     "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&crop=faces&q=70",
-    "createdAt": "2026-10-16T18:45:00.000Z"
+    "createdAt": "2026-10-16T18:45:00.000Z",
+    "agoMin": 25
   },
   {
     "_id": "640b187e71d9faa9039f0506",
@@ -13,7 +14,8 @@
     "link": "/orders/640b187e71d9faa9039f00d2",
     "read": true,
     "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70",
-    "createdAt": "2026-10-16T14:55:00.000Z"
+    "createdAt": "2026-10-16T18:45:00.000Z",
+    "agoMin": 300
   },
   {
     "_id": "640b187e71d9faa9039f0502",
@@ -37,7 +39,8 @@
     "link": "/orders/640b187e71d9faa9039f00d1",
     "read": false,
     "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&q=70",
-    "createdAt": "2026-10-16T09:55:00.000Z"
+    "createdAt": "2026-10-16T18:45:00.000Z",
+    "agoMin": 150
   },
   {
     "_id": "640b187e71d9faa9039f0501",
