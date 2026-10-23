@@ -31,6 +31,8 @@ export class Header {
   protected readonly sellMode = signal(false);
   /** Đang ở trang chủ: ô gọn ẩn khi ô lớn còn thấy */
   protected readonly onHome = signal(false);
+  /** Đơn hàng và Messenger không cần ô tìm kiếm trên header */
+  protected readonly noSearch = signal(false);
 
   constructor() {
     this.router.events
@@ -42,6 +44,7 @@ export class Header {
         this.search.text.set(first === 'search' ? (url.queryParams['q'] ?? '') : '');
         this.sellMode.set(first === 'seller');
         this.onHome.set(first === undefined);
+        this.noSearch.set(first === 'orders' || first === 'messenger');
       });
     // đăng nhập xong (hoặc tải lại trang) thì nạp thông báo để chấm chuông đếm đúng
     effect(() => {
