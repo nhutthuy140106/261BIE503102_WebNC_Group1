@@ -187,13 +187,10 @@ export class OrderDetail implements OnInit {
     const ps = this.priceStep(o);
     const names = placedStepNames(o.kind, ps);
     const sh = ps ? 1 : 0;
-    const svc = this.kind(o) === 'service';
-    // đồ ăn / đồ dùng chỉ có 4 bước: chuẩn bị và giao gộp vào "Đang giao"
-    const mid = svc ? 2 + sh : 2;
-    const posMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: mid, delivering: svc ? 3 + sh : 2, ready: svc ? 3 + sh : 2, done: svc ? 4 + sh : 3 };
+    const posMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: 2 + sh, delivering: 3 + sh, ready: 3 + sh, done: 4 + sh };
     const pos = posMap[o.status as string] ?? 0;
     const stopped = ['cancelled', 'declined'].includes(o.status as string);
-    const cutMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: mid, delivering: svc ? 3 + sh : 2, ready: svc ? 3 + sh : 2 };
+    const cutMap: Record<string, number> = { pending: 0, confirmed: 1, pricing: 2, preparing: 2 + sh, delivering: 3 + sh, ready: 3 + sh };
     const cutAt = o.priceRejected ? 2 : o.cancelFrom ? Math.min(names.length - 1, (cutMap[o.cancelFrom] ?? 0) + 1) : 1;
     if (stopped) names[cutAt] = o.priceRejected ? 'Đã từ chối giá' : this.label(o);
     const times = (o.history ?? []).map((h) => formatTime(h.at));
