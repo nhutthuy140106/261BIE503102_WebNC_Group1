@@ -114,3 +114,8 @@ a.who:hover b { text-decoration: underline; text-underline-offset: 3px; }
 
 .grp .gh, .grp .gh:first-of-type { margin: 0 0 10px; }
 .grp.need { padding: 20px; }
+
+.gh { font-size: 21px; font-weight: 700; letter-spacing: -.015em; color: var(--ink); margin: 0 0 14px; }
+.gh.todo { color: var(--accent); }
+.grp { margin-top: 32px; }
+.grp.need { margin-top: 24px; }
