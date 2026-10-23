@@ -49,3 +49,24 @@
   .btn2 { flex: 1; }
   .oh .shop { display: none; }
 }
+
+/* ===== Làm lại cho bớt một màu: nền xám nhạt cho cả danh sách, thẻ trắng nổi lên, đầu thẻ ngả màu theo trạng thái ===== */
+.tabs { display: inline-flex; margin-top: 18px; padding: 4px; gap: 2px; border: 0; border-radius: 999px; background: #F1F2F5; overflow-x: auto; max-width: 100%; }
+.tabs button { flex: none; padding: 9px 20px; border-radius: 999px; border-bottom: 0; color: var(--smoke); transition: background .15s, color .15s; }
+.tabs button:hover { color: var(--ink); }
+.tabs button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(34, 48, 74, .14); border-bottom: 0; }
+.board { margin-top: 18px; padding: 18px; border-radius: 20px; background: #F3F4F6; }
+.board .list { margin-top: 0; gap: 16px; }
+.order { border: 0; box-shadow: 0 1px 2px rgba(34, 48, 74, .06); }
+.oh { border-bottom: 0; }
+.t-act .oh { background: #FFF1E8; }
+.t-go .oh { background: #EDF7F1; }
+.t-wait .oh { background: #FFF8E6; }
+.t-end .oh { background: #F1F2F5; }
+.t-act { border-left: 4px solid var(--accent); }
+.t-go { border-left: 4px solid #3BAA6A; }
+.t-wait { border-left: 4px solid #E0A526; }
+.t-end { border-left: 4px solid #C9CDD5; }
+.oh .kind { background: #fff; border-color: transparent; }
+.of { border-top: 1px solid #ECEEF2; }
+.empty { border: 0; background: #fff; }

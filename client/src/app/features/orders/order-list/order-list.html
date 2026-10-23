@@ -8,19 +8,15 @@
   <button type="button" [class.on]="tab() === 'history'" (click)="setTab('history')">Lịch sử</button>
 </nav>
 
-<label class="search">
-  <svg class="i"><use href="#search" /></svg>
-  <input type="search" placeholder="Tìm theo tên đơn, người bán / người đăng việc hoặc mã đơn" [value]="query()" (input)="query.set($any($event.target).value)" />
-</label>
-
 @if (loading()) {
   <p class="muted">Đang tải…</p>
 } @else if (error()) {
   <div class="notice">Không tải được đơn hàng: {{ error() }}</div>
 } @else {
+  <div class="board">
   <ul class="list">
     @for (o of shown(); track o._id) {
-      <li class="order">
+      <li class="order" [ngClass]="'t-' + dot(o)">
         <div class="oh">
           <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="24" />
           <b>{{ o.counterpartName }}</b>
@@ -57,4 +53,5 @@
       <li class="empty"><img src="assets/clean/idle.png" alt="" /><p>Không có đơn nào ở đây.</p></li>
     }
   </ul>
+  </div>
 }
