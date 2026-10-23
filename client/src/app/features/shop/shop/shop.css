@@ -46,3 +46,4 @@
 .cta .btn.ghost { background: var(--accent); border-color: var(--accent); color: #fff; }
 .cta .btn.ghost:hover { filter: brightness(.95); }
 .cta .btn.ghost.on { background: #fff; border-color: var(--ink); color: var(--ink); }
+.stats .of5 { font-style: normal; font-size: 16px; font-weight: 500; color: var(--smoke); letter-spacing: 0; margin-left: 2px; }

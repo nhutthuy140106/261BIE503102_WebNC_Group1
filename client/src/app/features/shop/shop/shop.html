@@ -26,7 +26,7 @@
   <div class="stats">
     <div>
       @if (rating(); as r) {
-        <strong><span class="star">★</span> {{ r.avg }}</strong><span>{{ r.count }} đánh giá</span>
+        <strong><span class="star">★</span> {{ r.avg }}<em class="of5">/5</em></strong><span>{{ r.count }} đánh giá</span>
       } @else {
         <strong>—</strong><span>Chưa có đánh giá</span>
       }
