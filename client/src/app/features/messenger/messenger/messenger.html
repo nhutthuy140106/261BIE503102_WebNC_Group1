@@ -5,7 +5,7 @@
   <div class="chat">
     <aside class="side">
       <h1>Đoạn chat</h1>
-      <label class="find"><svg class="i"><use href="#search" /></svg><input [value]="query()" (input)="query.set($any($event.target).value)" placeholder="Tìm trên Messenger" /></label>
+      <label class="find"><svg class="i"><use href="#search" /></svg><input [value]="query()" (input)="query.set($any($event.target).value)" placeholder="Tìm kiếm cuộc trò chuyện" /></label>
       <ul class="threads">
         @for (c of shown(); track c._id) {
           <li>
@@ -40,13 +40,30 @@
           }
           @for (m of c.messages; track m._id; let i = $index) {
             @if (i === 0 || gap(c.messages[i - 1], m)) { <li class="stamp">{{ fmt(m.createdAt) }}</li> }
-            <li class="msg" [class.mine]="m.mine"><span [title]="fmt(m.createdAt)">{{ m.text }}</span></li>
+            <li class="msg" [class.mine]="m.mine">
+              @if (m.media; as md) {
+                @if (md.kind === 'image') { <img class="mimg" [src]="md.url" alt="Hình ảnh" /> }
+                @else if (md.kind === 'video') { <video class="mimg" [src]="md.url" controls preload="metadata"></video> }
+                @else { <audio class="maud" [src]="md.url" controls preload="metadata"></audio> }
+              }
+              @if (m.text) { <span [title]="fmt(m.createdAt)">{{ m.text }}</span> }
+            </li>
           }
         </ul>
-        <form (ngSubmit)="send()">
-          <input [formControl]="input" placeholder="Aa" maxlength="2000" autocomplete="off" />
-          <button type="submit" aria-label="Gửi" [disabled]="input.invalid"><svg class="i"><use href="#send" /></svg></button>
-        </form>
+        @if (recording()) {
+          <div class="rec">
+            <button type="button" class="rbtn" aria-label="Hủy ghi âm" (click)="stopRec(true)"><svg class="i"><use href="#xmark" /></svg></button>
+            <span class="pulse"></span><b>Đang ghi âm {{ clock(recSec()) }}</b>
+            <button type="button" class="send" aria-label="Gửi ghi âm" (click)="stopRec()"><svg class="i"><use href="#send" /></svg></button>
+          </div>
+        } @else {
+          <form (ngSubmit)="send()">
+            <button type="button" class="rbtn" aria-label="Ghi âm giọng nói" title="Ghi âm giọng nói" (click)="startRec()"><svg class="i"><use href="#mic" /></svg></button>
+            <label class="rbtn" title="Gửi hình ảnh hoặc video" aria-label="Gửi hình ảnh hoặc video"><input type="file" accept="image/*,video/*" multiple hidden (change)="attach($any($event.target))" /><svg class="i"><use href="#camera" /></svg></label>
+            <input [formControl]="input" placeholder="Aa" maxlength="2000" autocomplete="off" />
+            <button type="submit" class="send" aria-label="Gửi" [disabled]="input.invalid"><svg class="i"><use href="#send" /></svg></button>
+          </form>
+        }
       </section>
     } @else {
       <section class="thread blank"><p>Chọn một đoạn chat để bắt đầu.</p></section>

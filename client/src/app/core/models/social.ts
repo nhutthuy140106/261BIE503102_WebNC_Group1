@@ -28,6 +28,8 @@ export interface Message {
   _id: string;
   mine: boolean;
   text: string;
+  /** Hình / video / ghi âm đính kèm (mock: ảnh lưu dạng data URL, video và ghi âm chỉ sống trong phiên) */
+  media?: { kind: 'image' | 'video' | 'audio'; url: string; sec?: number };
   createdAt: string;
 }
 

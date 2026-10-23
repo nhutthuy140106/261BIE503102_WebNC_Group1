@@ -37,7 +37,20 @@
 .msg.mine span { background: var(--ink); color: #fff; }
 .thread form { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
 .thread form input { flex: 1; height: 42px; padding: 0 16px; border: 0; border-radius: 999px; background: #F0F2F5; font: inherit; outline: none; }
-.thread form button { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; }
-.thread form button svg { width: 19px; height: 19px; }
-.thread form button:disabled { background: transparent; color: #B9BEC8; }
+.thread form button.send, .rec .send { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; }
+.send svg { width: 19px; height: 19px; }
+.send:disabled { background: transparent; color: #B9BEC8; }
 @media (max-width: 800px) { .chat { grid-template-columns: 1fr; height: auto; } .side { border-right: 0; border-bottom: 1px solid var(--border); max-height: 280px; } .thread { min-height: 480px; } }
+
+.rbtn { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: none; color: var(--accent); cursor: pointer; }
+.rbtn:hover { background: #F5F6F8; }
+.rbtn svg { width: 22px; height: 22px; }
+.rec { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.rec b { flex: 1; font-size: 14.5px; }
+.pulse { width: 10px; height: 10px; border-radius: 50%; background: #D93025; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+.rec .send { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; }
+.mimg { max-width: min(320px, 68%); max-height: 320px; border-radius: 16px; object-fit: cover; background: #F0F2F5; }
+.maud { max-width: 280px; height: 40px; }
+.msg { flex-wrap: wrap; align-items: flex-end; }
+.thread form button.send:disabled { background: transparent; color: #B9BEC8; }

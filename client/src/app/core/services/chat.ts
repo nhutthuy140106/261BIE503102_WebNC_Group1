@@ -32,17 +32,17 @@ export class ChatService {
     return this.db.list<Conversation>(COLLECTION).pipe(map((rows) => rows.find((c) => c._id === conversationId)?.messages ?? []));
   }
 
-  send(conversationId: string, text: string): Observable<Message> {
+  send(conversationId: string, text: string, media?: Message['media']): Observable<Message> {
     if (!useMock('chat')) return this.api.post<unknown>(`/conversations/${conversationId}/messages`, { text }).pipe(
       map((m) => messageFromApi(m, this.auth.currentUser()?._id ?? '')),
     );
     return this.db.list<Conversation>(COLLECTION).pipe(
       map((rows) => {
         const t = text.trim();
-        if (!t || t.length > 2000) {
+        if ((!t && !media) || t.length > 2000) {
           throw new AppError('Dữ liệu chưa hợp lệ.', 422, 'VALIDATION_ERROR', [{ field: 'text', message: 'Tin nhắn dài 1–2000 ký tự.' }]);
         }
-        const msg: Message = { _id: this.db.newId(), mine: true, text: t, createdAt: new Date().toISOString() };
+        const msg: Message = { _id: this.db.newId(), mine: true, text: t, ...(media ? { media } : {}), createdAt: new Date().toISOString() };
         this.db.save(
           COLLECTION,
           rows.map((c) => (c._id === conversationId ? { ...c, messages: [...c.messages, msg] } : c)),

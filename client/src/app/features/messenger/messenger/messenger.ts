@@ -36,7 +36,9 @@ export class Messenger implements OnInit, OnDestroy {
   /** Dòng xem trước dưới tên: tin cuối ("Bạn: …" nếu là tin của mình) */
   protected preview(c: Conversation): string {
     const m = c.messages[c.messages.length - 1];
-    return m ? (m.mine ? 'Bạn: ' : '') + m.text : (c.context?.label ?? '');
+    if (!m) return c.context?.label ?? '';
+    const body = m.text || (m.media?.kind === 'image' ? 'Đã gửi một hình ảnh' : m.media?.kind === 'video' ? 'Đã gửi một video' : m.media ? 'Tin nhắn thoại' : '');
+    return (m.mine ? 'Bạn: ' : '') + body;
   }
 
   /** Link tới bài / đơn gắn với cuộc trò chuyện */
@@ -91,6 +93,83 @@ export class Messenger implements OnInit, OnDestroy {
         this.conversations.update((l) => l.map((x) => (x._id === c._id ? { ...x, unread: 0 } : x))),
       );
     }
+  }
+
+  /** Chọn hình / video: ảnh thu nhỏ rồi lưu dạng data URL, video giữ link tạm trong phiên */
+  async attach(input: HTMLInputElement): Promise<void> {
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    for (const f of files) {
+      if (f.type.startsWith('video/')) this.sendMedia({ kind: 'video', url: URL.createObjectURL(f) });
+      else if (f.type.startsWith('image/')) this.sendMedia({ kind: 'image', url: await this.shrink(f) });
+    }
+  }
+
+  private shrink(f: File): Promise<string> {
+    return new Promise((ok) => {
+      const img = new Image();
+      const src = URL.createObjectURL(f);
+      img.onload = () => {
+        const k = Math.min(1, 900 / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * k);
+        cv.height = Math.round(img.height * k);
+        cv.getContext('2d')?.drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(src);
+        ok(cv.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = () => ok(src);
+      img.src = src;
+    });
+  }
+
+  // ----- ghi âm giọng nói -----
+  protected readonly recording = signal(false);
+  protected readonly recSec = signal(0);
+  private recorder: MediaRecorder | null = null;
+  private recChunks: Blob[] = [];
+  private recTimer: ReturnType<typeof setInterval> | null = null;
+  private recCancel = false;
+
+  async startRec(): Promise<void> {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.recChunks = [];
+      this.recCancel = false;
+      this.recorder = new MediaRecorder(stream);
+      this.recorder.ondataavailable = (e) => this.recChunks.push(e.data);
+      this.recorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        if (this.recTimer) clearInterval(this.recTimer);
+        const sec = this.recSec();
+        this.recording.set(false);
+        if (!this.recCancel && sec > 0) this.sendMedia({ kind: 'audio', url: URL.createObjectURL(new Blob(this.recChunks, { type: 'audio/webm' })), sec });
+      };
+      this.recorder.start();
+      this.recSec.set(0);
+      this.recording.set(true);
+      this.recTimer = setInterval(() => this.recSec.update((s) => s + 1), 1000);
+    } catch {
+      this.error.set('Không mở được micro. Bạn hãy cho phép trình duyệt dùng micro rồi thử lại.');
+    }
+  }
+
+  stopRec(cancel = false): void {
+    this.recCancel = cancel;
+    this.recorder?.stop();
+  }
+
+  protected clock(s: number): string {
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  private sendMedia(media: NonNullable<Message['media']>): void {
+    const c = this.selected();
+    if (!c) return;
+    this.chat.send(c._id, '', media).subscribe({
+      next: (m) => this.conversations.update((l) => l.map((x) => (x._id === c._id ? { ...x, messages: [...x.messages, m] } : x))),
+      error: (e: Error) => this.error.set(e.message),
+    });
   }
 
   send(): void {
