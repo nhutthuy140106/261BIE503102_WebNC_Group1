@@ -97,3 +97,11 @@
 .avscrim img { max-width: min(520px, 92vw); max-height: 86vh; border-radius: 50%; object-fit: cover; aspect-ratio: 1; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
 .avx { position: absolute; top: 18px; right: 18px; width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, .16); color: #fff; display: grid; place-items: center; }
 .avx:hover { background: rgba(255, 255, 255, .28); }
+
+/* tách rõ hai vùng: menu bên trái và vùng thao tác bên phải là hai thẻ trắng nổi trên nền xám nhạt */
+:host { background: #F3F4F6; border-radius: 20px; padding: 22px; margin-top: 8px; }
+.shell { grid-template-columns: 270px minmax(0, 1fr); gap: 22px; }
+.side { top: 90px; padding: 16px 12px; border-radius: 16px; background: #fff; box-shadow: 0 1px 6px rgba(34, 48, 74, .12); }
+.panel { padding: 28px 32px 32px; border-radius: 16px; background: #fff; box-shadow: 0 1px 6px rgba(34, 48, 74, .12); min-height: 420px; }
+.tiles a, .xurow, .balance { background: #fff; }
+@media (max-width: 800px) { :host { padding: 12px; } .shell { grid-template-columns: 1fr; } .side { position: static; } }
