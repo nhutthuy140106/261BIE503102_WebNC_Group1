@@ -45,3 +45,4 @@ h2 { font-size: 18px; margin: 22px 0 6px; }
 .nmenu.pointer::before { content: ''; position: absolute; right: 14px; top: -6px; width: 14px; height: 14px; background: #fff; transform: rotate(45deg); border-radius: 3px 0 0 0; }
 .nmenu.pointer button { position: relative; height: 44px; background: #F0F2F5; font-size: 14.5px; }
 .nmenu.pointer button:disabled { opacity: .45; cursor: default; }
+.card { overflow: visible; }
