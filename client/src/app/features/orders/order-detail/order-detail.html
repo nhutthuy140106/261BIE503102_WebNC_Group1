@@ -90,7 +90,7 @@
                 @if (d.quantity) { <dt>{{ d.quantityLabel ?? 'Số lượng' }}</dt><dd>{{ d.quantity }}{{ d.unit ? ' ' + d.unit : '' }}</dd> }
                 @if (d.when) { <dt>{{ d.whenLabel ?? 'Thời gian' }}</dt><dd>{{ d.when }}</dd> }
                 @if (d.place || d.address) { <dt>{{ d.place ? (d.placeLabel ?? 'Hình thức nhận hàng') : 'Địa chỉ' }}</dt><dd>@if (d.place) { {{ d.place }}@if (d.address) { <span class="sub">{{ d.address }}</span> } } @else { {{ d.address }} }</dd> }
-                @if (d.utensils) { <dt>Dụng cụ / ống hút</dt><dd>Có lấy</dd> }
+                @if (d.utensils) { <dt>Dụng cụ</dt><dd>Có lấy</dd> }
               }
               <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
             </dl>
