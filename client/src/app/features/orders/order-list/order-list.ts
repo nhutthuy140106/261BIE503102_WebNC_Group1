@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ORDER_ACTION } from '../../../core/config/order-actions';
 import { Order } from '../../../core/models/order';
 import { OrderService } from '../../../core/services/order';
 import { stripAccents } from '../../../core/utils/slug-helper';
@@ -47,6 +48,7 @@ export class OrderList implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly tab = signal<Tab>('all');
   protected readonly label = statusLabel;
+  protected readonly act = ORDER_ACTION;
   protected readonly fmt = formatDateTime;
 
   protected readonly counts = computed(() => {
@@ -109,17 +111,18 @@ export class OrderList implements OnInit {
   /** Nút nhỏ trên thanh trạng thái: ghi rõ việc bạn cần làm tiếp (null = không cần làm gì) */
   protected next(o: Order): string | null {
     if (!needsAction(o)) return null;
-    if (o.type === 'received') return o.status === 'chosen' ? 'Bắt đầu làm' : o.status === 'working' ? 'Báo hoàn thành' : !o.paid ? 'Xác nhận đã nhận tiền' : 'Đánh giá';
-    if (o.status === 'pricing') return 'Xem giá & trả lời';
-    if (o.resched?.by === 'seller') return 'Duyệt giờ mới';
-    return 'Xem phản hồi';
+    const A = ORDER_ACTION;
+    if (o.type === 'received') return o.status === 'chosen' ? A.start : o.status === 'working' ? A.finish : !o.paid ? A.confirmPaid : A.rate;
+    if (o.status === 'pricing') return A.approvePrice;
+    if (o.resched?.by === 'seller') return A.approveResched;
+    return A.viewIssue;
   }
 
   /** Nút chính khi đơn đã xong: đặt lại món/dịch vụ, hoặc tìm việc khác */
   protected side(o: Order): { label: string; link: unknown[]; params?: Record<string, string | undefined> } {
     return o.type === 'received'
-      ? { label: 'Tìm việc khác', link: ['/search'], params: { kind: 'job' } }
-      : { label: 'Đặt lại', link: ['/posts', o.postId] };
+      ? { label: ORDER_ACTION.findJob, link: ['/search'], params: { kind: 'job' } }
+      : { label: ORDER_ACTION.reorder, link: ['/posts', o.postId] };
   }
 
   /** Một câu nói rõ đơn đang ở đâu và ai đang chờ ai */

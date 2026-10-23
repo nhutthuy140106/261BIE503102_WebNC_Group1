@@ -44,7 +44,7 @@
         <div class="of">
           <span class="hint"></span>
           <div class="btns">
-            <a class="btn2" routerLink="/messenger" [queryParams]="{ to: o.counterpartName, av: o.counterpartAvatar }">Nhắn tin</a>
+            <a class="btn2" routerLink="/messenger" [queryParams]="{ to: o.counterpartName, av: o.counterpartAvatar }">{{ act.chat }}</a>
             @if (next(o); as n) {
               <a class="btn2 main" [routerLink]="['/orders', o._id]">{{ n }}</a>
             } @else if (isEnded(o)) {

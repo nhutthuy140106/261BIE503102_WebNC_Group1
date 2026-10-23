@@ -170,7 +170,7 @@
               @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actR(b.id)">{{ b.label }}</button> }
             }
             <div class="arow2">
-              <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
+              <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>{{ act.chat }}</button>
               @for (b of p.btns; track b.id) {
                 @if (b.kind !== 'main') { <button type="button" class="gbtn" [class.warn]="b.kind === 'warn'" (click)="actR(b.id)">{{ b.label }}</button> }
               }
@@ -199,7 +199,7 @@
               @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actP(b.id)">{{ b.label }}</button> }
             }
             <div class="arow2">
-              <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
+              <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>{{ act.chat }}</button>
               @for (b of p.btns; track b.id) {
                 @if (b.kind !== 'main') { <button type="button" class="gbtn" [class.warn]="b.kind === 'warn'" (click)="actP(b.id)">{{ b.label }}</button> }
               }

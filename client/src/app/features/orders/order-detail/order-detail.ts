@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { useMock } from '../../../core/config/api.config';
 import { AppError } from '../../../core/models/api';
 import { OFFER_STEPS, OFFER_STATE_LABEL, Offer, OfferState } from '../../../core/models/offer';
+import { ORDER_ACTION } from '../../../core/config/order-actions';
 import { ISSUE_HOURS, Order, OrderIssue } from '../../../core/models/order';
 import { Post } from '../../../core/models/post';
 import { JobOfferService } from '../../../core/services/job-offer';
@@ -39,6 +40,7 @@ const ISSUE_TYPES = {
 };
 const ISSUE_WANTS = { food: ['Làm lại món', 'Hoàn tiền'], goods: ['Trả hàng, nhận lại tiền'], service: ['Làm lại miễn phí', 'Giảm tiền'] };
 const ISSUE_PH = { food: 'Ví dụ: đặt trà sữa ít đá nhưng nhận được nhiều đá', goods: 'Ví dụ: loa không lên nguồn, khác với mô tả “còn mới 95%”', service: 'Ví dụ: còn sót vết bẩn ở góc bếp, chưa lau cửa kính' };
+const A = ORDER_ACTION;
 const ISSUE_LABEL = { food: 'Báo vấn đề với món', goods: 'Yêu cầu trả hàng', service: 'Báo dịch vụ chưa đạt' };
 const DAY_SLOTS = ['8:00', '9:00', '10:00', '13:00', '14:00', '15:00', '17:00', '18:00', '19:00', '20:00'];
 const WEEKDAYS = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
@@ -62,6 +64,7 @@ export class OrderDetail implements OnInit {
   private readonly reviewService = inject(ReviewService);
   private readonly postService = inject(PostService);
   private readonly toast = inject(ToastService);
+  protected readonly act = ORDER_ACTION;
   private readonly xu = inject(XuService);
 
   protected readonly order = signal<Order | null>(null);
@@ -255,22 +258,22 @@ export class OrderDetail implements OnInit {
     const pc = o.priceCheck;
     const rs = o.resched;
     const lateNote = k === 'service' && o.apptIn != null && o.apptIn < 2 ? ' Còn dưới 2 giờ tới giờ hẹn — hủy lúc này sẽ ghi "hủy sát giờ" vào hồ sơ.' : '';
-    const reschBtn: Btn[] = this.canResched(o) && !rs ? [{ id: 'resched', label: 'Đổi lịch', kind: 'ghost' }] : [];
+    const reschBtn: Btn[] = this.canResched(o) && !rs ? [{ id: 'resched', label: A.resched, kind: 'ghost' }] : [];
     const iss = o.issue;
     if (iss && iss.st !== 'closed') {
       const base: Record<string, { h: string; why: string; btns: Btn[] }> = {
         open: { h: 'Đã gửi cho ' + sl, why: sl + ' sẽ ' + (k === 'food' ? 'chọn làm lại, hoàn một phần hoặc hoàn hết' : k === 'goods' ? 'trả lời có nhận lại hàng không' : 'chọn làm lại miễn phí hoặc giảm tiền') + '. Bạn sẽ nhận thông báo khi có phản hồi.', btns: [] },
-        redo: { h: sl + ' sẽ làm lại', why: iss.reply ?? '', btns: [{ id: 'issue-done', label: k === 'food' ? 'Đã nhận món làm lại' : 'Đã làm lại xong', kind: 'main' }] },
-        refund: { h: sl + ' hoàn ' + this.vnd(iss.amount ?? 0), why: (iss.reply ?? '') + ' ' + sl + ' chuyển trả trực tiếp cho bạn — AntGo không giữ tiền. Nhận được thì bấm xác nhận.', btns: [{ id: 'issue-paid', label: 'Đã nhận tiền hoàn ' + this.vnd(iss.amount ?? 0), kind: 'main' }, { id: 'issue', label: 'Chưa nhận được tiền?', kind: 'ghost' }] },
-        returnAgreed: { h: sl + ' đồng ý nhận lại hàng', why: (iss.reply ?? '') + ' Khi trả hàng, ' + sl + ' trả lại ' + this.vnd(iss.amount ?? 0) + ' trực tiếp cho bạn.', btns: [{ id: 'issue-paid', label: 'Đã trả hàng & nhận ' + this.vnd(iss.amount ?? 0), kind: 'main' }, { id: 'issue', label: 'Có trục trặc khi trả hàng?', kind: 'ghost' }] },
-        rejected: { h: sl + ' không đồng ý', why: (iss.reply ?? '') + ' Hai bên chưa thỏa thuận được thì nhờ AntGo xem giúp: AntGo ghi nhận, có thể hạ uy tín hoặc khóa tài khoản vi phạm, nhưng không ép hoàn tiền.', btns: [{ id: 'issue', label: 'Nhờ AntGo hỗ trợ', kind: 'main' }, { id: 'issue-drop', label: 'Thôi, đóng yêu cầu', kind: 'ghost' }] },
+        redo: { h: sl + ' sẽ làm lại', why: iss.reply ?? '', btns: [{ id: 'issue-done', label: A.issueResolved, kind: 'main' }] },
+        refund: { h: sl + ' hoàn ' + this.vnd(iss.amount ?? 0), why: (iss.reply ?? '') + ' ' + sl + ' chuyển trả trực tiếp cho bạn — AntGo không giữ tiền. Nhận được thì bấm xác nhận.', btns: [{ id: 'issue-paid', label: A.issueResolved, kind: 'main' }, { id: 'issue', label: A.unpaid, kind: 'ghost' }] },
+        returnAgreed: { h: sl + ' đồng ý nhận lại hàng', why: (iss.reply ?? '') + ' Khi trả hàng, ' + sl + ' trả lại ' + this.vnd(iss.amount ?? 0) + ' trực tiếp cho bạn.', btns: [{ id: 'issue-paid', label: A.issueResolved, kind: 'main' }, { id: 'issue', label: A.support, kind: 'ghost' }] },
+        rejected: { h: sl + ' không đồng ý', why: (iss.reply ?? '') + ' Hai bên chưa thỏa thuận được thì nhờ AntGo xem giúp: AntGo ghi nhận, có thể hạ uy tín hoặc khóa tài khoản vi phạm, nhưng không ép hoàn tiền.', btns: [{ id: 'issue', label: A.support, kind: 'main' }, { id: 'issue-drop', label: A.issueDrop, kind: 'ghost' }] },
       };
       return base[iss.st];
     }
     if (rs?.by === 'seller') {
       return {
         h: sl + ' xin đổi giờ hẹn', why: sl + ' đề nghị giờ mới. Bạn đồng ý thì đơn đổi sang giờ mới; không đồng ý thì vẫn giữ giờ cũ.',
-        btns: [{ id: 'resched-yes', label: 'Đồng ý giờ mới', kind: 'main' }, { id: 'resched', label: 'Chọn giờ khác', kind: 'ghost' }, { id: 'resched-no', label: 'Giữ giờ cũ', kind: 'warn' }],
+        btns: [{ id: 'resched-yes', label: A.approveResched, kind: 'main' }, { id: 'resched', label: A.pickResched, kind: 'ghost' }, { id: 'resched-no', label: A.keepTime, kind: 'warn' }],
       };
     }
     switch (o.status as string) {
@@ -279,23 +282,23 @@ export class OrderDetail implements OnInit {
         return {
           h: pc === 'quote' ? sl + ' đã báo giá sửa' : pc === 'surcharge' ? sl + ' báo phụ thu' : 'Duyệt giá cuối',
           why: sl + ' báo giá sau khi ' + (pc === 'quote' ? 'kiểm tra máy' : pc === 'surcharge' ? 'xem đồ thực tế' : 'cân đồ thực tế') + '. Đơn chỉ làm tiếp khi bạn đồng ý.',
-          btns: np ? [{ id: 'approve', label: 'Đồng ý · ' + this.vnd(np.total), kind: 'main' }, { id: 'reject', label: 'Từ chối giá này', kind: 'warn' }] : [],
+          btns: np ? [{ id: 'approve', label: A.approvePrice, kind: 'main' }, { id: 'reject', label: A.rejectPrice, kind: 'warn' }] : [],
         };
       }
       case 'pending':
-        return { h: 'Chờ bên bán xác nhận', why: sl + ' sẽ phản hồi sớm. Chưa xác nhận thì bạn hủy được ngay.', btns: [...reschBtn, { id: 'cancel', label: 'Hủy đơn', kind: 'warn' }] };
+        return { h: 'Chờ bên bán xác nhận', why: sl + ' sẽ phản hồi sớm. Chưa xác nhận thì bạn hủy được ngay.', btns: [...reschBtn, { id: 'cancel', label: A.cancel, kind: 'warn' }] };
       case 'confirmed':
-        return { h: 'Đơn đã được nhận', why: sl + ' đã xác nhận. Theo dõi thời gian và cách giao nhận ở bên trái.' + (k === 'service' && o.apptIn != null ? (o.apptIn >= 2 ? ' Hủy miễn phí tới 2 giờ trước giờ hẹn.' : lateNote) : ''), btns: [...reschBtn, { id: 'cancel', label: 'Hủy đơn', kind: 'warn' }] };
+        return { h: 'Đơn đã được nhận', why: sl + ' đã xác nhận. Theo dõi thời gian và cách giao nhận ở bên trái.' + (k === 'service' && o.apptIn != null ? (o.apptIn >= 2 ? ' Hủy miễn phí tới 2 giờ trước giờ hẹn.' : lateNote) : ''), btns: [...reschBtn, { id: 'cancel', label: A.cancel, kind: 'warn' }] };
       case 'preparing':
-        return { h: k === 'service' ? 'Dịch vụ đang thực hiện' : 'Bên bán đang chuẩn bị', why: sl + ' đã bắt đầu nên không tự hủy được nữa. Cần thì gửi yêu cầu hủy — ' + sl + ' đồng ý mới hủy.', btns: o.cancelRequested ? [] : [{ id: 'cancelreq', label: 'Gửi yêu cầu hủy', kind: 'warn' }] };
+        return { h: k === 'service' ? 'Dịch vụ đang thực hiện' : 'Bên bán đang chuẩn bị', why: sl + ' đã bắt đầu nên không tự hủy được nữa. Cần thì gửi yêu cầu hủy — ' + sl + ' đồng ý mới hủy.', btns: o.cancelRequested ? [] : [{ id: 'cancelreq', label: A.cancelReq, kind: 'warn' }] };
       case 'delivering':
-        return { h: k === 'service' ? 'Dịch vụ đã hoàn tất' : 'Đang giao', why: k === 'service' ? 'Kiểm tra kết quả rồi xác nhận để đóng đơn.' : 'Khi đã nhận đủ, hãy xác nhận để đóng đơn.', btns: [{ id: 'received', label: 'Tôi đã nhận đủ', kind: 'main' }] };
+        return { h: k === 'service' ? 'Dịch vụ đã hoàn tất' : 'Đang giao', why: k === 'service' ? 'Kiểm tra kết quả rồi xác nhận để đóng đơn.' : 'Khi đã nhận đủ, hãy xác nhận để đóng đơn.', btns: [{ id: 'received', label: A.received, kind: 'main' }] };
       case 'ready':
-        return { h: 'Sẵn sàng nhận', why: 'Kiểm tra hàng hoặc kết quả dịch vụ khi nhận.', btns: [{ id: 'received', label: 'Tôi đã nhận đủ', kind: 'main' }] };
+        return { h: 'Sẵn sàng nhận', why: 'Kiểm tra hàng hoặc kết quả dịch vụ khi nhận.', btns: [{ id: 'received', label: A.received, kind: 'main' }] };
       case 'done': {
         const left = this.issueLeft(o);
         const btns: Btn[] = [];
-        if (!o.rated) btns.push({ id: 'rate', label: 'Đánh giá ' + sl, kind: 'main' });
+        if (!o.rated) btns.push({ id: 'rate', label: A.rate, kind: 'main' });
         if (left > 0) btns.push({ id: 'issue-open', label: ISSUE_LABEL[k], kind: 'ghost' });
         return {
           h: 'Đơn đã hoàn thành',
@@ -307,10 +310,10 @@ export class OrderDetail implements OnInit {
         return {
           h: o.priceRejected ? 'Bạn đã từ chối giá mới' : o.cancelBy === 'seller' ? sl + ' đã hủy đơn' : 'Bạn đã hủy đơn',
           why: o.priceRejected ?? (o.cancelWhy ? 'Lý do: ' + o.cancelWhy + '.' + (o.cancelLate ? ' Hủy sát giờ hẹn — đã ghi vào hồ sơ của bạn.' : '') + (o.cancelBy === 'seller' ? ' Bạn không phải trả gì.' : '') : 'Đơn đã dừng. Bạn có thể tìm lựa chọn khác trong khu.'),
-          btns: [{ id: 'more', label: 'Khám phá quanh khu', kind: 'ghost' }],
+          btns: [{ id: 'more', label: A.explore, kind: 'ghost' }],
         };
       case 'declined':
-        return { h: 'Bên bán không nhận đơn', why: 'Bạn có thể tìm lựa chọn khác trong khu.', btns: [{ id: 'more', label: 'Khám phá quanh khu', kind: 'ghost' }] };
+        return { h: 'Bên bán không nhận đơn', why: 'Bạn có thể tìm lựa chọn khác trong khu.', btns: [{ id: 'more', label: A.explore, kind: 'ghost' }] };
       default:
         return { h: 'Chờ xác nhận', why: 'Đang chờ bên bán phản hồi.', btns: [] };
     }
@@ -560,23 +563,23 @@ export class OrderDetail implements OnInit {
     const pay = o.paymentMethod === 'cash' ? 'tiền mặt' : 'chuyển khoản';
     switch (of.state) {
       case 'offered':
-        return { h: 'Chờ ' + nn + ' chọn người', why: 'Bạn sẽ được báo ngay khi ' + nn + ' chọn. Gửi đề nghị chưa phải là đã nhận việc.', btns: [{ id: 'edit', label: 'Sửa giới thiệu', kind: 'ghost' }, { id: 'withdraw', label: 'Rút đề nghị', kind: 'warn' }] };
+        return { h: 'Chờ ' + nn + ' chọn người', why: 'Bạn sẽ được báo ngay khi ' + nn + ' chọn. Gửi đề nghị chưa phải là đã nhận việc.', btns: [{ id: 'edit', label: A.editOffer, kind: 'ghost' }, { id: 'withdraw', label: A.withdraw, kind: 'warn' }] };
       case 'chosen':
-        return { h: 'Bạn đã được chọn!', why: 'Địa chỉ chính xác đã hiện bên trái. Đến giờ làm, bấm Bắt đầu làm để ' + nn + ' biết bạn đã tới.', btns: [{ id: 'start', label: 'Bắt đầu làm', kind: 'main' }, { id: 'rcancel', label: 'Xin hủy việc', kind: 'ghost' }] };
+        return { h: 'Bạn đã được chọn!', why: 'Địa chỉ chính xác đã hiện bên trái. Đến giờ làm, bấm Bắt đầu làm để ' + nn + ' biết bạn đã tới.', btns: [{ id: 'start', label: A.start, kind: 'main' }, { id: 'rcancel', label: A.cancelJob, kind: 'ghost' }] };
       case 'working':
-        return { h: 'Đang làm', why: 'Làm xong thì bấm Báo hoàn thành, kèm ảnh nếu có để ' + nn + ' dễ kiểm tra.', btns: [{ id: 'report', label: 'Báo hoàn thành', kind: 'main' }, { id: 'rcancel', label: 'Gặp sự cố, xin hủy', kind: 'ghost' }] };
+        return { h: 'Đang làm', why: 'Làm xong thì bấm Báo hoàn thành, kèm ảnh nếu có để ' + nn + ' dễ kiểm tra.', btns: [{ id: 'report', label: A.finish, kind: 'main' }, { id: 'rcancel', label: A.cancelJob, kind: 'ghost' }] };
       case 'reported':
         return { h: 'Chờ ' + nn + ' xác nhận', why: n + ' sẽ kiểm tra rồi xác nhận hoàn thành. Nếu ' + nn + ' không phản hồi, đơn tự hoàn thành sau 24 giờ.', btns: [] };
       case 'done':
-        if (!of.paid) return { h: 'Hoàn thành — bạn đã nhận tiền công chưa?', why: n + ' trả bằng ' + pay + '. Nhận đủ ' + money + ' rồi thì bấm xác nhận. AntGo không giữ tiền, hai bên trả trực tiếp cho nhau.', btns: [{ id: 'paid', label: 'Đã nhận ' + money, kind: 'main' }, { id: 'unpaid', label: 'Chưa nhận được tiền công', kind: 'ghost' }] };
-        if (!of.rated) return { h: 'Đánh giá ' + nn, why: 'Bạn đã nhận đủ tiền công. Một vài dòng đánh giá giúp hàng xóm khác biết ' + nn + ' có dễ hợp tác không.', btns: [{ id: 'rrate', label: 'Đánh giá ' + nn, kind: 'main' }] };
-        return { h: 'Xong việc rồi!', why: 'Đã nhận tiền công và đánh giá. Cảm ơn bạn đã giúp hàng xóm.', btns: [{ id: 'more', label: 'Tìm việc khác gần nhà', kind: 'ghost' }] };
+        if (!of.paid) return { h: 'Hoàn thành — bạn đã nhận tiền công chưa?', why: n + ' trả bằng ' + pay + '. Nhận đủ ' + money + ' rồi thì bấm xác nhận. AntGo không giữ tiền, hai bên trả trực tiếp cho nhau.', btns: [{ id: 'paid', label: A.confirmPaid, kind: 'main' }, { id: 'unpaid', label: A.unpaid, kind: 'ghost' }] };
+        if (!of.rated) return { h: 'Đánh giá ' + nn, why: 'Bạn đã nhận đủ tiền công. Một vài dòng đánh giá giúp hàng xóm khác biết ' + nn + ' có dễ hợp tác không.', btns: [{ id: 'rrate', label: A.rate, kind: 'main' }] };
+        return { h: 'Xong việc rồi!', why: 'Đã nhận tiền công và đánh giá. Cảm ơn bạn đã giúp hàng xóm.', btns: [{ id: 'more', label: A.findJob, kind: 'ghost' }] };
       case 'rejected':
-        return { h: 'Chưa được chọn lần này', why: n + ' đã chọn người khác. Đề nghị của bạn không ảnh hưởng gì tới hồ sơ.', btns: [{ id: 'more', label: 'Tìm việc tương tự', kind: 'main' }] };
+        return { h: 'Chưa được chọn lần này', why: n + ' đã chọn người khác. Đề nghị của bạn không ảnh hưởng gì tới hồ sơ.', btns: [{ id: 'more', label: A.findJob, kind: 'main' }] };
       case 'withdrawn':
-        return { h: 'Bạn đã rút đề nghị', why: n + ' không còn thấy đề nghị của bạn.', btns: [{ id: 'post', label: 'Xem lại bài việc làm', kind: 'ghost' }] };
+        return { h: 'Bạn đã rút đề nghị', why: n + ' không còn thấy đề nghị của bạn.', btns: [{ id: 'post', label: A.viewPost, kind: 'ghost' }] };
       default:
-        return { h: 'Đơn đã hủy', why: 'Lý do: ' + (of.cancelReason ?? '—') + '. ' + n + ' đã được báo để tìm người khác.', btns: [{ id: 'more', label: 'Tìm việc khác gần nhà', kind: 'ghost' }] };
+        return { h: 'Đơn đã hủy', why: 'Lý do: ' + (of.cancelReason ?? '—') + '. ' + n + ' đã được báo để tìm người khác.', btns: [{ id: 'more', label: A.findJob, kind: 'ghost' }] };
     }
   }
 
