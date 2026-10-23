@@ -400,7 +400,7 @@ export class OrderDetail implements OnInit {
       'sim-late': () => this.move({ apptIn: (o.apptIn ?? 5) >= 2 ? 1 : 5 }, '(bản mẫu) đổi thời điểm hẹn'),
       'sim-quote': () => {
         const total = o.priceCheck === 'quote' ? 850000 : Math.round((o.total * 1.3) / 1000) * 1000;
-        const reason = o.priceCheck === 'quote' ? 'Ổ cứng hỏng — thay SSD 512GB, cài lại máy, bảo hành 3 tháng. Đã trừ 50.000đ phí kiểm tra.' : o.priceCheck === 'surcharge' ? 'Thùng hàng khoảng 20kg — phụ thu đồ to/nặng 10.000đ.' : 'Khối lượng thực tế lớn hơn ước tính lúc đặt.';
+        const reason = o.priceCheck === 'quote' ? 'Sau khi kiểm tra, máy cần thay linh kiện. Đã trừ phí kiểm tra đã trả.' : o.priceCheck === 'surcharge' ? 'Thực tế khác với lựa chọn lúc đặt nên phát sinh phụ thu.' : 'Khối lượng thực tế nhiều hơn dự kiến lúc đặt.';
         this.move({ status: 'pricing', newPrice: { total, reason, lines: [[reason, total]] } }, n + (o.priceCheck === 'surcharge' ? ' báo phụ thu ' : ' báo giá cuối ') + this.vnd(total), 'Đơn đang chờ bạn duyệt giá');
       },
       'sim-resched-other': () => this.move({ resched: { to: '14:00 ngày mai', by: 'seller', note: 'Giờ bạn chọn mình kín lịch rồi, 14:00 ngày mai được không bạn?' } }, n + ' đề xuất giờ khác'),
@@ -606,6 +606,12 @@ export class OrderDetail implements OnInit {
 
   protected kindName(k: string): string {
     return ({ food: 'Đồ ăn', goods: 'Đồ dùng', service: 'Dịch vụ', job: 'Việc làm' } as Record<string, string>)[k] ?? '';
+  }
+
+  /** Chênh lệch giữa giá cuối và giá lúc đặt, ví dụ "+22.500đ" */
+  protected diff(o: Order): string {
+    const n = (o.newPrice?.total ?? o.total) - o.total;
+    return (n >= 0 ? '+' : '−') + this.vnd(Math.abs(n));
   }
 
   protected stepTime(state: OfferState): string {

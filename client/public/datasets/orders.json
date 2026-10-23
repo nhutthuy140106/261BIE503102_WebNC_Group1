@@ -61,10 +61,10 @@
     "priceCheck": "estimate",
     "newPrice": {
       "total": 97500,
-      "reason": "Cân thật 6,5kg (bạn ước 5kg) · 15.000đ/kg",
+      "reason": "Khối lượng thực tế nhiều hơn dự kiến lúc đặt.",
       "lines": [
         [
-          "Giặt sấy 6,5kg × 15.000đ",
+          "Giặt sấy (6,5kg × 15.000đ)",
           97500
         ]
       ]

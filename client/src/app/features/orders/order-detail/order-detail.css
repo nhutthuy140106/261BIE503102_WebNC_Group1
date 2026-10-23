@@ -218,3 +218,10 @@ a.pbtn.link { text-decoration: none; }
 .apanel > .pbtn + .arow2 { margin-top: 10px; }
 .arow2 .gbtn { height: 46px; }
 .apanel .lbtn { margin-top: 20px; }
+
+/* hộp báo giá cuối chung cho mọi dịch vụ: giá lúc đặt, chênh lệch, giá cuối, lý do, chi tiết */
+.pricebox .diff { color: #B4441C; font-weight: 600; }
+.pricebox .why2 { padding: 10px 0 2px; border-top: 1px solid #F2D5C5; }
+.pricebox .why2 small { color: var(--smoke); font-size: 12px; }
+.pricebox .why2 p { margin: 3px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink); }
+.pricebox .pbl { border-top: 0; padding-top: 4px; }

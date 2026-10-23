@@ -180,9 +180,10 @@
             <h3>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
             @if (o.status === 'pricing' && o.newPrice; as np) {
               <div class="pricebox">
-                <div class="pb"><span>{{ o.priceCheck === 'quote' ? 'Đã trả lúc đặt (phí kiểm tra)' : 'Giá lúc đặt' }}</span><s>{{ o.total | vnd }}</s></div>
+                <div class="pb"><span>{{ o.priceCheck === 'quote' ? 'Đã trả lúc đặt' : 'Giá lúc đặt' }}</span><s>{{ o.total | vnd }}</s></div>
+                <div class="pb"><span>Chênh lệch</span><span class="diff">{{ diff(o) }}</span></div>
                 <div class="pb new"><span>Giá cuối</span><b>{{ np.total | vnd }}</b></div>
-                <p class="pbw">{{ np.reason }}</p>
+                <div class="why2"><small>Lý do từ {{ o.counterpartName }}</small><p>{{ np.reason }}</p></div>
                 @if (np.lines) { <div class="pbl">@for (l of np.lines; track l[0]) { <div><span>{{ l[0] }}</span><span>{{ l[1] < 0 ? '−' + vnd(-l[1]) : vnd(l[1]) }}</span></div> }</div> }
               </div>
             }
