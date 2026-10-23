@@ -247,8 +247,9 @@ export class OrderDetail implements OnInit {
     return h >= 1 ? 'còn ' + Math.floor(h) + ' giờ' : 'còn ' + Math.max(1, Math.round(h * 60)) + ' phút';
   }
 
-  protected canResched(o: Order): boolean {
-    return this.kind(o) === 'service' && ['pending', 'confirmed'].includes(o.status as string) && !!o.detail?.when;
+  /** Đổi lịch: hai bên tự nhắn tin thỏa thuận, app không có bước riêng (giữ code để bật lại nếu cần) */
+  protected canResched(_o: Order): boolean {
+    return false;
   }
 
   /** Nội dung bảng hành động của đơn đã đặt: tiêu đề + lời giải thích + các nút */
