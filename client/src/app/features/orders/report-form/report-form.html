@@ -17,7 +17,12 @@
   </div>
 } @else {
   <form [formGroup]="form" (ngSubmit)="submit()">
-    <p class="rnote">Dùng khi bạn cần AntGo can thiệp. Muốn làm lại món, trả hàng hay hoàn tiền thì hãy dùng nút báo vấn đề với bên bán ngay trong đơn.</p>
+    <section class="rtip">
+      <h2>Trước khi báo cáo</h2>
+      <p>Hãy nhắn cho người còn lại trong đơn để trao đổi rõ vấn đề. Nếu liên quan tới tiền công, kiểm tra lại phương thức thanh toán hai bên đã thống nhất.</p>
+      <p>Muốn làm lại món, trả hàng hay hoàn tiền thì dùng nút báo vấn đề với bên bán ngay trong đơn. Báo cáo này dùng khi bạn cần AntGo can thiệp.</p>
+      <a [routerLink]="['/orders', orderId()]">Xem Đơn hàng</a>
+    </section>
     <div class="rf" [class.bad]="tried() && !picks().length">
       <label>Vấn đề bạn gặp <span>(chọn được nhiều)</span></label>
       <div class="rlist">

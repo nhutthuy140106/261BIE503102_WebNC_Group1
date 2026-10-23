@@ -42,3 +42,8 @@ textarea:focus { border-color: var(--ink); }
 .rlist button::after { border-radius: 6px; }
 .rlist button.on::after { border-color: var(--accent); background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat; }
 .rlist + textarea { margin-top: 6px; }
+
+.rtip { display: grid; gap: 8px; justify-items: start; }
+.rtip h2 { font-size: 17px; }
+.rtip p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--smoke); }
+.rtip a { margin-top: 4px; font-weight: 600; font-size: 14px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
