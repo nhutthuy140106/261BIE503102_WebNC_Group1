@@ -6,7 +6,7 @@
   <div class="dhead">
     <div>
       <div class="chips">
-        @if (job()?.category; as c) { <span class="chip">{{ c }}</span> }
+        @if (job(); as j) { <span class="chip"><svg class="i"><use [attr.href]="'#' + (j.kind === 'food' ? 'bellhop' : j.kind === 'goods' ? 'bag' : j.kind === 'service' ? 'tap' : 'hand')" /></svg>{{ j.category ?? kindName(j.kind) }}</span> }
         <span class="chip">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span>
         <span class="code">Mã đơn {{ o.code }}</span>
       </div>
@@ -17,6 +17,7 @@
         } @else {
           <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="28" /><b>{{ o.counterpartName }}</b>
         }
+        @if (job()?.rating; as r) { <span class="rt"><svg class="i"><use href="#star" /></svg><b>{{ ('' + r).replace('.', ',') }}</b>@if (job()?.reviewCount) { <i>{{ job()?.reviewCount }} đánh giá</i> }</span> }
         <button type="button" class="btn-msg" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
       </div>
     </div>

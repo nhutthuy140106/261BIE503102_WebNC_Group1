@@ -105,6 +105,7 @@ export class OrderDetail implements OnInit {
             this.postService.getPostById(of.jobId).subscribe((p) => this.job.set(p ?? null));
           });
         }
+        if (o.type === 'placed') this.postService.getPostById(o.postId).subscribe((p) => this.job.set(p ?? null));
         this.loading.set(false);
       },
       error: (e: Error) => {
@@ -596,6 +597,10 @@ export class OrderDetail implements OnInit {
     const of = this.offer();
     const btns = o.type === 'received' ? (of ? this.receivedPanel(o, of).btns : []) : this.placedPanel(o).btns;
     return !btns.some((b) => b.kind === 'main') && o.status !== 'pricing' && !o.newPrice;
+  }
+
+  protected kindName(k: string): string {
+    return ({ food: 'Đồ ăn', goods: 'Đồ dùng', service: 'Dịch vụ', job: 'Việc làm' } as Record<string, string>)[k] ?? '';
   }
 
   protected stepTime(state: OfferState): string {
