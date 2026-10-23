@@ -75,3 +75,33 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
   nav a.on::after { left: 25%; right: 25%; top: -1px; bottom: auto; }
 }
 .hsp { flex: 1 1 0; min-width: 0; }
+
+/* khung thông báo thả xuống từ chuông */
+.nwrap { position: relative; display: inline-flex; }
+.iconbtn.on { background: #F0F2F5; }
+.npanel { position: absolute; right: -60px; top: 48px; z-index: 60; width: 390px; max-height: min(78vh, 640px); display: flex; flex-direction: column; border-radius: 14px; background: #fff; box-shadow: 0 12px 40px rgba(34, 48, 74, .26); overflow: hidden; }
+.nhead { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 6px; }
+.nhead h2 { font-size: 22px; letter-spacing: -.02em; margin: 0; }
+.nall { background: none; font-size: 13px; font-weight: 600; color: var(--accent); }
+.nall:hover { text-decoration: underline; }
+.ntabs { display: flex; gap: 6px; padding: 6px 14px 8px; }
+.ntabs button { height: 34px; padding: 0 14px; border-radius: 999px; background: none; font-size: 14px; font-weight: 600; color: var(--ink); }
+.ntabs button:hover { background: #F0F2F5; }
+.ntabs button.on { background: #FCEEE6; color: #B4571F; }
+.nbody { flex: 1; min-height: 0; overflow-y: auto; padding: 0 8px 8px; }
+.nbody h3 { margin: 8px 10px 4px; font-size: 16px; font-weight: 700; }
+.nitem { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; border-radius: 10px; background: none; text-align: left; }
+.nitem:hover { background: #F5F6F8; }
+.nic { flex: none; width: 52px; height: 52px; border-radius: 50%; background: #FCEEE6; color: var(--accent); display: grid; place-items: center; }
+.nic svg { width: 24px; height: 24px; }
+.ntx { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.nt { font-size: 14px; line-height: 1.4; color: var(--smoke); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.ntx small { font-size: 12.5px; color: var(--smoke); }
+.nitem.unread .nt { color: var(--ink); font-weight: 600; }
+.nitem.unread .ntx small { color: var(--accent); font-weight: 600; }
+.ndot { flex: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+.nnone { padding: 28px 16px; text-align: center; color: var(--smoke); font-size: 14px; }
+.nfoot { display: block; margin: 0 10px 10px; height: 42px; line-height: 42px; border-radius: 10px; background: #F0F2F5; text-align: center; font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.nfoot:hover { background: #E6E9EE; }
+@media (max-width: 520px) { .npanel { position: fixed; right: 8px; left: 8px; top: 64px; width: auto; } }
+.nitem, .nitem .nt { white-space: normal; } .nt { overflow-wrap: anywhere; }

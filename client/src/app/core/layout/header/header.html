@@ -48,10 +48,36 @@
         @if (saved.ids().length) { <span class="cnt">{{ saved.ids().length }}</span> }
       </button>
       @if (auth.isLoggedIn()) {
-        <a routerLink="/notifications" class="iconbtn" title="Thông báo">
-          <svg class="i"><use href="#bell" /></svg>
-          @if (notifications.unreadCount()) { <span class="d"></span> }
-        </a>
+        <span class="nwrap">
+          <button type="button" class="iconbtn" [class.on]="notifOpen()" title="Thông báo" (click)="toggleNotif()">
+            <svg class="i"><use href="#bell" /></svg>
+            @if (notifications.unreadCount()) { <span class="d"></span> }
+          </button>
+          @if (notifOpen()) {
+            <div class="npanel">
+              <div class="nhead"><h2>Thông báo</h2>@if (notifications.unreadCount()) { <button type="button" class="nall" (click)="readAll()">Đánh dấu đã đọc tất cả</button> }</div>
+              <div class="ntabs">
+                <button type="button" [class.on]="notifTab() === 'all'" (click)="notifTab.set('all')">Tất cả</button>
+                <button type="button" [class.on]="notifTab() === 'unread'" (click)="notifTab.set('unread')">Chưa đọc</button>
+              </div>
+              <div class="nbody">
+                @for (g of notifGroups(); track g.title) {
+                  <h3>{{ g.title }}</h3>
+                  @for (n of g.items; track n._id) {
+                    <button type="button" class="nitem" [class.unread]="!n.read" (click)="openNotif(n)">
+                      <span class="nic"><svg class="i"><use [attr.href]="notifIcon(n)" /></svg></span>
+                      <span class="ntx"><span class="nt">{{ n.text }}</span><small>{{ short(n.createdAt) }}</small></span>
+                      @if (!n.read) { <i class="ndot"></i> }
+                    </button>
+                  }
+                } @empty {
+                  <p class="nnone">{{ notifTab() === 'unread' ? 'Không có thông báo chưa đọc.' : 'Chưa có thông báo nào.' }}</p>
+                }
+              </div>
+              <a routerLink="/notifications" class="nfoot" (click)="notifOpen.set(false)">Xem tất cả</a>
+            </div>
+          }
+        </span>
         <a routerLink="/profile" class="av" [title]="auth.currentUser()?.fullName ?? 'Tài khoản'">
           <app-avatar [src]="auth.currentUser()?.avatar" [name]="auth.currentUser()?.fullName" [size]="34" />
         </a>

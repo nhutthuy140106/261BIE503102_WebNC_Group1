@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -10,6 +10,8 @@ import { NotificationService } from '../../services/notification';
 import { SavedService } from '../../services/saved';
 import { SearchUiService } from '../../services/search-ui';
 import { XuService } from '../../services/xu';
+import { timeShort } from '../../utils/time-short';
+import { AppNotification } from '../../models/social';
 
 @Component({
   selector: 'app-header',
@@ -29,6 +31,48 @@ export class Header {
   private readonly router = inject(Router);
   /** Công tắc Mua | Bán: theo không gian đang ở (/seller = Bán) */
   protected readonly sellMode = signal(false);
+
+  // ----- khung thông báo thả xuống từ chuông (kiểu Facebook) -----
+  protected readonly notifOpen = signal(false);
+  protected readonly notifTab = signal<'all' | 'unread'>('all');
+  protected readonly short = timeShort;
+  /** Thông báo đang xem theo tab, chia nhóm Mới (trong 24 giờ) / Trước đó */
+  protected readonly notifGroups = computed(() => {
+    const list = this.notifications.all().filter((n) => this.notifTab() === 'all' || !n.read);
+    const day = 24 * 3600 * 1000;
+    const fresh = list.filter((n) => Date.now() - new Date(n.createdAt).getTime() < day);
+    const older = list.filter((n) => !fresh.includes(n));
+    return [{ title: 'Mới', items: fresh }, { title: 'Trước đó', items: older }].filter((g) => g.items.length);
+  });
+
+  protected notifIcon(n: AppNotification): string {
+    return n.link.startsWith('/orders') ? '#receipt' : n.link.startsWith('/messenger') ? '#chat' : n.link.startsWith('/posts') ? '#bag' : '#bell';
+  }
+
+  protected toggleNotif(): void {
+    this.notifOpen.update((v) => !v);
+    if (this.notifOpen()) this.notifications.list().subscribe({ error: () => undefined });
+  }
+
+  protected openNotif(n: AppNotification): void {
+    this.notifOpen.set(false);
+    if (!n.read) this.notifications.markRead([n._id]).subscribe({ error: () => undefined });
+    this.router.navigateByUrl(n.link);
+  }
+
+  protected readAll(): void {
+    this.notifications.markRead().subscribe({ error: () => undefined });
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocClick(e: Event): void {
+    if (this.notifOpen() && !(e.target as HTMLElement).closest('.nwrap')) this.notifOpen.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEsc(): void {
+    this.notifOpen.set(false);
+  }
   /** Đang ở trang chủ: ô gọn ẩn khi ô lớn còn thấy */
   protected readonly onHome = signal(false);
   /** Ô tìm trên header chỉ hiện ở trang chủ và trang kết quả tìm kiếm */

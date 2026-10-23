@@ -15,6 +15,8 @@ export class NotificationService {
   private readonly db = inject(MockDb);
 
   private readonly items = signal<AppNotification[]>([]);
+  /** Danh sách đã nạp (cho khung thả xuống ở chuông) */
+  readonly all = this.items.asReadonly();
   readonly unreadCount = computed(() => this.items().filter((n) => !n.read).length);
 
   list(): Observable<AppNotification[]> {
