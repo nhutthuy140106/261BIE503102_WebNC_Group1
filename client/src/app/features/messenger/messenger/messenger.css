@@ -226,3 +226,4 @@
 .thread.blank { flex-direction: column; gap: 6px; }
 .thread.blank img { width: 280px; height: auto; }
 .thread.blank p { margin: 0; color: var(--smoke); font-size: 14.5px; }
+.thread.blank img { position: relative; left: 58px; }
