@@ -92,3 +92,17 @@ a.who:hover b { text-decoration: underline; text-underline-offset: 3px; }
 .total s { flex-basis: 100%; order: -1; text-align: right; font-size: 13px; color: var(--fog); }
 .total em { font-style: normal; font-size: 16px; font-weight: 700; color: var(--ink); }
 .total b { font-size: 22px; }
+
+/* bớt chữ in hoa và chữ đậm cho nhẹ nhàng hơn */
+.ost { text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 600; }
+.gh { text-transform: none; letter-spacing: 0; font-size: 16px; font-weight: 600; }
+.gh small { font-weight: 500; }
+.oh b, .who b { font-weight: 600; }
+.oh .kind { font-weight: 500; }
+.main h3 { font-weight: 500; }
+.btn2 { font-weight: 500; }
+.btn2.main { font-weight: 600; }
+.total em { font-size: 15px; font-weight: 600; }
+.total b { font-weight: 700; }
+.tabs button { font-weight: 500; }
+.tabs button.on { font-weight: 600; }
