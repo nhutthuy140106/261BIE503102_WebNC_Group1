@@ -510,8 +510,8 @@ export class OrderDetail implements OnInit {
       if (!this.pick()) return void this.bad.set('Chọn vấn đề.');
       if (!this.pick2()) return void this.bad.set('Chọn điều bạn mong muốn.');
       if (this.pick() === 'Khác' && !this.text().trim()) return void this.bad.set('Mô tả ngắn giúp bên bán hiểu.');
-      if (needPhoto && !this.photos()) return void this.bad.set('Cần ít nhất 1 ảnh để bên bán kiểm tra.');
-      return this.move({ issue: { st: 'open', type: this.pick(), want: this.pick2(), text: this.text().trim(), photos: this.photos() } }, (this.kind(o) === 'goods' ? 'Bạn yêu cầu trả hàng: ' : 'Bạn báo vấn đề: ') + this.pick(), 'Đã gửi cho ' + n);
+      if (needPhoto && !this.rvPics().length) return void this.bad.set('Cần ít nhất 1 ảnh để bên bán kiểm tra.');
+      return this.move({ issue: { st: 'open', type: this.pick(), want: this.pick2(), text: this.text().trim(), photos: this.rvPics().length } }, (this.kind(o) === 'goods' ? 'Bạn yêu cầu trả hàng: ' : 'Bạn báo vấn đề: ') + this.pick(), 'Đã gửi cho ' + n);
     }
     if (d === 'resched') {
       if (!this.pick() || !this.pick2()) return void this.bad.set('Chọn ngày và giờ.');
