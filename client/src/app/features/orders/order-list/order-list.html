@@ -15,7 +15,7 @@
   @for (g of groups(); track g.key) {
   <section class="grp" [class.need]="g.key === 'todo'">
   @if (g.title) {
-    <h2 class="gh" [class.todo]="g.key === 'todo'">@if (g.key === 'todo') { <svg class="i"><use href="#bolt" /></svg> }{{ g.title }} <small>· {{ g.items.length }}</small></h2>
+    <h2 class="gh" [class.todo]="g.key === 'todo'">{{ g.title }} <small class="cnt">{{ g.items.length }}</small></h2>
     @if (g.key === 'todo') { <p class="nhint">Những đơn đang chờ bạn bấm bước tiếp theo.</p> }
   }
   <ul class="list">
