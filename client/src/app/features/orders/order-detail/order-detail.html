@@ -119,7 +119,7 @@
               <span>Giá lúc đặt</span><b class="strike">{{ o.oldTotal | vnd }}</b>
               <span class="total">Giá cuối bạn đã đồng ý</span><b class="total">{{ o.total | vnd }}</b>
             } @else if (o.detail; as d) {
-              <span>{{ o.priceCheck === 'quote' ? 'Phí kiểm tra và khoản đã chọn' : o.priceCheck === 'estimate' ? 'Tạm tính theo thông tin bạn gửi' : 'Thành tiền' }}</span><b>{{ d.subtotal | vnd }}</b>
+              @if (d.fee || d.discount) { <span>{{ o.priceCheck === 'quote' ? 'Phí kiểm tra và khoản đã chọn' : o.priceCheck === 'estimate' ? 'Tạm tính theo thông tin bạn gửi' : 'Thành tiền' }}</span><b>{{ d.subtotal | vnd }}</b> }
               @if (d.fee) { <span>Phí vận chuyển</span><b>{{ d.fee | vnd }}</b> }
               @if (d.discount) { <span>Voucher · {{ d.voucher }}</span><b>−{{ d.discount | vnd }}</b> }
               <span class="total">{{ o.status === 'cancelled' || o.status === 'declined' ? 'Đơn đã hủy · bạn không phải trả' : o.priceCheck === 'quote' ? 'Trước khi báo giá' : o.priceCheck === 'estimate' ? 'Tạm tính' : 'Tổng' }}</span>
@@ -129,7 +129,7 @@
             }
           </div>
           @if (!o.priceDone && o.priceCheck && o.status !== 'cancelled' && o.status !== 'declined') {
-            <p class="hintp">{{ o.priceCheck === 'quote' ? 'Thợ kiểm tra rồi báo giá sửa' : o.priceCheck === 'surcharge' ? 'Nếu đồ thực tế to/nặng hơn bạn chọn, người làm báo phụ thu để bạn đồng ý trước.' : 'Bên cung cấp cân/đo thực tế rồi báo giá cuối' }}{{ o.priceCheck === 'surcharge' ? '' : '; bạn đồng ý thì mới làm tiếp.' }}</p>
+            <p class="hintp hintbox">{{ o.priceCheck === 'quote' ? 'Thợ kiểm tra rồi báo giá sửa' : o.priceCheck === 'surcharge' ? 'Nếu đồ thực tế to/nặng hơn bạn chọn, người làm báo phụ thu để bạn đồng ý trước.' : 'Bên cung cấp cân/đo thực tế rồi báo giá cuối' }}{{ o.priceCheck === 'surcharge' ? '' : '; bạn đồng ý thì mới làm tiếp.' }}</p>
           }
         </section>
 
