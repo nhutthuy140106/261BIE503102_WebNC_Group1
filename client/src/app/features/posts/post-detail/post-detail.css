@@ -383,3 +383,10 @@
 
 /* Nhắn tin nằm sát mép phải của dòng người bán (như bản đầu) */
 .block.seller .btn-msg { margin-left: auto; }
+
+/* icon, công tắc, mũi tên thẳng hàng với dòng tiêu đề (không căn giữa theo chiều cao cả khối) */
+.crow, .crow.col { align-items: flex-start; }
+.crow .ic { margin-top: 0; }
+.crow .ct b { line-height: 22px; }
+.crow input.tg { margin-top: -2px; }
+.crow .cv { margin-top: 4px; }
