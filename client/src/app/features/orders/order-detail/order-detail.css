@@ -170,8 +170,6 @@ a.pbtn.link { text-decoration: none; }
 .lbtn { margin-top: 0; font-size: 12.5px; }
 
 /* Nhắn tin cạnh tên người bán ở đầu trang */
-.msgtop { margin-left: 6px; height: 30px; padding: 0 14px; border-radius: 999px; border: 1px solid #DADDE3; background: #fff; font: inherit; font-size: 13px; font-weight: 600; }
-.msgtop:hover { background: #F7F8FA; }
 /* hủy đơn / rút / báo cáo: liên kết nhỏ dưới các nút chính */
 .alinks { display: flex; flex-wrap: wrap; gap: 6px 18px; padding-top: 14px; border-top: 1px solid var(--border); }
 .alinks button { background: none; font: inherit; font-size: 13px; color: var(--smoke); text-decoration: underline; text-underline-offset: 3px; }

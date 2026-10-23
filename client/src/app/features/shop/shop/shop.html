@@ -19,7 +19,7 @@
       <button type="button" class="btn ghost" [class.on]="following()" (click)="toggleFollow()">
         {{ following() ? 'Đang theo dõi' : 'Theo dõi' }}
       </button>
-      <button type="button" class="btn" (click)="message()">Nhắn tin</button>
+      <button type="button" class="btn-msg" (click)="message()"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
     </div>
   </header>
 

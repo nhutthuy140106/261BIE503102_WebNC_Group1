@@ -59,7 +59,6 @@
 .shoplink b { display: block; font-size: 16px; }
 .shoplink u { margin-left: 10px; font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 600; }
 .shoplink small { display: block; color: var(--smoke); font-size: 13px; }
-.msg { margin-left: auto; height: 40px; padding: 0 18px; border-radius: 10px; background: var(--ink); color: #fff; font-weight: 600; }
 .pc-stats { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--soft); }
 .pc-stats div { padding: 12px 16px; text-align: center; }
 .pc-stats b { display: block; font-size: 18px; }

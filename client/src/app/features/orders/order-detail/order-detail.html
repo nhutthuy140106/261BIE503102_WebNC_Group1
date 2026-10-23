@@ -17,7 +17,7 @@
         } @else {
           <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="28" /><b>{{ o.counterpartName }}</b>
         }
-        <button type="button" class="msgtop" (click)="go('chat')">Nhắn tin</button>
+        <button type="button" class="btn-msg" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
       </div>
     </div>
     <div class="pay">

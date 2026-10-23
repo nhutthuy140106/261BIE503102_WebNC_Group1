@@ -28,8 +28,6 @@
 .shoplink b { display: block; font-size: 16px; }
 .shoplink:hover b { text-decoration: underline; text-underline-offset: 3px; }
 .shoplink small { color: var(--smoke); font-size: 13px; }
-.msg { margin-left: auto; height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--ink); font-weight: 600; background: none; }
-.msg:hover { background: var(--soft); }
 .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .facts div { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 12px; background: var(--soft); font-size: 13px; color: var(--smoke); }
 .facts svg { width: 20px; height: 20px; color: var(--ink); flex: none; }

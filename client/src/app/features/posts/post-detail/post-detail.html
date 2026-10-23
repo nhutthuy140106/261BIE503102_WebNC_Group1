@@ -42,7 +42,7 @@
           <app-avatar [src]="p.sellerAvatar ?? img(v.tpl.seller.av, 120, 120)" [name]="p.sellerName" [size]="56" />
           <span><b>{{ p.sellerName }}</b><small>{{ v.tpl.seller.reply }}</small></span>
         </a>
-        <button type="button" class="msg" (click)="message(p)">Nhắn tin</button>
+        <button type="button" class="btn-msg" (click)="message(p)"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
       </section>
 
       <section class="block">

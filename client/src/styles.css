@@ -82,3 +82,8 @@ input, select, textarea {
 .input:focus { border-color: var(--ink); }
 .empty img { width: 125px; height: auto; display: block; margin: 0 auto 14px; }
 .demo-note { margin: 24px 0 40px; color: var(--fog); font-size: 12px; }
+
+/* Nút "Nhắn tin" dùng chung (chi tiết bài, chi tiết việc, gian hàng, chi tiết đơn): viền xanh đen, bo 10, icon chat */
+.btn-msg { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px; border: 1px solid var(--ink); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background .15s; }
+.btn-msg:hover { background: #F4F5F7; }
+.btn-msg svg { width: 18px; height: 18px; }
