@@ -26,10 +26,11 @@ type DlgType =
   | 'edit' | 'withdraw' | 'start' | 'report' | 'rcancel' | 'unpaid' | 'rate'
   | 'pcancel' | 'received' | 'issue' | 'resched' | 'approve' | 'reject';
 
-const R_REASONS = ['Tôi bận đột xuất', 'Không liên lạc được người đăng', 'Việc khác với mô tả', 'Lý do khác'];
+const OTHER_REASON = 'Lý do khác';
+const R_REASONS = ['Tôi bận đột xuất', 'Sức khỏe không đảm bảo', 'Địa điểm quá xa', 'Không liên lạc được người đăng', 'Việc khác với mô tả', 'Thời gian không còn phù hợp', OTHER_REASON];
 const P_REASONS = {
-  service: ['Đặt nhầm / không cần nữa', 'Muốn đổi sang giờ khác', 'Tìm được người làm khác', 'Lý do khác'],
-  other: ['Đặt nhầm món / số lượng', 'Không cần nữa', 'Chờ lâu quá', 'Lý do khác'],
+  service: ['Đặt nhầm / không cần nữa', 'Muốn đổi sang giờ khác', 'Muốn đổi địa chỉ', 'Tìm được người làm khác', 'Giá không như mong đợi', 'Đặt trùng đơn', OTHER_REASON],
+  other: ['Đặt nhầm món / số lượng', 'Muốn đổi món khác', 'Muốn đổi địa chỉ nhận hàng', 'Đặt trùng đơn', 'Thủ tục thanh toán rắc rối', 'Chờ lâu quá', 'Không cần nữa', OTHER_REASON],
 };
 const ISSUE_TYPES = {
   food: ['Sai món', 'Thiếu món / thiếu phần', 'Món bị hỏng, có vấn đề vệ sinh', 'Khác'],
@@ -80,6 +81,20 @@ export class OrderDetail implements OnInit {
   protected readonly stars = signal(0);
   protected readonly bad = signal<string>('');
   protected readonly rReasons = R_REASONS;
+  protected readonly otherReason = OTHER_REASON;
+  /** Lý do hủy: chọn được nhiều lý do cùng lúc; ô "Ghi thêm" chỉ hiện khi chọn "Lý do khác" */
+  protected readonly picks = signal<string[]>([]);
+
+  protected togglePickReason(r: string): void {
+    this.picks.update((l) => (l.includes(r) ? l.filter((x) => x !== r) : [...l, r]));
+    this.bad.set('');
+  }
+
+  private reasonText(): string {
+    const l = this.picks().filter((x) => x !== OTHER_REASON);
+    const extra = this.picks().includes(OTHER_REASON) ? this.text().trim() || OTHER_REASON : '';
+    return [...l, extra].filter(Boolean).join('; ');
+  }
   protected readonly days = this.buildDays();
   protected readonly daySlots = DAY_SLOTS;
   protected readonly dlgNow = signal(true);
@@ -145,6 +160,7 @@ export class OrderDetail implements OnInit {
 
   protected open(t: DlgType, init: { text?: string } = {}): void {
     this.pick.set('');
+    this.picks.set([]);
     this.pick2.set('');
     this.text.set(init.text ?? '');
     this.photos.set(0);
@@ -425,8 +441,8 @@ export class OrderDetail implements OnInit {
     if (!o || !d) return;
     const n = o.counterpartName;
     if (d === 'pcancel') {
-      if (!this.pick()) return void this.bad.set('Chọn một lý do.');
-      const why = this.pick() + (this.text().trim() ? ' — ' + this.text().trim() : '');
+      if (!this.picks().length) return void this.bad.set('Chọn ít nhất một lý do.');
+      const why = this.reasonText();
       const now = this.dlgNow();
       const late = now && this.kind(o) === 'service' && o.status === 'confirmed' && o.apptIn != null && o.apptIn < 2;
       if (now) return this.move({ status: 'cancelled', cancelFrom: o.status as string, cancelBy: 'buyer', cancelWhy: why, cancelLate: late }, 'Bạn hủy đơn: ' + why, 'Đã hủy đơn');
@@ -575,8 +591,8 @@ export class OrderDetail implements OnInit {
       return void this.offerService.act(of._id, 'reportDone', { note: this.text().trim() }).subscribe({ next: (n) => done(n, 'Đã gửi báo hoàn thành cho ' + nm), error: err });
     }
     if (d === 'rcancel') {
-      if (!this.pick()) return void this.bad.set('Chọn một lý do.');
-      return void this.offerService.act(of._id, 'cancelRequest', { reason: this.pick() }).subscribe({ next: (n) => done(n, 'Đã hủy và báo cho ' + nm), error: err });
+      if (!this.picks().length) return void this.bad.set('Chọn ít nhất một lý do.');
+      return void this.offerService.act(of._id, 'cancelRequest', { reason: this.reasonText() }).subscribe({ next: (n) => done(n, 'Đã hủy và báo cho ' + nm), error: err });
     }
     if (d === 'unpaid') {
       this.close();

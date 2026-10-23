@@ -254,8 +254,9 @@
           }
           @case ('rcancel') {
             <h3>Xin hủy việc này?</h3><p class="p">{{ o.counterpartName }} sẽ được báo ngay để tìm người khác. Hủy sát giờ làm sẽ hiện trong hồ sơ của bạn.</p>
-            <div class="fld" [class.bad]="bad()"><label>Lý do</label>
-              <div class="reasons">@for (r of rReasons; track r) { <button type="button" [class.on]="pick() === r" (click)="pick.set(r); bad.set('')">{{ r }}</button> }</div>
+            <div class="fld" [class.bad]="bad()"><label>Lý do <small class="hintl">(chọn được nhiều)</small></label>
+              <div class="reasons">@for (r of rReasons; track r) { <button type="button" [class.on]="picks().includes(r)" (click)="togglePickReason(r)">{{ r }}</button> }</div>
+              @if (picks().includes(otherReason)) { <textarea maxlength="200" placeholder="Bạn ghi rõ lý do giúp mình nhé" [value]="text()" (input)="text.set($any($event.target).value)"></textarea> }
               <div class="err2">{{ bad() }}</div></div>
             <div class="btns"><button type="button" class="ghost" (click)="close()">Không hủy</button><button type="button" class="go dark" (click)="okR()">Hủy việc</button></div>
           }
@@ -276,9 +277,9 @@
             <p class="p">{{ dlgNow() ? (o.status === 'pending' ? 'Bên bán chưa xác nhận nên' : 'Bên bán chưa bắt đầu nên') + ' đơn hủy ngay, ' + o.counterpartName + ' nhận thông báo.' : o.counterpartName + ' đã bắt đầu. Đơn chỉ hủy khi ' + o.counterpartName + ' đồng ý.' }}</p>
             @if (dlgNow() && o.kind === 'service' && o.status === 'confirmed' && o.apptIn != null && o.apptIn < 2) { <p class="request-note warnbox">Còn dưới 2 giờ tới giờ hẹn — hủy sát giờ sẽ hiện trong hồ sơ của bạn.</p> }
             @if (dlgNow() && canResched(o)) { <p class="p">Chỉ muốn đổi giờ? <button type="button" class="linkbtn" (click)="open('resched')">Đổi lịch</button> thay vì hủy.</p> }
-            <div class="fld" [class.bad]="bad()"><label>Lý do</label>
-              <div class="reasons">@for (r of pReasons(o); track r) { <button type="button" [class.on]="pick() === r" (click)="pick.set(r); bad.set('')">{{ r }}</button> }</div>
-              <textarea maxlength="200" placeholder="Ghi thêm (không bắt buộc)" [value]="text()" (input)="text.set($any($event.target).value)"></textarea>
+            <div class="fld" [class.bad]="bad()"><label>Lý do <small class="hintl">(chọn được nhiều)</small></label>
+              <div class="reasons">@for (r of pReasons(o); track r) { <button type="button" [class.on]="picks().includes(r)" (click)="togglePickReason(r)">{{ r }}</button> }</div>
+              @if (picks().includes(otherReason)) { <textarea maxlength="200" placeholder="Bạn ghi rõ lý do giúp mình nhé" [value]="text()" (input)="text.set($any($event.target).value)"></textarea> }
               <div class="err2">{{ bad() }}</div></div>
             <div class="btns"><button type="button" class="ghost" (click)="close()">Giữ đơn</button><button type="button" class="go dark" (click)="okP()">{{ dlgNow() ? 'Hủy đơn' : 'Gửi yêu cầu' }}</button></div>
           }

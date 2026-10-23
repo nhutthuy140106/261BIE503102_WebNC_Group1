@@ -235,3 +235,9 @@ a.pbtn.link { text-decoration: none; }
 .reasons:not(.two):not(.three):not(.five) button.on::after { border-color: var(--accent); background: radial-gradient(var(--accent) 42%, transparent 46%); }
 .fld > label { text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 700; color: var(--ink); }
 .modal .reasons + textarea { margin-top: 14px; }
+
+.hintl { font-weight: 400; color: var(--smoke); font-size: 12.5px; }
+/* chọn nhiều lý do: nút vuông bo nhẹ thay cho nút tròn để người dùng hiểu là chọn được nhiều */
+.modal .fld:has(.hintl) .reasons button::after { border-radius: 6px; }
+.modal .fld:has(.hintl) .reasons button.on::after { border-color: var(--accent); background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat; }
+.modal .fld:has(.hintl) .reasons { max-height: 300px; overflow: auto; }
