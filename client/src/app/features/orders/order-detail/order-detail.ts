@@ -563,7 +563,7 @@ export class OrderDetail implements OnInit {
     const pay = o.paymentMethod === 'cash' ? 'tiền mặt' : 'chuyển khoản';
     switch (of.state) {
       case 'offered':
-        return { h: 'Chờ ' + nn + ' chọn người', why: 'Bạn sẽ được báo ngay khi ' + nn + ' chọn. Gửi đề nghị chưa phải là đã nhận việc.', btns: [{ id: 'edit', label: A.editOffer, kind: 'ghost' }, { id: 'withdraw', label: A.withdraw, kind: 'warn' }] };
+        return { h: 'Chờ ' + nn + ' chọn người', why: 'Bạn sẽ được báo ngay khi ' + nn + ' chọn. Gửi đề nghị chưa phải là đã nhận việc.', btns: [{ id: 'withdraw', label: A.withdraw, kind: 'warn' }] };
       case 'chosen':
         return { h: 'Bạn đã được chọn!', why: 'Địa chỉ chính xác đã hiện bên trái. Đến giờ làm, bấm Bắt đầu làm để ' + nn + ' biết bạn đã tới.', btns: [{ id: 'start', label: A.start, kind: 'main' }, { id: 'rcancel', label: A.cancelJob, kind: 'ghost' }] };
       case 'working':
