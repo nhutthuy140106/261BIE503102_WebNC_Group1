@@ -99,6 +99,8 @@ export interface OrderDetail {
   address?: string;
   place?: string;
   when?: string;
+  /** Tên dòng giờ: "Nhận lúc", "Hẹn lấy", "Lấy đồ lúc"… (lấy từ bài) */
+  whenLabel?: string;
   utensils?: boolean;
   voucher?: string;
   subtotal: number;
