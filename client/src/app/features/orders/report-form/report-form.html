@@ -37,7 +37,7 @@
     </div>
     <div class="rf">
       <label>Hình ảnh <span>(không bắt buộc)</span></label>
-      <label class="photo-add" [class.full]="pics().length >= 4"><input type="file" accept="image/*" multiple hidden (change)="addPics($any($event.target))" /><svg class="i"><use href="#camera" /></svg>Chọn ảnh (tối đa 4)</label>
+      <label class="photo-add" [class.full]="pics().length >= 4"><input type="file" accept="image/*" multiple hidden (change)="addPics($any($event.target))" /><svg class="i"><use href="#camera" /></svg>Thêm hình ảnh</label>
 @if (pics().length) { <div class="photo-thumbs">@for (u of pics(); track u) { <span class="photo-thumb"><img [src]="u" alt="" /><button type="button" aria-label="Bỏ ảnh" (click)="dropPic(u)">×</button></span> }</div> }
     </div>
     @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
