@@ -100,7 +100,12 @@ export class OrderDraft {
   /** Các lựa chọn đã chọn, dạng "Nhóm: lựa chọn" để hiện trong hộp xác nhận và ghi vào đơn */
   readonly lines = computed(() => {
     const out: string[] = [];
-    for (const g of this.tpl.opts) out.push(g.name + ': ' + parseChoice(this.opt()[g.name] ?? '').name);
+    for (const g of this.tpl.opts) {
+      const c = parseChoice(this.opt()[g.name] ?? '');
+      // Lựa chọn mặc định (không tính thêm tiền, trong khi nhóm có lựa chọn nâng cấp trả thêm) không cần ghi vào đơn
+      const isBase = c.add === 0 && g.choices.some((x) => parseChoice(x).add > 0);
+      if (!isBase) out.push(g.name + ': ' + c.name);
+    }
     for (const q of this.tpl.qs) {
       const a = this.ans()[q.label] ?? '';
       const v = q.type === 'multi' ? this.picks(q.label).map((x) => parseChoice(x).name).join(', ') : q.type === 'choice' ? parseChoice(a).name : a;

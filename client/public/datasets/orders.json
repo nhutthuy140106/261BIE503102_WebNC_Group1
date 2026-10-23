@@ -17,8 +17,7 @@
     "kind": "food",
     "detail": {
       "lines": [
-        "Món mặn hôm nay: Sườn ram",
-        "Phần cơm: Vừa"
+        "Món mặn hôm nay: Sườn ram"
       ],
       "subtotal": 80000,
       "fee": 5000,
@@ -80,7 +79,6 @@
     "detail": {
       "lines": [
         "Nước xả: Hương nhẹ",
-        "Gấp đồ: Gấp gọn",
         "Có đồ trắng cần giặt riêng?: Có"
       ],
       "subtotal": 75000,
