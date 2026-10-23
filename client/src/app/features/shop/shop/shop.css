@@ -30,3 +30,19 @@
 
 .stats .star { color: #E39B1A; }
 .bought { margin-top: 6px; font-size: 12.5px; color: var(--smoke); }
+
+/* số liệu: một khung ba ô bằng nhau, số to */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 16px 0 28px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.stats div { min-width: 0; padding: 20px 24px; border: 0; border-radius: 0; gap: 4px; }
+.stats div + div { border-left: 1px solid var(--border); }
+.stats strong { font-size: 32px; letter-spacing: -.02em; line-height: 1.1; }
+.stats span { font-size: 14px; }
+.stats .star { font-size: 26px; vertical-align: 2px; }
+@media (max-width: 700px) { .stats strong { font-size: 26px; } .stats div { padding: 14px 16px; } }
+
+/* nút đầu trang: cùng cỡ, Theo dõi nổi bật */
+.cta { gap: 10px; }
+.cta .btn, .cta .btn-msg { height: 46px; padding: 0 22px; border-radius: 12px; font-size: 15px; font-weight: 600; }
+.cta .btn.ghost { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cta .btn.ghost:hover { filter: brightness(.95); }
+.cta .btn.ghost.on { background: #fff; border-color: var(--ink); color: var(--ink); }
