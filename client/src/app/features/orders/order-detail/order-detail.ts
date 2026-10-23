@@ -392,6 +392,13 @@ export class OrderDetail implements OnInit {
     return ISSUE_WANTS[this.kind(o)];
   }
 
+  /** Lúc đặt đơn, đầy đủ ngày giờ để truy xuất: "16/10/2026 · 13:02" */
+  protected placedAt(o: Order): string {
+    const d = new Date(o.createdAt);
+    const p = (n: number) => String(n).padStart(2, '0');
+    return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' · ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
   protected issuePh(o: Order): string {
     return ISSUE_PH[this.kind(o)];
   }

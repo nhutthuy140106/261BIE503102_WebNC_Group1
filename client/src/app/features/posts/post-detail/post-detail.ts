@@ -424,7 +424,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         address: a ? a.name + ' · ' + a.phone + '\n' + this.addressText(a) : undefined,
         place: placeText,
         when: this.whenLabel(d),
-        whenLabel: 'Thời gian dự kiến nhận hàng',
+        whenLabel: d.tpl.key === 'food' || d.tpl.key === 'goods' ? 'Thời gian dự kiến nhận hàng' : 'Thời gian hẹn',
         pickup: !d.needsAddress(),
         utensils: d.tpl.key === 'food' ? d.utensils() : undefined,
         voucher: d.voucher()?.title,

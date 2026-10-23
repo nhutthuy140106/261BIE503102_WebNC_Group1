@@ -16,9 +16,7 @@
     "category": "food",
     "kind": "food",
     "detail": {
-      "lines": [
-        "Số lượng: 2 phần"
-      ],
+      "lines": [],
       "subtotal": 80000,
       "fee": 5000,
       "discount": 0,
@@ -28,8 +26,9 @@
         "Đang giao",
         "Hoàn thành"
       ],
-      "when": "11:30 hôm nay",
-      "place": "Giao tận cửa"
+      "when": "Hôm nay · 11:30",
+      "place": "Giao tận cửa",
+      "quantity": "2 phần"
     },
     "history": [
       {
@@ -85,7 +84,7 @@
         "Trả đồ",
         "Hoàn thành"
       ],
-      "when": "Lấy đồ 18:00 hôm nay",
+      "when": "Hôm nay · 18:00 (lấy đồ)",
       "place": "Lấy & trả tận cửa · Block B"
     },
     "history": [
@@ -120,9 +119,7 @@
     "kind": "food",
     "doneAgoH": 216,
     "detail": {
-      "lines": [
-        "Số lượng: 2 tô"
-      ],
+      "lines": [],
       "subtotal": 90000,
       "fee": 0,
       "discount": 0,
@@ -132,8 +129,9 @@
         "Đang giao",
         "Hoàn thành"
       ],
-      "when": "Đã nhận 10/10",
-      "place": "Tự đến lấy"
+      "when": "10/10/2026 · 12:00",
+      "place": "Tự đến lấy",
+      "quantity": "2 tô"
     },
     "history": [
       {
@@ -199,7 +197,7 @@
         "Đang sửa",
         "Hoàn thành"
       ],
-      "when": "Hẹn lúc 19:00 hôm nay",
+      "when": "Hôm nay · 19:00",
       "place": "Thợ đến nhà · Block B"
     },
     "history": [
@@ -275,7 +273,7 @@
     "doneAgoH": 3,
     "detail": {
       "lines": [
-        "Tình trạng trong bài: Đã dùng · còn 95%"
+        "Tình trạng: Đã dùng · còn 95%"
       ],
       "subtotal": 650000,
       "fee": 0,
@@ -286,8 +284,9 @@
         "Hẹn lấy hàng",
         "Hoàn thành"
       ],
-      "when": "Đã nhận 3 giờ trước",
-      "place": "Tự đến lấy ở Block A"
+      "when": "16/10/2026 · 15:00",
+      "place": "Tự đến lấy ở Block A",
+      "quantity": "1"
     },
     "history": [
       {

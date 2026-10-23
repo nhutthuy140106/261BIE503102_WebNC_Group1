@@ -82,16 +82,17 @@
           <div class="orderbox">
             @if (o.image) { <img class="orderphoto" [src]="o.image" alt="" /> }
             <dl class="details">
-              <dt>Món / dịch vụ</dt><dd>{{ o.postTitle }}</dd>
+              <dt>{{ o.kind === 'service' ? 'Dịch vụ' : o.kind === 'goods' ? 'Đồ dùng' : 'Món' }}</dt><dd>{{ o.postTitle }}</dd>
               @if (o.detail; as d) {
                 @for (l of d.lines; track l) { <dt>{{ l.split(': ')[0] }}</dt><dd>{{ l.split(': ').slice(1).join(': ') }}</dd> }
                 @if (d.quantity) { <dt>Số lượng</dt><dd>{{ d.quantity }}</dd> }
-                @if (d.when) { <dt>{{ d.whenLabel ?? 'Thời gian' }}</dt><dd>{{ d.when }}</dd> }
-                @if (d.place) { <dt>Cách nhận</dt><dd>{{ d.place }}</dd> }
+                @if (d.when) { <dt>{{ o.kind === 'service' ? 'Thời gian hẹn' : 'Thời gian dự kiến nhận hàng' }}</dt><dd>{{ d.when }}</dd> }
+                @if (d.place) { <dt>{{ o.kind === 'service' ? 'Địa điểm' : 'Cách nhận' }}</dt><dd>{{ d.place }}</dd> }
                 @if (d.address) { <dt>Giao tới</dt><dd>{{ d.address }}</dd> }
                 @if (d.utensils !== undefined) { <dt>Dụng cụ / ống hút</dt><dd>{{ d.utensils ? 'Có lấy' : 'Không lấy' }}</dd> }
               }
               <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
+              <dt>Thời gian đặt</dt><dd>{{ placedAt(o) }}</dd>
             </dl>
           </div>
           @if (o.note) { <p class="request-note">Ghi chú: {{ o.note }}</p> }
