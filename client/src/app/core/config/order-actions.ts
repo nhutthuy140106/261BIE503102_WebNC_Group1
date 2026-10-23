@@ -24,7 +24,7 @@ export const ORDER_ACTION = {
   issueDrop: 'Đóng yêu cầu',
   viewIssue: 'Xem phản hồi',
   reportIssue: 'Báo vấn đề',
-  returnGoods: 'Trả hàng',
+  returnGoods: 'Trả hàng/Hoàn tiền',
   support: 'Nhờ AntGo hỗ trợ',
   editOffer: 'Sửa giới thiệu',
   withdraw: 'Rút đề nghị',

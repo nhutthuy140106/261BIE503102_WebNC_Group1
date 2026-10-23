@@ -208,9 +208,9 @@
             @if (o.status === 'done' && !o.issue && o.kind) {
               <div class="donenote">
                 @if (issueLeft(o) > 0) {
-                  <p><b>{{ o.kind === 'goods' ? 'Trả hàng khi khác mô tả' : 'Báo vấn đề' }}</b> trong {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận — {{ leftText(issueLeft(o)) }}.</p>
+                  <p><b>{{ o.kind === 'service' ? 'Báo vấn đề' : 'Trả hàng/Hoàn tiền' }}</b> trong {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận — {{ leftText(issueLeft(o)) }}.</p>
                 } @else {
-                  <p>Đã quá {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận nên không còn {{ o.kind === 'goods' ? 'trả hàng' : 'báo vấn đề' }} với bên bán.</p>
+                  <p>Đã quá {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận nên không còn {{ o.kind === 'service' ? 'báo vấn đề' : 'trả hàng/hoàn tiền' }} với bên bán.</p>
                   <button type="button" class="linkbtn" (click)="go('issue')">Báo cáo cho AntGo</button>
                 }
               </div>

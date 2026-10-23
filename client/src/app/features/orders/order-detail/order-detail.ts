@@ -41,7 +41,7 @@ const ISSUE_TYPES = {
 const ISSUE_WANTS = { food: ['Làm lại món', 'Hoàn tiền'], goods: ['Trả hàng, nhận lại tiền'], service: ['Làm lại miễn phí', 'Giảm tiền'] };
 const ISSUE_PH = { food: 'Ví dụ: đặt trà sữa ít đá nhưng nhận được nhiều đá', goods: 'Ví dụ: loa không lên nguồn, khác với mô tả “còn mới 95%”', service: 'Ví dụ: còn sót vết bẩn ở góc bếp, chưa lau cửa kính' };
 const A = ORDER_ACTION;
-const ISSUE_LABEL = { food: A.reportIssue, goods: A.returnGoods, service: A.reportIssue };
+const ISSUE_LABEL = { food: A.returnGoods, goods: A.returnGoods, service: A.reportIssue };
 const DAY_SLOTS = ['8:00', '9:00', '10:00', '13:00', '14:00', '15:00', '17:00', '18:00', '19:00', '20:00'];
 const WEEKDAYS = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
@@ -303,7 +303,7 @@ export class OrderDetail implements OnInit {
         if (left > 0) btns.push({ id: 'issue-open', label: ISSUE_LABEL[k], kind: 'ghost' });
         return {
           h: 'Đơn đã hoàn thành',
-          why: (o.issue?.st === 'closed' ? 'Yêu cầu ' + (k === 'goods' ? 'trả hàng' : 'báo vấn đề') + ' đã xong: ' + o.issue.result + '. ' : '') + (this.xu.has('order:' + o._id) ? 'Đã cộng +10 Xu cho đơn này. ' : '') + (o.rated ? 'Cảm ơn bạn đã đánh giá.' : 'Đánh giá có viết nhận xét để nhận thêm +5 Xu.'),
+          why: (o.issue?.st === 'closed' ? 'Yêu cầu ' + (k === 'service' ? 'báo vấn đề' : 'trả hàng/hoàn tiền') + ' đã xong: ' + o.issue.result + '. ' : '') + (this.xu.has('order:' + o._id) ? 'Đã cộng +10 Xu cho đơn này. ' : '') + (o.rated ? 'Cảm ơn bạn đã đánh giá.' : 'Đánh giá có viết nhận xét để nhận thêm +5 Xu.'),
           btns: o.issue ? btns.filter((b) => b.id !== 'issue-open') : btns,
         };
       }
@@ -516,7 +516,7 @@ export class OrderDetail implements OnInit {
       if (!this.picks().length) return void this.bad.set('Chọn ít nhất một vấn đề.');
       if (this.picks().includes(OTHER_REASON) && !this.text().trim()) return void this.bad.set('Mô tả ngắn giúp bên bán hiểu.');
       if (needPhoto && !this.rvPics().length) return void this.bad.set('Cần ít nhất 1 ảnh để bên bán kiểm tra.');
-      return this.move({ issue: { st: 'open', type: this.reasonText(), want: '', text: this.more().trim(), photos: this.rvPics().length } }, (this.kind(o) === 'goods' ? 'Bạn yêu cầu trả hàng: ' : 'Bạn báo vấn đề: ') + this.reasonText(), 'Đã gửi cho ' + n);
+      return this.move({ issue: { st: 'open', type: this.reasonText(), want: '', text: this.more().trim(), photos: this.rvPics().length } }, (this.kind(o) === 'service' ? 'Bạn báo vấn đề: ' : 'Bạn yêu cầu trả hàng/hoàn tiền: ') + this.reasonText(), 'Đã gửi cho ' + n);
     }
     if (d === 'resched') {
       if (!this.pick() || !this.pick2()) return void this.bad.set('Chọn ngày và giờ.');
