@@ -38,7 +38,7 @@
             <span class="sub">{{ when(o) }}</span>
             <span class="code">Mã đơn {{ o.code }}</span>
           </span>
-          <span class="total">{{ o.type === 'placed' ? 'Tổng tiền' : 'Tiền công' }}@if (o.newPrice) { <s>{{ o.total | vnd }}</s> }<b>{{ (o.newPrice?.total ?? o.total) | vnd }}</b></span>
+          <span class="total">@if (o.newPrice) { <s>{{ o.total | vnd }}</s> }<em>{{ o.type === 'placed' ? 'Tổng tiền' : 'Tiền công' }}</em><b>{{ (o.newPrice?.total ?? o.total) | vnd }}</b></span>
         </a>
 
         <div class="of">
