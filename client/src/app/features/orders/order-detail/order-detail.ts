@@ -591,6 +591,13 @@ export class OrderDetail implements OnInit {
     }
   }
 
+  /** Bảng hành động không có nút chính (chỉ chữ + liên kết nhỏ): vẽ nhẹ, không khung, không bóng */
+  protected lightPanel(o: Order): boolean {
+    const of = this.offer();
+    const btns = o.type === 'received' ? (of ? this.receivedPanel(o, of).btns : []) : this.placedPanel(o).btns;
+    return !btns.some((b) => b.kind === 'main') && o.status !== 'pricing' && !o.newPrice;
+  }
+
   protected stepTime(state: OfferState): string {
     const h = this.offer()?.history.find((x) => x.state === state);
     return h ? formatDateTime(h.at) : '';

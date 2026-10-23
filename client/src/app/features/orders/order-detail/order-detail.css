@@ -177,3 +177,10 @@ a.pbtn.link { text-decoration: none; }
 .alinks button { background: none; font: inherit; font-size: 13px; color: var(--smoke); text-decoration: underline; text-underline-offset: 3px; }
 .alinks button:hover { color: var(--ink); }
 .alinks button.warn { color: #B4441C; }
+
+.shoplink { display: inline-flex; align-items: center; gap: 10px; color: inherit; }
+.shoplink b { color: var(--ink); font-weight: 600; }
+.shoplink:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.apanel.light { position: static; padding: 0 0 0 4px; border: 0; background: none; box-shadow: none; border-radius: 0; }
+.apanel.light h3 { font-size: 18px; }
+.apanel.light .alinks { border-top: 0; padding-top: 2px; }

@@ -12,9 +12,11 @@
       </div>
       <h1>{{ o.postTitle }}</h1>
       <div class="meta who">
-        <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="26" />
-        <b>{{ o.counterpartName }}</b>
-        @if (o.counterpartId) { <a [routerLink]="['/shop', o.counterpartId]">Xem gian hàng ›</a> }
+        @if (o.counterpartId) {
+          <a class="shoplink" [routerLink]="['/shop', o.counterpartId]" title="Xem gian hàng"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="28" /><b>{{ o.counterpartName }}</b></a>
+        } @else {
+          <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="28" /><b>{{ o.counterpartName }}</b>
+        }
         <button type="button" class="msgtop" (click)="go('chat')">Nhắn tin</button>
       </div>
     </div>
@@ -149,7 +151,7 @@
 
     <!-- ===== bảng hành động bên phải ===== -->
     <aside>
-      <div class="apanel">
+      <div class="apanel" [class.light]="lightPanel(o)">
 
 
         @if (o.type === 'received' && offer(); as of) {
