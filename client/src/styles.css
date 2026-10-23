@@ -104,3 +104,4 @@ input, select, textarea {
 .photo-add { flex-direction: column; gap: 6px; height: 96px; }
 .photo-add svg { width: 26px; height: 26px; }
 .photo-thumb { width: 84px; height: 84px; }
+.photo-add { display: flex !important; flex-direction: column; align-items: center; justify-content: center; height: 96px !important; margin-bottom: 0 !important; }
