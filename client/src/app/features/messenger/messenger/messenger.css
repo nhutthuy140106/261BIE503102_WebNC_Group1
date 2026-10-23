@@ -102,3 +102,8 @@
 .msg.mine .bb { background: var(--ink); color: #fff; }
 .tabs button.on { background: var(--ink); color: #F0A878; }
 .tabs button.on { background: #FCEEE6; color: #B4571F; }
+.tx small { display: grid; grid-template-columns: minmax(0, auto) auto; justify-content: start; }
+.tx small .tm { padding-left: 4px; white-space: nowrap; }
+.threads button.unread .tx b { font-weight: 700; }
+.threads button.unread .tx small .tm { font-weight: 400; color: var(--smoke); }
+.dot { width: 14px; height: 14px; }
