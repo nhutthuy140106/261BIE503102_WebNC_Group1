@@ -59,6 +59,28 @@ export class Messenger implements OnInit, OnDestroy {
     return c.context?.type === 'post' || c.context?.type === 'job' ? 'Xem bài gốc' : 'Xem đơn hàng';
   }
 
+  /** "5 phút", "2 giờ", "3 ngày" — thời gian ngắn gọn cạnh tin cuối (như Facebook) */
+  protected short(iso: string): string {
+    const m = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+    if (m < 1) return 'Vừa xong';
+    if (m < 60) return m + ' phút';
+    if (m < 1440) return Math.floor(m / 60) + ' giờ';
+    return Math.floor(m / 1440) + ' ngày';
+  }
+
+  protected lastTime(c: Conversation): string {
+    const m = c.messages[c.messages.length - 1];
+    return m ? this.short(m.createdAt) : '';
+  }
+
+  /** Vị trí của tin trong cụm tin liên tiếp cùng người gửi: bo góc nối liền như Facebook */
+  protected pos(ms: Message[], i: number): string {
+    const joined = (a?: Message, b?: Message) => !!a && !!b && a.mine === b.mine && !this.gap(a, b);
+    const prev = joined(ms[i - 1], ms[i]);
+    const next = joined(ms[i], ms[i + 1]);
+    return prev && next ? 'mid' : prev ? 'last' : next ? 'first' : 'solo';
+  }
+
   /** Hai tin cách nhau trên 30 phút thì chèn mốc giờ giữa chúng */
   protected gap(a: Message, b: Message): boolean {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() > 30 * 60 * 1000;

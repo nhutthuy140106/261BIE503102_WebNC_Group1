@@ -14,7 +14,7 @@
               <app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="52" />
               <span class="tx">
                 <b>{{ c.withName }}</b>
-                <small>{{ preview(c) }}</small>
+                <small><span class="pv">{{ preview(c) }}</span>@if (lastTime(c)) { <span class="tm"> · {{ lastTime(c) }}</span> }</small>
               </span>
               @if (c.unread) { <i class="dot" aria-label="Chưa đọc"></i> }
             </button>
@@ -35,14 +35,18 @@
         <ul class="messages">
           @for (m of c.messages; track m._id; let i = $index) {
             @if (i === 0 || gap(c.messages[i - 1], m)) { <li class="stamp">{{ fmt(m.createdAt) }}</li> }
-            <li class="msg" [class.mine]="m.mine">
+            <li class="msg" [class.mine]="m.mine" [ngClass]="pos(c.messages, i)">
+              @if (!m.mine) {
+                <span class="av">@if (pos(c.messages, i) === 'last' || pos(c.messages, i) === 'solo') { <app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="28" /> }</span>
+              }
               @if (m.media; as md) {
                 @if (md.kind === 'image') { <img class="mimg" [src]="md.url" alt="Hình ảnh" /> }
                 @else if (md.kind === 'video') { <video class="mimg" [src]="md.url" controls preload="metadata"></video> }
                 @else { <audio class="maud" [src]="md.url" controls preload="metadata"></audio> }
               }
-              @if (m.text) { <span [title]="fmt(m.createdAt)">{{ m.text }}</span> }
+              @if (m.text) { <span class="bb" [title]="fmt(m.createdAt)">{{ m.text }}</span> }
             </li>
+            @if (m.mine && i === c.messages.length - 1) { <li class="seen">Đã gửi {{ short(m.createdAt).toLowerCase() === 'vừa xong' ? 'vừa xong' : short(m.createdAt) + ' trước' }}</li> }
           }
         </ul>
         @if (recording()) {

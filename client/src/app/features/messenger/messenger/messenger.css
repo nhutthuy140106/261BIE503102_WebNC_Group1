@@ -74,3 +74,28 @@
 .ctxcard app-order-thumb ::ng-deep .th { width: 64px; height: 56px; border-radius: 10px; }
 .ctxcard app-order-thumb ::ng-deep .ph small { display: none; }
 .ctxcard .cx b { font-size: 15px; }
+
+/* học theo Facebook Messenger */
+.tabs { gap: 4px; }
+.tabs button { background: none; color: var(--ink); font-weight: 600; }
+.tabs button:hover { background: #F0F2F5; }
+.tabs button.on { background: var(--accent-soft); color: var(--accent); }
+.threads button.active { background: #F0F2F5; }
+.threads button .tm { flex: none; }
+.tx small { display: flex; gap: 0; }
+.tx small .pv { overflow: hidden; text-overflow: ellipsis; }
+.tx small .tm { flex: none; white-space: pre; }
+.stamp { font-size: 12.5px; font-weight: 600; color: #65676B; margin: 14px 0 8px; }
+.msg { align-items: flex-end; gap: 8px; flex-wrap: nowrap; }
+.msg .av { flex: none; width: 28px; height: 28px; }
+.msg .bb { max-width: 68%; border-radius: 18px; padding: 8px 14px; font-size: 15px; }
+.msg.first .bb, .msg.mid .bb { }
+.msg:not(.mine).first .bb { border-bottom-left-radius: 4px; }
+.msg:not(.mine).mid .bb { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
+.msg:not(.mine).last .bb { border-top-left-radius: 4px; }
+.msg.mine.first .bb { border-bottom-right-radius: 4px; }
+.msg.mine.mid .bb { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+.msg.mine.last .bb { border-top-right-radius: 4px; }
+.msg.mine .bb { background: var(--accent); color: #fff; }
+.seen { align-self: flex-end; margin-top: 4px; font-size: 12px; color: #65676B; }
+.msg .av { padding: 0; background: none; border-radius: 0; max-width: none; }
