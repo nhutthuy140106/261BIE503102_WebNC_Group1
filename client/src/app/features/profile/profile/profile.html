@@ -22,13 +22,16 @@
           <h1>Tổng quan</h1>
           <p class="lead">Xin chào {{ u.fullName }}. Đây là nơi quản lý tài khoản, địa chỉ nhận hàng và AntXu của bạn.</p>
 
+          <div class="fcard">
           <h2>Đơn hàng của bạn</h2>
           <div class="tiles">
             <a routerLink="/orders" [queryParams]="{ f: 'placed' }"><b>{{ stats().placed }}</b><span>Đơn đã đặt đang chạy</span></a>
             <a routerLink="/orders" [queryParams]="{ f: 'received' }"><b>{{ stats().received }}</b><span>Việc đã nhận đang chạy</span></a>
             <a routerLink="/orders" [queryParams]="{ f: 'history' }"><b>{{ stats().history }}</b><span>Trong lịch sử</span></a>
           </div>
+          </div>
 
+          <div class="fcard">
           <h2>AntXu</h2>
           <button type="button" class="xurow" (click)="go('xu')">
             <img src="assets/clean/antxu.png" alt="" />
@@ -36,7 +39,9 @@
               @if (xu.expiring(); as ex) { <small>{{ ex.amount }} Xu hết hạn ngày {{ date(ex.date.getTime()) }}</small> } @else { <small>Dùng Xu đổi voucher giảm giá khi đặt hàng</small> }</span>
             <i aria-hidden="true">›</i>
           </button>
+          </div>
 
+          <div class="fcard">
           <h2>Lối tắt</h2>
           <ul class="links">
             <li><button type="button" (click)="go('saved')">Bài đã lưu</button></li>
@@ -44,10 +49,13 @@
             <li><a routerLink="/notifications">Thông báo</a></li>
             <li><a routerLink="/messenger">Tin nhắn</a></li>
           </ul>
+          </div>
         }
         @case ('edit') {
           <h1>Chỉnh sửa hồ sơ</h1>
           <form class="pform" [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+            <div class="fcard">
+            <h2>Ảnh đại diện</h2>
             <div class="avedit">
               <div class="avbig">
                 <app-avatar [src]="newAvatar() ?? u.avatar" [name]="u.fullName" [size]="132" />
@@ -61,6 +69,9 @@
               </div>
               <div class="avname"><b>{{ u.fullName }}</b><small>{{ area.current() }}</small></div>
             </div>
+            </div>
+            <div class="fcard">
+            <h2>Thông tin cá nhân</h2>
             @if (avView()) {
               <div class="avscrim" (click)="avView.set(false)"><img [src]="newAvatar() ?? u.avatar" alt="Ảnh đại diện" (click)="$event.stopPropagation()" /><button type="button" class="avx" aria-label="Đóng" (click)="avView.set(false)"><svg class="i"><use href="#xmark" /></svg></button></div>
             }
@@ -75,11 +86,13 @@
               <small class="hint">Số điện thoại là tên đăng nhập nên không đổi được ở đây.</small>
             </div>
             <button type="submit" class="go" [disabled]="saving()">Lưu thay đổi</button>
+            </div>
           </form>
         }
         @case ('password') {
           <h1>Đổi mật khẩu</h1>
           <form class="pform" [formGroup]="passForm" (ngSubmit)="savePassword()" novalidate>
+            <div class="fcard">
             <div class="field">
               <label for="pcur">Mật khẩu hiện tại</label>
               <app-password-input inputId="pcur" autocomplete="current-password" formControlName="current" [invalid]="passTried() && passForm.controls.current.invalid" />
@@ -97,10 +110,11 @@
               @if (passTried() && passMismatch()) { <small class="error">Hai mật khẩu chưa giống nhau.</small> }
             </div>
             <button type="submit" class="go" [disabled]="saving()">Đổi mật khẩu</button>
+            </div>
           </form>
         }
-        @case ('saved') { <app-saved-list id="saved" /> }
-        @case ('addresses') { <app-address-book id="addresses" /> }
+        @case ('saved') { <div class="fcard"><app-saved-list id="saved" /></div> }
+        @case ('addresses') { <div class="fcard"><app-address-book id="addresses" /></div> }
         @case ('xu') {
           <h1>AntXu & voucher</h1>
           <div class="balance">
@@ -129,12 +143,14 @@
         }
         @case ('area') {
           <h1>Khu vực</h1>
+          <div class="fcard">
           <p class="lead">Bài đăng trong khu bạn chọn được xếp lên trước khi tìm kiếm.</p>
           <ul class="areas">
             @for (n of area.names; track n) {
               <li><button type="button" [class.on]="area.current() === n" (click)="area.set(n)"><i></i>{{ n }}</button></li>
             }
           </ul>
+          </div>
         }
       }
     </section>
