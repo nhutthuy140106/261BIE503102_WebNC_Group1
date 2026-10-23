@@ -6,7 +6,7 @@
     <aside class="side">
       <h1>Đoạn chat</h1>
       <label class="find"><svg class="i"><use href="#search" /></svg><input [value]="query()" (input)="query.set($any($event.target).value)" placeholder="Tìm kiếm cuộc trò chuyện" /></label>
-      <div class="tabs"><button type="button" [class.on]="!onlyUnread()" (click)="onlyUnread.set(false)">Tất cả</button><button type="button" [class.on]="onlyUnread()" (click)="onlyUnread.set(true)">Chưa đọc @if (unreadCount()) { <i>{{ unreadCount() }}</i> }</button></div>
+      <div class="tabs"><button type="button" [class.on]="!onlyUnread()" (click)="onlyUnread.set(false)">Tất cả</button><button type="button" [class.on]="onlyUnread()" (click)="onlyUnread.set(true)">Chưa đọc</button></div>
       <ul class="threads">
         @for (c of shown(); track c._id) {
           <li>
@@ -16,7 +16,7 @@
                 <b>{{ c.withName }}</b>
                 <small><span class="pv">{{ preview(c) }}</span>@if (lastTime(c)) { <span class="tm"> · {{ lastTime(c) }}</span> }</small>
               </span>
-              @if (c.unread) { <i class="dot" aria-label="Tin chưa đọc">{{ c.unread > 9 ? '9+' : c.unread }}</i> }
+              @if (c.unread) { <i class="dot" aria-label="Tin chưa đọc"></i> }
             </button>
           </li>
         } @empty {
