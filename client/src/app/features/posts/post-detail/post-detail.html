@@ -241,16 +241,13 @@
             <!-- 3. Cách nhận, thời gian, tùy chọn -->
             <section class="cs">
               @if (v.tpl.place.mode === 'choice') {
-                <div class="crow col">
+                <label class="crow sw">
                   <svg class="i ic"><use href="#home" /></svg>
-                  <span class="ct"><b>{{ v.tpl.place.label }}</b>
-                    <span class="seg2">
-                      @for (c of v.tpl.place.choices!; track c[0]; let i = $index) {
-                        <button type="button" [class.on]="d.place() === i" (click)="d.place.set(i)"><b>{{ c[0] }}</b>@if (c[1]) { <span>+{{ fmt(c[1]) }}</span> } @else { <span>Miễn phí</span> }</button>
-                      }
-                    </span>
+                  <span class="ct"><b>{{ v.tpl.place.choices![0][0] }}</b>
+                    <small>{{ d.place() === 0 ? (v.tpl.place.choices![0][1] ? '+' + fmt(v.tpl.place.choices![0][1]) : 'Miễn phí') : 'Đang tắt — ' + v.tpl.place.choices![1][0].toLowerCase() }}</small>
                   </span>
-                </div>
+                  <input type="checkbox" class="tg" [checked]="d.place() === 0" (change)="d.place.set($any($event.target).checked ? 0 : 1)" />
+                </label>
               }
 
               <div class="crow col">
@@ -332,7 +329,7 @@
                 </button>
               }
               <div class="crow col">
-                <svg class="i ic"><use href="#coin" /></svg>
+                <svg class="i ic"><use href="#wallet" /></svg>
                 <span class="ct"><b>Phương thức thanh toán</b>
                   <span class="seg">
                     <button type="button" [class.on]="d.pay() === 'cash'" (click)="d.pay.set('cash')">Tiền mặt</button>
@@ -350,7 +347,6 @@
                 @if (d.placeFee()) { <div><dt>Phí vận chuyển</dt><dd>{{ fmt(d.placeFee()) }}</dd></div> }
                 @if (d.discount()) { <div class="disc"><dt>Voucher</dt><dd>−{{ fmt(d.discount()) }}</dd></div> }
                 @if (v.tpl.price.type === 'quote') { <div><dt>Tiền sửa</dt><dd>báo giá sau khi kiểm tra</dd></div> }
-                <div class="tot"><dt>Tổng cộng</dt><dd>{{ fmt(d.grand()) }}</dd></div>
               </dl>
               @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
               @if (tried() && d.missing(true); as miss) { <p class="warn">{{ miss }}</p> }
