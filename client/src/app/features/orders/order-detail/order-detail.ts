@@ -41,7 +41,7 @@ const ISSUE_TYPES = {
 const ISSUE_WANTS = { food: ['Làm lại món', 'Hoàn tiền'], goods: ['Trả hàng, nhận lại tiền'], service: ['Làm lại miễn phí', 'Giảm tiền'] };
 const ISSUE_PH = { food: 'Ví dụ: đặt trà sữa ít đá nhưng nhận được nhiều đá', goods: 'Ví dụ: loa không lên nguồn, khác với mô tả “còn mới 95%”', service: 'Ví dụ: còn sót vết bẩn ở góc bếp, chưa lau cửa kính' };
 const A = ORDER_ACTION;
-const ISSUE_LABEL = { food: 'Báo vấn đề với món', goods: 'Yêu cầu trả hàng', service: 'Báo dịch vụ chưa đạt' };
+const ISSUE_LABEL = { food: A.reportIssue, goods: A.returnGoods, service: A.reportIssue };
 const DAY_SLOTS = ['8:00', '9:00', '10:00', '13:00', '14:00', '15:00', '17:00', '18:00', '19:00', '20:00'];
 const WEEKDAYS = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 

@@ -23,6 +23,8 @@ export const ORDER_ACTION = {
   issueResolved: 'Xác nhận đã xử lý',
   issueDrop: 'Đóng yêu cầu',
   viewIssue: 'Xem phản hồi',
+  reportIssue: 'Báo vấn đề',
+  returnGoods: 'Trả hàng',
   support: 'Nhờ AntGo hỗ trợ',
   editOffer: 'Sửa giới thiệu',
   withdraw: 'Rút đề nghị',
