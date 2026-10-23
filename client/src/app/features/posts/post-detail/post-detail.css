@@ -380,3 +380,6 @@
 .cs.pay .tot { margin-top: 4px; padding-top: 12px; border-top: 1px solid #ECEEF2; color: var(--ink); font-weight: 700; }
 .cs.pay .tot dd { color: var(--accent); font-size: 17px; font-weight: 700; }
 .cs.pay .warn, .cs.pay .notice { margin: 12px 0 0; }
+
+/* Nhắn tin nằm sát mép phải của dòng người bán (như bản đầu) */
+.block.seller .btn-msg { margin-left: auto; }
