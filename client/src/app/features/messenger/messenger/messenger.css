@@ -116,3 +116,11 @@
 .threads button.unread .tx b { font-weight: 600; }
 .threads button.unread .tx small .pv { color: var(--ink); font-weight: 700; }
 .threads button.unread .tx small .tm { color: #65676B; font-weight: 400; }
+
+/* tin chưa đọc nổi bật: nền cam rất nhạt, chữ đậm, huy hiệu số tin */
+.threads button.unread { background: #FFF6F0; }
+.threads button.unread:hover { background: #FFEFE5; }
+.threads button.unread.active { background: #FFEBDD; }
+.threads button.unread .tx b { font-weight: 800; }
+.threads button.unread .tx small .pv { color: #000; font-weight: 800; }
+.dot { width: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; font-style: normal; font-size: 12.5px; font-weight: 700; color: #fff; display: inline-grid; place-items: center; }

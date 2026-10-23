@@ -16,7 +16,7 @@
                 <b>{{ c.withName }}</b>
                 <small><span class="pv">{{ preview(c) }}</span>@if (lastTime(c)) { <span class="tm"> · {{ lastTime(c) }}</span> }</small>
               </span>
-              @if (c.unread) { <i class="dot" aria-label="Chưa đọc"></i> }
+              @if (c.unread) { <i class="dot" aria-label="Tin chưa đọc">{{ c.unread > 9 ? '9+' : c.unread }}</i> }
             </button>
           </li>
         } @empty {
