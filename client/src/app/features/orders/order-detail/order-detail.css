@@ -225,3 +225,13 @@ a.pbtn.link { text-decoration: none; }
 .pricebox .why2 small { color: var(--smoke); font-size: 12px; }
 .pricebox .why2 p { margin: 3px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink); }
 .pricebox .pbl { border-top: 0; padding-top: 4px; }
+
+/* Lý do hủy / vấn đề: danh sách chọn một kiểu Shopee — mỗi dòng có nút tròn bên phải, không khung riêng */
+.reasons:not(.two):not(.three):not(.five) { gap: 0; border-top: 1px solid #ECEEF2; }
+.reasons:not(.two):not(.three):not(.five) button { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 0 2px; border: 0; border-bottom: 1px solid #ECEEF2; border-radius: 0; background: none; color: var(--ink); font-size: 14.5px; font-weight: 400; text-align: left; }
+.reasons:not(.two):not(.three):not(.five) button::after { content: ''; flex: none; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #B9BEC8; transition: border-color .15s; }
+.reasons:not(.two):not(.three):not(.five) button:hover::after { border-color: var(--ink); }
+.reasons:not(.two):not(.three):not(.five) button.on { background: none; color: var(--ink); font-weight: 600; }
+.reasons:not(.two):not(.three):not(.five) button.on::after { border-color: var(--accent); background: radial-gradient(var(--accent) 42%, transparent 46%); }
+.fld > label { text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 700; color: var(--ink); }
+.modal .reasons + textarea { margin-top: 14px; }
