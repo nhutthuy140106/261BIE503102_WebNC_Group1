@@ -197,7 +197,7 @@ export class OrderDetail implements OnInit {
     const times = (o.history ?? []).map((h) => formatTime(h.at));
     return names.map((label, i) => {
       const cls = stopped ? (i < cutAt ? 'ok' : i === cutAt ? 'cut' : '') : i < pos ? 'ok' : i === pos ? 'cur' : '';
-      return { label, cls, time: cls === 'ok' || cls === 'cur' ? i === 0 ? '' : times[i] ?? '' : '', n: i + 1 };
+      return { label, cls, time: cls === 'ok' || cls === 'cur' ? times[i] ?? '' : '', n: i + 1 };
     });
   }
 
