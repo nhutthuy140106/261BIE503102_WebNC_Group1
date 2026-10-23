@@ -79,6 +79,7 @@ export class OrderDetail implements OnInit {
   protected readonly pick2 = signal('');
   protected readonly text = signal('');
   protected readonly photos = signal(0);
+  protected readonly rvPics = signal<string[]>([]);
   protected readonly stars = signal(0);
   protected readonly bad = signal<string>('');
   protected readonly rReasons = R_REASONS;
@@ -166,6 +167,7 @@ export class OrderDetail implements OnInit {
     this.pick2.set('');
     this.text.set(init.text ?? '');
     this.photos.set(0);
+    this.rvPics.set([]);
     this.stars.set(0);
     this.bad.set('');
     this.dlg.set(t);
@@ -393,6 +395,16 @@ export class OrderDetail implements OnInit {
 
   protected issueLabel(o: Order): string {
     return ISSUE_LABEL[this.kind(o)];
+  }
+
+  protected addPics(input: HTMLInputElement): void {
+    const urls = Array.from(input.files ?? []).map((f) => URL.createObjectURL(f));
+    this.rvPics.update((l) => [...l, ...urls].slice(0, 4));
+    input.value = '';
+  }
+
+  protected dropPic(u: string): void {
+    this.rvPics.update((l) => l.filter((x) => x !== u));
   }
 
   protected sendPhotos(n: number): void {

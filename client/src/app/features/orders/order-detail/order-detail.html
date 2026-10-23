@@ -265,9 +265,9 @@
             <div class="btns"><button type="button" class="ghost" (click)="close()">Đóng</button><button type="button" class="go" (click)="okR()">Nhắn {{ o.counterpartName }}</button></div>
           }
           @case ('rate') {
-            <h3>Đánh giá</h3>
+            <h3 class="rvh">Đánh giá</h3>
             <div class="rvprod">
-              @if (o.image) { <img [src]="o.image" alt="" /> } @else { <span class="rvph">{{ o.counterpartName.charAt(0) }}</span> }
+              <app-order-thumb [image]="o.image" [category]="o.kind ?? 'job'" />
               <span><b>{{ o.postTitle }}</b><small>{{ o.counterpartName }}</small></span>
             </div>
             <div class="rvstars" [class.bad]="bad()">
@@ -279,6 +279,10 @@
               @for (t of rateTags(o); track t) { <button type="button" [class.on]="tags().includes(t)" (click)="toggleTag(t)">{{ t }}</button> }
             </div>
             <textarea class="rvtext" maxlength="300" placeholder="Hãy chia sẻ nhận xét của bạn nhé!" [value]="text()" (input)="text.set($any($event.target).value)"></textarea>
+            <div class="rvpics">
+              @for (u of rvPics(); track u) { <span class="rvpic"><img [src]="u" alt="" /><button type="button" aria-label="Bỏ ảnh" (click)="dropPic(u)">×</button></span> }
+              @if (rvPics().length < 4) { <label class="rvadd"><input type="file" accept="image/*" multiple hidden (change)="addPics($any($event.target))" /><svg class="i"><use href="#camera" /></svg><small>Thêm hình ảnh</small></label> }
+            </div>
             <div class="btns one"><button type="button" class="go" (click)="o.type === 'received' ? okR() : okP()">Gửi đánh giá</button></div>
           }
           @case ('pcancel') {
