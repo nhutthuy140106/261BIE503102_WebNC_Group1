@@ -21,7 +21,7 @@
             <span class="rowmore" [class.open]="rowMenu() === c._id">
               <button type="button" class="more" aria-label="Tùy chọn" (click)="rowMenu.set(rowMenu() === c._id ? null : c._id)"><svg class="i"><use href="#dots" /></svg></button>
               @if (rowMenu() === c._id) {
-                <span class="rowmenu"><button type="button" (click)="toggleUnread(c)"><svg class="i"><use [attr.href]="c.unread > 0 ? '#mail' : '#mail-unread'" /></svg>{{ c.unread > 0 ? 'Đánh dấu là đã đọc' : 'Đánh dấu là chưa đọc' }}</button></span>
+                <span class="rowmenu"><button type="button" (click)="toggleUnread(c)"><svg class="i"><use [attr.href]="c.unread > 0 ? '#mail' : '#mail-unread'" /></svg><span>{{ c.unread > 0 ? 'Đánh dấu là đã đọc' : 'Đánh dấu là chưa đọc' }}</span></button></span>
               }
             </span>
           </li>

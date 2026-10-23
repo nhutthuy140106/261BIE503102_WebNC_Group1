@@ -206,3 +206,5 @@
 .rowmenu { min-width: 230px; }
 .rowmenu button { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
 .rowmenu svg { width: 20px; height: 20px; flex: none; }
+.rowmenu button span { line-height: 1; padding-top: 2px; }
+.rowmenu button svg { transform: translateY(0.5px); }
