@@ -88,7 +88,10 @@ export class OrderDetail implements OnInit {
   protected readonly picks = signal<string[]>([]);
 
   protected togglePickReason(r: string): void {
-    this.picks.update((l) => (l.includes(r) ? l.filter((x) => x !== r) : [...l, r]));
+    this.picks.update((l) => {
+      if (l.includes(r)) return l.filter((x) => x !== r);
+      return r === OTHER_REASON ? [r] : [...l.filter((x) => x !== OTHER_REASON), r];
+    });
     this.bad.set('');
   }
 
