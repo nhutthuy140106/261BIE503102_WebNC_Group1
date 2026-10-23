@@ -167,7 +167,6 @@
         @if (o.type === 'received' && offer(); as of) {
           @if (receivedPanel(o, of); as p) {
             <h3>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
-            @if (of.state === 'reported') { <div class="cd">Tự hoàn thành sau 24 giờ</div> }
             @for (b of p.btns; track b.id) {
               @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actR(b.id)">{{ b.label }}</button> }
             }
