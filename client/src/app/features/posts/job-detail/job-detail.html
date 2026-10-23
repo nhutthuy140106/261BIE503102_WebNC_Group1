@@ -152,7 +152,7 @@
             <h3>Đã gửi đề nghị!</h3>
             <p>{{ j.sellerName }} sẽ xem và chọn người. Gửi đề nghị <b>chưa phải là đã nhận việc</b> — bạn sẽ nhận thông báo khi có kết quả.</p>
             <div class="stepper mini">@for (n of stepLabels; track $index) { <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span>{{ n }}</div> }</div>
-            <div class="btns"><button type="button" class="ghost" (click)="confirm.set(false)">Ở lại đây</button><button type="button" class="go" (click)="openOrder()">Xem trong Đơn hàng</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="confirm.set(false)">Quay lại</button><button type="button" class="go" (click)="openOrder()">Xem trong Đơn hàng</button></div>
           </div>
         } @else {
           <h3>Gửi đề nghị nhận việc</h3>
