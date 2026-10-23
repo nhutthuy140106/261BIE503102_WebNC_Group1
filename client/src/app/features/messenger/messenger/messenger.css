@@ -208,3 +208,6 @@
 .rowmenu svg { width: 20px; height: 20px; flex: none; }
 .rowmenu button span { line-height: 1; padding-top: 2px; }
 .rowmenu button svg { transform: translateY(0.5px); }
+.thread.blank { flex-direction: column; gap: 6px; }
+.thread.blank img { width: 200px; height: auto; }
+.thread.blank p { margin: 0; }
