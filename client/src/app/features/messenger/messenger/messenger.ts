@@ -177,15 +177,27 @@ export class Messenger implements OnInit, OnDestroy {
     }
   }
 
+  /** Menu "⋯" của một dòng trong danh sách (id hội thoại đang mở menu) */
+  protected readonly rowMenu = signal<string | null>(null);
+
+  protected toggleUnread(c: Conversation): void {
+    this.rowMenu.set(null);
+    const next = c.unread > 0 ? this.chat.markRead(c._id) : this.chat.markUnread(c._id);
+    next.subscribe(() => this.conversations.update((l) => l.map((x) => (x._id === c._id ? { ...x, unread: c.unread > 0 ? 0 : 1 } : x))));
+  }
+
   /** Bấm ra ngoài menu chọn ảnh (hoặc phím Esc) thì menu tự đóng */
   @HostListener('document:click', ['$event'])
   onDocClick(e: Event): void {
-    if (this.picMenu() && !(e.target as HTMLElement).closest('.picwrap')) this.picMenu.set(false);
+    const el = e.target as HTMLElement;
+    if (this.picMenu() && !el.closest('.picwrap')) this.picMenu.set(false);
+    if (this.rowMenu() && !el.closest('.rowmore')) this.rowMenu.set(null);
   }
 
   @HostListener('document:keydown.escape')
   onEsc(): void {
     this.picMenu.set(false);
+    this.rowMenu.set(null);
   }
 
   startCam(): void {

@@ -191,3 +191,14 @@
 .picmenu { bottom: 52px; left: -6px; width: 232px; padding: 8px; }
 .picmenu::after { content: ''; position: absolute; left: 14px; bottom: -6px; width: 14px; height: 14px; background: #fff; transform: rotate(45deg); box-shadow: 4px 4px 8px rgba(34, 48, 74, .08); border-radius: 0 0 3px 0; }
 .picmenu button, .picmenu label { height: 44px; font-size: 14.5px; }
+
+/* nút ⋯ trên mỗi dòng: hiện khi rê chuột, bấm ra menu Đánh dấu chưa đọc */
+.threads li { position: relative; }
+.rowmore { position: absolute; right: 34px; top: 50%; transform: translateY(-50%); opacity: 0; }
+.threads li:hover .rowmore, .rowmore.open { opacity: 1; }
+.rowmore .more { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #fff; box-shadow: 0 1px 4px rgba(34, 48, 74, .28); color: var(--ink); padding: 0; }
+.rowmore .more svg { width: 16px; height: 16px; }
+.rowmenu { position: absolute; right: 0; top: 36px; z-index: 6; min-width: 190px; padding: 6px; border-radius: 12px; background: #fff; box-shadow: 0 8px 28px rgba(34, 48, 74, .22); }
+.rowmenu button { display: block; width: 100%; height: 40px; padding: 0 12px; border-radius: 8px; background: none; text-align: left; font-size: 14px; font-weight: 600; color: var(--ink); }
+.rowmenu button:hover { background: #F0F2F5; }
+.threads li:has(.rowmore.open) { z-index: 7; }

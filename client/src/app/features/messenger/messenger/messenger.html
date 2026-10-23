@@ -18,6 +18,12 @@
               </span>
               @if (c.unread) { <i class="dot" aria-label="Tin chưa đọc"></i> }
             </button>
+            <span class="rowmore" [class.open]="rowMenu() === c._id">
+              <button type="button" class="more" aria-label="Tùy chọn" (click)="rowMenu.set(rowMenu() === c._id ? null : c._id)"><svg class="i"><use href="#dots" /></svg></button>
+              @if (rowMenu() === c._id) {
+                <span class="rowmenu"><button type="button" (click)="toggleUnread(c)">{{ c.unread > 0 ? 'Đánh dấu đã đọc' : 'Đánh dấu chưa đọc' }}</button></span>
+              }
+            </span>
           </li>
         } @empty {
           <li class="none">{{ query() ? 'Không tìm thấy cuộc trò chuyện nào.' : onlyUnread() ? 'Không có tin nhắn chưa đọc.' : 'Chưa có cuộc trò chuyện nào.' }}</li>

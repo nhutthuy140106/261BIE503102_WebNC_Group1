@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { Conversation, Message } from '../models/social';
@@ -61,6 +61,16 @@ export class ChatService {
         const c: Conversation = { _id: this.db.newId(), withName, withAvatar, unread: 0, messages: [] };
         this.db.save(COLLECTION, [c, ...rows]);
         return c;
+      }),
+    );
+  }
+
+  /** Đánh dấu chưa đọc (chỉ phía mình). API thật chưa có điểm cuối riêng nên chỉ lưu ở mock. */
+  markUnread(conversationId: string): Observable<void> {
+    if (!useMock('chat')) return of(undefined);
+    return this.db.list<Conversation>(COLLECTION).pipe(
+      map((rows) => {
+        this.db.save(COLLECTION, rows.map((c) => (c._id === conversationId ? { ...c, unread: Math.max(1, c.unread) } : c)));
       }),
     );
   }
