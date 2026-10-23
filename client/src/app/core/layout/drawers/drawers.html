@@ -36,7 +36,7 @@
     }
   </div>
   <div class="dfoot">
-    <a routerLink="/profile" fragment="saved" (click)="goAll()">Xem tất cả bài đã lưu <svg class="i" style="width: 16px; height: 16px"><use href="#right" /></svg></a>
+    <a routerLink="/profile" [queryParams]="{ tab: 'saved' }" (click)="goAll()">Xem tất cả bài đã lưu <svg class="i" style="width: 16px; height: 16px"><use href="#right" /></svg></a>
   </div>
 </aside>
 

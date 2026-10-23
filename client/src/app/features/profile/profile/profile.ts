@@ -64,7 +64,7 @@ export class Profile implements OnInit {
   }
 
   protected badge(t: Tab): string {
-    return t === 'saved' ? String(this.saved.ids().length || '') : t === 'xu' ? String(this.xu.balance()) : '';
+    return t === 'xu' ? String(this.xu.balance()) : '';
   }
 
   protected date(ms: number): string {
