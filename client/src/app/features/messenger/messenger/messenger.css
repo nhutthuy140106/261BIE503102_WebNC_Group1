@@ -54,3 +54,19 @@
 .maud { max-width: 280px; height: 40px; }
 .msg { flex-wrap: wrap; align-items: flex-end; }
 .thread form button.send:disabled { background: transparent; color: #B9BEC8; }
+
+/* ô tìm trắng có viền để không trùng màu với dòng đang chọn */
+.find { background: #fff; border: 1px solid var(--border); }
+.find:focus-within { border-color: var(--ink); }
+.threads button:hover { background: #F7F7F8; }
+.threads button.active { background: var(--accent-soft, #FDEEE5); }
+.tabs { display: flex; gap: 8px; padding: 0 16px 10px; }
+.tabs button { height: 34px; padding: 0 16px; border-radius: 999px; background: #F0F2F5; color: var(--ink); font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.tabs button.on { background: var(--ink); color: #fff; }
+.tabs i { font-style: normal; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 11.5px; display: inline-grid; place-items: center; }
+.ctxcard { grid-template-columns: auto 1fr auto; gap: 4px 14px; padding: 14px 16px; border: 0; background: #F6F7F9; border-radius: 16px; }
+.ctxcard .ci { width: 42px; height: 42px; border-radius: 12px; background: #fff; display: grid; place-items: center; color: var(--ink); }
+.ctxcard .ci svg { width: 22px; height: 22px; }
+.ctxcard .cx { display: grid; gap: 1px; min-width: 0; }
+.ctxcard a { border-radius: 999px; padding: 9px 16px; }
+.ctxcard p { grid-column: 1 / -1; margin: 6px 0 0; text-align: center; }

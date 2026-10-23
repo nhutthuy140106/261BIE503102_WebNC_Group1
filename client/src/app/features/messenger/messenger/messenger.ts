@@ -26,9 +26,11 @@ export class Messenger implements OnInit, OnDestroy {
   protected readonly input = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(2000)] });
 
   protected readonly query = signal('');
+  protected readonly onlyUnread = signal(false);
+  protected readonly unreadCount = computed(() => this.conversations().filter((c) => c.unread > 0).length);
   protected readonly shown = computed(() => {
     const q = stripAccents(this.query().trim());
-    return this.conversations().filter((c) => !q || stripAccents(c.withName + ' ' + (c.context?.label ?? '')).includes(q));
+    return this.conversations().filter((c) => (!this.onlyUnread() || c.unread > 0) && (!q || stripAccents(c.withName + ' ' + (c.context?.label ?? '')).includes(q)));
   });
 
   protected readonly selected = computed(() => this.conversations().find((c) => c._id === this.selectedId()) ?? null);

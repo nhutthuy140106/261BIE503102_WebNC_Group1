@@ -6,6 +6,7 @@
     <aside class="side">
       <h1>Đoạn chat</h1>
       <label class="find"><svg class="i"><use href="#search" /></svg><input [value]="query()" (input)="query.set($any($event.target).value)" placeholder="Tìm kiếm cuộc trò chuyện" /></label>
+      <div class="tabs"><button type="button" [class.on]="!onlyUnread()" (click)="onlyUnread.set(false)">Tất cả</button><button type="button" [class.on]="onlyUnread()" (click)="onlyUnread.set(true)">Chưa đọc @if (unreadCount()) { <i>{{ unreadCount() }}</i> }</button></div>
       <ul class="threads">
         @for (c of shown(); track c._id) {
           <li>
@@ -19,7 +20,7 @@
             </button>
           </li>
         } @empty {
-          <li class="none">{{ query() ? 'Không tìm thấy cuộc trò chuyện nào.' : 'Chưa có cuộc trò chuyện nào.' }}</li>
+          <li class="none">{{ query() ? 'Không tìm thấy cuộc trò chuyện nào.' : onlyUnread() ? 'Không có tin nhắn chưa đọc.' : 'Chưa có cuộc trò chuyện nào.' }}</li>
         }
       </ul>
     </aside>
@@ -33,7 +34,8 @@
         <ul class="messages">
           @if (c.context) {
             <li class="ctxcard">
-              <span><small>{{ c.context.type === 'post' || c.context.type === 'job' ? 'Bài đăng' : 'Đơn hàng' }}</small><b>{{ c.context.label }}</b></span>
+              <span class="ci"><svg class="i"><use [attr.href]="c.context.type === 'post' || c.context.type === 'job' ? '#bag' : '#receipt'" /></svg></span>
+              <span class="cx"><small>{{ c.context.type === 'post' || c.context.type === 'job' ? 'Bài đăng' : 'Đơn hàng' }}</small><b>{{ c.context.label }}</b></span>
               <a [routerLink]="ctxLink(c)">{{ ctxText(c) }}</a>
               <p>Nhắn tin không tự đổi trạng thái đơn.</p>
             </li>
