@@ -88,7 +88,7 @@
                 @if (d.quantity) { <dt>{{ d.quantityLabel ?? 'Số lượng' }}</dt><dd>{{ d.quantity }}{{ d.unit ? ' ' + d.unit : '' }}</dd> }
                 @if (d.when) { <dt>{{ d.whenLabel ?? 'Thời gian' }}</dt><dd>{{ d.when }}</dd> }
                 @if (d.place) { <dt>{{ d.placeLabel ?? 'Cách nhận' }}</dt><dd>{{ d.place }}</dd> }
-                @if (d.address) { <dt>{{ d.place ? 'Giao tới' : (d.placeLabel ?? 'Địa chỉ') }}</dt><dd>{{ d.address }}</dd> }
+                @if (d.address) { <dt>Địa chỉ</dt><dd>{{ d.address }}</dd> }
                 @if (d.utensils !== undefined) { <dt>Dụng cụ / ống hút</dt><dd>{{ d.utensils ? 'Có lấy' : 'Không lấy' }}</dd> }
               }
               <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
