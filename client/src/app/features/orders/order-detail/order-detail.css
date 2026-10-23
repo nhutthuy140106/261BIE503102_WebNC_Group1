@@ -292,3 +292,7 @@ a.pbtn.link { text-decoration: none; }
 
 .modal .fld > label { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
 .modal .fld > label .hintl { font-size: 13px; }
+
+/* danh sách lý do không có thanh cuộn riêng: để cả hộp cuộn khi quá cao */
+.modal .fld:has(.hintl) .reasons { max-height: none; overflow: visible; }
+.modal .reasons:not(.two):not(.three):not(.five) button { min-height: 48px; }
