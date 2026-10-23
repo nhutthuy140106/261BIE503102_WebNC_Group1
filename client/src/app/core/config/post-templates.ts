@@ -72,7 +72,7 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
     },
     place: {
       mode: 'choice',
-      label: 'Cách nhận',
+      label: 'Hình thức nhận hàng',
       choices: [
         [
           'Giao tận nơi',
@@ -181,7 +181,7 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
     },
     place: {
       mode: 'choice',
-      label: 'Cách nhận',
+      label: 'Hình thức nhận hàng',
       choices: [
         [
           'Giao tận nơi',

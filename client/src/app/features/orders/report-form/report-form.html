@@ -1,29 +1,49 @@
-<a [routerLink]="['/orders', orderId()]" class="btn ghost">← Về đơn</a>
+<a [routerLink]="['/orders', orderId()]" class="back">← Về đơn</a>
 <h1>Báo cáo vấn đề</h1>
-<p class="muted">{{ title() }}</p>
+
+@if (order(); as o) {
+  <div class="rorder">
+    <app-order-thumb [image]="o.image" [category]="o.kind ?? 'job'" />
+    <span><b>{{ o.postTitle }}</b><small>{{ o.counterpartName }} · {{ o.code }}</small></span>
+  </div>
+}
 
 @if (sent()) {
-  <div class="notice">Đã gửi báo cáo. Đội hỗ trợ sẽ xem xét — bạn có thể theo dõi trong mục Tôi.</div>
+  <div class="rdone">
+    <img src="assets/clean/wave.png" alt="" />
+    <h2>Đã gửi báo cáo</h2>
+    <p>AntGo sẽ xem xét và phản hồi bạn qua thông báo. Báo cáo không tự hoàn tiền; hai bên vẫn nên trao đổi trực tiếp.</p>
+    <a class="go" [routerLink]="['/orders', orderId()]">Về đơn hàng</a>
+  </div>
 } @else {
   <form [formGroup]="form" (ngSubmit)="submit()">
-    <div class="field">
-      <label for="reason">Vấn đề bạn gặp</label>
-      <select id="reason" formControlName="reason">
-        <option value="">— Chọn —</option>
-        @for (r of reasons; track r[0]) { <option [value]="r[0]">{{ r[1] }}</option> }
-      </select>
-      @if (form.controls.reason.invalid && form.controls.reason.touched) { <small class="error">Hãy chọn vấn đề.</small> }
+    <p class="rnote">Dùng khi bạn cần AntGo can thiệp. Muốn làm lại món, trả hàng hay hoàn tiền thì hãy dùng nút báo vấn đề với bên bán ngay trong đơn.</p>
+    <div class="rf" [class.bad]="form.controls.reason.invalid && form.controls.reason.touched">
+      <label>Vấn đề bạn gặp</label>
+      <div class="rlist">
+        @for (r of reasons(); track r[0]) {
+          <button type="button" [class.on]="form.controls.reason.value === r[0]" (click)="form.controls.reason.setValue(r[0])">{{ r[1] }}</button>
+        }
+      </div>
+      @if (form.controls.reason.invalid && form.controls.reason.touched) { <small class="error">Hãy chọn một vấn đề.</small> }
     </div>
-    <div class="field">
+    <div class="rf">
       <label for="detail">Mô tả</label>
-      <textarea id="detail" rows="5" formControlName="detail"></textarea>
+      <textarea id="detail" rows="4" maxlength="1000" formControlName="detail" placeholder="Chuyện gì đã xảy ra? Ghi rõ để AntGo xử lý nhanh hơn."></textarea>
       @if (form.controls.detail.errors?.['server']; as msg) {
         <small class="error">{{ msg }}</small>
       } @else if (form.controls.detail.invalid && form.controls.detail.touched) {
         <small class="error">Mô tả ít nhất 10 ký tự.</small>
       }
     </div>
+    <div class="rf">
+      <label>Hình ảnh <span>(không bắt buộc)</span></label>
+      <div class="rpics">
+        @for (u of pics(); track u) { <span class="rpic"><img [src]="u" alt="" /><button type="button" aria-label="Bỏ ảnh" (click)="dropPic(u)">×</button></span> }
+        @if (pics().length < 4) { <label class="radd"><input type="file" accept="image/*" multiple hidden (change)="addPics($any($event.target))" /><svg class="i"><use href="#camera" /></svg><small>Thêm hình ảnh</small></label> }
+      </div>
+    </div>
     @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
-    <button type="submit" class="btn" [disabled]="form.invalid">Gửi báo cáo</button>
+    <button type="submit" class="go" [disabled]="form.invalid">Gửi báo cáo</button>
   </form>
 }

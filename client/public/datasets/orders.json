@@ -34,7 +34,7 @@
       "unit": "phần",
       "whenLabel": "Nhận lúc",
       "when": "16/10/2026 · 11:30",
-      "placeLabel": "Cách nhận",
+      "placeLabel": "Hình thức nhận hàng",
       "place": "Giao tận nơi",
       "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05",
       "utensils": true
@@ -152,7 +152,7 @@
       "unit": "phần",
       "whenLabel": "Nhận lúc",
       "when": "10/10/2026 · 12:00",
-      "placeLabel": "Cách nhận",
+      "placeLabel": "Hình thức nhận hàng",
       "place": "Tự đến lấy",
       "utensils": false
     },
