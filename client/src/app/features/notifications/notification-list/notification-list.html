@@ -1,6 +1,12 @@
+<div class="card">
 <div class="head">
   <h1>Thông báo</h1>
-  @if (unread() > 0) { <button type="button" class="all" (click)="readAll()">Đánh dấu đã đọc tất cả</button> }
+  <span class="nmore top" [class.open]="topMenu()">
+    <button type="button" class="more" aria-label="Tùy chọn" (click)="topMenu.set(!topMenu())"><svg class="i"><use href="#dots" /></svg></button>
+    @if (topMenu()) {
+      <span class="nmenu pointer"><button type="button" [disabled]="unread() === 0" (click)="readAll()"><svg class="i"><use href="#check" /></svg><span>Đánh dấu tất cả là đã đọc</span></button></span>
+    }
+  </span>
 </div>
 @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
 <div class="tabs">
@@ -16,7 +22,11 @@
       @for (n of g.items; track n._id) {
         <div class="row">
           <button type="button" class="item" [class.unread]="!n.read" (click)="open(n)">
-            <span class="ic"><svg class="i"><use [attr.href]="icon(n)" /></svg></span>
+            @if (n.avatar) {
+              <span class="av"><app-avatar [src]="n.avatar" [size]="56" /><span class="badge"><svg class="i"><use [attr.href]="icon(n)" /></svg></span></span>
+            } @else {
+              <span class="ic"><svg class="i"><use [attr.href]="icon(n)" /></svg></span>
+            }
             <span class="tx"><span class="t">{{ n.text }}</span><small>{{ short(n.createdAt) }}</small></span>
             @if (!n.read) { <i class="dot"></i> }
           </button>
@@ -33,3 +43,4 @@
     <p class="none">{{ tab() === 'unread' ? 'Không có thông báo chưa đọc.' : 'Chưa có thông báo nào.' }}</p>
   }
 }
+</div>

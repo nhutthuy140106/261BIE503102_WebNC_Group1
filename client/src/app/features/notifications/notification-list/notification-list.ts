@@ -20,14 +20,15 @@ export class NotificationList implements OnInit {
   protected readonly unread = this.service.unreadCount;
   protected readonly tab = signal<'all' | 'unread'>('all');
   protected readonly menu = signal<string | null>(null);
+  protected readonly topMenu = signal(false);
   protected readonly short = timeShort;
 
   protected readonly groups = computed(() => {
     const list = this.service.all().filter((n) => this.tab() === 'all' || !n.read);
-    const day = 24 * 3600 * 1000;
-    const fresh = list.filter((n) => Date.now() - new Date(n.createdAt).getTime() < day);
+    const today = new Date().toDateString();
+    const fresh = list.filter((n) => new Date(n.createdAt).toDateString() === today);
     const older = list.filter((n) => !fresh.includes(n));
-    return [{ title: 'Mới', items: fresh }, { title: 'Trước đó', items: older }].filter((g) => g.items.length);
+    return [{ title: 'Hôm nay', items: fresh }, { title: 'Trước đó', items: older }].filter((g) => g.items.length);
   });
 
   ngOnInit(): void {
@@ -57,11 +58,15 @@ export class NotificationList implements OnInit {
   }
 
   readAll(): void {
+    this.topMenu.set(false);
     this.service.markRead().subscribe();
   }
 
   @HostListener('document:click', ['$event'])
   onDocClick(e: Event): void {
-    if (this.menu() && !(e.target as HTMLElement).closest('.nmore')) this.menu.set(null);
+    if (!(e.target as HTMLElement).closest('.nmore')) {
+      this.menu.set(null);
+      this.topMenu.set(false);
+    }
   }
 }

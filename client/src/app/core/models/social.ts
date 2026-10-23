@@ -49,6 +49,8 @@ export interface AppNotification {
   /** Đường dẫn nội bộ để mở đúng đơn/hội thoại */
   link: string;
   read: boolean;
+  /** Ảnh người liên quan (người bán / người đăng việc); không có thì hiện icon theo loại */
+  avatar?: string;
   createdAt: string;
 }
 

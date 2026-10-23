@@ -55,7 +55,14 @@
           </button>
           @if (notifOpen()) {
             <div class="npanel">
-              <div class="nhead"><h2>Thông báo</h2>@if (notifications.unreadCount()) { <button type="button" class="nall" (click)="readAll()">Đánh dấu đã đọc tất cả</button> }</div>
+              <div class="nhead"><h2>Thông báo</h2>
+                <span class="nmore ntop" [class.open]="nTop()">
+                  <button type="button" class="more" aria-label="Tùy chọn" (click)="nTop.set(!nTop())"><svg class="i"><use href="#dots" /></svg></button>
+                  @if (nTop()) {
+                    <span class="nmenu npointer"><button type="button" [disabled]="!notifications.unreadCount()" (click)="readAll()"><svg class="i"><use href="#check" /></svg><span>Đánh dấu tất cả là đã đọc</span></button></span>
+                  }
+                </span>
+              </div>
               <div class="ntabs">
                 <button type="button" [class.on]="notifTab() === 'all'" (click)="notifTab.set('all')">Tất cả</button>
                 <button type="button" [class.on]="notifTab() === 'unread'" (click)="notifTab.set('unread')">Chưa đọc</button>
@@ -66,7 +73,11 @@
                   @for (n of g.items; track n._id) {
                     <div class="nrow">
                       <button type="button" class="nitem" [class.unread]="!n.read" (click)="openNotif(n)">
-                        <span class="nic"><svg class="i"><use [attr.href]="notifIcon(n)" /></svg></span>
+                        @if (n.avatar) {
+                          <span class="nav"><app-avatar [src]="n.avatar" [size]="52" /><span class="nbadge"><svg class="i"><use [attr.href]="notifIcon(n)" /></svg></span></span>
+                        } @else {
+                          <span class="nic"><svg class="i"><use [attr.href]="notifIcon(n)" /></svg></span>
+                        }
                         <span class="ntx"><span class="nt">{{ n.text }}</span><small>{{ short(n.createdAt) }}</small></span>
                         @if (!n.read) { <i class="ndot"></i> }
                       </button>

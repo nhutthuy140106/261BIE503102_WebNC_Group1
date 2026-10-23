@@ -36,13 +36,13 @@ export class Header {
   protected readonly notifOpen = signal(false);
   protected readonly notifTab = signal<'all' | 'unread'>('all');
   protected readonly short = timeShort;
-  /** Thông báo đang xem theo tab, chia nhóm Mới (trong 24 giờ) / Trước đó */
+  /** Thông báo đang xem theo tab, chia nhóm Hôm nay / Trước đó */
   protected readonly notifGroups = computed(() => {
     const list = this.notifications.all().filter((n) => this.notifTab() === 'all' || !n.read);
-    const day = 24 * 3600 * 1000;
-    const fresh = list.filter((n) => Date.now() - new Date(n.createdAt).getTime() < day);
+    const today = new Date().toDateString();
+    const fresh = list.filter((n) => new Date(n.createdAt).toDateString() === today);
     const older = list.filter((n) => !fresh.includes(n));
-    return [{ title: 'Mới', items: fresh }, { title: 'Trước đó', items: older }].filter((g) => g.items.length);
+    return [{ title: 'Hôm nay', items: fresh }, { title: 'Trước đó', items: older }].filter((g) => g.items.length);
   });
 
   protected notifIcon(n: AppNotification): string {
@@ -80,7 +80,10 @@ export class Header {
     (n.read ? this.notifications.markUnread(n._id) : this.notifications.markRead([n._id])).subscribe({ error: () => undefined });
   }
 
+  protected readonly nTop = signal(false);
+
   protected readAll(): void {
+    this.nTop.set(false);
     this.notifications.markRead().subscribe({ error: () => undefined });
   }
 
@@ -88,7 +91,10 @@ export class Header {
   onDocClick(e: Event): void {
     const el = e.target as HTMLElement;
     if (this.notifOpen() && !el.closest('.nwrap')) this.notifOpen.set(false);
-    if (this.nMenu() && !el.closest('.nmore')) this.nMenu.set(null);
+    if (!el.closest('.nmore')) {
+      this.nMenu.set(null);
+      this.nTop.set(false);
+    }
   }
 
   @HostListener('document:keydown.escape')
