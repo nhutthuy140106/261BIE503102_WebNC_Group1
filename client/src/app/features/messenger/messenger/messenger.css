@@ -154,3 +154,8 @@
 .threads button.unread.active { background: #F0F2F5; }
 .threads button.unread .tx b { font-weight: 600; }
 .threads button.unread .tx small .pv { color: var(--ink); font-weight: 600; }
+
+/* chưa đọc: không tô nền, chỉ in đậm tin cuối + chấm cam */
+.threads button.unread, .threads button.unread:hover { background: none; }
+.threads button.unread:hover { background: #F5F6F8; }
+.threads button.unread.active { background: #F0F2F5; }
