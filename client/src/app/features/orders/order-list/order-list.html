@@ -13,10 +13,9 @@
 } @else if (error()) {
   <div class="notice">Không tải được đơn hàng: {{ error() }}</div>
 } @else {
-  <div class="board">
   <ul class="list">
     @for (o of shown(); track o._id) {
-      <li class="order" [ngClass]="'t-' + dot(o)">
+      <li class="order">
         <div class="oh">
           <app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="24" />
           <b>{{ o.counterpartName }}</b>
@@ -53,5 +52,4 @@
       <li class="empty"><img src="assets/clean/idle.png" alt="" /><p>Không có đơn nào ở đây.</p></li>
     }
   </ul>
-  </div>
 }
