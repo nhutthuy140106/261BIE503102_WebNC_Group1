@@ -186,3 +186,8 @@
 .thread form button.send:disabled { background: none; color: var(--accent); opacity: .4; }
 .rbtn:hover, .thread form button.send:hover:not(:disabled) { background: #F5F6F8; }
 .rec .send { background: none; color: var(--accent); }
+
+/* hộp chọn ảnh có mũi nhọn trỏ vào nút, như Facebook */
+.picmenu { bottom: 52px; left: -6px; width: 232px; padding: 8px; }
+.picmenu::after { content: ''; position: absolute; left: 14px; bottom: -6px; width: 14px; height: 14px; background: #fff; transform: rotate(45deg); box-shadow: 4px 4px 8px rgba(34, 48, 74, .08); border-radius: 0 0 3px 0; }
+.picmenu button, .picmenu label { height: 44px; font-size: 14.5px; }

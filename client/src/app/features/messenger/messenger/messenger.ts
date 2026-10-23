@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Conversation, Message } from '../../../core/models/social';
@@ -175,6 +175,17 @@ export class Messenger implements OnInit, OnDestroy {
       this.closeCam();
       this.error.set('Không mở được camera. Bạn hãy cho phép trình duyệt dùng camera rồi thử lại.');
     }
+  }
+
+  /** Bấm ra ngoài menu chọn ảnh (hoặc phím Esc) thì menu tự đóng */
+  @HostListener('document:click', ['$event'])
+  onDocClick(e: Event): void {
+    if (this.picMenu() && !(e.target as HTMLElement).closest('.picwrap')) this.picMenu.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEsc(): void {
+    this.picMenu.set(false);
   }
 
   startCam(): void {
