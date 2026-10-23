@@ -1,8 +1,17 @@
 <header class="ohead"><h1>Đơn hàng</h1></header>
 
+@if (counts().todo && tab() !== 'todo') {
+  <button type="button" class="alert" (click)="setTab('todo')">
+    <span class="ai"><svg class="i"><use href="#bolt" /></svg></span>
+    <span class="at"><b>Có {{ counts().todo }} đơn cần bạn xử lý</b><small>Duyệt giá, bắt đầu làm, xác nhận đã nhận… bấm để xem ngay</small></span>
+    <span class="ag">Xem ngay</span>
+  </button>
+} @else if (tab() === 'todo') {
+  <button type="button" class="back" (click)="setTab('all')">← Tất cả đơn</button>
+}
+
 <nav class="tabs" aria-label="Lọc đơn">
   <button type="button" [class.on]="tab() === 'all'" (click)="setTab('all')">Tất cả</button>
-  <button type="button" [class.on]="tab() === 'todo'" (click)="setTab('todo')">Cần bạn xử lý @if (counts().todo) { <em>{{ counts().todo }}</em> }</button>
   <button type="button" [class.on]="tab() === 'placed'" (click)="setTab('placed')">Đơn đã đặt</button>
   <button type="button" [class.on]="tab() === 'received'" (click)="setTab('received')">Việc đã nhận</button>
   <button type="button" [class.on]="tab() === 'history'" (click)="setTab('history')">Lịch sử</button>

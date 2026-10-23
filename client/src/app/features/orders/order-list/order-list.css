@@ -64,3 +64,16 @@
 .gh.todo small { color: var(--accent); opacity: .8; }
 .gh + .list { margin-top: 12px; }
 .gh:first-of-type { margin-top: 20px; }
+
+/* Cần bạn xử lý: không nằm trong thanh tab mà là một dải nổi ở đầu trang, bấm là thấy ngay */
+.alert { display: flex; align-items: center; gap: 14px; width: 100%; margin-top: 18px; padding: 14px 18px; border-radius: 14px; background: var(--accent); color: #fff; text-align: left; font: inherit; box-shadow: 0 12px 24px -16px rgba(216, 90, 28, .9); transition: filter .15s, transform .15s; }
+.alert:hover { filter: brightness(.95); transform: translateY(-1px); }
+.alert .ai { width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, .2); display: grid; place-items: center; flex: none; }
+.alert .ai svg { width: 20px; height: 20px; }
+.alert .at { flex: 1; display: grid; gap: 2px; }
+.alert .at b { font-size: 16px; }
+.alert .at small { font-size: 13px; opacity: .9; }
+.alert .ag { flex: none; padding: 9px 18px; border-radius: 999px; background: #fff; color: var(--accent); font-weight: 700; font-size: 14px; }
+.back { margin-top: 18px; padding: 8px 0; background: none; font: inherit; font-weight: 600; color: var(--smoke); }
+.back:hover { color: var(--ink); }
+.alert + .tabs { margin-top: 16px; }
