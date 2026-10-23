@@ -125,19 +125,23 @@
 .threads button.unread .tx small .pv { color: #000; font-weight: 800; }
 .dot { width: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; font-style: normal; font-size: 12.5px; font-weight: 700; color: #fff; display: inline-grid; place-items: center; }
 
-/* bố cục kiểu Facebook: danh sách trái không viền, khung chat nổi như một thẻ bên phải, rộng gần hết màn hình */
-:host { width: min(1480px, calc(100vw - 48px)); margin-left: 50%; transform: translateX(-50%); }
-.chat { grid-template-columns: 380px 1fr; gap: 12px; border: 0; border-radius: 0; background: none; overflow: visible; height: calc(100vh - 110px); }
-.side { border-right: 0; background: #fff; }
-.thread { border: 0; border-radius: 16px; background: #fff; box-shadow: 0 1px 8px rgba(34, 48, 74, .16); overflow: hidden; }
-.thread.blank { background: #F7F8FA; box-shadow: none; }
-.top { padding: 12px 20px; }
-.ctxlink { padding: 8px 16px; border-radius: 999px; background: #F0F2F5; text-decoration: none; font-weight: 600; }
-.ctxlink:hover { background: #E6E9EE; }
-.side h1 { padding: 8px 12px 10px; }
-.find, .tabs { margin-left: 8px; margin-right: 8px; }
-.tabs { padding-left: 0; padding-right: 0; }
-.threads { padding: 0; }
-@media (max-width: 1100px) { .chat { grid-template-columns: 320px 1fr; } }
-@media (max-width: 800px) { :host { width: auto; margin-left: 0; transform: none; } .chat { grid-template-columns: 1fr; height: auto; } }
 .dot { width: 14px; min-width: 14px; height: 14px; padding: 0; }
+
+/* kích thước gọn, cân hai bên */
+.chat { height: calc(100vh - 150px); min-height: 520px; }
+.side h1 { font-size: 22px; padding: 16px 18px 8px; }
+.find { margin: 0 14px 8px; height: 38px; }
+.tabs { padding: 0 14px 8px; }
+.tabs button { height: 32px; font-size: 13.5px; padding: 0 14px; }
+.threads { padding: 0 8px 8px; }
+.threads button { padding: 9px 10px; gap: 11px; }
+.threads button .tx b, .tx b { font-size: 14.5px; }
+.tx small { font-size: 13px; }
+.top { padding: 10px 18px; }
+.top .tx b { font-size: 15px; }
+.top .tx small { font-size: 12.5px; }
+.ctxlink { font-size: 13px; padding: 7px 14px; }
+.messages { padding: 14px 18px; }
+.msg .bb { font-size: 14px; padding: 7px 13px; }
+.stamp { font-size: 12px; }
+.thread form input { height: 40px; font-size: 14px; }
