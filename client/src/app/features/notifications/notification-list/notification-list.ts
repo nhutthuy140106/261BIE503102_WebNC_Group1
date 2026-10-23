@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppNotification } from '../../../core/models/social';
 import { NotificationService } from '../../../core/services/notification';
-import { formatDateTime } from '../../../core/utils/status-label';
+import { timeShort } from '../../../core/utils/time-short';
 
+/** Trang Thông báo đầy đủ — cùng kiểu với khung thả xuống ở chuông: lọc Tất cả / Chưa đọc, nhóm Mới / Trước đó. */
 @Component({
   selector: 'app-notification-list',
   standalone: false,
@@ -14,18 +15,24 @@ export class NotificationList implements OnInit {
   private readonly service = inject(NotificationService);
   private readonly router = inject(Router);
 
-  protected readonly items = signal<AppNotification[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
-  protected readonly fmt = formatDateTime;
   protected readonly unread = this.service.unreadCount;
+  protected readonly tab = signal<'all' | 'unread'>('all');
+  protected readonly menu = signal<string | null>(null);
+  protected readonly short = timeShort;
+
+  protected readonly groups = computed(() => {
+    const list = this.service.all().filter((n) => this.tab() === 'all' || !n.read);
+    const day = 24 * 3600 * 1000;
+    const fresh = list.filter((n) => Date.now() - new Date(n.createdAt).getTime() < day);
+    const older = list.filter((n) => !fresh.includes(n));
+    return [{ title: 'Mới', items: fresh }, { title: 'Trước đó', items: older }].filter((g) => g.items.length);
+  });
 
   ngOnInit(): void {
     this.service.list().subscribe({
-      next: (rows) => {
-        this.items.set(rows);
-        this.loading.set(false);
-      },
+      next: () => this.loading.set(false),
       error: (e: Error) => {
         this.error.set(e.message);
         this.loading.set(false);
@@ -33,17 +40,28 @@ export class NotificationList implements OnInit {
     });
   }
 
+  protected icon(n: AppNotification): string {
+    return n.link.startsWith('/orders') ? '#receipt' : n.link.startsWith('/messenger') ? '#chat' : n.link.startsWith('/posts') ? '#bag' : '#bell';
+  }
+
   open(n: AppNotification): void {
     // Chỉ điều hướng tới đường dẫn nội bộ
     const go = () => this.router.navigateByUrl(n.link.startsWith('/') && !n.link.startsWith('//') ? n.link : '/');
     if (n.read) return void go();
-    this.service.markRead([n._id]).subscribe(() => {
-      this.items.update((l) => l.map((x) => (x._id === n._id ? { ...x, read: true } : x)));
-      go();
-    });
+    this.service.markRead([n._id]).subscribe(go);
+  }
+
+  toggleRead(n: AppNotification): void {
+    this.menu.set(null);
+    (n.read ? this.service.markUnread(n._id) : this.service.markRead([n._id])).subscribe({ error: () => undefined });
   }
 
   readAll(): void {
-    this.service.markRead().subscribe(() => this.items.update((l) => l.map((x) => ({ ...x, read: true }))));
+    this.service.markRead().subscribe();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocClick(e: Event): void {
+    if (this.menu() && !(e.target as HTMLElement).closest('.nmore')) this.menu.set(null);
   }
 }

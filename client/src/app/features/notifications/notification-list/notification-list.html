@@ -1,19 +1,35 @@
-<h1>Thông báo</h1>
+<div class="head">
+  <h1>Thông báo</h1>
+  @if (unread() > 0) { <button type="button" class="all" (click)="readAll()">Đánh dấu đã đọc tất cả</button> }
+</div>
 @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
+<div class="tabs">
+  <button type="button" [class.on]="tab() === 'all'" (click)="tab.set('all')">Tất cả</button>
+  <button type="button" [class.on]="tab() === 'unread'" (click)="tab.set('unread')">Chưa đọc</button>
+</div>
 @if (loading()) {
   <p class="muted">Đang tải…</p>
 } @else {
-  @if (unread() > 0) {
-    <button type="button" class="btn ghost" (click)="readAll()">Đánh dấu đã đọc tất cả ({{ unread() }})</button>
+  @for (g of groups(); track g.title) {
+    <h2>{{ g.title }}</h2>
+    <div class="list">
+      @for (n of g.items; track n._id) {
+        <div class="row">
+          <button type="button" class="item" [class.unread]="!n.read" (click)="open(n)">
+            <span class="ic"><svg class="i"><use [attr.href]="icon(n)" /></svg></span>
+            <span class="tx"><span class="t">{{ n.text }}</span><small>{{ short(n.createdAt) }}</small></span>
+            @if (!n.read) { <i class="dot"></i> }
+          </button>
+          <span class="nmore" [class.open]="menu() === n._id">
+            <button type="button" class="more" aria-label="Tùy chọn" (click)="menu.set(menu() === n._id ? null : n._id)"><svg class="i"><use href="#dots" /></svg></button>
+            @if (menu() === n._id) {
+              <span class="nmenu"><button type="button" (click)="toggleRead(n)"><svg class="i"><use [attr.href]="n.read ? '#mail-unread' : '#mail'" /></svg><span>{{ n.read ? 'Đánh dấu là chưa đọc' : 'Đánh dấu là đã đọc' }}</span></button></span>
+            }
+          </span>
+        </div>
+      }
+    </div>
+  } @empty {
+    <p class="none">{{ tab() === 'unread' ? 'Không có thông báo chưa đọc.' : 'Chưa có thông báo nào.' }}</p>
   }
-  <ul class="list">
-    @for (n of items(); track n._id) {
-      <li class="card" [class.unread]="!n.read">
-        <button type="button" class="link" (click)="open(n)">{{ n.text }}</button>
-        <small class="muted">{{ fmt(n.createdAt) }}</small>
-      </li>
-    } @empty {
-      <li class="empty">Chưa có thông báo nào.</li>
-    }
-  </ul>
 }
