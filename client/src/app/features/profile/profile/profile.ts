@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Order } from '../../../core/models/order';
@@ -53,6 +53,24 @@ export class Profile implements OnInit {
     fullName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2), Validators.maxLength(40)] }),
   });
   protected readonly newAvatar = signal<string | null>(null);
+  protected readonly avMenu = signal(false);
+  protected readonly avView = signal(false);
+
+  protected viewAvatar(): void {
+    this.avMenu.set(false);
+    this.avView.set(true);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocClick(e: Event): void {
+    if (this.avMenu() && !(e.target as HTMLElement).closest('.avbig')) this.avMenu.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEsc(): void {
+    this.avMenu.set(false);
+    this.avView.set(false);
+  }
   protected readonly saving = signal(false);
 
   protected pickAvatar(input: HTMLInputElement): void {

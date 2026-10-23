@@ -77,3 +77,23 @@
 .photo-add.small svg { width: 18px; height: 18px; }
 .pform .go { height: 48px; padding: 0 28px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 700; font-size: 15px; }
 .pform .go:disabled { background: #D9D3CF; }
+
+/* ảnh đại diện kiểu Facebook: ảnh lớn, nút máy ảnh nhỏ ở góc, bấm ra menu có mũi nhọn */
+.avedit { display: flex; align-items: center; gap: 22px; margin-bottom: 26px; }
+.avbig { position: relative; width: 132px; height: 132px; flex: none; }
+.avbig ::ng-deep .avatar, .avbig ::ng-deep img { border: 1px solid var(--border); }
+.avcam { position: absolute; right: 2px; bottom: 6px; width: 38px; height: 38px; border-radius: 50%; background: #E9ECF0; border: 3px solid #fff; display: grid; place-items: center; color: var(--ink); cursor: pointer; }
+.avcam:hover { background: #DDE1E6; }
+.avcam svg { width: 20px; height: 20px; }
+.avmenu { position: absolute; left: 50%; top: calc(100% + 14px); transform: translateX(-30%); z-index: 20; width: 260px; padding: 8px; border-radius: 14px; background: #fff; box-shadow: 0 8px 28px rgba(34, 48, 74, .24); display: grid; gap: 2px; }
+.avmenu::before { content: ''; position: absolute; left: 30%; top: -6px; width: 14px; height: 14px; margin-left: -7px; background: #fff; transform: rotate(45deg); border-radius: 3px 0 0 0; }
+.avmenu button, .avmenu label { position: relative; display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px; background: none; font-size: 14.5px; font-weight: 600; color: var(--ink); cursor: pointer; text-align: left; }
+.avmenu button:hover, .avmenu label:hover { background: #F0F2F5; }
+.avmenu svg { width: 22px; height: 22px; flex: none; }
+.avname { display: grid; gap: 3px; }
+.avname b { font-size: 22px; letter-spacing: -.01em; }
+.avname small { color: var(--smoke); font-size: 14px; }
+.avscrim { position: fixed; inset: 0; z-index: 95; background: rgba(20, 28, 44, .82); display: grid; place-items: center; padding: 28px; }
+.avscrim img { max-width: min(520px, 92vw); max-height: 86vh; border-radius: 50%; object-fit: cover; aspect-ratio: 1; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
+.avx { position: absolute; top: 18px; right: 18px; width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, .16); color: #fff; display: grid; place-items: center; }
+.avx:hover { background: rgba(255, 255, 255, .28); }

@@ -48,10 +48,22 @@
         @case ('edit') {
           <h1>Chỉnh sửa hồ sơ</h1>
           <form class="pform" [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
-            <div class="avrow">
-              <app-avatar [src]="newAvatar() ?? u.avatar" [name]="u.fullName" [size]="96" />
-              <label class="photo-add small"><input type="file" accept="image/*" hidden (change)="pickAvatar($any($event.target))" /><svg class="i"><use href="#photo" /></svg>Đổi ảnh đại diện</label>
+            <div class="avedit">
+              <div class="avbig">
+                <app-avatar [src]="newAvatar() ?? u.avatar" [name]="u.fullName" [size]="132" />
+                <button type="button" class="avcam" aria-label="Đổi ảnh đại diện" (click)="avMenu.set(!avMenu())"><svg class="i"><use href="#cam-s" /></svg></button>
+                @if (avMenu()) {
+                  <span class="avmenu">
+                    <button type="button" (click)="viewAvatar()"><svg class="i"><use href="#p-user" /></svg>Xem ảnh đại diện</button>
+                    <label (click)="avMenu.set(false)"><input type="file" accept="image/*" hidden (change)="pickAvatar($any($event.target))" /><svg class="i"><use href="#photo" /></svg>Chọn ảnh đại diện</label>
+                  </span>
+                }
+              </div>
+              <div class="avname"><b>{{ u.fullName }}</b><small>{{ area.current() }}</small></div>
             </div>
+            @if (avView()) {
+              <div class="avscrim" (click)="avView.set(false)"><img [src]="newAvatar() ?? u.avatar" alt="Ảnh đại diện" (click)="$event.stopPropagation()" /><button type="button" class="avx" aria-label="Đóng" (click)="avView.set(false)"><svg class="i"><use href="#xmark" /></svg></button></div>
+            }
             <div class="field">
               <label for="fullName">Họ và tên</label>
               <input id="fullName" class="tx" formControlName="fullName" maxlength="40" />
