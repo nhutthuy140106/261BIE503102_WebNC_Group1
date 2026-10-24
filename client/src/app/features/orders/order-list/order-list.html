@@ -32,7 +32,7 @@
         </div>
 
         <a class="body" [routerLink]="['/orders', o._id]">
-          <app-order-thumb [image]="o.image" [category]="o.category" />
+          <app-order-thumb [image]="o.image" [category]="o.category" [avatar]="o.counterpartAvatar" [name]="o.counterpartName" />
           <span class="main">
             <h3>{{ o.postTitle }}</h3>
             <span class="sub">{{ when(o) }}</span>

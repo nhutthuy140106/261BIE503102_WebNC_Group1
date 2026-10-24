@@ -27,6 +27,9 @@ export class OrderThumb {
   }
 
   @Input() category: string | undefined;
+  /** Việc làm không có ảnh: hiện ảnh người đăng việc thay cho ô chữ */
+  @Input() avatar: string | undefined;
+  @Input() name: string | undefined;
 
   get showImage(): boolean {
     return !!this._image && !this.failed();

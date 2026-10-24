@@ -3,7 +3,7 @@
 
 @if (order(); as o) {
   <a class="rorder" [routerLink]="['/orders', o._id]">
-    <app-order-thumb [image]="o.image" [category]="o.kind ?? 'job'" />
+    <app-order-thumb [image]="o.image" [category]="o.kind ?? 'job'" [avatar]="o.counterpartAvatar" [name]="o.counterpartName" />
     <span><b>{{ o.postTitle }}</b><small>{{ o.counterpartName }} · {{ o.code }}</small></span>
     <em>Xem đơn hàng ›</em>
   </a>

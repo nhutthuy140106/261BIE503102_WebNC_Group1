@@ -275,7 +275,7 @@
           @case ('rate') {
             <h3 class="rvh">Đánh giá</h3>
             <div class="rvprod">
-              <app-order-thumb [image]="o.image" [category]="o.kind ?? 'job'" />
+              <app-order-thumb [image]="o.image" [category]="o.kind ?? 'job'" [avatar]="o.counterpartAvatar" [name]="o.counterpartName" />
               <span><b>{{ o.postTitle }}</b><small>{{ o.counterpartName }}</small></span>
             </div>
             <div class="rvstars" [class.bad]="bad()">
