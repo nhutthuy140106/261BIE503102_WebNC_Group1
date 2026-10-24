@@ -200,3 +200,7 @@
 .one:has(.pwform) { max-width: 440px; }
 .one:has(.pwform) { width: 100%; margin: 0 auto; }
 .pwform { width: 100%; }
+/* tiêu đề + nút Tài khoản giữ như các mục khác (rộng 760px, lề trái); chỉ khung form hẹp và nằm giữa */
+.subhead.narrow { max-width: 760px; }
+.one:has(.pwform) { max-width: 760px; }
+.pwform { max-width: 440px; margin: 0 auto; }
