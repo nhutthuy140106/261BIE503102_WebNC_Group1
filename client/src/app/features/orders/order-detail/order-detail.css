@@ -347,3 +347,4 @@ a.pbtn.link { text-decoration: none; }
 .quote { background: #FEF8F5; box-shadow: inset 3px 0 0 #F2D9CB; padding: 14px 18px; border-radius: 12px; }
 .quote { box-shadow: none; }
 .rlabel { font-family: inherit; font-weight: 400; font-size: 14.5px; }
+.rlabel { font-weight: 500; }
