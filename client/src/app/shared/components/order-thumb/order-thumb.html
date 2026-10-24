@@ -1,8 +1,8 @@
 <span class="th">
   @if (showImage) {
     <img [src]="image" alt="" loading="lazy" (error)="onError()" />
-  } @else if (category === 'job' && (avatar || name)) {
-    <span class="pv"><app-avatar [src]="avatar" [name]="name" [size]="52" /><i class="hb"><svg class="i"><use href="#hand" /></svg></i></span>
+  } @else if (category === 'job') {
+    <img class="jobic" src="assets/clean/job-icon.png" alt="Việc làm" />
   } @else {
     <span class="ph"><svg class="i"><use [attr.href]="'#' + icon" /></svg><small>{{ label }}</small></span>
   }
