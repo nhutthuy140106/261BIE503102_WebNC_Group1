@@ -480,3 +480,16 @@
 .stepper.mini .s:last-of-type { justify-items: end; }
 .stepper.mini .s .dot { background: #fff; }
 .st .rc { color: var(--smoke); font-weight: 400; margin-left: -2px; }
+
+/* hộp Xác nhận đơn hàng: tiêu đề, nút đóng và nội dung thẳng cùng một lề trái/phải */
+.modal header .x { margin-right: -8px; }
+.ck .crow > svg.ic { margin-left: -3px; }
+.ck .crow .cv { margin-right: -2px; }
+/* ẩn thanh cuộn trong hộp xác nhận (vẫn cuộn được) để nội dung không bị hẹp hơn tiêu đề và chân hộp */
+.modal .mbody.ck { scrollbar-width: none; }
+.modal .mbody.ck::-webkit-scrollbar { display: none; }
+.modal header .x { margin-right: 0; }
+/* tiêu đề hộp xác nhận gọn lại, gần đường kẻ bên dưới */
+.modal header { padding: 14px 22px 12px; }
+.modal header h2 { line-height: 1.2; }
+.modal header .x { margin-right: -10px; }
