@@ -194,6 +194,10 @@ export class Profile implements OnInit {
     });
   }
 
+  protected titleOf(t: Tab): string {
+    return { overview: 'Tổng quan', edit: 'Chỉnh sửa hồ sơ', password: 'Đổi mật khẩu', saved: 'Bài đã lưu', addresses: 'Địa chỉ của tôi', xu: 'AntXu & voucher', area: 'Khu vực' }[t];
+  }
+
   protected go(t: Tab): void {
     if (t === 'xu') return void this.router.navigate(['/xu']);
     this.router.navigate([], { relativeTo: this.route, queryParams: { tab: t === 'overview' ? null : t } });
