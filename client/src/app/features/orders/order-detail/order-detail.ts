@@ -289,14 +289,14 @@ export class OrderDetail implements OnInit {
     const k = this.kind(o);
     const pc = o.priceCheck;
     const rs = o.resched;
-    const lateNote = k === 'service' && o.apptIn != null && o.apptIn < 2 ? ' Còn dưới 2 giờ tới giờ hẹn — hủy lúc này sẽ ghi "hủy sát giờ" vào hồ sơ.' : '';
+    const lateNote = k === 'service' && o.apptIn != null && o.apptIn < 2 ? ' Còn dưới 2 giờ tới giờ hẹn, hủy lúc này sẽ ghi "hủy sát giờ" vào hồ sơ.' : '';
     const reschBtn: Btn[] = this.canResched(o) && !rs ? [{ id: 'resched', label: A.resched, kind: 'ghost' }] : [];
     const iss = o.issue;
     if (iss && iss.st !== 'closed') {
       const base: Record<string, { h: string; why: string; btns: Btn[] }> = {
         open: { h: 'Đã gửi cho ' + sl, why: sl + ' sẽ ' + (k === 'food' ? 'chọn làm lại, hoàn một phần hoặc hoàn hết' : k === 'goods' ? 'trả lời có nhận lại hàng không' : 'chọn làm lại miễn phí hoặc giảm tiền') + '. Bạn sẽ nhận thông báo khi có phản hồi.', btns: [] },
         redo: { h: sl + ' sẽ làm lại', why: iss.reply ?? '', btns: [{ id: 'issue-done', label: A.issueResolved, kind: 'main' }] },
-        refund: { h: sl + ' hoàn ' + this.vnd(iss.amount ?? 0), why: (iss.reply ?? '') + ' ' + sl + ' chuyển trả trực tiếp cho bạn — AntGo không giữ tiền. Nhận được thì bấm xác nhận.', btns: [{ id: 'issue-paid', label: A.issueResolved, kind: 'main' }, { id: 'issue', label: A.unpaid, kind: 'ghost' }] },
+        refund: { h: sl + ' hoàn ' + this.vnd(iss.amount ?? 0), why: (iss.reply ?? '') + ' ' + sl + ' chuyển trả trực tiếp cho bạn, AntGo không giữ tiền. Nhận được thì bấm xác nhận.', btns: [{ id: 'issue-paid', label: A.issueResolved, kind: 'main' }, { id: 'issue', label: A.unpaid, kind: 'ghost' }] },
         returnAgreed: { h: sl + ' đồng ý nhận lại hàng', why: (iss.reply ?? '') + ' Khi trả hàng, ' + sl + ' trả lại ' + this.vnd(iss.amount ?? 0) + ' trực tiếp cho bạn.', btns: [{ id: 'issue-paid', label: A.issueResolved, kind: 'main' }, { id: 'issue', label: A.support, kind: 'ghost' }] },
         rejected: { h: sl + ' không đồng ý', why: (iss.reply ?? '') + ' Hai bên chưa thỏa thuận được thì nhờ AntGo xem giúp: AntGo ghi nhận, có thể hạ uy tín hoặc khóa tài khoản vi phạm, nhưng không ép hoàn tiền.', btns: [{ id: 'issue', label: A.support, kind: 'main' }, { id: 'issue-drop', label: A.issueDrop, kind: 'ghost' }] },
       };
@@ -322,7 +322,7 @@ export class OrderDetail implements OnInit {
       case 'confirmed':
         return { h: 'Đơn đã được nhận', why: sl + ' đã xác nhận. Theo dõi thời gian và cách giao nhận ở bên trái.' + (k === 'service' && o.apptIn != null ? (o.apptIn >= 2 ? ' Hủy miễn phí tới 2 giờ trước giờ hẹn.' : lateNote) : ''), btns: [...reschBtn, { id: 'cancel', label: A.cancel, kind: 'warn' }] };
       case 'preparing':
-        return { h: k === 'service' ? 'Dịch vụ đang thực hiện' : 'Bên bán đang chuẩn bị', why: sl + ' đã bắt đầu nên không tự hủy được nữa. Cần thì gửi yêu cầu hủy — ' + sl + ' đồng ý mới hủy.', btns: o.cancelRequested ? [] : [{ id: 'cancelreq', label: A.cancelReq, kind: 'warn' }] };
+        return { h: k === 'service' ? 'Dịch vụ đang thực hiện' : 'Bên bán đang chuẩn bị', why: sl + ' đã bắt đầu nên không tự hủy được nữa. Cần thì gửi yêu cầu hủy, ' + sl + ' đồng ý mới hủy.', btns: o.cancelRequested ? [] : [{ id: 'cancelreq', label: A.cancelReq, kind: 'warn' }] };
       case 'delivering':
         return { h: k === 'service' ? 'Dịch vụ đã hoàn tất' : 'Đang giao', why: k === 'service' ? 'Kiểm tra kết quả rồi xác nhận để đóng đơn.' : 'Khi đã nhận đủ, hãy xác nhận để đóng đơn.', btns: [{ id: 'received', label: A.received, kind: 'main' }] };
       case 'ready':
@@ -341,7 +341,7 @@ export class OrderDetail implements OnInit {
       case 'cancelled':
         return {
           h: o.priceRejected ? 'Bạn đã từ chối giá mới' : o.cancelBy === 'seller' ? sl + ' đã hủy đơn' : 'Bạn đã hủy đơn',
-          why: o.priceRejected ?? (o.cancelWhy ? 'Lý do: ' + o.cancelWhy + '.' + (o.cancelLate ? ' Hủy sát giờ hẹn — đã ghi vào hồ sơ của bạn.' : '') + (o.cancelBy === 'seller' ? ' Bạn không phải trả gì.' : '') : 'Đơn đã dừng. Bạn có thể tìm lựa chọn khác trong khu.'),
+          why: o.priceRejected ?? (o.cancelWhy ? 'Lý do: ' + o.cancelWhy + '.' + (o.cancelLate ? ' Hủy sát giờ hẹn, đã ghi vào hồ sơ của bạn.' : '') + (o.cancelBy === 'seller' ? ' Bạn không phải trả gì.' : '') : 'Đơn đã dừng. Bạn có thể tìm lựa chọn khác trong khu.'),
           btns: [{ id: 'more', label: A.explore, kind: 'ghost' }],
         };
       case 'declined':
@@ -482,8 +482,8 @@ export class OrderDetail implements OnInit {
       return this.move({ issue: { ...(iss as OrderIssue), st: 'closed', result: res } }, a === 'issue-done' ? 'Bạn xác nhận đã được làm lại' : 'Bạn xác nhận đã nhận tiền hoàn ' + this.vnd(iss?.amount ?? 0), 'Đã đóng yêu cầu');
     }
     if (a === 'issue-drop') return this.move({ issue: { ...(iss as OrderIssue), st: 'closed', result: 'bạn đã đóng yêu cầu' } }, 'Bạn đóng yêu cầu');
-    if (a === 'resched-undo') return this.move({ resched: null }, 'Bạn rút đề nghị đổi lịch', 'Đã rút đề nghị — giữ giờ cũ');
-    if (a === 'resched-no') return this.move({ resched: null }, 'Bạn giữ giờ cũ', 'Đã giữ giờ cũ — ' + n + ' nhận được phản hồi');
+    if (a === 'resched-undo') return this.move({ resched: null }, 'Bạn rút đề nghị đổi lịch', 'Đã rút đề nghị, giữ giờ cũ');
+    if (a === 'resched-no') return this.move({ resched: null }, 'Bạn giữ giờ cũ', 'Đã giữ giờ cũ, ' + n + ' nhận được phản hồi');
     if (a === 'resched-yes' || a === 'sim-resched-ok') {
       const to = o.resched?.to ?? '';
       return this.move({ resched: null, detail: o.detail ? { ...o.detail, when: 'Hẹn lúc ' + to } : o.detail }, (a === 'resched-yes' ? 'Bạn đồng ý đổi lịch sang ' : n + ' đồng ý đổi lịch sang ') + to, a === 'resched-yes' ? 'Đã đổi sang giờ mới' : undefined);
@@ -556,7 +556,7 @@ export class OrderDetail implements OnInit {
     if (d === 'approve') {
       const np = o.newPrice;
       if (!np) return;
-      return this.move({ status: 'preparing', oldTotal: o.total, total: np.total, priceDone: true, newPrice: null }, 'Bạn đồng ý giá cuối ' + this.vnd(np.total), 'Đã đồng ý giá mới — đơn làm tiếp');
+      return this.move({ status: 'preparing', oldTotal: o.total, total: np.total, priceDone: true, newPrice: null }, 'Bạn đồng ý giá cuối ' + this.vnd(np.total), 'Đã đồng ý giá mới, đơn làm tiếp');
     }
     if (d === 'reject') {
       const pc = o.priceCheck;
@@ -600,7 +600,7 @@ export class OrderDetail implements OnInit {
       case 'reported':
         return { h: 'Chờ ' + nn + ' xác nhận', why: n + ' sẽ kiểm tra rồi xác nhận hoàn thành. Nếu ' + nn + ' không phản hồi, đơn tự hoàn thành sau 24 giờ.', btns: [] };
       case 'done':
-        if (!of.paid) return { h: 'Hoàn thành — bạn đã nhận tiền công chưa?', why: n + ' trả bằng ' + pay + '. Nhận đủ ' + money + ' rồi thì bấm xác nhận. AntGo không giữ tiền, hai bên trả trực tiếp cho nhau.', btns: [{ id: 'paid', label: A.confirmPaid, kind: 'main' }, { id: 'unpaid', label: A.unpaid, kind: 'ghost' }] };
+        if (!of.paid) return { h: 'Hoàn thành, bạn đã nhận tiền công chưa?', why: n + ' trả bằng ' + pay + '. Nhận đủ ' + money + ' rồi thì bấm xác nhận. AntGo không giữ tiền, hai bên trả trực tiếp cho nhau.', btns: [{ id: 'paid', label: A.confirmPaid, kind: 'main' }, { id: 'unpaid', label: A.unpaid, kind: 'ghost' }] };
         if (!of.rated) return { h: 'Đánh giá ' + nn, why: 'Bạn đã nhận đủ tiền công. Một vài dòng đánh giá giúp hàng xóm khác biết ' + nn + ' có dễ hợp tác không.', btns: [{ id: 'rrate', label: A.rate, kind: 'main' }] };
         return { h: 'Xong việc rồi!', why: 'Đã nhận tiền công và đánh giá. Cảm ơn bạn đã giúp hàng xóm.', btns: [{ id: 'more', label: A.findJob, kind: 'ghost' }] };
       case 'rejected':

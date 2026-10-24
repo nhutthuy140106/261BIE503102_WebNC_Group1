@@ -263,7 +263,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected stockLine(): { text: string; sub: string; off: boolean } {
     const s = this.view()!.tpl.stock;
     if (this.post()?.closed) return { text: 'Tạm ngưng nhận', sub: 'Người bán đang tạm dừng bài này.', off: true };
-    if (s.mode === 'once') return { text: 'Còn hàng', sub: 'Bán một lần — ai đặt trước được trước.', off: false };
+    if (s.mode === 'once') return { text: 'Còn hàng', sub: 'Bán một lần, ai đặt trước được trước.', off: false };
     if (s.mode === 'limit') return { text: 'Còn ' + s.left + ' phần hôm nay', sub: s.sched ?? '', off: false };
     return { text: 'Đang nhận đặt', sub: s.sched ?? '', off: false };
   }
@@ -277,7 +277,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected priceSub(): string {
     const p = this.view()!.tpl.price;
     if (p.type === 'quote') return 'Phí kiểm tra ' + this.fmt(p.inspect ?? 0) + ' · trừ vào tiền sửa nếu đồng ý';
-    return p.estimate ? 'Giá ước tính — tính theo ' + (p.unit ?? 'đơn vị') + ' thực tế' : '';
+    return p.estimate ? 'Giá ước tính, tính theo ' + (p.unit ?? 'đơn vị') + ' thực tế' : '';
   }
 
   protected fmt(n: number): string {

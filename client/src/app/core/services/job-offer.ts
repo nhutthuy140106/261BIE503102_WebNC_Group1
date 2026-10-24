@@ -116,7 +116,7 @@ export class JobOfferService {
    * Máy chủ chưa có endpoint cho các bước này (docs/handoff.md).
    */
   patch(id: string, patch: Partial<Offer>, _line?: string): Observable<Offer> {
-    if (!useMock('offer')) throw new AppError('Bước này cần máy chủ hỗ trợ — chưa có API.', 501, 'NOT_IMPLEMENTED');
+    if (!useMock('offer')) throw new AppError('Bước này cần máy chủ hỗ trợ, chưa có API.', 501, 'NOT_IMPLEMENTED');
     return this.mutate(id, (o) => ({
       ...o,
       ...patch,

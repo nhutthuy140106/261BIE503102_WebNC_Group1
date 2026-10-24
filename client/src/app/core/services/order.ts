@@ -128,7 +128,7 @@ export class OrderService {
    * "giả lập phía người bán" ở bản mẫu. Máy chủ chưa có endpoint cho các bước này (docs/handoff.md).
    */
   update(id: string, patch: Partial<Order>, line?: string): Observable<Order> {
-    if (!useMock('order')) throw new AppError('Bước này cần máy chủ hỗ trợ — chưa có API.', 501, 'NOT_IMPLEMENTED');
+    if (!useMock('order')) throw new AppError('Bước này cần máy chủ hỗ trợ, chưa có API.', 501, 'NOT_IMPLEMENTED');
     return this.placed().pipe(
       map((rows) => {
         const cur = rows.find((r) => r._id === id);

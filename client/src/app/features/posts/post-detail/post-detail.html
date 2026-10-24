@@ -265,7 +265,7 @@
                 <label class="crow sw">
                   <svg class="i ic"><use href="#l-home" /></svg>
                   <span class="ct"><b>{{ v.tpl.place.choices![0][0] }}</b>
-                    <small>{{ d.place() === 0 ? (v.tpl.place.choices![0][1] ? '+' + fmt(v.tpl.place.choices![0][1]) : 'Miễn phí') : 'Đang tắt — ' + v.tpl.place.choices![1][0].toLowerCase() }}</small>
+                    <small>{{ d.place() === 0 ? (v.tpl.place.choices![0][1] ? '+' + fmt(v.tpl.place.choices![0][1]) : 'Miễn phí') : 'Đang tắt, ' + v.tpl.place.choices![1][0].toLowerCase() }}</small>
                   </span>
                   <input type="checkbox" class="tg" [checked]="d.place() === 0" (change)="d.place.set($any($event.target).checked ? 0 : 1)" />
                 </label>
@@ -323,7 +323,7 @@
                 <label class="crow sw"><svg class="i ic"><use href="#l-cal" /></svg><span class="ct"><b>Lặp lại hằng tuần</b><small>Giữ cố định khung giờ này mỗi tuần</small></span><input type="checkbox" class="tg" [checked]="d.repeat()" (change)="d.repeat.set($any($event.target).checked)" /></label>
               }
               @if (v.tpl.key === 'food') {
-                <label class="crow sw"><svg class="i ic"><use href="#l-bag" /></svg><span class="ct"><b>Lấy dụng cụ ăn uống</b><small>Muỗng, đũa, khăn giấy — tắt để bớt rác thải</small></span><input type="checkbox" class="tg" [checked]="d.utensils()" (change)="d.utensils.set($any($event.target).checked)" /></label>
+                <label class="crow sw"><svg class="i ic"><use href="#l-bag" /></svg><span class="ct"><b>Lấy dụng cụ ăn uống</b><small>Muỗng, đũa, khăn giấy, tắt để bớt rác thải</small></span><input type="checkbox" class="tg" [checked]="d.utensils()" (change)="d.utensils.set($any($event.target).checked)" /></label>
               }
               @if (v.tpl.key === 'drink') {
                 <label class="crow sw"><svg class="i ic"><use href="#l-bag" /></svg><span class="ct"><b>Lấy ống hút</b><small>Tắt để bớt rác thải</small></span><input type="checkbox" class="tg" [checked]="d.utensils()" (change)="d.utensils.set($any($event.target).checked)" /></label>

@@ -7,7 +7,7 @@ export type PromptReason = 'login' | 'save' | 'chat' | 'order' | 'offer' | 'ask'
 
 export const PROMPT_TEXT: Record<PromptReason, string> = {
   login: 'Một tài khoản cho cả mua, bán và nhận việc trong khu.',
-  save: 'Đăng nhập để lưu bài — xem lại được trên mọi máy.',
+  save: 'Đăng nhập để lưu bài, xem lại được trên mọi máy.',
   chat: 'Đăng nhập để nhắn tin với người bán, người đăng việc.',
   order: 'Đăng nhập để đặt. Những món bạn vừa chọn vẫn được giữ nguyên.',
   offer: 'Đăng nhập để gửi đề nghị. Lời giới thiệu bạn vừa viết vẫn còn đó.',

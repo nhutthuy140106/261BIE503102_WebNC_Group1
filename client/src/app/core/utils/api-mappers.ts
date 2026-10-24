@@ -184,7 +184,7 @@ export function notificationLink(l: Raw): string {
 export function notificationFromApi(n: Raw): AppNotification {
   return {
     _id: n._id,
-    text: n.body ? `${n.title} — ${n.body}` : n.title,
+    text: n.body ? `${n.title}, ${n.body}` : n.title,
     link: notificationLink(n.link),
     read: !!n.read,
     createdAt: n.createdAt,

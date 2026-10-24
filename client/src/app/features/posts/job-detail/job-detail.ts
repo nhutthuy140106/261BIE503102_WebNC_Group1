@@ -140,7 +140,7 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   protected chosenSlots(): string {
     const v = this.offerForm.getRawValue();
     const l = this.slotOptions().filter((_, i) => v.slots[i]).map((o) => o.label);
-    return l.length ? l.join(', ') : 'Chưa chọn — thỏa thuận sau';
+    return l.length ? l.join(', ') : 'Chưa chọn, thỏa thuận sau';
   }
 
   protected toggleSave(): void {

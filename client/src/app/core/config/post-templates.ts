@@ -122,7 +122,7 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
     action: 'Đặt món',
     xuOk: true,
     title: 'Trà sữa trân châu đường đen',
-    explain: 'Quán Nhà Mây pha khi có đơn — bạn đặt, quán làm xong rồi giao hoặc để bạn ghé lấy.',
+    explain: 'Quán Nhà Mây pha khi có đơn, bạn đặt, quán làm xong rồi giao hoặc để bạn ghé lấy.',
     imgs: [
       '1558857563-b371033873b8',
       '1525803377221-4f6ccdaa5133',
@@ -159,7 +159,7 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
     ],
     list: [
       'Đơn từ 2 ly giao miễn phí trong khu',
-      'Có ly giấy nếu bạn không dùng ly nhựa — ghi chú giúp quán'
+      'Có ly giấy nếu bạn không dùng ly nhựa, ghi chú giúp quán'
     ],
     price: {
       type: 'fixed',
@@ -431,7 +431,7 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
     kind: 'Dịch vụ',
     cat: 'Sửa chữa',
     action: 'Gửi yêu cầu kiểm tra',
-    title: 'Sửa laptop, điện thoại — kiểm tra tận nơi',
+    title: 'Sửa laptop, điện thoại, kiểm tra tận nơi',
     imgs: [
       '1581092918056-0c4c3acd3789',
       '1597424216809-3ba9864aeb18',
@@ -655,7 +655,7 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
     kind: 'Dịch vụ',
     cat: 'Giao nhận hộ',
     action: 'Đặt lấy hộ',
-    explain: 'Minh nhận lấy đồ hộ — bạn đặt, Minh đi lấy và giao tận cửa cho bạn.',
+    explain: 'Minh nhận lấy đồ hộ, bạn đặt, Minh đi lấy và giao tận cửa cho bạn.',
     title: 'Lấy đồ hộ, giao nhận trong khu',
     imgs: [
       '1617347454431-f49d7ff5c3b1',

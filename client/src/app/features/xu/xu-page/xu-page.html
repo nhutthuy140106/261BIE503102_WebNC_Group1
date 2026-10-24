@@ -5,7 +5,7 @@
   <div>
     <span class="lbl">Số dư của bạn</span>
     <b>{{ xu.balance() }} <small>Xu</small></b>
-    @if (xu.expiring(); as ex) { <p><svg class="i"><use href="#clock" /></svg>{{ ex.amount }} Xu hết hạn ngày {{ date(ex.date.getTime()) }} — đổi voucher trước nhé</p> }
+    @if (xu.expiring(); as ex) { <p><svg class="i"><use href="#clock" /></svg>{{ ex.amount }} Xu hết hạn ngày {{ date(ex.date.getTime()) }}, đổi voucher trước nhé</p> }
   </div>
 </section>
 
@@ -59,4 +59,4 @@
   @if (xu.ledger().length > 8 && !showAll()) { <button type="button" class="moreb" (click)="showAll.set(true)">Xem tất cả</button> }
 </section>
 
-<p class="note">Xu hết hạn sau 6 tháng kể từ ngày nhận. Xu không mua bằng tiền và không đổi ra tiền. Voucher dùng được ở bài có nhãn "Dùng được Xu" — người bán tự chọn tham gia.</p>
+<p class="note">Xu hết hạn sau 6 tháng kể từ ngày nhận. Xu không mua bằng tiền và không đổi ra tiền. Voucher dùng được ở bài có nhãn "Dùng được Xu", người bán tự chọn tham gia.</p>

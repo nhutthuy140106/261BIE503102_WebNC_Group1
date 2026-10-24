@@ -97,7 +97,7 @@
             </dl>
           </div>
           @if (o.cancelDenied) { <div class="request-note">{{ o.counterpartName }} không đồng ý hủy: {{ o.cancelDenied }}</div> }
-          @if (o.resched?.by === 'buyer') { <div class="request-note">Đã gửi đề nghị đổi sang <b>{{ o.resched!.to }}</b>. Chờ {{ o.counterpartName }} đồng ý — đơn vẫn giữ giờ cũ. <button type="button" class="linkbtn" (click)="actP('resched-undo')">Rút đề nghị</button></div> }
+          @if (o.resched?.by === 'buyer') { <div class="request-note">Đã gửi đề nghị đổi sang <b>{{ o.resched!.to }}</b>. Chờ {{ o.counterpartName }} đồng ý, đơn vẫn giữ giờ cũ. <button type="button" class="linkbtn" (click)="actP('resched-undo')">Rút đề nghị</button></div> }
         </section>
 
         @if (o.issue; as iss) {
@@ -206,7 +206,7 @@
             @if (o.status === 'done' && !o.issue && o.kind) {
               <div class="donenote">
                 @if (issueLeft(o) > 0) {
-                  <p><b>{{ o.kind === 'service' ? 'Báo vấn đề' : 'Trả hàng/Hoàn tiền' }}</b> trong {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận — {{ leftText(issueLeft(o)) }}.</p>
+                  <p><b>{{ o.kind === 'service' ? 'Báo vấn đề' : 'Trả hàng/Hoàn tiền' }}</b> trong {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận ({{ leftText(issueLeft(o)) }}).</p>
                 } @else {
                   <p>Đã quá {{ o.kind === 'food' ? 2 : 24 }} giờ sau khi nhận nên không còn {{ o.kind === 'service' ? 'báo vấn đề' : 'trả hàng/hoàn tiền' }} với bên bán.</p>
                   <button type="button" class="linkbtn" (click)="go('issue')">Báo cáo cho AntGo</button>
@@ -226,7 +226,7 @@
 
   @if (isMock && (o.type === 'placed' ? placedSims(o).length : receivedSims(o, offer()!).length)) {
     <div class="demo2">
-      Bản mẫu — giả lập phía {{ o.type === 'placed' ? 'người bán' : 'người đăng việc' }}:
+      Bản mẫu, giả lập phía {{ o.type === 'placed' ? 'người bán' : 'người đăng việc' }}:
       @if (o.type === 'placed') {
         @for (s of placedSims(o); track s.id) { <button type="button" (click)="actP(s.id)">{{ s.label }}</button> }
       } @else if (offer(); as of) {
@@ -269,7 +269,7 @@
             <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go dark" (click)="okR()">{{ act.cancelJob }}</button></div>
           }
           @case ('unpaid') {
-            <h3>Chưa nhận được tiền công?</h3><p class="p">Nhắn {{ o.counterpartName }} trước — đa số trường hợp chỉ là quên. Sau 3 ngày vẫn chưa nhận được, bạn có thể báo AntGo hỗ trợ.</p>
+            <h3>Chưa nhận được tiền công?</h3><p class="p">Nhắn {{ o.counterpartName }} trước, đa số trường hợp chỉ là quên. Sau 3 ngày vẫn chưa nhận được, bạn có thể báo AntGo hỗ trợ.</p>
             <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go" (click)="okR()">{{ act.chat }}</button></div>
           }
           @case ('rate') {
@@ -307,7 +307,7 @@
           @case ('pcancel') {
             <h3>{{ dlgNow() ? 'Hủy đơn này?' : 'Gửi yêu cầu hủy?' }}</h3>
             <p class="p">{{ dlgNow() ? (o.status === 'pending' ? 'Bên bán chưa xác nhận nên' : 'Bên bán chưa bắt đầu nên') + ' đơn hủy ngay, ' + o.counterpartName + ' nhận thông báo.' : o.counterpartName + ' đã bắt đầu. Đơn chỉ hủy khi ' + o.counterpartName + ' đồng ý.' }}</p>
-            @if (dlgNow() && o.kind === 'service' && o.status === 'confirmed' && o.apptIn != null && o.apptIn < 2) { <p class="request-note warnbox">Còn dưới 2 giờ tới giờ hẹn — hủy sát giờ sẽ hiện trong hồ sơ của bạn.</p> }
+            @if (dlgNow() && o.kind === 'service' && o.status === 'confirmed' && o.apptIn != null && o.apptIn < 2) { <p class="request-note warnbox">Còn dưới 2 giờ tới giờ hẹn, hủy sát giờ sẽ hiện trong hồ sơ của bạn.</p> }
             @if (dlgNow() && canResched(o)) { <p class="p">Chỉ muốn đổi giờ? <button type="button" class="linkbtn" (click)="open('resched')">Đổi lịch</button> thay vì hủy.</p> }
             <div class="fld" [class.bad]="bad()"><label>Lý do <small class="hintl">(chọn được nhiều)</small></label>
               <div class="reasons">@for (r of pReasons(o); track r) { <button type="button" [class.on]="picks().includes(r)" (click)="togglePickReason(r)">{{ r }}</button> }</div>

@@ -44,7 +44,7 @@ export function viewOf(post: Post): PostView {
       ? [post.description]
       : same
         ? base.desc
-        : [post.title + ' — bài đăng của ' + post.sellerName + ' tại ' + post.block + '.', 'Nhắn người bán nếu cần hỏi thêm trước khi đặt.'],
+        : [post.title + ', bài đăng của ' + post.sellerName + ' tại ' + post.block + '.', 'Nhắn người bán nếu cần hỏi thêm trước khi đặt.'],
     list: same ? base.list : [],
     stock: same ? base.stock : { mode: 'open', sched: base.stock.sched },
     opts: own ?? (same ? base.opts : []),

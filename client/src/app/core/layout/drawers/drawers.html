@@ -55,7 +55,7 @@
       </div>
     </div>
     @if (xu.expiring(); as ex) {
-      <div class="xuexp"><svg class="i"><use href="#clock" /></svg>{{ ex.amount }} Xu hết hạn ngày {{ ex.date | date: 'dd/MM/yyyy' }} — đổi voucher trước nhé</div>
+      <div class="xuexp"><svg class="i"><use href="#clock" /></svg>{{ ex.amount }} Xu hết hạn ngày {{ ex.date | date: 'dd/MM/yyyy' }}, đổi voucher trước nhé</div>
     }
     <div class="dsec">Đổi voucher</div>
     <div>
@@ -87,7 +87,7 @@
         </li>
       }
     </ul>
-    <p class="dnote">Xu hết hạn sau 6 tháng kể từ ngày nhận. Xu không mua bằng tiền và không đổi ra tiền. Voucher dùng được ở bài có nhãn "Dùng được Xu" — người bán tự chọn tham gia.</p>
+    <p class="dnote">Xu hết hạn sau 6 tháng kể từ ngày nhận. Xu không mua bằng tiền và không đổi ra tiền. Voucher dùng được ở bài có nhãn "Dùng được Xu", người bán tự chọn tham gia.</p>
     <a class="xuhist" routerLink="/xu" (click)="goAll()">Lịch sử Xu<svg class="i"><use href="#right" /></svg></a>
   </div>
 </aside>

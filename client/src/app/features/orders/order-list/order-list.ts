@@ -133,26 +133,26 @@ export class OrderList implements OnInit {
     if (o.type === 'received') {
       const m: Record<string, string> = {
         offered: 'Chờ ' + n + ' chọn người',
-        chosen: 'Bạn được chọn — đến giờ bấm Bắt đầu làm',
-        working: 'Đang làm — xong thì báo hoàn thành',
+        chosen: 'Bạn được chọn, đến giờ bấm Bắt đầu làm',
+        working: 'Đang làm, xong thì báo hoàn thành',
         reported: 'Chờ ' + n + ' xác nhận (tự hoàn thành sau 24 giờ)',
-        done: !o.paid ? 'Xong việc — xác nhận đã nhận ' + money(o.total) + ' tiền công' : !o.rated ? 'Đã nhận tiền công — mời bạn đánh giá' : 'Hoàn thành',
+        done: !o.paid ? 'Xong việc, xác nhận đã nhận ' + money(o.total) + ' tiền công' : !o.rated ? 'Đã nhận tiền công, mời bạn đánh giá' : 'Hoàn thành',
         rejected: n + ' đã chọn người khác',
         withdrawn: 'Bạn đã rút đề nghị',
         cancelled: 'Việc đã hủy',
       };
       return m[st] ?? '';
     }
-    if (o.issue && o.issue.st !== 'closed') return o.issue.st === 'open' ? 'Đã gửi yêu cầu — chờ ' + n + ' trả lời' : n + ' đã trả lời yêu cầu của bạn';
+    if (o.issue && o.issue.st !== 'closed') return o.issue.st === 'open' ? 'Đã gửi yêu cầu, chờ ' + n + ' trả lời' : n + ' đã trả lời yêu cầu của bạn';
     if (o.resched?.by === 'seller') return n + ' xin đổi giờ sang ' + o.resched.to;
     if (o.resched?.by === 'buyer') return 'Chờ ' + n + ' đồng ý đổi giờ';
     const m: Record<string, string> = {
       pending: 'Chờ ' + n + ' xác nhận',
       confirmed: n + ' đã nhận đơn',
-      pricing: n + ' báo giá cuối ' + money(o.newPrice?.total ?? o.total) + ' (lúc đặt ' + money(o.total) + ') — chờ bạn đồng ý',
+      pricing: n + ' báo giá cuối ' + money(o.newPrice?.total ?? o.total) + ' (lúc đặt ' + money(o.total) + '), chờ bạn đồng ý',
       preparing: o.kind === 'service' ? n + ' đang làm' : n + ' đang chuẩn bị',
       delivering: 'Đang giao tới bạn',
-      ready: 'Sẵn sàng — bạn qua lấy',
+      ready: 'Sẵn sàng, bạn qua lấy',
       done: 'Đã nhận hàng',
       cancelled: o.cancelBy === 'seller' ? n + ' đã hủy đơn' : 'Đã hủy',
       declined: n + ' không nhận đơn',
