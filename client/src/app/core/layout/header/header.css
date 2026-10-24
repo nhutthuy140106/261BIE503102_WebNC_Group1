@@ -164,9 +164,17 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
 
 .uitem .uxu { width: 24px; height: 24px; flex: none; }
 
-/* trang không có ô tìm kiếm: menu chính nằm chính giữa thanh, không bị lệch khi tên khu vực dài */
+/* menu chính luôn nằm chính giữa: ba cột (logo | menu | cụm bên phải), hai cột ngoài rộng bằng nhau nên tên khu vực dài thì cả hai bên cùng nới ra, menu không bị chồng */
 @media (min-width: 1000px) {
-  .bar.center { position: relative; }
-  .bar.center .left { position: static; }
-  .bar.center nav { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .bar.center { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); gap: 20px; }
+  .bar.center .left { display: contents; }
+  .bar.center .logo { grid-column: 1; justify-self: start; }
+  .bar.center nav { grid-column: 2; justify-self: center; }
+  .bar.center .right { grid-column: 3; justify-self: end; margin-left: 0; }
+  .bar.center > .hsp, .bar.center > .hsearch { display: none; }
+}
+/* tên khu vực dài: thanh đầu trang bung rộng ra đều hai bên (không vượt mép màn hình), hai cột ngoài luôn bằng nhau nên menu vẫn ở chính giữa và không bị chồng */
+@media (min-width: 1000px) {
+  .bar.center { grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); width: max-content; min-width: 100%; max-width: calc(100vw - 32px); margin-left: 50%; transform: translateX(-50%); }
+  .appbar { overflow: visible; }
 }
