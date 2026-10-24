@@ -93,9 +93,9 @@
                 @if (d.utensils) { <dt>Dụng cụ</dt><dd>Có lấy</dd> }
               }
               <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
+              @if (o.note) { <dt>Ghi chú</dt><dd class="noteval">{{ o.note }}</dd> }
             </dl>
           </div>
-          @if (o.note) { <p class="request-note">Ghi chú: {{ o.note }}</p> }
           @if (o.cancelDenied) { <div class="request-note">{{ o.counterpartName }} không đồng ý hủy: {{ o.cancelDenied }}</div> }
           @if (o.resched?.by === 'buyer') { <div class="request-note">Đã gửi đề nghị đổi sang <b>{{ o.resched!.to }}</b>. Chờ {{ o.counterpartName }} đồng ý — đơn vẫn giữ giờ cũ. <button type="button" class="linkbtn" (click)="actP('resched-undo')">Rút đề nghị</button></div> }
         </section>

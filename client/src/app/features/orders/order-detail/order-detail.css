@@ -313,3 +313,4 @@ a.pbtn.link { text-decoration: none; }
 /* mọi hàng nút: tối đa 2 nút, bằng nhau */
 .arow2, .arow2:has(.pbtn) { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
 .arow2 .pbtn, .arow2 .gbtn { width: 100%; height: 46px; border-radius: 12px; font-size: 15px; padding: 0 12px; margin-top: 0; }
+.details dd.noteval { font-weight: 500; white-space: pre-line; overflow-wrap: anywhere; }
