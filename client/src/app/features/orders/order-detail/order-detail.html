@@ -164,15 +164,19 @@
         @if (o.type === 'received' && offer(); as of) {
           @if (receivedPanel(o, of); as p) {
             <h3>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
-            @for (b of p.btns; track b.id) {
-              @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actR(b.id)">{{ b.label }}</button> }
-            }
             <div class="arow2">
-              <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>{{ act.chat }}</button>
               @for (b of p.btns; track b.id) {
-                @if (b.kind !== 'main') { <button type="button" class="gbtn" [class.warn]="b.kind === 'warn'" (click)="actR(b.id)">{{ b.label }}</button> }
+                @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actR(b.id)">{{ b.label }}</button> }
               }
+              <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>{{ act.chat }}</button>
             </div>
+            @if (hasSecondary(p.btns)) {
+              <div class="arow2">
+                @for (b of p.btns; track b.id) {
+                  @if (b.kind !== 'main') { <button type="button" class="gbtn" [class.warn]="b.kind === 'warn'" (click)="actR(b.id)">{{ b.label }}</button> }
+                }
+              </div>
+            }
           }
         } @else {
           @if (placedPanel(o); as p) {
@@ -193,15 +197,19 @@
                 @if (o.resched!.note) { <p class="pbw">{{ o.resched!.note }}</p> }
               </div>
             }
-            @for (b of p.btns; track b.id) {
-              @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actP(b.id)">{{ b.label }}</button> }
-            }
             <div class="arow2">
-              <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>{{ act.chat }}</button>
               @for (b of p.btns; track b.id) {
-                @if (b.kind !== 'main') { <button type="button" class="gbtn" [class.warn]="b.kind === 'warn'" (click)="actP(b.id)">{{ b.label }}</button> }
+                @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actP(b.id)">{{ b.label }}</button> }
               }
+              <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>{{ act.chat }}</button>
             </div>
+            @if (hasSecondary(p.btns)) {
+              <div class="arow2">
+                @for (b of p.btns; track b.id) {
+                  @if (b.kind !== 'main') { <button type="button" class="gbtn" [class.warn]="b.kind === 'warn'" (click)="actP(b.id)">{{ b.label }}</button> }
+                }
+              </div>
+            }
             @if (o.status === 'done' && !o.issue && o.kind) {
               <div class="donenote">
                 @if (issueLeft(o) > 0) {

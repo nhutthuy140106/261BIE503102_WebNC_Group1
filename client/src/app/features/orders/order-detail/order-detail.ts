@@ -234,6 +234,10 @@ export class OrderDetail implements OnInit {
     });
   }
 
+  protected hasSecondary(btns: { kind?: string }[]): boolean {
+    return btns.some((b) => b.kind !== 'main');
+  }
+
   protected issueLeft(o: Order): number {
     const at = o.doneAt ?? (o.doneAgoH != null ? Date.now() - o.doneAgoH * 3600e3 : 0);
     return ISSUE_HOURS[this.kind(o)] - (Date.now() - at) / 3600e3;

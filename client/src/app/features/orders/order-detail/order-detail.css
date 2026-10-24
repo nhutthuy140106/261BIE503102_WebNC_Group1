@@ -298,3 +298,10 @@ a.pbtn.link { text-decoration: none; }
 .modal .reasons:not(.two):not(.three):not(.five) button { min-height: 48px; }
 
 .details dd .sub { display: block; margin-top: 2px; font-weight: 400; color: var(--smoke); }
+
+/* nút chính và Nhắn tin chung một hàng; nút phụ (hủy, rút…) xuống hàng dưới */
+.arow2 .pbtn { margin-top: 0; height: 46px; font-size: 15px; }
+.arow2 .pbtn + .gbtn { flex: 0 0 auto; width: auto; padding: 0 18px; }
+.arow2:has(.pbtn) { grid-auto-flow: column; grid-auto-columns: auto; grid-template-columns: 1fr auto; }
+.arow2:has(.pbtn) .pbtn:only-of-type { grid-column: 1; }
+.apanel .arow2 + .arow2 { margin-top: 10px; }
