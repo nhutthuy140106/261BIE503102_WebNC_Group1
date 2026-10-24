@@ -352,3 +352,7 @@ a.pbtn.link { text-decoration: none; }
 .thanks .btns { width: auto; justify-content: center; }
 .thanks .btns .go { width: auto; padding: 0 36px; }
 .thanks img { width: 150px; }
+/* nút trong hộp thoại: vừa với chữ, đặt giữa, cách nhau vừa phải */
+.modal .btns { display: flex; justify-content: center; gap: 14px; margin-top: 6px; }
+.modal .btns button { flex: 0 0 auto; width: auto; min-width: 120px; padding: 0 30px; white-space: nowrap; }
+.modal .btns.one { justify-content: center; }
