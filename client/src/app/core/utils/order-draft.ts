@@ -21,6 +21,8 @@ export class OrderDraft {
   readonly opt = signal<Record<string, string>>({});
   /** Câu hỏi riêng: nhãn → chữ / lựa chọn thô / nhiều lựa chọn thô nối bằng "|||" */
   readonly ans = signal<Record<string, string>>({});
+  /** Đồ ăn: nhóm đầu tiên là danh sách MÓN, mỗi món có số lượng riêng (0 = không lấy). Tên món → số lượng. */
+  readonly dishes = signal<Record<string, number>>({});
   readonly place = signal(0);
   readonly date = signal('');
   readonly time = signal('');
@@ -39,8 +41,36 @@ export class OrderDraft {
     const o: Record<string, string> = {};
     for (const g of tpl.opts) o[g.name] = g.choices[0];
     this.opt.set(o);
+    if (this.dishGroup) this.dishes.set({ [this.dishGroup.choices[0]]: tpl.qty?.min ?? 1 });
     this.hours.set(tpl.time.dur?.[0] ?? 2);
     this.time.set(tpl.time.win[0]);
+  }
+
+  /** Nhóm "món" (chỉ đồ ăn): chọn nhiều món, mỗi món một số lượng */
+  get dishGroup(): PostTemplate['opts'][number] | null {
+    return this.tpl.key === 'food' && this.tpl.opts.length ? this.tpl.opts[0] : null;
+  }
+
+  /** Các món đã chọn (số lượng > 0) */
+  readonly dishRows = computed(() => {
+    const g = this.dishGroup;
+    if (!g) return [] as { raw: string; name: string; qty: number; add: number }[];
+    return g.choices.map((raw) => ({ raw, ...parseChoice(raw), qty: this.dishes()[raw] ?? 0 })).filter((r) => r.qty > 0).map((r) => ({ raw: r.raw, name: r.name, qty: r.qty, add: r.add }));
+  });
+
+  /** Tổng số phần = tổng số lượng các món (đồ ăn); các loại khác dùng `qty` */
+  readonly totalDishes = computed(() => this.dishRows().reduce((s, r) => s + r.qty, 0));
+
+  dishQty(raw: string): number {
+    return this.dishes()[raw] ?? 0;
+  }
+
+  /** Tăng / giảm số lượng một món; tổng không vượt giới hạn của bài */
+  setDish(raw: string, n: number): void {
+    const others = this.totalDishes() - this.dishQty(raw);
+    const q = Math.max(0, Math.min(n, this.maxQty() - others));
+    this.dishes.update((d) => ({ ...d, [raw]: q }));
+    this.qty.set(Math.max(this.totalDishes(), 0));
   }
 
   readonly maxQty = computed(() => Math.min(this.tpl.qty?.max ?? 1, this.stock ?? Infinity));
@@ -53,7 +83,7 @@ export class OrderDraft {
     return (p.amount ?? 0) * mult;
   });
 
-  readonly optAdd = computed(() => this.tpl.opts.reduce((s, g) => s + parseChoice(this.opt()[g.name] ?? '').add, 0));
+  readonly optAdd = computed(() => this.tpl.opts.reduce((s, g) => s + (g === this.dishGroup ? 0 : parseChoice(this.opt()[g.name] ?? '').add), 0));
   readonly qsAdd = computed(() =>
     this.tpl.qs.reduce((s, q) => {
       if (q.type === 'choice') return s + parseChoice(this.ans()[q.label] ?? '').add;
@@ -63,7 +93,7 @@ export class OrderDraft {
   );
 
   /** Phụ giá của tùy chọn/câu hỏi, nhân theo số lượng phần */
-  readonly extra = computed(() => (this.optAdd() + this.qsAdd()) * (this.tpl.qty ? this.qty() : 1));
+  readonly extra = computed(() => (this.optAdd() + this.qsAdd()) * (this.tpl.qty ? this.qty() : 1) + this.dishRows().reduce((s, r) => s + r.add * r.qty, 0));
   readonly subtotal = computed(() => (this.tpl.price.type === 'quote' ? this.tpl.price.inspect ?? 0 : this.unit() + this.extra()));
   readonly placeFee = computed(() => (this.tpl.place.mode === 'choice' ? this.tpl.place.choices?.[this.place()]?.[1] ?? 0 : 0));
   /** Cách nhận có phụ phí (giao tận cửa / thợ đến nhà) thì cần địa chỉ người nhận */
@@ -101,6 +131,7 @@ export class OrderDraft {
   readonly lines = computed(() => {
     const out: string[] = [];
     for (const g of this.tpl.opts) {
+      if (g === this.dishGroup) continue;
       const c = parseChoice(this.opt()[g.name] ?? '');
       // Lựa chọn mặc định (không tính thêm tiền, trong khi nhóm có lựa chọn nâng cấp trả thêm) không cần ghi vào đơn
       const isBase = c.add === 0 && g.choices.some((x) => parseChoice(x).add > 0);
@@ -125,6 +156,7 @@ export class OrderDraft {
     for (const q of this.tpl.qs) {
       if (q.req && !(this.ans()[q.label] ?? '').trim()) return 'Hãy điền “' + q.label + '”.';
     }
+    if (this.dishGroup && this.totalDishes() < 1) return 'Hãy chọn ít nhất 1 món.';
     if (this.paying() && !this.payBack()) return 'Hãy nhập số tiền cần trả giùm.';
     if (!checkout) return '';
     if (this.tpl.time.mode === 'datedur' && !this.date()) return 'Hãy chọn ngày giờ.';

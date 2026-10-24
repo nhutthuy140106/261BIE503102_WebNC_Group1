@@ -98,6 +98,9 @@ export interface OrderDetail {
   quantity?: number;
   /** Tên dòng số lượng + đơn vị (lấy từ khối Số lượng của bài): "Khối lượng ước tính" + "kg" */
   quantityLabel?: string;
+  /** Đồ ăn: các món đã chọn, mỗi món một số lượng (tên nhóm món ở `itemsLabel`) */
+  items?: { name: string; qty: number }[];
+  itemsLabel?: string;
   unit?: string;
   address?: string;
   /** Cách nhận đã chọn (chỉ khi bài cho chọn / người bán nhận tại chỗ) */

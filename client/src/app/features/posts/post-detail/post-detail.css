@@ -445,3 +445,11 @@
 /* tình trạng bán: dòng 1 là trạng thái, dòng 2 là giờ nhận đặt (không có dấu chấm lẻ loi) */
 .avail { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 8px; margin-top: 10px; }
 .avail span { grid-column: 2; color: var(--smoke); font-size: 13px; font-weight: 400; }
+
+/* danh sách món có số lượng bên phải mỗi món */
+.row.dish { cursor: default; }
+.row.dish.on > span:first-child { font-weight: 600; }
+.qty.sm { flex: none; height: 32px; border-radius: 10px; }
+.qty.sm button { width: 30px; font-size: 16px; }
+.qty.sm b { min-width: 24px; font-size: 14px; }
+.row.dish small { margin-left: auto; margin-right: 6px; }

@@ -423,7 +423,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const body: CreateOrderBody = {
       postId: p._id,
       quantity: d.qty(),
-      selections: d.tpl.opts.map((g) => ({ group: g.name, choices: [parseChoice(d.opt()[g.name] ?? '').name] })),
+      selections: d.tpl.opts.map((g) => ({ group: g.name, choices: g === d.dishGroup ? d.dishRows().map((r) => r.name) : [parseChoice(d.opt()[g.name] ?? '').name] })),
       answers: d.tpl.qs.map((q) => ({ question: q.label, value: d.lines().find((l) => l.startsWith(q.label + ': '))?.slice(q.label.length + 2) ?? '' })).filter((x) => x.value),
       fulfillment: d.needsAddress() ? 'delivery' : 'pickup',
       addressId: d.needsAddress() ? d.addressId() : undefined,
@@ -436,6 +436,8 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
       detail: {
         lines: d.lines(),
         quantity: d.tpl.qty ? d.qty() : undefined,
+        items: d.dishGroup ? d.dishRows().map((r) => ({ name: r.name, qty: r.qty })) : undefined,
+        itemsLabel: d.dishGroup?.name,
         quantityLabel: d.tpl.qty ? d.tpl.qty.label.replace(/\s*\(.*\)/, '') : undefined,
         unit: d.tpl.qty ? d.tpl.price.unit : undefined,
         address: d.needsAddress() && a ? a.name + ' · ' + a.phone + '\n' + this.addressText(a) : place.mode === 'seller' ? place.where : undefined,

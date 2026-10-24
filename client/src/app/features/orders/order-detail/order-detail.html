@@ -86,8 +86,9 @@
             @if (o.image) { <img class="orderphoto" [src]="o.image" alt="" /> }
             <dl class="details">
               @if (o.detail; as d) {
+                @if (d.items?.length) { <dt>{{ d.itemsLabel ?? 'Món' }}</dt><dd class="noteval">@for (it of d.items; track $index) { {{ it.name }} × {{ it.qty }}{{ $last ? '' : '\n' }} }</dd> }
                 @for (l of d.lines; track l) { <dt>{{ l.split(': ')[0] }}</dt><dd>{{ l.split(': ').slice(1).join(': ') }}</dd> }
-                @if (d.quantity) { <dt>{{ d.quantityLabel ?? 'Số lượng' }}</dt><dd>{{ d.quantity }}{{ d.unit ? ' ' + d.unit : '' }}</dd> }
+                @if (d.quantity && !d.items?.length) { <dt>{{ d.quantityLabel ?? 'Số lượng' }}</dt><dd>{{ d.quantity }}{{ d.unit ? ' ' + d.unit : '' }}</dd> }
                 @if (d.when) { <dt>Thời gian</dt><dd>{{ d.when }}</dd> }
                 @if (d.place || d.address) { <dt>{{ d.place ? 'Hình thức nhận hàng' : 'Địa chỉ' }}</dt><dd>@if (d.place) { {{ d.place }}@if (d.address) { <span class="sub">{{ d.address }}</span> } } @else { {{ d.address }} }</dd> }
                 @if (d.utensils) { <dt>Dụng cụ</dt><dd>Có lấy</dd> }

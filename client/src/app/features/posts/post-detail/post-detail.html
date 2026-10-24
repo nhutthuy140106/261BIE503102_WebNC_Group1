@@ -89,6 +89,21 @@
       }
 
       @for (g of v.tpl.opts; track g.name) {
+        @if (g === d.dishGroup) {
+          <div class="rows">
+            <h4>{{ g.name }}</h4>
+            @for (c of g.choices; track c) {
+              <div class="row dish" [class.on]="d.dishQty(c) > 0">
+                <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }
+                <span class="qty sm">
+                  <button type="button" [disabled]="d.dishQty(c) <= 0" (click)="d.setDish(c, d.dishQty(c) - 1)" aria-label="Giảm">−</button>
+                  <b>{{ d.dishQty(c) }}</b>
+                  <button type="button" [disabled]="d.totalDishes() >= d.maxQty()" (click)="d.setDish(c, d.dishQty(c) + 1)" aria-label="Tăng">+</button>
+                </span>
+              </div>
+            }
+          </div>
+        } @else {
         <div class="rows">
           <h4>{{ g.name }} <small>Chọn 1</small></h4>
           @for (c of g.choices; track c) {
@@ -97,6 +112,7 @@
             </button>
           }
         </div>
+        }
       }
 
       @for (q of v.tpl.qs; track q.label) {
@@ -148,7 +164,7 @@
         }
       }
 
-      @if (v.tpl.qty; as q) {
+      @if (v.tpl.qty; as q) { @if (!d.dishGroup) {
         <div class="qtyrow">
           <span>{{ q.label }}</span>
           <div class="qty">
@@ -157,7 +173,7 @@
             <button type="button" [disabled]="d.qty() >= d.maxQty()" (click)="setQty(d, d.qty() + 1)" aria-label="Tăng">+</button>
           </div>
         </div>
-      }
+      } }
 
       @if (tried() && d.missing(false); as miss) { <p class="warn">{{ miss }}</p> }
       <button type="button" class="primary" [disabled]="stockLine().off" (click)="next(d)">
@@ -232,6 +248,7 @@
                 <img [src]="v.images[0]" alt="" />
                 <span class="ct">
                   <b>{{ v.tpl.qty ? d.qty() + '× ' : '' }}{{ v.tpl.title }}</b>
+                  @for (r of d.dishRows(); track r.raw) { <small>{{ r.name }} × {{ r.qty }}</small> }
                   @if (d.lines().length) { <small>{{ d.lines().join(' · ') }}</small> }
                   <small class="by">{{ p.sellerName }} · {{ p.block }}</small>
                 </span>
