@@ -1,0 +1,47 @@
+<div class="ohead">
+  <div><h1>Giao dịch</h1><p>Đơn khách đặt từ bài của bạn và những việc bạn đăng cần người.</p></div>
+  <div class="otoggles">
+    <button type="button" [class.on]="!f()" (click)="setF('')">Tất cả <small>{{ counts().placed + counts().jobs }}</small></button>
+    <button type="button" [class.on]="f() === 'placed'" (click)="setF('placed')">Đơn khách đặt <small>{{ counts().placed }}</small></button>
+    <button type="button" [class.on]="f() === 'jobs'" (click)="setF('jobs')">Việc bạn đăng <small>{{ counts().jobs }}</small></button>
+    <span class="tsep"></span>
+    <button type="button" [class.on]="f() === 'hist'" (click)="setF('hist')"><svg class="i"><use href="#clock" /></svg>Lịch sử <small>{{ counts().hist }}</small></button>
+  </div>
+</div>
+
+<ng-template #row let-x>
+  <a class="orow" [class.ended]="x.ended" [routerLink]="x.link">
+    <span class="th">
+      @if (x.image) { <img [src]="x.image" alt="" /> } @else { <span><svg class="i"><use [attr.href]="'#' + x.icon" /></svg><small>{{ x.iconText }}</small></span> }
+    </span>
+    <span class="mid"><span class="otag" [class.job]="x.job">{{ x.tag }}</span><h3>{{ x.title }}</h3><span class="sub">{{ x.sub }}</span></span>
+    <span class="end"><b>{{ x.amount | vnd }}</b><span class="stat" [class]="'stat ' + x.cls">{{ x.stat }}</span></span>
+  </a>
+</ng-template>
+
+@if (f() === 'hist') {
+  <section class="ogroup">
+    <h2>Lịch sử · {{ old().length }}</h2>
+    <div class="olist">@for (x of old(); track x.key) { <ng-container *ngTemplateOutlet="row; context: { $implicit: x }" /> }</div>
+  </section>
+} @else {
+  @if (need().length) {
+    <section class="ogroup needgroup">
+      <h2><svg class="i"><use href="#bolt" /></svg>Cần bạn xử lý · {{ need().length }}</h2>
+      <div class="olist">@for (x of need(); track x.key) { <ng-container *ngTemplateOutlet="row; context: { $implicit: x }" /> }</div>
+    </section>
+  }
+  @if (active().length) {
+    <section class="ogroup">
+      <h2>Đang diễn ra · {{ active().length }}</h2>
+      <div class="olist">@for (x of active(); track x.key) { <ng-container *ngTemplateOutlet="row; context: { $implicit: x }" /> }</div>
+    </section>
+  }
+  <button type="button" class="histlink" (click)="setF('hist')">
+    <svg class="i"><use href="#clock" /></svg><span><b>Lịch sử giao dịch</b>{{ counts().hist }} đơn và việc đã kết thúc</span><svg class="i"><use href="#right" /></svg>
+  </button>
+}
+@if (f() === 'hist' ? !old().length : !need().length && !active().length) {
+  <div class="empty2"><img src="assets/clean/peek.png" alt="" />Không có giao dịch nào ở đây.</div>
+}
+<p class="demo-note">Bản mẫu · tài khoản Bếp Cô Lan · <a href="#" (click)="reset($event)">Đặt lại dữ liệu mẫu</a></p>

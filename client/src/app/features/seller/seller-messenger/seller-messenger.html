@@ -1,0 +1,64 @@
+<div class="chat-layout">
+  <aside class="chat-list">
+    <div class="chat-list-head">
+      <h2>Messenger</h2>
+      <input class="input" placeholder="Tìm người hoặc nội dung" [value]="term()" (input)="term.set($any($event.target).value)" />
+      <div class="tabs">
+        <button type="button" [class.on]="tab() === 'all'" (click)="tab.set('all')">Tất cả</button>
+        <button type="button" [class.on]="tab() === 'order'" (click)="tab.set('order')">Khách đặt</button>
+        <button type="button" [class.on]="tab() === 'job'" (click)="tab.set('job')">Người nhận việc</button>
+      </div>
+    </div>
+    <div class="thread-list">
+      @for (c of list(); track c.id) {
+        <button type="button" class="thread" [class.on]="c.id === active()" [class.unread]="c.unread" (click)="open(c.id)">
+          <img [src]="c.avatar" alt="" />
+          <span class="text">
+            <b>{{ c.name }}</b>
+            <small>@if (last(c); as m) { {{ m.from === 'me' ? 'Bạn: ' : '' }}{{ m.text }} } @else { Chưa có tin nhắn }</small>
+            @if (ctxOf(c); as x) { <span class="ctx">{{ x.title }}</span> }
+          </span>
+          <span class="when">{{ last(c)?.time }}@if (c.unread) { <i></i> }</span>
+        </button>
+      } @empty {
+        <div class="none">Không có cuộc trò chuyện nào.</div>
+      }
+    </div>
+  </aside>
+
+  <section class="chat-main">
+    @if (cur(); as c) {
+      <div class="chat-top">
+        <img [src]="c.avatar" alt="" />
+        <div><h2>{{ c.name }}</h2><small>{{ c.ctx?.type === 'job' ? 'Người nhận việc' : 'Khách' }} · hàng xóm trong khu</small></div>
+        @if (ctxOf(c); as x) {
+          <a class="btn open" [routerLink]="x.link"><svg class="i"><use href="#receipt" /></svg>{{ c.ctx?.type === 'job' ? 'Mở việc' : 'Mở đơn' }}</a>
+        }
+      </div>
+      <div class="messages" #msgs>
+        @if (ctxOf(c); as x) {
+          <a class="context-card" [routerLink]="x.link">
+            @if (x.image) { <img [src]="x.image" alt="" /> } @else { <span class="th"><svg class="i"><use [attr.href]="'#' + x.icon" /></svg></span> }
+            <span class="cc"><b>{{ x.title }}</b><small>{{ x.sub }} · </small><span class="stat" [class]="'stat ' + x.cls">{{ x.st }}</span></span>
+            <svg class="i"><use href="#right" /></svg>
+          </a>
+        }
+        @for (m of c.messages; track $index) {
+          <div class="bubble" [class.them]="m.from === 'them'">{{ m.text }}<small>{{ m.time }}</small></div>
+        } @empty {
+          <div class="note">Chưa có tin nhắn — bắt đầu bằng một câu trả lời nhanh bên dưới.</div>
+        }
+      </div>
+      <div class="quick">
+        <span class="lb">Trả lời nhanh:</span>
+        @for (t of quick(); track t) { <button type="button" (click)="useQuick(t)">{{ t }}</button> }
+      </div>
+      <form class="compose" (submit)="send($event)">
+        <textarea #draft class="input" [placeholder]="'Nhắn cho ' + c.name" maxlength="2000" (keydown)="key($event)" (input)="grow(draft)"></textarea>
+        <button type="submit" class="btn primary"><svg class="i"><use href="#right" /></svg>Gửi</button>
+      </form>
+    } @else {
+      <div class="empty-chat"><img src="assets/clean/peek.png" alt="" />Chưa có cuộc trò chuyện nào.</div>
+    }
+  </section>
+</div>

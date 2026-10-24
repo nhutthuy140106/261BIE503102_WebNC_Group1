@@ -1,2 +1,7 @@
 .app-toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); opacity: 0; z-index: 90; max-width: calc(100vw - 32px); padding: 12px 18px; border-radius: 12px; background: var(--ink); color: #fff; font-size: 14px; font-weight: 500; transition: .25s; pointer-events: none; }
 .app-toast.show { opacity: 1; transform: translate(-50%, 0); }
+/* thông báo kèm nút (vd. "Hoàn tác"): bấm được */
+.app-toast { display: flex; align-items: center; gap: 14px; }
+.app-toast.act.show { pointer-events: auto; }
+.app-toast button { flex: none; padding: 0; font: inherit; font-weight: 700; color: #ffb48a; background: none; border: 0; cursor: pointer; }
+.app-toast button:hover { text-decoration: underline; }

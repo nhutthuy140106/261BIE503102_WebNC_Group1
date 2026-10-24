@@ -1,0 +1,55 @@
+<div class="ohead">
+  <div><h1>Bài đăng</h1><p>{{ seller.posts().length }} bài · {{ openCount() }} đang mở bán / nhận việc</p></div>
+  <div class="newwrap">
+    <button type="button" class="btn primary" (click)="newOpen.set(!newOpen())"><svg class="i"><use href="#plus" /></svg>Đăng bài mới</button>
+    @if (newOpen()) {
+      <div class="newmenu">
+        @for (n of newKinds; track n[0]) {
+          <a routerLink="/seller/posts/new" [queryParams]="{ type: n[0] }"><svg class="i"><use [attr.href]="'#' + n[1]" /></svg><span><b>{{ n[2] }}</b><small>{{ n[3] }}</small></span></a>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<div class="tools">
+  <div class="ptoggles">
+    <button type="button" [class.on]="kind() === 'all'" (click)="kind.set('all')">Tất cả <small>{{ count('all') }}</small></button>
+    @for (k of kinds; track k) {
+      <button type="button" [class.on]="kind() === k" (click)="kind.set(k)">{{ kindLabel[k] }} <small>{{ count(k) }}</small></button>
+    }
+  </div>
+  <span class="grow"></span>
+  <select class="sel" aria-label="Lọc trạng thái" [value]="status()" (change)="status.set($any($event.target).value)">
+    <option value="all" [selected]="status() === 'all'">Mọi trạng thái</option>
+    <option value="open" [selected]="status() === 'open'">Đang hoạt động</option>
+    <option value="low" [selected]="status() === 'low'">Sắp hết</option>
+    <option value="off" [selected]="status() === 'off'">Tạm ngưng</option>
+    <option value="promo" [selected]="status() === 'promo'">Đang quảng bá</option>
+  </select>
+  <label class="srch"><svg class="i"><use href="#search" /></svg><input placeholder="Tìm bài của bạn" [value]="q()" (input)="q.set($any($event.target).value)" /></label>
+</div>
+
+<div class="summary">
+  <span>Đang hiện <b>{{ shown().length }}</b> bài</span>
+  <span><svg class="i"><use href="#eye" /></svg> <b>{{ views() }}</b> lượt xem</span>
+  <span>♡ <b>{{ saves() }}</b> lượt lưu</span>
+  <span>Số dư <b>{{ seller.xu() }}</b> Xu</span>
+</div>
+
+@if (groups().length) {
+  @for (g of groups(); track g.kind) {
+    <section class="grp">
+      <div class="lgh"><b>{{ lane[g.kind].title }}</b><small>{{ g.posts.length }} bài</small></div>
+      <div class="cards">
+        @for (p of g.posts; track p.id) {
+          <app-seller-post-card [post]="p" [manage]="true" (toggled)="toggle(p)" (promoted)="promote(p)"
+            (priced)="price(p, $event)" (duplicated)="duplicate(p)" (removed)="remove(p)" />
+        }
+      </div>
+    </section>
+  }
+} @else {
+  <div class="empty2"><img src="assets/clean/peek.png" alt="" />Không có bài nào khớp bộ lọc.</div>
+}
+<p class="demo-note">Bản mẫu · bấm vào giá để sửa nhanh · <a href="#" (click)="reset($event)">Đặt lại dữ liệu mẫu</a></p>

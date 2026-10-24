@@ -1,0 +1,26 @@
+<div class="modal" (click)="backdrop($event)">
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+    <h2 id="pickTitle">Chọn người · {{ job.title }}</h2>
+    <p>{{ job.when }} · {{ job.pay | vnd }} {{ job.unit }} · cần {{ job.head }} người. Địa chỉ chính xác chỉ gửi cho người bạn chọn.</p>
+    @for (o of job.waiting; track o.id) {
+      <div class="offer">
+        <img [src]="o.worker.avatar" alt="" />
+        <div>
+          <b>{{ o.worker.name }}</b>
+          <div class="m">
+            <span><svg class="i st"><use href="#star" /></svg>{{ o.worker.rating }}</span>
+            <span><svg class="i"><use href="#check" /></svg>{{ o.worker.jobs }} việc đã làm</span>
+            <span><svg class="i"><use href="#pin" /></svg>{{ o.worker.distance }}</span>
+            <span><svg class="i"><use href="#clock" /></svg>{{ o.slot }}</span>
+          </div>
+          <p>“{{ o.intro }}”</p>
+        </div>
+        <div class="btns">
+          <button type="button" class="btn dark" (click)="chosen.emit(o.id)">Chọn</button>
+          <a class="btn" routerLink="/seller/messenger" [queryParams]="{ to: o.worker.name, job: job.id }">Nhắn</a>
+        </div>
+      </div>
+    }
+    <div class="foot"><span>Chọn một người thì các đề nghị còn lại chuyển “Không được chọn”.</span><button type="button" class="btn" (click)="closed.emit()">Để sau</button></div>
+  </div>
+</div>

@@ -1,0 +1,123 @@
+@if (o(); as o) {
+  <a class="crumb" routerLink="/seller/orders"><svg class="i"><use href="#right" /></svg>Giao dịch</a>
+  <div class="dhead">
+    <div>
+      <div class="chips">
+        <span class="chip"><svg class="i"><use [attr.href]="'#' + kindIcon[o.kind]" /></svg>{{ kindLabel[o.kind] }}</span>
+        <span class="chip">Đơn khách đặt</span><span class="chip">{{ o.code }}</span>
+      </div>
+      <h1>{{ o.title }}</h1>
+      <div class="who"><img [src]="o.buyer.avatar" alt="" /><b>{{ o.buyer.name }}</b> · {{ whenText() }}</div>
+    </div>
+    <div class="amt"><small>Tổng tiền · {{ o.pay === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</small><b>{{ o.total | vnd }}</b></div>
+  </div>
+
+  <app-seller-steps [steps]="steps()" [current]="o.state" [history]="o.history" [cut]="cut()" />
+
+  <div class="dgrid">
+    <div>
+      <div class="box">
+        <h2>Thông tin đơn</h2>
+        <dl class="info">
+          <div><dt><svg class="i"><use href="#user" /></svg>Khách</dt><dd>{{ o.buyer.name }}<small>{{ o.buyer.phone }}</small></dd></div>
+          <div><dt><svg class="i"><use href="#pin" /></svg>{{ o.fulfil === 'home' ? 'Làm tại' : 'Nhận hàng' }}</dt>
+            <dd>{{ o.fulfil === 'pickup' ? 'Khách tự đến lấy' : o.fulfil === 'home' ? 'Tại nhà khách' : 'Giao tận cửa' }}<small>{{ o.address }}</small></dd></div>
+          <div><dt><svg class="i"><use href="#clock" /></svg>Thời gian</dt><dd>{{ o.time }} · {{ dayLabel(o.day) }}@if (o.duration) { <small>Khoảng {{ o.duration / 60 }} giờ</small> }</dd></div>
+          <div><dt><svg class="i"><use href="#bag" /></svg>{{ o.fulfil === 'home' ? 'Dịch vụ' : 'Món' }}</dt>
+            <dd>@for (i of o.items; track $index) { {{ i.name }} × {{ i.qty }}@if (i.option) { <small>{{ i.option }}</small> } }</dd></div>
+          @for (a of o.answers ?? []; track $index) {
+            <div><dt><svg class="i"><use href="#question" /></svg>{{ a[0] }}</dt><dd>{{ a[1] }}</dd></div>
+          }
+          @if (o.note) { <div><dt><svg class="i"><use href="#pencil" /></svg>Ghi chú</dt><dd>{{ o.note }}</dd></div> }
+          @if (o.declineReason && o.state === 'declined') { <div><dt><svg class="i"><use href="#xmark" /></svg>Lý do từ chối</dt><dd>{{ o.declineReason }}</dd></div> }
+        </dl>
+      </div>
+
+      <div class="box">
+        <h2>Chi tiết thanh toán</h2>
+        <div class="lines">
+          @for (i of o.items; track $index) {
+            <div><span>{{ i.name }} × {{ i.qty }}@if (i.option) { · {{ i.option }} }</span><b>{{ i.qty * i.price | vnd }}</b></div>
+          }
+          @if (o.ship) { <div><span>Phí giao</span><b>{{ o.ship | vnd }}</b></div> }
+          @if (o.surcharge; as s) { <div><span>Phụ thu · {{ s.reason }}</span><b>{{ s.amount | vnd }}{{ s.ok ? '' : ' · chờ khách' }}</b></div> }
+          <div class="tot"><span>Tổng cộng</span><b>{{ o.total | vnd }}</b></div>
+        </div>
+      </div>
+
+      @if (review(); as rv) {
+        <div class="box" id="review">
+          <h2>Đánh giá của khách</h2>
+          <div class="rev">
+            <img [src]="rv.by.avatar" alt="" />
+            <div class="rv">
+              <b>{{ rv.by.name }}</b> <span class="muted">· {{ rv.at }}</span>
+              <div class="st">{{ stars(rv.stars) }}</div>
+              <p>{{ rv.text }}</p>
+              @if (rv.reply) {
+                <div class="rep"><b>Bạn đã phản hồi</b>{{ rv.reply }}</div>
+              } @else {
+                <form class="form" (submit)="sendReply($event, rt.value)">
+                  <textarea #rt class="input" placeholder="Phản hồi khách (hiện công khai dưới đánh giá)" required maxlength="300"></textarea>
+                  <div class="row2"><button type="submit" class="btn dark">Gửi phản hồi</button></div>
+                </form>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <aside class="side">
+      <div class="panel">
+        <div class="now"><span class="stat" [class]="'stat ' + o.cls">{{ o.cancelRequest ? 'Khách xin hủy' : o.label }}</span></div>
+        @if (o.cancelRequest) {
+          <div class="warn"><b>Khách xin hủy đơn</b>“{{ o.cancelRequest }}”</div>
+        } @else {
+          <p>{{ guide[o.state] }}@if (o.state === 'waiting' && o.due) { <b class="due"> {{ o.due }}.</b> }</p>
+        }
+        @switch (form()) {
+          @case ('decline') {
+            <form class="form" (submit)="decline($event)">
+              <span class="ftitle">Lý do từ chối</span>
+              @for (r of reasons; track r) {
+                <label class="rd" [class.on]="reason === r"><input type="radio" name="rs" [checked]="reason === r" (change)="reason = r" />{{ r }}</label>
+              }
+              <div class="row2"><button type="button" class="btn" (click)="form.set(null)">Thôi</button><button type="submit" class="btn primary">Từ chối đơn</button></div>
+            </form>
+          }
+          @case ('surcharge') {
+            <form class="form" (submit)="surcharge($event, sa.value, sr.value)">
+              <span class="ftitle">Báo phụ thu</span>
+              <span class="muted small">Khách đồng ý thì phụ thu mới cộng vào đơn.</span>
+              <input #sa class="input" type="number" min="1000" step="1000" placeholder="Số tiền, ví dụ 50000" required />
+              <input #sr class="input" placeholder="Lý do, ví dụ: thêm 2 món" required maxlength="80" />
+              <div class="row2"><button type="button" class="btn" (click)="form.set(null)">Thôi</button><button type="submit" class="btn primary">Gửi khách</button></div>
+            </form>
+          }
+          @default {
+            @for (a of actions(); track a[0]) {
+              <button type="button" class="btn" [class.primary]="a[2]" (click)="act(a[0])">{{ a[1] }}</button>
+            }
+          }
+        }
+      </div>
+      <div class="panel">
+        <div class="person"><img [src]="o.buyer.avatar" alt="" /><div><b>{{ o.buyer.name }}</b><small>Khách · {{ o.buyer.phone }}</small></div></div>
+        <div class="prow">
+          <a class="btn" routerLink="/seller/messenger" [queryParams]="{ to: o.buyer.name, order: o.id }"><svg class="i"><use href="#chat" /></svg>Nhắn</a>
+          <a class="btn" [href]="tel(o.buyer.phone)"><svg class="i"><use href="#phone" /></svg>Gọi</a>
+        </div>
+      </div>
+      <a class="reportlink" routerLink="/help"><svg class="i"><use href="#shield" /></svg>Báo cáo vấn đề với đơn này</a>
+    </aside>
+  </div>
+  @if (askView(); as v) {
+    <app-seller-confirm-dialog [heading]="v.heading" [message]="v.message" [flow]="v.flow" [step]="v.step" [thumb]="o.image ?? o.buyer.avatar" [round]="!o.image"
+      [title]="o.title" [sub]="v.sub" [okLabel]="v.ok" (ok)="confirmAsk()" (closed)="ask.set(null)" />
+  }
+} @else if (ready()) {
+  <div class="empty2"><img src="assets/clean/peek.png" alt="" />Không tìm thấy giao dịch này.<br /><a class="btn" routerLink="/seller/orders">Về Giao dịch</a></div>
+} @else {
+  <p class="muted">Đang tải…</p>
+}

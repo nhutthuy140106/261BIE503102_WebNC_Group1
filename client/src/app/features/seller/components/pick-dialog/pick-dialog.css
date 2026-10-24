@@ -1,0 +1,10 @@
+.offer { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 14px; padding: 14px 0; border-top: 1px solid var(--border); }
+.offer img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+.offer b { font-size: 15px; }
+.m { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; color: var(--smoke); margin-top: 2px; }
+.m span { display: inline-flex; align-items: center; gap: 4px; }
+.m svg { width: 13px; height: 13px; }
+.m .st { color: #e39b1a; }
+.offer p { margin: 6px 0 0; font-size: 13.5px; color: #3c4660; }
+.btns { display: grid; gap: 6px; align-content: start; }
+.btns .btn { height: 34px; font-size: 13px; }

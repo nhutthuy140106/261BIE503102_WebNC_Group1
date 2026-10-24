@@ -1,0 +1,47 @@
+/* Giao dịch — chuyển từ design/mockups/seller-orders.html */
+.ohead { margin-top: 6px; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+.ohead h1 { font-size: 30px; letter-spacing: -.02em; margin: 0; }
+.ohead p { margin: 6px 0 0; color: var(--smoke); }
+.otoggles { display: flex; gap: 8px; flex-wrap: wrap; }
+.otoggles button { height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-weight: 600; font-size: 13.5px; display: inline-flex; align-items: center; gap: 8px; }
+.otoggles button:hover { border-color: var(--ink); }
+.otoggles button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.otoggles small { font-size: 12px; opacity: .6; }
+.otoggles svg { width: 15px; height: 15px; }
+.tsep { width: 1px; height: 24px; background: var(--border); align-self: center; margin: 0 4px; }
+
+.ogroup { margin-top: 30px; }
+.ogroup h2 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--smoke); margin: 0 0 10px; display: flex; align-items: center; gap: 6px; }
+.ogroup h2 svg { width: 15px; height: 15px; }
+.needgroup { padding: 18px 18px 20px; border-radius: 18px; background: #fff6f1; border: 1px solid #f6dacb; }
+.needgroup h2 { color: var(--accent); }
+.needgroup .orow { border-color: #f2d5c5; }
+.olist { display: grid; gap: 10px; }
+.orow { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 18px; align-items: center; padding: 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); transition: background .15s; }
+.orow:hover { background: var(--soft); }
+.orow.ended { opacity: .72; }
+.th { width: 92px; height: 76px; border-radius: 12px; overflow: hidden; background: var(--soft); display: grid; place-items: center; text-align: center; }
+.th img { width: 100%; height: 100%; object-fit: cover; }
+.th svg { width: 26px; height: 26px; }
+.th small { display: block; margin-top: 2px; font-size: 11px; font-weight: 600; color: var(--smoke); }
+.mid { min-width: 0; }
+.otag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 700; border: 1px solid var(--border); color: var(--smoke); }
+.otag.job { border-color: var(--ink); color: var(--ink); }
+.orow h3 { margin: 6px 0 0; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sub { display: block; margin-top: 3px; color: var(--smoke); font-size: 13px; }
+.end { text-align: right; display: grid; gap: 8px; justify-items: end; }
+.end b { font-size: 16px; }
+
+.histlink { margin-top: 26px; width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 16px; border: 1px dashed var(--border); background: #fff; text-align: left; color: var(--smoke); }
+.histlink:hover { background: var(--soft); }
+.histlink > svg { width: 20px; height: 20px; }
+.histlink > svg:last-child { margin-left: auto; width: 16px; height: 16px; }
+.histlink b { display: block; color: var(--ink); font-size: 15px; }
+.empty2 { padding: 50px 0; text-align: center; color: var(--smoke); }
+.empty2 img { width: 110px; display: block; margin: 0 auto 12px; }
+
+@media (max-width: 700px) {
+  .orow { grid-template-columns: 64px minmax(0, 1fr); }
+  .th { width: 64px; height: 56px; }
+  .end { grid-column: 1 / -1; justify-items: start; text-align: left; }
+}

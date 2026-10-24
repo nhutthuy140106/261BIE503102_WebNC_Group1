@@ -1,0 +1,61 @@
+<div class="item" [class.dim]="st.locked || !post.on || (manage && st.cls === 'off')">
+  <div class="ph">
+    @if (post.image) {
+      <img [src]="post.image" alt="" />
+    } @else {
+      <span class="cream"><svg class="i"><use [attr.href]="'#' + (post.icon || kindIcon[post.kind])" /></svg><small>{{ kindLabel[post.kind] }}</small></span>
+    }
+    <span class="stp"><span class="stat" [class]="'stat ' + st.cls">{{ st.text }}</span></span>
+    @if (post.promo) {
+      <span class="duep ad">QUẢNG BÁ · {{ post.promo }}</span>
+    } @else {
+      <span class="duep"><svg class="i"><use href="#eye" /></svg>{{ post.views }}</span>
+    }
+  </div>
+  <div class="body">
+    <h3><a [routerLink]="link">{{ post.title }}</a></h3>
+    @if (manage && editing()) {
+      <form class="pedit" (submit)="savePrice($event, pin.value)">
+        <input #pin class="input" type="number" min="0" step="1000" [value]="post.price" required autofocus />
+        <button type="submit" class="btn dark">Lưu</button>
+      </form>
+    } @else if (manage) {
+      <button type="button" class="price" title="Bấm để sửa giá" (click)="editing.set(true)">{{ post.price | vnd }}@if (post.unit) { <small>{{ post.unit }}</small> }<svg class="i"><use href="#pencil" /></svg></button>
+    } @else {
+      <div class="pr">{{ post.price | vnd }}@if (post.unit) { <span> {{ post.unit }}</span> }</div>
+    }
+    @if (manage) {
+      <div class="meta"><span>{{ post.category || kindLabel[post.kind] }}</span><span>♡ {{ post.saves }} · {{ soldText }}</span></div>
+    }
+  </div>
+  <div class="ctl">
+    <span class="step">
+      <button type="button" aria-label="Bớt" [disabled]="st.locked || post.stock <= min" (click)="step(-1)">−</button>
+      <span>Còn {{ post.stock }}</span>
+      <button type="button" aria-label="Thêm" [disabled]="st.locked || post.stock >= post.max" (click)="step(1)">+</button>
+    </span>
+    <label class="togl">Đang mở
+      <button type="button" class="tog" [class.on]="post.on && !st.locked" [attr.aria-pressed]="post.on" aria-label="Đang mở" [disabled]="st.locked" (click)="toggled.emit()"></button>
+    </label>
+  </div>
+  <div class="xurow">
+    @if (post.promo) {
+      <button type="button" class="btn xub on" disabled><img class="coinsm" src="assets/clean/antxu.png" alt="" />{{ manage ? 'Quảng bá ' + post.promo : 'Đang quảng bá · ' + post.promo }}</button>
+    } @else if (manage) {
+      <button type="button" class="btn xub" (click)="promoted.emit()"><img class="coinsm" src="assets/clean/antxu.png" alt="" />{{ post.kind === 'job' ? 'Ghim' : 'Quảng bá' }} · {{ lane[post.kind].xu[1] }} Xu</button>
+    } @else {
+      <button type="button" class="btn xub" (click)="promoted.emit()"><img class="coinsm" src="assets/clean/antxu.png" alt="" />{{ lane[post.kind].xu[0] }} · {{ lane[post.kind].xu[1] }} Xu</button>
+    }
+    @if (manage) {
+      <a class="ib" [routerLink]="editLink" title="Sửa bài"><svg class="i"><use href="#pencil" /></svg></a>
+      <button type="button" class="ib more" title="Thêm" (click)="menuOpen.set(!menuOpen()); confirmDel.set(false)"><svg class="i"><use href="#dots" /></svg></button>
+    }
+  </div>
+  @if (menuOpen()) {
+    <div class="menu">
+      <button type="button" (click)="menuOpen.set(false); duplicated.emit()"><svg class="i"><use href="#copy" /></svg>Nhân bản bài</button>
+      <a [routerLink]="['/shop', myId()]"><svg class="i"><use href="#out" /></svg>Xem như khách</a>
+      <button type="button" class="danger" (click)="del()"><svg class="i"><use href="#xmark" /></svg>{{ confirmDel() ? 'Bấm lần nữa để xóa' : 'Xóa bài' }}</button>
+    </div>
+  }
+</div>

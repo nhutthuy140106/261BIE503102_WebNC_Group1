@@ -1,0 +1,149 @@
+@if (seller.shop(); as sh) {
+  <!-- Hồ sơ gian hàng thay cho tiêu đề trang -->
+  <div class="shophead" title="Xem gian hàng của bạn ở chế độ người bán" (click)="openShop($event)">
+    <img [src]="sh.avatar" alt="" />
+    <div class="nm">
+      <h1>{{ sh.name }}</h1>
+      <div class="meta"><span><svg class="i"><use href="#pin" /></svg>{{ sh.at }}</span></div>
+      <div class="meta">
+        <span><svg class="i st"><use href="#star" /></svg>{{ sh.rating }} ({{ sh.reviewCount }})</span>
+        <span><svg class="i"><use href="#receipt" /></svg>{{ sh.doneCount }} đơn</span>
+      </div>
+    </div>
+    <div class="acts">
+      <a class="hbtn2" [routerLink]="['/shop', myId()]"><svg class="i"><use href="#eye" /></svg>Xem như khách</a>
+      <button type="button" class="hbtn2" [class.off]="seller.pause()" aria-haspopup="dialog" (click)="togglePop($event)">
+        <i></i>{{ pauseText() }}<svg class="i chev"><use href="#chev" /></svg>
+      </button>
+      @if (popOpen()) {
+        <div class="pop" role="dialog" aria-label="Trạng thái nhận đơn" (click)="$event.stopPropagation()">
+          <h3>Trạng thái nhận đơn</h3>
+          <label class="opt" [class.on]="popMode() === 'open'"><input type="radio" name="pm" [checked]="popMode() === 'open'" (change)="popMode.set('open')" /><span><b>Đang nhận đơn</b><small>Mọi mảng mở bình thường</small></span></label>
+          <label class="opt" [class.on]="popMode() === 'all'"><input type="radio" name="pm" [checked]="popMode() === 'all'" (change)="popMode.set('all')" /><span><b>Tạm nghỉ cả gian hàng</b><small>Khách vẫn xem bài, chưa đặt được</small></span></label>
+          <label class="opt" [class.on]="popMode() === 'some'"><input type="radio" name="pm" [checked]="popMode() === 'some'" (change)="popMode.set('some')" /><span><b>Tạm nghỉ một vài mảng</b><small>Vd. hết cơm nhưng vẫn nhận nấu cỗ</small></span></label>
+          <div class="pkinds">
+            @for (k of pauseKinds; track k) {
+              <label><input type="checkbox" [checked]="popKinds().includes(k)" (change)="toggleKind(k, $any($event.target).checked)" />{{ kindLabel[k] }}</label>
+            }
+          </div>
+          <div class="row2">Mở lại
+            <select class="input" [(ngModel)]="popUntil">
+              <option value="sau 1 giờ">sau 1 giờ</option>
+              <option value="sáng mai">sáng mai</option>
+              <option value="khi bạn tự mở lại">khi tôi tự mở lại</option>
+            </select>
+          </div>
+          <div class="pfoot"><button type="button" class="btn" (click)="popOpen.set(false)">Hủy</button><button type="button" class="btn dark" (click)="savePause()">Lưu</button></div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- 4 nút đăng bài -->
+  <div class="posts4">
+    @for (n of newKinds; track n[0]) {
+      <a [routerLink]="['/seller/posts/new']" [queryParams]="{ type: n[0] }"><span class="pi"><svg class="i"><use [attr.href]="'#' + n[1]" /></svg></span>{{ n[2] }}<svg class="i plus"><use href="#plus" /></svg></a>
+    }
+  </div>
+
+  <!-- Banner AntXu -->
+  <div class="xuband">
+    <img src="assets/clean/antxu.png" alt="" />
+    <div class="tx"><b>Đưa bài lên Nổi bật trong khu</b><small>Dùng AntXu để quảng bá bài và giúp gian hàng bạn tiếp cận nhiều cư dân hơn.</small></div>
+    <span class="bal">Bạn có <b>{{ seller.xu() }}</b> Xu</span>
+    <button type="button" class="btn primary" (click)="pickPromo(lanesEl)">Chọn bài quảng bá</button>
+  </div>
+
+  @if (seller.pause(); as p) {
+    <div class="pausebar"><svg class="i"><use href="#pause" /></svg><span><b>{{ pauseWhat(p) }}</b> · mở lại {{ p.until }}</span><button type="button" class="btn" (click)="resume()">Mở nhận đơn lại</button></div>
+  }
+
+  <!-- Cần bạn xử lý -->
+  <section class="needgroup">
+    <div class="gh">
+      <h2>Cần bạn xử lý</h2>
+      <div class="toggles">
+        <button type="button" [class.on]="kind() === 'all'" (click)="setKind('all')">Tất cả <small>{{ count('all') }}</small></button>
+        @for (k of kinds; track k) {
+          <button type="button" [class.on]="kind() === k" (click)="setKind(k)">{{ kindLabel[k] }} <small>{{ count(k) }}</small></button>
+        }
+      </div>
+    </div>
+    @if (tasks().length) {
+      <div class="cards">
+        @for (t of shownTasks(); track t.key) {
+          <app-seller-task-card [task]="t" (act)="onTask(t, $event)" (replied)="onReply(t, $event)" (opened)="openTask(t)" />
+        }
+      </div>
+      @if (hidden()) {
+        <div class="needmore">
+          <button type="button" (click)="showAll.set(!showAll())">
+            @if (showAll()) { Thu gọn } @else { Xem thêm {{ hidden() }} việc<svg class="i"><use href="#chev" /></svg> }
+          </button>
+        </div>
+      }
+    } @else {
+      <div class="allclear"><img src="assets/clean/idle.png" alt="" /><span>Không còn việc cần xử lý. Kiến canh cửa hàng giúp bạn!</span></div>
+    }
+  </section>
+
+  <!-- Lịch hôm nay + Hiệu quả -->
+  <div class="cols">
+    <section class="sec">
+      <div class="gh"><h2>Lịch hôm nay</h2><a class="more" routerLink="/seller/calendar">Xem cả tuần<svg class="i"><use href="#right" /></svg></a></div>
+      <div class="card"><app-seller-day-agenda [day]="0" [kind]="kind()" /></div>
+    </section>
+    <section class="sec">
+      <div class="gh">
+        <h2>Hiệu quả</h2>
+        <select class="range" aria-label="Khoảng thời gian" [value]="range()" (change)="setRange($any($event.target).value)">
+          @for (r of ranges; track r) { <option [value]="r" [selected]="r === range()">{{ seller.statsFor(r)?.label }}</option> }
+        </select>
+      </div>
+      @if (stats(); as d) {
+        <div class="card kpis">
+          <div class="kduo">
+            <div class="kbig"><span class="lb">Tổng tiền đã bán</span><b>{{ d.income | vnd }}</b><span class="up">▲ {{ up(d.incomeUp) }}</span></div>
+            <div class="kbig"><span class="lb">Tổng tiền đã thuê</span><b>{{ d.paid | vnd }}</b><span class="up">▲ {{ up(d.paidUp) }}</span></div>
+          </div>
+          <div class="kgrid">
+            <div class="kt"><span>Đơn hoàn thành</span><b>{{ d.done }}</b><span class="up">▲ {{ up(d.doneUp) }}</span></div>
+            <div class="kt"><span>Việc thuê xong</span><b>{{ d.hired }}</b><span class="up">▲ {{ up(d.hiredUp) }}</span></div>
+            <div class="kt"><span>Đánh giá</span><b><span class="st">★</span> {{ d.rating }}</b><small>{{ d.ratingCount }} đánh giá</small></div>
+            <div class="kt"><span>Lượt xem bài</span><b>{{ d.views | vnd: '' }}</b><span class="up">▲ {{ up(d.viewsUp) }}</span></div>
+          </div>
+          <a class="kmore" routerLink="/seller/insights">Xem báo cáo chi tiết<svg class="i"><use href="#right" /></svg></a>
+        </div>
+      }
+    </section>
+  </div>
+
+  <!-- Tình trạng bán: mỗi danh mục một hàng -->
+  <section class="sec" #lanesEl>
+    <div class="gh"><h2>Tình trạng bán</h2><a class="more" routerLink="/seller/posts">Tất cả bài đăng<svg class="i"><use href="#right" /></svg></a></div>
+    <div class="lanes">
+      @for (l of lanes(); track l.kind) {
+        <div class="lanegrp">
+          <div class="lgh"><b>{{ lane[l.kind].title }}</b></div>
+          <div class="cards">
+            @for (p of l.posts; track p.id) {
+              <app-seller-post-card [post]="p" (toggled)="toggle(p)" (promoted)="promote(p)" />
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <p class="demo-note">Bản mẫu · tài khoản Bếp Cô Lan · <a href="#" (click)="resetData($event)">Đặt lại dữ liệu mẫu</a></p>
+
+  @if (askView(); as v) {
+    <app-seller-confirm-dialog [heading]="v.heading" [message]="v.message" [flow]="v.flow" [step]="v.step" [thumb]="v.thumb" [round]="v.round"
+      [title]="v.title" [sub]="v.sub" [okLabel]="v.ok" (ok)="confirmAsk()" (closed)="ask.set(null)" />
+  }
+  @if (pickJob(); as j) {
+    <app-seller-pick-dialog [job]="j" (chosen)="choose($event)" (closed)="pickId.set(null)" />
+  }
+} @else {
+  <p class="muted loading">Đang tải…</p>
+}

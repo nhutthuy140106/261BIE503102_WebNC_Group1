@@ -1,0 +1,49 @@
+/* Kiểu dùng chung của khu Bán & Đăng việc (chuyển từ design/mockups/shared/base.css + seller.html).
+   Mỗi component trong features/seller nạp file này trước file CSS riêng của nó. */
+
+/* Nút kiểu mockup: mặc định viền trắng, .dark xanh đen, .primary cam (chỉ cho hành động chính) */
+.btn { border: 1px solid var(--border); background: #fff; color: var(--ink); border-radius: 10px; padding: 9px 14px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; }
+.btn:hover { background: var(--soft); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { filter: brightness(.95); }
+.btn.dark { background: var(--ink); border-color: var(--ink); color: #fff; }
+.btn svg { width: 16px; height: 16px; }
+
+/* Tiêu đề nhóm — giống .sh h2 trang chủ phía Mua */
+.gh { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.gh h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.015em; color: var(--ink); }
+.gh .more { margin-left: auto; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.gh .more svg { width: 14px; height: 14px; }
+
+/* Chấm trạng thái theo tên bước */
+.stat { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.stat::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.stat.act { color: var(--accent); }
+.stat.wait { color: #a86a12; }
+.stat.go { color: #2e7d4f; }
+.stat.done { color: var(--smoke); }
+.stat.off { color: var(--fog); }
+
+/* Nút lọc theo mảng */
+.toggles { display: flex; flex-wrap: wrap; gap: 6px; }
+.toggles button { height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid #f0d3c4; background: #fff; font-weight: 600; font-size: 12.5px; display: inline-flex; align-items: center; gap: 6px; }
+.toggles button:hover { border-color: var(--ink); }
+.toggles button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.toggles button small { font-size: 11.5px; font-weight: 600; opacity: .6; }
+
+/* Lưới thẻ 4 cột */
+.cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1100px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .cards { grid-template-columns: 1fr; } }
+
+/* Hộp thoại */
+.modal { position: fixed; inset: 0; z-index: 80; background: rgba(34, 48, 74, .32); display: flex; align-items: flex-start; justify-content: center; padding: 70px 16px 16px; overflow: auto; }
+.dlg { width: 620px; max-width: 100%; background: #fff; border-radius: 18px; padding: 22px; box-shadow: 0 24px 60px rgba(34, 48, 74, .22); }
+.dlg.sm { width: 480px; }
+.dlg h2 { margin: 0; font-size: 20px; }
+.dlg > p { margin: 4px 0 14px; color: var(--smoke); font-size: 13.5px; }
+.dlg .cbtns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.dlg .cbtns .btn { height: 40px; }
+.dlg .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--smoke); }
+
+.demo-note a { text-decoration: underline; }

@@ -1,0 +1,127 @@
+@if (j(); as j) {
+  <a class="crumb" routerLink="/seller/orders" [queryParams]="{ f: 'jobs' }"><svg class="i"><use href="#right" /></svg>Giao dịch</a>
+  <div class="dhead">
+    <div>
+      <div class="chips"><span class="chip"><svg class="i"><use href="#hand" /></svg>Việc làm</span><span class="chip">{{ j.category }}</span><span class="chip">{{ j.code }}</span></div>
+      <h1>{{ j.title }}</h1>
+      <div class="who">{{ j.when }} · {{ j.area }} · cần {{ j.head }} người</div>
+    </div>
+    <div class="amt"><small>Tiền công · trả trực tiếp</small><b>{{ j.pay | vnd }}<span class="u"> {{ j.unit }}</span></b></div>
+  </div>
+
+  <app-seller-steps [steps]="flow" [current]="current()" [history]="history()" />
+
+  <div class="dgrid">
+    <div>
+      <div class="box">
+        <h2>Người đề nghị · {{ j.offers.length }}</h2>
+        @for (o of j.offers; track o.id) {
+          <div class="offer" [class.out]="out(o)">
+            <img [src]="o.worker.avatar" alt="" />
+            <div>
+              <b>{{ o.worker.name }}</b>
+              <div class="m">
+                <span><svg class="i gold"><use href="#star" /></svg>{{ o.worker.rating }}</span>
+                <span><svg class="i"><use href="#check" /></svg>{{ o.worker.jobs }} việc đã làm</span>
+                <span><svg class="i"><use href="#pin" /></svg>{{ o.worker.distance }}</span>
+                <span><svg class="i"><use href="#clock" /></svg>{{ o.slot }}</span>
+              </div>
+              <p>“{{ o.intro }}”</p>
+              @if (o.report && o.state === 'reported') {
+                <div class="reportbox"><b>Đã báo hoàn thành lúc {{ o.report.at }}</b>{{ o.report.note }}
+                  <div class="photos">@for (p of photos(o.report.photos); track p) { <span><svg class="i"><use href="#camera" /></svg></span> }</div>
+                  <small class="muted">Không phản hồi trong 24 giờ, việc tự hoàn thành.</small>
+                </div>
+              }
+              @if (o.rated) { <div class="reportbox rated"><b>Bạn đã đánh giá {{ '★'.repeat(o.rated.stars) }}</b>{{ o.rated.text }}</div> }
+              @if (rating() === o.id) {
+                <form class="form rateform" (submit)="rate($event, o, rtxt.value)">
+                  <div class="stars">@for (n of [1, 2, 3, 4, 5]; track n) { <button type="button" [class.on]="n <= stars()" (click)="stars.set(n)">★</button> }</div>
+                  <textarea #rtxt class="input" placeholder="Nhận xét (không bắt buộc)" maxlength="300"></textarea>
+                  <div class="row2"><button type="button" class="btn" (click)="rating.set(null)">Thôi</button><button type="submit" class="btn dark">Gửi đánh giá</button></div>
+                </form>
+              }
+            </div>
+            <div class="oacts">
+              <span class="stat" [class]="'stat ' + cls(o)">{{ o.label }}</span>
+              @if (o.state === 'offered' && !j.closed) {
+                <button type="button" class="btn dark" (click)="offer(o, 'choose')">Chọn người này</button>
+                <button type="button" class="btn" (click)="offer(o, 'reject')">Từ chối</button>
+              }
+              @if (o.state === 'reported') { <button type="button" class="btn primary" (click)="offer(o, 'confirmDone')">Xác nhận hoàn thành</button> }
+              @if (o.state === 'done' && !o.rated) { <button type="button" class="btn dark" (click)="stars.set(5); rating.set(o.id)">Đánh giá người làm</button> }
+              @if (engaged(o)) {
+                <a class="btn" routerLink="/seller/messenger" [queryParams]="{ to: o.worker.name, job: j.id }"><svg class="i"><use href="#chat" /></svg>Nhắn</a>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="box">
+        <h2>Thông tin việc</h2>
+        <dl class="info">
+          <div><dt><svg class="i"><use href="#clock" /></svg>Thời gian</dt><dd>{{ j.when }}</dd></div>
+          <div><dt><svg class="i"><use href="#pin" /></svg>Địa điểm</dt><dd>{{ j.area }}<small>{{ j.exact }} — chỉ người được chọn mới thấy</small></dd></div>
+          <div><dt><svg class="i"><use href="#users" /></svg>Số người cần</dt><dd>{{ j.head }} người</dd></div>
+          <div><dt><svg class="i"><use href="#pencil" /></svg>Việc cần làm</dt><dd>{{ j.desc }}</dd></div>
+          @if (j.reqs.length) { <div><dt><svg class="i"><use href="#check" /></svg>Yêu cầu</dt><dd>@for (r of j.reqs; track r) { <span class="req">{{ r }}</span> }</dd></div> }
+        </dl>
+      </div>
+
+      <div class="box" id="qa">
+        <h2>Hỏi đáp công khai · {{ j.questions.length }}</h2>
+        @if (j.questions.length) {
+          <div class="qa">
+            @for (q of j.questions; track q.id) {
+              <div class="q">
+                <div class="h"><img [src]="q.by.avatar" alt="" /><b>{{ q.by.name }}</b> · {{ q.at }}</div>
+                <p>{{ q.text }}</p>
+                @if (q.answer) {
+                  <div class="a"><b>Bạn trả lời</b>{{ q.answer }}</div>
+                } @else {
+                  <form (submit)="answer($event, q.id, qin)"><input #qin class="input" placeholder="Trả lời công khai, không ghi số điện thoại…" required maxlength="300" /><button type="submit" class="btn dark">Trả lời</button></form>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="muted">Chưa có câu hỏi nào.</p>
+        }
+      </div>
+    </div>
+
+    <aside class="side">
+      <div class="panel">
+        <div class="now"><span class="stat" [class]="'stat ' + j.cls">{{ j.label }}</span></div>
+        @if (j.active[0]; as a) {
+          <p>
+            @switch (a.state) {
+              @case ('reported') { {{ a.worker.name }} đã báo xong. Kiểm tra rồi xác nhận để hoàn thành việc. }
+              @case ('done') { Việc đã hoàn thành. Nhớ trả {{ j.pay | vnd }} trực tiếp cho {{ a.worker.name }} và đánh giá người làm. }
+              @default { Bạn đã chọn {{ a.worker.name }}. Địa chỉ chính xác đã gửi cho người làm. }
+            }
+          </p>
+        } @else {
+          <p>{{ j.closed ? 'Việc đã đóng, không nhận thêm đề nghị.' : 'So sánh người đề nghị rồi chọn một người. Gửi đề nghị chưa phải là đã nhận việc.' }}</p>
+        }
+        @if (!j.closed) {
+          <button type="button" class="btn" (click)="setClosed(true)"><svg class="i"><use href="#pause" /></svg>Đóng nhận đề nghị</button>
+        } @else if (j.active[0]?.state !== 'done') {
+          <button type="button" class="btn" (click)="setClosed(false)"><svg class="i"><use href="#play" /></svg>Mở lại việc</button>
+        }
+        @if (j.postId) {
+          <a class="btn" [routerLink]="['/seller/posts', j.postId, 'edit']"><svg class="i"><use href="#pencil" /></svg>Sửa việc</a>
+        }
+        @if (!j.closed && !j.active.length) {
+          <button type="button" class="btn" (click)="pin()"><img class="coin" src="assets/clean/antxu.png" alt="" />Ghim đầu danh sách · 20 Xu</button>
+        }
+      </div>
+      <a class="reportlink" routerLink="/help"><svg class="i"><use href="#shield" /></svg>Báo cáo vấn đề với việc này</a>
+    </aside>
+  </div>
+} @else if (ready()) {
+  <div class="empty2"><img src="assets/clean/peek.png" alt="" />Không tìm thấy việc này.<br /><a class="btn" routerLink="/seller/orders">Về Giao dịch</a></div>
+} @else {
+  <p class="muted">Đang tải…</p>
+}
