@@ -151,3 +151,8 @@
 /* các mục con rộng bằng nhau và thẳng lề với nút quay lại + tiêu đề */
 .one, .one.wide { max-width: 760px; }
 :host { min-height: calc(100vh - 160px); }
+/* ảnh đại diện cao bằng khối chữ bên cạnh (tên + số điện thoại + khu vực + Xu) */
+.idcard .avbig { width: 136px; height: 136px; }
+.idcard .avbig ::ng-deep .av { border-radius: 32px; }
+.idtx { gap: 8px; }
+.idtx { gap: 11px; align-self: center; }
