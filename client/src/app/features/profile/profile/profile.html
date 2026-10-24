@@ -110,8 +110,7 @@
       }
       @case ('password') {
         <div class="one">
-          <form class="fcard" [formGroup]="passForm" (ngSubmit)="savePassword()" novalidate>
-            <h2>Đổi mật khẩu</h2>
+          <form class="fcard pwform" [formGroup]="passForm" (ngSubmit)="savePassword()" novalidate>
             <div class="field">
               <label for="pcur">Mật khẩu hiện tại</label>
               <app-password-input inputId="pcur" autocomplete="current-password" formControlName="current" [invalid]="passTried() && passForm.controls.current.invalid" />

@@ -183,3 +183,13 @@
 /* khu vực: danh sách rộng hết khung, không lặp tiêu đề */
 .areas { max-width: none; margin-top: 4px; }
 .fcard > .lead { margin: 0 0 14px; }
+
+/* Đổi mật khẩu gọn: form hẹp, ô thấp, khoảng cách vừa */
+.pwform { max-width: 440px; }
+.pwform .field { margin-bottom: 12px; gap: 5px; }
+.pwform .field > label { font-size: 14px; }
+.pwform ::ng-deep .field input.field, .pwform ::ng-deep input.field { height: 42px; font-size: 14.5px; }
+.pwform ::ng-deep .eye { height: 42px; }
+.pwform .go { height: 42px; padding: 0 22px; font-size: 14.5px; margin-top: 4px; }
+.pwform .field { margin: 0 0 10px; padding: 0; }
+.pwform { padding: 20px 22px 22px; }
