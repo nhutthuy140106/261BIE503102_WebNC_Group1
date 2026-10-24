@@ -439,3 +439,5 @@
 .row.on span { font-weight: 600; }
 .row small { margin-left: auto; font-size: 13.5px; font-weight: 600; color: var(--smoke); white-space: nowrap; }
 .qtyrow { margin-top: 18px; padding-top: 18px; font-size: 15px; font-weight: 700; }
+/* chỉ tick, không tô nền dòng đang chọn */
+.row:hover, .row.on { background: none; }
