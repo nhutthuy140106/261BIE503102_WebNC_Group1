@@ -281,7 +281,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   protected setQty(d: OrderDraft, n: number): void {
-    d.qty.set(Math.min(d.mainCap(), Math.max(d.tpl.qty?.min ?? 1, n)));
+    d.qty.set(Math.min(d.maxQty(), Math.max(d.tpl.qty?.min ?? 1, n)));
   }
 
   protected onPhoto(d: OrderDraft, label: string, e: Event): void {
@@ -422,7 +422,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const placeText = place.mode === 'choice' ? place.choices?.[d.place()]?.[0] : place.mode === 'seller' ? place.where : undefined;
     const body: CreateOrderBody = {
       postId: p._id,
-      quantity: d.totalQty(),
+      quantity: d.qty(),
       selections: d.tpl.opts.map((g) => ({ group: g.name, choices: [parseChoice(d.opt()[g.name] ?? '').name] })),
       answers: d.tpl.qs.map((q) => ({ question: q.label, value: d.lines().find((l) => l.startsWith(q.label + ': '))?.slice(q.label.length + 2) ?? '' })).filter((x) => x.value),
       fulfillment: d.needsAddress() ? 'delivery' : 'pickup',
@@ -435,8 +435,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
       total: d.grand(),
       detail: {
         lines: d.lines(),
-        quantity: d.tpl.qty ? d.totalQty() : undefined,
-        portions: d.portionRows().length ? d.portionRows() : undefined,
+        quantity: d.tpl.qty ? d.qty() : undefined,
         quantityLabel: d.tpl.qty ? d.tpl.qty.label.replace(/\s*\(.*\)/, '') : undefined,
         unit: d.tpl.qty ? d.tpl.price.unit : undefined,
         address: d.needsAddress() && a ? a.name + ' · ' + a.phone + '\n' + this.addressText(a) : place.mode === 'seller' ? place.where : undefined,
