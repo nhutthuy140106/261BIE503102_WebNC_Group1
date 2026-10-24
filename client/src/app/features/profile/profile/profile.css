@@ -193,3 +193,10 @@
 .pwform .go { height: 42px; padding: 0 22px; font-size: 14.5px; margin-top: 4px; }
 .pwform .field { margin: 0 0 10px; padding: 0; }
 .pwform { padding: 20px 22px 22px; }
+
+/* Đổi mật khẩu: cả tiêu đề và khung cùng hẹp 440px và nằm giữa trang */
+.subhead.narrow { max-width: 440px; }
+.pwform { margin: 0 auto; }
+.one:has(.pwform) { max-width: 440px; }
+.one:has(.pwform) { width: 100%; margin: 0 auto; }
+.pwform { width: 100%; }

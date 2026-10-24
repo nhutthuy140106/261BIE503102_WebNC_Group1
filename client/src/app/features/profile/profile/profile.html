@@ -49,7 +49,7 @@
       </section>
     </div>
   } @else {
-    <div class="subhead">
+    <div class="subhead" [class.narrow]="tab() === 'password'">
       <button type="button" class="backt" (click)="go('overview')"><svg class="i"><use href="#right" /></svg>Tài khoản</button>
       <h1>{{ titleOf(tab()) }}</h1>
     </div>
