@@ -17,7 +17,7 @@
         @if (p.images.length) {
           <img [src]="p.images[0]" alt="" />
         } @else {
-          <span class="jb">Việc</span>
+          <span class="jb"><app-avatar [src]="p.sellerAvatar" [name]="p.sellerName" [size]="44" /><i class="jbadge"><svg class="i"><use href="#hand" /></svg></i></span>
         }
         <div class="t">
           <b>{{ p.title }}</b>
