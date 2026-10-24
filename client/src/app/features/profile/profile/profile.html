@@ -15,6 +15,7 @@
         </div>
         <div class="idtx">
           <h1>{{ u.fullName }}</h1>
+          <p><svg class="i"><use href="#p-phone" /></svg>{{ u.username }}</p>
           <p><svg class="i"><use href="#pin" /></svg>{{ area.current() }}</p>
           <a routerLink="/xu" class="xupill"><img src="assets/clean/antxu.png" alt="" />{{ xu.balance() }} Xu</a>
         </div>
