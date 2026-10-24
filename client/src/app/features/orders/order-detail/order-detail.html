@@ -6,7 +6,6 @@
   <div class="dhead">
     <div>
       <div class="chips">
-        @if (job(); as j) { <span class="chip"><svg class="i"><use [attr.href]="'#' + (j.kind === 'food' ? 'bellhop' : j.kind === 'goods' ? 'bag' : j.kind === 'service' ? 'tap' : 'hand')" /></svg>{{ j.category ?? kindName(j.kind) }}</span> }
         <span class="chip">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span>
         <span class="code">Mã đơn {{ o.code }} · {{ placedAt(o) }}</span>
       </div>
