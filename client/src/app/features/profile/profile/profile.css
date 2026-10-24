@@ -156,3 +156,26 @@
 .idcard .avbig ::ng-deep .av { border-radius: 32px; }
 .idtx { gap: 8px; }
 .idtx { gap: 11px; align-self: center; }
+
+/* hồ sơ: lưới hai cột kiểu Shopee, thêm email / ngày sinh / giới tính / giới thiệu */
+.one { display: grid; gap: 16px; }
+.fcard + .fcard { margin-top: 0; }
+.fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
+.fgrid .span2 { grid-column: 1 / -1; }
+.fcard .opt { font-weight: 400; color: var(--smoke); font-size: 13px; }
+.fcard .ta { height: auto; padding: 12px 14px; resize: vertical; line-height: 1.5; }
+.fcard .hint.cnt { margin-top: 2px; }
+.gseg { display: flex; gap: 10px; flex-wrap: wrap; }
+.gseg button { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 20px 0 14px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font-size: 14.5px; font-weight: 500; }
+.gseg button i { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #B9BEC8; }
+.gseg button.on { border-color: var(--ink); font-weight: 600; }
+.gseg button.on i { border-color: var(--accent); background: radial-gradient(var(--accent) 42%, transparent 46%); }
+.ffoot { display: flex; justify-content: flex-end; margin-top: 4px; }
+.kv { display: grid; }
+.kv li { display: grid; grid-template-columns: 180px 1fr auto; gap: 12px; align-items: center; padding: 14px 0; border-top: 1px solid var(--border); font-size: 14.5px; }
+.kv li:first-child { border-top: 0; padding-top: 4px; }
+.kv span { color: var(--smoke); }
+.kv b { font-weight: 600; }
+.linkb { background: none; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; font-size: 14px; }
+@media (max-width: 640px) { .fgrid { grid-template-columns: 1fr; } .kv li { grid-template-columns: 1fr auto; } .kv span { grid-column: 1 / -1; } }
+.fgrid .field { align-content: start; margin-bottom: 18px; }

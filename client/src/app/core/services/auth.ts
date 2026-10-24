@@ -98,7 +98,7 @@ export class AuthService {
   }
 
   /** Cập nhật hồ sơ (tên, ảnh). Mock lưu trong phiên; API thật chờ máy chủ có điểm cuối. */
-  updateProfile(body: { fullName: string; avatar?: string }): Observable<User> {
+  updateProfile(body: Partial<Pick<User, 'fullName' | 'avatar' | 'email' | 'gender' | 'birthday' | 'bio'>>): Observable<User> {
     const cur = this.currentUser();
     if (!cur) return throwError(() => new AppError('Bạn cần đăng nhập.', 401, 'UNAUTHORIZED'));
     if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));

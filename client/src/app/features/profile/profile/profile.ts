@@ -92,7 +92,17 @@ export class Profile implements OnInit {
   // ----- chỉnh sửa hồ sơ -----
   protected readonly profileForm = new FormGroup({
     fullName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2), Validators.maxLength(40)] }),
+    email: new FormControl('', { nonNullable: true, validators: [Validators.email, Validators.maxLength(80)] }),
+    gender: new FormControl<'male' | 'female' | 'other' | ''>('', { nonNullable: true }),
+    birthday: new FormControl('', { nonNullable: true }),
+    bio: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(200)] }),
   });
+  protected readonly genders: { key: 'male' | 'female' | 'other'; label: string }[] = [
+    { key: 'male', label: 'Nam' },
+    { key: 'female', label: 'Nữ' },
+    { key: 'other', label: 'Khác' },
+  ];
+  protected readonly maxBirthday = new Date().toISOString().slice(0, 10);
   protected readonly newAvatar = signal<string | null>(null);
   protected readonly avMenu = signal(false);
   protected readonly avView = signal(false);
@@ -132,7 +142,8 @@ export class Profile implements OnInit {
   protected saveProfile(): void {
     if (this.profileForm.invalid) return this.profileForm.markAllAsTouched();
     this.saving.set(true);
-    this.auth.updateProfile({ fullName: this.profileForm.controls.fullName.value.trim(), avatar: this.auth.currentUser()?.avatar }).subscribe({
+    const v = this.profileForm.getRawValue();
+    this.auth.updateProfile({ fullName: v.fullName.trim(), email: v.email.trim() || undefined, gender: v.gender || undefined, birthday: v.birthday || undefined, bio: v.bio.trim() || undefined }).subscribe({
       next: () => {
         this.saving.set(false);
         this.newAvatar.set(null);
@@ -178,7 +189,8 @@ export class Profile implements OnInit {
   }
 
   ngOnInit(): void {
-    this.profileForm.controls.fullName.setValue(this.auth.currentUser()?.fullName ?? '');
+    const me = this.auth.currentUser();
+    this.profileForm.patchValue({ fullName: me?.fullName ?? '', email: me?.email ?? '', gender: me?.gender ?? '', birthday: me?.birthday ?? '', bio: me?.bio ?? '' });
     this.route.queryParamMap.subscribe((p) => {
       const t = p.get('tab') as Tab | null;
       this.tab.set(t && this.menu.some((m) => m.key === t) ? t : 'overview');
