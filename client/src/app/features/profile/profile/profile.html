@@ -81,13 +81,9 @@
                 <label for="birthday">Ngày sinh</label>
                 <input id="birthday" class="tx" type="date" formControlName="birthday" [max]="maxBirthday" />
               </div>
-              <div class="field span2">
-                <label>Giới tính</label>
-                <div class="gseg">
-                  @for (g of genders; track g.key) {
-                    <button type="button" [class.on]="profileForm.controls.gender.value === g.key" (click)="profileForm.controls.gender.setValue(profileForm.controls.gender.value === g.key ? '' : g.key)"><i></i>{{ g.label }}</button>
-                  }
-                </div>
+              <div class="field">
+                <label for="gender">Giới tính</label>
+                <app-select inputId="gender" formControlName="gender" [options]="genderOptions" placeholder="Chọn giới tính" />
               </div>
               <div class="field span2">
                 <label for="bio">Giới thiệu bản thân <span class="opt">(không bắt buộc)</span></label>

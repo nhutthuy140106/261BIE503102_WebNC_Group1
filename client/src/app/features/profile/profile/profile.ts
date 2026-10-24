@@ -102,6 +102,7 @@ export class Profile implements OnInit {
     { key: 'female', label: 'Nữ' },
     { key: 'other', label: 'Khác' },
   ];
+  protected readonly genderOptions = [{ value: 'male', label: 'Nam' }, { value: 'female', label: 'Nữ' }, { value: 'other', label: 'Khác' }];
   protected readonly maxBirthday = new Date().toISOString().slice(0, 10);
   protected readonly newAvatar = signal<string | null>(null);
   protected readonly avMenu = signal(false);
