@@ -305,3 +305,7 @@ a.pbtn.link { text-decoration: none; }
 .arow2:has(.pbtn) { grid-auto-flow: column; grid-auto-columns: auto; grid-template-columns: 1fr auto; }
 .arow2:has(.pbtn) .pbtn:only-of-type { grid-column: 1; }
 .apanel .arow2 + .arow2 { margin-top: 10px; }
+/* hai nút cùng hàng: bằng nhau về rộng, cao, bo góc, cỡ chữ */
+.arow2:has(.pbtn) { grid-template-columns: 1fr 1fr; grid-auto-flow: row; }
+.arow2:has(.pbtn) .pbtn, .arow2:has(.pbtn) .gbtn { width: 100%; height: 46px; border-radius: 12px; font-size: 15px; padding: 0 12px; }
+.arow2 .pbtn + .gbtn { width: 100%; padding: 0 12px; }
