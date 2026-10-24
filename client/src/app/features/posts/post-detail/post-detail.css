@@ -415,3 +415,8 @@
 /* icon ngày và giờ cùng nằm bên phải ô, cùng cỡ, cùng màu nhạt */
 .datebtn svg { color: var(--fog); width: 20px; height: 20px; flex: none; }
 .clk { color: var(--fog); width: 20px; height: 20px; right: 14px; top: 12px; }
+
+/* icon ngày và giờ nằm bên trái ô, đậm hơn một chút */
+.datebtn svg { color: #4A5368; width: 20px; height: 20px; }
+.timein { padding: 0 14px 0 42px; }
+.clk { left: 14px; right: auto; top: 12px; color: #4A5368; width: 20px; height: 20px; }

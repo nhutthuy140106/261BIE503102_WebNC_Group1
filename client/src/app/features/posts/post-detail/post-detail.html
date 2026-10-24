@@ -256,7 +256,7 @@
                   <span class="when">
                     <span class="datebox">
                       <button type="button" class="datebtn" [class.open]="calOpen()" (click)="toggleCal(d)">
-                        <span>{{ dateLabel(d.date()) }}</span><svg class="i"><use href="#l-cal" /></svg>
+                        <svg class="i"><use href="#l-cal" /></svg><span>{{ dateLabel(d.date()) }}</span>
                       </button>
                       @if (calOpen()) {
                         <span class="cal" role="dialog" aria-label="Chọn ngày">
