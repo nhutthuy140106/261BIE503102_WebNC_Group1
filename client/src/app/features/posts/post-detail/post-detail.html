@@ -93,13 +93,16 @@
           <div class="rows">
             <h4>{{ g.name }}</h4>
             @for (c of g.choices; track c) {
-              <div class="row dish" [class.on]="d.dishQty(c) > 0">
+              <div class="row dish" role="checkbox" tabindex="0" [attr.aria-checked]="d.dishQty(c) > 0" [class.on]="d.dishQty(c) > 0" (click)="d.toggleDish(c)" (keydown.enter)="d.toggleDish(c)" (keydown.space)="d.toggleDish(c); $event.preventDefault()">
+                <i class="check"></i>
                 <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }
-                <span class="qty sm">
-                  <button type="button" [disabled]="d.dishQty(c) <= 0" (click)="d.setDish(c, d.dishQty(c) - 1)" aria-label="Giảm">−</button>
-                  <b>{{ d.dishQty(c) }}</b>
-                  <button type="button" [disabled]="d.totalDishes() >= d.maxQty()" (click)="d.setDish(c, d.dishQty(c) + 1)" aria-label="Tăng">+</button>
-                </span>
+                @if (d.dishQty(c) > 0) {
+                  <span class="qty sm" (click)="$event.stopPropagation()">
+                    <button type="button" [disabled]="d.dishQty(c) <= 1" (click)="d.setDish(c, d.dishQty(c) - 1)" aria-label="Giảm">−</button>
+                    <b>{{ d.dishQty(c) }}</b>
+                    <button type="button" [disabled]="d.totalDishes() >= d.maxQty()" (click)="d.setDish(c, d.dishQty(c) + 1)" aria-label="Tăng">+</button>
+                  </span>
+                }
               </div>
             }
           </div>

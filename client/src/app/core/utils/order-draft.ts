@@ -65,6 +65,11 @@ export class OrderDraft {
     return this.dishes()[raw] ?? 0;
   }
 
+  /** Tick một món = lấy 1 phần; bỏ tick = không lấy (nếu còn chỗ trong giới hạn) */
+  toggleDish(raw: string): void {
+    this.setDish(raw, this.dishQty(raw) > 0 ? 0 : 1);
+  }
+
   /** Tăng / giảm số lượng một món; tổng không vượt giới hạn của bài */
   setDish(raw: string, n: number): void {
     const others = this.totalDishes() - this.dishQty(raw);
