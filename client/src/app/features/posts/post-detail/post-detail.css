@@ -495,3 +495,7 @@
 .modal header .x { margin-right: -10px; }
 .modal header { padding: 22px 22px 14px; align-items: center; }
 .modal header .x { display: grid; place-items: center; width: 34px; height: 34px; line-height: 1; padding: 0; align-self: center; transform: translateY(-4px); }
+/* khoảng cách tiêu đề → đường kẻ → dòng địa chỉ gọn hơn */
+.modal header { padding: 16px 22px 10px; }
+.ck .cs:first-child { padding-top: 0; }
+.ck .cs:first-child .crow:first-child { padding-top: 10px; }
