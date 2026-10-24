@@ -21,7 +21,7 @@ export const ORDER_ACTION = {
   rate: 'Đánh giá',
   start: 'Bắt đầu làm',
   finish: 'Báo hoàn thành',
-  confirmPaid: 'Xác nhận đã nhận tiền',
+  confirmPaid: 'Đã nhận tiền',
   unpaid: 'Chưa nhận được tiền',
   issueResolved: 'Xác nhận đã xử lý',
   issueDrop: 'Đóng yêu cầu',

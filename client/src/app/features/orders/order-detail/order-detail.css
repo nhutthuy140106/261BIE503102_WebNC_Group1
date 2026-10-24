@@ -330,3 +330,5 @@ a.pbtn.link { text-decoration: none; }
 .rq1 p { margin: 0; line-height: 1.55; font-size: 14.5px; overflow-wrap: anywhere; }
 .rqchips { display: flex; flex-wrap: wrap; gap: 8px; }
 .rqchips span { padding: 6px 14px; border-radius: 999px; background: #F0F2F5; font-size: 14px; font-weight: 600; }
+/* chữ trên nút không bao giờ xuống dòng */
+.arow2 .pbtn, .arow2 .gbtn, .btns button { white-space: nowrap; }
