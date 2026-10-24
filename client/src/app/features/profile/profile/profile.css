@@ -180,3 +180,6 @@
 @media (max-width: 640px) { .fgrid { grid-template-columns: 1fr; } .kv li { grid-template-columns: 1fr auto; } .kv span { grid-column: 1 / -1; } }
 .fgrid .field { align-content: start; margin-bottom: 18px; }
 .hint .hl { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+/* khu vực: danh sách rộng hết khung, không lặp tiêu đề */
+.areas { max-width: none; margin-top: 4px; }
+.fcard > .lead { margin: 0 0 14px; }

@@ -1,5 +1,4 @@
 <section>
-  <h2>Bài đã lưu</h2>
   <div class="filters">
     @for (f of filters; track f.key) {
       <button type="button" class="btn ghost" [class.active]="filter() === f.key" (click)="filter.set(f.key)">{{ f.label }}</button>
