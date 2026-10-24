@@ -79,6 +79,14 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   });
   protected readonly voucherOpen = signal(false);
   protected readonly lightbox = signal<number | null>(null);
+  /** Ảnh đang xem ở bộ ảnh (kiểu Shopee: ảnh lớn + dải ảnh nhỏ bên dưới) */
+  protected readonly galIdx = signal(0);
+
+  protected galStep(n: number): void {
+    const len = this.view()?.images.length ?? 1;
+    this.galIdx.update((i) => (i + n + len) % len);
+  }
+
   protected readonly reviewsOpen = signal(false);
   protected readonly rvFilter = signal<RvFilter>('all');
   protected readonly tried = signal(false);

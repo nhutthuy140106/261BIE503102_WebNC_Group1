@@ -26,12 +26,21 @@
     </div>
   </div>
 
-  <div class="gallery" [class.one]="v.images.length < 3">
-    @for (src of v.images; track src; let i = $index) {
-      <img [src]="src" [alt]="p.title" (click)="openLightbox(i)" />
-    }
+  <div class="gal">
+    <div class="gmain">
+      <img [src]="v.images[galIdx()]" [alt]="p.title" (click)="openLightbox(galIdx())" />
+      @if (v.images.length > 1) {
+        <button type="button" class="gnav prev" aria-label="Ảnh trước" (click)="galStep(-1)">‹</button>
+        <button type="button" class="gnav next" aria-label="Ảnh sau" (click)="galStep(1)">›</button>
+        <span class="gcount">{{ galIdx() + 1 }} / {{ v.images.length }}</span>
+      }
+    </div>
     @if (v.images.length > 1) {
-      <button type="button" class="all" (click)="openLightbox(0)"><svg class="i"><use href="#grid" /></svg>{{ v.images.length }} ảnh</button>
+      <div class="gthumbs">
+        @for (src of v.images; track src; let i = $index) {
+          <button type="button" [class.on]="i === galIdx()" (mouseenter)="galIdx.set(i)" (click)="galIdx.set(i)" [attr.aria-label]="'Ảnh ' + (i + 1)"><img [src]="src" alt="" /></button>
+        }
+      </div>
     }
   </div>
 
@@ -456,7 +465,7 @@
 
   <!-- ===== Xem ảnh lớn ===== -->
   @if (lightbox() !== null) {
-    <div class="slbl">
+    <div class="lb">
       <div class="lbtop"><span>{{ lightbox()! + 1 }} / {{ v.images.length }}</span><button type="button" class="x" (click)="lightbox.set(null)" aria-label="Đóng">✕</button></div>
       <div class="stage">
         <button type="button" class="nav prev" (click)="step(-1)" aria-label="Ảnh trước">‹</button>
