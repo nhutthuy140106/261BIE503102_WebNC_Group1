@@ -160,9 +160,9 @@ export class OrderList implements OnInit {
     return m[st] ?? '';
   }
 
-  /** Mốc thời gian ở dòng đơn: đơn đặt = lúc đặt; việc đã nhận = lúc bắt đầu gửi đề nghị (cùng một kiểu ngày giờ đầy đủ) */
+  /** Mốc thời gian ở dòng đơn, chỉ ghi ngày giờ: đơn đặt = lúc đặt; việc đã nhận = lúc bắt đầu gửi đề nghị */
   protected when(o: Order): string {
-    return (o.type === 'placed' ? 'Đặt lúc ' : 'Gửi đề nghị lúc ') + formatDateTime(o.createdAt);
+    return formatDateTime(o.createdAt);
   }
 
   ngOnInit(): void {
