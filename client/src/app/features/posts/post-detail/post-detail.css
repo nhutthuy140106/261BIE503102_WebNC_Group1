@@ -411,3 +411,7 @@
 .calfoot { display: block; text-align: right; }
 .calfoot button { color: var(--ink); font-weight: 600; padding: 4px 0 4px 8px; }
 .calfoot button:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* icon ngày và giờ cùng nằm bên phải ô, cùng cỡ, cùng màu nhạt */
+.datebtn svg { color: var(--fog); width: 20px; height: 20px; flex: none; }
+.clk { color: var(--fog); width: 20px; height: 20px; right: 14px; top: 12px; }
