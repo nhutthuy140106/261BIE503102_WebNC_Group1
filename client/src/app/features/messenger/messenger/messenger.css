@@ -232,3 +232,4 @@
 .tabs button { background: #F0F2F5; color: var(--ink); }
 .tabs button:hover { background: #E6E9EE; }
 .tabs button.on { background: var(--ink); color: #fff; }
+.thread.blank img { left: 0; width: 240px; }

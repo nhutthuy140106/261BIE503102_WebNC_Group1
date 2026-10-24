@@ -251,7 +251,7 @@ a.pbtn.link { text-decoration: none; }
 .rvstars { margin-top: 16px; text-align: center; }
 .rvstars .rate { justify-content: center; gap: 10px; }
 .rvstars .rate button { font-size: 38px; }
-.rlabel { display: block; margin-top: 4px; font-style: normal; font-size: 15px; font-weight: 600; color: #E2A33B; }
+.rlabel { display: block; margin-top: 4px; font-style: normal; font-size: 15px; font-weight: 500; color: #E2A33B; }
 .rvstars .err2 { text-align: center; }
 .rvtags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .rvtags button { height: 34px; padding: 0 14px; border: 1px solid #DADDE3; border-radius: 999px; background: #fff; font: inherit; font-size: 13.5px; color: var(--ink); }
