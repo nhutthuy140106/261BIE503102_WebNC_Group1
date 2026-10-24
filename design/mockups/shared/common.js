@@ -37,28 +37,42 @@
   });
   window.AntGo = { getArea, setArea, esc, icon, orderRef, refreshBell };
 
+  // Không gian Bán: các trang chưa dựng (bấm vào chỉ hiện thông báo) và 4 loại bài đăng (bộ nút ở trang Hôm nay)
+  const SOON = [];
+  const NEW_KINDS = [["food", "fork", "Bán đồ ăn & uống", "Món theo phần, theo ngày"], ["goods", "package", "Bán đồ dùng", "Đồ mới hoặc đã dùng"],
+    ["service", "wrench", "Đăng dịch vụ", "Bạn làm, khách đặt lịch"], ["job", "hand", "Đăng việc cần người", "Hàng xóm gửi đề nghị, bạn chọn"]];
+  window.AntGo.NEW_KINDS = NEW_KINDS;
+
   const mount = document.getElementById("siteHeader");
   if (mount) {
     // Header + footer giống hệt trang chủ (CSS ở shared/chrome.css) để mọi trang trông là một app.
     const active = mount.dataset.active || "";
+    // data-space="sell": header của không gian Bán & Đăng việc (menu riêng + nút Đăng mới, không có ô tìm kiếm phía Mua)
+    const sell = mount.dataset.space === "sell";
     if (!document.querySelector("link[href='shared/chrome.css']")) document.head.insertAdjacentHTML("beforeend", '<link rel="stylesheet" href="shared/chrome.css">');
     const q0 = new URLSearchParams(location.search).get("q") || "";
-    mount.outerHTML = `<header class="appbar"><div class="wrap bar">
+    const link = (href, key, ic, label) => `<a href="${href}" class="${active === key ? "on" : ""}" title="${label}"${SOON.includes(href) ? " data-soon" : ""}>${icon(ic)}<span class="t">${label}</span></a>`;
+    const nav = sell
+      ? link("seller.html", "today", "sun", "Hôm nay") + link("seller-orders.html", "sorders", "receipt", "Giao dịch") + link("seller-calendar.html", "calendar", "calendar", "Lịch")
+        + link("seller-posts.html", "posts", "store", "Bài đăng") + link("seller-insights.html", "insights", "chart", "Hiệu quả") + link("seller-messenger.html", "messenger", "chat", "Messenger")
+      : link("home-v5.html", "home", "home", "Trang chủ") + link("orders.html", "orders", "receipt", "Đơn hàng") + link("messenger.html", "messenger", "chat", "Messenger");
+    const middle = sell
+      ? `<span class="grow"></span>`
+      : `<div class="hsearch"><svg class="i lead"><use href="#search"/></svg><input placeholder="Tìm món ăn, đồ dùng, dịch vụ hoặc việc làm" value="${esc(q0)}"><button class="sbtn" data-voice title="Tìm bằng giọng nói">${icon("mic")}</button><button class="sbtn" data-image title="Tìm bằng hình ảnh">${icon("camera")}</button><button class="go" aria-label="Tìm">${icon("search")}</button></div>`;
+    mount.outerHTML = `<header class="appbar${sell ? " sell" : ""}"><div class="wrap bar">
       <div class="left">
-        <a class="logo" href="home-v5.html">Ant<span>Go</span></a>
-        <nav><a href="home-v5.html" class="${active === "home" ? "on" : ""}" title="Trang chủ">${icon("home")}<span class="t">Trang chủ</span></a>
-          <a href="orders.html" class="${active === "orders" ? "on" : ""}" title="Đơn hàng">${icon("receipt")}<span class="t">Đơn hàng</span></a>
-          <a href="messenger.html" class="${active === "messenger" ? "on" : ""}" title="Messenger">${icon("chat")}<span class="t">Messenger</span></a></nav>
+        <a class="logo" href="${sell ? "seller.html" : "home-v5.html"}">Ant<span>Go</span></a>
+        <nav>${nav}</nav>
       </div>
-      <div class="hsearch"><svg class="i lead"><use href="#search"/></svg><input placeholder="Tìm món ăn, đồ dùng, dịch vụ hoặc việc làm" value="${esc(q0)}"><button class="sbtn" data-voice title="Tìm bằng giọng nói">${icon("mic")}</button><button class="sbtn" data-image title="Tìm bằng hình ảnh">${icon("camera")}</button><button class="go" aria-label="Tìm">${icon("search")}</button></div>
+      ${middle}
       <div class="right">
-        <div class="role" data-role title="Đổi vai trò"><button class="on" data-v="buy">Mua</button><button data-v="sell">Bán</button></div>
+        <div class="role" data-role title="Đổi vai trò"><button class="${sell ? "" : "on"}" data-v="buy">Mua</button><button class="${sell ? "on" : ""}" data-v="sell">Bán</button></div>
         <button class="hbtn" title="Khu vực đang xem">${icon("pin")}<span class="t">${getArea()}</span><svg class="i chev"><use href="#chev"/></svg></button>
         <span class="sep"></span>
         <button class="xubtn" id="xuBtn" title="AntXu của bạn"><img class="coin" src="assets/clean/antxu.png?v=2" alt="">120 Xu</button>
         <button class="iconbtn" id="savedBtn" title="Đã lưu">${icon("heart")}<span class="cnt" id="savedCnt"></span></button>
         <button class="iconbtn" title="Thông báo">${icon("bell")}</button>
-        <span class="av" title="Tài khoản"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70" alt="Tài khoản"></span>
+        <span class="av" title="Tài khoản"><img src="https://images.unsplash.com/photo-${sell ? "1508214751196-bcfd4ca60f91" : "1494790108377-be9c29b29330"}?w=80&h=80&fit=crop&q=70" alt="Tài khoản"></span>
       </div>
     </div></header>`;
     const main = document.querySelector("main");
@@ -72,20 +86,16 @@
       </div>
       <div class="bottom"><div class="wrap"><span>© 2026 AntGo</span><a>Điều khoản</a><a>Quyền riêng tư</a><span class="end">${icon("pin")}Đang xem: <span data-area-label>${getArea()}</span> · Tiếng Việt</span></div></div>
     </footer>`);
-    // Mua | Bán: không gian Bán chưa dựng
-    document.querySelectorAll(".appbar [data-role] button").forEach(b => b.addEventListener("click", () => {
-      if (b.dataset.v === "sell") toast("Không gian Bán & Đăng việc đang được làm");
-    }));
     // giọng nói (Chrome/Edge) và hình ảnh (mô phỏng) như trang chủ
-    const hs = document.querySelector(".appbar .hsearch"), hin = hs.querySelector("input");
-    hs.querySelector("[data-voice]").addEventListener("click", e => {
+    const hs = document.querySelector(".appbar .hsearch"), hin = hs && hs.querySelector("input");
+    if (hs) hs.querySelector("[data-voice]").addEventListener("click", e => {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition, btn = e.currentTarget;
       if (!SR) return toast("Trình duyệt này chưa hỗ trợ tìm bằng giọng nói");
       const rec = new SR(); rec.lang = "vi-VN"; btn.classList.add("rec");
       rec.onresult = ev => { hin.value = ev.results[0][0].transcript; location.href = "search.html?q=" + encodeURIComponent(hin.value); };
       rec.onend = () => btn.classList.remove("rec"); rec.start();
     });
-    hs.querySelector("[data-image]").addEventListener("click", () => toast("Tìm bằng ảnh cần máy chủ nhận dạng — bản mẫu chưa hỗ trợ"));
+    if (hs) hs.querySelector("[data-image]").addEventListener("click", () => toast("Tìm bằng ảnh cần máy chủ nhận dạng — bản mẫu chưa hỗ trợ"));
     // ngăn kéo Đã lưu + Xu dùng chung
     if (!document.querySelector("script[src='shared/drawers.js']")) { const sc = document.createElement("script"); sc.src = "shared/drawers.js"; document.body.appendChild(sc); }
   }
@@ -93,8 +103,26 @@
     el.textContent = t; el.classList.add("show"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 2400); }
   window.AntGo.toast = toast;
 
+  // Mua | Bán ở mọi trang (header dựng sẵn lẫn header riêng của trang cũ): chuyển hẳn sang trang chủ của không gian kia
+  document.querySelectorAll("header [data-role] button").forEach(b => b.addEventListener("click", () => {
+    const toSell = b.dataset.v === "sell", inSell = !!document.querySelector(".appbar.sell");
+    if (toSell !== inSell) location.href = toSell ? "seller.html" : "home-v5.html";
+  }));
+  // Footer mọi trang (kể cả trang cũ có footer riêng) + nút "Đăng việc cần người" ở trang chủ → đúng trang phía Bán
+  const SELL_LINKS = { "Đăng bài bán": "seller-post-form.html?type=food", "Đăng việc cần người": "seller-post-form.html?type=job", "Quảng bá bằng AntXu": "seller-posts.html?status=promo", "Hướng dẫn người bán": "seller.html?new=1" };
+  const wireSellLinks = () => {
+    document.querySelectorAll("footer a").forEach(a => { const href = SELL_LINKS[a.textContent.trim()]; if (href && !a.getAttribute("href")) a.href = href; });
+    const ep = document.getElementById("earnPost"); if (ep) ep.onclick = () => { location.href = "seller-post-form.html?type=job"; };
+  };
+  wireSellLinks(); document.addEventListener("DOMContentLoaded", wireSellLinks);
+  // Trang phía Bán chưa dựng: báo thay vì mở trang trống
+  document.addEventListener("click", e => {
+    const a = e.target.closest("a[data-soon]");
+    if (a) { e.preventDefault(); toast("Màn này của không gian Bán đang được làm"); }
+  });
+
   // Các trang cũ đã có header riêng: nối đúng nơi đến, không đổi bố cục đã duyệt.
-  document.querySelectorAll("header nav a[title='Messenger']").forEach(a => { a.href = "messenger.html"; a.querySelector(".n")?.remove(); });
+  document.querySelectorAll("header:not(.sell) nav a[title='Messenger']").forEach(a => { a.href = "messenger.html"; a.querySelector(".n")?.remove(); });
   document.querySelectorAll("header .right .iconbtn[title='Thông báo']").forEach(b => { b.onclick = () => location.href = "notifications.html"; b.querySelector(".d")?.remove(); });
   refreshBell();
   document.querySelectorAll("header .right .av[title='Tài khoản']").forEach(a => { a.style.cursor = "pointer"; a.setAttribute("role", "link"); a.setAttribute("tabindex", "0"); a.onclick = () => location.href = "profile.html"; a.onkeydown = e => { if (e.key === "Enter") a.click(); }; });

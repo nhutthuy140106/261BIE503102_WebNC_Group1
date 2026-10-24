@@ -72,3 +72,6 @@
 .appfoot .bottom .end { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .appfoot .bottom .end svg { width: 14px; height: 14px; }
 .appbar ~ main { min-height: 0; }
+
+/* Không gian Bán (header có class .sell): khoảng trống thay ô tìm kiếm phía Mua */
+.appbar .grow { flex: 1 1 auto; }

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AntGo — Bán &amp; Đăng việc · Messenger</title>
+<link rel="stylesheet" href="shared/base.css"><style>
+  /* Messenger phía Bán — cùng giao diện messenger.html (phía Mua) nhưng là hộp tin của người bán:
+     khách hỏi về đơn, người nhận việc hỏi về việc; thẻ ngữ cảnh mở đúng giao dịch; mẫu trả lời nhanh. */
+  /* vừa một màn hình: trang không cuộn, chỉ danh sách và nội dung hội thoại cuộn */
+  main.chatpage{min-height:0;padding-top:16px;padding-bottom:16px}
+  @media(min-width:761px){body.fit{height:100vh;overflow:hidden;display:flex;flex-direction:column}body.fit>main{flex:1;min-height:0;width:100%;display:flex;flex-direction:column}body.fit .appfoot{display:none}body.fit .chat-layout{flex:1;height:auto;min-height:0;grid-template-rows:minmax(0,1fr)}body.fit .chat-list,body.fit .chat-main{min-height:0}}
+  .chat-layout{display:grid;grid-template-columns:300px minmax(0,1fr);height:calc(100vh - 64px - 32px);min-height:460px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff}
+  .chat-list{border-right:1px solid var(--border);display:flex;flex-direction:column;min-width:0}
+  .chat-list-head{padding:14px 16px;border-bottom:1px solid var(--border)}
+  .chat-list-head h2{font-size:17px;margin:0 0 10px}.chat-list-head .input{height:38px}.chat-list-head input{width:100%}
+  .tabs{display:flex;gap:6px;margin-top:10px}
+  .tabs button{height:30px;padding:0 10px;white-space:nowrap;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12.5px;font-weight:600}
+  .tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .thread-list{overflow:auto;flex:1}
+  .thread{width:100%;display:flex;align-items:center;gap:10px;padding:11px 16px;border:0;border-bottom:1px solid var(--border);background:#fff;text-align:left}
+  .thread:hover,.thread.on{background:var(--soft)}
+  .thread img{width:38px;height:38px;border-radius:50%;object-fit:cover;flex:none}
+  .thread .text{min-width:0;flex:1}.thread b,.thread small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .thread small{color:var(--smoke);margin-top:2px}.thread .ctx{display:block;font-size:11.5px;color:var(--fog);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .thread .when{align-self:flex-start;display:grid;justify-items:end;gap:6px;font-size:11.5px;color:var(--fog);white-space:nowrap}
+  .thread .when i{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .thread.unread b{font-weight:700}.thread.unread small{color:var(--ink);font-weight:500}
+  .chat-main{display:flex;flex-direction:column;min-width:0}
+  .chat-top{flex:none;padding:10px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+  .chat-top img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+  .chat-top h2{font-size:17px;margin:0}.chat-top small{color:var(--smoke)}
+  .chat-top .acts{margin-left:auto;display:flex;gap:8px}.chat-top .acts .btn{height:36px}
+  .messages{flex:1;min-height:0;overflow:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;background:#FFFDFC}
+  .context-card{align-self:center;width:100%;max-width:540px;display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:#fff;font-size:13px;margin-bottom:6px}
+  .context-card:hover{background:var(--soft)}.context-card img,.context-card .th{width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none;background:var(--soft);display:grid;place-items:center}
+  .context-card .th svg{width:20px;height:20px}
+  .context-card span{flex:1;min-width:0}.context-card b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.context-card small{color:var(--smoke)}
+  .context-card>svg{width:18px;height:18px;color:var(--smoke)}
+  .stat{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;white-space:nowrap}
+  .stat::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .stat.act{color:var(--accent)}.stat.go{color:#2E7D4F}.stat.done{color:var(--smoke)}.stat.off{color:var(--fog)}.stat.wait{color:#A86A12}
+  .bubble{max-width:min(68%,520px);align-self:flex-end;background:var(--ink);color:#fff;padding:10px 14px;border-radius:14px 14px 3px 14px;white-space:pre-wrap;overflow-wrap:anywhere}
+  .bubble small{display:block;color:#d6dbe5;text-align:right;margin-top:4px;font-size:11px}
+  .bubble.them{align-self:flex-start;background:#fff;color:var(--ink);border:1px solid var(--border);border-radius:14px 14px 14px 3px}
+  .bubble.them small{color:var(--fog);text-align:left}
+  .quick{flex:none;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 18px 0;border-top:1px solid var(--border)}.quick::-webkit-scrollbar{display:none}
+  .quick button{flex:none;height:30px;padding:0 12px;white-space:nowrap;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12.5px;font-weight:600;color:var(--ink)}
+  .quick button:hover{background:var(--soft)}
+  .quick .lb{flex:none;font-size:12px;color:var(--smoke);align-self:center;margin-right:4px}
+  .compose{flex:none;padding:10px 18px 14px;display:flex;align-items:flex-end;gap:10px}
+  .compose textarea{flex:1;height:44px;min-height:44px;max-height:120px;resize:none;padding-top:11px;line-height:1.4}.compose .btn{height:44px}
+  .note{align-self:center;font-size:12px;color:var(--fog)}
+  @media(max-width:760px){.chat-layout{grid-template-columns:1fr;height:auto}.chat-list{max-height:240px;border-right:0;border-bottom:1px solid var(--border)}.chat-main{min-height:520px}.bubble{max-width:88%}.chat-top .acts{display:none}}
+</style></head><body class="fit">
+<div id="siteHeader" data-space="sell" data-active="messenger"></div><main class="wrap chatpage">
+<div class="chat-layout"><aside class="chat-list"><div class="chat-list-head"><h2>Messenger</h2><input id="find" class="input" placeholder="Tìm người hoặc nội dung">
+  <div class="tabs" id="tabs"><button data-t="all" class="on">Tất cả</button><button data-t="order">Khách đặt</button><button data-t="job">Người nhận việc</button></div></div><div id="threads" class="thread-list"></div></aside>
+<section class="chat-main" id="main"></section></div>
+</main>
+<script src="shared/icons.js"></script><script src="shared/common.js"></script><script src="shared/seller-data.js"></script><script>
+(() => {
+  const A = AntSeller, esc = AntGo.esc, icon = AntGo.icon, $ = id => document.getElementById(id);
+  const { U, F, AV, KIND } = A;
+  const S = A.load();
+  const KEY = "antgo_seller_chats", q = new URLSearchParams(location.search);
+  // Hội thoại mẫu của Bếp Cô Lan (me = người bán). ctx: {t:"order", id} hoặc {t:"job", id}
+  const SEED = [
+    { id: "c-minh", name: "Minh", av: AV.minh, unread: 1, ctx: { t: "order", id: "o3024" }, messages: [{ from: "them", text: "Cô ơi cho con ít cơm, nhiều rau nha. 11:45 con ở nhà.", time: "11:03" }] },
+    { id: "c-ha", name: "Thu Hà", av: AV.ha, unread: 1, ctx: { t: "order", id: "o3025" }, messages: [
+      { from: "them", text: "Chị ơi 6h chiều nay em qua xem nồi chiên được không ạ? Em muốn chạy thử trước.", time: "10:41" }] },
+    { id: "c-thuy", name: "Ngọc Thủy", av: AV.thuy, ctx: { t: "order", id: "o3012" }, messages: [
+      { from: "them", text: "Cô ơi cho con ít cay một phần nha, phần còn lại bình thường.", time: "9:42" },
+      { from: "me", text: "Được con, cô ghi chú rồi. 11:30 cô giao tận cửa nha.", time: "9:51" }] },
+    { id: "c-hoa", name: "Chị Hoa", av: AV.hoa, ctx: { t: "order", id: "s0412" }, messages: [
+      { from: "them", text: "Cô Lan ơi, thứ Bảy nhà chị 8 người, cô nấu giúp 5 món nhé. Thực đơn cô gợi ý giúp chị.", time: "9:16" }] },
+    { id: "c-khoa", name: "Minh Khoa", av: AV.khoa, ctx: { t: "job", id: "j-giao" }, messages: [
+      { from: "them", text: "Chị ơi em có xe đạp thôi, giao trong khu được không ạ?", time: "Hôm qua" }] },
+    { id: "c-quoc", name: "Quốc Anh", av: AV.quoc, ctx: { t: "job", id: "j-cho" }, messages: [
+      { from: "them", text: "Em mua đủ rồi nhé chị, hóa đơn 1.240.000đ em gửi trong phần báo xong.", time: "7:12" },
+      { from: "me", text: "Cảm ơn em, chị kiểm tra rồi xác nhận liền.", time: "7:20" }] },
+  ];
+  const QUICK = {
+    order: ["Cảm ơn bạn, mình nhận đơn rồi nhé!", "Đơn đang chuẩn bị, khoảng 15 phút nữa giao.", "Mình tới sảnh rồi, bạn xuống nhận giúp nhé.", "Xin lỗi bạn, món này hôm nay hết rồi."],
+    job: ["Được em, cứ làm như mô tả nhé.", "Em có mặt ở bếp lúc 10:55 giúp chị.", "Chị đã gửi địa chỉ chính xác trong trang việc.", "Cảm ơn em, chị xác nhận hoàn thành rồi."],
+  };
+  let chats; try { chats = JSON.parse(localStorage.getItem(KEY)); if (!Array.isArray(chats)) chats = null; } catch (e) { chats = null; }
+  if (!chats) chats = JSON.parse(JSON.stringify(SEED));
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(chats)); } catch (e) {} };
+
+  // thẻ ngữ cảnh lấy trạng thái mới nhất từ dữ liệu chung (đơn / việc)
+  function ctxInfo(c) {
+    if (!c.ctx) return null;
+    if (c.ctx.t === "order") { const o = A.orders(S).find(x => x.id === c.ctx.id); if (!o) return null;
+      return { href: `seller-orders.html?id=${o.id}`, pic: o.img ? `<img src="${U(o.img, 96, 96)}" alt="">` : `<span class="th">${icon(o.ic || KIND[o.k][0])}</span>`, title: `${o.code} · ${o.title}`, sub: "Đơn khách đặt", st: [o.cls, o.cancelReq ? "Khách xin hủy" : o.label] }; }
+    const j = A.jobs(S).find(x => x.id === c.ctx.id); if (!j) return null;
+    return { href: `seller-orders.html?job=${j.id}`, pic: `<span class="th">${icon("hand")}</span>`, title: j.title, sub: "Việc bạn đăng", st: [j.cls, j.label] };
+  }
+  // mở từ nút "Nhắn" ở các trang Bán: ?to=Tên&order=id | &job=id
+  function start(name, ctx) {
+    let c = chats.find(x => x.name.toLowerCase() === name.toLowerCase());
+    if (!c) { const who = Object.values(A.orders(S).map(o => o.buyer)).concat(A.jobs(S).flatMap(j => j.offers.map(o => o.who))).find(w => w.n === name);
+      c = { id: "c" + Date.now(), name, av: who ? who.av : null, ctx, messages: [] }; chats.unshift(c); }
+    else if (ctx) c.ctx = ctx;
+    save(); return c.id;
+  }
+  let tab = "all";
+  let active = q.get("to") ? start(q.get("to"), q.get("order") ? { t: "order", id: q.get("order") } : q.get("job") ? { t: "job", id: q.get("job") } : null) : chats[0] && chats[0].id;
+  const cur = () => chats.find(c => c.id === active);
+  const pic = c => c.av ? `<img src="${F(c.av)}" alt="">` : `<img src="${F(AV.lan)}" alt="" style="filter:grayscale(1)">`;
+
+  function renderList() {
+    const term = $("find").value.trim().toLowerCase();
+    const list = chats.filter(c => (tab === "all" || (c.ctx && c.ctx.t === tab)) && (c.name.toLowerCase().includes(term) || c.messages.some(m => m.text.toLowerCase().includes(term))));
+    $("threads").innerHTML = list.length ? list.map(c => { const last = c.messages[c.messages.length - 1], ci = ctxInfo(c);
+      return `<button class="thread${c.id === active ? " on" : ""}${c.unread ? " unread" : ""}" data-id="${c.id}">${pic(c)}<span class="text"><b>${esc(c.name)}</b><small>${last ? (last.from === "me" ? "Bạn: " : "") + esc(last.text) : "Chưa có tin nhắn"}</small>${ci ? `<span class="ctx">${esc(ci.title)}</span>` : ""}</span><span class="when">${last ? esc(last.time) : ""}${c.unread ? "<i></i>" : ""}</span></button>`; }).join("")
+      : `<div class="empty">Không có cuộc trò chuyện nào.</div>`;
+  }
+  function renderMain() {
+    const c = cur();
+    if (!c) { $("main").innerHTML = `<div class="empty" style="margin:auto"><img src="assets/clean/peek.png" alt="">Chưa có cuộc trò chuyện nào.</div>`; return; }
+    const ci = ctxInfo(c), qk = QUICK[c.ctx ? c.ctx.t : "order"];
+    $("main").innerHTML = `<div class="chat-top">${pic(c)}<div><h2>${esc(c.name)}</h2><small>${c.ctx && c.ctx.t === "job" ? "Người nhận việc" : "Khách"} · hàng xóm trong khu</small></div>
+        ${ci ? `<div class="acts"><a class="btn" href="${ci.href}">${icon("receipt")}${c.ctx.t === "job" ? "Mở việc" : "Mở đơn"}</a></div>` : ""}</div>
+      <div class="messages" id="msgs">${ci ? `<a class="context-card" href="${ci.href}">${ci.pic}<span><b>${esc(ci.title)}</b><small>${ci.sub} · </small><span class="stat ${ci.st[0]}">${esc(ci.st[1])}</span></span>${icon("right")}</a>` : ""}
+        ${c.messages.map(m => `<div class="bubble${m.from === "them" ? " them" : ""}">${esc(m.text)}<small>${esc(m.time)}</small></div>`).join("") || `<div class="note">Chưa có tin nhắn — bắt đầu bằng một câu trả lời nhanh bên dưới.</div>`}</div>
+      <div class="quick"><span class="lb">Trả lời nhanh:</span>${qk.map((t, i) => `<button data-q="${i}">${esc(t)}</button>`).join("")}</div>
+      <form class="compose" id="send"><textarea id="draft" class="input" placeholder="Nhắn cho ${esc(c.name)}" maxlength="2000" required></textarea><button class="btn primary">${icon("right")}Gửi</button></form>`;
+    $("send").onsubmit = e => { e.preventDefault(); const v = $("draft").value.trim(); if (!v) return; push(c, v); };
+    $("draft").oninput = e => { e.target.style.height = "44px"; e.target.style.height = Math.min(120, e.target.scrollHeight) + "px"; };
+    $("draft").onkeydown = e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("send").requestSubmit(); } };
+    $("main").querySelectorAll("[data-q]").forEach(b => b.onclick = () => { $("draft").value = qk[+b.dataset.q]; $("draft").focus(); });
+    $("msgs").scrollTop = $("msgs").scrollHeight;
+  }
+  function push(c, text) {
+    c.messages.push({ from: "me", text, time: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }) });
+    chats = [c, ...chats.filter(x => x.id !== c.id)]; save(); render(); $("draft").focus();
+  }
+  function render() { const c = cur(); if (c && c.unread) { c.unread = 0; save(); } renderList(); renderMain(); }
+  $("threads").addEventListener("click", e => { const b = e.target.closest("[data-id]"); if (b) { active = b.dataset.id; render(); } });
+  $("tabs").addEventListener("click", e => { const b = e.target.closest("[data-t]"); if (!b) return; tab = b.dataset.t; $("tabs").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); renderList(); });
+  $("find").oninput = renderList;
+  render();
+})();
+</script></body></html>

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AntGo — Bán &amp; Đăng việc · Bài đăng</title><link rel="stylesheet" href="shared/base.css"><style>
+  /* Bài đăng — quản lý mọi bài của gian hàng theo mảng: sửa giá tại chỗ, số lượng, bật/tắt, nhân bản, quảng bá Xu, xóa */
+  .ohead{margin-top:30px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+  .ohead h1{font-size:30px;letter-spacing:-.02em;margin:0}.ohead p{margin:6px 0 0;color:var(--smoke)}
+  .newwrap{position:relative}
+  .newwrap>.btn{height:44px;padding:0 18px}
+  .newmenu{position:absolute;right:0;top:calc(100% + 8px);width:290px;padding:6px;border-radius:14px;background:#fff;border:1px solid var(--border);box-shadow:0 18px 40px rgba(34,48,74,.14);display:none;z-index:30}
+  .newwrap.open .newmenu{display:grid}
+  .newmenu a{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px}.newmenu a:hover{background:var(--soft)}
+  .newmenu a>svg{width:20px;height:20px}.newmenu b{display:block;font-size:14px}.newmenu small{display:block;font-size:12px;color:var(--smoke)}
+  .tools{margin-top:22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .toggles{display:flex;gap:6px;flex-wrap:wrap}
+  .toggles button{height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+  .toggles button:hover{border-color:var(--ink)}.toggles button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .toggles button small{opacity:.6;font-size:12px}
+  .tools .grow{flex:1}
+  .sel{height:36px;padding:0 30px 0 12px;border:1px solid var(--border);border-radius:999px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%236A6879' d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E") no-repeat right 10px center/13px;font-size:13px;font-weight:600;color:var(--ink);appearance:none;cursor:pointer}
+  .srch{height:36px;display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--border);border-radius:999px;background:#fff;width:240px}
+  .srch svg{width:16px;height:16px;color:var(--smoke)}.srch input{border:0;outline:0;flex:1;min-width:0;font-size:13.5px;background:none}
+  .summary{margin-top:14px;display:flex;gap:18px;flex-wrap:wrap;color:var(--smoke);font-size:13px}
+  .summary b{color:var(--ink)}
+  /* thẻ bài — cùng kiểu thẻ ở "Tình trạng bán" (seller.html) */
+  .groups{display:grid;gap:8px}
+  .grp{min-width:0}
+  .grp .cards{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .lgh{display:flex;align-items:center;gap:8px;margin:18px 0 10px}.lgh svg{width:17px;height:17px}.lgh b{font-size:15px}.lgh small{color:var(--smoke);font-size:13px}
+  .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .item{background:#fff;border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;min-width:0;position:relative}
+  .item .ph{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--soft);border-radius:12px 12px 0 0}
+  .item .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .item.dim .ph img,.item.dim .ph .cream{opacity:.55}
+  .item .cream{width:100%;height:100%;display:grid;place-content:center;justify-items:center;gap:4px}
+  .item .cream svg{width:34px;height:34px}.item .cream small{font-size:12px;font-weight:600;color:var(--smoke)}
+  .item .stp{position:absolute;left:8px;top:8px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.94)}
+  .item .duep{position:absolute;right:8px;top:8px;display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:#fff;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .item .duep svg{width:13px;height:13px;color:var(--smoke)}
+  .item .duep.ad{background:rgba(34,28,21,.74);color:#fff;letter-spacing:.02em}
+  .item .body{padding:10px 12px 6px;display:flex;flex-direction:column;gap:4px;flex:1}
+  .item h3{margin:0;font-size:14px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em}
+  .item h3 a:hover{text-decoration:underline}
+  .item .meta{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--smoke)}
+  .item .meta span{display:inline-flex;align-items:center;gap:4px}.item .meta svg{width:13px;height:13px}
+  .price{display:inline-flex;align-items:baseline;gap:4px;font-weight:700;font-size:15px;cursor:text;border-radius:8px;padding:2px 6px;margin-left:-6px;align-self:flex-start}
+  .price:hover{background:var(--soft)}.price small{font-weight:400;font-size:12px;color:var(--smoke)}
+  .price svg{width:12px;height:12px;color:var(--fog);align-self:center}
+  .pedit{display:flex;gap:6px}.pedit input{flex:1;min-width:0;padding:6px 8px;font-size:13.5px}.pedit button{height:34px;padding:0 12px;font-size:12.5px}
+  .item .ctl{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px 10px}
+  .step{display:inline-flex;align-items:center;height:32px;border:1px solid var(--border);border-radius:9px;min-width:0}
+  .step button{width:30px;height:30px;border:0;background:none;font-size:16px;font-weight:700;color:var(--smoke);flex:none}.step button:hover{color:var(--ink)}
+  .step button:disabled{opacity:.3}
+  .step span{padding:0 4px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .togl{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--smoke);white-space:nowrap}
+  .item .xurow{display:flex;gap:6px;padding:0 12px 12px}
+  .item .xub{flex:1;min-width:0;height:36px;font-size:12.5px;white-space:nowrap;overflow:hidden;background:#FFF6EC;border-color:#F6DCC2;color:#7A4A12}
+  .item .xub:hover{background:#FDEBD6}.item .xub.on{background:#fff;color:var(--smoke);cursor:default}
+  .coinsm{width:16px;height:16px}
+  .stat{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .stat::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .stat.act{color:var(--accent)}.stat.wait{color:#A86A12}.stat.go{color:#2E7D4F}.stat.done{color:var(--smoke)}.stat.off{color:var(--fog)}
+  .tog{width:36px;height:20px;border-radius:10px;border:0;background:var(--border);position:relative;transition:background .2s;flex:none}
+  .tog::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:left .2s}
+  .tog.on{background:var(--ink)}.tog.on::after{left:18px}.tog:disabled{opacity:.4;cursor:not-allowed}
+  .ib{width:36px;height:36px;border:1px solid var(--border);border-radius:9px;background:#fff;display:grid;place-items:center;color:var(--ink);flex:none}
+  .ib:hover{background:var(--soft)}.ib svg{width:16px;height:16px}
+  .menu{position:absolute;right:12px;bottom:54px;width:210px;padding:6px;border-radius:12px;background:#fff;border:1px solid var(--border);box-shadow:0 18px 40px rgba(34,48,74,.14);display:none;z-index:20}
+  .menu.open{display:grid}
+  .menu button,.menu a{display:flex;align-items:center;gap:10px;padding:9px 10px;border:0;background:none;border-radius:8px;font-size:13.5px;text-align:left}
+  .menu button:hover,.menu a:hover{background:var(--soft)}.menu svg{width:16px;height:16px}
+  .menu .danger{color:#C0392B}
+  .empty2{padding:46px 0;text-align:center;color:var(--smoke)}.empty2 img{width:100px;display:block;margin:0 auto 12px}
+  .demo-note a{text-decoration:underline}
+  @media(max-width:1100px){.grp .cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:700px){.grp .cards{grid-template-columns:1fr}.srch{width:100%}}
+</style></head><body><div id="siteHeader" data-space="sell" data-active="posts"></div><main class="wrap" id="page"></main>
+<script src="shared/icons.js"></script><script src="shared/common.js"></script><script src="shared/seller-data.js"></script><script>
+(() => {
+  const A = AntSeller, esc = AntGo.esc, icon = AntGo.icon, $ = id => document.getElementById(id), page = $("page");
+  const { U, money, KIND, LANE } = A;
+  const S = A.load();
+  const P0 = new URLSearchParams(location.search);
+  const V = { kind: P0.get("kind") || "all", status: P0.get("status") || "all", q: "", edit: null, confirm: null };
+
+  function state(p) {
+    if (p.k === "job") { const j = A.jobs(S).find(x => x.id === p.job); if (j) return [j.cls === "act" ? "act" : j.closed ? "off" : "go", j.label]; }
+    if (p.id === "g1" && S.done.o3025) return ["off", "Đã bán"];
+    if (!p.on) return ["off", p.k === "food" ? "Hết món" : "Tạm ẩn"];
+    if (!p.val) return ["off", p.k === "service" ? "Hết buổi trống" : "Hết hàng"];
+    if (p.k !== "service" && p.val <= 3 && p.max > 3) return ["wait", "Sắp hết"];
+    return ["go", p.k === "service" ? "Nhận lịch" : "Đang bán"];
+  }
+  const matchStatus = p => {
+    const st = state(p)[0];
+    return V.status === "all" || (V.status === "open" && (st === "go" || st === "wait" || st === "act")) || (V.status === "off" && st === "off") || (V.status === "low" && st === "wait") || (V.status === "promo" && p.promo);
+  };
+  const strip = s => String(s).toLowerCase().replace(/đ/g, "d").normalize("NFD").replace(/\p{M}/gu, "");
+
+  function render() {
+    const all = A.posts(S);
+    const shown = all.filter(p => (V.kind === "all" || p.k === V.kind) && matchStatus(p) && (!V.q || strip(p.t).includes(strip(V.q))));
+    const n = k => all.filter(p => k === "all" || p.k === k).length;
+    const open = all.filter(p => state(p)[0] !== "off").length;
+    page.innerHTML = `
+      <div class="ohead"><div><h1>Bài đăng</h1><p>${all.length} bài · ${open} đang mở bán / nhận việc</p></div>
+        <div class="newwrap"><button class="btn primary" data-new>${icon("plus")}Đăng bài mới</button>
+          <div class="newmenu">${AntGo.NEW_KINDS.map(([k, ic, t, s]) => `<a href="seller-post-form.html?type=${k}">${icon(ic)}<span><b>${t}</b><small>${s}</small></span></a>`).join("")}</div></div></div>
+      <div class="tools"><div class="toggles">${[["all", "Tất cả"], ...Object.entries(KIND).map(([k, [, t]]) => [k, t])].map(([k, t]) => `<button class="${V.kind === k ? "on" : ""}" data-kind="${k}">${t} <small>${n(k)}</small></button>`).join("")}</div>
+        <span class="grow"></span>
+        <select class="sel" id="status" aria-label="Lọc trạng thái"><option value="all">Mọi trạng thái</option><option value="open">Đang mở</option><option value="low">Sắp hết</option><option value="off">Tạm ẩn / hết</option><option value="promo">Đang quảng bá</option></select>
+        <label class="srch">${icon("search")}<input id="q" placeholder="Tìm bài của bạn" value="${esc(V.q)}"></label></div>
+      <div class="summary"><span>Đang hiện <b>${shown.length}</b> bài</span><span>${icon("eye").replace('class="i"', 'class="i" style="width:13px;height:13px;vertical-align:-2px"')} <b>${shown.reduce((s, p) => s + (p.views || 0), 0)}</b> lượt xem</span><span>♡ <b>${shown.reduce((s, p) => s + (p.saves || 0), 0)}</b> lượt lưu</span><span>Số dư <b id="xuBal">${S.xu}</b> Xu</span></div>
+      ${shown.length ? `<div class="groups">` + Object.keys(KIND).filter(k => shown.some(p => p.k === k)).map(k => `<section class="grp" style="--n:${Math.min(4, shown.filter(p => p.k === k).length)}"><div class="lgh"><b>${LANE[k].title}</b><small>${shown.filter(p => p.k === k).length} bài</small></div><div class="cards">${shown.filter(p => p.k === k).map(row).join("")}</div></section>`).join("") + `</div>`
+        : `<div class="empty2"><img src="assets/clean/peek.png" alt="">Không có bài nào khớp bộ lọc.</div>`}
+      <p class="demo-note">Bản mẫu · bấm vào giá để sửa nhanh · <a href="#" data-reset>Đặt lại dữ liệu mẫu</a></p>`;
+    $("status").value = V.status;
+  }
+  function row(p) {
+    const job = p.job ? A.jobs(S).find(x => x.id === p.job) : null;
+    // khóa chỉnh khi đồ dùng đã bán hoặc việc đã chọn được người
+    const st = state(p), L = LANE[p.k], locked = (p.id === "g1" && S.done.o3025) || !!(job && job.offers.some(o => ["chosen", "working", "reported", "done"].includes(o.st) && o.day === undefined));
+    const edit = p.k === "job" ? `seller-post-form.html?type=job&id=${p.id}` : `seller-post-form.html?id=${p.id}`;
+    const ph = p.img ? `<img src="${U(p.img, 480, 360)}" alt="">` : `<span class="cream">${icon(p.ic || KIND[p.k][0])}<small>${KIND[p.k][1]}</small></span>`;
+    const top = p.promo ? `<span class="duep ad">QUẢNG BÁ · ${p.promo}</span>` : `<span class="duep">${icon("eye")}${p.views || 0}</span>`;
+    const price = V.edit === p.id ? `<form class="pedit" data-pform="${p.id}"><input class="input" type="number" min="0" step="1000" value="${p.price}" required><button class="btn dark">Lưu</button></form>`
+      : `<span class="price" data-pedit="${p.id}" title="Bấm để sửa giá">${money(p.price)}${p.unit ? `<small>${p.unit}</small>` : ""}${icon("pencil")}</span>`;
+    const sold = p.k === "job" ? `${job ? job.offers.length : 0} đề nghị` : `${p.sold || 0} đã bán`;
+    return `<div class="item${st[0] === "off" ? " dim" : ""}"><div class="ph">${ph}<span class="stp"><span class="stat ${st[0]}">${st[1]}</span></span>${top}</div>
+      <div class="body"><h3><a href="${p.k === "job" && p.job ? `seller-orders.html?job=${p.job}` : edit}">${esc(p.t)}</a></h3>${price}
+        <div class="meta"><span>${p.cat ? esc(p.cat) : KIND[p.k][1]}</span><span>♡ ${p.saves || 0} · ${sold}</span></div></div>
+      <div class="ctl"><span class="step"><button data-step="${p.id}" data-d="-1" aria-label="Bớt"${locked ? " disabled" : ""}>−</button><span>${L.step(p.val)}</span><button data-step="${p.id}" data-d="1" aria-label="Thêm"${locked ? " disabled" : ""}>+</button></span>
+        <label class="togl">${L.tog}<button class="tog${p.on && !locked ? " on" : ""}" data-tog="${p.id}" aria-label="${L.tog}" aria-pressed="${!!p.on}"${locked ? " disabled" : ""}></button></label></div>
+      <div class="xurow">${p.promo ? `<button class="btn xub on" disabled><img class="coinsm" src="assets/clean/antxu.png?v=2" alt="">Quảng bá ${p.promo}</button>` : `<button class="btn xub" data-xu="${p.id}"><img class="coinsm" src="assets/clean/antxu.png?v=2" alt="">${p.k === "job" ? "Ghim" : "Quảng bá"} · ${L.xu[1]} Xu</button>`}
+        <a class="ib" href="${edit}" title="Sửa bài">${icon("pencil")}</a><button class="ib" data-menu="${p.id}" title="Thêm">${icon("dots")}</button></div>
+      <div class="menu" id="m-${p.id}"><button data-dup="${p.id}">${icon("copy")}Nhân bản bài</button>
+        <a href="${p.k === "job" ? "job.html" : "detail.html"}">${icon("out")}Xem như khách</a>
+        <button class="danger" data-del="${p.id}">${icon("xmark")}${V.confirm === p.id ? "Bấm lần nữa để xóa" : "Xóa bài"}</button></div></div>`;
+  }
+  const keep = (id, patch) => { A.setPost(S, id, patch); render(); };
+  const find = id => A.posts(S).find(p => p.id === id);
+  function syncXu() { const b = $("xuBal"); if (b) b.textContent = S.xu; document.querySelectorAll(".appbar .xubtn").forEach(x => x.lastChild.textContent = `${S.xu} Xu`); }
+
+  document.addEventListener("click", e => {
+    const t = e.target;
+    if (t.closest("[data-new]")) { t.closest(".newwrap").classList.toggle("open"); return; }
+    if (!t.closest(".newwrap")) document.querySelector(".newwrap")?.classList.remove("open");
+    const mb = t.closest("[data-menu]");
+    document.querySelectorAll(".menu.open").forEach(m => { if (!mb || m.id !== "m-" + mb.dataset.menu) m.classList.remove("open"); });
+    if (mb) { $("m-" + mb.dataset.menu).classList.toggle("open"); return; }
+    const kb = t.closest("[data-kind]");
+    if (kb) { V.kind = kb.dataset.kind; render(); return; }
+    const pe = t.closest("[data-pedit]");
+    if (pe) { V.edit = pe.dataset.pedit; render(); const i = page.querySelector(".pedit input"); i.focus(); i.select(); return; }
+    const st = t.closest("[data-step]");
+    if (st) { const p = find(st.dataset.step); keep(p.id, { val: Math.max(p.k === "job" ? 1 : 0, Math.min(p.max, p.val + +st.dataset.d)) }); return; }
+    const tg = t.closest("[data-tog]");
+    if (tg) { const p = find(tg.dataset.tog); const on = p.on ? 0 : 1; keep(p.id, Object.assign({ on }, on && !p.val ? { val: p.max } : {})); AntGo.toast(on ? `Đã mở lại “${p.t}”` : `Đã tạm ẩn “${p.t}” — khách vẫn thấy bài nhưng chưa đặt được`); return; }
+    const xb = t.closest("[data-xu]");
+    if (xb) { const p = find(xb.dataset.xu), [, cost] = LANE[p.k].xu; if (S.xu < cost) return AntGo.toast(`Cần ${cost} Xu, bạn còn ${S.xu} Xu`); S.xu -= cost; keep(p.id, { promo: "còn 3 ngày" }); syncXu(); return AntGo.toast(`Đã dùng ${cost} Xu — “${p.t}” được ${p.k === "job" ? "ghim đầu danh sách việc" : "lên Nổi bật trong khu"} 3 ngày`); }
+    const dp = t.closest("[data-dup]");
+    if (dp) { const p = find(dp.dataset.dup); const id = "n" + Date.now(); S.newPosts.push(Object.assign({}, p, { id, t: p.t + " (bản sao)", on: 0, views: 0, saves: 0, sold: 0, promo: null, job: null })); A.save(S); render(); return AntGo.toast("Đã nhân bản — bản sao đang tạm ẩn, sửa xong thì bật lên"); }
+    const dl = t.closest("[data-del]");
+    if (dl) { const id = dl.dataset.del; if (V.confirm !== id) { V.confirm = id; render(); $("m-" + id).classList.add("open"); return; } const p = find(id); keep(id, { deleted: 1 }); V.confirm = null; return AntGo.toast(`Đã xóa “${p.t}”`); }
+    if (t.closest("[data-reset]")) { e.preventDefault(); localStorage.removeItem(A.KEY); location.reload(); }
+  });
+  document.addEventListener("submit", e => {
+    const f = e.target.closest("[data-pform]"); if (!f) return; e.preventDefault();
+    const v = Math.max(0, Math.round(+f.querySelector("input").value)); V.edit = null; keep(f.dataset.pform, { price: v }); AntGo.toast(`Đã đổi giá thành ${money(v)}`);
+  });
+  document.addEventListener("change", e => { if (e.target.id === "status") { V.status = e.target.value; render(); } });
+  document.addEventListener("input", e => { if (e.target.id === "q") { V.q = e.target.value; const pos = e.target.selectionStart; render(); const i = $("q"); i.focus(); i.setSelectionRange(pos, pos); } });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { V.edit = null; V.confirm = null; render(); } });
+  render(); syncXu();
+  // thông báo mang sang từ trang Đăng bài
+  try { const m = sessionStorage.getItem("antgo_toast"); if (m) { sessionStorage.removeItem("antgo_toast"); AntGo.toast(m); } } catch (e) {}
+})();
+</script>
+</body></html>
