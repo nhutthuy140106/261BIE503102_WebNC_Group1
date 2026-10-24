@@ -351,3 +351,4 @@ a.pbtn.link { text-decoration: none; }
 /* nút Đóng ở popup cảm ơn: vừa với chữ, nằm giữa */
 .thanks .btns { width: auto; justify-content: center; }
 .thanks .btns .go { width: auto; padding: 0 36px; }
+.thanks img { width: 150px; }
