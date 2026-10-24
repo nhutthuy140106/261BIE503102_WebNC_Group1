@@ -85,7 +85,7 @@
       <div class="price">{{ priceLabel() }} @if (v.tpl.price.type !== 'quote' && v.tpl.price.unit) { <span>/ {{ v.tpl.price.unit }}</span> }@if (v.tpl.xuOk) { <img class="xuico" src="assets/clean/antxu.png" alt="Dùng được Xu" title="Đơn này dùng được voucher AntXu" /> }</div>
       @if (priceSub()) { <div class="psub">{{ priceSub() }}</div> }
       @if (stockLine(); as s) {
-        <div class="avail" [class.off]="s.off"><i></i><b>{{ s.text }}</b>@if (s.sub) { <span>· {{ s.sub }}</span> }</div>
+        <div class="avail" [class.off]="s.off"><i></i><b>{{ s.text }}</b>@if (s.sub) { <span>{{ s.sub }}</span> }</div>
       }
 
       @for (g of v.tpl.opts; track g.name) {

@@ -441,3 +441,7 @@
 .qtyrow { margin-top: 18px; padding-top: 18px; font-size: 15px; font-weight: 700; }
 /* chỉ tick, không tô nền dòng đang chọn */
 .row:hover, .row.on { background: none; }
+
+/* tình trạng bán: dòng 1 là trạng thái, dòng 2 là giờ nhận đặt (không có dấu chấm lẻ loi) */
+.avail { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 8px; margin-top: 10px; }
+.avail span { grid-column: 2; color: var(--smoke); font-size: 13px; font-weight: 400; }
