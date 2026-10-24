@@ -164,16 +164,11 @@
         @if (o.type === 'received' && offer(); as of) {
           @if (receivedPanel(o, of); as p) {
             <h3>{{ p.h }}</h3><p class="why">{{ p.why }}</p>
-            <div class="arow2">
-              @for (b of p.btns; track b.id) {
-                @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actR(b.id)">{{ b.label }}</button> }
-              }
-              <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>{{ act.chat }}</button>
-            </div>
-            @if (hasSecondary(p.btns)) {
+            @for (row of actionRows(p.btns); track $index) {
               <div class="arow2">
-                @for (b of p.btns; track b.id) {
-                  @if (b.kind !== 'main') { <button type="button" class="gbtn" [class.warn]="b.kind === 'warn'" (click)="actR(b.id)">{{ b.label }}</button> }
+                @for (it of row; track $index) {
+                  @if (it.chat) { <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>{{ act.chat }}</button> }
+                  @else { <button type="button" [class]="it.b!.kind === 'main' ? 'pbtn' : 'gbtn'" [class.warn]="it.b!.kind === 'warn'" (click)="actR(it.b!.id)">{{ it.b!.label }}</button> }
                 }
               </div>
             }
@@ -197,16 +192,11 @@
                 @if (o.resched!.note) { <p class="pbw">{{ o.resched!.note }}</p> }
               </div>
             }
-            <div class="arow2">
-              @for (b of p.btns; track b.id) {
-                @if (b.kind === 'main') { <button type="button" class="pbtn" (click)="actP(b.id)">{{ b.label }}</button> }
-              }
-              <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>{{ act.chat }}</button>
-            </div>
-            @if (hasSecondary(p.btns)) {
+            @for (row of actionRows(p.btns); track $index) {
               <div class="arow2">
-                @for (b of p.btns; track b.id) {
-                  @if (b.kind !== 'main') { <button type="button" class="gbtn" [class.warn]="b.kind === 'warn'" (click)="actP(b.id)">{{ b.label }}</button> }
+                @for (it of row; track $index) {
+                  @if (it.chat) { <button type="button" class="gbtn" (click)="go('chat')"><svg class="i"><use href="#chat" /></svg>{{ act.chat }}</button> }
+                  @else { <button type="button" [class]="it.b!.kind === 'main' ? 'pbtn' : 'gbtn'" [class.warn]="it.b!.kind === 'warn'" (click)="actP(it.b!.id)">{{ it.b!.label }}</button> }
                 }
               </div>
             }

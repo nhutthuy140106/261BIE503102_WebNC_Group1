@@ -234,8 +234,17 @@ export class OrderDetail implements OnInit {
     });
   }
 
-  protected hasSecondary(btns: { kind?: string }[]): boolean {
-    return btns.some((b) => b.kind !== 'main');
+  /**
+   * Xếp nút hành động thành các hàng song song, mỗi hàng tối đa 2 nút bằng nhau:
+   * có nút chính -> hàng 1 = nút chính + Nhắn tin; không có -> hàng 1 = Nhắn tin + nút phụ đầu tiên; nút phụ còn lại xếp tiếp từng 2 nút.
+   */
+  protected actionRows<T extends { kind?: string }>(btns: T[]): { chat?: boolean; b?: T }[][] {
+    const main = btns.filter((b) => b.kind === 'main');
+    const sec = btns.filter((b) => b.kind !== 'main');
+    const first: { chat?: boolean; b?: T }[] = main.length ? [...main.map((b) => ({ b })), { chat: true }] : [{ chat: true }, ...(sec.length ? [{ b: sec.shift() }] : [])];
+    const rows = [first];
+    for (let i = 0; i < sec.length; i += 2) rows.push(sec.slice(i, i + 2).map((b) => ({ b })));
+    return rows;
   }
 
   protected issueLeft(o: Order): number {
