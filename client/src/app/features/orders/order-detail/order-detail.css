@@ -348,3 +348,6 @@ a.pbtn.link { text-decoration: none; }
 .quote { box-shadow: none; }
 .rlabel { font-family: inherit; font-weight: 400; font-size: 14.5px; }
 .rlabel { font-weight: 500; }
+/* nút Đóng ở popup cảm ơn: vừa với chữ, nằm giữa */
+.thanks .btns { width: auto; justify-content: center; }
+.thanks .btns .go { width: auto; padding: 0 36px; }
