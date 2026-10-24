@@ -163,3 +163,7 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
 .uitem em { margin-left: auto; font-style: normal; font-size: 13px; font-weight: 600; color: var(--smoke); }
 
 .uitem .uxu { width: 24px; height: 24px; flex: none; }
+
+/* ô tìm gọn đang ẩn (ở trang chủ) không được chiếm chỗ, kẻo cụm bên phải bị đẩy tràn ra khỏi lề khi tên khu vực dài */
+.hsearch.away { flex: 0 0 0; max-width: 0; min-width: 0; margin: 0; padding: 0; border-width: 0; overflow: hidden; }
+.hbtn .t { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
