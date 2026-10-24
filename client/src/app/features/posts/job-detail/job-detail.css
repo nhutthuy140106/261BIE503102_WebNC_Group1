@@ -144,5 +144,5 @@
 .stepper.mini { display: flex; align-items: flex-start; justify-content: space-between; }
 .stepper.mini .s { flex: none; display: grid; justify-items: center; gap: 6px; padding: 0; width: auto; }
 .stepper.mini .s::before { display: none; }
-.stepper.mini .s .lb { white-space: nowrap; font-size: 12px; line-height: 1.3; }
+.stepper.mini .s .slbl { white-space: nowrap; font-size: 12px; line-height: 1.3; }
 .stepper.mini .ln { flex: 1; min-width: 12px; height: 2px; margin: 15px 6px 0; background: var(--border); }

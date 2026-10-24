@@ -196,7 +196,7 @@
             <div class="stepper mini">
               @for (n of doneSteps(o); track $index) {
                 @if ($index > 0) { <i class="ln"></i> }
-                <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span><span class="lb">{{ n }}</span></div>
+                <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span><span class="slbl">{{ n }}</span></div>
               }
             </div>
             <div class="donebtns">
@@ -436,7 +436,7 @@
 
   <!-- ===== Xem ảnh lớn ===== -->
   @if (lightbox() !== null) {
-    <div class="lb">
+    <div class="slbl">
       <div class="lbtop"><span>{{ lightbox()! + 1 }} / {{ v.images.length }}</span><button type="button" class="x" (click)="lightbox.set(null)" aria-label="Đóng">✕</button></div>
       <div class="stage">
         <button type="button" class="nav prev" (click)="step(-1)" aria-label="Ảnh trước">‹</button>
