@@ -316,7 +316,7 @@
             <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go dark" (click)="okP()">{{ dlgNow() ? act.cancel : act.cancelReq }}</button></div>
           }
           @case ('received') {
-            <h3>Xác nhận đã nhận?</h3><p class="p">Kiểm tra hàng hoặc kết quả dịch vụ trước khi xác nhận hoàn thành.</p>
+            <h3>Bạn đã nhận được chưa?</h3><p class="p">Kiểm tra hàng hoặc kết quả dịch vụ trước khi xác nhận hoàn thành.</p>
             <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go" (click)="okP()">{{ act.received }}</button></div>
           }
           @case ('issue') {
