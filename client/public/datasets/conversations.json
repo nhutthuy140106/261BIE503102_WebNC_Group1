@@ -5,7 +5,7 @@
     "context": {
       "type": "order",
       "id": "640b187e71d9faa9039f00c9",
-      "label": "AG-O3012 · Cơm nhà làm"
+      "label": "AG-O3012 · Cơm nhà làm, thực đơn đổi mỗi ngày"
     },
     "unread": 4,
     "messages": [
@@ -40,7 +40,7 @@
         "createdAt": "2026-10-16T10:45:00.000Z"
       }
     ],
-    "withAvatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70"
+    "withAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f0402",
@@ -75,12 +75,12 @@
   },
   {
     "_id": "640b187e71d9faa9039f0403",
-    "withName": "Giặt sấy Mỹ Linh",
-    "withAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&crop=faces&q=70",
+    "withName": "Tiệm Sạch Thơm",
+    "withAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
     "context": {
       "type": "order",
       "id": "640b187e71d9faa9039f00ca",
-      "label": "AG-O3009 · Giặt sấy gấp 5kg"
+      "label": "AG-O3009 · Giặt sấy gấp, lấy và trả tận cửa"
     },
     "unread": 3,
     "messages": [
@@ -113,11 +113,11 @@
   {
     "_id": "640b187e71d9faa9039f0404",
     "withName": "Anh Tùng",
-    "withAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&q=70",
+    "withAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=70",
     "context": {
       "type": "order",
       "id": "640b187e71d9faa9039f00d1",
-      "label": "AG-O3015 · Sửa laptop — máy không lên nguồn"
+      "label": "AG-O3015 · Sửa laptop, điện thoại — kiểm tra tận nơi"
     },
     "unread": 1,
     "messages": [
@@ -138,11 +138,11 @@
   {
     "_id": "640b187e71d9faa9039f0405",
     "withName": "Minh",
-    "withAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70",
+    "withAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=70",
     "context": {
       "type": "order",
       "id": "640b187e71d9faa9039f00d2",
-      "label": "AG-O3018 · Lấy đồ hộ — thùng hàng ở cổng chính"
+      "label": "AG-O3018 · Lấy đồ hộ, giao nhận trong khu"
     },
     "unread": 2,
     "messages": [
@@ -163,7 +163,7 @@
   {
     "_id": "640b187e71d9faa9039f0406",
     "withName": "Anh Quân",
-    "withAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70",
+    "withAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=70",
     "context": {
       "type": "order",
       "id": "640b187e71d9faa9039f00d3",

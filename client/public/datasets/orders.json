@@ -3,15 +3,15 @@
     "_id": "640b187e71d9faa9039f00c9",
     "code": "AG-O3012",
     "type": "placed",
-    "postId": "640b187e71d9faa9039f0001",
-    "postTitle": "Cơm nhà làm — cơm gà xé ×2",
+    "postId": "62bc5cf25fbf9289efa9039d",
+    "postTitle": "Cơm nhà làm, thực đơn đổi mỗi ngày",
     "counterpartName": "Bếp Cô Lan",
     "status": "preparing",
-    "total": 90000,
+    "total": 75000,
     "paymentMethod": "cash",
     "createdAt": "2026-10-16T10:00:00.000Z",
-    "counterpartAvatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70",
-    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=70",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&h=375&fit=crop&q=70",
     "counterpartId": "640b187e71d9faa9039f0065",
     "category": "food",
     "kind": "food",
@@ -19,7 +19,7 @@
       "lines": [
         "Món mặn hôm nay: Sườn ram"
       ],
-      "subtotal": 80000,
+      "subtotal": 70000,
       "fee": 5000,
       "discount": 0,
       "steps": [
@@ -31,7 +31,7 @@
       "quantity": 2,
       "quantityLabel": "Số lượng",
       "unit": "phần",
-      "whenLabel": "Nhận lúc",
+      "whenLabel": "Thời gian",
       "when": "16/10/2026 · 11:30",
       "placeLabel": "Hình thức nhận hàng",
       "place": "Giao tận nơi",
@@ -53,26 +53,26 @@
     "_id": "640b187e71d9faa9039f00ca",
     "code": "AG-O3009",
     "type": "placed",
-    "postId": "640b187e71d9faa9039f0008",
-    "postTitle": "Giặt sấy gấp 5kg",
-    "counterpartName": "Giặt sấy Mỹ Linh",
+    "postId": "1fe7afa422737d39bdc56d59",
+    "postTitle": "Giặt sấy gấp, lấy và trả tận cửa",
+    "counterpartName": "Tiệm Sạch Thơm",
     "status": "pricing",
-    "total": 75000,
+    "total": 90000,
     "paymentMethod": "transfer",
     "createdAt": "2026-10-16T11:00:00.000Z",
-    "counterpartAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&crop=faces&q=70",
-    "image": "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=800&h=600&fit=crop&q=70",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500&h=375&fit=crop&q=70",
     "counterpartId": "640b187e71d9faa9039f006c",
     "category": "service",
     "kind": "service",
     "priceCheck": "estimate",
     "newPrice": {
-      "total": 97500,
+      "total": 117000,
       "reason": "Khối lượng thực tế nhiều hơn dự kiến lúc đặt.",
       "lines": [
         [
-          "Giặt sấy (6,5kg × 15.000đ)",
-          97500
+          "Giặt sấy (6,5kg × 18.000đ)",
+          117000
         ]
       ]
     },
@@ -81,7 +81,7 @@
         "Nước xả: Hương nhẹ",
         "Có đồ trắng cần giặt riêng?: Có"
       ],
-      "subtotal": 75000,
+      "subtotal": 90000,
       "fee": 0,
       "discount": 0,
       "steps": [
@@ -95,9 +95,9 @@
       "quantity": 5,
       "quantityLabel": "Khối lượng ước tính",
       "unit": "kg",
-      "whenLabel": "Lấy đồ lúc",
+      "whenLabel": "Thời gian",
       "when": "16/10/2026 · 18:00",
-      "placeLabel": "Lấy & trả tại",
+      "placeLabel": "Hình thức nhận hàng",
       "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
     },
     "history": [
@@ -113,29 +113,27 @@
         "state": "Mỹ Linh báo giá cuối",
         "at": "2026-10-16T18:25:00Z"
       }
-    ]
+    ],
+    "oldTotal": null
   },
   {
     "_id": "640b187e71d9faa9039f00cb",
     "code": "AG-O2987",
     "type": "placed",
-    "postId": "640b187e71d9faa9039f0002",
-    "postTitle": "Phở bò tái ×2",
+    "postId": "cea72ed545bbceaffbc970ec",
+    "postTitle": "Phở bò tái, nước dùng hầm xương",
     "counterpartName": "Quán Phở Bà Tư",
     "status": "done",
     "total": 90000,
     "paymentMethod": "cash",
     "createdAt": "2026-10-10T07:00:00.000Z",
-    "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&q=70",
+    "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&h=375&fit=crop&q=70",
     "counterpartId": "640b187e71d9faa9039f0066",
     "category": "food",
     "kind": "food",
     "doneAgoH": 216,
     "detail": {
-      "lines": [
-        "Món mặn hôm nay: Cá kho tộ",
-        "Phần cơm: Nhiều cơm"
-      ],
+      "lines": [],
       "subtotal": 90000,
       "fee": 0,
       "discount": 0,
@@ -147,8 +145,8 @@
       ],
       "quantity": 2,
       "quantityLabel": "Số lượng",
-      "unit": "phần",
-      "whenLabel": "Nhận lúc",
+      "unit": "tô",
+      "whenLabel": "Thời gian",
       "when": "10/10/2026 · 12:00",
       "placeLabel": "Hình thức nhận hàng",
       "place": "Tự đến lấy",
@@ -167,7 +165,8 @@
         "state": "Bạn nhận món",
         "at": "2026-10-10T11:45:00Z"
       }
-    ]
+    ],
+    "counterpartAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f00cc",
@@ -189,15 +188,15 @@
     "_id": "640b187e71d9faa9039f00d1",
     "code": "AG-O3015",
     "type": "placed",
-    "postId": "640b187e71d9faa9039f0001",
-    "postTitle": "Sửa laptop — máy không lên nguồn",
+    "postId": "63a678d472b4fc39bfb06a5e",
+    "postTitle": "Sửa laptop, điện thoại — kiểm tra tận nơi",
     "counterpartName": "Anh Tùng",
-    "counterpartAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&q=70",
-    "image": "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=600&fit=crop&q=70",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=500&h=375&fit=crop&q=70",
     "kind": "service",
     "category": "service",
     "status": "confirmed",
-    "total": 50000,
+    "total": 80000,
     "paymentMethod": "cash",
     "createdAt": "2026-10-16T09:50:00Z",
     "priceCheck": "quote",
@@ -209,7 +208,7 @@
         "Cần sao lưu dữ liệu trước?: Không"
       ],
       "subtotal": 50000,
-      "fee": 0,
+      "fee": 30000,
       "discount": 0,
       "steps": [
         "Đã gửi",
@@ -219,9 +218,9 @@
         "Đang sửa",
         "Hoàn thành"
       ],
-      "whenLabel": "Hẹn kiểm tra lúc",
+      "whenLabel": "Thời gian",
       "when": "16/10/2026 · 19:00",
-      "placeLabel": "Kiểm tra ở đâu",
+      "placeLabel": "Hình thức nhận hàng",
       "place": "Thợ đến nhà",
       "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
     },
@@ -240,11 +239,11 @@
     "_id": "640b187e71d9faa9039f00d2",
     "code": "AG-O3018",
     "type": "placed",
-    "postId": "640b187e71d9faa9039f0001",
-    "postTitle": "Lấy đồ hộ — thùng hàng ở cổng chính",
+    "postId": "f037d575836173f5e7bddc03",
+    "postTitle": "Lấy đồ hộ, giao nhận trong khu",
     "counterpartName": "Minh",
-    "counterpartAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70",
-    "image": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&h=600&fit=crop&q=70",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1617347454431-f49d7ff5c3b1?w=500&h=375&fit=crop&q=70",
     "kind": "service",
     "category": "service",
     "status": "confirmed",
@@ -267,9 +266,9 @@
         "Đang đi lấy",
         "Đã giao"
       ],
-      "whenLabel": "Lúc nào",
+      "whenLabel": "Thời gian",
       "when": "16/10/2026 · 14:30",
-      "placeLabel": "Lấy & giao",
+      "placeLabel": "Hình thức nhận hàng",
       "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
     },
     "history": [
@@ -287,11 +286,11 @@
     "_id": "640b187e71d9faa9039f00d3",
     "code": "AG-O3021",
     "type": "placed",
-    "postId": "640b187e71d9faa9039f0001",
+    "postId": "b01f30adb4100dd41c90a854",
     "postTitle": "Nồi chiên không dầu 5L, dùng 6 tháng",
     "counterpartName": "Anh Quân",
-    "counterpartAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70",
-    "image": "https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=800&h=600&fit=crop&q=70",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=375&fit=crop&q=70",
     "kind": "goods",
     "category": "goods",
     "status": "done",
@@ -310,11 +309,11 @@
         "Hẹn lấy hàng",
         "Hoàn thành"
       ],
-      "whenLabel": "Hẹn qua lấy",
+      "whenLabel": "Thời gian",
       "when": "16/10/2026 · 17:30",
-      "placeLabel": "Nơi nhận hàng",
-      "place": "Block A · căn 08.11",
-      "pickup": true
+      "placeLabel": "Hình thức nhận hàng",
+      "pickup": true,
+      "address": "Block A · căn 08.11"
     },
     "history": [
       {

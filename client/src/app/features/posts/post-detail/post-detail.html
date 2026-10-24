@@ -190,7 +190,7 @@
             <dl class="recap">
               <div><dt>Mã đơn</dt><dd>{{ o.code }}</dd></div>
               <div><dt>{{ v.tpl.title }}</dt><dd>{{ o.total | vnd }}</dd></div>
-              @if (o.detail?.when) { <div><dt>{{ o.detail?.whenLabel ?? 'Thời gian' }}</dt><dd>{{ o.detail?.when }}</dd></div> }
+              @if (o.detail?.when) { <div><dt>Thời gian</dt><dd>{{ o.detail?.when }}</dd></div> }
               <div><dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd></div>
             </dl>
             <div class="stepper mini">

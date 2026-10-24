@@ -18,6 +18,7 @@ import { SavedService } from '../../../core/services/saved';
 import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
+import { formatDateTime } from '../../../core/utils/status-label';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
 import { placedStepNames } from '../../../core/utils/placed-steps';
 import { resolveId } from '../../../core/utils/slug-helper';
@@ -383,12 +384,12 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     this.addrOpen.set(false);
   }
 
-  /** "Hôm nay (23/10) · 11:00", thêm thời lượng với dịch vụ tính theo giờ */
+  /** "23/10/2026 · 11:00", thêm thời lượng với dịch vụ tính theo giờ */
   protected whenLabel(d: OrderDraft): string {
     const t = d.tpl.time;
-    const day = this.dateLabel(d.date() || this.todayIso(), true);
-    if (t.mode === 'datedur') return day + ' · ' + d.time() + ' · ' + d.hours() + ' giờ' + (d.repeat() ? ' · lặp hằng tuần' : '');
-    return day + ' · ' + d.time();
+    const day = formatDateTime(new Date((d.date() || this.todayIso()) + 'T' + d.time()).toISOString());
+    if (t.mode === 'datedur') return day + ' · ' + d.hours() + ' giờ' + (d.repeat() ? ' · lặp hằng tuần' : '');
+    return day;
   }
 
   protected doneSteps(o: Order): string[] {
@@ -423,11 +424,11 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         quantity: d.tpl.qty ? d.qty() : undefined,
         quantityLabel: d.tpl.qty ? d.tpl.qty.label.replace(/\s*\(.*\)/, '') : undefined,
         unit: d.tpl.qty ? d.tpl.price.unit : undefined,
-        address: a ? a.name + ' · ' + a.phone + '\n' + this.addressText(a) : undefined,
+        address: d.needsAddress() && a ? a.name + ' · ' + a.phone + '\n' + this.addressText(a) : place.mode === 'seller' ? place.where : undefined,
         place: placeText,
-        placeLabel: place.label,
+        placeLabel: 'Hình thức nhận hàng',
         when: this.whenLabel(d),
-        whenLabel: d.tpl.time.label,
+        whenLabel: 'Thời gian',
         pickup: !d.needsAddress(),
         utensils: d.tpl.key === 'food' ? d.utensils() : undefined,
         voucher: d.voucher()?.title,
