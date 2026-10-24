@@ -402,3 +402,8 @@
 /* ghi chú chỉ là một đường kẻ dưới chữ, không khung, không bo góc */
 .noteinp { height: auto; padding: 6px 0; border: 0; border-bottom: 1px solid #E3E5EA; border-radius: 0; background: none; box-shadow: none; }
 .noteinp:focus { border-color: transparent; border-bottom-color: var(--ink); outline: none; }
+
+/* lịch: bỏ đường kẻ chân lịch, nổi hẳn lên trên các hàng bên dưới (không bị đường kẻ của hàng khác cắt ngang) */
+.calfoot { border-top: 0; padding-top: 4px; margin-top: 4px; }
+.cal { z-index: 30; }
+.crow:has(.cal) { position: relative; z-index: 30; }
