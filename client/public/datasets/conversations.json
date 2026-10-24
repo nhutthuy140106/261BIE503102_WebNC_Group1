@@ -44,11 +44,11 @@
   },
   {
     "_id": "640b187e71d9faa9039f0402",
-    "withName": "Chị Hoa",
+    "withName": "Chị Ngân",
     "context": {
       "type": "offer",
       "id": "640b187e71d9faa9039f00cc",
-      "label": "AG-J1998 · Cho mèo ăn"
+      "label": "AG-J1998 · Cho mèo ăn 3 ngày khi đi vắng"
     },
     "unread": 2,
     "messages": [
@@ -71,7 +71,7 @@
         "createdAt": "2026-10-16T12:12:00.000Z"
       }
     ],
-    "withAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces&q=70"
+    "withAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f0403",
