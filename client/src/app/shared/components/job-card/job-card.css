@@ -29,3 +29,9 @@ h3 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.35; display: -
 .meta { flex-wrap: nowrap; align-items: center; }
 .meta > span:first-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .jst { flex: none; white-space: nowrap; }
+
+.item { position: relative; }
+.save { position: absolute; right: 10px; top: 10px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, .92); display: grid; place-items: center; color: var(--ink); }
+.save svg { width: 16px; height: 16px; }
+.save:hover { background: #fff; }
+.save.on { color: var(--accent); }

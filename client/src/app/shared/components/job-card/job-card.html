@@ -11,6 +11,10 @@
       }
     </div>
   </a>
+  <button type="button" class="save" [class.on]="savedSvc.has(job._id)" (click)="onSave($event)" [attr.aria-pressed]="savedSvc.has(job._id)"
+          [attr.aria-label]="savedSvc.has(job._id) ? 'Bỏ lưu' : 'Lưu việc'">
+    <svg class="i"><use [attr.href]="savedSvc.has(job._id) ? '#heartFill' : '#heart'" /></svg>
+  </button>
   <div class="body">
     <h3><a [routerLink]="['/posts/job', slug]">{{ job.title }}</a></h3>
     <div class="pr">{{ job.price | vnd }} @if (job | unit; as u) { <span>/ {{ u }}</span> }</div>
