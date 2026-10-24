@@ -103,6 +103,7 @@ export class AuthService {
     if (!cur) return throwError(() => new AppError('Bạn cần đăng nhập.', 401, 'UNAUTHORIZED'));
     if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
     const user: User = { ...cur, ...body };
+    if (body.fullName) this.saveMockName(cur.username, body.fullName);
     sessionStorage.setItem(MOCK_KEY, JSON.stringify(user));
     this.currentUser.set(user);
     return of(user);
