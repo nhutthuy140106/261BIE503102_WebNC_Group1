@@ -499,3 +499,6 @@
 .modal header { padding: 16px 22px 10px; }
 .ck .cs:first-child { padding-top: 0; }
 .ck .cs:first-child .crow:first-child { padding-top: 10px; }
+/* khối địa chỉ nằm sát đường ngăn bên dưới */
+.ck .cs:first-child { padding-bottom: 0; }
+.ck .cs:first-child .crow:last-child { padding-bottom: 6px; }
