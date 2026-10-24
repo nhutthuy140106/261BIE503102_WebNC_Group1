@@ -107,7 +107,7 @@
           </label>
           <label class="check all">
             <input type="checkbox" [checked]="requiredAgreed()" (change)="agreeRequired($any($event.target).checked)" />
-            <span><b>Đồng ý tất cả</b> các mục bắt buộc</span>
+            <span><b>Đồng ý tất cả các mục bắt buộc</b></span>
           </label>
           @if (info.controls.agreeTerms.touched && info.controls.agreeTerms.invalid || info.controls.agreeLiability.touched && info.controls.agreeLiability.invalid) {
             <small class="error">Bạn cần đồng ý 2 mục đầu để tạo tài khoản.</small>
