@@ -407,3 +407,7 @@
 .calfoot { border-top: 0; padding-top: 4px; margin-top: 4px; }
 .cal { z-index: 30; }
 .crow:has(.cal) { position: relative; z-index: 30; }
+/* chữ Hôm nay căn phải, thẳng với cột số cuối, cùng màu xanh đen với nút tròn */
+.calfoot { display: block; text-align: right; }
+.calfoot button { color: var(--ink); font-weight: 600; padding: 4px 0 4px 8px; }
+.calfoot button:hover { text-decoration: underline; text-underline-offset: 3px; }
