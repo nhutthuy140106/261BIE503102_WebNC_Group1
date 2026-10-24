@@ -357,8 +357,8 @@
 .crow input.tg::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .2s; }
 .crow input.tg:checked { background: var(--accent); }
 .crow input.tg:checked::after { transform: translateX(18px); }
-.noteinp { width: 100%; padding: 6px 0; border: 0; border-bottom: 1px solid #E3E5EA; background: none; font: inherit; font-size: 14px; color: var(--ink); }
-.noteinp:focus { outline: none; border-bottom-color: var(--ink); }
+.noteinp { width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E3E5EA; border-radius: 10px; background: #fff; font: inherit; font-size: 14px; color: var(--ink); }
+.noteinp:focus { outline: none; border-color: var(--ink); }
 .crow .ct .seg2, .crow .ct .seg, .crow .ct .when { display: grid; margin-top: 6px; }
 .crow .ct .seg2, .crow .ct .seg { grid-template-columns: 1fr 1fr; gap: 8px; }
 .crow .ct .when { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 8px; }
@@ -398,3 +398,7 @@
 /* các bước nằm trọn một hàng, không xuống dòng */
 .stepper.mini .s { white-space: nowrap; padding: 0; font-size: 12px; }
 .stepper.mini .s::before { left: calc(-50% + 16px); width: calc(100% - 32px); }
+
+/* ghi chú chỉ là một đường kẻ dưới chữ, không khung, không bo góc */
+.noteinp { height: auto; padding: 6px 0; border: 0; border-bottom: 1px solid #E3E5EA; border-radius: 0; background: none; box-shadow: none; }
+.noteinp:focus { border-color: transparent; border-bottom-color: var(--ink); outline: none; }
