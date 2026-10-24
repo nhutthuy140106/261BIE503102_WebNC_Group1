@@ -58,3 +58,5 @@ h1, .why, label[for='otp'] { text-align: center; }
 .check em { color: var(--fog); font-style: normal; }
 .go.narrow { display: block; width: min(100%, 380px); margin-left: auto; margin-right: auto; }
 .check.all { margin-top: 2px; color: var(--ink); }
+
+.hid-user { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; }

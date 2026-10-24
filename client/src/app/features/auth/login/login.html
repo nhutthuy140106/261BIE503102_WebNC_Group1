@@ -3,7 +3,7 @@
   <p class="why">{{ why }}</p>
   <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
     <label for="phone">Số điện thoại</label>
-    <input id="phone" class="tx" formControlName="phone" autocomplete="tel" inputmode="numeric" maxlength="10"
+    <input id="phone" class="tx" formControlName="phone" name="username" autocomplete="username" inputmode="numeric" maxlength="10"
            [class.is-invalid]="form.controls.phone.invalid && form.controls.phone.touched" />
     @if (form.controls.phone.invalid && form.controls.phone.touched) {
       <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small>

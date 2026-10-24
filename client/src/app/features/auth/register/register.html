@@ -44,6 +44,8 @@
       <p class="why">Chỉ còn vài thông tin để tạo tài khoản cho số {{ phone.value }}.</p>
       <form [formGroup]="info" (ngSubmit)="onSubmit()" novalidate>
         <h2 class="grp">Tài khoản</h2>
+        <!-- tên đăng nhập = số điện thoại: để trình duyệt lưu mật khẩu theo số điện thoại chứ không theo họ tên -->
+        <input type="text" class="hid-user" name="username" autocomplete="username" tabindex="-1" aria-hidden="true" [value]="phone.value" readonly />
         <div class="row">
           <div class="cell full">
             <label for="name">Họ và tên</label>
