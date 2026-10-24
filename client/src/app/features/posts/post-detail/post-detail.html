@@ -181,7 +181,7 @@
   <!-- ===== Bước 2: Xác nhận đơn hàng ===== -->
   @if (checkout()) {
     <div class="scrim" (click)="closeCheckout()">
-      <div class="modal" role="dialog" aria-label="Xác nhận đơn hàng" (click)="$event.stopPropagation()">
+      <div class="modal" role="dialog" aria-label="Xác nhận đơn hàng" (click)="$event.stopPropagation(); closePickers($event)">
         @if (placed(); as o) {
           <div class="done">
             <img class="mascot" src="assets/clean/wave.png" alt="" />
@@ -279,7 +279,7 @@
                     </span>
                     <span class="timebox">
                       <input type="text" class="timein" inputmode="numeric" maxlength="5" placeholder="hh:mm" [value]="customTime() || d.time()"
-                             (focus)="timeOpen.set(true)" (click)="timeOpen.set(true)" (input)="onCustomTime(d, $any($event.target).value)" aria-label="Giờ" />
+                             (focus)="openTime()" (click)="openTime()" (input)="onCustomTime(d, $any($event.target).value)" aria-label="Giờ" />
                       <svg class="i clk"><use href="#l-timer" /></svg>
                       @if (timeOpen()) {
                         <span class="tlist" role="listbox">

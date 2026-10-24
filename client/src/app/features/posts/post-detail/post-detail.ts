@@ -152,7 +152,21 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     this.calMonth.set(new Date(m.getFullYear(), m.getMonth() + n, 1));
   }
 
+  /** Mở danh sách giờ thì đóng lịch (chỉ một bảng mở một lúc) */
+  protected openTime(): void {
+    this.calOpen.set(false);
+    this.timeOpen.set(true);
+  }
+
+  /** Bấm vào chỗ khác trong hộp thì đóng lịch và danh sách giờ (hộp này chặn nổi bọt sự kiện nên cần tự xử lý) */
+  protected closePickers(e: Event): void {
+    const t = e.target as HTMLElement;
+    if (!t.closest('.datebox')) this.calOpen.set(false);
+    if (!t.closest('.timebox')) this.timeOpen.set(false);
+  }
+
   protected toggleCal(d: OrderDraft): void {
+    this.timeOpen.set(false);
     if (!this.calOpen() && d.date()) {
       const [y, mo] = d.date().split('-').map(Number);
       this.calMonth.set(new Date(y, mo - 1, 1));
