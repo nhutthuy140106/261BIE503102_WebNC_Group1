@@ -339,3 +339,7 @@ a.pbtn.link { text-decoration: none; }
 .thanks h3 { margin: 4px 0 0; font-size: 20px; }
 .thanks .p { margin: 0 0 10px; max-width: 340px; }
 .thanks .btns { width: 100%; }
+/* khối Bạn đã báo hoàn thành / Bạn đánh giá: một lớp nền xám rất nhạt, không viền */
+.quote { background: #F7F8FA; border: 0; padding: 14px 16px; border-radius: 12px; }
+.quote p { margin: 0; color: var(--ink); font-size: 14.5px; line-height: 1.55; }
+.quote .rstars { margin: 0; }
