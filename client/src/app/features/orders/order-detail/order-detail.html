@@ -52,7 +52,7 @@
         <section class="blk">
           <h2>Thông tin việc @if (job(); as j) { <a [routerLink]="['/posts/job', j._id]">Xem bài gốc</a> }</h2>
           <div class="info">
-            <div class="ir"><span class="il">Thời gian làm</span><span class="iv">{{ job()?.job?.due ?? '—' }}</span></div>
+            <div class="ir"><span class="il">Thời gian làm</span><span class="iv">{{ (job()?.job | jobWhen) || '—' }}</span></div>
             <div class="ir">
               <span class="il">Địa điểm</span>
               <span class="iv">{{ job()?.block ?? '—' }}

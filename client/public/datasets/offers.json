@@ -13,7 +13,7 @@
       "Chiều"
     ],
     "state": "chosen",
-    "exactAddress": "Căn C-0912, Block C — nhận chìa khóa ở bảo vệ",
+    "exactAddress": "B.1207 · Block B",
     "history": [
       {
         "state": "offered",
@@ -47,7 +47,8 @@
       }
     ],
     "posterAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
-    "posterId": "d3cb4d4e1a036f3674759c50"
+    "posterId": "d3cb4d4e1a036f3674759c50",
+    "exactAddress": "A.304 · Block A"
   },
   {
     "_id": "640b187e71d9faa9039f00ce",
@@ -62,7 +63,7 @@
       "Chiều"
     ],
     "state": "done",
-    "exactAddress": "Căn D-0503, Block D",
+    "exactAddress": "D.302 · Block D",
     "history": [
       {
         "state": "offered",

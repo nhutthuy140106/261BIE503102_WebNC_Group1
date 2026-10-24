@@ -13,7 +13,7 @@
       <div class="meta">
         <span>{{ j.block }}@if (j.distance != null) { · {{ j.distance | distance }} }</span>
         <span>Đăng {{ j.createdAt | ago }}</span>
-        <span>Hạn: {{ j.job?.due }}</span>
+        <span>Hạn: {{ j.job | jobWhen }}</span>
       </div>
     </div>
     <div class="pay"><small>Tiền công</small><b>{{ j.price | vnd }}</b><span>/ {{ j | unit }}</span>
@@ -27,7 +27,7 @@
   </div>
 
   <div class="kfacts">
-    <div><svg class="i"><use href="#clock" /></svg><span><b>Thời gian làm</b>{{ j.job?.due }}</span></div>
+    <div><svg class="i"><use href="#clock" /></svg><span><b>Thời gian làm</b>{{ j.job | jobWhen }}</span></div>
     <div><svg class="i"><use href="#pin" /></svg><span><b>Địa điểm</b>{{ j.block }}</span></div>
     <div><svg class="i"><use href="#users" /></svg><span><b>Số người cần</b>1 người</span></div>
     <div><svg class="i"><use href="#receipt" /></svg><span><b>Thanh toán</b>Tiền mặt</span></div>

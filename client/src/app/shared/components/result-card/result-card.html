@@ -8,7 +8,7 @@
         </div>
         @if (post.description) { <p>{{ post.description }}</p> }
         <div class="jc-foot">
-          @if (post.job?.due) { <span class="due"><svg class="i"><use href="#clock" /></svg>{{ post.job?.due }}</span> }
+          @if (post.job?.due) { <span class="due"><svg class="i"><use href="#clock" /></svg>{{ post.job | jobWhen }}</span> }
         </div>
       </div>
     } @else {

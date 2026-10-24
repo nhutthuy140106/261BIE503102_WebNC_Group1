@@ -7,7 +7,7 @@
     @if (job.description) { <p class="jc-desc">{{ job.description }}</p> }
     <div class="jc-foot">
       @if (job.job?.due) {
-        <span class="jc-due"><svg class="i"><use href="#clock" /></svg>{{ job.job?.due }}</span>
+        <span class="jc-due"><svg class="i"><use href="#clock" /></svg>{{ job.job | jobWhen }}</span>
       }
     </div>
   </a>

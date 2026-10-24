@@ -101,3 +101,8 @@ Khung đặt hàng phía Mua (`client/src/app/features/posts/post-detail`) **kh�
 | Xu | +10 khi xong (đơn ≥ 30.000đ) | giống | giống | +15 khi xong |
 
 Việc còn mở: phụ thu cho đồ ăn; tách riêng việc làm khỏi trang đơn nếu cần.
+
+## Thời gian làm của việc (cập nhật 24/10)
+- Bài việc làm có thêm `job.start` (ISO, bắt buộc với việc có ngày cụ thể), `job.end` (ISO, nếu kéo dài nhiều ngày), `job.allDay` (chỉ có ngày, không giờ). Phía Bán: form đăng việc cần chọn **ngày + giờ** bằng ô chọn ngày/giờ thay cho ô gõ chữ tự do.
+- Việc lặp theo tuần ("Tối T3 & T5") không có một ngày cụ thể → để trống `start`, ghi chữ ở `job.due`.
+- Phía Mua hiển thị bằng `jobWhen()` / pipe `jobWhen` (`core/utils/status-label.ts`) theo một kiểu `dd/MM/yyyy · HH:mm`; đơn việc đã nhận lấy thời gian và địa điểm từ chính bài việc, địa chỉ chính xác (`exactAddress`) lấy từ đề nghị khi được chọn.

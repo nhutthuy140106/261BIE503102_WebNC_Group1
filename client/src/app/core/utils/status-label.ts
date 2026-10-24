@@ -21,3 +21,19 @@ export function formatDateTime(iso: string): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' · ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
 }
+
+/** Chỉ ngày: "24/10/2026" */
+export function formatDate(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+}
+
+/** Thời gian làm của một việc, MỘT kiểu chung: "24/10/2026 · 06:30", "28/10/2026 – 30/10/2026"; việc lặp tuần thì dùng chữ `due`. */
+export function jobWhen(job: { due: string; start?: string; end?: string; allDay?: boolean } | undefined | null): string {
+  if (!job) return '';
+  if (!job.start) return job.due;
+  const f = job.allDay ? formatDate : formatDateTime;
+  return job.end ? f(job.start) + ' – ' + f(job.end) : f(job.start);
+}

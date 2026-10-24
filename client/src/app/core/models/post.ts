@@ -83,7 +83,14 @@ export interface Post {
   createdAt: string;
   /** Chỉ dùng cho việc làm */
   job?: {
+    /** Mô tả thời gian dạng chữ — chỉ dùng khi việc lặp lại theo tuần ("Tối T3 & T5"); việc có ngày cụ thể dùng start/end */
     due: string;
+    /** Ngày giờ bắt đầu làm (ISO). Có `start` thì hiển thị theo kiểu chung dd/MM/yyyy · HH:mm */
+    start?: string;
+    /** Ngày giờ kết thúc (ISO), nếu việc kéo dài nhiều ngày */
+    end?: string;
+    /** Chỉ có ngày, không có giờ cụ thể */
+    allDay?: boolean;
     offers: number;
     status: 'open' | 'taken';
     /** Khung giờ người nhận được chọn (ISO). Rỗng = tự do */

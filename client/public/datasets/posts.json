@@ -872,7 +872,8 @@
     "job": {
       "due": "Hôm nay · 11:30",
       "offers": 1,
-      "status": "open"
+      "status": "open",
+      "start": "2026-10-24T11:30:00+07:00"
     }
   },
   {
@@ -895,7 +896,8 @@
     "job": {
       "due": "CN 25/10 · 9:00",
       "offers": 3,
-      "status": "open"
+      "status": "open",
+      "start": "2026-10-25T09:00:00+07:00"
     }
   },
   {
@@ -918,7 +920,8 @@
     "job": {
       "due": "T7 24/10 · 14:00",
       "offers": 0,
-      "status": "open"
+      "status": "open",
+      "start": "2026-10-24T14:00:00+07:00"
     }
   },
   {
@@ -964,7 +967,10 @@
     "job": {
       "due": "28 – 30/10",
       "offers": 2,
-      "status": "open"
+      "status": "open",
+      "start": "2026-10-28T00:00:00+07:00",
+      "end": "2026-10-30T00:00:00+07:00",
+      "allDay": true
     }
   },
   {
@@ -987,7 +993,8 @@
     "job": {
       "due": "T7 24/10 · 6:30",
       "offers": 2,
-      "status": "open"
+      "status": "open",
+      "start": "2026-10-24T06:30:00+07:00"
     }
   },
   {
@@ -1010,7 +1017,8 @@
     "job": {
       "due": "Tối nay · 19:00",
       "offers": 1,
-      "status": "open"
+      "status": "open",
+      "start": "2026-10-24T19:00:00+07:00"
     }
   },
   {
@@ -1079,7 +1087,9 @@
     "job": {
       "due": "T7 24/10",
       "offers": 1,
-      "status": "taken"
+      "status": "taken",
+      "start": "2026-10-24T00:00:00+07:00",
+      "allDay": true
     }
   }
 ]
