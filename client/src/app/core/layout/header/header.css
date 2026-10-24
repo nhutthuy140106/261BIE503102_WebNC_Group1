@@ -163,13 +163,3 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
 .uitem em { margin-left: auto; font-style: normal; font-size: 13px; font-weight: 600; color: var(--smoke); }
 
 .uitem .uxu { width: 24px; height: 24px; flex: none; }
-
-/* menu chính luôn nằm chính giữa: ba cột (logo | menu | cụm bên phải), hai cột ngoài rộng bằng nhau nên tên khu vực dài thì cả hai bên cùng nới ra, menu không bị chồng */
-@media (min-width: 1000px) {
-  .bar.center { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); gap: 20px; }
-  .bar.center .left { display: contents; }
-  .bar.center .logo { grid-column: 1; justify-self: start; }
-  .bar.center nav { grid-column: 2; justify-self: center; }
-  .bar.center .right { grid-column: 3; justify-self: end; margin-left: 0; }
-  .bar.center > .hsp, .bar.center > .hsearch { display: none; }
-}
