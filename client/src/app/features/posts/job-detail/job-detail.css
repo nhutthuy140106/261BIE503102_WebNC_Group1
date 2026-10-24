@@ -153,3 +153,8 @@
 .stepper.mini .s:first-of-type { justify-items: start; }
 .stepper.mini .s:last-of-type { justify-items: end; }
 .stepper.mini .s .dot { background: #fff; }
+
+/* thanh bước nhỏ: các cột đều nhau, số nằm đúng giữa chữ bên dưới, đường kẻ liền chạy từ giữa cột đầu tới giữa cột cuối */
+.stepper.mini { display: grid; grid-template-columns: repeat(var(--n, 5), 1fr); justify-content: initial; }
+.stepper.mini::before { left: calc(50% / var(--n, 5)); right: calc(50% / var(--n, 5)); }
+.stepper.mini .s, .stepper.mini .s:first-of-type, .stepper.mini .s:last-of-type { justify-items: center; text-align: center; }

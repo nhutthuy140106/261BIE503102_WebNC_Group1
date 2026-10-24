@@ -212,7 +212,7 @@
               @if (o.detail?.when) { <div><dt>Thời gian</dt><dd>{{ o.detail?.when }}</dd></div> }
               <div><dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd></div>
             </dl>
-            <div class="stepper mini">
+            <div class="stepper mini" [style.--n]="doneSteps(o).length">
               @for (n of doneSteps(o); track $index) {
                 @if ($index > 0) { <i class="ln"></i> }
                 <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span><span class="slbl">{{ n }}</span></div>
