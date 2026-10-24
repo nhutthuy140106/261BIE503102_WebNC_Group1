@@ -324,9 +324,9 @@ export class OrderDetail implements OnInit {
       case 'preparing':
         return { h: k === 'service' ? 'Dịch vụ đang thực hiện' : 'Bên bán đang chuẩn bị', why: sl + ' đã bắt đầu nên không tự hủy được nữa. Cần thì gửi yêu cầu hủy, ' + sl + ' đồng ý mới hủy.', btns: o.cancelRequested ? [] : [{ id: 'cancelreq', label: A.cancelReq, kind: 'warn' }] };
       case 'delivering':
-        return { h: k === 'service' ? 'Dịch vụ đã hoàn tất' : 'Đang giao', why: k === 'service' ? 'Kiểm tra kết quả rồi xác nhận để đóng đơn.' : 'Khi đã nhận đủ, hãy xác nhận để đóng đơn.', btns: [{ id: 'received', label: A.received, kind: 'main' }] };
+        return { h: k === 'service' ? 'Dịch vụ đã hoàn tất' : 'Đang giao', why: k === 'service' ? 'Kiểm tra kết quả rồi xác nhận để đóng đơn.' : 'Khi đã nhận đủ, hãy xác nhận để đóng đơn.', btns: [{ id: 'received', label: k === 'service' ? A.confirmDone : A.received, kind: 'main' }] };
       case 'ready':
-        return { h: 'Sẵn sàng nhận', why: 'Kiểm tra hàng hoặc kết quả dịch vụ khi nhận.', btns: [{ id: 'received', label: A.received, kind: 'main' }] };
+        return { h: 'Sẵn sàng nhận', why: 'Kiểm tra hàng hoặc kết quả dịch vụ khi nhận.', btns: [{ id: 'received', label: k === 'service' ? A.confirmDone : A.received, kind: 'main' }] };
       case 'done': {
         const left = this.issueLeft(o);
         const btns: Btn[] = [];

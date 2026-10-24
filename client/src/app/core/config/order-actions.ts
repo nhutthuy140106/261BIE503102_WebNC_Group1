@@ -18,6 +18,7 @@ export const ORDER_ACTION = {
   cancelReq: 'Yêu cầu hủy',
   cancelJob: 'Xin hủy việc',
   received: 'Đã nhận',
+  confirmDone: 'Xác nhận',
   rate: 'Đánh giá',
   start: 'Bắt đầu làm',
   finish: 'Báo hoàn thành',
