@@ -332,3 +332,10 @@ a.pbtn.link { text-decoration: none; }
 .rqchips span { padding: 6px 14px; border-radius: 999px; background: #F0F2F5; font-size: 14px; font-weight: 600; }
 /* chữ trên nút không bao giờ xuống dòng */
 .arow2 .pbtn, .arow2 .gbtn, .btns button { white-space: nowrap; }
+
+/* popup cảm ơn sau khi đánh giá */
+.thanks { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 6px 0 0; }
+.thanks img { width: 110px; }
+.thanks h3 { margin: 4px 0 0; font-size: 20px; }
+.thanks .p { margin: 0 0 10px; max-width: 340px; }
+.thanks .btns { width: 100%; }

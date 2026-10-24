@@ -291,6 +291,14 @@
 @if (rvPics().length) { <div class="photo-thumbs">@for (u of rvPics(); track u) { <span class="photo-thumb"><img [src]="u" alt="" /><button type="button" aria-label="Bỏ ảnh" (click)="dropPic(u)">×</button></span> }</div> }
             <div class="btns one"><button type="button" class="go" (click)="o.type === 'received' ? okR() : okP()">{{ act.submitRate }}</button></div>
           }
+          @case ('thanks') {
+            <div class="thanks">
+              <img src="assets/clean/wave.png" alt="" />
+              <h3>Cảm ơn bạn đã sử dụng AntGo!</h3>
+              <p class="p">Đánh giá của bạn giúp hàng xóm khác chọn đúng người, đúng dịch vụ.@if (xu.has('review:' + o._id) || xu.has('review:' + (offer()?._id ?? ''))) { Bạn được cộng thêm +5 Xu. }</p>
+              <div class="btns one"><button type="button" class="go" (click)="close()">Đóng</button></div>
+            </div>
+          }
           @case ('creqdone') {
             <h3>Đã gửi yêu cầu hủy</h3>
             <p class="p">{{ o.counterpartName }} sẽ xem yêu cầu của bạn. Đơn vẫn tiếp tục cho tới khi {{ o.counterpartName }} đồng ý hủy, bạn sẽ nhận thông báo khi có phản hồi.</p>

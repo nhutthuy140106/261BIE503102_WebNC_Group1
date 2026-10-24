@@ -25,7 +25,7 @@ interface Btn {
 
 type DlgType =
   | 'edit' | 'withdraw' | 'start' | 'report' | 'rcancel' | 'unpaid' | 'rate'
-  | 'pcancel' | 'creqdone' | 'received' | 'issue' | 'resched' | 'approve' | 'reject';
+  | 'pcancel' | 'creqdone' | 'thanks' | 'received' | 'issue' | 'resched' | 'approve' | 'reject';
 
 const OTHER_REASON = 'Lý do khác';
 const R_REASONS = ['Tôi bận đột xuất', 'Sức khỏe không đảm bảo', 'Địa điểm quá xa', 'Không liên lạc được người đăng', 'Việc khác với mô tả', 'Thời gian không còn phù hợp', OTHER_REASON];
@@ -538,7 +538,7 @@ export class OrderDetail implements OnInit {
       const s = this.stars();
       const t = this.reviewText();
       this.reviewService.create({ targetType: 'order', targetId: o._id, rating: s, comment: t }).subscribe({ error: () => undefined });
-      return this.move({ rated: { s, t } }, 'Bạn đánh giá ' + n + ' ' + s + ' sao', 'Cảm ơn bạn đã đánh giá');
+      return this.move({ rated: { s, t } }, 'Bạn đánh giá ' + n + ' ' + s + ' sao', undefined, 'thanks');
     }
     if (d === 'issue') {
       const needPhoto = this.kind(o) !== 'service';
@@ -661,7 +661,7 @@ export class OrderDetail implements OnInit {
     const d = this.dlg();
     if (!o || !of || !d) return;
     const nm = o.counterpartName;
-    const done = (n: Offer, msg: string) => this.applyOffer(n, msg);
+    const done = (n: Offer, msg?: string) => this.applyOffer(n, msg);
     const err = (e: Error) => this.fail(e);
     if (d === 'edit') {
       if (!this.text().trim()) return void this.bad.set('Viết vài dòng để ' + nm + ' biết bạn hợp việc này.');
@@ -688,7 +688,8 @@ export class OrderDetail implements OnInit {
       this.reviewService.create({ targetType: 'offer', targetId: of._id, rating: s, comment: t }).subscribe({ error: () => undefined });
       return void this.offerService.patch(of._id, { rated: { s, t } }, 'Bạn đánh giá ' + nm + ' ' + s + ' sao').subscribe({
         next: (n) => {
-          done(n, 'Cảm ơn bạn đã đánh giá');
+          done(n);
+          this.dlg.set('thanks');
           if (t) this.xu.earn(5, 'Đánh giá việc ' + o.code, 'review:' + of._id);
         },
         error: err,
