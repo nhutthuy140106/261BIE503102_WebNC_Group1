@@ -253,14 +253,13 @@ export class OrderDetail implements OnInit {
   }
 
   /** Câu trạng thái ngắn của yêu cầu báo vấn đề / trả hàng */
-  protected issueState(o: Order, iss: OrderIssue): string {
-    const n = o.counterpartName;
+  protected issueState(iss: OrderIssue): string {
     const m: Record<OrderIssue['st'], string> = {
-      open: 'Đã gửi, chờ ' + n + ' phản hồi',
-      redo: n + ' nhận làm lại',
-      refund: n + ' đồng ý hoàn tiền',
-      returnAgreed: n + ' đồng ý nhận lại hàng',
-      rejected: n + ' không đồng ý',
+      open: 'Chờ bên bán phản hồi',
+      redo: 'Bên bán nhận làm lại',
+      refund: 'Bên bán đồng ý hoàn tiền',
+      returnAgreed: 'Bên bán đồng ý nhận lại hàng',
+      rejected: 'Bên bán không đồng ý',
       closed: 'Đã xong' + (iss.result ? ': ' + iss.result : ''),
     };
     return m[iss.st];
