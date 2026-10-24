@@ -21,7 +21,7 @@
     </div>
     <div class="pay">
       @if (o.type === 'placed' && (o.status === 'cancelled' || o.status === 'declined') && !o.priceRejected) {
-        <small>Đơn đã hủy</small><b class="strike">{{ o.total | vnd }}</b><span>Bạn không phải trả</span>
+        <small>Đơn đã hủy</small><b class="strike">{{ o.total | vnd }}</b>
       } @else if (o.status === 'pricing' && o.newPrice) {
         <small>Giá cuối · chờ bạn duyệt</small><b>{{ o.newPrice.total | vnd }}</b><span>Lúc đặt: {{ o.total | vnd }}</span>
       } @else {
