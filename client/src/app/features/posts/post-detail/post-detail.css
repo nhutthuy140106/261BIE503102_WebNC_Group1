@@ -502,3 +502,9 @@
 /* khối địa chỉ nằm sát đường ngăn bên dưới */
 .ck .cs:first-child { padding-bottom: 0; }
 .ck .cs:first-child .crow:last-child { padding-bottom: 6px; }
+/* giữ nguyên khung cũ, chỉ cho chữ tiêu đề nằm chính giữa theo chiều dọc */
+.modal header { padding: 19px 22px 19px; }
+.ck .cs:first-child .crow:first-child { padding-top: 6px; }
+.modal header h2 { line-height: 1.2; margin: 0; }
+.modal header { padding: 15px 22px; }
+.modal header .x { transform: none; align-self: center; }
