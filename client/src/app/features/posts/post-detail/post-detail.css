@@ -470,3 +470,12 @@
 .qty.sm button:hover:not(:disabled) { background: #F0F2F5; }
 .qty.sm button:disabled { color: #C8CCD4; opacity: 1; }
 .qty.sm b { min-width: 20px; font-size: 14.5px; font-weight: 600; text-align: center; }
+
+/* thanh bước nhỏ: MỘT đường kẻ liền chạy từ vòng tròn đầu tới vòng tròn cuối, chữ đầu căn trái, chữ cuối căn phải */
+.stepper.mini { position: relative; display: flex; justify-content: space-between; align-items: flex-start; }
+.stepper.mini::before { content: ''; position: absolute; left: 15px; right: 15px; top: 14px; height: 2px; background: var(--border); }
+.stepper.mini .ln { display: none; }
+.stepper.mini .s { position: relative; z-index: 1; }
+.stepper.mini .s:first-of-type { justify-items: start; }
+.stepper.mini .s:last-of-type { justify-items: end; }
+.stepper.mini .s .dot { background: #fff; }

@@ -146,3 +146,10 @@
 .stepper.mini .s::before { display: none; }
 .stepper.mini .s .slbl { white-space: nowrap; font-size: 12px; line-height: 1.3; }
 .stepper.mini .ln { flex: 1; min-width: 12px; height: 2px; margin: 15px 6px 0; background: var(--border); }
+.stepper.mini { position: relative; display: flex; justify-content: space-between; align-items: flex-start; }
+.stepper.mini::before { content: ''; position: absolute; left: 15px; right: 15px; top: 14px; height: 2px; background: var(--border); }
+.stepper.mini .ln { display: none; }
+.stepper.mini .s { position: relative; z-index: 1; }
+.stepper.mini .s:first-of-type { justify-items: start; }
+.stepper.mini .s:last-of-type { justify-items: end; }
+.stepper.mini .s .dot { background: #fff; }
