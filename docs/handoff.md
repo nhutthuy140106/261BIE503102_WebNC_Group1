@@ -106,3 +106,17 @@ Việc còn mở: phụ thu cho đồ ăn; tách riêng việc làm khỏi trang
 - Bài việc làm có thêm `job.start` (ISO, bắt buộc với việc có ngày cụ thể), `job.end` (ISO, nếu kéo dài nhiều ngày), `job.allDay` (chỉ có ngày, không giờ). Phía Bán: form đăng việc cần chọn **ngày + giờ** bằng ô chọn ngày/giờ thay cho ô gõ chữ tự do.
 - Việc lặp theo tuần ("Tối T3 & T5") không có một ngày cụ thể → để trống `start`, ghi chữ ở `job.due`.
 - Phía Mua hiển thị bằng `jobWhen()` / pipe `jobWhen` (`core/utils/status-label.ts`) theo một kiểu `dd/MM/yyyy · HH:mm`; đơn việc đã nhận lấy thời gian và địa điểm từ chính bài việc, địa chỉ chính xác (`exactAddress`) lấy từ đề nghị khi được chọn.
+
+## Lưu ý cho phía Bán để thống nhất với phía Mua (24/10)
+Mục tiêu: người bán đăng bài và xử lý đơn thế nào thì phía Mua cũng hiển thị đúng như vậy, **không ai tự đặt chữ riêng**.
+
+1. **Bài đăng = các khối, đơn lấy lại từ các khối đó.** Form đăng bài chỉ sinh ra 7 khối (giá, số lượng, thời gian, địa điểm, tùy chọn, câu hỏi riêng, tình trạng bán). Nội dung đơn của người mua (`Order.detail`) được dựng từ đúng các khối này. Người bán **không** gõ tay mô tả đơn.
+2. **Tên dòng cố định, người bán không đặt tên:** Thời gian · Hình thức nhận hàng · Địa chỉ · Dụng cụ · Thanh toán · Số lượng (hoặc "Khối lượng ước tính" khi bán theo kg). Người bán chỉ đặt: tên các **câu hỏi riêng**, tên **tùy chọn** và các lựa chọn, đơn vị tính, giá cộng thêm.
+3. **Lựa chọn mặc định:** lựa chọn đầu tiên của một nhóm, không phụ phí, mà nhóm đó có lựa chọn nâng cấp trả thêm (vd. "Phần cơm: Vừa" / "Nhiều cơm|+5.000đ") thì không ghi vào đơn. Muốn rõ hơn, form nên cho người bán đánh dấu "mặc định" cho từng lựa chọn.
+4. **Thời gian:** việc làm dùng `job.start` / `job.end` / `job.allDay` (ISO), form phải có ô chọn ngày giờ. Hiển thị luôn qua `jobWhen()` / `formatDateTime()` (`core/utils/status-label.ts`), kiểu `dd/MM/yyyy · HH:mm`. Việc lặp tuần ghi chữ ở `job.due`.
+5. **Trạng thái đơn và nút bấm:** bộ trạng thái và các bước theo loại bài nằm ở `core/utils/placed-steps.ts` (đồ ăn 5 bước, đồ dùng 4 bước, dịch vụ 4 bước + Duyệt giá). Mọi tên nút hành động nằm **một chỗ** ở `core/config/order-actions.ts`; phía Bán thêm hành động mới vào đó, không viết chữ riêng. Nút xếp song song, mỗi hàng tối đa 2 nút bằng nhau.
+6. **Báo giá và phụ thu:** người bán chỉ gửi số tiền, lý do và các dòng chi tiết; người mua thấy "Giá lúc đặt / Chênh lệch / Giá cuối" từ dữ liệu, không phải chữ tự gõ.
+7. **Thời hạn:** báo vấn đề / trả hàng trong 2 giờ (đồ ăn), 24 giờ (đồ dùng, dịch vụ) kể từ lúc nhận (`ISSUE_HOURS`). Phía Bán dùng đúng hằng số này khi hiển thị hạn xử lý.
+8. **Giao diện dùng chung:** icon chỉ dùng bộ **Phosphor** (`index.html`), khung chọn ảnh dùng class `.photo-add`, ngày giờ dùng helper chung, ảnh đơn dùng `app-order-thumb`, ảnh đại diện dùng `app-avatar`. Không tự vẽ icon hay viết lại component đã có ở `shared/`.
+9. **Dữ liệu mẫu:** sửa cấu trúc dữ liệu mẫu thì đổi `DATA_VERSION` trong `core/services/mock-db.ts` để trình duyệt tự nạp lại.
+10. **Chưa có ở phía Mua, cần bàn:** tự hoàn thành đơn đặt sau 2 giờ (đồ ăn) hoặc 24 giờ (đồ dùng, dịch vụ) khi người mua im lặng; người bán cập nhật tiến độ chi tiết theo mẫu bài (ví dụ giặt sấy: "Đang giặt").
