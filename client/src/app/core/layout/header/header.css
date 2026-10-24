@@ -173,8 +173,3 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
   .bar.center .right { grid-column: 3; justify-self: end; margin-left: 0; }
   .bar.center > .hsp, .bar.center > .hsearch { display: none; }
 }
-/* logo giữ vị trí cũ; menu ở giữa. Tên khu vực quá dài thì cụm bên phải nới ra và menu nhích trái vừa đủ để không bị chồng */
-@media (min-width: 1000px) {
-  .bar.center { grid-template-columns: minmax(0, 1fr) auto minmax(max-content, 1fr); }
-  .bar.center .hbtn .t { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-}
