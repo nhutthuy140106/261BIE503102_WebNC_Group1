@@ -321,3 +321,12 @@ a.pbtn.link { text-decoration: none; }
 .reasonlist { display: grid; gap: 6px; }
 .reasonlist span { position: relative; padding-left: 14px; }
 .reasonlist span::before { content: ''; position: absolute; left: 0; top: .6em; width: 5px; height: 5px; border-radius: 50%; background: var(--smoke); }
+
+/* Yêu cầu của bạn: thẻ trắng, nhãn nhỏ phía trên, lý do dạng viên thuốc */
+.reqcard { border: 1px solid var(--border); border-radius: 14px; background: #fff; }
+.rq1 { padding: 16px 18px; display: grid; gap: 8px; }
+.rq1 + .rq1 { border-top: 1px solid var(--border); }
+.rql { font-size: 13px; color: var(--smoke); }
+.rq1 p { margin: 0; line-height: 1.55; font-size: 14.5px; overflow-wrap: anywhere; }
+.rqchips { display: flex; flex-wrap: wrap; gap: 8px; }
+.rqchips span { padding: 6px 14px; border-radius: 999px; background: #F0F2F5; font-size: 14px; font-weight: 600; }

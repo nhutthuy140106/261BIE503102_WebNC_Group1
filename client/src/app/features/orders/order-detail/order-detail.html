@@ -103,13 +103,14 @@
 
         @if (o.issue; as iss) {
           <section class="blk">
-            <h2>{{ o.kind === 'service' ? 'Báo vấn đề' : 'Trả hàng/Hoàn tiền' }}</h2>
-            <div class="info">
-              <div class="ir"><span class="il">Trạng thái</span><span class="iv"><span class="stbadge" [class.done]="iss.st === 'closed'">{{ issueState(iss) }}</span></span></div>
-              <div class="ir"><span class="il">Lý do</span><span class="iv plain reasonlist">@for (r of splitReasons(iss.type); track $index) { <span>{{ r }}</span> }</span></div>
-              @if (iss.text) { <div class="ir"><span class="il">Mô tả</span><span class="iv plain">{{ iss.text }}</span></div> }
-              @if (iss.photos) { <div class="ir"><span class="il">Hình ảnh</span><span class="iv plain">{{ iss.photos }} ảnh đính kèm</span></div> }
-              @if (iss.reply) { <div class="ir"><span class="il">Phản hồi của bên bán</span><span class="iv plain">{{ iss.reply }}</span></div> }
+            <h2>Yêu cầu của bạn</h2>
+            <div class="reqcard">
+              <div class="rq1">
+                <span class="rql">Bạn đã gửi</span>
+                <div class="rqchips">@for (r of splitReasons(iss.type); track $index) { <span>{{ r }}</span> }</div>
+              </div>
+              @if (iss.text) { <div class="rq1"><span class="rql">Mô tả</span><p>{{ iss.text }}</p></div> }
+              @if (iss.photos) { <div class="rq1"><span class="rql">Ảnh kèm</span><p>{{ iss.photos }} ảnh</p></div> }
             </div>
           </section>
         }
