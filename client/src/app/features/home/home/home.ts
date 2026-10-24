@@ -156,9 +156,18 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    // mặc định ẩn ô tìm gọn ngay từ đầu (đang ở đầu trang, ô tìm lớn đang hiện); chỉ hiện khi cuộn qua ô lớn
+    this.search.hideCompact.set(true);
     // cuộn qua ô tìm kiếm lớn → ô gọn trượt lên giữa header
     const big = new IntersectionObserver(([e]) => this.search.hideCompact.set(e.isIntersecting || e.boundingClientRect.top >= 64), { rootMargin: '-64px 0px 0px 0px' });
     big.observe(this.bigSearch().nativeElement);
+    const sync = () => {
+      const r = this.bigSearch().nativeElement.getBoundingClientRect();
+      this.search.hideCompact.set(r.bottom > 64 && r.top < window.innerHeight);
+    };
+    window.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+    this.observers.push({ disconnect: () => { window.removeEventListener('scroll', sync); window.removeEventListener('resize', sync); } } as unknown as IntersectionObserver);
     // cuộn gần tới cuối khối Khám phá → tự tải thêm (tối đa 3 lần, sau đó hiện nút "Xem thêm")
     const feed = new IntersectionObserver(([e]) => {
       if (e.isIntersecting && this.loads() > 0 && this.loads() < MAX_AUTO_LOADS) this.loadMore();
