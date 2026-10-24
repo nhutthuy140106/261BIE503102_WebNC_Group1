@@ -6,17 +6,18 @@
  * ví dụ `{ address: false }` khi endpoint /me/addresses đã "Xong" trong api-buyer-job.md.
  */
 /**
- * Mặc định gọi API thật. Người chỉ làm giao diện (chưa chạy backend) bật dữ liệu mẫu bằng cách mở
- * `http://localhost:4200/?mock=1` (nhớ trong trình duyệt); `?mock=0` để tắt. Không cần sửa mã.
+ * Mặc định dùng DỮ LIỆU MẪU (public/datasets) vì máy chủ Express chưa chạy: mở `http://localhost:4200` là có dữ liệu.
+ * Khi đã có backend thật, mở `?mock=0` để gọi API (trình duyệt nhớ lựa chọn); `?mock=1` để quay lại dữ liệu mẫu.
+ * Không cần sửa mã.
  */
 function mockFlag(): boolean {
   try {
     const q = new URLSearchParams(location.search).get('mock');
-    if (q === '1') localStorage.setItem('antgo_mock', '1');
-    if (q === '0') localStorage.removeItem('antgo_mock');
-    return localStorage.getItem('antgo_mock') === '1';
+    if (q === '1') localStorage.removeItem('antgo_mock_off');
+    if (q === '0') localStorage.setItem('antgo_mock_off', '1');
+    return localStorage.getItem('antgo_mock_off') !== '1';
   } catch {
-    return false; // trình duyệt chặn localStorage: dùng API thật
+    return true; // trình duyệt chặn localStorage: dùng dữ liệu mẫu
   }
 }
 export const USE_MOCK = mockFlag();
