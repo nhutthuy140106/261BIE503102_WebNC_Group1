@@ -493,3 +493,5 @@
 .modal header { padding: 14px 22px 12px; }
 .modal header h2 { line-height: 1.2; }
 .modal header .x { margin-right: -10px; }
+.modal header { padding: 22px 22px 14px; align-items: center; }
+.modal header .x { display: grid; place-items: center; width: 34px; height: 34px; line-height: 1; padding: 0; align-self: center; transform: translateY(-4px); }
