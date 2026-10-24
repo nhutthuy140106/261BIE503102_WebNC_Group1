@@ -445,3 +445,12 @@
 /* tình trạng bán: dòng 1 là trạng thái, dòng 2 là giờ nhận đặt (không có dấu chấm lẻ loi) */
 .avail { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 8px; margin-top: 10px; }
 .avail span { grid-column: 2; color: var(--smoke); font-size: 13px; font-weight: 400; }
+
+/* nhiều phần trong một đơn */
+.phead { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 15px; }
+.phead.first { margin-top: 16px; padding-top: 0; border-top: 0; }
+.prem { background: none; color: var(--smoke); font-size: 13.5px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.prem:hover { color: var(--ink); }
+.portion .rows { margin-top: 10px; padding-top: 6px; border-top: 0; }
+.addp { margin-top: 18px; width: 100%; height: 44px; border: 1px dashed #B9BEC8; border-radius: 12px; background: none; font-weight: 600; font-size: 14.5px; color: var(--ink); cursor: pointer; }
+.addp:hover { border-color: var(--ink); }

@@ -88,6 +88,7 @@
         <div class="avail" [class.off]="s.off"><i></i><b>{{ s.text }}</b>@if (s.sub) { <span>{{ s.sub }}</span> }</div>
       }
 
+      @if (d.portions().length) { <div class="phead first"><b>Phần 1</b></div> }
       @for (g of v.tpl.opts; track g.name) {
         <div class="rows">
           <h4>{{ g.name }} <small>Chọn 1</small></h4>
@@ -154,10 +155,35 @@
           <div class="qty">
             <button type="button" [disabled]="d.qty() <= q.min" (click)="setQty(d, d.qty() - 1)" aria-label="Giảm">−</button>
             <b>{{ d.qty() }}</b>
-            <button type="button" [disabled]="d.qty() >= d.maxQty()" (click)="setQty(d, d.qty() + 1)" aria-label="Tăng">+</button>
+            <button type="button" [disabled]="d.qty() >= d.mainCap()" (click)="setQty(d, d.qty() + 1)" aria-label="Tăng">+</button>
           </div>
         </div>
       }
+
+      @for (po of d.portions(); track $index; let i = $index) {
+        <div class="portion">
+          <div class="phead"><b>Phần {{ i + 2 }}</b><button type="button" class="prem" (click)="d.removePortion(i)">Xóa</button></div>
+          @for (g of v.tpl.opts; track g.name) {
+            <div class="rows">
+              <h4>{{ g.name }} <small>Chọn 1</small></h4>
+              @for (c of g.choices; track c) {
+                <button type="button" class="row" [class.on]="po.opt[g.name] === c" (click)="d.setPortionOpt(i, g.name, c)">
+                  <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
+                </button>
+              }
+            </div>
+          }
+          <div class="qtyrow">
+            <span>{{ v.tpl.qty!.label }}</span>
+            <div class="qty">
+              <button type="button" [disabled]="po.qty <= 1" (click)="d.setPortionQty(i, po.qty - 1)" aria-label="Giảm">−</button>
+              <b>{{ po.qty }}</b>
+              <button type="button" [disabled]="d.totalQty() >= d.maxQty()" (click)="d.setPortionQty(i, po.qty + 1)" aria-label="Tăng">+</button>
+            </div>
+          </div>
+        </div>
+      }
+      @if (d.canAddPortion()) { <button type="button" class="addp" (click)="d.addPortion()">+ Thêm phần khác</button> }
 
       @if (tried() && d.missing(false); as miss) { <p class="warn">{{ miss }}</p> }
       <button type="button" class="primary" [disabled]="stockLine().off" (click)="next(d)">
@@ -231,7 +257,8 @@
               <div class="citem">
                 <img [src]="v.images[0]" alt="" />
                 <span class="ct">
-                  <b>{{ v.tpl.qty ? d.qty() + '× ' : '' }}{{ v.tpl.title }}</b>
+                  <b>{{ v.tpl.qty ? d.totalQty() + '× ' : '' }}{{ v.tpl.title }}</b>
+                  @for (r of d.portionRows(); track $index) { <small>{{ r.title }}: {{ r.text }} × {{ r.qty }}</small> }
                   @if (d.lines().length) { <small>{{ d.lines().join(' · ') }}</small> }
                   <small class="by">{{ p.sellerName }} · {{ p.block }}</small>
                 </span>

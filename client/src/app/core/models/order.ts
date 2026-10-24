@@ -98,6 +98,8 @@ export interface OrderDetail {
   quantity?: number;
   /** Tên dòng số lượng + đơn vị (lấy từ khối Số lượng của bài): "Khối lượng ước tính" + "kg" */
   quantityLabel?: string;
+  /** Đơn có nhiều phần (món khác nhau): từng phần một dòng */
+  portions?: { title: string; qty: number; text: string }[];
   unit?: string;
   address?: string;
   /** Cách nhận đã chọn (chỉ khi bài cho chọn / người bán nhận tại chỗ) */
