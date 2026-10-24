@@ -241,22 +241,22 @@
           @case ('edit') {
             <h3>Sửa lời giới thiệu</h3><p class="p">{{ o.counterpartName }} sẽ thấy bản mới nhất.</p>
             <div class="fld" [class.bad]="bad()"><label>Giới thiệu ngắn</label><textarea maxlength="300" [value]="text()" (input)="text.set($any($event.target).value); bad.set('')"></textarea><div class="cnt2">{{ text().length }}/300</div></div>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Hủy</button><button type="button" class="go" (click)="okR()">Lưu</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Hủy</button><button type="button" class="go" (click)="okR()">{{ act.save }}</button></div>
           }
           @case ('withdraw') {
             <h3>Rút đề nghị?</h3><p class="p">{{ o.counterpartName }} sẽ không còn thấy đề nghị của bạn. Nếu việc vẫn còn mở, bạn có thể gửi lại sau.</p>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Giữ đề nghị</button><button type="button" class="go dark" (click)="okR()">Rút đề nghị</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Giữ đề nghị</button><button type="button" class="go dark" (click)="okR()">{{ act.withdraw }}</button></div>
           }
           @case ('start') {
             <h3>Bắt đầu làm?</h3><p class="p">{{ o.counterpartName }} sẽ nhận thông báo bạn đã bắt đầu. Làm xong nhớ bấm <b>Báo hoàn thành</b>.</p>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Chưa</button><button type="button" class="go" (click)="okR()">Bắt đầu</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Chưa</button><button type="button" class="go" (click)="okR()">{{ act.start }}</button></div>
           }
           @case ('report') {
             <h3>Báo hoàn thành</h3><p class="p">{{ o.counterpartName }} sẽ kiểm tra và xác nhận. Không phản hồi trong 24 giờ thì đơn tự hoàn thành.</p>
             <div class="fld" [class.bad]="bad()"><label>Ghi chú cho {{ o.counterpartName }}</label><textarea maxlength="300" placeholder="Ví dụ: Đã để đồ trước cửa, hóa đơn kẹp trong túi." [value]="text()" (input)="text.set($any($event.target).value); bad.set('')"></textarea><div class="err2">{{ bad() }}</div></div>
             <div class="fld"><label>Hình ảnh <small class="hintl">(không bắt buộc)</small></label><label class="photo-add" [class.full]="rvPics().length >= 4"><input type="file" accept="image/*" multiple hidden (change)="addPics($any($event.target))" /><svg class="i"><use href="#camera" /></svg>Thêm hình ảnh</label>
 @if (rvPics().length) { <div class="photo-thumbs">@for (u of rvPics(); track u) { <span class="photo-thumb"><img [src]="u" alt="" /><button type="button" aria-label="Bỏ ảnh" (click)="dropPic(u)">×</button></span> }</div> }</div>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go" (click)="okR()">Gửi báo hoàn thành</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go" (click)="okR()">{{ act.finish }}</button></div>
           }
           @case ('rcancel') {
             <h3>Xin hủy việc này?</h3><p class="p">{{ o.counterpartName }} sẽ được báo ngay để tìm người khác. Hủy sát giờ làm sẽ hiện trong hồ sơ của bạn.</p>
@@ -264,11 +264,11 @@
               <div class="reasons">@for (r of rReasons; track r) { <button type="button" [class.on]="picks().includes(r)" (click)="togglePickReason(r)">{{ r }}</button> }</div>
               @if (picks().includes(otherReason)) { <textarea maxlength="200" placeholder="Bạn ghi rõ lý do giúp mình nhé" [value]="text()" (input)="text.set($any($event.target).value)"></textarea> }
               <div class="err2">{{ bad() }}</div></div>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go dark" (click)="okR()">Hủy việc</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go dark" (click)="okR()">{{ act.cancelJob }}</button></div>
           }
           @case ('unpaid') {
             <h3>Chưa nhận được tiền công?</h3><p class="p">Nhắn {{ o.counterpartName }} trước — đa số trường hợp chỉ là quên. Sau 3 ngày vẫn chưa nhận được, bạn có thể báo AntGo hỗ trợ.</p>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go" (click)="okR()">Nhắn {{ o.counterpartName }}</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go" (click)="okR()">{{ act.chat }}</button></div>
           }
           @case ('rate') {
             <h3 class="rvh">Đánh giá</h3>
@@ -287,7 +287,7 @@
             <textarea class="rvtext" maxlength="300" placeholder="Hãy chia sẻ nhận xét của bạn nhé!" [value]="text()" (input)="text.set($any($event.target).value)"></textarea>
             <label class="photo-add" [class.full]="rvPics().length >= 4"><input type="file" accept="image/*" multiple hidden (change)="addPics($any($event.target))" /><svg class="i"><use href="#camera" /></svg>Thêm hình ảnh</label>
 @if (rvPics().length) { <div class="photo-thumbs">@for (u of rvPics(); track u) { <span class="photo-thumb"><img [src]="u" alt="" /><button type="button" aria-label="Bỏ ảnh" (click)="dropPic(u)">×</button></span> }</div> }
-            <div class="btns one"><button type="button" class="go" (click)="o.type === 'received' ? okR() : okP()">Gửi đánh giá</button></div>
+            <div class="btns one"><button type="button" class="go" (click)="o.type === 'received' ? okR() : okP()">{{ act.submitRate }}</button></div>
           }
           @case ('creqdone') {
             <h3>Đã gửi yêu cầu hủy</h3>
@@ -303,11 +303,11 @@
               <div class="reasons">@for (r of pReasons(o); track r) { <button type="button" [class.on]="picks().includes(r)" (click)="togglePickReason(r)">{{ r }}</button> }</div>
               @if (picks().includes(otherReason)) { <textarea maxlength="200" placeholder="Bạn ghi rõ lý do giúp mình nhé" [value]="text()" (input)="text.set($any($event.target).value)"></textarea> }
               <div class="err2">{{ bad() }}</div></div>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go dark" (click)="okP()">{{ dlgNow() ? 'Hủy đơn' : 'Gửi yêu cầu' }}</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go dark" (click)="okP()">{{ dlgNow() ? act.cancel : act.cancelReq }}</button></div>
           }
           @case ('received') {
             <h3>Xác nhận đã nhận đủ?</h3><p class="p">Kiểm tra hàng hoặc kết quả dịch vụ trước khi xác nhận hoàn thành.</p>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go" (click)="okP()">Đã nhận đủ</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go" (click)="okP()">{{ act.received }}</button></div>
           }
           @case ('issue') {
             <h3>{{ issueLabel(o) }}</h3>
@@ -320,7 +320,7 @@
               <label class="photo-add" [class.full]="rvPics().length >= 4"><input type="file" accept="image/*" multiple hidden (change)="addPics($any($event.target))" /><svg class="i"><use href="#camera" /></svg>Thêm hình ảnh</label>
 @if (rvPics().length) { <div class="photo-thumbs">@for (u of rvPics(); track u) { <span class="photo-thumb"><img [src]="u" alt="" /><button type="button" aria-label="Bỏ ảnh" (click)="dropPic(u)">×</button></span> }</div> }</div>
             @if (bad()) { <div class="err2 show">{{ bad() }}</div> }
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go dark" (click)="okP()">Gửi cho {{ o.counterpartName }}</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go dark" (click)="okP()">{{ act.submitIssue }}</button></div>
           }
           @case ('resched') {
             <h3>Đổi lịch hẹn</h3>
@@ -332,13 +332,13 @@
           }
           @case ('approve') {
             <h3>Đồng ý giá {{ o.newPrice?.total | vnd }}?</h3><p class="p">{{ o.counterpartName }} sẽ làm tiếp với giá này. Bạn trả trực tiếp khi nhận, AntGo không giữ tiền.</p>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go" (click)="okP()">Đồng ý</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go" (click)="okP()">{{ act.approvePrice }}</button></div>
           }
           @case ('reject') {
             <h3>Từ chối giá {{ o.newPrice?.total | vnd }}?</h3>
             <p class="p">{{ o.priceCheck === 'quote' ? 'Bạn chỉ trả phí kiểm tra ' + vnd(o.total) + ', ' + o.counterpartName + ' trả lại máy. Đơn kết thúc.' : o.priceCheck === 'surcharge' ? o.counterpartName + ' không lấy đồ nữa, đơn hủy và bạn không phải trả gì.' : 'Đơn hủy, ' + o.counterpartName + ' trả lại đồ cho bạn và không tính tiền giặt.' }}</p>
             <div class="fld"><label>Nhắn {{ o.counterpartName }} lý do (không bắt buộc)</label><textarea maxlength="300" placeholder="Ví dụ: giá cao hơn mình dự tính" [value]="text()" (input)="text.set($any($event.target).value)"></textarea></div>
-            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go dark" (click)="okP()">Từ chối</button></div>
+            <div class="btns"><button type="button" class="ghost" (click)="close()">Quay lại</button><button type="button" class="go dark" (click)="okP()">{{ act.rejectPrice }}</button></div>
           }
         }
       </div>

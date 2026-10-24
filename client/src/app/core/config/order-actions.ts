@@ -5,6 +5,9 @@
  */
 export const ORDER_ACTION = {
   chat: 'Nhắn tin',
+  save: 'Lưu',
+  submitRate: 'Gửi đánh giá',
+  submitIssue: 'Gửi yêu cầu',
   approvePrice: 'Duyệt giá',
   rejectPrice: 'Từ chối giá',
   approveResched: 'Duyệt đổi giờ',
