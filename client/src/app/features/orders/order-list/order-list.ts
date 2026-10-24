@@ -160,9 +160,9 @@ export class OrderList implements OnInit {
     return m[st] ?? '';
   }
 
-  /** Thời điểm quan trọng nhất của đơn: giờ hẹn/giao với đơn đặt, ngày gửi với việc đã nhận */
+  /** Mốc thời gian ở dòng đơn: đơn đặt = lúc đặt; việc đã nhận = lúc bắt đầu gửi đề nghị (cùng một kiểu ngày giờ đầy đủ) */
   protected when(o: Order): string {
-    return o.type === 'placed' && o.detail?.when ? o.detail.when : (o.type === 'placed' ? 'Đặt ' : 'Gửi đề nghị ') + new Date(o.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+    return (o.type === 'placed' ? 'Đặt lúc ' : 'Gửi đề nghị lúc ') + formatDateTime(o.createdAt);
   }
 
   ngOnInit(): void {
