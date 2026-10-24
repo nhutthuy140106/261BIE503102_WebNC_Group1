@@ -13,7 +13,7 @@
     <div>
       <h1>{{ p.title }}</h1>
       <div class="sub">
-        @if (reviews().length) { <span class="st"><svg class="i"><use href="#star" /></svg>{{ rate() }} · {{ reviews().length }} đánh giá</span> } @else { <span>Chưa có đánh giá</span> }
+        @if (reviews().length) { <span class="st"><svg class="i"><use href="#star" /></svg>{{ rate() }} <span class="rc">({{ reviews().length }})</span></span> } @else { <span>Chưa có đánh giá</span> }
         @if (p.sold) { <span>{{ p.kind === 'service' ? 'Đã đặt' : 'Đã bán' }} {{ p.sold | count }}</span> }
         <span><svg class="i"><use href="#pin" /></svg>@if (p.area) { {{ p.area }} · }{{ p.block }}@if (p.distance != null) { · {{ p.distance | distance }} }</span>
       </div>
@@ -26,21 +26,12 @@
     </div>
   </div>
 
-  <div class="gal">
-    <div class="gmain">
-      <img [src]="v.images[galIdx()]" [alt]="p.title" (click)="openLightbox(galIdx())" />
-      @if (v.images.length > 1) {
-        <button type="button" class="gnav prev" aria-label="Ảnh trước" (click)="galStep(-1)">‹</button>
-        <button type="button" class="gnav next" aria-label="Ảnh sau" (click)="galStep(1)">›</button>
-        <span class="gcount">{{ galIdx() + 1 }} / {{ v.images.length }}</span>
-      }
-    </div>
+  <div class="gallery" [class.one]="v.images.length < 3">
+    @for (src of v.images; track src; let i = $index) {
+      <img [src]="src" [alt]="p.title" (click)="openLightbox(i)" />
+    }
     @if (v.images.length > 1) {
-      <div class="gthumbs">
-        @for (src of v.images; track src; let i = $index) {
-          <button type="button" [class.on]="i === galIdx()" (mouseenter)="galIdx.set(i)" (click)="galIdx.set(i)" [attr.aria-label]="'Ảnh ' + (i + 1)"><img [src]="src" alt="" /></button>
-        }
-      </div>
+      <button type="button" class="all" (click)="openLightbox(0)"><svg class="i"><use href="#grid" /></svg>{{ v.images.length }} ảnh</button>
     }
   </div>
 
