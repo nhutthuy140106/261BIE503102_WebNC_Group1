@@ -314,3 +314,10 @@ a.pbtn.link { text-decoration: none; }
 .arow2, .arow2:has(.pbtn) { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
 .arow2 .pbtn, .arow2 .gbtn { width: 100%; height: 46px; border-radius: 12px; font-size: 15px; padding: 0 12px; margin-top: 0; }
 .details dd.noteval { font-weight: 500; white-space: pre-line; overflow-wrap: anywhere; }
+
+/* khối Báo vấn đề / Trả hàng trong đơn: bảng dạng hàng như Thông tin việc */
+.stbadge { display: inline-block; padding: 4px 12px; border-radius: 999px; background: #FDF1DB; color: #8A5A10; font-size: 13px; font-weight: 600; }
+.stbadge.done { background: #E8F4EC; color: #2E7D4F; }
+.reasonlist { display: grid; gap: 6px; }
+.reasonlist span { position: relative; padding-left: 14px; }
+.reasonlist span::before { content: ''; position: absolute; left: 0; top: .6em; width: 5px; height: 5px; border-radius: 50%; background: var(--smoke); }

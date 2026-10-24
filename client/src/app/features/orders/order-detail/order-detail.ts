@@ -247,6 +247,25 @@ export class OrderDetail implements OnInit {
     return rows;
   }
 
+  /** Các lý do người mua đã chọn (ghép bằng dấu ;) tách lại thành từng dòng */
+  protected splitReasons(type: string): string[] {
+    return type.split(';').map((x) => x.trim()).filter(Boolean);
+  }
+
+  /** Câu trạng thái ngắn của yêu cầu báo vấn đề / trả hàng */
+  protected issueState(o: Order, iss: OrderIssue): string {
+    const n = o.counterpartName;
+    const m: Record<OrderIssue['st'], string> = {
+      open: 'Đã gửi, chờ ' + n + ' phản hồi',
+      redo: n + ' nhận làm lại',
+      refund: n + ' đồng ý hoàn tiền',
+      returnAgreed: n + ' đồng ý nhận lại hàng',
+      rejected: n + ' không đồng ý',
+      closed: 'Đã xong' + (iss.result ? ': ' + iss.result : ''),
+    };
+    return m[iss.st];
+  }
+
   protected issueLeft(o: Order): number {
     const at = o.doneAt ?? (o.doneAgoH != null ? Date.now() - o.doneAgoH * 3600e3 : 0);
     return ISSUE_HOURS[this.kind(o)] - (Date.now() - at) / 3600e3;
