@@ -163,3 +163,10 @@ nav a.on::after { content: ""; position: absolute; left: 10px; right: 10px; bott
 .uitem em { margin-left: auto; font-style: normal; font-size: 13px; font-weight: 600; color: var(--smoke); }
 
 .uitem .uxu { width: 24px; height: 24px; flex: none; }
+
+/* trang không có ô tìm kiếm: menu chính nằm chính giữa thanh, không bị lệch khi tên khu vực dài */
+@media (min-width: 1000px) {
+  .bar.center { position: relative; }
+  .bar.center .left { position: static; }
+  .bar.center nav { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+}
