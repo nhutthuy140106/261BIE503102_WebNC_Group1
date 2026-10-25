@@ -14,7 +14,7 @@
   <button type="button" [class.on]="tab() === 'unread'" (click)="tab.set('unread')">Chưa đọc</button>
 </div>
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-skeleton variant="rows" [count]="5" />
 } @else {
   @for (g of groups(); track g.title) {
     <h2>{{ g.title }}</h2>

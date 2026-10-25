@@ -14,6 +14,8 @@ import { ToastService } from './toast';
 const KEY = 'antgo_xu';
 const DAY = 864e5;
 const HALF_YEAR = 182 * DAY;
+/** Trần Xu nhận từ mini game mỗi ngày (chống cày Xu lấy voucher). */
+export const GAME_DAILY_CAP = 30;
 
 export interface XuEntry {
   /** Số Xu: + nhận, − tiêu / hết hạn */
@@ -141,6 +143,26 @@ export class XuService {
     this.write({ ...s, ledger: [...s.ledger, { d, t, key, at: now, exp: now + HALF_YEAR, note: true }] });
     this.toast.show(`+${d} Xu · ${t}`);
     return d;
+  }
+
+  /** Xu nhận từ game hôm nay (khóa bắt đầu bằng "game:"). Xu là tiền giảm giá thật nên có trần mỗi ngày. */
+  readonly gameToday = computed(() => {
+    const today = new Date().toDateString();
+    return this.state().ledger.filter((x) => x.d > 0 && x.key.startsWith('game:') && new Date(x.at).toDateString() === today).reduce((a, x) => a + x.d, 0);
+  });
+
+  /** Cộng Xu từ game, cắt theo trần ngày. Trả về số Xu thật sự được cộng (0 nếu đã đủ trần). */
+  earnGame(d: number, t: string, key: string): number {
+    if (d <= 0) return 0;
+    const give = Math.min(d, GAME_DAILY_CAP - this.gameToday());
+    if (give <= 0) {
+      this.toast.show(`Hôm nay bạn đã nhận đủ ${GAME_DAILY_CAP} Xu từ game`);
+      return 0;
+    }
+    const s = this.state();
+    const now = Date.now();
+    this.write({ ...s, ledger: [...s.ledger, { d: give, t, key: 'game:' + key, at: now, exp: now + HALF_YEAR, note: true }] });
+    return give;
   }
 
   /** Thu lại Xu đã cộng (đơn hủy / hoàn tiền). */

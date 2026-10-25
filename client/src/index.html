@@ -65,6 +65,18 @@
   <symbol id="bellhop" viewBox="0 0 256 256"><path d="M168,224a8,8,0,0,1-8,8H96a8,8,0,1,1,0-16h64A8,8,0,0,1,168,224Zm53.85-32A15.8,15.8,0,0,1,208,200H48a16,16,0,0,1-13.8-24.06C39.75,166.38,48,139.34,48,104a80,80,0,1,1,160,0c0,35.33,8.26,62.38,13.81,71.94A15.89,15.89,0,0,1,221.84,192ZM208,184c-7.73-13.27-16-43.95-16-80a64,64,0,1,0-128,0c0,36.06-8.28,66.74-16,80Z"/></symbol>
   <symbol id="hand" viewBox="0 0 256 256"><path d="M188,48a27.75,27.75,0,0,0-12,2.71V44a28,28,0,0,0-54.65-8.6A28,28,0,0,0,80,60v64l-3.82-6.13a28,28,0,0,0-48.6,27.82c16,33.77,28.93,57.72,43.72,72.69C86.24,233.54,103.2,240,128,240a88.1,88.1,0,0,0,88-88V76A28,28,0,0,0,188,48Zm12,104a72.08,72.08,0,0,1-72,72c-20.38,0-33.51-4.88-45.33-16.85C69.44,193.74,57.26,171,41.9,138.58a6.36,6.36,0,0,0-.3-.58,12,12,0,0,1,20.79-12,1.76,1.76,0,0,0,.14.23l18.67,30A8,8,0,0,0,96,152V60a12,12,0,0,1,24,0v60a8,8,0,0,0,16,0V44a12,12,0,0,1,24,0v76a8,8,0,0,0,16,0V76a12,12,0,0,1,24,0Z"/></symbol>
 </svg>
-  <app-root></app-root>
+  <app-root>
+    <!-- Màn chờ lúc tải ứng dụng: Angular thay thế nội dung này khi khởi động xong -->
+    <style>
+      .boot { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 8px; font-family: 'Mona Sans', system-ui, sans-serif; color: #6a6879; font-size: 13px; }
+      .boot .tr { position: relative; width: 190px; height: 74px; overflow: hidden; background: radial-gradient(circle, rgba(34,48,74,.22) 1.6px, transparent 2px) 0 calc(100% - 6px) / 14px 6px repeat-x; }
+      .boot .wk { position: absolute; left: 0; bottom: 4px; animation: bootwalk 2.6s linear infinite; }
+      .boot img { display: block; height: 62px; width: auto; transform-origin: 50% 100%; animation: bootstep .42s ease-in-out infinite; }
+      @keyframes bootwalk { from { transform: translateX(-34px); } to { transform: translateX(190px); } }
+      @keyframes bootstep { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
+      @media (prefers-reduced-motion: reduce) { .boot .wk, .boot img { animation: none; } .boot .wk { left: 75px; } }
+    </style>
+    <div class="boot" role="status"><div class="tr"><span class="wk"><img src="assets/clean/lean-sm.png" alt=""></span></div>Đang tải AntGo…</div>
+  </app-root>
 </body>
 </html>

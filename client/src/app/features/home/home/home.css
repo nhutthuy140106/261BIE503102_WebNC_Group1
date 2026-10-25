@@ -125,3 +125,6 @@
   .kband { padding: 28px 20px; margin-top: 44px; gap: 24px; }
   .kband h2 { font-size: 22px; }
 }
+
+.popline .spinlink { padding: 6px 14px; border: 1px dashed var(--accent); border-radius: 999px; color: var(--accent); font-size: 13px; font-weight: 600; }
+.popline .spinlink:hover { background: var(--accent-soft); }

@@ -1,5 +1,5 @@
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else if (job(); as j) {
   <div class="crumb"><button type="button" class="back" (click)="back()">Quay lại</button><span>·</span><a routerLink="/">Trang chủ</a><span>›</span><span>Việc làm</span>@if (j.category) { <span>›</span><span>{{ j.category }}</span> }</div>
 
