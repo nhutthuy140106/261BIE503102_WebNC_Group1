@@ -13,4 +13,6 @@ module.exports.mount = (app) => {
   app.use('/api/uploads', require('./upload/upload.routes'));
   app.use('/api', require('./recommend/recommend.routes'));
   app.use('/api/reports', require('./report/report.routes'));
+  app.use('/api/assistant', require('./assistant/assistant.routes'));
+  app.use('/api/pricing', require('./pricing/pricing.routes'));
 };
