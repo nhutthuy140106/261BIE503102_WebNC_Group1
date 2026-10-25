@@ -2,7 +2,7 @@
 @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
 
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else {
   <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="form">
     <div class="field">
@@ -47,6 +47,15 @@
         </div>
       }
     </div>
+    @if (priceHint(); as h) {
+      <div class="hint" role="status">
+        <div>
+          <b>Gợi ý: {{ h.suggested | vnd }}</b> <span class="muted">(thường {{ h.low | vnd }}–{{ h.high | vnd }})</span>
+        </div>
+        <small class="muted">Dựa trên {{ h.samples }} {{ isJob() ? 'việc' : 'bài' }} tương tự{{ h.confidence === 'low' ? ' — ít mẫu giống nên chỉ tham khảo' : '' }}: {{ h.basis[0]?.title }}…</small>
+        <button type="button" class="btn-ghost" (click)="applyHint(h.suggested)">Dùng giá này</button>
+      </div>
+    }
 
     <div class="field">
       <label for="block">Khu vực</label>
