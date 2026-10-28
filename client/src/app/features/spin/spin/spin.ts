@@ -36,7 +36,7 @@ export function spinPool(posts: Post[], tab: SpinTab, budget: number): Post[] {
   );
 }
 
-const ITEM_W = 164; // bề rộng một ô trước khi đo; thực tế = 1/5 bề rộng khung nhìn (5 ô của khung gỗ)
+const ITEM_W = 110; // bề rộng một ô trước khi đo; thực tế tính theo chiều cao rãnh của khung gỗ
 const REEL_LEN = 40;
 const WIN_AT = 33;
 const SPIN_MS = 4200;
@@ -55,6 +55,7 @@ export class Spin implements OnInit, OnDestroy {
   protected readonly tabs = TABS;
   protected readonly budgets = BUDGETS;
   protected readonly itemW = signal(ITEM_W);
+  protected readonly trackH = signal(90);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly foods = signal<Post[]>([]);
@@ -73,8 +74,11 @@ export class Spin implements OnInit, OnDestroy {
   @HostListener('window:resize')
   onResize(): void {
     if (this.spinning()) return;
-    const vw = this.view?.nativeElement.clientWidth;
-    if (vw) this.itemW.set(vw / 5);
+    const vh = this.view?.nativeElement.clientHeight;
+    if (vh) {
+      this.trackH.set(vh);
+      this.itemW.set(vh * (222 / 200) + 10); // thẻ cao bằng rãnh, tỉ lệ khung viền món, cộng khoảng cách
+    }
   }
 
   ngOnInit(): void {

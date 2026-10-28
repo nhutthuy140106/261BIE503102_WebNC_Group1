@@ -20,12 +20,15 @@
       <img class="cloud c2" src="assets/garden/cloud2.png" alt="" />
       <span class="petals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
 
-      <div class="board">
+      <div class="board" [style.--t]="trackH() + 'px'">
         <div class="view" #view>
           <div class="strip" [class.instant]="instant()" [style.transform]="'translateX(' + offset() + 'px)'">
             @for (p of reel(); track $index) {
               <div class="item" [class.win]="!spinning() && result() === p && $index === 33" [style.width.px]="itemW()">
-                @if (p.images.length) { <img [src]="p.images[0]" [alt]="p.title" loading="lazy" /> } @else { <span class="ph"></span> }
+                <div class="card">
+                  @if (p.images.length) { <img class="food" [src]="p.images[0]" [alt]="p.title" loading="lazy" /> } @else { <span class="food ph"></span> }
+                  <img class="rim" src="assets/garden/rim.png" alt="" />
+                </div>
               </div>
             } @empty {
               <p class="empty-reel">Chưa có món nào ở nhóm này.</p>
@@ -33,6 +36,7 @@
           </div>
         </div>
         <img class="frame" src="assets/garden/frame.png" alt="" />
+        <img class="sel" [class.on]="spinning()" [class.hit]="!spinning() && result()" src="assets/garden/sel.png" alt="" />
       </div>
 
       <div class="base">
