@@ -1,4 +1,4 @@
-<app-auth-shell [centered]="true" [wide]="step() === 3" [showAnt]="false" [showGoogle]="step() === 1">
+<app-auth-shell [centered]="true" [wide]="step() === 3" [showAnt]="false" [showGoogle]="false">
   <ol class="steps" aria-label="Các bước đăng ký">
     @for (s of stepNames; track s; let i = $index) {
       <li [class.on]="step() >= i + 1" [class.now]="step() === i + 1" [class.done]="step() > i + 1">
