@@ -2,13 +2,14 @@
 .loader { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 36px 0; color: var(--smoke); }
 .track { position: relative; width: 190px; height: 74px; overflow: hidden;
   background: radial-gradient(circle, rgba(34, 48, 74, .22) 1.6px, transparent 2px) 0 calc(100% - 6px) / 14px 6px repeat-x; }
-.walker { position: absolute; left: 0; bottom: 4px; animation: walk 2.6s linear infinite; }
-.ant { display: block; height: 62px; width: auto; transform-origin: 50% 100%; animation: step .42s ease-in-out infinite; filter: drop-shadow(0 4px 4px rgba(150, 70, 20, .18)); }
+.walker { position: absolute; left: 0; bottom: 2px; animation: walk 2.4s linear infinite; }
+/* con kiến chạy: 9 dáng xếp thành một dải ảnh, đổi dáng theo từng bước */
+.ant { display: block; width: 58px; height: 62px; background: url('/assets/clean/ant-run.png') 0 0 / 522px 62px no-repeat; animation: run .8s steps(9) infinite; filter: drop-shadow(0 4px 4px rgba(150, 70, 20, .18)); }
 .label { font-size: 13px; font-weight: 500; }
-@keyframes walk { from { transform: translateX(-34px); } to { transform: translateX(190px); } }
-@keyframes step { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
+@keyframes walk { from { transform: translateX(-60px); } to { transform: translateX(190px); } }
+@keyframes run { to { background-position: -522px 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .walker { animation: none; left: 75px; }
+  .walker { animation: none; left: 66px; }
   .ant { animation: none; }
 }
 :host(.compact) .loader { padding: 8px 0 0; }
