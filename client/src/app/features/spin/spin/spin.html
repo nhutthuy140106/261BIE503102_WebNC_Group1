@@ -36,7 +36,11 @@
           </div>
         </div>
         <img class="frame" src="assets/garden/frame.png" alt="" />
-        <img class="sel" [class.on]="spinning()" [class.hit]="!spinning() && result()" src="assets/garden/sel.png" alt="" />
+        <div class="selbox" [class.on]="spinning()" [class.hit]="!spinning() && result()">
+          <img class="sel" src="assets/garden/sel.png" alt="" />
+          <img class="pin top" src="assets/garden/pin.png" alt="" />
+          <img class="pin bot" src="assets/garden/pin.png" alt="" />
+        </div>
       </div>
 
       <div class="base">

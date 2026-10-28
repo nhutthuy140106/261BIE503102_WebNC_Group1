@@ -70,6 +70,8 @@ export class Spin implements OnInit, OnDestroy {
 
   protected readonly pool = computed(() => spinPool(this.foods(), this.tab(), this.budget()));
   private timers: ReturnType<typeof setTimeout>[] = [];
+  private raf = 0;
+  private scaleUntil = 0;
 
   @HostListener('window:resize')
   onResize(): void {
@@ -77,7 +79,8 @@ export class Spin implements OnInit, OnDestroy {
     const vh = this.view?.nativeElement.clientHeight;
     if (vh) {
       this.trackH.set(vh);
-      this.itemW.set(vh * (222 / 200) + 10); // thẻ cao bằng rãnh, tỉ lệ khung viền món, cộng khoảng cách
+      this.itemW.set(vh * (222 / 228.6) + 16); // thẻ cao bằng rãnh, tỉ lệ khung viền món, cộng khoảng cách
+      setTimeout(() => this.place());
     }
   }
 
@@ -98,6 +101,48 @@ export class Spin implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.timers.forEach(clearTimeout);
+    cancelAnimationFrame(this.raf);
+  }
+
+  /** Đặt dải sao cho một thẻ nằm đúng giữa khung ngắm (món trúng nếu đã quay, không thì thẻ thứ 4). */
+  private place(): void {
+    const view = this.view?.nativeElement;
+    if (!view || this.spinning()) return;
+    const w = this.itemW();
+    const idx = this.result() ? WIN_AT : 3;
+    this.instant.set(true);
+    this.offset.set(view.clientWidth / 2 - (idx * w + w / 2));
+    setTimeout(() => this.applyScale());
+  }
+
+  /** Thẻ càng gần giữa càng to (khớp lòng khung ngắm); tính theo vị trí thật của dải mỗi khung hình. */
+  private applyScale(): void {
+    const view = this.view?.nativeElement;
+    const strip = view?.firstElementChild as HTMLElement | null;
+    if (!view || !strip) return;
+    const tx = new DOMMatrixReadOnly(getComputedStyle(strip).transform).m41;
+    const w = this.itemW();
+    const cx = view.clientWidth / 2;
+    const items = strip.children;
+    for (let i = 0; i < items.length; i++) {
+      const el = items[i] as HTMLElement;
+      const card = el.firstElementChild as HTMLElement | null;
+      if (!card) continue;
+      const k = Math.max(0, 1 - Math.abs(i * w + w / 2 + tx - cx) / w);
+      const s = 1 + 0.34 * (k * k * (3 - 2 * k));
+      card.style.transform = s > 1.001 ? `scale(${s.toFixed(3)})` : '';
+      el.style.zIndex = k > 0.4 ? '2' : '';
+    }
+  }
+
+  private runScale(ms: number): void {
+    this.scaleUntil = performance.now() + ms;
+    cancelAnimationFrame(this.raf);
+    const tick = () => {
+      this.applyScale();
+      if (performance.now() < this.scaleUntil) this.raf = requestAnimationFrame(tick);
+    };
+    this.raf = requestAnimationFrame(tick);
   }
 
   setTab(t: SpinTab): void {
@@ -121,6 +166,7 @@ export class Spin implements OnInit, OnDestroy {
     this.instant.set(true);
     this.offset.set(0);
     this.reel.set(shuffle(this.pool()).slice(0, 12));
+    setTimeout(() => this.place());
   }
 
   private reset(): void {
@@ -157,6 +203,7 @@ export class Spin implements OnInit, OnDestroy {
     this.timers.push(setTimeout(() => {
       this.instant.set(false);
       this.offset.set(target);
+      this.runScale(reduce ? 200 : SPIN_MS + 500);
     }, 40));
     this.timers.push(setTimeout(() => {
       this.spinning.set(false);
