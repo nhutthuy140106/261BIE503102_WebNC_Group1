@@ -1,13 +1,14 @@
 import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth';
-import { isGuessablePassword, passwordRules, phoneValidator, strongPasswordValidator } from '../../../core/utils/validators';
+import { isGuessablePassword, passwordRules, passwordStrength, phoneValidator, strongPasswordValidator } from '../../../core/utils/validators';
 
 const matchValidator: ValidatorFn = (g: AbstractControl): ValidationErrors | null =>
   g.get('password')?.value === g.get('confirmPass')?.value ? null : { mismatch: true };
 
 type Step = 1 | 2 | 3 | 4;
 const OTP_SECONDS = 60;
+const STRENGTH_LABEL = ['', 'Yếu', 'Vừa', 'Mạnh'];
 
 /**
  * Quên mật khẩu: số điện thoại → mã xác nhận → mật khẩu mới → xong.
@@ -41,6 +42,8 @@ export class ForgotPassword implements OnDestroy {
 
   private readonly passwordValue = signal('');
   protected readonly rules = computed(() => passwordRules(this.passwordValue()));
+  protected readonly strength = computed(() => passwordStrength(this.passwordValue(), this.phone.value));
+  protected readonly strengthLabel = computed(() => STRENGTH_LABEL[this.strength()]);
   protected readonly guessable = computed(() => isGuessablePassword(this.passwordValue(), this.phone.value));
 
   constructor() {
