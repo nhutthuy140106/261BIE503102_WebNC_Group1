@@ -218,9 +218,9 @@
 /* con kiến to hơn, bong bóng thoại giống trang giới thiệu (nền kem, chữ serif nghiêng, góc nhọn phía kiến) */
 .thread.blank .stage { position: relative; display: block; }
 .thread.blank .stage img { width: 280px; display: block; }
-.thread.blank .say { position: absolute; left: 66%; top: -2%; margin: 0; padding: 10px 18px; white-space: nowrap; border: 0; border-radius: 20px 20px 20px 4px; background: #fff8ec; box-shadow: 0 10px 30px -10px rgba(120, 60, 20, .35); font: italic 500 20px 'Newsreader', serif; color: var(--ink); }
+.thread.blank .say { position: absolute; left: 66%; top: -2%; margin: 0; padding: 10px 18px; white-space: nowrap; border: 0; border-radius: 20px 20px 20px 4px; background: #fff8ec; box-shadow: 0 10px 30px -10px rgba(120, 60, 20, .35); font: 600 18px 'Mona Sans', sans-serif; color: var(--ink); }
 .thread.blank .say::after { display: none; }
-.thread.blank .say i { color: #c25415; }
+.thread.blank .say i { color: #c25415; font-style: normal; }
 .thread.blank .say { left: 74%; top: -4%; }
 /* khung trống: con kiến + dòng chữ thường bên dưới */
 .thread.blank { flex-direction: column; gap: 6px; }
