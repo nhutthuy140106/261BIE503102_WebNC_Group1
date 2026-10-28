@@ -63,5 +63,6 @@ export function strongPasswordValidator(c: AbstractControl): ValidationErrors | 
   const v = String(c.value ?? '');
   if (v === '') return null;
   if (v.length > 72) return { tooLong: true };
-  return passwordRules(v).every((r) => r.ok) ? null : { weak: true };
+  // hợp lệ từ mức Khá trở lên (đạt ít nhất 3 trong 4 điều kiện); tối thiểu 6 ký tự cho khớp máy chủ
+  return v.length >= 6 && passwordStrength(v) >= 3 ? null : { weak: true };
 }
