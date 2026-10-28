@@ -82,11 +82,11 @@ h1 .ico img:hover { animation-play-state: paused; transform: rotate(-8deg) trans
   background: radial-gradient(closest-side, rgba(255,252,240,.95), rgba(255,236,200,.55) 45%, rgba(255,220,170,0)); }
 .puff { position: absolute; z-index: 2; border-radius: 50%; pointer-events: none; animation: puff var(--dur, .8s) cubic-bezier(.15,.7,.3,1) var(--delay, 0s) both; }
 @keyframes puff { 0% { opacity: 0; transform: translate(0, 0) scale(.4); } 12% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--vx), var(--vy)) scale(.3); } }
-.bubble { position: absolute; z-index: 3; left: 60%; top: -12%; font: 600 17px 'Mona Sans', sans-serif; white-space: nowrap; color: var(--ink);
+.bubble { position: absolute; z-index: 3; left: 60%; top: -12%; font: 500 15px 'Mona Sans', sans-serif; white-space: nowrap; color: var(--ink);
   background: #fff8ec; padding: 9px 16px; border-radius: 18px 18px 18px 4px; box-shadow: 0 10px 30px -10px rgba(120,60,20,.35);
   opacity: 0; transform: translateY(8px) scale(.9); transform-origin: 0 100%; transition: opacity .25s, transform .35s cubic-bezier(.3,1.6,.5,1); pointer-events: none; }
 .bubble.show { opacity: 1; transform: none; }
-.bubble ::ng-deep i { color: #c25415; font-style: normal; }
+.bubble ::ng-deep i { color: inherit; font-style: normal; }
 
 /* ---------- màn mở đầu: nền kem + lưới kẻ + nhãn góc + chữ AntGo ---------- */
 .igrid { position: fixed; inset: 0; pointer-events: none; z-index: 30; opacity: 0; transition: opacity .5s; }
