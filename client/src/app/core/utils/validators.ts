@@ -49,17 +49,14 @@ export function isGuessablePassword(value: string, phone = ''): boolean {
 }
 
 /**
- * Độ mạnh 0–4: Yếu (thiếu điều kiện hoặc dễ đoán) · Trung bình (đủ 4 điều kiện) · Khá (+ dài từ 10 ký tự hoặc có ký tự đặc biệt)
- * · Mạnh (+ cả hai: dài từ 12 ký tự và có ký tự đặc biệt).
+ * Độ mạnh 0–4 = số điều kiện đã đạt (8 ký tự, chữ hoa, chữ thường, chữ số):
+ * 1 Yếu · 2 Trung bình · 3 Khá · 4 Mạnh. Mật khẩu quá dễ đoán (hoặc chứa số điện thoại) luôn chỉ ở mức Yếu.
  */
 export function passwordStrength(value: string, phone = ''): 0 | 1 | 2 | 3 | 4 {
   if (!value) return 0;
-  const passed = passwordRules(value).filter((r) => r.ok).length;
-  if (passed < 4 || isGuessablePassword(value, phone)) return 1;
-  const long = value.length >= 10;
-  const special = /[^A-Za-z0-9]/.test(value);
-  if (value.length >= 12 && special) return 4;
-  return long || special ? 3 : 2;
+  const passed = passwordRules(value).filter((r) => r.ok).length as 0 | 1 | 2 | 3 | 4;
+  if (isGuessablePassword(value, phone)) return 1;
+  return Math.max(1, passed) as 1 | 2 | 3 | 4;
 }
 
 export function strongPasswordValidator(c: AbstractControl): ValidationErrors | null {
