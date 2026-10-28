@@ -36,8 +36,7 @@ export function spinPool(posts: Post[], tab: SpinTab, budget: number): Post[] {
   );
 }
 
-const ITEM_W = 164; // bề rộng một ô trong dải quay (px) — màn hình rộng
-const ITEM_W_SMALL = 128; // điện thoại
+const ITEM_W = 164; // bề rộng một ô trước khi đo; thực tế = 1/5 bề rộng khung nhìn (5 ô của khung gỗ)
 const REEL_LEN = 40;
 const WIN_AT = 33;
 const SPIN_MS = 4200;
@@ -73,16 +72,18 @@ export class Spin implements OnInit, OnDestroy {
 
   @HostListener('window:resize')
   onResize(): void {
-    if (!this.spinning()) this.itemW.set(typeof innerWidth === 'number' && innerWidth < 560 ? ITEM_W_SMALL : ITEM_W);
+    if (this.spinning()) return;
+    const vw = this.view?.nativeElement.clientWidth;
+    if (vw) this.itemW.set(vw / 5);
   }
 
   ngOnInit(): void {
-    this.onResize();
     this.postService.getPosts().subscribe({
       next: (list) => {
         this.foods.set(list.filter((p) => p.kind === 'food'));
         this.loading.set(false);
         this.preview();
+        setTimeout(() => this.onResize());
       },
       error: (e: Error) => {
         this.error.set(e.message);
@@ -126,6 +127,7 @@ export class Spin implements OnInit, OnDestroy {
   spin(): void {
     const pool = this.pool();
     if (!pool.length || this.spinning()) return;
+    this.onResize();
     const winner = pool[Math.floor(Math.random() * pool.length)];
     // Dải quay: toàn món trong nhóm, món trúng đặt ở vị trí WIN_AT; không để hai ô liền kề giống nhau
     const reel: Post[] = [];
