@@ -8,7 +8,7 @@ const matchValidator: ValidatorFn = (g: AbstractControl): ValidationErrors | nul
 
 type Step = 1 | 2 | 3 | 4;
 const OTP_SECONDS = 60;
-const STRENGTH_LABEL = ['', 'Yếu', 'Vừa', 'Mạnh'];
+const STRENGTH_LABEL = ['', 'Yếu', 'Trung bình', 'Khá', 'Mạnh'];
 
 /**
  * Quên mật khẩu: số điện thoại → mã xác nhận → mật khẩu mới → xong.

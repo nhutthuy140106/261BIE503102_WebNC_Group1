@@ -48,12 +48,18 @@ export function isGuessablePassword(value: string, phone = ''): boolean {
   return COMMON_PASSWORDS.includes(v) || (phone.length >= 6 && v.includes(phone));
 }
 
-/** Độ mạnh 0–3: Yếu · Vừa · Mạnh (cộng điểm khi dài ≥ 12 hoặc có ký tự đặc biệt). */
-export function passwordStrength(value: string, phone = ''): 0 | 1 | 2 | 3 {
+/**
+ * Độ mạnh 0–4: Yếu (thiếu điều kiện hoặc dễ đoán) · Trung bình (đủ 4 điều kiện) · Khá (+ dài từ 10 ký tự hoặc có ký tự đặc biệt)
+ * · Mạnh (+ cả hai: dài từ 12 ký tự và có ký tự đặc biệt).
+ */
+export function passwordStrength(value: string, phone = ''): 0 | 1 | 2 | 3 | 4 {
   if (!value) return 0;
   const passed = passwordRules(value).filter((r) => r.ok).length;
   if (passed < 4 || isGuessablePassword(value, phone)) return 1;
-  return value.length >= 12 || /[^A-Za-z0-9]/.test(value) ? 3 : 2;
+  const long = value.length >= 10;
+  const special = /[^A-Za-z0-9]/.test(value);
+  if (value.length >= 12 && special) return 4;
+  return long || special ? 3 : 2;
 }
 
 export function strongPasswordValidator(c: AbstractControl): ValidationErrors | null {

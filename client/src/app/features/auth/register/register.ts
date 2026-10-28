@@ -13,7 +13,7 @@ const passwordMatchValidator: ValidatorFn = (g: AbstractControl): ValidationErro
 
 type Step = 1 | 2 | 3 | 4;
 const OTP_SECONDS = 60;
-const STRENGTH_LABEL = ['', 'Yếu', 'Vừa', 'Mạnh'];
+const STRENGTH_LABEL = ['', 'Yếu', 'Trung bình', 'Khá', 'Mạnh'];
 
 /**
  * Đăng ký 3 bước: số điện thoại → mã xác nhận (OTP) → thông tin tài khoản.

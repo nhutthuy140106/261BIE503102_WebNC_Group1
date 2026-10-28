@@ -76,7 +76,7 @@
           </div>
         </div>
         @if (info.controls.password.value) {
-          <div class="meter" [attr.data-level]="strength()" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="meter" [attr.data-level]="strength()" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           <p class="meter-label" [attr.data-level]="strength()">Độ mạnh: <b>{{ strengthLabel() }}</b></p>
           <ul class="rules">
             @for (r of rules(); track r.key) { <li [class.ok]="r.ok">{{ r.label }}</li> }
