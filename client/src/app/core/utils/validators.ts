@@ -25,7 +25,7 @@ export function noPhoneValidator(c: AbstractControl): ValidationErrors | null {
 const COMMON_PASSWORDS = ['12345678', '123456789', 'password', 'password1', 'matkhau123', 'qwerty123', 'abc12345', 'antgo123', '11111111', 'iloveyou1'];
 
 export interface PasswordRule {
-  key: 'length' | 'upper' | 'lower' | 'digit';
+  key: 'length' | 'case' | 'digit' | 'special';
   label: string;
   /** Nhãn ngắn cho dạng viên nhỏ */
   short: string;
@@ -36,9 +36,9 @@ export interface PasswordRule {
 export function passwordRules(value: string): PasswordRule[] {
   return [
     { key: 'length', label: 'Ít nhất 8 ký tự', short: '8+ ký tự', ok: value.length >= 8 },
-    { key: 'upper', label: 'Có chữ in hoa (A–Z)', short: 'A–Z', ok: /[A-Z]/.test(value) },
-    { key: 'lower', label: 'Có chữ thường (a–z)', short: 'a–z', ok: /[a-z]/.test(value) },
+    { key: 'case', label: 'Có chữ in hoa và chữ thường', short: 'Aa', ok: /[A-Z]/.test(value) && /[a-z]/.test(value) },
     { key: 'digit', label: 'Có chữ số (0–9)', short: '0–9', ok: /\d/.test(value) },
+    { key: 'special', label: 'Có ký tự đặc biệt (! @ # $ …)', short: '!@#', ok: /[^A-Za-z0-9\s]/.test(value) },
   ];
 }
 
@@ -49,7 +49,7 @@ export function isGuessablePassword(value: string, phone = ''): boolean {
 }
 
 /**
- * Độ mạnh 0–4 = số điều kiện đã đạt (8 ký tự, chữ hoa, chữ thường, chữ số):
+ * Độ mạnh 0–4 = số điều kiện đã đạt (8 ký tự, chữ hoa + chữ thường, chữ số, ký tự đặc biệt):
  * 1 Yếu · 2 Trung bình · 3 Khá · 4 Mạnh. Mật khẩu quá dễ đoán (hoặc chứa số điện thoại) luôn chỉ ở mức Yếu.
  */
 export function passwordStrength(value: string, phone = ''): 0 | 1 | 2 | 3 | 4 {
