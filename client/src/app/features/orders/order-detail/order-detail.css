@@ -352,3 +352,4 @@ a.pbtn.link { text-decoration: none; }
 .thanks .btns { width: auto; justify-content: center; }
 .thanks .btns .go { width: auto; padding: 0 36px; }
 .thanks img { width: 150px; }
+.trk-slot { display: block; margin-bottom: 16px; }

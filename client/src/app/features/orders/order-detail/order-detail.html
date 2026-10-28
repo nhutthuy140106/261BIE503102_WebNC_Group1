@@ -1,5 +1,5 @@
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else if (order(); as o) {
   <div class="crumb"><a routerLink="/orders" class="back">Đơn hàng</a><span>/</span><span>{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span></div>
 
@@ -44,6 +44,10 @@
       </div>
     }
   </div>
+
+  @if (trackable(o)) {
+    <app-order-tracking class="trk-slot" [orderId]="o._id" [shopName]="o.counterpartName" [address]="o.detail?.address ?? ''" />
+  }
 
   <div class="cols">
     <div class="left">

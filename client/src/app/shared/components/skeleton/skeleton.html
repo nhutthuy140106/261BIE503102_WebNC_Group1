@@ -1,0 +1,18 @@
+<div class="sk" [class.rows]="variant === 'rows'" role="status" aria-live="polite" aria-label="Đang tải">
+  @for (i of items; track i) {
+    @if (variant === 'cards') {
+      <div class="card">
+        <div class="img bar"></div>
+        <div class="line bar w80"></div>
+        <div class="line bar w50"></div>
+        <div class="line bar w35 price"></div>
+      </div>
+    } @else {
+      <div class="row">
+        <div class="av bar"></div>
+        <div class="txt"><div class="line bar w60"></div><div class="line bar w40"></div></div>
+        <div class="line bar w15"></div>
+      </div>
+    }
+  }
+</div>

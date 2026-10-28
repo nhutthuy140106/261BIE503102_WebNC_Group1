@@ -202,6 +202,11 @@ export class OrderDetail implements OnInit {
   // =============================================================
   // Đơn đã đặt
   // =============================================================
+  /** Bản đồ theo dõi giao hàng (demo): đơn đồ ăn/đồ dùng có giao tận cửa, đang chuẩn bị hoặc đang giao */
+  protected trackable(o: Order): boolean {
+    return o.type === 'placed' && this.kind(o) !== 'service' && !o.detail?.pickup && (o.status === 'preparing' || o.status === 'delivering' || o.status === 'ready');
+  }
+
   protected kind(o: Order): 'food' | 'goods' | 'service' {
     return o.kind ?? 'goods';
   }

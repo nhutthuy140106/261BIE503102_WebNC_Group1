@@ -1,11 +1,15 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { EMPTY, catchError, combineLatest, debounceTime, distinctUntilChanged, map, startWith, switchMap } from 'rxjs';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppError } from '../../../core/models/api';
 import { CanComponentDeactivate } from '../../../core/guards/pending-changes-guard';
 import { KIND_LABEL, PostKind } from '../../../core/models/post';
 import { BLOCKS } from '../../../core/models/user';
+import { PricingService } from '../../../core/services/pricing';
 import { SellerService } from '../../../core/services/seller';
+import { PriceSuggestion } from '../../../core/utils/price-suggest';
 import { UploadService } from '../../../core/services/upload';
 
 const MAX_IMAGES = 4;
@@ -25,6 +29,8 @@ export class PostForm implements OnInit, CanComponentDeactivate {
   private readonly route = inject(ActivatedRoute);
   private readonly seller = inject(SellerService);
   private readonly upload = inject(UploadService);
+  private readonly pricing = inject(PricingService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly kinds = Object.entries(KIND_LABEL) as [PostKind, string][];
   protected readonly blocks = BLOCKS;
@@ -36,6 +42,8 @@ export class PostForm implements OnInit, CanComponentDeactivate {
   protected readonly error = signal<string | null>(null);
   protected readonly isJob = signal(false);
   protected readonly priceLabel = computed(() => (this.isJob() ? 'Tiền công (đ)' : 'Giá (đ)'));
+  /** Gợi ý giá theo tên + loại (kNN trên bài tương tự); null khi chưa đủ dữ liệu */
+  protected readonly priceHint = signal<PriceSuggestion | null>(null);
   private saved = false;
 
   protected readonly form = new FormGroup({
@@ -51,6 +59,16 @@ export class PostForm implements OnInit, CanComponentDeactivate {
 
   ngOnInit(): void {
     this.form.controls.kind.valueChanges.subscribe((k) => this.onKind(k));
+    combineLatest([
+      this.form.controls.title.valueChanges.pipe(startWith(this.form.controls.title.value), debounceTime(500), map((t) => t.trim())),
+      this.form.controls.kind.valueChanges.pipe(startWith(this.form.controls.kind.value)),
+    ])
+      .pipe(
+        distinctUntilChanged(([t1, k1], [t2, k2]) => t1 === t2 && k1 === k2),
+        switchMap(([title, kind]) => (title.length >= 5 ? this.pricing.suggest(kind, title).pipe(catchError(() => EMPTY)) : [null])),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((h) => this.priceHint.set(h));
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.editingId.set(id);
@@ -79,6 +97,11 @@ export class PostForm implements OnInit, CanComponentDeactivate {
     const due = this.form.controls.due;
     due.setValidators(k === 'job' ? [Validators.required, Validators.maxLength(60)] : []);
     due.updateValueAndValidity({ emitEvent: false });
+  }
+
+  applyHint(value: number): void {
+    this.form.controls.price.setValue(value);
+    this.form.controls.price.markAsDirty();
   }
 
   hasUnsavedChanges(): boolean {

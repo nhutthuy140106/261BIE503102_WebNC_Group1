@@ -37,3 +37,20 @@ Hai bài "giống nhau" khi nói về cùng thứ (từ khóa chung), cùng lo�
 - Không dùng hành vi của người dùng khác (collaborative filtering) vì dữ liệu đồ án quá ít.
 - Tính lại vector mỗi lần gọi (≤ 500 bài, vài chục ms); nếu dữ liệu lớn thì cần lưu sẵn vector hoặc dùng dịch vụ tìm kiếm.
 - Trọng số `0.6/0.15/0.15/0.1` là chọn tay, chưa được tinh chỉnh bằng dữ liệu thật.
+
+---
+
+## Bổ sung: tìm kiếm thông minh, gợi ý giá, công cụ cho trợ lý
+
+### Tìm kiếm thông minh — `server/src/utils/smart-search.js`
+- Chỉ chạy khi tìm thường (regex trên `searchText`) **không ra bài nào**; kết quả có `meta.smart = true`.
+- Từ khóa được **mở rộng đồng nghĩa** (bảng nhóm từ trong file: "lau nhà" ↔ "dọn nhà", "cf" ↔ "cà phê"…), rồi so với từ vựng của kho bài: khớp đúng (1.0), **gõ lặp chữ kiểu Telex** ("coom", "gaa") 0.8, tiền tố 0.8, **sai ≤ 1–2 ký tự (Levenshtein)** 0.7, đồng nghĩa 0.6.
+- Điểm bài = Σ trọng số × idf (từ hiếm quan trọng hơn), xếp giảm dần. Không dịch vụ ngoài, chạy trên tối đa 500 bài.
+
+### Gợi ý giá khi đăng — `GET /api/pricing/suggest?kind=&title=&category=`
+- **kNN hồi quy**: vector TF-IDF của tên bài đang soạn so với bài cùng loại (`Post`, hoặc `Job` với tiền công); lấy k = 7 bài giống nhất (cosine ≥ 0.12).
+- Giá gợi ý = **trung vị có trọng số** theo độ giống; khoảng thường gặp = phân vị 25%–75%; làm tròn theo thang giá VN.
+- `confidence`: high (≥5 mẫu giống), medium (3–4), low (ít mẫu giống → dùng mặt bằng chung của loại). Bản FE cho chế độ dữ liệu mẫu: `client/src/app/core/utils/price-suggest.ts`.
+
+### Trợ lý (chatbot) — công cụ gọi được
+`search_catalog` (tìm bài, lọc giá/loại/khu), `my_orders` (đơn của chính người đang chat), `pick_dish` (chọn ngẫu nhiên một món trong ngân sách). Bộ trả lời cơ bản (không cần khóa AI) hiểu thêm: "đơn của tôi", "chọn giúp tôi…", "ngân sách 150k cho cả ngày" (thực đơn sáng–trưa–tối, mỗi bữa ≤ 1/3 ngân sách).

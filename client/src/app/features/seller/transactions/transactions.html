@@ -10,7 +10,7 @@
 
 @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else if (tab() === 'orders') {
   <ul class="list">
     @for (o of orders(); track o._id) {

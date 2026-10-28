@@ -1,0 +1,17 @@
+:host { display: block; }
+.sk { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; padding: 4px 0; }
+.sk.rows { grid-template-columns: 1fr; gap: 0; }
+@media (max-width: 1100px) { .sk { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .sk { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .sk.rows { grid-template-columns: 1fr; } }
+.card { display: grid; gap: 8px; }
+.img { aspect-ratio: 4 / 3; border-radius: 12px; }
+.line { height: 12px; border-radius: 6px; }
+.line.price { height: 16px; margin-top: 4px; }
+.w80 { width: 80%; } .w60 { width: 60%; } .w50 { width: 50%; } .w40 { width: 40%; } .w35 { width: 35%; } .w15 { width: 15%; min-width: 48px; }
+.row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid #F0E2DC; }
+.av { width: 48px; height: 48px; border-radius: 12px; flex: none; }
+.txt { flex: 1; display: grid; gap: 8px; }
+/* vệt sáng lướt ngang; tắt chuyển động nếu người dùng chọn giảm hiệu ứng */
+.bar { background: linear-gradient(100deg, #f3ebe7 30%, #fbf6f3 50%, #f3ebe7 70%) 0 0 / 300% 100%; animation: sweep 1.3s ease-in-out infinite; }
+@keyframes sweep { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .bar { animation: none; background: #f3ebe7; } }

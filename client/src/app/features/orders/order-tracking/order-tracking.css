@@ -1,0 +1,53 @@
+:host { display: block; }
+.trk { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 0 16px; align-items: start; border: 1px solid #F0E2DC; border-radius: 16px; background: #fff; padding: 12px; box-shadow: 0 1px 6px rgba(34, 48, 74, .06); }
+.mapbox { grid-column: 1; position: relative; border-radius: 12px; overflow: hidden; background: #FBF4F1; min-height: 340px; }
+.map { position: absolute; inset: 0; }
+.map.hid { display: none; }
+.maperr { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: #6b7280; }
+.sim { grid-column: 1; margin: 6px 2px 0; font-size: 12px; color: #6b7280; }
+.card { grid-column: 2; grid-row: 1 / span 2; display: grid; gap: 12px; align-content: start; }
+h2 { margin: 0; font-size: 18px; line-height: 1.3; color: #22304A; }
+.eta { margin: -6px 0 0; color: #6b7280; }
+.eta b { color: #D85A1C; }
+.eta.ok { color: #1f7a4d; font-weight: 600; }
+.who { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; background: #FBF4F1; }
+.meta { flex: 1; min-width: 0; display: grid; }
+.meta small { color: #6b7280; }
+.ic { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #F0E2DC; background: #fff; display: grid; place-items: center; cursor: pointer; }
+.ic .i { width: 18px; height: 18px; fill: currentColor; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.steps li { position: relative; display: flex; align-items: center; gap: 10px; padding: 7px 0; color: #9aa0aa; font-size: 14px; }
+.steps li::before { content: ''; position: absolute; left: 10px; top: -9px; width: 2px; height: 18px; background: #e6dcd7; }
+.steps li:first-child::before { display: none; }
+.dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #d9cfc9; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none; background: #fff; }
+.steps li.ok { color: #22304A; }
+.steps li.ok .dot { background: #D85A1C; border-color: #D85A1C; color: #fff; }
+.steps li.cur { color: #D85A1C; font-weight: 600; }
+.steps li.cur .dot { border-color: #D85A1C; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(216, 90, 28, .45); } 50% { box-shadow: 0 0 0 6px rgba(216, 90, 28, 0); } }
+.demo { display: flex; align-items: center; gap: 8px; padding-top: 10px; border-top: 1px dashed #e6dcd7; font-size: 12px; color: #6b7280; }
+.demo button { border: 1px solid #F0E2DC; background: #fff; border-radius: 8px; padding: 5px 10px; cursor: pointer; font-size: 12.5px; }
+.demo button.on { border-color: #D85A1C; color: #D85A1C; }
+@media (prefers-reduced-motion: reduce) { .steps li.cur .dot { animation: none; } }
+
+@media (max-width: 800px) {
+  .trk { grid-template-columns: 1fr; padding: 10px; }
+  .mapbox { min-height: 300px; }
+  .card { grid-column: 1; grid-row: auto; margin-top: 10px; }
+}
+
+/* marker Leaflet nằm ngoài view của component nên dùng ::ng-deep */
+:host ::ng-deep .pin-wrap { background: none; border: 0; }
+:host ::ng-deep .pin { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: #fff; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, .3); }
+:host ::ng-deep .pin.shop { background: #22304A; }
+:host ::ng-deep .pin.home { background: #1f7a4d; }
+:host ::ng-deep .pin.courier { background: #D85A1C; }
+
+/* hiệu ứng "xe đang chạy": nét đứt dịch chuyển dọc tuyến (stroke-dashoffset) */
+:host ::ng-deep path.trk-rest { animation: trk-march 1.6s linear infinite; }
+:host ::ng-deep path.trk-flow { animation: trk-march 0.9s linear infinite; }
+:host ::ng-deep path.trk-done { filter: drop-shadow(0 0 4px rgba(216, 90, 28, .6)); }
+@keyframes trk-march { to { stroke-dashoffset: -28; } }
+@media (prefers-reduced-motion: reduce) {
+  :host ::ng-deep path.trk-rest, :host ::ng-deep path.trk-flow { animation: none; }
+}

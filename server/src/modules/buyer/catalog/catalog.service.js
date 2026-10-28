@@ -4,11 +4,22 @@ const Offer = require('../offer/offer.model');
 const ApiError = require('../../../utils/ApiError');
 const { parsePaging, escapeRegex } = require('../../../utils/pagination');
 const { stripAccents, resolveId } = require('../../../utils/text');
+const smart = require('../../../utils/smart-search');
 
 const SELLER_FIELDS = 'name avatar area';
 
 // Tìm tương đối, không phân biệt dấu/hoa thường: 'bun bo' ra 'Bún bò'. Khớp trên searchText đã bỏ dấu.
 const searchRegex = (q) => new RegExp(escapeRegex(stripAccents(q).trim()), 'i');
+
+// Tìm thường không ra gì thì thử lại thông minh (gõ sai, đồng nghĩa), xếp theo độ liên quan. meta.smart = true để giao diện báo.
+async function smartFallback(Model, filter, q, { page, limit, skip }, populateField, select) {
+  const { searchText: _drop, ...rest } = filter;
+  let query = Model.find(rest).select('+searchText').limit(500); // searchText mặc định bị ẩn
+  if (select) query = query.select(select);
+  const pool = await query.populate(populateField, SELLER_FIELDS);
+  const ranked = smart.rank(pool, q.q);
+  return { items: ranked.slice(skip, skip + limit).map((x) => x.doc), meta: { page, limit, total: ranked.length, smart: true } };
+}
 
 async function listPosts(q) {
   const { page, limit, skip } = parsePaging(q);
@@ -28,6 +39,7 @@ async function listPosts(q) {
     Post.find(filter).sort({ ...sort, _id: 1 }).skip(skip).limit(limit).populate('seller', SELLER_FIELDS),
     Post.countDocuments(filter),
   ]);
+  if (total === 0 && q.q) return smartFallback(Post, filter, q, { page, limit, skip }, 'seller');
   return { items, meta: { page, limit, total } };
 }
 
@@ -52,6 +64,7 @@ async function listJobs(q) {
     Job.find(filter).select('-exactAddress').sort({ ...sort, _id: 1 }).skip(skip).limit(limit).populate('poster', SELLER_FIELDS),
     Job.countDocuments(filter),
   ]);
+  if (total === 0 && q.q) return smartFallback(Job, filter, q, { page, limit, skip }, 'poster', '-exactAddress');
   return { items, meta: { page, limit, total } };
 }
 

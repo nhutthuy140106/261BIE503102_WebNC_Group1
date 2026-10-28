@@ -1,0 +1,63 @@
+:host { position: fixed; right: 20px; bottom: 20px; z-index: 35; font-size: 14px; }
+.fab { position: relative; display: flex; align-items: center; gap: 8px; height: 56px; min-width: 56px; padding: 0 12px; border-radius: 28px; background: #fff; border: 1px solid var(--border); box-shadow: 0 10px 28px rgba(34, 48, 74, .18); transition: transform .15s, box-shadow .15s; }
+.fab:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(34, 48, 74, .22); }
+.fab img { display: block; object-fit: contain; }
+.fab .tip { font-weight: 600; color: var(--ink); padding-right: 6px; }
+.fab.on { background: var(--ink); border-color: var(--ink); width: 56px; justify-content: center; padding: 0; }
+.fab .x { color: #fff; font-size: 28px; line-height: 1; }
+
+.panel { position: absolute; right: 0; bottom: 70px; width: min(380px, calc(100vw - 24px)); height: min(560px, calc(100vh - 110px)); display: flex; flex-direction: column; background: #fff; border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 18px 50px rgba(34, 48, 74, .22); overflow: hidden; animation: pop .18s ease-out; }
+@keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--soft); border-bottom: 1px solid var(--border); }
+header img { border-radius: 10px; flex: none; }
+header div { flex: 1; min-width: 0; display: grid; line-height: 1.25; }
+header small { color: var(--smoke); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ghost { border-radius: 8px; padding: 4px 8px; font-size: 13px; color: var(--smoke); }
+.ghost:hover { background: #fff; color: var(--ink); }
+
+.list { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.hello p { background: var(--soft); border-radius: 14px; padding: 12px 14px; margin: 0 0 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { border: 1px solid var(--border); border-radius: 999px; padding: 7px 12px; font-size: 13px; background: #fff; }
+.chips button:hover { border-color: var(--ink); }
+.row { display: grid; gap: 8px; justify-items: start; }
+.row.me { justify-items: end; }
+.bubble { max-width: 88%; padding: 9px 13px; border-radius: 14px 14px 14px 4px; background: var(--soft); white-space: pre-wrap; word-break: break-word; }
+.row.me .bubble { background: var(--ink); color: #fff; border-radius: 14px 14px 4px 14px; }
+.bubble.err { background: #fdecea; color: #8a2a1f; }
+.bubble.typing { padding: 0 10px; }
+.bubble.typing app-loader { display: block; transform: scale(.7); transform-origin: left center; margin: -22px 0; }
+.cards { display: grid; gap: 8px; width: 100%; }
+.card { display: flex; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--border); border-radius: 12px; background: #fff; }
+.card:hover { border-color: var(--ink); }
+.card img, .card .ph { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; flex: none; background: var(--soft); }
+.card .ph { display: grid; place-items: center; font-size: 12px; color: var(--smoke); }
+.meta { display: grid; min-width: 0; line-height: 1.3; }
+.meta b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta small { color: var(--smoke); }
+.meta em { font-style: normal; font-weight: 700; color: var(--accent); }
+.meta em i { font-style: normal; font-weight: 500; color: var(--smoke); }
+
+form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--border); }
+form input { flex: 1; min-width: 0; border-radius: 999px; padding: 10px 14px; }
+form button { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 16px; }
+form button:disabled { opacity: .45; cursor: not-allowed; }
+.login { padding: 14px; text-align: center; border-top: 1px solid var(--border); color: var(--smoke); }
+.login a { color: var(--accent); font-weight: 600; }
+
+/* điện thoại: nút nổi nằm trên thanh điều hướng dưới, khung chat gần toàn màn hình */
+@media (max-width: 700px) {
+  :host { right: 12px; bottom: 68px; }
+  .fab .tip { display: none; }
+  .fab { padding: 0 9px; }
+  .panel { position: fixed; left: 8px; right: 8px; bottom: 132px; width: auto; height: min(70vh, 520px); }
+}
+@media (prefers-reduced-motion: reduce) { .panel { animation: none; } .fab { transition: none; } }
+.chips .spinlink { border: 1px dashed var(--accent); color: var(--accent); border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 600; }
+
+.quick { display: flex; gap: 6px; padding: 8px 10px 0; overflow-x: auto; scrollbar-width: none; border-top: 1px solid var(--border); }
+.quick::-webkit-scrollbar { display: none; }
+.quick button { flex: none; border: 1px solid var(--border); border-radius: 999px; padding: 5px 11px; font-size: 12.5px; background: #fff; white-space: nowrap; }
+.quick button:hover:not(:disabled) { border-color: var(--ink); }
+.quick button:disabled { opacity: .5; }
+.quick + form { border-top: 0; }

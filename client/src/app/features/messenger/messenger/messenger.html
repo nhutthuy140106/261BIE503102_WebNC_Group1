@@ -1,6 +1,6 @@
 @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else {
   <div class="chat">
     <aside class="side">

@@ -1,5 +1,5 @@
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else if (post(); as p) {
   @if (view(); as v) {
   @if (draft(); as d) {

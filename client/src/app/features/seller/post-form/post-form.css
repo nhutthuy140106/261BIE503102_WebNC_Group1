@@ -14,3 +14,7 @@ h1 { font-size: 28px; letter-spacing: -.02em; }
 .add:hover { border-color: var(--ink); color: var(--ink); }
 .note { font-size: 13px; margin-bottom: 12px; }
 .acts { display: flex; gap: 8px; }
+
+.hint { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--line, #F0E2DC); border-radius: 10px; background: var(--soft, #FBF4F1); display: grid; gap: 4px; justify-items: start; font-size: 14px; }
+.hint .muted { color: #6b7280; }
+.hint .btn-ghost { margin-top: 4px; padding: 6px 12px; border: 1px solid var(--accent, #D85A1C); color: var(--accent, #D85A1C); background: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; }

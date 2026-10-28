@@ -49,11 +49,13 @@
     @for (w of popular; track w) {
       <button type="button" (click)="fill(w, q)">{{ w }}</button>
     }
+    <a routerLink="/quay-mon" class="spinlink">Chưa biết ăn gì? Quay món</a>
+    <a routerLink="/vuon" class="spinlink">Hái xu nhận giảm giá</a>
   </div>
 </section>
 
 @if (loading()) {
-  <p class="muted sec">Đang tải…</p>
+  <app-skeleton variant="cards" [count]="8" />
 } @else if (error()) {
   <div class="notice sec">Không tải được dữ liệu: {{ error() }}</div>
 } @else {

@@ -1,0 +1,59 @@
+<div class="wrap">
+  <a routerLink="/vuon" class="back">← Vườn AntGo</a>
+
+  <div #host class="stage" (pointermove)="pointer($event)" (pointerdown)="pointer($event)">
+    @if (loading()) { <app-loader class="ld" label="Đang dựng khu vườn…" /> }
+    @if (error(); as e) { <div class="err" role="alert">{{ e }}</div> }
+
+    <div class="hud" aria-live="polite">
+      <div class="pill"><small>Thời gian</small><b>{{ timeLeft() }}s</b></div>
+      <div class="pill score"><small>Điểm</small><b>{{ score() }}</b></div>
+    </div>
+
+    @if (phase() === 'ready' && !loading() && !error()) {
+      <div class="veil">
+        <div class="box">
+          <h1>Hái xu</h1>
+          <p>Di chuột (hoặc vuốt) để kiến hứng xu rơi từ cây xoài.</p>
+          <ul>
+            <li><i class="d c"></i> Xu thường <b>+1</b></li>
+            <li><i class="d g"></i> Xu vàng lấp lánh <b>+5</b></li>
+            <li><i class="d b"></i> Bọ xít, lá khô <b>−1</b></li>
+          </ul>
+          @if (canPlay()) {
+            <button type="button" class="go" (click)="start()">Bắt đầu · còn {{ playsLeft() }}/{{ maxPlays }} lượt hôm nay</button>
+          } @else if (playsLeft() === 0) {
+            <p class="note">Bạn đã dùng hết {{ maxPlays }} lượt hôm nay. Mai quay lại nhé!</p>
+          } @else {
+            <p class="note">Hôm nay bạn đã nhận đủ {{ cap }} Xu từ game. Mai quay lại nhé!</p>
+          }
+          <small class="sub">Xu từ game: {{ xu.gameToday() }}/{{ cap }} hôm nay · phần thưởng mô phỏng</small>
+        </div>
+      </div>
+    }
+
+    @if (phase() === 'over' && result(); as r) {
+      <div class="veil">
+        <div class="box">
+          <h1>Hết giờ!</h1>
+          <p class="big">{{ r.score }} điểm</p>
+          @if (r.xu > 0) { <p class="gain">+{{ r.xu }} Xu vào ví của bạn</p> }
+          @else if (r.score > 0) { <p class="note">Hôm nay bạn đã nhận đủ {{ cap }} Xu từ game.</p> }
+          @for (u of r.unlocked; track u.at) {
+            <div class="badge" role="status">
+              <span class="medal">{{ u.at }}</span>
+              <div><b>{{ u.badge }}</b>
+                @if (u.code) { <small>Bạn đã mở khóa mã giảm 5%: <code>{{ u.code }}</code> (mã mô phỏng)</small> } @else { <small>Mốc {{ u.at }} điểm bạn đã mở khóa trước đó</small> }
+              </div>
+            </div>
+          }
+          <div class="row">
+            @if (canPlay()) { <button type="button" class="go" (click)="start()">Chơi lại · còn {{ playsLeft() }} lượt</button> }
+            <a routerLink="/vuon" class="alt">Về Vườn AntGo</a>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+  <p class="hint">Mẹo: chơi bằng chuột, chạm vuốt trên điện thoại, hoặc phím ← →.</p>
+</div>

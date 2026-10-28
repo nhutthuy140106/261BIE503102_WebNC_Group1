@@ -45,7 +45,7 @@ npm install
 npm start                   # ng serve; /api được chuyển sang http://localhost:3000 qua proxy.conf.json
 ```
 
-Mở **http://localhost:4200** rồi đăng nhập bằng **số điện thoại + mật khẩu** (mật khẩu = giá trị `SEED_PASSWORD` bạn đặt trong `server/.env`):
+Giao diện **mặc định dùng dữ liệu mẫu** (xem Cách 2). Để nối với API thật, mở **http://localhost:4200/?mock=0** một lần (trình duyệt nhớ lựa chọn); mở `?mock=1` để quay lại dữ liệu mẫu. Sau đó đăng nhập bằng **số điện thoại + mật khẩu** (mật khẩu = giá trị `SEED_PASSWORD` bạn đặt trong `server/.env`):
 
 | Số điện thoại | Vai trò |
 |---|---|
@@ -57,21 +57,34 @@ Mở **http://localhost:4200** rồi đăng nhập bằng **số điện thoại
 
 Danh sách đầy đủ tài khoản mẫu: `server/README.md`. Đăng ký tài khoản mới cũng dùng số điện thoại (10 số, bắt đầu bằng 0).
 
-### Cách 2 — Chỉ chạy giao diện (dữ liệu mẫu, không cần server/MongoDB)
+### Chatbot tư vấn (trợ lý AntGo)
 
-Mở `client/src/app/core/config/api.config.ts`, đổi `export const USE_MOCK = false;` thành `true`, rồi:
+Nút con kiến ở góc phải dưới mở khung chat tư vấn món ăn, đồ dùng, dịch vụ, việc làm trong khu; trong khung có thêm nút "Chưa biết ăn gì? Quay món" (trang `/quay-mon`). Chatbot cần chạy Cách 1 với `?mock=0` và phải đăng nhập. Chế độ chọn bằng `ASSISTANT_MODE` trong `server/.env`:
+
+| Chế độ | Cách hoạt động | Chi phí |
+|---|---|---|
+| `auto` (mặc định) | Thử lần lượt **Gemini** (`GEMINI_API_KEY`) → **nhà cung cấp kiểu OpenAI như Groq** (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, ví dụ `openai/gpt-oss-120b`) → **bộ trả lời cơ bản**; bước nào thiếu khóa hoặc lỗi thì chuyển sang bước sau | Gói miễn phí của Google / Groq |
+| `llm` | Chỉ dùng nhà cung cấp kiểu OpenAI, lỗi thì báo lỗi | Gói miễn phí của Groq |
+| `gemini` | Bắt buộc dùng Gemini; thiếu khóa hoặc lỗi thì báo lỗi | Gói miễn phí của Google |
+| `local` | Luôn dùng **bộ cơ bản**: hiểu câu hỏi bằng quy tắc (loại bài, khoảng giá "dưới 50k", bữa ăn, từ khóa), tìm và xếp hạng trong bài đăng thật | Miễn phí, không cần khóa |
+
+Cả hai bộ đều chỉ tư vấn từ bài đăng thật trong cơ sở dữ liệu (Gemini gọi công cụ tìm bài, không tự bịa món).
+
+Bật Gemini: vào https://aistudio.google.com → "Get API key", rồi thêm vào `server/.env` dòng `GEMINI_API_KEY=<khóa>` (đổi model bằng `GEMINI_MODEL`, mặc định `gemini-3.8-flash`; các bản 2.5 Google đã ngừng cho tài khoản mới, và một số model mới có thể đòi bật thanh toán trên dự án Google) và khởi động lại server. **Không commit khóa lên GitHub** (`.env` đã được `.gitignore` chặn). Server giới hạn 12 lượt/phút mỗi IP, tin tối đa 500 ký tự, nhớ 12 tin gần nhất; khóa chỉ gửi ở header, không nằm trong URL.
+
+### Cách 2 — Chỉ chạy giao diện (dữ liệu mẫu, không cần server/MongoDB) — mặc định
 
 ```bash
 cd client && npm install && npm start     # http://localhost:4200
 ```
 
-Dữ liệu đọc từ `client/public/datasets/*.json`; mọi thao tác (đặt đơn, đề nghị, tin nhắn…) chỉ lưu trong trình duyệt (`localStorage` khóa `antgo_mock_*`). Đăng nhập bằng số điện thoại bất kỳ + mật khẩu từ 6 ký tự. Muốn quay về dữ liệu gốc: xóa các khóa `antgo_mock_*` trong DevTools → Application → Local Storage.
+Dữ liệu đọc từ `client/public/datasets/*.json`; mọi thao tác (đặt đơn, đề nghị, tin nhắn…) chỉ lưu trong trình duyệt (`localStorage` khóa `antgo_mock_*`). Đăng nhập bằng số điện thoại bất kỳ + mật khẩu từ 6 ký tự. Muốn quay về dữ liệu gốc: xóa các khóa `antgo_mock_*` trong DevTools → Application → Local Storage. Chatbot không trả lời thật ở chế độ này.
 
 > Khu **Bán & Đăng việc** (`/seller`) hiện luôn dùng dữ liệu mẫu trong trình duyệt (chưa có API phía Bán), kể cả ở Cách 1.
 
 ### Cách 3 — Bật từng phần API thật
 
-Trong `api.config.ts`, giữ `USE_MOCK = true` rồi bật riêng từng service: `MOCK_OVERRIDES = { address: false, post: false }`. Tên service: `auth, post, order, offer, address, saved, question, review, chat, notification, report, upload, recommend, seller`.
+Trong `client/src/app/core/config/api.config.ts`, bật riêng từng service bằng `MOCK_OVERRIDES = { address: false, post: false }` (ghi đè chế độ mẫu/thật chung). Tên service: `auth, post, order, offer, address, saved, question, review, chat, notification, report, upload, recommend, xu, assistant, seller`.
 
 ### Kiểm thử và đóng gói
 
@@ -85,7 +98,7 @@ cd server && npm test                   # test API (dùng MongoDB trong bộ nh�
 
 | Hiện tượng | Cách xử lý |
 |---|---|
-| Đăng nhập báo **"Số điện thoại hoặc mật khẩu không đúng"** (HTTP 401) | Phải nhập **số điện thoại** (không phải tên), mật khẩu là `SEED_PASSWORD` trong `server/.env`. Nếu đổi `SEED_PASSWORD` sau khi đã seed thì chạy lại `npm run seed`. |
+| Đăng nhập báo **"Số điện thoại hoặc mật khẩu không đúng"** (HTTP 401) | Đã mở `?mock=0` chưa? Phải nhập **số điện thoại** (không phải tên), mật khẩu là `SEED_PASSWORD` trong `server/.env`. Nếu đổi `SEED_PASSWORD` sau khi đã seed thì chạy lại `npm run seed`. |
 | Trang trắng / "Không kết nối được máy chủ" | Server chưa chạy hoặc MongoDB chưa bật: kiểm tra `http://localhost:3000/api/health` trả `{"ok":true}`. |
 | Terminal ghi `ECONNREFUSED 127.0.0.1:3000` (proxy) | Chưa bật `server` — chạy `npm start` trong `server/` rồi tải lại trang. |
 | `Port 4200 is already in use` | Đã có một `ng serve` khác đang chạy: tắt nó, hoặc `npm start -- --port 4300` (nhớ đổi `CLIENT_ORIGIN` trong `server/.env` nếu gọi API trực tiếp). |
