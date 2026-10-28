@@ -15,7 +15,7 @@ export class App implements OnInit {
   private readonly saved = inject(SavedService);
 
   /** Trang giới thiệu và đăng nhập tự có bố cục toàn màn hình nên không dùng header/footer chung. */
-  private static readonly BARE_PAGES = ['/welcome', '/auth/login', '/auth/register'];
+  private static readonly BARE_PAGES = ['/welcome', '/auth/login', '/auth/register', '/auth/forgot'];
   protected readonly bare = signal(false);
 
   /** Khôi phục trạng thái đăng nhập khi mở/tải lại trang (hỏi server, hoặc phiên mock) để header hiện đúng. */

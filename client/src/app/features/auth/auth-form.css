@@ -16,3 +16,9 @@ small.error { display: block; margin-top: 6px; }
 .alt a { color: var(--accent); font-weight: 600; }
 
 @media (max-height: 820px) and (min-width: 761px) { h1 { font-size: 23px; } label { margin-top: 12px; } .tx { height: 44px; } .go { height: 48px; margin-top: 14px; } }
+
+/* hàng "Ghi nhớ đăng nhập" + "Quên mật khẩu?" */
+.rmrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.rmrow .remember { margin: 0; }
+.forgot { font-size: 13.5px; font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.forgot:hover { color: var(--accent); }
