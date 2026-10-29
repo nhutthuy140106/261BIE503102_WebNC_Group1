@@ -72,6 +72,8 @@ export interface SvcPreset {
   noPlace?: boolean;
   /** mẫu không cần câu hỏi riêng (giặt sấy: tùy chọn cộng giá đã đủ) */
   noQuestions?: boolean;
+  /** mẫu giặt sấy: "Lịch lấy đồ" (tiệm qua lấy) + "Hình thức nhận" khi trả đồ, đơn có bước Duyệt giá sau khi cân */
+  laundry?: boolean;
   /** mẫu lưu trú: hiện mục "Tiện nghi & nội quy", lịch theo đêm, cột số phòng / khách tối đa */
   stay?: boolean;
 }
@@ -82,7 +84,7 @@ const P = (o: Partial<SvcPreset>): SvcPreset => ({
 export const SVC_PRESETS: Record<string, SvcPreset> = {
   'Giặt sấy': P({
     items: [['Giặt sấy quần áo', 18000, 'kg'], ['Giặt chăn, ga', 40000, 'bộ'], ['Giặt gối', 25000, 'cái'], ['Giặt thú bông', 30000, 'cái'], ['Vệ sinh giày', 60000, 'đôi']],
-    estimate: true, noQuick: true, noPlace: true, noQuestions: true,
+    estimate: true, noQuick: true, noPlace: true, noQuestions: true, laundry: true,
     options: [{ name: 'Nước xả', choices: [['Hương nhẹ', 0], ['Không mùi', 0]] }, { name: 'Gấp đồ', choices: [['Gấp gọn', 0], ['Treo móc', 10000]] }],
   }),
   'Sửa chữa': P({
@@ -163,7 +165,7 @@ const sellSchedule = (fb: FormBuilder, prep: number) =>
 
 /** Thông tin nhận chuyển khoản: bắt buộc khi bật "Chuyển khoản" (kiểm tra ở extraError); `name` = mã ngân hàng (banks.ts) */
 const bankGroup = (fb: FormBuilder) => fb.group({ name: [''], no: [''], holder: [''], qr: [''] });
-/** Cách nhận (đồ ăn, đồ uống, đồ dùng): giao trong khu + phí / miễn phí từ, khách tự đến lấy */
+/** Hình thức nhận (đồ ăn, đồ uống, đồ dùng, trả đồ giặt sấy): giao tận tòa + phí / miễn phí từ, khách tự đến lấy */
 const fulfil = (fb: FormBuilder, delivery = true, fee = 5000) => fb.group({ delivery: [delivery], fee: [fee, Validators.min(0)], freeFrom: [100000], pickup: [true] });
 
 export function foodGroup(fb: FormBuilder) {
@@ -175,8 +177,6 @@ export function foodGroup(fb: FormBuilder) {
     minOrder: [1, Validators.min(1)],
     spicy: [false],
     kitchenNote: [true],
-    /** Combo: bài này gói các món đồ ăn khác của chính mình (postId → số lượng), giá combo < tổng giá lẻ */
-    combo: fb.group({ on: [false], price: [null as number | null], qty: fb.control<Record<string, number>>({}) }),
     /** tùy chọn nhanh người bán tự đặt (khách bật / tắt khi đặt, không tính tiền): lấy dụng cụ, để sốt riêng… */
     quick: fb.array([quickGroup(fb, 'Lấy dụng cụ ăn uống (muỗng, đũa, khăn giấy)')]),
     schedule: sellSchedule(fb, 30),
@@ -262,6 +262,9 @@ export function serviceGroup(fb: FormBuilder, preset: string) {
     idRequired: [true],
     building: [''],
     room: [''],
+    // giặt sấy: trả đồ trong khoảng n giờ (như "Thời gian chuẩn bị" của đồ ăn), cách trả đồ = Hình thức nhận
+    returnHours: [24, Validators.min(1)],
+    fulfil: fulfil(fb, true, 0),
     // nơi làm
     place: [p.place],
     where: [''],

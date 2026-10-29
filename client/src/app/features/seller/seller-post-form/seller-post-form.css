@@ -258,20 +258,12 @@ textarea.small { min-height: 64px; }
 .ioadd svg { width: 13px; height: 13px; }
 /* lưu trú: bảng loại phòng thêm cột Số phòng + Khách tối đa */
 .items.q.g .ihead, .items.q.g .iline { grid-template-columns: minmax(0, 1fr) 120px 130px 84px 84px 40px; }
-/* Gợi ý giá · Combo · Giờ vàng (tính năng của HoangKhai, giao diện theo form mới) */
+/* Gợi ý giá · Giờ vàng (tính năng của HoangKhai, giao diện theo form mới) */
 .phint { display: grid; gap: 4px; padding: 12px 14px; border-radius: 12px; background: #f3f6fb; border: 1px solid #dfe6f2; }
 .phint .pht { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; }
 .phint .pht span { color: var(--smoke); font-size: 13px; }
 .phint .pht .btn { margin-left: auto; height: 34px; padding: 0 12px; font-size: 13px; }
 .phint small { font-size: 12px; color: var(--smoke); }
-.combo { display: grid; gap: 8px; }
-.cline { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; }
-.cline .cn { flex: 1; min-width: 0; display: grid; }
-.cline .cn b { font-size: 14px; font-weight: 600; }
-.cline .cn small { font-size: 12.5px; color: var(--smoke); }
-.cline .step { display: inline-flex; align-items: center; gap: 10px; }
-.cline .step button { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: #fff; font-size: 16px; }
-.cline .step button:disabled { opacity: .4; }
 .hint.warn { color: #c0392b; }
 .promo { display: grid; gap: 10px; }
 .promo .pbody { display: grid; gap: 12px; margin-left: 18px; padding-left: 12px; border-left: 2px solid var(--soft); }

@@ -83,13 +83,8 @@
             <header><span class="no">2</span><span><b>Thực đơn</b></span></header>
             <div class="bd">
               <!-- thực đơn: mỗi món một giá, số phần mỗi ngày và tùy chọn cộng giá riêng (topping, cỡ phần…); bài 1 món thì chỉ 1 dòng -->
-              <label class="ck"><input type="checkbox" [formControl]="$any(c('spec.combo.on'))" /><span>Bài này là combo<small>Gói các món bạn đang bán, khách mua trọn gói với giá combo</small></span></label>
-              @if (c('spec.combo.on').value) {
-                <ng-container *ngTemplateOutlet="comboBox" />
-              } @else {
-                <ng-container *ngTemplateOutlet="itemTable; context: { list: foodUnits, nameLabel: 'Tên món', namePh: 'Ví dụ: Xôi bắp', pricePh: '15000', addLabel: 'Thêm món', ph: 'khay', qty: true, opts: true }" />
-                <span class="hint">Mỗi món có giá, số phần bán mỗi ngày và tùy chọn cộng giá riêng. Khách chọn một hoặc nhiều món trong cùng một đơn; thẻ bài hiện giá món rẻ nhất, ví dụ “từ 15.000đ”.</span>
-              }
+              <ng-container *ngTemplateOutlet="itemTable; context: { list: foodUnits, nameLabel: 'Tên món', namePh: 'Ví dụ: Xôi bắp', pricePh: '15000', addLabel: 'Thêm món', ph: 'khay', qty: true, opts: true }" />
+              <span class="hint">Mỗi món có giá, số phần bán mỗi ngày và tùy chọn cộng giá riêng. Khách chọn một hoặc nhiều món trong cùng một đơn; thẻ bài hiện giá món rẻ nhất, ví dụ “từ 15.000đ”.</span>
               <ng-container *ngTemplateOutlet="priceHintBox" />
               <ng-container *ngTemplateOutlet="promoBox" />
             </div>
@@ -146,7 +141,7 @@
           </section>
         }
 
-        <!-- ================= ĐỒ DÙNG (theo trang chi tiết phía Mua: Tình trạng · Cách nhận · giá · hẹn qua lấy · còn hàng) ================= -->
+        <!-- ================= ĐỒ DÙNG (theo trang chi tiết phía Mua: Tình trạng · Hình thức nhận · giá · hẹn qua lấy · còn hàng) ================= -->
         @case ('goods') {
           <section class="sec">
             <header><span class="no">2</span><span><b>Tình trạng</b></span></header>
@@ -180,7 +175,7 @@
               </div>
             </div>
           </section>
-          <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 5, title: 'Nhận hàng' }" />
+          <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 5 }" />
           <section class="sec">
             <header><span class="no">6</span><span><b>Thanh toán</b></span></header>
             <div class="bd"><ng-container *ngTemplateOutlet="payPills" /></div>
@@ -277,9 +272,17 @@
             </div>
           </section>
           <section class="sec">
-            <header><span class="no">{{ svcNo('time') }}</span><span><b>{{ svcPreset().stay ? 'Lịch nhận phòng' : 'Lịch hẹn' }}</b></span></header>
+            <header><span class="no">{{ svcNo('time') }}</span><span><b>{{ svcPreset().stay ? 'Lịch nhận phòng' : svcPreset().laundry ? 'Lịch lấy đồ' : 'Lịch hẹn' }}</b></span></header>
             <div class="bd">
-              @if (svcPreset().stay) {
+              @if (svcPreset().laundry) {
+                <!-- giặt sấy: khách hẹn giờ để tiệm qua lấy đồ; giặt xong tiệm báo và trả, không hẹn lịch trả -->
+                <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: 'Ngày nhận đơn' }" />
+                <div class="row3">
+                  <div class="fld"><label for="lf">Nhận đặt từ</label><app-time-input inputId="lf" formControlName="from" /></div>
+                  <div class="fld"><label for="lt">Đóng đơn lúc</label><app-time-input inputId="lt" formControlName="to" /></div>
+                  <div class="fld"><label for="rh">Trả đồ trong khoảng (giờ)</label><input id="rh" class="input" type="number" min="1" formControlName="returnHours" /></div>
+                </div>
+              } @else if (svcPreset().stay) {
                 <div class="drow">
                   <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: 'Ngày còn phòng' }" />
                   <div class="fld"><label for="ci">Nhận phòng từ</label><app-time-input inputId="ci" formControlName="checkIn" /></div>
@@ -305,6 +308,9 @@
               }
             </div>
           </section>
+          @if (svcPreset().laundry) {
+            <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: svcNo('recv'), title: 'Cách trả đồ sau khi giặt xong' }" />
+          }
           @if (!svcPreset().noPlace) {
           <section class="sec">
             <header><span class="no">{{ svcNo('place') }}</span><span><b>Nơi làm</b></span></header>
@@ -435,11 +441,11 @@
       <!-- ===== cách nhận (đồ ăn, đồ uống, đồ dùng) ===== -->
       <ng-template #fulfilBlock let-n="n" let-title="title">
         <section class="sec" formGroupName="fulfil">
-          <header><span class="no">{{ n }}</span><span><b>{{ title || 'Nhận món' }}</b><small>Địa chỉ chính xác chỉ gửi sau khi bạn xác nhận đơn</small></span></header>
+          <header><span class="no">{{ n }}</span><span><b>Hình thức nhận</b>@if (title) { <small>{{ title }}</small> }</span></header>
           <div class="bd">
-            <label class="ck"><input type="checkbox" formControlName="delivery" /><span>Giao trong khu</span>
+            <label class="ck"><input type="checkbox" formControlName="delivery" /><span>Giao tận tòa</span>
               @if (c('spec.fulfil.delivery').value) { <span class="money extra" (click)="$event.stopPropagation()"><input class="input" type="number" min="0" step="1000" formControlName="fee" placeholder="Phí giao" /></span> }</label>
-            @if (c('spec.fulfil.delivery').value && type() !== 'goods') {
+            @if (c('spec.fulfil.delivery').value && foodish()) {
               <div class="fld half"><label for="ff">Miễn phí giao cho đơn từ</label><span class="money"><input id="ff" class="input" type="number" min="0" step="1000" formControlName="freeFrom" /></span></div>
             }
             <label class="ck"><input type="checkbox" formControlName="pickup" /><span>Khách tự đến lấy</span></label>
@@ -531,27 +537,6 @@
             <small>Dựa trên {{ h.samples }} {{ type() === 'job' ? 'việc' : 'bài' }} tương tự{{ h.confidence === 'low' ? ', ít mẫu giống nên chỉ tham khảo' : '' }}{{ h.basis[0] ? ': ' + h.basis[0].title + '…' : '' }}</small>
           </div>
         }
-      </ng-template>
-
-      <!-- ===== Combo (đồ ăn): gói các món đồ ăn khác của chính mình ===== -->
-      <ng-template #comboBox>
-        <div class="combo">
-          @for (p of comboCandidates(); track p._id) {
-            <div class="cline">
-              <span class="cn"><b>{{ p.title }}</b><small>{{ p.price | vnd }}</small></span>
-              <span class="step">
-                <button type="button" aria-label="Bớt" [disabled]="!comboQty(p._id)" (click)="setComboQty(p._id, comboQty(p._id) - 1)">−</button>
-                <b>{{ comboQty(p._id) }}</b>
-                <button type="button" aria-label="Thêm" (click)="setComboQty(p._id, comboQty(p._id) + 1)">+</button>
-              </span>
-            </div>
-          } @empty { <span class="hint">Bạn chưa có bài đồ ăn nào khác đang bán để gói thành combo.</span> }
-          <div class="row3">
-            <div class="fld" [class.bad]="tried() && !!comboError()"><label for="cbp">Giá combo</label><span class="money"><input id="cbp" class="input" type="number" min="0" step="1000" [formControl]="$any(c('spec.combo.price'))" placeholder="50000" /></span></div>
-          </div>
-          @if (comboError(); as ce) { <span class="hint warn">{{ ce }}</span> }
-          @else if (comboList() > 0) { <span class="hint">Giá lẻ {{ comboList() | vnd }} → giá combo <b>{{ +c('spec.combo.price').value | vnd }}</b>, khách tiết kiệm {{ comboList() - c('spec.combo.price').value | vnd }}.</span> }
-        </div>
       </ng-template>
 
       <!-- ===== Giờ vàng: giảm giá trong khung giờ, tự về giá gốc khi hết giờ (core/utils/promo.ts) ===== -->
