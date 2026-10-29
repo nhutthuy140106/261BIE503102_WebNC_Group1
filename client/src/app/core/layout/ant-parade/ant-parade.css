@@ -1,0 +1,12 @@
+/* nằm dưới nút chat (z-index thấp hơn), không bắt chuột */
+.lane { position: fixed; left: 0; right: 0; bottom: 0; height: 60px; overflow: hidden; pointer-events: none; z-index: 40; }
+.go { position: absolute; left: 0; will-change: transform; animation: cross linear both; transform: translateX(-60px); }
+.go.rtl { left: auto; right: 0; animation-name: cross-rtl; transform: translateX(60px); }
+/* mỗi con một nhịp chạy: sprite 9 khung, thu nhỏ còn khoảng 0,5 lần so với hiệu ứng tải trang */
+.ant { display: block; width: 30px; height: 32px; background: url('/assets/clean/ant-run.png') 0 0 / 270px 32px no-repeat; animation: run .8s steps(9) infinite; transform: scale(var(--s, 1)); transform-origin: bottom center; opacity: .95; }
+.rtl .ant { transform: scale(var(--s, 1)) scaleX(-1); }
+@keyframes run { to { background-position: -270px 0; } }
+@keyframes cross { from { transform: translateX(-60px); } to { transform: translateX(calc(100vw + 60px)); } }
+@keyframes cross-rtl { from { transform: translateX(60px); } to { transform: translateX(calc(-100vw - 60px)); } }
+@media (prefers-reduced-motion: reduce) { .lane { display: none; } }
+@media (max-width: 600px) { .lane { height: 44px; } .ant { width: 24px; height: 26px; background-size: 216px 26px; } @keyframes run { to { background-position: -216px 0; } } }

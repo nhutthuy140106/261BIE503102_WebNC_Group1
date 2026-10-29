@@ -10,11 +10,12 @@ import { Drawers } from './core/layout/drawers/drawers';
 import { AreaDialog } from './core/layout/area-dialog/area-dialog';
 import { Toast } from './core/layout/toast/toast';
 import { ChatWidget } from './core/layout/chat-widget/chat-widget';
+import { AntParade } from './core/layout/ant-parade/ant-parade';
 import { NotFound } from './core/not-found/not-found';
 import { SharedModule } from './shared/shared-module';
 
 @NgModule({
-  declarations: [App, Header, Footer, NotFound, Drawers, AreaDialog, Toast, ChatWidget],
+  declarations: [App, Header, Footer, NotFound, Drawers, AreaDialog, Toast, ChatWidget, AntParade],
   imports: [BrowserModule, AppRoutingModule, SharedModule],
   providers: [provideBrowserGlobalErrorListeners(), provideHttpClient(withInterceptors([apiInterceptor]), withInterceptorsFromDi())],
   bootstrap: [App],
