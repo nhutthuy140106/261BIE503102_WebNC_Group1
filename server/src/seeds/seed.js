@@ -108,7 +108,8 @@ async function seed() {
     const start = Date.now() - daysAgo * DAY;
     const last = order.fulfillment === 'delivery' ? 'delivering' : 'ready';
     const path = to === 'cancelled' ? ['waiting', 'cancelled']
-      : to === 'done' ? ['waiting', 'confirmed', 'preparing', last, 'done']
+      : to === 'ready' ? ['waiting', 'confirmed', 'preparing', 'ready']
+        : to === 'done' ? ['waiting', 'confirmed', 'preparing', last, 'done']
         : ['waiting', 'confirmed', 'preparing', 'delivering'].slice(0, ['waiting', 'confirmed', 'preparing', 'delivering'].indexOf(to) + 1);
     const history = path.map((state, i) => ({ state, at: new Date(start + i * 25 * 60000) }));
     await Order.collection.updateOne({ _id: order._id }, { $set: { state: to, history, createdAt: new Date(start), updatedAt: history[history.length - 1].at, ...extra } });
@@ -130,6 +131,17 @@ async function seed() {
   o.sur = await place('thuy', 'giaonhan', { fulfillment: 'delivery', addressId: addr.thuy, answers: [{ question: 'Kích thước đồ (dưới 10kg?)', value: 'Dưới 10kg' }], note: 'Lấy ở cổng sau' });
   await Order.collection.updateOne({ _id: o.sur._id }, { $set: { state: 'confirmed', history: [{ state: 'waiting', at: ago(5 * HOUR) }, { state: 'confirmed', at: ago(4.5 * HOUR) }], surcharge: { amount: 15000, reason: 'Đồ nặng hơn đã chọn (khoảng 14kg)', status: 'pending' } } });
   o.giat = await place('thuy', 'giat', { fulfillment: 'delivery', addressId: addr.thuy, scheduledAt: inDays(1, 9), answers: [{ question: 'Khối lượng ước tính (kg)', value: '5' }] });
+
+  // Thêm đơn cho đủ mọi trạng thái; hai đơn giao tận nơi tới Block A (địa chỉ của mẹ) để bản đồ có tuyến khác nhau
+  const addrMe = String((await Address.findOne({ user: u.thuy._id, isDefault: { $ne: true } }))._id);
+  o.prep = await place('thuy', 'bunCha', { fulfillment: 'delivery', addressId: addr.thuy });
+  await advance(o.prep, 'preparing', 0.02);
+  o.deliver2 = await place('thuy', 'comChay', { fulfillment: 'delivery', addressId: addrMe, note: 'Đưa cho mẹ' });
+  await advance(o.deliver2, 'delivering', 0.03);
+  o.ready = await place('thuy', 'banhFlan', {});
+  await advance(o.ready, 'ready', 0.5);
+  o.declined = await place('thuy', 'bep', {});
+  await Order.collection.updateOne({ _id: o.declined._id }, { $set: { state: 'declined', history: [{ state: 'waiting', at: ago(2 * DAY) }, { state: 'declined', at: ago(2 * DAY - HOUR) }] } });
 
   // Người mua khác — để các bài có đánh giá thật
   const doneOrder = async (buyer, post, daysAgo, input = {}) => {

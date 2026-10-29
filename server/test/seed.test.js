@@ -41,7 +41,7 @@ const snapshot = async () => Object.fromEntries(await Promise.all(MODELS.map(asy
 
 test('seed đầy đủ: đủ vai trò, nhiều bài/việc, có dữ liệu giao dịch', async () => {
   const r = await seed();
-  assert.ok(r.posts >= 20 && r.jobs >= 10 && r.users >= 15);
+  assert.ok(r.posts >= 30 && r.jobs >= 12 && r.users >= 15);
   const User = M('User');
   assert.equal(await User.countDocuments({ role: 'admin' }), 1);
   assert.ok((await User.countDocuments({ role: 'enduser' })) >= 10);
@@ -95,7 +95,9 @@ test('seed dùng được qua API: Thủy thấy đơn, việc, đánh giá; bà
   const com = (await api('GET', '/posts?q=com nha')).body.data[0];
   const rv = (await api('GET', `/reviews?postId=${com._id}`)).body.data;
   assert.ok(rv.count >= 3 && rv.average >= 4 && rv.items.some((i) => i.reply));
-  assert.equal((await api('GET', '/posts?limit=100')).body.data.length, 24); // 25 bài, trừ bài đã bị ẩn
+  assert.equal((await api('GET', '/posts?limit=100')).body.data.length, 32); // 33 bài, trừ bài đã bị ẩn (limit tối đa 100)
+  const cheap = (await api('POST', '/assistant/chat', jar, { messages: [{ role: 'user', content: 'ăn gì dưới 50k' }] })).body;
+  assert.ok((cheap.data.items || cheap.data.posts || []).length >= 3 || (await api('GET', '/posts?type=food&maxPrice=50000', jar)).body.data.length >= 3);
   const jobs = (await api('GET', '/jobs?limit=100')).body.data;
   assert.ok(jobs.every((j) => j.exactAddress === undefined));
   assert.equal(jobs.find((j) => j.title.startsWith('Lấy giúp')).offerCount, 2, 'thẻ việc đếm đúng số đề nghị đang chờ');
