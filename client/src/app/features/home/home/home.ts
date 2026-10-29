@@ -211,10 +211,10 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ----- tìm kiếm -----
-  /** Bấm một mục "Phổ biến" → điền vào ô tìm kiếm (không đi ngay). */
-  protected fill(word: string, input: HTMLInputElement): void {
+  /** Bấm một mục "Phổ biến" → điền vào ô tìm kiếm và tìm ngay (không cần bấm nút Tìm). */
+  protected fill(word: string, _input?: HTMLInputElement): void {
     this.search.text.set(word);
-    input.focus();
+    this.submitSearch();
   }
 
   protected submitSearch(): void {

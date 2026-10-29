@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of, retry, throwError } from 'rxjs';
 import { API_BASE, useMock } from '../config/api.config';
 import { Post, PostKind } from '../models/post';
-import { stripAccents } from '../utils/slug-helper';
+import { textMatches } from '../utils/text-match';
 import { jobFromApi, postFromApi } from '../utils/api-mappers';
 import { ApiService } from './api';
 import { MockDb } from './mock-db';
@@ -76,11 +76,6 @@ export function matches(p: Post, f: PostFilter): boolean {
   if (f.block && p.block !== f.block) return false;
   if (f.min != null && p.price < f.min) return false;
   if (f.max != null && p.price > f.max) return false;
-  if (f.q) {
-    const q = stripAccents(f.q);
-    if (!stripAccents(`${p.title} ${p.description} ${p.category ?? ''} ${p.block}`).includes(q)) {
-      return false;
-    }
-  }
+  if (f.q && !textMatches(`${p.title} ${p.description} ${p.category ?? ''} ${p.block}`, f.q)) return false;
   return true;
 }
