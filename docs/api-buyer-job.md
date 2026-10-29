@@ -329,6 +329,8 @@ Người rút gọn (`UserSummary`) luôn có `_id`, `name`, `avatar`, `area`. C
 ### 18.1 `POST /assistant/chat` (đăng nhập)
 Body `{ messages: [{ role: 'user'|'assistant', content }] }` (tin cuối phải của `user`, ≤ 500 ký tự). Trả `{ data: { reply, cards: [{ id, kind, title, price, unit, sellerName, area, image, slug }] } }`. Chế độ do `ASSISTANT_MODE` (xem `server/README.md`); thiếu khóa ở chế độ ép buộc → 503 `ASSISTANT_UNAVAILABLE`; nhà cung cấp lỗi → 503 thân thiện.
 
+**Giờ vàng trong chatbot (7.20):** thẻ bài (`cards[]`) của bài đang giảm có `price` = giá thực trả, kèm `originalPrice`, `dealLabel`, `dealEndsAt`. Công cụ `deals_now` (Gemini/Groq) và bộ luật nhận câu "đang giảm giá gì", "khuyến mãi", "giờ vàng", "ưu đãi"; kết quả nêu giá gốc, % giảm, còn bao lâu và bài sắp giảm trong 3 giờ tới. `pick_dish` ưu tiên (~70%) món đang giảm, tìm kiếm bộ luật xếp bài đang giảm lên trước khi ngang điểm.
+
 ### 18.2 `GET /pricing/suggest?kind=&title=&category=` (đăng nhập)
 `kind` ∈ food|goods|service|job. Trả `{ data: { low, suggested, high, samples, confidence, basis } | null }` (kNN TF-IDF, xem `thuat-toan-goi-y.md`).
 

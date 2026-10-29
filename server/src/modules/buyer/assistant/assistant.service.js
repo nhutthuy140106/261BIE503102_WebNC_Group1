@@ -20,7 +20,7 @@ const MODE = () => (process.env.ASSISTANT_MODE || 'auto').toLowerCase();
 const SYSTEM = `Bạn là trợ lý của AntGo — ứng dụng kết nối hàng xóm trong khu: đặt món ăn/đồ uống, mua đồ dùng, thuê dịch vụ và nhận việc vặt.
 
 Nhiệm vụ: giúp người dùng chọn món ăn, đồ dùng, dịch vụ hoặc việc làm phù hợp CHỈ từ các bài đang có trên AntGo.
-- Gọi công cụ search_catalog để tìm bài trước khi gợi ý, nhưng TỐI ĐA 2–3 lần gọi rồi phải trả lời (câu hỏi có cả đồ ăn lẫn đồ uống thì tìm một lần với từ khóa chung hoặc hai lần, mỗi loại một lần); không bịa món, giá hay người bán. Hỏi về đơn của họ thì gọi my_orders; khi họ phân vân chưa biết ăn gì và nhờ chọn hộ thì gọi pick_dish. Không có kết quả thì nói thật và gợi ý đổi từ khóa hoặc bỏ bớt điều kiện.
+- Gọi công cụ search_catalog để tìm bài trước khi gợi ý, nhưng TỐI ĐA 2–3 lần gọi rồi phải trả lời (câu hỏi có cả đồ ăn lẫn đồ uống thì tìm một lần với từ khóa chung hoặc hai lần, mỗi loại một lần); không bịa món, giá hay người bán. Hỏi về đơn của họ thì gọi my_orders; khi họ phân vân chưa biết ăn gì và nhờ chọn hộ thì gọi pick_dish; hỏi về giảm giá/khuyến mãi/giờ vàng thì gọi deals_now (giá trong kết quả là giá thực trả, đừng tự tính lại). Không có kết quả thì nói thật và gợi ý đổi từ khóa hoặc bỏ bớt điều kiện.
 - Trả lời tiếng Việt, thân thiện, ngắn gọn (tối đa khoảng 4 câu). Nêu tên món, giá (đồng) và tên người bán/người đăng; chọn tối đa 4 bài hợp nhất. Bài đầy đủ sẽ hiện thành thẻ bấm được bên dưới câu trả lời, nên không cần chép lại mô tả dài.
 - Câu hỏi mơ hồ ("ăn gì?") thì có thể hỏi lại một ý ngắn (ngân sách, món nước hay khô, bữa nào) hoặc tự gợi ý vài lựa chọn phổ biến.
 - Chỉ tư vấn trong phạm vi AntGo. Nếu hỏi chuyện ngoài lề, trả lời rất ngắn cho lịch sự rồi dẫn lại việc bạn giúp được.
@@ -50,6 +50,17 @@ const TOOLS = [
     input_schema: {
       type: 'object',
       properties: { state: { type: 'string', enum: ['active', 'history', 'all'], description: 'active=đang diễn ra (mặc định), history=đã kết thúc, all=tất cả.' } },
+    },
+  },
+  {
+    name: 'deals_now',
+    description: 'Xem món/bài ĐANG GIẢM GIÁ theo khung giờ vàng ngay lúc này (kèm giá gốc, % giảm, còn bao lâu) và bài sắp giảm trong 3 giờ tới. Dùng khi họ hỏi "đang giảm giá gì", "khuyến mãi", "giờ vàng", "có ưu đãi không".',
+    input_schema: {
+      type: 'object',
+      properties: {
+        type: { type: 'string', enum: ['food', 'goods', 'service'], description: 'Lọc theo loại; bỏ trống để xem tất cả.' },
+        area: { type: 'string', enum: ['A', 'B', 'C', 'D'] },
+      },
     },
   },
   {
@@ -93,7 +104,7 @@ async function runSearch(input) {
   }
   const cards = [...posts.map((p) => shortCard(p.type, p)), ...jobs.map((j) => shortCard('job', j))].slice(0, limit);
   const text = cards.length
-    ? JSON.stringify(cards.map((c) => ({ id: c.id, loai: c.kind, ten: c.title, gia: c.price, don_vi: c.unit, nguoi_ban: c.sellerName, khu: c.area })))
+    ? JSON.stringify(cards.map((c) => ({ id: c.id, loai: c.kind, ten: c.title, gia: c.price, don_vi: c.unit, nguoi_ban: c.sellerName, khu: c.area, ...(c.dealLabel ? { gia_goc: c.originalPrice, khuyen_mai: c.dealLabel, het_luc: c.dealEndsAt } : {}) })))
     : 'Không có bài nào khớp điều kiện.';
   return { text, cards };
 }
@@ -104,6 +115,7 @@ async function runTool(name, input, user) {
   if (name === 'search_catalog') return runSearch(args);
   if (name === 'my_orders') return tools.myOrders(user, ['active', 'history', 'all'].includes(args.state) ? args.state : 'active');
   if (name === 'pick_dish') return tools.pickDish(args);
+  if (name === 'deals_now') return tools.dealsNow(args);
   throw new Error('Công cụ không tồn tại');
 }
 
