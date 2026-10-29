@@ -16,6 +16,16 @@ const loginLimiter = rateLimit({
   handler: (req, res) => res.status(429).json({ error: { code: 'TOO_MANY_REQUESTS', message: 'Bạn thử đăng nhập quá nhiều lần, vui lòng đợi ít phút' } }),
 });
 
+// Chống tạo tài khoản hàng loạt: tối đa 20 lần đăng ký / giờ / IP
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 20,
+  skip: () => isTest,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => res.status(429).json({ error: { code: 'TOO_MANY_REQUESTS', message: 'Bạn đăng ký quá nhiều lần, vui lòng thử lại sau' } }),
+});
+
 /**
  * @openapi
  * /auth/register:
@@ -75,7 +85,7 @@ const loginLimiter = rateLimit({
  *       401: { description: Chưa đăng nhập hoặc hết phiên }
  *       403: { description: Tài khoản bị khóa }
  */
-router.post('/register', body(v.register), c.register);
+router.post('/register', registerLimiter, body(v.register), c.register);
 router.post('/login', loginLimiter, body(v.login), c.login);
 router.post('/logout', c.logout);
 router.get('/profile', auth, c.profile);

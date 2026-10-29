@@ -270,3 +270,10 @@ Hai phần này dựa vào schema chung nên **Q1–Q8** nên được chốt tr
 - Người ghi: FE
 - Nội dung: `USE_MOCK = false` (trừ khu Bán). FE đăng nhập/đăng ký bằng **SĐT** (`phone`, `name`) đúng BE, bỏ `username`. Lớp `api-mappers.ts` đổi `type→kind`, `seller/poster→sellerName/sellerAvatar/sellerId`, `unit→priceUnit`, `pay/desc→price/description`, `area "B"→"Block B"`, `Order.snapshot→postTitle/image/counterpart*`, đơn `waiting→pending`, `Offer.job` lồng, v.v. Nếu BE đổi tên field thì sửa một chỗ này. Điểm cần BE/Planning xác nhận: (1) `User` không có `xu` → ẩn nút Xu ở header; (2) `Post` không có `promoted`/`rating`/`reviewCount` nên "Nổi bật trong khu" trống và gian hàng không có điểm ★; (3) API chỉ có **đồng ý** phụ thu, không có từ chối (F7) → nút "Không đồng ý" chỉ hiện ở mock; (4) `Message` không kèm tên người gửi, FE dùng `sender === mình`.
 - Quyết định: (điền khi chốt)
+
+
+### [29/10] F10 — Luật game Hái xu và sổ Xu ở server
+- Trạng thái: CẦN CHỐT (Planning)
+- Người ghi: BE
+- Nội dung: server tự kiểm để chống gian lận (FE lưu localStorage thì sửa được): **tối đa 3 lượt/ngày** cho game `hai-xu`, **trần 30 Xu/ngày từ game**, **điểm ≤ 80/lượt**, **8 điểm = 1 Xu** (một lượt tối đa 10 Xu), ngày tính theo giờ Việt Nam; vượt giới hạn trả 429 `GAME_LIMIT`. Xu chào mừng 30 (một lần). Voucher đổi bằng Xu có hạn **30 ngày**, danh mục `v10` (20 Xu), `v20` (50 Xu), `ship` (30 Xu) khớp FE. Chưa làm: Xu hết hạn sau 6 tháng, cộng Xu khi hoàn thành đơn/việc/đánh giá ở server, dùng mã `XU-…` khi đặt đơn (hiện `POST /orders` vẫn nhận `XU10`/`XU5` tạm).
+- Quyết định: (điền khi chốt)

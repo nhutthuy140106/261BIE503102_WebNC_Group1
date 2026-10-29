@@ -322,3 +322,24 @@ Mọi hành động ghi vào `auditlogs` (ai, làm gì, đối tượng, lúc n�
 | `GET /orders`, `/orders/:id`, `POST /orders`, `POST /cart/checkout` | `snapshot.sellerAvatar` | Có (bản chụp lúc đặt; `seller` vẫn là id) |
 
 Người rút gọn (`UserSummary`) luôn có `_id`, `name`, `avatar`, `area`. Chưa có endpoint để người dùng tự đổi ảnh (upload ở Mục 13 có thể dùng cho việc này) — xem `decisions.md` B1.
+
+
+## 18. Phase 7A — chatbot, gợi ý giá, AntXu, theo dõi giao hàng (29/10)
+
+### 18.1 `POST /assistant/chat` (đăng nhập)
+Body `{ messages: [{ role: 'user'|'assistant', content }] }` (tin cuối phải của `user`, ≤ 500 ký tự). Trả `{ data: { reply, cards: [{ id, kind, title, price, unit, sellerName, area, image, slug }] } }`. Chế độ do `ASSISTANT_MODE` (xem `server/README.md`); thiếu khóa ở chế độ ép buộc → 503 `ASSISTANT_UNAVAILABLE`; nhà cung cấp lỗi → 503 thân thiện.
+
+### 18.2 `GET /pricing/suggest?kind=&title=&category=` (đăng nhập)
+`kind` ∈ food|goods|service|job. Trả `{ data: { low, suggested, high, samples, confidence, basis } | null }` (kNN TF-IDF, xem `thuat-toan-goi-y.md`).
+
+### 18.3 AntXu — sổ Xu và game (đăng nhập)
+| Route | Mô tả |
+|---|---|
+| `GET /me/xu` | `{ balance, ledger[{id,delta,title,kind,at}], vouchers[{id,cid,code,title,cond,expiresAt,status}], catalog[{cid,title,cond,cost}], game{id,playsLeft,capLeft,maxPlays,dailyCap} }`. Lần đầu gọi cộng 30 Xu chào mừng (một lần). |
+| `POST /me/xu/game` `{ game:'hai-xu', score }` | Server tính Xu = `floor(score/8)`, cắt theo trần. Trả `{ granted, capLeft, playsLeft, balance }`. Điểm > 80 hoặc game lạ → 422; hết 3 lượt hoặc hết trần 30 Xu/ngày (giờ VN) → **429 `GAME_LIMIT`**. |
+| `POST /me/xu/redeem` `{ cid:'v10'\|'v20'\|'ship' }` | 201 `{ id, cid, code, title, expiresAt, balance }` (mã `XU-XXXXXX`, hạn 30 ngày). Thiếu Xu → 409, cid lạ → 404. |
+
+Voucher đổi ra hiện chưa dùng được ở `POST /orders` (đơn vẫn nhận `XU10`/`XU5` tạm) — CẦN CHỐT, xem `decisions.md` F10.
+
+### 18.4 `GET /orders/:id/tracking` (chủ đơn / người bán / admin)
+`{ data: { simulated: true, note, shop:{lat,lng}, home:{lat,lng}, courier:{lat,lng,phase,etaMin,distanceKm} } }`. **Vị trí xe là mô phỏng**, tính từ mốc thời gian trong `history` (không có GPS thật) nên mọi thiết bị thấy cùng một chỗ. `phase`: `waiting` (chờ/đã xác nhận) · `preparing` (xe còn ở quán) · `delivering` (đang chạy shop→nhà, ~6 phút/km, tối thiểu 4 phút) · `delivered`. Toạ độ quanh tâm Block A–D. Đơn tự lấy, dịch vụ hoặc đã hủy/từ chối → 404 `NO_TRACKING`; người ngoài đơn → 403; id sai → 400.

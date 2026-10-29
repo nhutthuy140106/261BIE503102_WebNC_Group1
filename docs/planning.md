@@ -239,8 +239,8 @@ Làm **một màn một lần** (đúng luật `CLAUDE.md`): tạo component b�
   *Xong khi:* hai tab cùng thấy xe ở cùng một chỗ; test cho 4 giai đoạn.
 - [x] **7.3 Làm giàu dữ liệu seed** (để gợi ý, tìm thông minh, gợi ý giá có chất): ≥ 30 bài (đủ 4 nhóm, giá thực tế), ≥ 12 việc, đơn ở **mọi trạng thái** (kể cả vài đơn `delivering` có giao tận nơi), vài đánh giá. Giữ ObjectId khớp `client/public/datasets/` nếu có thể.
   *Xong khi:* `npm run seed` chạy lại sạch; câu hỏi chatbot "ăn gì dưới 50k" luôn ra ≥ 3 món.
-- [ ] **7.4 Rà bảo mật (6.1):** `helmet`, `saveUninitialized: false`, rate limit đăng nhập/đăng ký, không lộ `err.message` ở production, kiểm `ObjectId` mọi route `:id`, kiểm quyền sở hữu đơn/đề nghị/hội thoại. Ghi bảng KT 9.3 đạt/hoãn vào `server/README.md`.
-- [ ] **7.5 Tài liệu:** `api-buyer-job.md` thêm `/assistant/chat`, `/pricing/suggest`, `/me/xu*`, `/orders/:id/tracking`; Swagger đủ tag; `server/README.md` (biến `.env` mới: `LLM_*`, `GEMINI_*`, `ASSISTANT_MODE`).
+- [x] **7.4 Rà bảo mật (6.1):** `helmet`, `saveUninitialized: false`, rate limit đăng nhập/đăng ký, không lộ `err.message` ở production, kiểm `ObjectId` mọi route `:id`, kiểm quyền sở hữu đơn/đề nghị/hội thoại. Ghi bảng KT 9.3 đạt/hoãn vào `server/README.md`.
+- [x] **7.5 Tài liệu:** `api-buyer-job.md` thêm `/assistant/chat`, `/pricing/suggest`, `/me/xu*`, `/orders/:id/tracking`; Swagger đủ tag; `server/README.md` (biến `.env` mới: `LLM_*`, `GEMINI_*`, `ASSISTANT_MODE`).
 - [ ] **7.6 (tùy chọn, nếu còn thời gian) Máy học:** thêm đánh giá offline cho gợi ý (Precision@k trên seed) vào `docs/thuat-toan-goi-y.md` để có số liệu khi vấn đáp.
 
 ### 7B — Frontend **[FE]** (terminal `client`)
