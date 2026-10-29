@@ -1,4 +1,5 @@
-@if (finished) {
+@if (noTracking()) {
+} @else if (finished) {
 <section class="trk done-card" aria-label="Giao hàng">
   <div class="card"><h2>Đã giao</h2><p class="eta ok" role="status">Đơn đã giao đến {{ homeLabel }}. Chúc bạn ngon miệng!</p></div>
 </section>
@@ -13,9 +14,9 @@
   <p class="sim">Vị trí người giao là mô phỏng cho mục đích demo</p>
 
   <div class="card">
-    <h2>{{ sim.title() }}</h2>
-    @if (sim.phase() !== 'done') {
-      <p class="eta">Dự kiến đến trong <b>{{ sim.etaMinutes() }} phút</b> · Cách bạn <b>{{ sim.remainingKm().toFixed(1) }} km</b></p>
+    <h2>{{ title() }}</h2>
+    @if (phase() !== 'done') {
+      <p class="eta">Dự kiến đến trong <b>{{ eta() }} phút</b> · Cách bạn <b>{{ km().toFixed(1) }} km</b></p>
       <p class="route">{{ shopLabel }} → {{ homeLabel }}</p>
     } @else {
       <p class="eta ok" role="status">Giao thành công! Chúc bạn ngon miệng.</p>
@@ -34,11 +35,13 @@
       }
     </ol>
 
+    @if (!real) {
     <div class="demo">
       <span>Demo</span>
       <button type="button" (click)="sim.toggleFast()" [class.on]="sim.fast()">{{ sim.fast() ? 'Đang chuyển nhanh' : 'Chuyển nhanh' }}</button>
       <button type="button" (click)="sim.reset()">Đặt lại</button>
     </div>
+    }
   </div>
 </section>
 }

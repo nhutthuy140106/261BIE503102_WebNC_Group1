@@ -421,7 +421,6 @@ export class CoinCatch implements AfterViewInit, OnDestroy {
     const score = this.score();
     const unlocked = this.garden.finishCoinRound(score);
     const day = new Date().toDateString().replace(/\s/g, '');
-    const xu = this.xu.earnGame(score, 'Hái xu', `hai-xu:${day}:${Date.now()}`);
-    this.result.set({ score, xu, unlocked });
+    this.xu.playCoin(score, `hai-xu:${day}:${Date.now()}`).subscribe((xu) => this.result.set({ score, xu, unlocked }));
   }
 }
