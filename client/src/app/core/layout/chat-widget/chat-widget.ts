@@ -1,11 +1,13 @@
+import { Router } from '@angular/router';
 import { Component, ElementRef, HostListener, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { AppError } from '../../models/api';
-import { AssistantCard, AssistantService, AssistantTurn, trimHistory } from '../../services/assistant';
+import { AssistantCard, AssistantReply, AssistantService, AssistantTurn, trimHistory } from '../../services/assistant';
 import { AuthService } from '../../services/auth';
 import { createSlug } from '../../utils/slug-helper';
 
 interface Bubble extends AssistantTurn {
   cards?: AssistantCard[];
+  action?: AssistantReply['action'];
   error?: boolean;
 }
 
@@ -23,6 +25,7 @@ const MAX_SAVED = 30;
 })
 export class ChatWidget {
   private readonly assistant = inject(AssistantService);
+  private readonly router = inject(Router);
   protected readonly auth = inject(AuthService);
 
   @ViewChild('list') private list?: ElementRef<HTMLElement>;
@@ -84,6 +87,11 @@ export class ChatWidget {
     return [c.kind === 'job' ? '/posts/job' : '/posts', c.slug || createSlug(c.title, c.id)];
   }
 
+  go(to: string): void {
+    this.close();
+    void this.router.navigateByUrl(to);
+  }
+
   clear(): void {
     this.bubbles.set([]);
   }
@@ -99,7 +107,9 @@ export class ChatWidget {
     const history = trimHistory(this.bubbles().filter((b) => !b.error).map(({ role, content }) => ({ role, content })));
     this.assistant.ask(history).subscribe({
       next: (r) => {
-        this.bubbles.update((b) => [...b, { role: 'assistant', content: r.reply, cards: r.cards }]);
+        this.bubbles.update((b) => [...b, { role: 'assistant', content: r.reply, cards: r.cards, action: r.action }]);
+        // "Chưa biết ăn gì" → tự chuyển sang trang Quay món sau một nhịp để người dùng kịp đọc (nút bên dưới để đi ngay)
+        if (r.action?.type === 'navigate') setTimeout(() => this.go(r.action!.to), 1800);
         this.busy.set(false);
         this.scrollDown();
       },

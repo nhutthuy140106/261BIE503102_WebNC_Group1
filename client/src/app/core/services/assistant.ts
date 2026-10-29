@@ -22,6 +22,8 @@ export interface AssistantCard {
 export interface AssistantReply {
   reply: string;
   cards: AssistantCard[];
+  /** Trợ lý đề nghị chuyển trang (vd. "chưa biết ăn gì" → Quay món) */
+  action?: { type: 'navigate'; to: string; label: string };
 }
 
 export interface AssistantTurn {

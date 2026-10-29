@@ -43,7 +43,9 @@ function parse(raw) {
   else if (/\b(cam on|thanks|thank)\b/.test(t)) out.intent = 'thanks';
   else if (/(giup duoc gi|lam duoc gi|ban la ai|huong dan|cach dung)/.test(t)) out.intent = 'help';
   else if (/(don (hang )?(cua )?(toi|minh)|kiem tra don|tra cuu don|don (dang|toi) (dat|giao|den)|don den dau|xem don)/.test(t)) out.intent = 'orders';
-  else if (/(chon (giup|ho|dum|dai|cho)|quay mon|ngau nhien|an gi cung duoc|(chua|khong) biet an gi|phan van|random)/.test(t)) out.intent = 'pick';
+  // chưa biết ăn gì / ăn gì cũng được → chuyển sang trang Quay món; "chọn giúp tôi món…" thì chọn ngay một món
+  else if (/((chua|khong|ko) biet (hom nay |nay |toi nay |trua nay |bua nay )?an gi|an gi (cung )?duoc|gi cung duoc|an gi day|an gi bay gio|phan van|quay mon|quay (di|giup)|sao cung duoc|tuy (ban|y|co))/.test(t)) out.intent = 'spin';
+  else if (/(chon (giup|ho|dum|dai|cho)|ngau nhien|random)/.test(t)) out.intent = 'pick';
   else if (/(ca ngay|1 ngay|mot ngay|3 bua|ba bua|thuc don)/.test(t) && /\d/.test(t)) out.intent = 'plan';
 
   let m;
@@ -130,6 +132,9 @@ async function answerCore(text, prev, user) {
   if (q.intent === 'thanks') return { reply: 'Không có chi! Cần tìm gì thêm cứ hỏi mình nhé.', cards: [] };
   if (q.intent === 'help') return { reply: 'Mình gợi ý món ăn, đồ uống, đồ dùng, dịch vụ và việc làm từ các bài đang có trong khu. Thử hỏi: "trưa nay ăn gì dưới 50k", "có trà sữa không", "cần người dọn nhà", "việc vặt kiếm thêm".', cards: [] };
 
+  if (q.intent === 'spin') {
+    return { reply: 'Chưa biết ăn gì à? Để mình đưa bạn sang trang Quay món — bấm quay là AntGo chọn món giúp bạn nhé!', cards: [], action: { type: 'navigate', to: '/quay-mon', label: 'Mở Quay món' } };
+  }
   if (q.intent === 'orders') {
     const r = await tools.myOrders(user, /(lich su|da xong|da giao|da huy)/.test(stripAccents(text)) ? 'history' : 'active');
     return { reply: r.cards.length || /•/.test(r.text) ? `Đơn của bạn:
@@ -201,7 +206,7 @@ Chưa ưng thì nói "chọn món khác" hoặc mở trang Quay món.` : r.text,
   return { reply: `${head}\n${lines}\nBấm vào thẻ bên dưới để xem chi tiết và đặt nhé.`, cards, confident };
 }
 
-const KNOWN_INTENTS = new Set(['greet', 'thanks', 'help', 'orders', 'pick', 'plan']);
+const KNOWN_INTENTS = new Set(['greet', 'thanks', 'help', 'orders', 'pick', 'plan', 'spin']);
 
 /** Trả lời bằng luật. `confident` = câu quen thuộc, bộ luật tự tin trả lời; false = nên nhờ AI. */
 async function answer(text, prev, user) {

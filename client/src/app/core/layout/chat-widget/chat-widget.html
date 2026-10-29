@@ -34,6 +34,7 @@
       @for (b of bubbles(); track $index) {
         <div class="row" [class.me]="b.role === 'user'">
           <div class="bubble" [class.err]="b.error">{{ b.content }}</div>
+          @if (b.action; as a) { <button type="button" class="act" (click)="go(a.to)">{{ a.label }} →</button> }
           @if (b.cards?.length) {
             <div class="cards">
               @for (c of b.cards; track c.id) {

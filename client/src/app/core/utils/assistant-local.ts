@@ -62,9 +62,14 @@ export function localAssistant(text: string, prev: string | undefined, posts: Po
     return { reply: orderLines.length ? `Đơn của bạn:\n${orderLines.join('\n')}\nXem chi tiết ở mục Đơn hàng nhé.` : 'Bạn chưa có đơn nào đang diễn ra.', cards: [] };
   }
 
+  // chưa biết ăn gì / ăn gì cũng được → Quay món
+  if (/((chua|khong|ko) biet (hom nay |nay |toi nay |trua nay |bua nay )?an gi|an gi (cung )?duoc|gi cung duoc|an gi day|an gi bay gio|phan van|quay mon|quay (di|giup)|sao cung duoc)/.test(t)) {
+    return { reply: 'Chưa biết ăn gì à? Để mình đưa bạn sang trang Quay món — bấm quay là AntGo chọn món giúp bạn nhé!', cards: [], action: { type: 'navigate', to: '/quay-mon', label: 'Mở Quay món' } };
+  }
+
   let { min, max } = parsePrice(t);
   const wantsCheaper = /\b(re hon|re nua|mac qua)\b/.test(t);
-  const pick = /(chon (giup|ho|dum|dai)|quay mon|ngau nhien|an gi cung duoc|(chua|khong) biet an gi|phan van)/.test(t);
+  const pick = /(chon (giup|ho|dum|dai)|ngau nhien)/.test(t);
 
   // phân loại bài
   const score: Record<PostKind, number> = { food: 0, goods: 0, service: 0, job: 0 };

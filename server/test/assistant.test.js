@@ -182,7 +182,7 @@ test('chế độ llm mà thiếu khóa → 503 ASSISTANT_UNAVAILABLE', async ()
 
 test('bộ cơ bản: "chọn giúp" ra đúng 1 món trong ngân sách; "đơn của tôi" không lỗi; thực đơn cả ngày trong ngân sách', async () => {
   delete process.env.GEMINI_API_KEY; delete process.env.GOOGLE_API_KEY; delete process.env.LLM_API_KEY; delete process.env.ASSISTANT_MODE;
-  let r = await ask('chưa biết ăn gì chọn giúp tôi món dưới 100k');
+  let r = await ask('chọn giúp tôi món dưới 100k');
   assert.equal(r.status, 200);
   assert.equal(r.body.data.cards.length, 1);
   assert.ok(r.body.data.cards[0].price <= 100000);
@@ -256,4 +256,21 @@ test('LLM: model chính hết hạn mức (429) thì thử model dự phòng', a
   assert.equal(r.body.data.engine, 'llm');
   assert.equal(r.body.data.reply, 'Từ model dự phòng');
   assert.deepEqual(used, ['main-model', 'backup-model']);
+});
+
+test('"chưa biết ăn gì / ăn gì cũng được" → chuyển sang trang Quay món (action navigate), không tốn lượt AI', async () => {
+  delete process.env.GEMINI_API_KEY; delete process.env.GOOGLE_API_KEY; delete process.env.ASSISTANT_MODE;
+  process.env.LLM_API_KEY = 'k';
+  let calls = 0;
+  assistant.setLlmFetch(async () => { calls++; return jsonRes(200, { choices: [{ message: { role: 'assistant', content: 'x' } }] }); });
+  for (const q of ['hôm nay chưa biết ăn gì', 'ăn gì cũng được', 'trưa nay không biết ăn gì đây', 'gì cũng được']) {
+    const r = await ask(q);
+    assert.equal(r.body.data.engine, 'local', q);
+    assert.deepEqual(r.body.data.action, { type: 'navigate', to: '/quay-mon', label: 'Mở Quay món' }, q);
+  }
+  assert.equal(calls, 0);
+  // "chọn giúp tôi món" vẫn chọn ngay một món, không chuyển trang
+  const r = await ask('chọn giúp tôi món dưới 100k');
+  assert.equal(r.body.data.action, undefined);
+  assert.equal(r.body.data.cards.length, 1);
 });

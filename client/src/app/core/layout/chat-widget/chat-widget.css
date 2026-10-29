@@ -61,3 +61,6 @@ form button:disabled { opacity: .45; cursor: not-allowed; }
 .quick button:hover:not(:disabled) { border-color: var(--ink); }
 .quick button:disabled { opacity: .5; }
 .quick + form { border-top: 0; }
+
+.act { justify-self: start; border: 0; border-radius: 999px; padding: 8px 14px; background: var(--accent); color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; }
+.act:hover { filter: brightness(1.06); }
