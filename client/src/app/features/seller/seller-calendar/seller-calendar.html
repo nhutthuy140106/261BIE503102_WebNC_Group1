@@ -1,0 +1,52 @@
+<div class="ohead">
+  <h1>Lịch</h1>
+  <div class="wnav">
+    <button type="button" class="ib prev" aria-label="Tuần trước" (click)="go(-1)"><svg class="i"><use href="#right" /></svg></button>
+    <button type="button" class="lbl" [class.back]="week()" [title]="week() ? 'Về tuần này' : ''" (click)="week() && go(0)">{{ label() }}</button>
+    <button type="button" class="ib" aria-label="Tuần sau" (click)="go(1)"><svg class="i"><use href="#right" /></svg></button>
+  </div>
+</div>
+
+<div class="stats">
+  <div><svg class="i"><use href="#receipt" /></svg><b>{{ orderCount() }}</b><span>đơn &amp; lịch hẹn{{ week() ? '' : ' tuần này' }}</span></div>
+  <div><svg class="i"><use href="#hand" /></svg><b>{{ jobCount() }}</b><span>việc đã thuê{{ week() ? '' : ' tuần này' }}</span></div>
+</div>
+
+<div class="legend">
+  <span><i></i>Đồ ăn &amp; uống · Đồ dùng</span><span><i class="svc"></i>Dịch vụ</span><span><i class="job"></i>Việc làm</span>
+  <span><i class="lo"></i>Giờ nhận đơn</span>
+</div>
+
+<div class="week-box">
+  <div class="whead">
+    <div></div>
+    @for (c of cols(); track c.d; let i = $index) {
+      <div [class.today]="c.today">{{ days[i] }}<b>{{ c.date }}</b><small>{{ c.items.length ? c.items.length + ' mốc' : ' ' }}</small></div>
+    }
+  </div>
+  <div class="wbody" #wbody>
+    <div class="wcols" [style.height.px]="(H1 - H0) * PX">
+      <div class="gut">@for (h of hours; track h; let i = $index) { <span [style.top.px]="(i + 1) * PX">{{ h }}:00</span> }</div>
+      @for (c of cols(); track c.d) {
+        <div class="col" [class.today]="c.today">
+          @for (h of hours; track h; let i = $index) { <div class="hl" [style.top.px]="(i + 1) * PX"></div> }
+          @if (c.open; as o) { <div class="openb" [style.top.px]="o.top" [style.height.px]="o.h"></div> }
+          @if (c.now !== null) { <div class="nowl" [style.top.px]="c.now"></div> }
+          @for (s of c.stacks; track s.top) {
+            <div class="ev" [class.deck]="s.items.length > 1" [style.top.px]="s.top" [style.height.px]="64 + (s.items.length - 1) * 5" [style.--n]="s.items.length">
+              @if (s.items.length > 1) { <span class="cnt">{{ s.items.length }} đơn</span> }
+              @for (a of s.items; track a.key; let i = $index) {
+                <a class="mc" [class.job]="a.kind === 'job'" [class.service]="a.kind === 'service'" [class.fin]="a.done" [style.--i]="i" [routerLink]="a.link" [title]="a.item">
+                  @if (a.image) { <img [src]="a.image" alt="" /> } @else { <img class="av" [src]="a.avatar" alt="" /> }
+                  <div class="n"><b>{{ a.who }}</b><time>{{ a.time }}</time></div>
+                  <div class="l"><svg class="i"><use href="#pin" /></svg>{{ a.address }}</div>
+                  <div class="l"><svg class="i"><use href="#phone" /></svg>{{ a.phone }}</div>
+                </a>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AntGo — Bán &amp; Đăng việc · Hôm nay</title><link rel="stylesheet" href="shared/base.css"><style>
+  /* Không gian Bán & Đăng việc — trang "Hôm nay".
+     Thứ tự: hồ sơ gian hàng → 4 nút đăng bài → Cần bạn xử lý (thẻ vuông giống trang chủ phía Mua, 6 thẻ một hàng, chỉ thêm nút thao tác)
+     → Lịch hôm nay + Hiệu quả → Tình trạng bán. Một người bán nhiều mảng → lọc được theo mảng. */
+
+  /* Hồ sơ gian hàng (thay cho tiêu đề trang) */
+  .shophead{margin:22px -16px 0;padding:10px 16px;border-radius:18px;display:flex;align-items:center;gap:18px;cursor:pointer;transition:background .15s}
+  .shophead:hover{background:var(--soft)}
+  .shophead .mine{display:inline-flex;align-items:center;gap:3px;margin-left:10px;font-size:13px;font-weight:600;color:var(--smoke);vertical-align:middle}
+  .shophead:hover .mine{color:var(--ink)}.shophead .mine svg{width:14px;height:14px}
+  .shophead .acts{cursor:default}
+  .shophead>img{width:72px;height:72px;border-radius:50%;object-fit:cover;flex:none}
+  .shophead .nm{flex:1;min-width:0}
+  .shophead h1{margin:0;font-size:28px;line-height:1.2;letter-spacing:-.02em}
+  .shophead .meta{margin-top:6px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;color:var(--smoke);font-size:13.5px;line-height:18px}
+  .shophead .meta span{display:inline-flex;align-items:center;gap:6px}
+  .shophead .meta svg{width:16px;height:16px;flex:none}
+  .shophead .meta .st{color:#E39B1A}
+  .shophead .meta .prof{color:var(--ink);font-weight:600}
+  .shophead .acts{display:flex;align-items:center;gap:8px;position:relative}
+  .hbtn2{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border:1px solid var(--border);border-radius:12px;background:#fff;font-weight:600;font-size:13.5px}
+  .hbtn2:hover{background:var(--soft)}
+  .hbtn2 svg{width:16px;height:16px}
+  .hbtn2 .chev{width:13px;height:13px;color:var(--smoke)}
+  .hbtn2 i{width:8px;height:8px;border-radius:50%;background:#3BAA6A}
+  .hbtn2.off i{background:var(--fog)}
+
+  .pop{position:absolute;right:0;top:calc(100% + 8px);width:320px;padding:16px;border-radius:16px;background:#fff;border:1px solid var(--border);box-shadow:0 18px 40px rgba(34,48,74,.14);z-index:15;display:none}
+  .pop.open{display:block}
+  .pop h3{margin:0 0 12px;font-size:15px}
+  .opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer}
+  .opt.on{border-color:var(--ink);background:var(--soft)}
+  .opt input{margin-top:3px;accent-color:var(--ink)}.opt b{display:block;font-size:14px;font-weight:600}.opt small{color:var(--smoke);font-size:12px}
+  .kinds{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px 30px}
+  .kinds label{display:inline-flex;align-items:center;gap:5px;font-size:13px;padding:4px 10px;border:1px solid var(--border);border-radius:999px;cursor:pointer}
+  .kinds input{accent-color:var(--ink)}
+  .pop .row2{display:flex;align-items:center;gap:10px;margin-top:4px;font-size:13px;color:var(--smoke)}.pop select{flex:1}
+  .pop .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+
+  /* 4 nút đăng bài */
+  .posts4{margin-top:22px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .posts4 a{display:flex;align-items:center;gap:14px;height:90px;padding:0 20px;border-radius:16px;background:var(--accent);color:#fff;font-weight:700;font-size:15.5px;letter-spacing:-.01em;white-space:nowrap;transition:filter .15s,transform .15s}
+  .posts4 a:hover{filter:brightness(.95);transform:translateY(-1px)}
+  .posts4 .pi{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.2);display:grid;place-items:center;flex:none}
+  .posts4 svg{width:22px;height:22px}
+  .posts4 .plus{margin-left:auto;width:18px;height:18px;opacity:.85}
+  /* Banner AntXu dưới 4 nút đăng bài */
+  .xuband{margin-top:14px;display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:16px;background:#FFF1E4;border:1px solid #F8DCC4}
+  .xuband>img{width:40px;height:40px;flex:none}
+  .xuband .tx{flex:1;min-width:0}.xuband b{display:block;font-size:15px}.xuband small{display:block;font-size:13px;color:var(--smoke)}
+  .xuband .bal{font-size:13px;color:var(--smoke);white-space:nowrap}.xuband .bal b{display:inline;font-size:13px;color:var(--ink)}
+  .xuband .btn{height:40px;padding:0 16px}
+
+  .pausebar{margin-top:16px;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:var(--soft);border:1px solid var(--border);font-size:14px}
+  .pausebar svg{width:18px;height:18px}.pausebar span{flex:1}.pausebar[hidden]{display:none}
+
+  /* Tiêu đề nhóm — giống .ogroup h2 của orders.html */
+  .gh{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .gh h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-.015em;color:var(--ink);display:flex;align-items:center;gap:6px}
+  .gh h2 svg{width:15px;height:15px}
+  .gh .more{margin-left:auto;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+  .gh .more svg{width:14px;height:14px}
+  section.sec{margin-top:36px}
+
+  /* Cần bạn xử lý — khối nền cam nhạt như .needgroup của orders.html */
+  .needgroup{margin-top:24px;padding:18px 18px 20px;border-radius:18px;background:#FFF6F1;border:1px solid #F6DACB}
+  .toggles{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px}
+  .toggles button{height:32px;padding:0 12px;border-radius:999px;border:1px solid #F0D3C4;background:#fff;font-weight:600;font-size:12.5px;display:inline-flex;align-items:center;gap:6px}
+  .toggles button:hover{border-color:var(--ink)}
+  .toggles button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .toggles button small{font-size:11.5px;font-weight:600;opacity:.6}
+  /* Thẻ giống trang chủ phía Mua (home-v5): ảnh 4:3 hoặc ô be → tên → giá → dòng thông tin + trạng thái; 4 thẻ một hàng, thêm hàng nút */
+  .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .item{background:var(--card);border-radius:12px;overflow:hidden;border:1px solid #F2D5C5;display:flex;flex-direction:column;cursor:pointer;min-width:0}
+  .item .ph{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--soft)}
+  .item .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .item .kind{position:absolute;left:8px;top:8px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.92);font-size:11px;font-weight:600}
+  .item .duep,.item .jc-due{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:#fff;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .item .duep{position:absolute;right:8px;top:8px}
+  .item .duep svg,.item .jc-due svg{width:13px;height:13px;color:var(--accent)}
+  .item .body{padding:10px 12px 10px;display:flex;flex-direction:column;gap:4px;flex:1}
+  .item h3{margin:0;font-size:14px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em}
+  .item .pr{font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap}
+  .item .pr span{font-size:12px;font-weight:400;color:var(--smoke)}
+  .item .pr.note{font-size:13px;font-weight:500;color:var(--smoke)}
+  .item .pr.stars{color:#E39B1A;letter-spacing:1px}
+  .item .meta{margin-top:auto;padding-top:2px;display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--smoke);font-size:12px;min-width:0}
+  .item .meta>span:first-child{display:inline-flex;align-items:center;gap:4px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .meta svg{width:13px;height:13px;flex:none}
+  .item .meta .stat{font-size:12px;gap:6px;flex:none}
+  .item .meta .stat::before{width:7px;height:7px}
+  .item.jobc .ph{display:flex;flex-direction:column;gap:10px;padding:14px 16px}
+  .item.jobc .jc-top{display:flex;align-items:center;gap:8px;min-width:0}
+  .item.jobc .jc-top img{width:30px;height:30px;border-radius:50%;object-fit:cover;flex:none}
+  .item.jobc .jc-top .faces{display:inline-flex;flex:none}
+  .item.jobc .jc-top .faces img{width:28px;height:28px;margin-left:-9px;border:2px solid var(--soft)}
+  .item.jobc .jc-top .faces img:first-child{margin-left:0}
+  .item.jobc .jc-top>span{min-width:0;font-size:11.5px;color:var(--smoke);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item.jobc .jc-top b{display:block;font-size:13px;color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis}
+  .item.jobc .jc-tags{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .item.jobc .jcat{flex:none;padding:3px 8px;border-radius:6px;background:#fff;font-size:11px;font-weight:600}
+  .item.jobc .jc-desc{margin:0;font-size:13.5px;line-height:1.45;color:#3C4660;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* Thẻ Cần bạn xử lý: gọn — đơn nào, ai, mua gì, ở đâu */
+  .tcard{padding:12px 12px 0;gap:10px}
+  .tc-tags{display:flex;justify-content:space-between;align-items:center;gap:8px;height:26px;flex:none}
+  .tcard .kind,.tcard .duep{position:static}
+  .tcard .kind{background:var(--soft)}
+  .tcard .duep{background:#FFF6F1;color:var(--ink)}
+  .tc-head{display:flex;gap:10px;align-items:flex-start;min-width:0;height:76px;flex:none}
+  .tc-head .th{flex:none;width:52px;height:52px;border-radius:10px;overflow:hidden;background:var(--soft);display:grid;place-items:center}
+  .tc-head .th>img{width:100%;height:100%;object-fit:cover}.tc-head .th>img.av{border-radius:50%;width:44px;height:44px}
+  .tc-head .th .ic svg{width:22px;height:22px}
+  .tc-head .faces{display:flex}.tc-head .faces img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:2px solid var(--soft);margin-left:-8px}.tc-head .faces img:first-child{margin-left:0}
+  .tc-head>div{min-width:0;flex:1}
+  .tcard h3{min-height:0;-webkit-line-clamp:2;font-size:14px;line-height:1.3;margin-top:1px}
+  .tc-code{display:block;font-size:11.5px;color:var(--smoke);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tc-pr{margin-top:2px;font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap}.tc-pr span{font-size:11.5px;font-weight:400;color:var(--smoke)}
+  .tc-pr.gold{color:#E39B1A;letter-spacing:1px;font-weight:400}
+  .tc-sub{margin-top:3px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;font-size:12px;color:var(--smoke)}
+  .tc-sub>span:first-child{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tc-sub b{color:var(--ink)}
+  .tc-sub .gold{font-style:normal;color:#E39B1A;letter-spacing:1px}
+  .tc-sub .stat{flex:none;font-size:11.5px}
+  .tc-info{list-style:none;margin:0;padding:8px 0 0;border-top:1px dashed var(--border);display:grid;grid-auto-rows:16px;gap:4px;height:88px;flex:none;align-content:start;overflow:hidden}
+  .tc-info li{display:flex;gap:6px;align-items:center;font-size:11.5px;line-height:16px;color:#3C4660;min-width:0}
+  .tc-info li svg{width:13px;height:13px;flex:none;color:var(--smoke)}
+  .tc-info .tc-st .stat{font-size:11.5px;font-weight:600}
+  .tc-info li span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item.tcard .acts{padding:0 0 12px;margin-top:auto}.item.tcard .reply{padding:0 0 12px}
+  /* Hộp xác nhận: quy trình + bước sắp chuyển */
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 16px;font-size:12.5px;color:var(--smoke)}
+  .flow span{padding:5px 10px;border-radius:999px;background:var(--soft)}
+  .flow span.now{background:#FFF6F1;color:var(--accent);font-weight:700}
+  .flow span.next{background:var(--ink);color:#fff;font-weight:700}
+  .flow svg{width:12px;height:12px}
+  .csum{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;background:var(--soft);font-size:13px}
+  .csum img{width:48px;height:48px;border-radius:10px;object-fit:cover;flex:none}.csum b{display:block;font-size:14px}.csum span{color:var(--smoke)}
+  .dlg.sm{width:480px}
+  .dlg .cbtns{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.dlg .cbtns .btn{height:40px}
+  .item .acts{display:flex;gap:6px;padding:0 12px 12px}
+  .item .acts .btn{flex:1;height:36px;padding:0 10px;font-size:13px;white-space:nowrap}
+  .item .acts .ib{flex:none;width:36px;padding:0}
+  .item .acts .ib svg{width:16px;height:16px}
+  .item .reply{display:flex;gap:6px;padding:0 12px 12px}
+  .item .reply input{flex:1;min-width:0;padding:8px 10px}
+  .item .reply .btn{height:38px;padding:0 14px}
+  .needmore{margin-top:12px;display:flex;justify-content:center}
+  .needmore button{height:34px;padding:0 16px;border-radius:999px;border:1px solid #F0D3C4;background:#fff;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+  .needmore button svg{width:14px;height:14px}
+  .needmore[hidden]{display:none}
+  .stat{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;white-space:nowrap}
+  .stat::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+  .stat.act{color:var(--accent)}.stat.wait{color:#A86A12}.stat.go{color:#2E7D4F}.stat.done{color:var(--smoke)}.stat.off{color:var(--fog)}
+  .allclear{display:flex;align-items:center;gap:14px;padding:4px;color:var(--smoke)}
+  .allclear img{width:56px}
+  .allclear[hidden]{display:none}
+
+  /* Lịch hôm nay + 7 ngày qua */
+  .cols{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:stretch}
+  .cols>section{display:flex;flex-direction:column}
+  .cols>section>.card{height:540px}
+  .cols .gh{height:32px}
+  .seg{display:inline-flex;padding:3px;border-radius:999px;border:1px solid var(--border);margin-left:auto}
+  .seg button{height:28px;padding:0 12px;border:0;border-radius:999px;background:none;font-size:12.5px;font-weight:600;color:var(--smoke)}
+  .seg button.on{background:var(--soft);color:var(--ink)}
+  .card{border:1px solid var(--border);border-radius:16px;background:#fff}
+  /* Lịch hôm nay kiểu Google Calendar: trục giờ dọc, mỗi đơn là thẻ nhỏ đặt đúng giờ; nhiều đơn cùng giờ xếp chồng, rê chuột thì xòe ra */
+  .cal{position:relative;overflow-y:auto;padding:12px 14px 12px 0;scrollbar-width:thin}
+  .cal-in{position:relative;margin-left:58px}
+  .hr{position:absolute;left:-58px;right:0;height:0;border-top:1px solid var(--border)}
+  .hr span{position:absolute;left:0;top:-9px;width:50px;padding-right:8px;text-align:right;font-size:11.5px;color:var(--smoke);background:#fff}
+  .band{position:absolute;left:0;right:0;background:#F1F8F3;border-left:3px solid #8FCFA6;border-radius:0 8px 8px 0}
+  .band span{position:absolute;right:8px;top:6px;font-size:11px;font-weight:600;color:#2E7D4F}
+  .nowline{position:absolute;left:-6px;right:0;height:0;border-top:2px solid #E5484D;z-index:25;pointer-events:none}
+  .nowline::before{content:"";position:absolute;left:-1px;top:-6px;width:10px;height:10px;border-radius:50%;background:#E5484D}
+  .slot{position:absolute;padding-right:6px}
+  .mc{position:absolute;left:0;right:6px;top:0;height:64px;display:grid;grid-template-columns:34px minmax(0,1fr);grid-template-rows:repeat(3,auto);column-gap:9px;align-content:center;padding:6px 10px 6px 8px;background:#fff;border:1px solid var(--border);border-left:3px solid var(--ink);border-radius:10px;box-shadow:0 1px 3px rgba(34,48,74,.08);cursor:pointer;z-index:calc(10 - var(--i));transform:translate(calc(var(--i) * 6px),calc(var(--i) * 6px));transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
+  .mc.job{border-left-color:#3BAA6A}
+  .mc.fin{opacity:.6}
+  .mc>img{grid-row:1/4;width:34px;height:34px;border-radius:8px;object-fit:cover;align-self:center}
+  .mc>img.av{border-radius:50%}
+  .mc .n{display:flex;align-items:baseline;gap:6px;min-width:0}
+  .mc .n b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mc .n time{margin-left:auto;font-size:11px;font-weight:600;color:var(--smoke);flex:none}
+  .mc .l{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--smoke);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+  .mc .l svg{width:12px;height:12px;flex:none}
+  .slot.deck .cnt{position:absolute;right:-2px;top:-9px;z-index:15;padding:1px 7px;border-radius:999px;background:var(--ink);color:#fff;font-size:11px;font-weight:700}
+  .slot.deck:hover{z-index:40}
+  .slot.deck:hover .mc{transform:translateY(calc(var(--i) * 70px));box-shadow:0 10px 24px rgba(34,48,74,.16)}
+  .slot.deck:hover .cnt{opacity:0}
+  .calempty{padding:30px 0;text-align:center;color:var(--smoke)}
+  .agempty{padding:22px 0;color:var(--smoke);text-align:center}
+  .agempty[hidden]{display:none}
+  /* Hiệu quả: số chính to + 4 ô số liệu */
+  .range{margin-left:auto;height:32px;padding:0 30px 0 12px;border:1px solid var(--border);border-radius:999px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%236A6879' d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E") no-repeat right 10px center/13px;font-size:12.5px;font-weight:600;color:var(--ink);appearance:none;cursor:pointer}
+  .kpis{display:grid;grid-template-rows:1.35fr 2fr auto;gap:12px;padding:18px}
+  .kduo{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0}
+  .kbig{padding:14px;border-radius:14px;background:var(--ink);color:#fff;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .kbig .lb{display:block;font-size:13px;font-weight:600;color:#C9CEDB;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kbig .lb svg{width:14px;height:14px}
+  .kbig b{font-size:21px;line-height:1.15;letter-spacing:-.02em;white-space:nowrap}
+  .kbig small{font-size:11.5px;color:#AEB4C4}
+  .up{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:#E3F4E8;color:#2E7D4F;font-size:12px;font-weight:700;white-space:nowrap;align-self:flex-start}
+  .kbig .up{margin-top:auto;background:rgba(110,214,148,.18);color:#8BE0AA}
+  .kgrid{min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:10px}
+  .kt{padding:12px 14px;border-radius:14px;background:var(--soft);display:flex;flex-direction:column;gap:3px}
+  .kt span{font-size:12.5px;color:var(--smoke)}
+  .kt b{font-size:22px;letter-spacing:-.02em;line-height:1.15}
+  .kt small{font-size:12px;color:var(--smoke)}
+  .kt .up,.kt small{margin-top:auto}
+  .kt .st{color:#E39B1A}
+  .kmore{display:flex;align-items:center;justify-content:center;gap:4px;height:38px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:600}
+  .kmore:hover{background:var(--soft)}.kmore svg{width:14px;height:14px}
+
+  /* Tình trạng bán theo mảng */
+  /* Tình trạng bán: mỗi mảng một hàng thẻ bài */
+  #lanes{display:grid;gap:24px}
+  .lanegrp{min-width:0}
+  .lanegrp .cards{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .lgh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .lgh svg{width:17px;height:17px}.lgh b{font-size:15px}.lgh small{color:var(--smoke);font-size:13px}
+  #lanes .item{border-color:var(--border);cursor:default}
+  #lanes .item .body{padding-bottom:6px}
+  #lanes .item.dim .ph img,#lanes .item.dim .ph .cream{opacity:.55}
+  .item .cream{width:100%;height:100%;display:grid;place-content:center;justify-items:center;gap:4px;color:var(--ink)}
+  .item .cream svg{width:34px;height:34px}.item .cream small{font-size:12px;font-weight:600;color:var(--smoke)}
+  .item .stp{position:absolute;left:8px;top:8px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.94)}
+  .item .stp .stat{font-size:11.5px;gap:5px}.item .stp .stat::before{width:6px;height:6px}
+  .item .duep.ad{background:rgba(34,28,21,.74);color:#fff;letter-spacing:.02em}
+  .item .ctl{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px 10px}
+  .step{display:inline-flex;align-items:center;height:32px;border:1px solid var(--border);border-radius:9px;min-width:0}
+  .step button{width:30px;height:30px;border:0;background:none;font-size:16px;font-weight:700;color:var(--smoke);flex:none}
+  .step button:hover{color:var(--ink)}
+  .step span{padding:0 6px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .togl{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--smoke);white-space:nowrap}
+  .tog{width:36px;height:20px;border-radius:10px;border:0;background:var(--border);position:relative;flex:none;transition:background .2s}
+  .tog::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:left .2s}
+  .tog.on{background:var(--ink)}.tog.on::after{left:18px}
+  .tog:disabled{opacity:.4;cursor:not-allowed}
+  .item .xurow{padding:0 12px 12px}
+  .item .xub{width:100%;height:36px;font-size:12.5px;background:#FFF6EC;border-color:#F6DCC2;color:#7A4A12}
+  .item .xub:hover{background:#FDEBD6}
+  .item .xub.on{background:#fff;color:var(--smoke);cursor:default}
+
+  .coinsm{width:16px;height:16px}
+
+  /* Hộp chọn người nhận việc (so sánh đề nghị kiểu Airtasker) */
+  .modal{position:fixed;inset:0;z-index:80;background:rgba(34,48,74,.32);display:none;align-items:flex-start;justify-content:center;padding:70px 16px 16px;overflow:auto}
+  .modal.open{display:flex}
+  .dlg{width:620px;max-width:100%;background:#fff;border-radius:18px;padding:22px;box-shadow:0 24px 60px rgba(34,48,74,.22)}
+  .dlg h2{margin:0;font-size:20px}.dlg>p{margin:4px 0 14px;color:var(--smoke);font-size:13.5px}
+  .offer{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:14px;padding:14px 0;border-top:1px solid var(--border)}
+  .offer img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+  .offer b{font-size:15px}.offer .m{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--smoke);margin-top:2px}
+  .offer .m span{display:inline-flex;align-items:center;gap:4px}.offer .m svg{width:13px;height:13px}.offer .m .st{color:#E39B1A}
+  .offer p{margin:6px 0 0;font-size:13.5px;color:#3C4660}
+  .offer .btns{display:grid;gap:6px;align-content:start}.offer .btn{height:34px;font-size:13px}
+  .dlg .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:6px;padding-top:14px;border-top:1px solid var(--border);font-size:12.5px;color:var(--smoke)}
+
+  /* Người bán mới */
+  .newcard{margin-top:24px;padding:24px;border-radius:18px;background:var(--soft);display:flex;align-items:center;gap:24px}
+  .newcard img{width:110px;flex:none}
+  .newcard ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s;flex:1}
+  .newcard li{display:flex;gap:10px;font-size:14px;font-weight:600}
+  .newcard li::before{counter-increment:s;content:counter(s);width:26px;height:26px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:13px;flex:none}
+  .newcard small{display:block;font-weight:400;color:var(--smoke);font-size:13px}
+
+  #page .hide{display:none!important}
+  @media(max-width:1100px){.cols>section>.card{height:auto}.cal{height:480px}.lanegrp .cards{grid-template-columns:repeat(2,minmax(0,1fr))}.posts4 a{height:72px}.cols{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.lanes{grid-template-columns:repeat(2,minmax(0,1fr))}.posts4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:700px){.lanegrp .cards{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.shophead{flex-wrap:wrap}.shophead .acts{width:100%}.lanes,.posts4{grid-template-columns:1fr}.newcard{flex-direction:column}.newcard ol{grid-template-columns:1fr}}
+</style></head><body><div id="siteHeader" data-space="sell" data-active="today"></div><main class="wrap" id="page"></main>
+<div class="modal" id="pick"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="pickTitle"></div></div>
+<script src="shared/icons.js"></script><script src="shared/common.js"></script><script src="shared/seller-data.js"></script><script>
+(() => {
+  const esc = AntGo.esc, icon = AntGo.icon, $ = id => document.getElementById(id);
+  const U = (id, w = 200, h = 160) => `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&q=70`;
+  const F = id => U(id, 96, 96);
+  const money = n => n.toLocaleString("vi-VN") + "đ";
+  const day = (d, opt) => { const x = new Date(); x.setDate(x.getDate() + d); return x.toLocaleDateString("vi-VN", opt); };
+  const isNew = new URLSearchParams(location.search).has("new");
+
+  // ---- Dữ liệu mẫu: tài khoản Bếp Cô Lan bán đủ 4 mảng (số liệu và đơn khớp shop.html / orders.html) ----
+  const KIND = { food: ["fork", "Đồ ăn & uống"], goods: ["package", "Đồ dùng"], service: ["wrench", "Dịch vụ"], job: ["hand", "Việc làm"] };
+  const AV = { lan: "1508214751196-bcfd4ca60f91", minh: "1507591064344-4c6ce005b128", khoa: "1506794778202-cad84cf45f1d", quoc: "1500648767791-00dcc994a43e",
+    hoa: "1438761681033-6461ffad8d80", thuy: "1494790108377-be9c29b29330" };
+  const IMG = { com: "1504674900247-0877df9cc836", suon: "1555939594-58d7cb561ad1", noi: "1556909114-f6e7ad7d3136" };
+
+  // Việc cần xử lý, xếp theo độ gấp. Thẻ có ảnh (img) = thẻ món phía Mua; không ảnh = thẻ việc làm ô be (who/av/desc/pay).
+  // acts: [hành động, nhãn, nút chính?, icon] — nút phụ có icon thì thu thành nút vuông nhỏ cho vừa thẻ
+  // Quy trình hiển thị trong hộp xác nhận (khớp tên bước trên thanh tiến trình)
+  const FLOW = {
+    delivery: ["Đã đặt", "Chờ xác nhận", "Đang giao", "Hoàn thành"],
+    pickup: ["Đã đặt", "Chờ xác nhận", "Chờ khách lấy", "Hoàn thành"],
+    home: ["Đã đặt", "Chờ xác nhận", "Đang thực hiện", "Hoàn thành"],
+    job: ["Đã yêu cầu", "Chờ xác nhận", "Đang thực hiện", "Đã báo xong", "Hoàn thành"],
+    cancel: ["Khách xin hủy", "Đã hủy"],
+  };
+  // Thẻ: tag mảng + hạn · ảnh nhỏ · tên · mã & giá · người · nơi · ghi chú → nút.
+  // acts: [hành động, nhãn, nút chính?, icon]; ask: hỏi lại trước khi làm [quy trình, bước hiện tại]
+  const TODO = [
+    { id: "o3024", k: "food", due: "Còn 12 phút", st: "Chờ xác nhận", ask: ["delivery", 1],
+      acts: [["confirm", "Xác nhận", 1], ["decline", "Từ chối", 0, "xmark"]], ok: "Đã xác nhận AG-O3024 — đơn chuyển sang Đang giao, Minh được báo" },
+    { id: "j-giao", k: "job", due: "Chọn trước 10:30", st: "Chờ xác nhận", faces: [AV.minh, AV.khoa, AV.quoc], who: "3 người đề nghị · Minh, Minh Khoa, Quốc Anh", where: "Bếp B-0512 · 11:00–12:00 hôm nay",
+      acts: [["pick", "Xác nhận", 1]] },
+    { id: "c3019", k: "food", st: "Khách xin hủy", ask: ["cancel", 0], noteIc: "question", noteOf: o => "Lý do: " + o.cancelReq,
+      acts: [["approve", "Xác nhận hủy", 1], ["chat", "Nhắn khách", 0, "chat"]], ok: "Đã hủy AG-O3019 — trả lại 1 phần vào Đồ ăn & uống" },
+    { id: "o3025", k: "goods", due: "Còn 2 giờ", st: "Chờ xác nhận", ask: ["pickup", 1],
+      acts: [["confirm", "Xác nhận", 1], ["decline", "Từ chối", 0, "xmark"]], ok: "Đã xác nhận — chờ Thu Hà đến lấy, bài Nồi chiên tự ẩn vì bán một lần" },
+    { id: "s0412", k: "service", due: day(4, { weekday: "short" }) + " · 9:00", st: "Chờ xác nhận", ask: ["home", 1],
+      acts: [["confirm", "Xác nhận", 1], ["decline", "Từ chối", 0, "xmark"]], ok: "Đã xác nhận lịch nấu cỗ — đã thêm vào Lịch" },
+    { id: "j-cho", k: "job", due: "Tự xong sau 24 giờ", st: "Đã báo xong", ask: ["job", 3], av: AV.quoc, who: "Quốc Anh (0900 000 005)", where: "Chợ đầu mối · báo xong 7:10", note: "Đã mua đủ, kèm 2 ảnh hóa đơn",
+      acts: [["done", "Xác nhận", 1], ["chat", "Nhắn", 0, "chat"]], ok: "Đã xác nhận hoàn thành — nhớ trả 120.000đ cho Quốc Anh và đánh giá" },
+    { id: "q1", k: "job", tag: "Hỏi đáp", due: "15 phút trước", st: "Chờ phản hồi", av: AV.khoa, t: "Minh Khoa hỏi", sub: "Cần người giao cơm trưa", note: "“Có cần xe máy riêng không chị, hay đi bộ giao trong khu?”", noteIc: "chat",
+      acts: [["reply", "Phản hồi", 1]], ph: "Trả lời công khai, không ghi SĐT…", ok: "Đã phản hồi — câu trả lời hiện cho mọi người xem việc" },
+    { id: "r1", k: "food", tag: "Đánh giá", due: "2 giờ trước", st: "Chờ phản hồi", av: AV.thuy, t: "Ngọc Thủy đánh giá", stars: 5, sub: "Cơm gà xé", note: "“Cơm dẻo, gà thấm, giao đúng giờ. Sẽ đặt tiếp.”", noteIc: "chat",
+      acts: [["reply", "Phản hồi", 1]], ph: "Cảm ơn khách…", ok: "Đã gửi phản hồi — hiện dưới đánh giá ở trang bài" },
+  ];
+
+  // Lịch hôm nay: lấy từ shared/seller-data.js (calItems) — đơn đã xác nhận có giờ + việc đã chọn người
+
+  // Hiệu quả: số liệu mẫu theo từng mốc (tổng từ trước đến nay khớp shop.html: 86 đơn, ★4,3)
+  const RANGES = {
+    today: { label: "Hôm nay", inc: 210000, incUp: "+8%", pay: 40000, payUp: "+6%", payN: 1, payNUp: "+100%", done: 3, doneUp: "+20%", rate: "5,0", rateN: 3, view: 64, viewUp: "+12%" },
+    7: { label: "7 ngày qua", inc: 640000, incUp: "+12%", pay: 160000, payUp: "+10%", payN: 2, payNUp: "+100%", done: 14, doneUp: "+27%", rate: "4,3", rateN: 3, view: 412, viewUp: "+9%" },
+    30: { label: "30 ngày qua", inc: 2480000, incUp: "+5%", pay: 520000, payUp: "+4%", payN: 6, payNUp: "+20%", done: 52, doneUp: "+13%", rate: "4,3", rateN: 3, view: "1.630", viewUp: "+4%" },
+    90: { label: "3 tháng qua", inc: 3820000, incUp: "+18%", pay: 860000, payUp: "+15%", payN: 9, payNUp: "+50%", done: 78, doneUp: "+24%", rate: "4,3", rateN: 3, view: "4.210", viewUp: "+21%" },
+    year: { label: "Năm nay", inc: 4120000, incUp: "+40%", pay: 940000, payUp: "+38%", payN: 11, payNUp: "+57%", done: 81, doneUp: "+53%", rate: "4,3", rateN: 3, view: "4.980", viewUp: "+35%" },
+  };
+  // Bài đăng + nhãn từng mảng: shared/seller-data.js
+  let POSTS = [];
+  const LANE = AntSeller.LANE;
+
+  // ---- Trạng thái thao tác (lưu trong trình duyệt để bấm thử) ----
+  const S = AntSeller.load();
+  const save = () => AntSeller.save(S);
+  POSTS = AntSeller.posts(S);
+  // số tiền trên thẻ lấy từ dữ liệu đơn chung (khớp trang Giao dịch)
+  // điền người mua · món · nơi giao từ dữ liệu đơn chung
+  const PLACE = o => o.ful === "pickup" ? "Tự đến lấy" : o.ful === "home" ? "Tại nhà " + o.addr.split(",")[0] : "Giao tới " + o.addr.split(",")[0];
+  AntSeller.orders(S).forEach(o => { const x = TODO.find(t => t.id === o.id); if (!x) return;
+    Object.assign(x, { img: o.img, ic: o.ic, t: o.title, code: o.code, amt: o.total, who: o.buyer.n + " (" + o.buyer.phone + ")", where: PLACE(o) + " · " + (o.day ? day(o.day, { weekday: "short", day: "2-digit", month: "2-digit" }) + " " : "") + o.tm,
+      note: x.noteOf ? x.noteOf(o) : o.note, buyer: o.buyer.n }); });
+  AntSeller.jobs(S).forEach(j => { const x = TODO.find(t => t.id === j.id); if (x) Object.assign(x, { t: j.title, code: j.code, amt: j.pay, unit: j.unit }); });
+  const live = () => TODO.filter(x => !S.done[x.id]);
+
+  function render() {
+    $("page").innerHTML = shopHead() + posts4() + (isNew ? newSeller() : xuBand() + `
+      <div class="pausebar" id="pausebar" hidden>${icon("pause")}<span id="pauseText"></span><button class="btn" data-resume>Mở nhận đơn lại</button></div>
+      <section class="needgroup" id="need"></section>
+      <div class="cols">
+        <section class="sec"><div class="gh"><h2 id="agTitle">Lịch hôm nay</h2><a class="more" href="seller-calendar.html">Xem cả tuần${icon("right")}</a></div>
+          <div class="card cal" id="agenda"></div></section>
+        <section class="sec"><div class="gh"><h2>Hiệu quả</h2><select class="range" id="range" aria-label="Khoảng thời gian">${["today", "7", "30", "90", "year"].map(k => [k, RANGES[k]]).map(([k, r]) => `<option value="${k}">${r.label}</option>`).join("")}</select></div>
+          <div class="card kpis" id="kpis"></div></section>
+      </div>
+      <section class="sec"><div class="gh"><h2>Tình trạng bán</h2><a class="more" href="seller-posts.html">Tất cả bài đăng${icon("right")}</a></div><div id="lanes"></div></section>
+      <p class="demo-note">Bản mẫu · tài khoản Bếp Cô Lan · <a href="#" data-reset><u>Đặt lại dữ liệu mẫu</u></a> · <a href="seller.html?new=1"><u>Xem như người bán mới</u></a></p>`);
+    if (isNew) return;
+    renderNeed(); renderAgenda(); renderKpis(); renderLanes(); renderPause(); applyKind(); syncXu();
+  }
+
+  // Hồ sơ gian hàng thay cho tiêu đề trang
+  function shopHead() {
+    const sh = AntSeller.shop(S), name = isNew ? "Gian hàng của bạn" : sh.name;
+    const av = isNew ? `<span style="width:72px;height:72px;border-radius:50%;background:var(--soft);display:grid;place-items:center;flex:none">${icon("store")}</span>` : `<img src="${AntSeller.U(sh.av, 144, 144)}" alt="">`;
+    const meta = isNew ? `<span>${icon("pin")}Block B</span></div><div class="meta"><span>Chưa có đánh giá</span><span>${icon("receipt")}0 đơn</span>`
+      : `<span>${icon("pin")}${esc(sh.at)}</span></div><div class="meta"><span>${icon("star").replace('class="i"', 'class="i st"')}4,3 (3)</span><span>${icon("receipt")}86 đơn</span>`;
+    return `<div class="shophead" title="Xem gian hàng của bạn ở chế độ người bán">${av}<div class="nm"><h1>${esc(name)}</h1><div class="meta">${meta}</div></div>
+      <div class="acts"><a class="hbtn2" href="shop.html?name=${encodeURIComponent(AntSeller.shop(S).name)}">${icon("eye")}Xem như khách</a>
+        ${isNew ? "" : `<button class="hbtn2" id="openBtn" aria-haspopup="dialog"><i></i><span id="openText">Đang nhận đơn</span>${icon("chev").replace('class="i"', 'class="i chev"')}</button>${pausePop()}`}</div></div>`;
+  }
+  function pausePop() {
+    return `<div class="pop" id="pausePop" role="dialog" aria-label="Trạng thái nhận đơn"><h3>Trạng thái nhận đơn</h3>
+      <label class="opt" data-mode="open"><input type="radio" name="pm" value="open"><span><b>Đang nhận đơn</b><small>Mọi mảng mở bình thường</small></span></label>
+      <label class="opt" data-mode="all"><input type="radio" name="pm" value="all"><span><b>Tạm nghỉ cả gian hàng</b><small>Khách vẫn xem bài, chưa đặt được</small></span></label>
+      <label class="opt" data-mode="some"><input type="radio" name="pm" value="some"><span><b>Tạm nghỉ một vài mảng</b><small>Vd. hết cơm nhưng vẫn nhận nấu cỗ</small></span></label>
+      <div class="kinds" id="pauseKinds">${["food", "goods", "service"].map(k => `<label><input type="checkbox" value="${k}">${KIND[k][1]}</label>`).join("")}</div>
+      <div class="row2">Mở lại<select class="input" id="pauseUntil"><option value="sau 1 giờ">sau 1 giờ</option><option value="sáng mai">sáng mai</option><option value="khi bạn tự mở lại">khi tôi tự mở lại</option></select></div>
+      <div class="foot"><button class="btn" data-pop-close>Hủy</button><button class="btn dark" data-pop-save>Lưu</button></div></div>`;
+  }
+
+  const xuBand = () => `<div class="xuband"><img src="assets/clean/antxu.png?v=2" alt=""><div class="tx"><b>Đưa bài lên Nổi bật trong khu</b><small>Dùng AntXu để quảng bá bài và giúp gian hàng bạn tiếp cận nhiều cư dân hơn.</small></div>
+    <span class="bal">Bạn có <b id="xuBal">${S.xu}</b> Xu</span><button class="btn primary" data-xu-pick>Chọn bài quảng bá</button></div>`;
+  const posts4 = () => `<div class="posts4">${AntGo.NEW_KINDS.map(([k, ic, t]) =>
+    `<a href="seller-post-form.html?type=${k}"><span class="pi">${icon(ic)}</span>${t}${icon("plus").replace('class="i"', 'class="i plus"')}</a>`).join("")}</div>`;
+
+  // ---- Cần bạn xử lý: 4 thẻ một hàng, phần còn lại ẩn sau "Xem thêm" ----
+  const PAGE_N = 4;
+  function renderNeed() {
+    const n = k => live().filter(x => k === "all" || x.k === k).length;
+    const tg = [["all", "Tất cả"], ...Object.entries(KIND).map(([k, [, t]]) => [k, t])]
+      .map(([k, t]) => `<button class="${S.kind === k ? "on" : ""}" data-kind-btn="${k}">${t} <small>${n(k)}</small></button>`).join("");
+    $("need").innerHTML = `<div class="gh"><h2>Cần bạn xử lý</h2><div class="toggles">${tg}</div></div>
+      <div class="cards">${live().map(card).join("")}</div>
+      <div class="needmore" id="needMore" hidden><button data-more></button></div>
+      <div class="allclear" id="allclear" hidden><img src="assets/clean/idle.png" alt=""><span>Không còn việc cần xử lý. Kiến canh cửa hàng giúp bạn!</span></div>`;
+  }
+  function card(x) {
+    const acts = `<div class="acts">${x.acts.map(([a, t, p, ic]) => ic
+      ? `<button class="btn ib" data-act="${a}" data-id="${x.id}" title="${t}" aria-label="${t}">${icon(ic)}</button>`
+      : `<button class="btn${p ? " dark" : ""}" data-act="${a}" data-id="${x.id}">${t}</button>`).join("")}</div>`;
+    const th = x.img ? `<img src="${U(x.img, 120, 120)}" alt="">` : x.faces ? `<span class="faces">${x.faces.map(a => `<img src="${F(a)}" alt="">`).join("")}</span>`
+      : x.av ? `<img class="av" src="${F(x.av)}" alt="">` : `<span class="ic">${icon(x.ic || KIND[x.k][0])}</span>`;
+    const top = x.code || x.sub || "";
+    const pr = x.amt ? `<div class="tc-pr">${money(x.amt)}${x.unit ? ` <span>${x.unit}</span>` : ""}</div>` : x.stars ? `<div class="tc-pr gold">${"★".repeat(x.stars)}</div>` : "";
+    const line = (ic, v) => v ? `<li>${icon(ic)}<span>${esc(v)}</span></li>` : "";
+    return `<div class="item tcard" data-kind="${x.k}" data-open="${x.id}">
+      <div class="tc-tags"><span class="kind">${x.tag || KIND[x.k][1]}</span>${x.due ? `<span class="duep">${icon("clock")}${esc(x.due)}</span>` : ""}</div>
+      <div class="tc-head"><span class="th">${th}</span><div><small class="tc-code">${esc(top)}</small><h3>${esc(x.t)}</h3>${pr}</div></div>
+      <ul class="tc-info"><li class="tc-st"><span class="stat act">${x.st}</span></li>${x.faces ? line("users", x.who) : line("user", x.who)}${line("pin", x.where)}${line(x.noteIc || "pencil", x.note)}</ul>
+      ${acts}</div>`;
+  }
+
+  const H0 = 8, H1 = 19, PX = 72, CH = 64;  // giờ đầu/cuối, px mỗi giờ, chiều cao thẻ
+  const yOf = t => (toMin(t) - H0 * 60) / 60 * PX;
+  const calItems = () => AntSeller.calItems(S, 0);
+  function miniCard(a, i) {
+    const pic = a.img ? `<img src="${U(a.img, 80, 80)}" alt="">` : `<img class="av" src="${F(a.av)}" alt="">`;
+    return `<div class="mc${a.k === "job" ? " job" : ""}${a.done ? " fin" : ""}" style="--i:${i}" data-href="${a.href}" title="${esc(a.item)}">${pic}
+      <div class="n"><b>${esc(a.who)}</b><time>${a.tm}</time></div>
+      <div class="l">${icon("pin")}${esc(a.addr)}</div><div class="l">${icon("phone")}${esc(a.phone)}</div></div>`;
+  }
+  function renderAgenda() {
+    // gom đơn cùng giờ thành một chồng, rồi chia cột cho các chồng chồng lấn nhau (như Google Calendar)
+    const stacks = [];
+    for (const a of calItems()) { const last = stacks[stacks.length - 1]; if (last && last.tm === a.tm) last.items.push(a); else stacks.push({ tm: a.tm, items: [a] }); }
+    let cluster = [], colsEnd = [];
+    const flush = () => { cluster.forEach(st => st.n = colsEnd.length); cluster = []; colsEnd = []; };
+    for (const st of stacks) {
+      st.top = yOf(st.tm); st.h = CH + (st.items.length - 1) * 6;
+      if (cluster.length && st.top >= Math.max(...colsEnd)) flush();
+      let c = colsEnd.findIndex(end => end <= st.top);
+      if (c < 0) { c = colsEnd.length; colsEnd.push(0); }
+      colsEnd[c] = st.top + st.h + 4; st.col = c; cluster.push(st);
+    }
+    flush();
+    const hours = Array.from({ length: H1 - H0 + 1 }, (_, i) => `<div class="hr" style="top:${i * PX}px"><span>${H0 + i}:00</span></div>`).join("");
+    const oh = AntSeller.openOf(S, 0), CAL_OPEN = oh ? [oh.from, oh.to] : null;
+    const band = oh ? `<div class="band" style="top:${yOf(CAL_OPEN[0])}px;height:${yOf(CAL_OPEN[1]) - yOf(CAL_OPEN[0])}px"><span>Nhận đơn ${CAL_OPEN[0]} – ${CAL_OPEN[1]}</span></div>` : `<div class="band" style="top:0;height:${(H1 - H0) * PX}px;background:#F4F3F6;border-color:#D9D7E0"><span style="color:var(--smoke)">Hôm nay nghỉ bán</span></div>`;
+    const now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes();
+    const nowLine = nowMin >= H0 * 60 && nowMin <= H1 * 60 ? `<div class="nowline" style="top:${(nowMin - H0 * 60) / 60 * PX}px" title="Bây giờ"></div>` : "";
+    const slots = stacks.map(st => `<div class="slot${st.items.length > 1 ? " deck" : ""}" data-kind="${st.items[0].k}" data-n="${st.items.length}"
+        style="top:${st.top}px;height:${st.h}px;left:calc(${st.col} * 100% / ${st.n});width:calc(100% / ${st.n})">
+        ${st.items.length > 1 ? `<span class="cnt">${st.items.length} đơn</span>` : ""}${st.items.map(miniCard).join("")}</div>`).join("");
+    $("agenda").innerHTML = `<div class="cal-in" style="height:${(H1 - H0) * PX}px">${hours}${band}${nowLine}${slots}</div>
+      <div class="calempty" id="agEmpty" hidden>Không có lịch ở mảng này hôm nay.</div>`;
+    // mở lịch ở đơn đầu tiên trong ngày (cuộn xuống để xem các giờ sau)
+    $("agenda").scrollTop = Math.max(0, (stacks[0] ? stacks[0].top : CAL_OPEN ? yOf(CAL_OPEN[0]) : 0) - 30);
+    applyKind();
+  }
+  const toMin = t => { const m = /^(\d+):(\d+)/.exec(t); return m ? +m[1] * 60 + +m[2] : 0; };
+
+  // ---- Hiệu quả theo khoảng thời gian (so với khoảng liền trước) ----
+  function renderKpis() {
+    const d = RANGES[S.range] || RANGES["7"];
+    $("range").value = RANGES[S.range] ? S.range : "7";
+    const up = v => v ? `<span class="up">▲ ${v.replace(/^\+/, "")}</span>` : "";
+    const big = (ic, label, val, foot) => `<div class="kbig"><span class="lb">${label}</span><b>${val}</b>${foot}</div>`;
+    const tile = (label, val, foot) => `<div class="kt"><span>${label}</span><b>${val}</b>${foot}</div>`;
+    // hai khối đồng cấp: tiền thu từ việc bán và tiền trả khi thuê người
+    $("kpis").innerHTML = `<div class="kduo">${big("store", "Tổng tiền đã bán", money(d.inc), up(d.incUp))}${big("hand", "Tổng tiền đã thuê", money(d.pay), up(d.payUp))}</div>
+      <div class="kgrid">${tile("Đơn hoàn thành", d.done, up(d.doneUp))}${tile("Việc thuê xong", d.payN, up(d.payNUp))}
+        ${tile("Đánh giá", `<span class="st">★</span> ${d.rate}`, `<small>${d.rateN} đánh giá</small>`)}${tile("Lượt xem bài", d.view, up(d.viewUp))}</div>
+      <a class="kmore" href="seller-insights.html">Xem báo cáo chi tiết${icon("right")}</a>`;
+  }
+
+  // ---- Tình trạng bán: mỗi mảng một hàng thẻ bài (cùng kiểu thẻ ở Cần bạn xử lý) ----
+  function postState(p) {
+    if (p.k === "goods" && p.id === "g1" && S.done.o3025) return ["off", "Đã bán"];
+    if (p.k === "goods" && p.id === "g1") return ["wait", "Có người đặt"];
+    if (p.k === "job" && p.id === "j1" && S.done["j-giao"]) return ["go", `Đã chọn ${S.chosen || "người nhận"}`];
+    if (p.k === "job" && p.chosen) return ["go", `Đã chọn ${p.chosen}`];
+    if (!p.on) return ["off", p.k === "food" ? "Hết món" : p.k === "job" ? "Đã đóng" : "Tạm ngưng"];
+    if (p.k === "job") return ["act", `Đang mở · ${p.offers || 0} đề nghị`];
+    if (!p.val) return ["off", p.k === "service" ? "Hết buổi trống" : "Hết hàng"];
+    if (p.k !== "service" && p.val <= 3 && p.max > 3) return ["wait", "Sắp hết"];
+    return ["go", p.k === "service" ? "Nhận lịch" : "Đang bán"];
+  }
+  function postCard(p) {
+    const L = LANE[p.k], st = postState(p), locked = (p.id === "g1" && S.done.o3025) || (p.id === "j1" && S.done["j-giao"]) || !!p.chosen;
+    const ph = p.img ? `<img src="${U(p.img, 480, 360)}" alt="">` : `<span class="cream">${icon(p.ic)}<small>${KIND[p.k][1]}</small></span>`;
+    const top = p.promo ? `<span class="duep ad">QUẢNG BÁ · ${p.promo}</span>` : `<span class="duep">${icon("eye")}${p.views}</span>`;
+    const xu = p.promo ? `<button class="btn xub on" disabled><img class="coinsm" src="assets/clean/antxu.png?v=2" alt="">Đang quảng bá · ${p.promo}</button>`
+      : `<button class="btn xub" data-xu="${p.id}"><img class="coinsm" src="assets/clean/antxu.png?v=2" alt="">${L.xu[0]} · ${L.xu[1]} Xu</button>`;
+    return `<div class="item post${locked || !p.on ? " dim" : ""}" data-kind="${p.k}"><div class="ph">${ph}<span class="stp"><span class="stat ${st[0]}">${st[1]}</span></span>${top}</div>
+      <div class="body"><h3><a href="${p.k === "job" ? `seller-orders.html?job=${p.job || ""}` : `seller-post-form.html?id=${p.id}`}">${esc(p.t)}</a></h3><div class="pr">${money(p.price)}${p.unit ? ` <span>${p.unit}</span>` : ""}</div></div>
+      <div class="ctl"><span class="step">${locked ? "" : `<button data-step="${p.id}" data-d="-1" aria-label="Bớt">−</button>`}<span>${L.step(p.val)}</span>${locked ? "" : `<button data-step="${p.id}" data-d="1" aria-label="Thêm">+</button>`}</span>
+        <label class="togl">${L.tog}<button class="tog${p.on && !locked ? " on" : ""}" data-tog="${p.id}" aria-label="${L.tog}" aria-pressed="${!!p.on}"${locked ? " disabled" : ""}></button></label></div>
+      <div class="xurow">${xu}</div></div>`;
+  }
+  function renderLanes() {
+    $("lanes").innerHTML = Object.keys(LANE).map(k => {
+      const list = POSTS.filter(p => p.k === k);
+      return `<div class="lanegrp" data-kind="${k}" style="--n:${Math.min(list.length, 4)}"><div class="lgh"><b>${LANE[k].title}</b></div>
+        <div class="cards">${list.map(postCard).join("")}</div></div>`;
+    }).join("");
+    applyKind();
+  }
+
+  function newSeller() {
+    return `<div class="newcard"><img src="assets/clean/point.png" alt=""><ol>
+      <li><span>Hoàn thiện gian hàng<small>Ảnh, lời giới thiệu, giờ nhận đơn</small></span></li>
+      <li><span>Đăng bài đầu tiên<small>Chọn một trong 4 nút ở trên</small></span></li>
+      <li><span>Nhận đơn ở trang này<small>Việc cần xử lý và lịch hiện tại đây</small></span></li></ol></div>
+      <p class="demo-note">Bản mẫu · <a href="seller.html"><u>Xem trang của người bán đang hoạt động</u></a></p>`;
+  }
+
+  // ---- Lọc theo mảng (áp cho mọi khối) ----
+  function applyKind() {
+    document.querySelectorAll("#page [data-kind]").forEach(el => el.classList.toggle("hide", S.kind !== "all" && el.dataset.kind !== S.kind));
+    const firstOf = sel => { const v = [...document.querySelectorAll(sel)]; v.forEach(e => e.classList.remove("first")); const s = v.filter(e => !e.classList.contains("hide")); if (s[0]) s[0].classList.add("first"); return s.length; };
+    const nAg = [...document.querySelectorAll("#agenda .slot:not(.hide)")].reduce((n, el) => n + +el.dataset.n, 0);
+    const ae = $("agEmpty"); if (ae) ae.hidden = !!nAg;
+        const shownCards = [...document.querySelectorAll("#need .item")].filter(c => S.kind === "all" || c.dataset.kind === S.kind);
+    shownCards.forEach((c, i) => c.classList.toggle("hide", !S.needAll && i >= PAGE_N));
+    const nNeed = shownCards.length, nm = $("needMore");
+    if (nm) { nm.hidden = nNeed <= PAGE_N; nm.firstElementChild.innerHTML = S.needAll ? "Thu gọn" : `Xem thêm ${nNeed - PAGE_N} việc${icon("chev")}`; }
+    const ac = $("allclear"); if (ac) ac.hidden = !!nNeed;
+    const nn = $("needN"); if (nn) nn.textContent = nNeed;
+  }
+
+  // ---- Tạm nghỉ ----
+  function renderPause() {
+    const p = S.pause;
+    $("openBtn").classList.toggle("off", !!p);
+    $("openText").textContent = !p ? "Đang nhận đơn" : p.mode === "all" ? "Đang tạm nghỉ" : "Tạm nghỉ một phần";
+    $("pausebar").hidden = !p;
+    if (p) $("pauseText").innerHTML = (p.mode === "all" ? "<b>Gian hàng đang tạm nghỉ</b>" : `<b>Tạm nghỉ: ${p.kinds.map(k => KIND[k][1]).join(", ")}</b>`) + ` · mở lại ${esc(p.until)}`;
+  }
+  function syncPop() {
+    const mode = S.pause ? S.pause.mode : "open";
+    document.querySelectorAll("#pausePop .opt").forEach(o => { const on = o.dataset.mode === mode; o.classList.toggle("on", on); o.querySelector("input").checked = on; });
+    $("pauseKinds").querySelectorAll("input").forEach(i => i.checked = !!(S.pause && S.pause.kinds && S.pause.kinds.includes(i.value)));
+  }
+
+  // ---- Chọn người nhận việc ----
+  const OFFERS = [
+    { id: "minh", n: "Minh", phone: "0900 000 007", av: AV.minh, rate: "4,9", jobs: 12, dist: "Block B, tầng 8", slot: "10:45 – 12:30", intro: "Em học chiều nên trưa rảnh, có xe đạp, đã giao cơm cho Quán Nhà Mây 2 tháng." },
+    { id: "khoa", n: "Minh Khoa", phone: "0900 000 013", av: AV.khoa, rate: "4,9", jobs: 6, dist: "Block D", slot: "11:00 – 12:00", intro: "Đi bộ được, giao trong khu nhanh. Em đang chờ chị trả lời có cần xe máy không." },
+    { id: "quoc", n: "Quốc Anh", phone: "0900 000 005", av: AV.quoc, rate: "4,8", jobs: 3, dist: "Block B, tầng 5", slot: "từ 11:15", intro: "Làm online ở nhà, trưa ghé lấy cơm được. Hôm trước đi chợ giúp chị rồi." },
+  ];
+  function openPick() {
+    $("pick").querySelector(".dlg").classList.remove("sm");
+    $("pick").querySelector(".dlg").innerHTML = `<h2 id="pickTitle">Chọn người giao cơm trưa</h2><p>11:00 – 12:00 hôm nay · 40.000đ · cần 1 người. Địa chỉ bếp chỉ gửi cho người bạn chọn.</p>
+      ${OFFERS.map(o => `<div class="offer"><img src="${F(o.av)}" alt=""><div><b>${o.n}</b><div class="m"><span><b class="st">★</b>${o.rate}</span><span>${icon("check")}${o.jobs} việc đã làm</span><span>${icon("pin")}${o.dist}</span><span>${icon("clock")}${o.slot}</span></div><p>“${esc(o.intro)}”</p></div>
+        <div class="btns"><button class="btn dark" data-choose="${o.id}">Chọn</button><a class="btn" href="seller-messenger.html?to=${encodeURIComponent(o.n)}&job=j-giao">Nhắn</a></div></div>`).join("")}
+      <div class="foot"><span>Chọn một người thì các đề nghị còn lại chuyển “Không được chọn”.</span><button class="btn" data-close>Để sau</button></div>`;
+    $("pick").classList.add("open");
+  }
+
+  // ---- Sự kiện ----
+  document.addEventListener("click", e => {
+    const t = e.target;
+    // bấm vào ô hồ sơ (trừ các nút bên phải) → gian hàng của tôi ở chế độ người bán
+    if (t.closest(".shophead") && !t.closest(".acts")) { location.href = "seller-shop.html"; return; }
+    const kb = t.closest("[data-kind-btn]");
+    if (kb) { S.kind = kb.dataset.kindBtn; save(); renderNeed(); applyKind(); return; }
+    const sure = t.closest("[data-sure]");
+    if (sure) { $("pick").classList.remove("open"); return doAct(sure.dataset.sure, sure.dataset.id, sure); }
+    const act = t.closest("[data-act]");
+    if (act) return doAct(act.dataset.act, act.dataset.id, act);
+    if (t.closest(".item .reply")) return;
+    if (t.closest("[data-more]")) { S.needAll = !S.needAll; save(); applyKind(); return; }
+    const ch = t.closest("[data-choose]");
+    if (ch) {
+      const o = OFFERS.find(x => x.id === ch.dataset.choose);
+      $("pick").classList.remove("open");
+      AntSeller.offerAct(S, "j-giao", "of-" + o.id, "choose"); refresh();
+      return AntGo.toast(`Đã chọn ${o.n} — 2 người còn lại được báo “Không được chọn”`);
+    }
+    if (t.closest("[data-close]") || t === $("pick")) return $("pick").classList.remove("open");
+    const hc = t.closest("[data-href]");
+    if (hc) { location.href = hc.dataset.href; return; }
+    const op = t.closest("[data-open]");
+    if (op) { location.href = { "j-giao": "seller-orders.html?job=j-giao", "j-cho": "seller-orders.html?job=j-cho", q1: "seller-orders.html?job=j-giao#qa", r1: "seller-insights.html#reviews" }[op.dataset.open] || `seller-orders.html?id=${op.dataset.open}`; return; }
+    const tog = t.closest("[data-tog]");
+    if (tog) { const p = POSTS.find(x => x.id === tog.dataset.tog); p.on = p.on ? 0 : 1; if (p.on && !p.val) p.val = p.max; keepPost(p); return AntGo.toast(p.on ? `Đã mở lại “${p.t}”` : `Đã tắt “${p.t}” — khách thấy “${postState(p)[1]}”`); }
+    const st = t.closest("[data-step]");
+    if (st) { const p = POSTS.find(x => x.id === st.dataset.step); p.val = Math.max(p.k === "job" ? 1 : 0, Math.min(p.max, p.val + +st.dataset.d)); keepPost(p); return; }
+    const xb = t.closest("[data-xu]");
+    if (xb) {
+      const p = POSTS.find(x => x.id === xb.dataset.xu), [label, cost] = LANE[p.k].xu;
+      if (S.xu < cost) return AntGo.toast(`Cần ${cost} Xu, bạn còn ${S.xu} Xu`);
+      S.xu -= cost; p.promo = "còn 3 ngày"; keepPost(p); syncXu();
+      return AntGo.toast(`Đã dùng ${cost} Xu — “${p.t}” ${p.k === "job" ? "được ghim đầu danh sách việc" : "lên Nổi bật trong khu"} 3 ngày`);
+    }
+    if (t.closest("[data-xu-pick]")) { document.getElementById("lanes").scrollIntoView({ behavior: "smooth", block: "start" }); return AntGo.toast("Chọn bài và bấm nút Xu trên thẻ"); }
+    if (t.closest("#openBtn")) { syncPop(); $("pausePop").classList.toggle("open"); return; }
+    const opt = t.closest("#pausePop .opt");
+    if (opt) document.querySelectorAll("#pausePop .opt").forEach(o => o.classList.toggle("on", o === opt));
+    if (t.closest("[data-pop-close]")) return $("pausePop").classList.remove("open");
+    if (t.closest("[data-pop-save]")) {
+      const mode = document.querySelector("#pausePop input[name=pm]:checked")?.value || "open";
+      const kinds = [...$("pauseKinds").querySelectorAll("input:checked")].map(i => i.value);
+      if (mode === "some" && !kinds.length) return AntGo.toast("Chọn ít nhất một mảng để tạm nghỉ");
+      S.pause = mode === "open" ? null : { mode, kinds, until: $("pauseUntil").value };
+      save(); renderPause(); $("pausePop").classList.remove("open");
+      return AntGo.toast(S.pause ? "Đã tạm nghỉ — khách thấy “Tạm nghỉ” trên bài" : "Đang nhận đơn bình thường");
+    }
+    if (t.closest("[data-resume]")) { S.pause = null; save(); renderPause(); return AntGo.toast("Đã mở nhận đơn lại"); }
+    if ($("pausePop") && !t.closest("#pausePop")) $("pausePop").classList.remove("open");
+    if (t.closest("[data-soon-btn]")) { e.preventDefault(); location.href = "seller-posts.html"; return; }
+    if (t.closest("[data-reset]")) { e.preventDefault(); Object.keys(localStorage).filter(k => k.startsWith("antgo_seller_")).forEach(k => localStorage.removeItem(k)); location.href = "seller.html"; }
+  });
+  document.addEventListener("change", e => { if (e.target.id === "range") { S.range = e.target.value; save(); renderKpis(); } });
+  document.addEventListener("submit", e => {
+    const f = e.target.closest("[data-reply]");
+    if (!f) return;
+    e.preventDefault();
+    const v = f.querySelector("input").value.trim(), x = TODO.find(y => y.id === f.dataset.reply);
+    if (x.id === "q1" && /\d{9,}/.test(v.replace(/[\s.\-()_,]/g, ""))) return AntGo.toast("Không ghi số điện thoại ở hỏi đáp công khai — hãy nhắn riêng");
+    if (x.id === "q1") AntSeller.answer(S, "q1", v); else AntSeller.reply(S, x.id, v);
+    refresh(); AntGo.toast(x.ok);
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { $("pick").classList.remove("open"); $("pausePop")?.classList.remove("open"); } });
+
+  function doAct(a, id, btn) {
+    const x = TODO.find(y => y.id === id);
+    if (a === "pick") return openPick();
+    if (a === "chat") { const od = AntSeller.orders(S).find(y => y.id === id); location.href = "seller-messenger.html" + (od ? `?to=${encodeURIComponent(od.buyer.n)}&order=${id}` : id === "j-cho" ? "?to=Qu%E1%BB%91c%20Anh&job=j-cho" : ""); return; }
+    if (a === "reply") {
+      const card = btn.closest(".item");
+      btn.closest(".acts").style.display = "none";
+      if (!card.querySelector(".reply")) card.insertAdjacentHTML("beforeend", `<form class="reply" data-reply="${id}"><input class="input" placeholder="${esc(x.ph)}" required maxlength="300"><button class="btn dark">Gửi</button></form>`);
+      card.querySelector(".reply input").focus(); return;
+    }
+    if (x && x.ask && !btn.dataset.sure && a !== "decline") return askConfirm(x, a);
+    if (a === "decline") { AntSeller.orderAct(S, id, "decline", { reason: "Bếp không nhận kịp" }); refresh(); return AntGo.toast("Đã từ chối — khách được báo và có thể đặt nơi khác"); }
+    if (a === "done") AntSeller.offerAct(S, "j-cho", "of-2052", "confirmDone");
+    else AntSeller.orderAct(S, id, a === "approve" ? "approveCancel" : "confirm");
+    refresh(); AntGo.toast(x.ok);
+  }
+  function askConfirm(x, a) {
+    const [fk, i] = x.ask, fl = FLOW[fk], label = x.acts.find(y => y[0] === a)[1];
+    const flow = fl.map((n, k) => `<span class="${k === i ? "now" : k === i + 1 ? "next" : ""}">${n}</span>`).join(icon("right"));
+    const what = fk === "cancel" ? `Đơn ${x.code} sẽ chuyển sang <b>Đã hủy</b>, ${esc(x.buyer)} được báo.` : fk === "job" ? `Việc chuyển sang <b>Hoàn thành</b>. Bạn trả công trực tiếp cho người làm.` : `Đơn chuyển sang <b>${fl[i + 1]}</b>, ${esc(x.buyer)} được báo ngay.`;
+    const d = $("pick").querySelector(".dlg"); d.classList.add("sm");
+    d.innerHTML = `<h2 id="pickTitle">${fk === "cancel" ? "Bạn chắc chắn xác nhận hủy?" : `Xác nhận chuyển sang “${fl[i + 1]}”?`}</h2><p>${what}</p>
+      <div class="flow">${flow}</div>
+      <div class="csum">${x.img ? `<img src="${U(x.img, 100, 100)}" alt="">` : x.av ? `<img src="${F(x.av)}" alt="" style="border-radius:50%">` : ""}<div><b>${esc(x.t)}</b><span>${[x.code, x.amt ? money(x.amt) : "", x.who, x.where].filter(Boolean).map(esc).join(" · ")}</span></div></div>
+      <div class="cbtns"><button class="btn" data-close>Để sau</button><button class="btn dark" data-sure="${a}" data-id="${x.id}">${label}</button></div>`;
+    $("pick").classList.add("open");
+  }
+  function keepPost(p) { AntSeller.setPost(S, p.id, { val: p.val, on: p.on, promo: p.promo }); POSTS = AntSeller.posts(S); renderLanes(); }
+  // số dư Xu: banner + nút Xu trên header dùng chung một số
+  function syncXu() { const b = $("xuBal"); if (b) b.textContent = S.xu; document.querySelectorAll(".appbar .xubtn").forEach(x => x.lastChild.textContent = `${S.xu} Xu`); }
+  function refresh() { POSTS = AntSeller.posts(S); renderNeed(); renderAgenda(); renderLanes(); }
+
+  render();
+})();
+</script>
+</body></html>

@@ -31,6 +31,15 @@ export class Header {
   private readonly router = inject(Router);
   /** Công tắc Mua | Bán: theo không gian đang ở (/seller = Bán) */
   protected readonly sellMode = signal(false);
+  /** Menu khi ở khu Bán (thay Trang chủ · Đơn hàng · Messenger của phía Mua) */
+  protected readonly sellLinks = [
+    { path: '/seller', icon: 'sun', label: 'Hôm nay', exact: true },
+    { path: '/seller/orders', icon: 'receipt', label: 'Giao dịch', exact: false },
+    { path: '/seller/posts', icon: 'store', label: 'Bài đăng', exact: false },
+    { path: '/seller/calendar', icon: 'calendar', label: 'Lịch', exact: false },
+    { path: '/seller/insights', icon: 'chart', label: 'Hiệu quả', exact: false },
+    { path: '/seller/messenger', icon: 'chat', label: 'Messenger', exact: false },
+  ];
 
   // ----- khung thông báo thả xuống từ chuông (kiểu Facebook) -----
   protected readonly notifOpen = signal(false);

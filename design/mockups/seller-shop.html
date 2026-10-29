@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AntGo — Bán &amp; Đăng việc · Gian hàng của tôi</title><link rel="stylesheet" href="shared/base.css"><style>
+  /* Gian hàng của tôi — xem gian hàng ở chế độ NGƯỜI BÁN (sửa được), khác "Xem như khách" (shop.html).
+     Bố cục giống shop.html: đầu gian hàng · 3 chỉ số · giới thiệu · tab Đang bán / Việc đang cần người / Đánh giá; thêm số liệu riêng, hồ sơ hoàn thiện, nút sửa. */
+  .ownbar{margin-top:20px;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:#FFF6F1;border:1px solid #F6DACB;font-size:13.5px}
+  .ownbar svg{width:18px;height:18px;color:var(--accent);flex:none}.ownbar span{flex:1}.ownbar .btn{height:36px}
+  .shophead{margin-top:16px;border:1px solid var(--border);border-radius:20px;overflow:hidden}
+  .sh-top{position:relative;display:flex;align-items:center;gap:20px;padding:26px 28px;background:var(--soft)}
+  .sh-top.cover{background-size:cover;background-position:center}
+  .sh-top.cover::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.94),rgba(255,255,255,.7))}
+  .sh-top>*{position:relative}
+  .avw{position:relative;flex:none}
+  .avw img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:4px solid #fff;display:block}
+  .avw label{position:absolute;right:-2px;bottom:-2px;width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer;border:2px solid #fff}
+  .avw label svg{width:15px;height:15px}
+  .sh-top .nm{flex:1;min-width:0}.sh-top h1{font-size:28px;line-height:1.2;letter-spacing:-.02em;margin:0}
+  .sh-top .kd{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:12px;font-weight:700}
+  .sh-top p{margin:8px 0 0;color:var(--smoke);font-size:14px;display:flex;flex-wrap:wrap;gap:4px 14px}.sh-top p span{display:inline-flex;align-items:center;gap:5px}.sh-top p svg{width:15px;height:15px}
+  .sh-acts{display:flex;gap:8px;flex:none}.sh-acts .btn{height:44px;padding:0 18px}
+  .coverbtn{position:absolute!important;right:14px;top:12px;height:30px;padding:0 10px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.9);font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+  .coverbtn svg{width:14px;height:14px}
+  .sh-stats{display:grid;grid-template-columns:repeat(5,1fr)}
+  .sh-stats div{padding:16px 24px;border-left:1px solid var(--border)}.sh-stats div:first-child{border-left:0}
+  .sh-stats b{display:flex;align-items:center;gap:6px;font-size:20px}.sh-stats b svg{width:18px;height:18px;color:#E39B1A}.sh-stats span{font-size:13px;color:var(--smoke)}
+  .sh-stats .own{background:#FFFCFA}.sh-stats .own span::after{content:" · chỉ bạn thấy";color:var(--fog)}
+  .twocol{margin-top:22px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+  .bio{line-height:1.65;color:#3C4660;margin:0}
+  .editf{display:grid;gap:12px;padding:20px;border:1px solid var(--border);border-radius:18px;background:#fff}
+  .editf .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .editf label{display:grid;gap:6px;font-size:13.5px;font-weight:600}
+  .editf textarea{min-height:100px;resize:vertical;line-height:1.5}
+  .editf .foot{display:flex;justify-content:flex-end;gap:8px}
+  .check{border:1px solid var(--border);border-radius:18px;padding:18px;background:#fff}
+  .check h3{margin:0 0 4px;font-size:15px}.check .prog{height:6px;border-radius:3px;background:var(--soft);overflow:hidden;margin:8px 0 12px}.check .prog i{display:block;height:100%;background:var(--ink)}
+  .check ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:13.5px}
+  .check li{display:flex;align-items:center;gap:8px}.check li svg{width:15px;height:15px}.check li.ok{color:var(--smoke)}.check li.ok svg{color:#2E7D4F}
+  .check li a,.check li button{margin-left:auto;font-weight:600;font-size:12.5px;border:0;background:none;color:var(--ink);text-decoration:underline}
+  .tabs{display:flex;gap:26px;border-bottom:1px solid var(--border);margin-top:28px}
+  .tabs button{border:0;background:none;padding:0 0 13px;color:var(--smoke);font-weight:600;font-size:15px;position:relative}
+  .tabs button.on{color:var(--ink)}.tabs button.on::after{content:"";position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--ink)}.tabs small{font-size:12px;color:var(--fog);margin-left:4px}
+  .grid4{margin-top:22px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 18px}
+  .pc{display:block;min-width:0;position:relative}
+  .pc .ph{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--soft)}.pc .ph img{width:100%;height:100%;object-fit:cover}
+  .pc .ph .cream{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:4px;color:var(--ink)}.pc .ph .cream svg{width:30px;height:30px}
+  .pc.off .ph img,.pc.off .ph .cream{opacity:.5}
+  .pc .k{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--smoke)}
+  .pc h3{font-size:15px;line-height:1.35;margin:4px 0 6px;font-weight:600}.pc .pr{font-weight:700}.pc .pr small{font-weight:400;color:var(--smoke)}
+  .pc .edit{position:absolute;right:8px;top:8px;height:30px;padding:0 10px;border-radius:8px;background:rgba(255,255,255,.94);font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+  .pc .edit svg{width:13px;height:13px}
+  .pc .ad{position:absolute;left:8px;top:8px;padding:3px 8px;border-radius:6px;background:rgba(34,28,21,.74);color:#fff;font-size:11px;font-weight:700}
+  .stat{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600}.stat::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .stat.go{color:#2E7D4F}.stat.off{color:var(--fog)}.stat.act{color:var(--accent)}.stat.wait{color:#A86A12}
+  .addc{display:grid;place-content:center;justify-items:center;gap:6px;aspect-ratio:4/3;border:1.5px dashed #E2CFC6;border-radius:10px;color:var(--smoke);font-size:13px;font-weight:600}
+  .addc:hover{border-color:var(--accent);color:var(--accent)}.addc svg{width:24px;height:24px}
+  .revs{margin-top:10px}.rv{display:flex;gap:12px;padding:18px 0;border-bottom:1px solid var(--border)}
+  .rv img{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none}.rv b{font-size:14px}.rv small{margin-left:8px;color:var(--fog);font-size:12.5px}
+  .rv .st{color:#E39B1A;letter-spacing:1px;font-size:13px;margin-top:2px}.rv p{margin:4px 0 0;line-height:1.55;color:#3C4660}
+  .rv .on{display:inline-block;margin-top:6px;font-size:12px;color:var(--smoke);background:var(--soft);padding:2px 8px;border-radius:6px}
+  .rv .rep{margin-top:8px;padding:9px 12px;border-radius:10px;background:var(--soft);font-size:13.5px}.rv .rep b{display:block;font-size:12px}
+  .rv form{margin-top:8px;display:flex;gap:8px}.rv form input{flex:1}
+  .empty3{padding:40px 0;text-align:center;color:var(--smoke)}
+  @media(max-width:1000px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}.sh-top{flex-wrap:wrap}.twocol{grid-template-columns:1fr}.sh-stats{grid-template-columns:repeat(3,1fr)}}
+</style></head><body><div id="siteHeader" data-space="sell" data-active="today"></div><main class="wrap" id="page"></main>
+<input type="file" id="avFile" accept="image/png,image/jpeg,image/webp" hidden><input type="file" id="cvFile" accept="image/png,image/jpeg,image/webp" hidden>
+<script src="shared/icons.js"></script><script src="shared/common.js"></script><script src="shared/seller-data.js"></script><script>
+(() => {
+  const A = AntSeller, esc = AntGo.esc, icon = AntGo.icon, $ = id => document.getElementById(id), page = $("page");
+  const { U, F, money, KIND } = A;
+  const S = A.load();
+  const V = { tab: new URLSearchParams(location.search).get("tab") || "sell", edit: false };
+
+  function render() {
+    const sh = A.shop(S), posts = A.posts(S), sell = posts.filter(p => p.k !== "job"), jobs = posts.filter(p => p.k === "job"), revs = A.reviews(S);
+    const open = posts.filter(p => p.on).length;
+    const items = [["Ảnh đại diện", !!sh.av, "av"], ["Lời giới thiệu", sh.bio.trim().length >= 20, "bio"], ["Ảnh bìa gian hàng", !!sh.cover, "cover"], ["Thời gian trả lời", !!sh.reply, "bio"]];
+    const ok = items.filter(i => i[1]).length;
+    page.innerHTML = `<div class="ownbar">${icon("store")}<span><b>Bạn đang xem gian hàng của mình</b> ở chế độ người bán — sửa được hồ sơ, bài và phản hồi đánh giá. Khách thấy bản không có các nút sửa.</span><a class="btn" href="shop.html?name=${encodeURIComponent(sh.name)}">${icon("eye")}Xem như khách</a></div>
+      <div class="shophead"><div class="sh-top${sh.cover ? " cover" : ""}"${sh.cover ? ` style="background-image:url('${sh.cover}')"` : ""}>
+          <label class="coverbtn" for="cvFile">${icon("camera")}${sh.cover ? "Đổi ảnh bìa" : "Thêm ảnh bìa"}</label>
+          <div class="avw"><img src="${U(sh.av, 200, 200)}" alt=""><label for="avFile" title="Đổi ảnh đại diện">${icon("camera")}</label></div>
+          <div class="nm"><h1>${esc(sh.name)}</h1><span class="kd">${esc(sh.kind)}</span><p><span>${icon("pin")}${esc(sh.at)}</span><span>${icon("home")}${esc(sh.since)}</span><span>${icon("chat")}${esc(sh.reply)}</span></p></div>
+          <div class="sh-acts"><button class="btn dark" data-edit>${icon("pencil")}Sửa hồ sơ</button></div></div>
+        <div class="sh-stats"><div><b>${icon("star")}4,3</b><span>${revs.length} đánh giá</span></div><div><b>${open}</b><span>bài đang đăng</span></div><div><b>86</b><span>đơn đã hoàn thành</span></div>
+          <div class="own"><b>${sh.shopViews}</b><span>lượt xem tuần này</span></div><div class="own"><b>${sh.followers}</b><span>người theo dõi</span></div></div></div>
+      <div class="twocol"><div>${V.edit ? editForm(sh) : `<p class="bio">${esc(sh.bio)}</p>`}</div>
+        <div class="check"><h3>Hồ sơ hoàn thiện ${ok + 1}/${items.length + 1}</h3><div class="prog"><i style="width:${(ok + 1) / (items.length + 1) * 100}%"></i></div>
+          <ul>${items.map(([t, d, k]) => `<li class="${d ? "ok" : ""}">${icon(d ? "check" : "plus")}${t}${d ? "" : k === "cover" ? `<label for="cvFile" style="margin-left:auto;font-weight:600;font-size:12.5px;text-decoration:underline;cursor:pointer">Thêm</label>` : `<button data-edit>Thêm</button>`}</li>`).join("")}
+            <li class="ok">${icon("clock")}Giờ nhận đơn<a href="seller-calendar.html">Sửa</a></li></ul></div></div>
+      <div class="tabs"><button data-tab="sell" class="${V.tab === "sell" ? "on" : ""}">Đang bán<small>${sell.length}</small></button><button data-tab="jobs" class="${V.tab === "jobs" ? "on" : ""}">Việc đang cần người<small>${jobs.length}</small></button><button data-tab="revs" class="${V.tab === "revs" ? "on" : ""}">Đánh giá<small>${revs.length}</small></button></div>
+      ${V.tab === "revs" ? `<div class="revs">${revs.map(r => `<div class="rv"><img src="${F(r.by.av)}" alt=""><div style="flex:1"><b>${esc(r.by.n)}</b><small>${r.at}</small><div class="st">${"★".repeat(r.stars)}${"☆".repeat(5 - r.stars)}</div><p>${esc(r.text)}</p><span class="on">${esc(r.post)}</span>
+          ${r.reply ? `<div class="rep"><b>Bạn đã phản hồi</b>${esc(r.reply)}</div>` : `<form data-rv="${r.id}"><input class="input" placeholder="Phản hồi công khai…" required maxlength="300"><button class="btn dark">Gửi</button></form>`}</div></div>`).join("")}</div>`
+        : `<div class="grid4">${(V.tab === "sell" ? sell : jobs).map(card).join("")}<a class="addc" href="seller-post-form.html?type=${V.tab === "sell" ? "food" : "job"}">${icon("plus")}${V.tab === "sell" ? "Đăng bài bán" : "Đăng việc cần người"}</a></div>`}`;
+  }
+  function card(p) {
+    const st = !p.on ? ["off", p.k === "food" ? "Hết món" : "Tạm ẩn"] : p.k === "job" ? ["act", "Đang mở"] : p.k !== "service" && p.val <= 3 && p.max > 3 ? ["wait", "Sắp hết"] : ["go", "Đang bán"];
+    const edit = p.k === "job" ? `seller-post-form.html?type=job&id=${p.id}` : `seller-post-form.html?id=${p.id}`;
+    return `<div class="pc${p.on ? "" : " off"}"><a href="${edit}"><div class="ph">${p.img ? `<img src="${U(p.img, 480, 360)}" alt="">` : `<span class="cream">${icon(p.ic || KIND[p.k][0])}</span>`}${p.promo ? `<span class="ad">QUẢNG BÁ</span>` : ""}<span class="edit">${icon("pencil")}Sửa</span></div></a>
+      <span class="k"><span>${KIND[p.k][1]}${p.cat ? " · " + esc(p.cat) : ""}</span><span class="stat ${st[0]}">${st[1]}</span></span><h3>${esc(p.t)}</h3><div class="pr">${money(p.price)}${p.unit ? ` <small>${p.unit}</small>` : ""}</div></div>`;
+  }
+  function editForm(sh) {
+    return `<form class="editf" id="editf"><div class="row"><label>Tên gian hàng<input class="input" name="name" value="${esc(sh.name)}" maxlength="40" required></label><label>Loại gian hàng<input class="input" name="kind" value="${esc(sh.kind)}" maxlength="30" placeholder="Ví dụ: Bếp nhà làm"></label></div>
+      <div class="row"><label>Nơi ở (hiện cho khách)<input class="input" name="at" value="${esc(sh.at)}" maxlength="40"></label><label>Thời gian trả lời<select class="input" name="reply">${["Thường trả lời trong 10 phút", "Thường trả lời trong 30 phút", "Thường trả lời trong 1 giờ", "Thường trả lời trong ngày"].map(o => `<option${o === sh.reply ? " selected" : ""}>${o}</option>`).join("")}</select></label></div>
+      <label>Lời giới thiệu<textarea class="input" name="bio" maxlength="500" required>${esc(sh.bio)}</textarea></label>
+      <div class="foot"><button type="button" class="btn" data-cancel>Hủy</button><button class="btn primary">Lưu hồ sơ</button></div></form>`;
+  }
+  // ảnh: thu nhỏ để lưu được trong trình duyệt
+  const pickImg = (input, max, done) => input.addEventListener("change", () => {
+    const f = input.files[0]; input.value = ""; if (!f) return;
+    if (!/^image\/(png|jpeg|webp)$/.test(f.type) || f.size > 2 * 1024 * 1024) return AntGo.toast("Chọn ảnh PNG/JPG/WebP dưới 2 MB");
+    const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)); const c = document.createElement("canvas"); c.width = im.width * k; c.height = im.height * k; c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); done(c.toDataURL("image/jpeg", .82)); }; im.src = r.result; }; r.readAsDataURL(f);
+  });
+  pickImg($("avFile"), 240, d => { A.setShop(S, { av: d }); render(); AntGo.toast("Đã đổi ảnh đại diện"); });
+  pickImg($("cvFile"), 1200, d => { A.setShop(S, { cover: d }); render(); AntGo.toast("Đã thêm ảnh bìa gian hàng"); });
+
+  page.addEventListener("click", e => {
+    const t = e.target;
+    if (t.closest("[data-edit]")) { V.edit = true; render(); $("editf").querySelector("input").focus(); return; }
+    if (t.closest("[data-cancel]")) { V.edit = false; return render(); }
+    const tb = t.closest("[data-tab]"); if (tb) { V.tab = tb.dataset.tab; render(); }
+  });
+  page.addEventListener("submit", e => {
+    e.preventDefault();
+    if (e.target.id === "editf") { const f = new FormData(e.target); A.setShop(S, { name: f.get("name").trim(), kind: f.get("kind").trim(), at: f.get("at").trim(), reply: f.get("reply"), bio: f.get("bio").trim() }); V.edit = false; render(); return AntGo.toast("Đã lưu hồ sơ gian hàng"); }
+    const rf = e.target.closest("[data-rv]"); if (rf) { A.reply(S, rf.dataset.rv, rf.querySelector("input").value.trim()); render(); AntGo.toast("Đã gửi phản hồi"); }
+  });
+  render();
+})();
+</script>
+</body></html>

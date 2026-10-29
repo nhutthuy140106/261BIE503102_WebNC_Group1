@@ -1,0 +1,24 @@
+<button type="button" class="trigger" [id]="inputId ?? ''" [class.open]="open()" [class.empty]="!selected()" [disabled]="disabled"
+        aria-haspopup="listbox" [attr.aria-expanded]="open()" (click)="toggle()">
+  @if (selected(); as b) {
+    <img class="lg" [src]="logo(b.code)" alt="" /><span class="text"><b>{{ b.short }}</b></span>
+  } @else {
+    <span class="text">Chọn ngân hàng</span>
+  }
+  <svg class="chev" viewBox="0 0 256 256" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z" /></svg>
+</button>
+@if (open()) {
+  <div class="pop">
+    <label class="find"><input type="text" placeholder="Tìm theo tên ngân hàng" [value]="q()" (input)="q.set($any($event.target).value)" aria-label="Tìm ngân hàng" /><svg class="i"><use href="#search" /></svg></label>
+    <ul role="listbox">
+      @for (b of list(); track b.code) {
+        <li role="option" [class.sel]="b.code === value()" [attr.aria-selected]="b.code === value()" (click)="choose(b.code)">
+          <span class="nm"><span class="t"><img class="lg" [src]="logo(b.code)" alt="" loading="lazy" /><b>{{ b.short }}@if (b.code !== b.short) { ({{ b.code }}) }</b></span><small>{{ b.name }}</small></span>
+          @if (b.code === value()) { <i>✓</i> }
+        </li>
+      } @empty {
+        <li class="none">Không tìm thấy ngân hàng</li>
+      }
+    </ul>
+  </div>
+}

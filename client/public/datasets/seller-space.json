@@ -1,0 +1,1575 @@
+[
+  {
+    "version": "2026-10-27-a",
+    "posts": [
+      {
+        "id": "f1",
+        "kind": "food",
+        "title": "Cơm gà kho gừng",
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=70",
+        "price": 35000,
+        "unit": "/ phần",
+        "stock": 12,
+        "max": 20,
+        "on": true,
+        "views": 186,
+        "saves": 21,
+        "sold": 48,
+        "promo": "còn 2 ngày",
+        "category": "Cơm nhà làm"
+      },
+      {
+        "id": "f2",
+        "kind": "food",
+        "title": "Cơm sườn rim",
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=600&fit=crop&q=70",
+        "price": 45000,
+        "unit": "/ phần",
+        "stock": 3,
+        "max": 15,
+        "on": true,
+        "views": 94,
+        "saves": 9,
+        "sold": 22,
+        "category": "Cơm nhà làm"
+      },
+      {
+        "id": "f3",
+        "kind": "food",
+        "title": "Canh chua cá",
+        "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop&q=70",
+        "price": 25000,
+        "unit": "/ tô",
+        "stock": 0,
+        "max": 10,
+        "on": false,
+        "views": 41,
+        "saves": 3,
+        "sold": 9,
+        "category": "Món nước"
+      },
+      {
+        "id": "g1",
+        "kind": "goods",
+        "title": "Nồi chiên không dầu 5L (đã dùng)",
+        "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&q=70",
+        "price": 650000,
+        "stock": 1,
+        "max": 20,
+        "on": true,
+        "views": 58,
+        "saves": 6,
+        "sold": 0,
+        "category": "Đồ bếp"
+      },
+      {
+        "id": "g2",
+        "kind": "goods",
+        "title": "Bộ hộp cơm inox ×6",
+        "icon": "package",
+        "price": 180000,
+        "unit": "/ bộ",
+        "stock": 1,
+        "max": 10,
+        "on": true,
+        "views": 14,
+        "saves": 1,
+        "sold": 4,
+        "category": "Đồ bếp"
+      },
+      {
+        "id": "s1",
+        "kind": "service",
+        "title": "Nấu cỗ tại nhà",
+        "icon": "wrench",
+        "price": 1200000,
+        "unit": "/ buổi",
+        "stock": 3,
+        "max": 5,
+        "on": true,
+        "views": 18,
+        "saves": 0,
+        "sold": 3,
+        "category": "Nấu ăn"
+      },
+      {
+        "id": "s2",
+        "kind": "service",
+        "title": "Nấu cơm theo tuần",
+        "icon": "fork",
+        "price": 600000,
+        "unit": "/ tuần",
+        "stock": 0,
+        "max": 3,
+        "on": false,
+        "views": 9,
+        "saves": 1,
+        "sold": 2,
+        "category": "Nấu ăn"
+      },
+      {
+        "id": "j1",
+        "kind": "job",
+        "title": "Cần người giao cơm trưa 11:00–12:00",
+        "icon": "hand",
+        "price": 40000,
+        "unit": "/ buổi",
+        "stock": 1,
+        "max": 10,
+        "on": true,
+        "views": 72,
+        "saves": 4,
+        "sold": 0,
+        "category": "Giao nhận",
+        "jobId": "j-giao"
+      },
+      {
+        "id": "j2",
+        "kind": "job",
+        "title": "Đi chợ đầu mối buổi sáng",
+        "icon": "bag",
+        "price": 120000,
+        "unit": "/ lần",
+        "stock": 1,
+        "max": 10,
+        "on": false,
+        "views": 35,
+        "saves": 2,
+        "sold": 0,
+        "category": "Mua hộ",
+        "jobId": "j-cho"
+      },
+      {
+        "id": "j3",
+        "kind": "job",
+        "title": "Dọn bếp cuối tuần",
+        "icon": "hand",
+        "price": 80000,
+        "unit": "/ buổi",
+        "stock": 1,
+        "max": 10,
+        "on": true,
+        "views": 9,
+        "saves": 0,
+        "sold": 0,
+        "category": "Dọn dẹp",
+        "jobId": "j-don"
+      },
+      {
+        "id": "j4",
+        "kind": "job",
+        "title": "Phụ bếp nấu cỗ 8 người",
+        "icon": "hand",
+        "price": 150000,
+        "unit": "/ buổi",
+        "stock": 1,
+        "max": 10,
+        "on": true,
+        "views": 21,
+        "saves": 2,
+        "sold": 0,
+        "category": "Phụ việc",
+        "jobId": "j-pho"
+      }
+    ],
+    "orders": [
+      {
+        "id": "o3024",
+        "code": "AG-O3024",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm gà kho gừng ×2 · thêm trứng",
+        "items": [
+          {
+            "name": "Cơm gà kho gừng",
+            "qty": 2,
+            "option": "Thêm trứng",
+            "price": 40000
+          }
+        ],
+        "buyer": {
+          "name": "Minh",
+          "avatar": "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 007"
+        },
+        "fulfil": "delivery",
+        "address": "B-0812, Block B",
+        "day": 0,
+        "time": "11:45",
+        "ship": 5000,
+        "pay": "cash",
+        "note": "Ít cơm, nhiều rau",
+        "state": "waiting",
+        "cancelRequest": null,
+        "due": "Còn 12 phút",
+        "history": [
+          [
+            "waiting",
+            "11:02"
+          ]
+        ]
+      },
+      {
+        "id": "o3025",
+        "code": "AG-O3025",
+        "kind": "goods",
+        "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&q=70",
+        "title": "Nồi chiên không dầu 5L (đã dùng)",
+        "items": [
+          {
+            "name": "Nồi chiên không dầu 5L",
+            "qty": 1,
+            "option": "",
+            "price": 650000
+          }
+        ],
+        "buyer": {
+          "name": "Thu Hà",
+          "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 014"
+        },
+        "fulfil": "pickup",
+        "address": "Tự đến lấy tại bếp B-0512",
+        "day": 0,
+        "time": "18:00",
+        "ship": 0,
+        "pay": "transfer",
+        "note": "Cho mình xem máy chạy thử nhé",
+        "state": "waiting",
+        "cancelRequest": null,
+        "due": "Còn 2 giờ",
+        "history": [
+          [
+            "waiting",
+            "10:40"
+          ]
+        ]
+      },
+      {
+        "id": "s0412",
+        "code": "AG-O3026",
+        "kind": "service",
+        "icon": "wrench",
+        "title": "Nấu cỗ tại nhà · 8 người",
+        "items": [
+          {
+            "name": "Nấu cỗ tại nhà",
+            "qty": 1,
+            "option": "8 người · 5 món",
+            "price": 1200000
+          }
+        ],
+        "buyer": {
+          "name": "Chị Hoa",
+          "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 004"
+        },
+        "fulfil": "home",
+        "address": "B-0910, Block B",
+        "day": 4,
+        "time": "9:00",
+        "duration": 240,
+        "ship": 0,
+        "pay": "transfer",
+        "note": "Nguyên liệu nhà có sẵn",
+        "state": "waiting",
+        "cancelRequest": null,
+        "answers": [
+          [
+            "Số người ăn",
+            "8 người"
+          ],
+          [
+            "Bếp nhà có nồi lớn không?",
+            "Có, 2 nồi 10 lít"
+          ]
+        ],
+        "due": "Còn 5 giờ",
+        "history": [
+          [
+            "waiting",
+            "9:15"
+          ]
+        ]
+      },
+      {
+        "id": "c3019",
+        "code": "AG-O3019",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm sườn rim ×1",
+        "items": [
+          {
+            "name": "Cơm sườn rim",
+            "qty": 1,
+            "option": "",
+            "price": 45000
+          }
+        ],
+        "buyer": {
+          "name": "Phương",
+          "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 008"
+        },
+        "fulfil": "delivery",
+        "address": "B-0703, Block B",
+        "day": 0,
+        "time": "12:00",
+        "ship": 0,
+        "pay": "cash",
+        "note": "",
+        "state": "confirmed",
+        "cancelRequest": "Đổi lịch họp, không ở nhà buổi trưa",
+        "history": [
+          [
+            "waiting",
+            "8:20"
+          ],
+          [
+            "confirmed",
+            "8:31"
+          ]
+        ]
+      },
+      {
+        "id": "o3016",
+        "code": "AG-O3016",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm sườn rim ×1",
+        "items": [
+          {
+            "name": "Cơm sườn rim",
+            "qty": 1,
+            "option": "",
+            "price": 45000
+          }
+        ],
+        "buyer": {
+          "name": "Quốc Anh",
+          "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 005"
+        },
+        "fulfil": "pickup",
+        "address": "Tự đến lấy tại bếp B-0512",
+        "day": 0,
+        "time": "10:45",
+        "ship": 0,
+        "pay": "cash",
+        "note": "",
+        "state": "preparing",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "7:50"
+          ],
+          [
+            "confirmed",
+            "7:58"
+          ],
+          [
+            "preparing",
+            "10:05"
+          ]
+        ]
+      },
+      {
+        "id": "o3012",
+        "code": "AG-O3012",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm nhà làm — cơm gà xé ×2",
+        "items": [
+          {
+            "name": "Cơm gà xé",
+            "qty": 2,
+            "option": "",
+            "price": 45000
+          }
+        ],
+        "buyer": {
+          "name": "Ngọc Thủy",
+          "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 001"
+        },
+        "fulfil": "delivery",
+        "address": "B-1204, Block B",
+        "day": 0,
+        "time": "11:30",
+        "ship": 0,
+        "pay": "cash",
+        "note": "Gọi trước khi tới, nhà có em bé ngủ trưa",
+        "state": "preparing",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "8:05"
+          ],
+          [
+            "confirmed",
+            "8:12"
+          ],
+          [
+            "preparing",
+            "10:20"
+          ]
+        ]
+      },
+      {
+        "id": "o3018",
+        "code": "AG-O3018",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm gà kho gừng ×1",
+        "items": [
+          {
+            "name": "Cơm gà kho gừng",
+            "qty": 1,
+            "option": "",
+            "price": 35000
+          }
+        ],
+        "buyer": {
+          "name": "Thu Hà",
+          "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 014"
+        },
+        "fulfil": "delivery",
+        "address": "B-0405, Block B",
+        "day": 0,
+        "time": "11:30",
+        "ship": 5000,
+        "pay": "transfer",
+        "note": "",
+        "state": "confirmed",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "9:02"
+          ],
+          [
+            "confirmed",
+            "9:10"
+          ]
+        ]
+      },
+      {
+        "id": "o3020",
+        "code": "AG-O3020",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm sườn rim ×2",
+        "items": [
+          {
+            "name": "Cơm sườn rim",
+            "qty": 2,
+            "option": "",
+            "price": 45000
+          }
+        ],
+        "buyer": {
+          "name": "Chị Ngân",
+          "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 011"
+        },
+        "fulfil": "delivery",
+        "address": "B-1101, Block B",
+        "day": 0,
+        "time": "11:30",
+        "ship": 5000,
+        "pay": "cash",
+        "note": "",
+        "state": "confirmed",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "9:20"
+          ],
+          [
+            "confirmed",
+            "9:24"
+          ]
+        ]
+      },
+      {
+        "id": "o3021",
+        "code": "AG-O3021",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop&q=70",
+        "title": "Canh chua cá ×1",
+        "items": [
+          {
+            "name": "Canh chua cá",
+            "qty": 1,
+            "option": "",
+            "price": 25000
+          }
+        ],
+        "buyer": {
+          "name": "Anh Tuấn",
+          "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 012"
+        },
+        "fulfil": "delivery",
+        "address": "C-1203, Block C",
+        "day": 0,
+        "time": "12:15",
+        "ship": 5000,
+        "pay": "cash",
+        "note": "Không lấy rau ngổ",
+        "state": "confirmed",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "9:40"
+          ],
+          [
+            "confirmed",
+            "9:45"
+          ]
+        ]
+      },
+      {
+        "id": "o3005",
+        "code": "AG-O3005",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm gà xé ×2",
+        "items": [
+          {
+            "name": "Cơm gà xé",
+            "qty": 2,
+            "option": "",
+            "price": 45000
+          }
+        ],
+        "buyer": {
+          "name": "Ngọc Thủy",
+          "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 001"
+        },
+        "fulfil": "delivery",
+        "address": "B-1204, Block B",
+        "day": -1,
+        "time": "11:30",
+        "ship": 0,
+        "pay": "cash",
+        "note": "",
+        "state": "done",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "8:10"
+          ],
+          [
+            "confirmed",
+            "8:15"
+          ],
+          [
+            "preparing",
+            "10:30"
+          ],
+          [
+            "delivering",
+            "11:20"
+          ],
+          [
+            "done",
+            "11:34"
+          ]
+        ],
+        "reviewId": "r1"
+      },
+      {
+        "id": "o2998",
+        "code": "AG-O2998",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm sườn rim ×1",
+        "items": [
+          {
+            "name": "Cơm sườn rim",
+            "qty": 1,
+            "option": "",
+            "price": 45000
+          }
+        ],
+        "buyer": {
+          "name": "Quốc Anh",
+          "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 005"
+        },
+        "fulfil": "pickup",
+        "address": "Tự đến lấy tại bếp B-0512",
+        "day": -2,
+        "time": "11:00",
+        "ship": 0,
+        "pay": "cash",
+        "note": "",
+        "state": "done",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "9:00"
+          ],
+          [
+            "confirmed",
+            "9:05"
+          ],
+          [
+            "preparing",
+            "10:30"
+          ],
+          [
+            "ready",
+            "10:55"
+          ],
+          [
+            "done",
+            "11:04"
+          ]
+        ],
+        "reviewId": "r2"
+      },
+      {
+        "id": "o2990",
+        "code": "AG-O2990",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm gà kho gừng ×1",
+        "items": [
+          {
+            "name": "Cơm gà kho gừng",
+            "qty": 1,
+            "option": "",
+            "price": 35000
+          }
+        ],
+        "buyer": {
+          "name": "Minh",
+          "avatar": "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 007"
+        },
+        "fulfil": "delivery",
+        "address": "B-0812, Block B",
+        "day": -3,
+        "time": "12:00",
+        "ship": 5000,
+        "pay": "cash",
+        "note": "",
+        "state": "done",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "10:00"
+          ],
+          [
+            "confirmed",
+            "10:02"
+          ],
+          [
+            "preparing",
+            "11:20"
+          ],
+          [
+            "delivering",
+            "11:50"
+          ],
+          [
+            "done",
+            "12:03"
+          ]
+        ],
+        "reviewId": "r3"
+      },
+      {
+        "id": "o2981",
+        "code": "AG-O2981",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop&q=70",
+        "title": "Canh chua cá ×2",
+        "items": [
+          {
+            "name": "Canh chua cá",
+            "qty": 2,
+            "option": "",
+            "price": 25000
+          }
+        ],
+        "buyer": {
+          "name": "Phương",
+          "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 008"
+        },
+        "fulfil": "delivery",
+        "address": "B-0703, Block B",
+        "day": -4,
+        "time": "12:00",
+        "ship": 5000,
+        "pay": "cash",
+        "note": "",
+        "state": "declined",
+        "cancelRequest": null,
+        "declineReason": "Hết cá tươi hôm đó",
+        "history": [
+          [
+            "waiting",
+            "10:10"
+          ],
+          [
+            "declined",
+            "10:15"
+          ]
+        ]
+      },
+      {
+        "id": "o3027",
+        "code": "AG-O3027",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop&q=70",
+        "title": "Canh chua cá ×1",
+        "items": [
+          {
+            "name": "Canh chua cá",
+            "qty": 1,
+            "option": "",
+            "price": 25000
+          }
+        ],
+        "buyer": {
+          "name": "Chị Ngân",
+          "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 011"
+        },
+        "fulfil": "delivery",
+        "address": "B-1101, Block B",
+        "day": 0,
+        "time": "12:45",
+        "ship": 0,
+        "pay": "cash",
+        "note": "",
+        "state": "delivering",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "9:50"
+          ],
+          [
+            "confirmed",
+            "9:55"
+          ],
+          [
+            "preparing",
+            "12:10"
+          ],
+          [
+            "delivering",
+            "12:35"
+          ]
+        ]
+      },
+      {
+        "id": "o3028",
+        "code": "AG-O3028",
+        "kind": "goods",
+        "icon": "package",
+        "title": "Bộ hộp cơm inox ×6",
+        "items": [
+          {
+            "name": "Bộ hộp cơm inox ×6",
+            "qty": 1,
+            "option": "",
+            "price": 180000
+          }
+        ],
+        "buyer": {
+          "name": "Ngọc Thủy",
+          "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 001"
+        },
+        "fulfil": "pickup",
+        "address": "Tự đến lấy tại bếp B-0512",
+        "day": 0,
+        "time": "17:30",
+        "ship": 0,
+        "pay": "transfer",
+        "note": "Chiều mình ghé lấy nha cô",
+        "state": "ready",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "8:40"
+          ],
+          [
+            "confirmed",
+            "8:52"
+          ],
+          [
+            "ready",
+            "9:30"
+          ]
+        ]
+      },
+      {
+        "id": "o3029",
+        "code": "AG-O3029",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm gà kho gừng ×3",
+        "items": [
+          {
+            "name": "Cơm gà kho gừng",
+            "qty": 3,
+            "option": "",
+            "price": 35000
+          }
+        ],
+        "buyer": {
+          "name": "Minh",
+          "avatar": "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 007"
+        },
+        "fulfil": "delivery",
+        "address": "B-0812, Block B",
+        "day": 1,
+        "time": "11:30",
+        "ship": 0,
+        "pay": "cash",
+        "note": "Mai giao giúp con 3 phần cho cả nhà",
+        "state": "confirmed",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "14:05"
+          ],
+          [
+            "confirmed",
+            "14:12"
+          ]
+        ]
+      },
+      {
+        "id": "o3030",
+        "code": "AG-O3030",
+        "kind": "service",
+        "icon": "wrench",
+        "title": "Nấu cơm theo tuần · 5 buổi",
+        "items": [
+          {
+            "name": "Nấu cơm theo tuần",
+            "qty": 5,
+            "option": "Bữa tối cho 4 người",
+            "price": 600000
+          }
+        ],
+        "buyer": {
+          "name": "Chị Hoa",
+          "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 004"
+        },
+        "fulfil": "home",
+        "address": "B-0910, Block B",
+        "day": 3,
+        "time": "16:30",
+        "duration": 120,
+        "ship": 0,
+        "pay": "transfer",
+        "note": "Nhà ăn nhạt, không cay",
+        "state": "confirmed",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "Hôm qua"
+          ],
+          [
+            "confirmed",
+            "Hôm qua"
+          ]
+        ]
+      }
+    ],
+    "jobs": [
+      {
+        "id": "j-giao",
+        "code": "AG-J2061",
+        "postId": "j1",
+        "title": "Cần người giao cơm trưa 11:00–12:00",
+        "category": "Giao nhận",
+        "pay": 40000,
+        "unit": "/ buổi",
+        "when": "Hôm nay · 11:00 – 12:00",
+        "day": 0,
+        "time": "11:00",
+        "duration": 60,
+        "head": 1,
+        "area": "Block B",
+        "exact": "Bếp B-0512 (cửa xanh, tầng 5)",
+        "desc": "Nhận cơm tại bếp, giao cho khách trong Block B và C. Khoảng 10–15 phần mỗi buổi, đi bộ hoặc xe đạp đều được.",
+        "reqs": [
+          "Có mặt ở bếp lúc 10:55",
+          "Giao trong Block B và C",
+          "Gọi khách trước khi tới"
+        ],
+        "offers": [
+          {
+            "id": "of-minh",
+            "code": "AG-J2061-1",
+            "worker": {
+              "name": "Minh",
+              "avatar": "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=160&h=160&fit=crop&q=70&crop=faces",
+              "phone": "0900 000 007",
+              "rating": "4,9",
+              "jobs": 12,
+              "distance": "Block B, tầng 8"
+            },
+            "slot": "10:45 – 12:30",
+            "intro": "Em học chiều nên trưa rảnh, có xe đạp, đã giao cơm cho Quán Nhà Mây 2 tháng.",
+            "state": "offered",
+            "rated": null
+          },
+          {
+            "id": "of-khoa",
+            "code": "AG-J2061-2",
+            "worker": {
+              "name": "Minh Khoa",
+              "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop&q=70&crop=faces",
+              "phone": "0900 000 013",
+              "rating": "4,9",
+              "jobs": 6,
+              "distance": "Block D"
+            },
+            "slot": "11:00 – 12:00",
+            "intro": "Đi bộ được, giao trong khu nhanh. Em đang chờ chị trả lời có cần xe máy không.",
+            "state": "offered",
+            "rated": null
+          },
+          {
+            "id": "of-quoc",
+            "code": "AG-J2061-3",
+            "worker": {
+              "name": "Quốc Anh",
+              "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70&crop=faces",
+              "phone": "0900 000 005",
+              "rating": "4,8",
+              "jobs": 3,
+              "distance": "Block B, tầng 5"
+            },
+            "slot": "từ 11:15",
+            "intro": "Làm online ở nhà, trưa ghé lấy cơm được. Hôm trước đi chợ giúp chị rồi.",
+            "state": "offered",
+            "rated": null
+          }
+        ],
+        "questions": [
+          {
+            "id": "q0",
+            "by": {
+              "name": "Thu Hà",
+              "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&h=160&fit=crop&q=70&crop=faces",
+              "phone": "0900 000 014"
+            },
+            "at": "Hôm qua",
+            "text": "Mỗi buổi giao khoảng mấy phần vậy chị?",
+            "answer": "Khoảng 10–15 phần, trong Block B và C."
+          },
+          {
+            "id": "q1",
+            "by": {
+              "name": "Minh Khoa",
+              "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop&q=70&crop=faces",
+              "phone": "0900 000 013"
+            },
+            "at": "15 phút trước",
+            "text": "Có cần xe máy riêng không chị, hay đi bộ giao trong khu?"
+          }
+        ],
+        "due": "Chọn trước 10:30"
+      },
+      {
+        "id": "j-cho",
+        "code": "AG-J2050",
+        "postId": "j2",
+        "title": "Đi chợ đầu mối buổi sáng",
+        "category": "Mua hộ",
+        "pay": 120000,
+        "unit": "/ lần",
+        "when": "Thứ Hai & thứ Năm · 6:00",
+        "day": 2,
+        "time": "6:00",
+        "duration": 90,
+        "head": 1,
+        "area": "Block B",
+        "exact": "Bếp B-0512",
+        "desc": "Mua rau, thịt theo danh sách bếp gửi tối hôm trước, mang về bếp trước 7:30. Bếp ứng tiền chợ trước.",
+        "reqs": [
+          "Có xe máy",
+          "Giữ hóa đơn chợ"
+        ],
+        "offers": [
+          {
+            "id": "of-2052",
+            "code": "AG-J2052",
+            "worker": {
+              "name": "Quốc Anh",
+              "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70&crop=faces",
+              "phone": "0900 000 005",
+              "rating": "4,8",
+              "jobs": 3,
+              "distance": "Block B, tầng 5"
+            },
+            "slot": "Thứ Hai · 6:00",
+            "intro": "Nhà gần chợ, sáng nào cũng dậy sớm.",
+            "state": "reported",
+            "day": -2,
+            "report": {
+              "note": "Đã mua đủ theo danh sách, hóa đơn chợ 1.240.000đ.",
+              "at": "7:10",
+              "photos": 2
+            },
+            "rated": null
+          },
+          {
+            "id": "of-2058",
+            "code": "AG-J2058",
+            "worker": {
+              "name": "Minh Khoa",
+              "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop&q=70&crop=faces",
+              "phone": "0900 000 013",
+              "rating": "4,9",
+              "jobs": 6,
+              "distance": "Block D"
+            },
+            "slot": "Thứ Năm · 6:00",
+            "intro": "Em rảnh sáng thứ Năm, có xe máy.",
+            "state": "chosen",
+            "day": 2,
+            "rated": null
+          }
+        ],
+        "questions": [],
+        "due": "Tự xong sau 24 giờ"
+      },
+      {
+        "id": "j-rua",
+        "code": "AG-J2031",
+        "postId": null,
+        "title": "Rửa giúp 40 hộp cơm sau ca trưa",
+        "category": "Việc nhà",
+        "pay": 60000,
+        "unit": "/ lần",
+        "when": "Thứ Năm tuần trước · 13:00",
+        "day": -6,
+        "time": "13:00",
+        "duration": 60,
+        "head": 1,
+        "area": "Block B",
+        "exact": "Bếp B-0512",
+        "desc": "Rửa và úp khô 40 hộp cơm inox sau ca trưa.",
+        "reqs": [],
+        "offers": [
+          {
+            "id": "of-2031",
+            "code": "AG-J2031",
+            "worker": {
+              "name": "Minh",
+              "avatar": "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=160&h=160&fit=crop&q=70&crop=faces",
+              "phone": "0900 000 007",
+              "rating": "4,9",
+              "jobs": 12,
+              "distance": "Block B, tầng 8"
+            },
+            "slot": "13:00 – 14:00",
+            "intro": "Em làm được ạ.",
+            "state": "done",
+            "day": -6,
+            "rated": null
+          }
+        ],
+        "questions": [],
+        "closed": true
+      },
+      {
+        "id": "j-don",
+        "code": "AG-J2064",
+        "postId": "j3",
+        "title": "Dọn bếp cuối tuần",
+        "category": "Dọn dẹp",
+        "pay": 80000,
+        "unit": "/ buổi",
+        "when": "Thứ Bảy · 14:00 – 16:00",
+        "day": 4,
+        "time": "14:00",
+        "duration": 120,
+        "head": 1,
+        "area": "Block B",
+        "exact": "Bếp B-0512 (cửa xanh, tầng 5)",
+        "desc": "Lau bếp, rửa máy hút mùi, sắp lại tủ đồ khô. Dụng cụ có sẵn ở bếp.",
+        "reqs": [
+          "Cẩn thận với đồ điện",
+          "Làm xong chụp ảnh gửi bếp"
+        ],
+        "offers": [],
+        "questions": []
+      },
+      {
+        "id": "j-pho",
+        "code": "AG-J2066",
+        "postId": "j4",
+        "title": "Phụ bếp nấu cỗ 8 người",
+        "category": "Phụ việc",
+        "pay": 150000,
+        "unit": "/ buổi",
+        "when": "Thứ Sáu · 7:00 – 11:00",
+        "day": 3,
+        "time": "7:00",
+        "duration": 240,
+        "head": 1,
+        "area": "Block A",
+        "exact": "Nhà chị Hoa, A-0806",
+        "desc": "Sơ chế rau củ, rửa dọn trong lúc nấu cỗ tại nhà khách.",
+        "reqs": [
+          "Biết sơ chế cơ bản"
+        ],
+        "questions": [],
+        "offers": [
+          {
+            "id": "of-2067",
+            "code": "AG-J2067",
+            "worker": {
+              "name": "Minh Khoa",
+              "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop&q=70&crop=faces",
+              "phone": "0900 000 013",
+              "rating": "4,9",
+              "jobs": 6,
+              "distance": "Block D"
+            },
+            "slot": "Thứ Sáu · 7:00",
+            "intro": "Em từng phụ bếp quán cơm 6 tháng.",
+            "state": "chosen",
+            "day": 3,
+            "rated": null
+          }
+        ]
+      }
+    ],
+    "reviews": [
+      {
+        "id": "r1",
+        "by": {
+          "name": "Ngọc Thủy",
+          "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 001"
+        },
+        "stars": 5,
+        "at": "2 giờ trước",
+        "orderId": "o3005",
+        "post": "Cơm gà xé",
+        "text": "Cơm dẻo, gà thấm, giao đúng giờ. Sẽ đặt tiếp."
+      },
+      {
+        "id": "r2",
+        "by": {
+          "name": "Quốc Anh",
+          "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 005"
+        },
+        "stars": 4,
+        "at": "2 ngày trước",
+        "orderId": "o2998",
+        "post": "Cơm sườn rim",
+        "text": "Sườn mềm, hơi mặn chút.",
+        "reply": "Cảm ơn cháu, lần sau cô nêm nhạt hơn nhé!"
+      },
+      {
+        "id": "r3",
+        "by": {
+          "name": "Minh",
+          "avatar": "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 007"
+        },
+        "stars": 4,
+        "at": "3 ngày trước",
+        "orderId": "o2990",
+        "post": "Cơm gà kho gừng",
+        "text": "Ngon, phần hơi ít cơm so với mình."
+      }
+    ],
+    "shop": {
+      "name": "Bếp Cô Lan",
+      "kind": "Bếp nhà làm",
+      "at": "Block B, tầng 5",
+      "since": "Hàng xóm từ 2023",
+      "reply": "Thường trả lời trong 10 phút",
+      "bio": "Cô nấu cơm nhà mỗi ngày cho mấy cháu đi làm trong khu: ít dầu, nêm vừa, rau luộc theo mùa. Thực đơn ngày mai cô đăng vào buổi tối, đặt trước 10:30 là kịp trưa.",
+      "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=160&h=160&fit=crop&q=70&crop=faces",
+      "cover": null,
+      "followers": 24,
+      "shopViews": 132,
+      "rating": "4,3",
+      "reviewCount": 3,
+      "doneCount": 86
+    },
+    "hours": [
+      {
+        "on": true,
+        "from": "09:00",
+        "to": "13:00"
+      },
+      {
+        "on": true,
+        "from": "09:00",
+        "to": "13:00"
+      },
+      {
+        "on": true,
+        "from": "09:00",
+        "to": "13:00"
+      },
+      {
+        "on": true,
+        "from": "09:00",
+        "to": "13:00"
+      },
+      {
+        "on": true,
+        "from": "09:00",
+        "to": "13:00"
+      },
+      {
+        "on": true,
+        "from": "09:00",
+        "to": "11:00"
+      },
+      {
+        "on": false,
+        "from": "09:00",
+        "to": "13:00"
+      }
+    ],
+    "offs": [],
+    "stats": {
+      "7": {
+        "label": "7 ngày qua",
+        "income": 640000,
+        "incomeUp": "+12%",
+        "paid": 160000,
+        "paidUp": "+10%",
+        "hired": 2,
+        "hiredUp": "+100%",
+        "done": 14,
+        "doneUp": "+27%",
+        "rating": "4,3",
+        "ratingCount": 3,
+        "views": 412,
+        "viewsUp": "+9%",
+        "bookUp": "+4%",
+        "saves": 21,
+        "unit": "ngày",
+        "x": [
+          "T5",
+          "T6",
+          "T7",
+          "CN",
+          "T2",
+          "T3",
+          "T4"
+        ],
+        "y": [
+          95000,
+          130000,
+          70000,
+          0,
+          120000,
+          15000,
+          210000
+        ],
+        "mix": [
+          520000,
+          0,
+          120000
+        ]
+      },
+      "30": {
+        "label": "30 ngày qua",
+        "income": 2480000,
+        "incomeUp": "+5%",
+        "paid": 520000,
+        "paidUp": "+4%",
+        "hired": 6,
+        "hiredUp": "+20%",
+        "done": 52,
+        "doneUp": "+13%",
+        "rating": "4,3",
+        "ratingCount": 3,
+        "views": 1630,
+        "viewsUp": "+4%",
+        "bookUp": "+2%",
+        "saves": 74,
+        "unit": "tuần",
+        "x": [
+          "Tuần 1",
+          "Tuần 2",
+          "Tuần 3",
+          "Tuần 4",
+          "Tuần này"
+        ],
+        "y": [
+          520000,
+          610000,
+          480000,
+          230000,
+          640000
+        ],
+        "mix": [
+          1720000,
+          180000,
+          580000
+        ]
+      },
+      "90": {
+        "label": "3 tháng qua",
+        "income": 3820000,
+        "incomeUp": "+18%",
+        "paid": 860000,
+        "paidUp": "+15%",
+        "hired": 9,
+        "hiredUp": "+50%",
+        "done": 78,
+        "doneUp": "+24%",
+        "rating": "4,3",
+        "ratingCount": 3,
+        "views": 4210,
+        "viewsUp": "+21%",
+        "bookUp": "+6%",
+        "saves": 132,
+        "unit": "tháng",
+        "x": [
+          "Tháng 8",
+          "Tháng 9",
+          "Tháng 10"
+        ],
+        "y": [
+          640000,
+          1020000,
+          2160000
+        ],
+        "mix": [
+          2620000,
+          380000,
+          820000
+        ]
+      },
+      "today": {
+        "label": "Hôm nay",
+        "income": 210000,
+        "incomeUp": "+8%",
+        "paid": 40000,
+        "paidUp": "+6%",
+        "hired": 1,
+        "hiredUp": "+100%",
+        "done": 3,
+        "doneUp": "+20%",
+        "rating": "5,0",
+        "ratingCount": 3,
+        "views": 64,
+        "viewsUp": "+12%",
+        "bookUp": "+7%",
+        "saves": 3,
+        "unit": "giờ",
+        "x": [
+          "9h",
+          "10h",
+          "11h",
+          "12h",
+          "13h"
+        ],
+        "y": [
+          0,
+          45000,
+          120000,
+          45000,
+          0
+        ],
+        "mix": [
+          210000,
+          0,
+          0
+        ]
+      },
+      "year": {
+        "label": "Năm nay",
+        "income": 4120000,
+        "incomeUp": "+40%",
+        "paid": 940000,
+        "paidUp": "+38%",
+        "hired": 11,
+        "hiredUp": "+57%",
+        "done": 81,
+        "doneUp": "+53%",
+        "rating": "4,3",
+        "ratingCount": 3,
+        "views": 4980,
+        "viewsUp": "+35%",
+        "bookUp": "+11%",
+        "saves": 150,
+        "unit": "tháng",
+        "x": [
+          "T1",
+          "T2",
+          "T3",
+          "T4",
+          "T5",
+          "T6",
+          "T7",
+          "T8",
+          "T9",
+          "T10"
+        ],
+        "y": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          80000,
+          220000,
+          640000,
+          1020000,
+          2160000
+        ],
+        "mix": [
+          2840000,
+          420000,
+          860000
+        ]
+      }
+    },
+    "pause": null,
+    "chats": [
+      {
+        "id": "c-minh",
+        "name": "Minh",
+        "avatar": "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=160&h=160&fit=crop&q=70&crop=faces",
+        "unread": 1,
+        "ctx": {
+          "type": "order",
+          "id": "o3024"
+        },
+        "messages": [
+          {
+            "from": "them",
+            "text": "Cô ơi cho con ít cơm, nhiều rau nha. 11:45 con ở nhà.",
+            "time": "11:03"
+          }
+        ]
+      },
+      {
+        "id": "c-ha",
+        "name": "Thu Hà",
+        "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&h=160&fit=crop&q=70&crop=faces",
+        "unread": 1,
+        "ctx": {
+          "type": "order",
+          "id": "o3025"
+        },
+        "messages": [
+          {
+            "from": "them",
+            "text": "Chị ơi 6h chiều nay em qua xem nồi chiên được không ạ? Em muốn chạy thử trước.",
+            "time": "10:41"
+          }
+        ]
+      },
+      {
+        "id": "c-thuy",
+        "name": "Ngọc Thủy",
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&q=70&crop=faces",
+        "unread": 0,
+        "ctx": {
+          "type": "order",
+          "id": "o3012"
+        },
+        "messages": [
+          {
+            "from": "them",
+            "text": "Cô ơi cho con ít cay một phần nha, phần còn lại bình thường.",
+            "time": "9:42"
+          },
+          {
+            "from": "me",
+            "text": "Được con, cô ghi chú rồi. 11:30 cô giao tận cửa nha.",
+            "time": "9:51"
+          }
+        ]
+      },
+      {
+        "id": "c-hoa",
+        "name": "Chị Hoa",
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&q=70&crop=faces",
+        "unread": 0,
+        "ctx": {
+          "type": "order",
+          "id": "s0412"
+        },
+        "messages": [
+          {
+            "from": "them",
+            "text": "Cô Lan ơi, thứ Bảy nhà chị 8 người, cô nấu giúp 5 món nhé. Thực đơn cô gợi ý giúp chị.",
+            "time": "9:16"
+          }
+        ]
+      },
+      {
+        "id": "c-khoa",
+        "name": "Minh Khoa",
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop&q=70&crop=faces",
+        "unread": 0,
+        "ctx": {
+          "type": "job",
+          "id": "j-giao"
+        },
+        "messages": [
+          {
+            "from": "them",
+            "text": "Chị ơi em có xe đạp thôi, giao trong khu được không ạ?",
+            "time": "Hôm qua"
+          }
+        ]
+      },
+      {
+        "id": "c-quoc",
+        "name": "Quốc Anh",
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70&crop=faces",
+        "unread": 0,
+        "ctx": {
+          "type": "job",
+          "id": "j-cho"
+        },
+        "messages": [
+          {
+            "from": "them",
+            "text": "Em mua đủ rồi nhé chị, hóa đơn 1.240.000đ em gửi trong phần báo xong.",
+            "time": "7:12"
+          },
+          {
+            "from": "me",
+            "text": "Cảm ơn em, chị kiểm tra rồi xác nhận liền.",
+            "time": "7:20"
+          }
+        ]
+      }
+    ]
+  }
+]

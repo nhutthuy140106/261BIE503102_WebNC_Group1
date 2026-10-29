@@ -1,0 +1,149 @@
+@if (d(); as d) {
+  <div class="ohead">
+    <h1>Hiệu quả</h1>
+    <div class="ranges">
+      @for (r of ranges; track r) { <button type="button" [class.on]="!custom() && r === range()" (click)="setRange(r)">{{ seller.statsFor(r)?.label }}</button> }
+      <!-- khoảng ngày tự chọn: bấm ngày đầu rồi ngày cuối trên lịch -->
+      <div class="rpick">
+        <button type="button" class="rbtn" [class.on]="!!custom()" [attr.aria-expanded]="pickOpen()" (click)="togglePick()">
+          <svg class="i"><use href="#calendar" /></svg>{{ custom() ? customText() : 'Khoảng thời gian' }}
+        </button>
+        @if (pickOpen()) {
+          <div class="rcal" role="dialog" aria-label="Chọn khoảng thời gian">
+            <div class="calh">
+              <button type="button" class="calnav prev" aria-label="Tháng trước" (click)="moveMonth(-1)"><svg class="i"><use href="#right" /></svg></button>
+              <b>{{ calTitle() }}</b>
+              <button type="button" class="calnav" aria-label="Tháng sau" [disabled]="!calCanNext()" (click)="moveMonth(1)"><svg class="i"><use href="#right" /></svg></button>
+            </div>
+            <div class="calg">
+              @for (w of weekDays; track w) { <span class="wd">{{ w }}</span> }
+              @for (x of calCells(); track $index) {
+                @if (x) {
+                  <button type="button" [class.in]="x.in" [class.end]="x.end" [class.today]="x.today" [disabled]="x.future" (click)="pickDay(x.key)">{{ x.d }}</button>
+                } @else { <span></span> }
+              }
+            </div>
+            <div class="calf"><span>{{ pickText() }}</span>
+              <span class="cb"><button type="button" class="btn" (click)="pickOpen.set(false)">Hủy</button><button type="button" class="btn dark" [disabled]="!pickA()" (click)="applyPick()">Áp dụng</button></span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kduo">
+      <div class="kbig"><span class="lb"><svg class="i"><use href="#store" /></svg>Tổng tiền đã bán</span><b>{{ d.income | vnd }}</b><span class="up">▲ {{ up(d.incomeUp) }}</span></div>
+      <div class="kbig"><span class="lb"><svg class="i"><use href="#hand" /></svg>Tổng tiền đã thuê</span><b>{{ d.paid | vnd }}</b><span class="up">▲ {{ up(d.paidUp) }}</span></div>
+    </div>
+    <div class="kq">
+      <div class="kt"><span>Đơn hoàn thành</span><b>{{ d.done }}</b><span class="up">▲ {{ up(d.doneUp) }}</span></div>
+      <div class="kt"><span>Lượt xem bài</span><b>{{ d.views | vnd: '' }}</b><span class="up">▲ {{ up(d.viewsUp) }}</span></div>
+      <div class="kt"><span>Tỉ lệ đặt</span><b>{{ bookRate() }}%</b><span class="up">▲ {{ up(d.bookUp) }}</span></div>
+      <div class="kt"><span>Đánh giá</span><b><span class="st">★</span> {{ d.rating }}</b><small>{{ seller.reviews().length }} đánh giá</small></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <div class="box">
+        <header><h2>Đã thu theo {{ d.unit }}</h2><small>{{ d.label }} · {{ d.income | vnd }}</small>
+          <button type="button" class="tv" (click)="table.set(!table())">{{ table() ? 'Xem biểu đồ' : 'Xem dạng bảng' }}</button></header>
+        @if (table()) {
+          <table class="tvt">
+            <tr><th>{{ cap(d.unit) }}</th><th>Đã thu</th></tr>
+            @for (x of d.x; track $index; let i = $index) { <tr><td>{{ x }}</td><td>{{ d.y[i] | vnd }}</td></tr> }
+          </table>
+        } @else if (chart(); as c) {
+          <div class="chart">
+            <svg [attr.viewBox]="'0 0 ' + W + ' ' + H" role="img" [attr.aria-label]="'Đã thu theo ' + d.unit">
+              @for (t of c.ticks; track $index) {
+                <line class="gl" [attr.x1]="c.L" [attr.x2]="W" [attr.y1]="t.y" [attr.y2]="t.y" />
+                <text class="ax" [attr.x]="c.L - 8" [attr.y]="t.y + 4" text-anchor="end">{{ t.label }}</text>
+              }
+              @for (b of c.bars; track b.i) {
+                <rect class="hit" [attr.x]="b.hitX" [attr.y]="c.T" [attr.width]="b.slot" [attr.height]="c.plotH" (mouseenter)="hover.set(b.i)" (mouseleave)="hover.set(null)" />
+                <path class="bar" [class.on]="hover() === b.i" [attr.d]="b.d" />
+                <text class="ax" [attr.x]="b.cx" [attr.y]="H - 8" text-anchor="middle">{{ b.label }}</text>
+                @if (b.peak) { <text class="peak" [attr.x]="b.cx" [attr.y]="b.top - 6" text-anchor="middle">{{ short(b.v) }}</text> }
+              }
+            </svg>
+            @if (hover() !== null) {
+              <div class="tip" [style.left.%]="(c.bars[hover()!].cx / W) * 100" [style.top.%]="(c.bars[hover()!].top / H) * 100"><b>{{ c.bars[hover()!].v | vnd }}</b>{{ c.bars[hover()!].label }}</div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="box">
+        <header><h2>Bài bán chạy</h2><small>từ trước đến nay, theo tiền thu được</small></header>
+        <table class="tbl">
+          <tr><th>Bài</th><th class="n">Lượt xem</th><th class="n">Đã bán</th><th class="n">Đã thu</th></tr>
+          @for (p of topPosts(); track p.id) {
+            <tr>
+              <td><a class="pt" [routerLink]="['/seller/posts', p.id, 'edit']">
+                @if (p.image) { <img [src]="p.image" alt="" /> } @else { <span class="cream"><svg class="i"><use [attr.href]="'#' + (p.icon || kindIcon[p.kind])" /></svg></span> }
+                <span><b>{{ p.title }}</b><small>{{ kindLabel[p.kind] }}</small></span></a></td>
+              <td class="n">{{ p.views }}</td><td class="n">{{ p.sold }}</td><td class="n"><b>{{ p.sold * p.price | vnd }}</b></td>
+            </tr>
+          }
+        </table>
+      </div>
+
+      <div class="box" id="reviews">
+        <header><h2>Đánh giá của khách</h2><small>{{ seller.reviews().length }} đánh giá</small></header>
+        <div class="rsum">
+          <div class="big">{{ seller.shop()?.rating }}<small>{{ seller.reviews().length }} đánh giá</small></div>
+          <div class="dist">@for (r of dist(); track r.n) { <div><span>{{ r.n }} ★</span><i><u [style.width.%]="r.pct"></u></i><span>{{ r.c }}</span></div> }</div>
+        </div>
+        @for (r of seller.reviews(); track r.id) {
+          <div class="rev">
+            <img [src]="r.by.avatar" alt="" />
+            <div class="rv">
+              <div class="h"><b>{{ r.by.name }}</b> · {{ r.at }} · {{ r.post }}</div>
+              <div class="gold">{{ stars(r.stars) }}</div>
+              <p>{{ r.text }}</p>
+              @if (r.reply) { <div class="rep"><b>Bạn đã phản hồi</b>{{ r.reply }}</div> }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div>
+      <div class="box">
+        <header><h2>Thu theo mảng</h2><small>{{ d.label }}</small></header>
+        <div class="hb">
+          @for (m of mix(); track m.kind) {
+            <div class="r"><span><svg class="i"><use [attr.href]="'#' + kindIcon[m.kind]" /></svg>{{ kindLabel[m.kind] }}</span>
+              <div class="tr"><i [style.width.%]="m.pct"></i></div><b>{{ short(m.v) }}<small>{{ m.pct | number: '1.0-0' }}%</small></b></div>
+          }
+        </div>
+      </div>
+      <div class="box">
+        <header><h2>Hành trình khách</h2><small>{{ d.label }}</small></header>
+        <div class="hb funnel">
+          @for (f of funnel(); track f.t) {
+            <div class="r"><span><svg class="i"><use [attr.href]="'#' + f.ic" /></svg>{{ f.t }}</span>
+              <div class="tr"><i [style.width.%]="f.pct < 2 ? 2 : f.pct"></i></div><b>{{ f.v | vnd: '' }}<small>{{ f.pct | number: '1.0-1' }}%</small></b></div>
+          }
+        </div>
+        <p class="fine">Bài có ảnh thật và giá rõ thường được lưu nhiều hơn. Quảng bá bằng AntXu đưa bài lên “Nổi bật trong khu”.</p>
+      </div>
+      <div class="box">
+        <header><h2>Việc đã thuê</h2><small>{{ d.paid | vnd }} đã trả</small></header>
+        <table class="tbl">
+          @for (h of hired(); track h.o.id) {
+            <tr>
+              <td><a class="pt" [routerLink]="['/seller/jobs', h.j.id]"><img class="av" [src]="h.o.worker.avatar" alt="" /><span><b>{{ h.o.worker.name }}</b><small>{{ h.j.title }}</small></span></a></td>
+              <td class="n"><span class="stat" [class]="'stat ' + (h.o.state === 'done' ? 'done' : h.o.state === 'reported' ? 'act' : 'go')">{{ h.o.label }}</span><br /><b>{{ h.j.pay | vnd }}</b></td>
+            </tr>
+          }
+        </table>
+      </div>
+    </div>
+  </div>
+} @else {
+  <p class="muted">Đang tải…</p>
+}

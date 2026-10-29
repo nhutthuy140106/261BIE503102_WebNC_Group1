@@ -1,0 +1,37 @@
+<div class="modal" (click)="backdrop($event)">
+  @let j = job();
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+    <button type="button" class="x" aria-label="Đóng" (click)="closed.emit()"><svg class="i"><use href="#xmark" /></svg></button>
+    <h2 id="pickTitle">Chọn người nhận việc</h2>
+
+    <div class="lh">{{ j.waiting.length }} người đề nghị</div>
+    <div class="list" role="radiogroup" aria-label="Người đề nghị">
+      @for (o of j.waiting; track o.id) {
+        <div class="offer" role="radio" tabindex="0" [attr.aria-checked]="sel() === o.id" [class.on]="sel() === o.id"
+          (click)="sel.set(o.id)" (keydown.enter)="sel.set(o.id)" (keydown.space)="$event.preventDefault(); sel.set(o.id)">
+          <span class="dot" aria-hidden="true"></span>
+          <img [src]="o.worker.avatar" alt="" />
+          <div class="bd">
+            <b>{{ o.worker.name }}</b>
+            <div class="m">
+              <span><svg class="i st"><use href="#star" /></svg>{{ o.worker.rating }} ({{ o.worker.jobs }})</span>
+              <span><svg class="i"><use href="#pin" /></svg>{{ o.worker.distance }}</span>
+            </div>
+          </div>
+          <a class="chat" routerLink="/seller/messenger" [queryParams]="{ to: o.worker.name, job: j.id }" [attr.aria-label]="'Nhắn ' + o.worker.name" title="Nhắn tin" (click)="$event.stopPropagation()">
+            <svg class="i"><use href="#chat" /></svg>
+          </a>
+          <p>“{{ o.intro }}”</p>
+        </div>
+      }
+    </div>
+
+    <div class="foot">
+      <span><svg class="i"><use href="#p-lock" /></svg>Địa chỉ chính xác chỉ gửi cho người bạn chọn.</span>
+      <button type="button" class="btn" (click)="closed.emit()">Để sau</button>
+      <button type="button" class="btn primary" [disabled]="!picked()" (click)="confirm()">
+        {{ picked() ? 'Chọn ' + picked()!.worker.name : 'Chọn người' }}
+      </button>
+    </div>
+  </div>
+</div>
