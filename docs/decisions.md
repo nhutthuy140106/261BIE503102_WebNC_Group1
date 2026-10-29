@@ -301,3 +301,9 @@ Hai phần này dựa vào schema chung nên **Q1–Q8** nên được chốt tr
 - Người ghi: BE
 - Nội dung: (1) Combo là một `Post` (price = comboPrice) gồm ≥ 2 món **cùng người bán**, rẻ hơn tổng giá lẻ; không lồng combo trong combo, không chứa hàng bán một lần. (2) `listPrice` chụp lúc lưu combo; nếu người bán đổi giá món lẻ sau đó thì `listPrice` cũ cho tới khi lưu lại combo (đơn vẫn tính theo `comboPrice`, nên không ảnh hưởng tiền). (3) Đặt combo trừ kho **từng món thành phần**; combo không có kho riêng trừ khi bài đặt `stock`. (4) Đơn combo là **một đơn**, snapshot ghi từng món; hủy/hoàn đơn **chưa** trả lại kho món thành phần (giống bài thường: chưa có luật hoàn kho). (5) Giờ vàng áp lên combo và "Tiết kiệm" tính trên giá đang trả. (6) Tùy chọn cộng giá chỉ có ở bài thường; combo mặc định không có tùy chọn.
 - Quyết định: (điền khi chốt)
+
+### [29/10] F13 — Ô tạo combo trong form đăng bài khu Bán (7.22)
+- Trạng thái: CẦN CHỐT (bạn phụ trách phía Bán)
+- Người ghi: FE
+- Nội dung: `features/seller/post-form` thêm khối "Combo" gọn (chỉ khi loại = đồ ăn): chọn từ các bài đồ ăn khác của chính người bán + số lượng mỗi món; giá combo = ô Giá hiện có; kiểm FE ≥ 2 món và giá < tổng lẻ (server vẫn kiểm lại). Gửi `combo: { items: [{ postId, qty }], comboPrice }` trong thân `POST/PUT /seller/posts`; server tự tính `listPrice`. Chỉ cần dời `<fieldset class="promo combof">` nếu phía Bán muốn đổi chỗ đặt.
+- Quyết định: (điền khi chốt)

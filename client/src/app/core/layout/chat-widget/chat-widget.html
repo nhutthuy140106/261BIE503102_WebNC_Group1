@@ -44,6 +44,10 @@
                     <b>{{ c.title }}</b>
                     <small>{{ c.sellerName }}@if (c.area) { · Block {{ c.area }} }</small>
                     <em>{{ c.price | vnd }}@if (c.unit) {<i>/{{ c.unit }}</i>}</em>
+                    @if (c.combo || c.dealLabel) {
+                      <small class="tags">@if (c.combo) { <span class="tg">Combo</span> } @if (c.dealLabel) { <span class="tg">{{ c.dealLabel }}</span> }
+                        @if (c.listPrice && c.listPrice > c.price) { <s>{{ c.listPrice | vnd }}</s> } @else if (c.originalPrice && c.originalPrice > c.price) { <s>{{ c.originalPrice | vnd }}</s> }</small>
+                    }
                   </span>
                 </a>
               }

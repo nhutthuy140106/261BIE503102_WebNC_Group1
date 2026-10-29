@@ -57,6 +57,27 @@
       </div>
     }
 
+    @if (form.controls.kind.value === 'food') {
+      <fieldset class="promo combof">
+        <legend>Combo (gói nhiều món của bạn)</legend>
+        <label class="check"><input type="checkbox" [checked]="comboOn()" (change)="comboOn.set($any($event.target).checked); form.markAsDirty()" /> Đây là combo: khách mua trọn gói với giá ở ô Giá phía trên</label>
+        @if (comboOn()) {
+          @for (p of candidates(); track p._id) {
+            <div class="citem">
+              <span>{{ p.title }} <span class="muted">· {{ p.price | vnd }}</span></span>
+              <span class="qty">
+                <button type="button" aria-label="Bớt" (click)="setComboQty(p._id, (comboQty()[p._id] ?? 0) - 1)">−</button>
+                <b>{{ comboQty()[p._id] ?? 0 }}</b>
+                <button type="button" aria-label="Thêm" (click)="setComboQty(p._id, (comboQty()[p._id] ?? 0) + 1)">+</button>
+              </span>
+            </div>
+          } @empty { <small class="muted">Bạn chưa có bài đồ ăn nào khác để gói thành combo.</small> }
+          @if (comboError(); as ce) { <small class="error" role="alert">{{ ce }}</small> }
+          @else if (comboList() > 0) { <p class="pvw">Giá lẻ {{ comboList() | vnd }} → giá combo <b>{{ form.controls.price.value | vnd }}</b> <span class="muted">(khách tiết kiệm {{ comboList() - form.controls.price.value | vnd }})</span></p> }
+        }
+      </fieldset>
+    }
+
     @if (!isJob()) {
       <fieldset class="promo">
         <legend>Giờ vàng (khuyến mãi theo khung giờ)</legend>

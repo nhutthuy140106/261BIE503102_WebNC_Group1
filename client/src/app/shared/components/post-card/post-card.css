@@ -34,3 +34,5 @@ h3 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.35; display: -
 
 .deal { position: absolute; left: 10px; bottom: 10px; z-index: 2; }
 .pr:has(.now) { color: #D85A1C; }
+
+.comborow { margin: -2px 0 4px; }

@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of, retry, throwError } from 'rxjs';
 import { API_BASE, useMock } from '../config/api.config';
 import { Post, PostKind } from '../models/post';
+import { buildComboDetail } from '../utils/combo';
 import { textMatches } from '../utils/text-match';
 import { jobFromApi, postFromApi } from '../utils/api-mappers';
 import { ApiService } from './api';
@@ -41,7 +42,12 @@ export class PostService {
         catchError(() => of(undefined)),
       );
     }
-    return this.getPosts().pipe(map((list) => list.find((p) => p._id === id)));
+    return this.getPosts().pipe(
+      map((list) => {
+        const p = list.find((x) => x._id === id);
+        return p?.combo ? { ...p, comboDetail: buildComboDetail(p, list, Date.now()) } : p;
+      }),
+    );
   }
 
   /** Các bài theo danh sách id, kể cả bài đã đóng (ngăn kéo Đã lưu cần hiện "Tạm ngưng nhận"). */

@@ -20,6 +20,7 @@ import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
 import { formatDateTime } from '../../../core/utils/status-label';
 import { ClockService } from '../../../core/services/clock';
+import { comboSaving } from '../../../core/utils/combo';
 import { countdown, clockVN, dealAt } from '../../../core/utils/promo';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
 import { placedStepNames } from '../../../core/utils/placed-steps';
@@ -235,6 +236,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
             const d = new OrderDraft(v.tpl, v.tpl.stock.mode === 'limit' ? v.tpl.stock.left ?? null : null);
             const def = r?.addresses.find((a) => a.isDefault);
             if (def) d.addressId.set(def._id);
+            d.comboItems.set(p.comboDetail?.items.map((i) => i.title + (i.qty > 1 ? ' ×' + i.qty : '')) ?? []);
             this.draft.set(d);
             this.recommend.similar(p._id).subscribe({ next: (l) => this.similar.set(l), error: () => this.similar.set([]) });
             this.restore(d);
@@ -288,6 +290,13 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
       d?.promo.set(dl ? this.post()?.promo ?? null : null);
     });
   }
+
+  /** Combo: tiết kiệm theo giá đang trả (tự đổi khi vào/ra Giờ vàng) */
+  protected readonly saving = computed(() => {
+    const p = this.post();
+    return p ? comboSaving(p, this.clock.now()) : 0;
+  });
+  protected readonly comboUnavailable = computed(() => this.post()?.comboDetail?.items.some((i) => !i.available) ?? false);
 
   protected dealEnds(): string {
     const d = this.deal();

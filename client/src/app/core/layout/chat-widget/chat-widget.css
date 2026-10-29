@@ -64,3 +64,7 @@ form button:disabled { opacity: .45; cursor: not-allowed; }
 
 .act { justify-self: start; border: 0; border-radius: 999px; padding: 8px 14px; background: var(--accent); color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; }
 .act:hover { filter: brightness(1.06); }
+
+.meta .tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.meta .tg { padding: 1px 7px; border-radius: 999px; background: #FBF4F1; border: 1px solid #F0E2DC; color: #22304A; font-size: 11px; font-weight: 600; }
+.meta .tags s { color: #8b8f98; font-size: 12px; }

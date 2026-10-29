@@ -17,6 +17,12 @@ export interface AssistantCard {
   area?: string;
   image?: string;
   slug?: string;
+  /** Combo: giá lẻ tổng các món; bài đang Giờ vàng: giá gốc + nhãn + mốc hết giờ (price là giá thực trả) */
+  combo?: boolean;
+  listPrice?: number;
+  originalPrice?: number;
+  dealLabel?: string;
+  dealEndsAt?: number | string;
 }
 
 export interface AssistantReply {

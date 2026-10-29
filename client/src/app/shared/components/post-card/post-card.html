@@ -20,6 +20,7 @@
   <div class="body">
     <h3><a [routerLink]="['/posts', slug]">{{ post.title }}</a></h3>
     <div class="prrow"><div class="pr"><app-price [post]="post" /> @if (post | unit; as u) { <span>/ {{ u }}</span> }</div>@if (post.sold) { <span class="sold">{{ post.kind === 'service' ? 'Đã đặt' : 'Đã bán' }} {{ post.sold | count }}</span> }</div>
+    @if (post.combo) { <div class="comborow"><app-combo-saving [post]="post" /></div> }
     <div class="meta">
       <span><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</span>
       @if (post.rating) {

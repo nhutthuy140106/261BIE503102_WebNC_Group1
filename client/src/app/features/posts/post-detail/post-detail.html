@@ -53,7 +53,30 @@
         </div>
       </section>
 
-      <section class="block desc">
+      @if (post(); as cp) {
+          @if (cp.comboDetail; as cd) {
+            <section class="block combo">
+              <h2>Trong combo này</h2>
+              <ul class="citems">
+                @for (it of cd.items; track it.postId) {
+                  <li [class.na]="!it.available">
+                    @if (it.image) { <img [src]="it.image" alt="" width="48" height="48" loading="lazy" /> }
+                    <a [routerLink]="['/posts', it.postId]"><b>{{ it.title }}</b></a>
+                    <span class="q">× {{ it.qty }}</span>
+                    <span class="u">{{ fmt(it.unitPrice) }}{{ it.unit ? '/' + it.unit : '' }}</span>
+                    @if (!it.available) { <em>Tạm hết</em> }
+                  </li>
+                }
+              </ul>
+              <dl class="csum">
+                <div><dt>Giá lẻ</dt><dd><s>{{ fmt(cd.listPrice) }}</s></dd></div>
+                <div class="sv"><dt>Tiết kiệm</dt><dd>{{ fmt(saving()) }}</dd></div>
+              </dl>
+              @if (comboUnavailable()) { <p class="cwarn" role="alert">Có món trong combo đang tạm hết, bạn có thể chưa đặt được.</p> }
+            </section>
+          }
+        }
+        <section class="block desc">
         <h2>Mô tả</h2>
         @for (t of v.tpl.desc; track t) { <p>{{ t }}</p> }
         @if (v.tpl.list.length) {

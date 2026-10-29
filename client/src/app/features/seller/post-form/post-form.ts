@@ -12,6 +12,7 @@ import { SellerService } from '../../../core/services/seller';
 import { PriceSuggestion } from '../../../core/utils/price-suggest';
 import { UploadService } from '../../../core/services/upload';
 import { Promo, discounted } from '../../../core/utils/promo';
+import { Post } from '../../../core/models/post';
 
 const MAX_IMAGES = 4;
 
@@ -63,6 +64,29 @@ export class PostForm implements OnInit, CanComponentDeactivate {
     promoFrom: new FormControl('11:00', { nonNullable: true }),
     promoTo: new FormControl('13:00', { nonNullable: true }),
   });
+  /** Combo: bài đồ ăn của chính người bán để chọn làm món; số lượng mỗi món trong một combo */
+  protected readonly comboOn = signal(false);
+  protected readonly candidates = signal<Post[]>([]);
+  protected readonly comboQty = signal<Record<string, number>>({});
+  protected comboList(): number {
+    const q = this.comboQty();
+    return this.candidates().reduce((t, p) => t + p.price * (q[p._id] ?? 0), 0);
+  }
+  protected comboCount(): number {
+    return Object.values(this.comboQty()).filter((n) => n > 0).length;
+  }
+  protected setComboQty(id: string, n: number): void {
+    this.comboQty.update((q) => ({ ...q, [id]: Math.max(0, Math.min(10, n)) }));
+    this.formTick.update((x) => x + 1);
+    this.form.markAsDirty();
+  }
+  protected comboError(): string | null {
+    if (!this.comboOn()) return null;
+    if (this.comboCount() < 2) return 'Combo cần ít nhất 2 món khác nhau.';
+    const price = this.form.getRawValue().price;
+    if (!(price > 0) || price >= this.comboList()) return 'Giá combo phải thấp hơn tổng giá lẻ (' + new Intl.NumberFormat('vi-VN').format(this.comboList()) + 'đ).';
+    return null;
+  }
   protected readonly weekdays = [
     { d: 1, l: 'T2' }, { d: 2, l: 'T3' }, { d: 3, l: 'T4' }, { d: 4, l: 'T5' }, { d: 5, l: 'T6' }, { d: 6, l: 'T7' }, { d: 0, l: 'CN' },
   ];
@@ -93,6 +117,10 @@ export class PostForm implements OnInit, CanComponentDeactivate {
   }
 
   ngOnInit(): void {
+    this.seller.myPosts().subscribe({
+      next: (l) => this.candidates.set(l.filter((p) => p.kind === 'food' && !p.combo && !p.closed && p._id !== this.editingId())),
+      error: () => this.candidates.set([]),
+    });
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.formTick.update((n) => n + 1));
     this.form.controls.kind.valueChanges.subscribe((k) => this.onKind(k));
     combineLatest([
@@ -118,6 +146,10 @@ export class PostForm implements OnInit, CanComponentDeactivate {
             ...(p.promo ? { promoKind: p.promo.kind, promoValue: p.promo.value, promoFrom: p.promo.from, promoTo: p.promo.to } : {}),
           });
           this.promoDays.set(p.promo?.days ?? []);
+          if (p.combo) {
+            this.comboOn.set(true);
+            this.comboQty.set(Object.fromEntries(p.combo.items.map((i) => [i.postId, i.qty])));
+          }
           this.images.set(p.images);
           this.onKind(p.kind);
           this.form.markAsPristine();
@@ -172,6 +204,11 @@ export class PostForm implements OnInit, CanComponentDeactivate {
     const v = this.form.getRawValue();
     const promoErr = this.promoError();
     if (promoErr) return void this.error.set(promoErr);
+    const comboErr = v.kind === 'food' ? this.comboError() : null;
+    if (comboErr) return void this.error.set(comboErr);
+    const combo = v.kind === 'food' && this.comboOn()
+      ? { items: Object.entries(this.comboQty()).filter(([, n]) => n > 0).map(([postId, qty]) => ({ postId, qty })), comboPrice: v.price }
+      : null;
     const promo: Promo | null = v.promoOn && v.kind !== 'job'
       ? { kind: v.promoKind, value: v.promoValue, from: v.promoFrom, to: v.promoTo, days: [...this.promoDays()].sort(), active: true }
       : null;
@@ -180,7 +217,7 @@ export class PostForm implements OnInit, CanComponentDeactivate {
     this.seller
       .savePost(
         { kind: v.kind, title: v.title, description: v.description, price: v.price, priceUnit: v.priceUnit.trim() || undefined,
-          block: `Block ${v.block}`, images: this.images(), acceptsXu: v.acceptsXu, due: v.kind === 'job' ? v.due.trim() : undefined, promo },
+          block: `Block ${v.block}`, images: this.images(), acceptsXu: v.acceptsXu, due: v.kind === 'job' ? v.due.trim() : undefined, promo, combo },
         this.editingId() ?? undefined,
       )
       .subscribe({

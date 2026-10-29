@@ -147,8 +147,10 @@ export class OrderDraft {
   }
 
   /** Các lựa chọn đã chọn, dạng "Nhóm: lựa chọn" để hiện trong hộp xác nhận và ghi vào đơn */
+  /** Combo: các món trong một combo (hiện thành dòng "Gồm: …" ở hộp xác nhận và ghi vào đơn) */
+  readonly comboItems = signal<string[]>([]);
   readonly lines = computed(() => {
-    const out: string[] = [];
+    const out: string[] = this.comboItems().length ? ['Gồm: ' + this.comboItems().join(', ')] : [];
     for (const g of this.tpl.opts) {
       if (g === this.dishGroup) continue;
       const c = parseChoice(this.opt()[g.name] ?? '');

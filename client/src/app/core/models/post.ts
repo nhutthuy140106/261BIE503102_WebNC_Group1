@@ -37,6 +37,22 @@ export interface PostQuestion {
   pay?: boolean;
 }
 
+export interface ComboItem {
+  postId: string;
+  qty: number;
+  title: string;
+  unitPrice: number;
+  unit?: string;
+  image?: string;
+  available: boolean;
+}
+
+export interface ComboDetail {
+  items: ComboItem[];
+  listPrice: number;
+  saving: number;
+}
+
 export interface Post {
   /** ObjectId (24 ký tự hex) của MongoDB */
   _id: string;
@@ -66,6 +82,10 @@ export interface Post {
   priceUnit?: string;
   /** Giờ vàng (khuyến mãi theo khung giờ); giá thật do server tính, mock tự tính cùng quy tắc */
   promo?: Promo;
+  /** Combo: gói nhiều món cùng người bán (price = giá combo). Giá lẻ và tiết kiệm do server tính (mock tự tính). */
+  combo?: { items: { postId: string; qty: number }[]; comboPrice: number; listPrice: number };
+  /** Chi tiết combo (chỉ ở trang chi tiết): từng món + tiết kiệm theo giá đang trả */
+  comboDetail?: ComboDetail;
   rating?: number;
   reviewCount?: number;
   /** Số lượt đã bán / đã đặt (chỉ bài bán, không có ở việc làm) */

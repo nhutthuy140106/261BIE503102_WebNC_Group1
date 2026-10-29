@@ -838,8 +838,8 @@
   {
     "_id": "2a04c932c49491dce9d1cf2f",
     "kind": "food",
-    "title": "Combo 2 trà sữa + 1 bánh ngọt",
-    "description": "",
+    "title": "Combo 2 trà sữa + 1 cà phê",
+    "description": "Hai ly trà sữa trân châu đường đen và một ly cà phê sữa đá, giá rẻ hơn mua lẻ.",
     "images": [
       "https://images.unsplash.com/photo-1558857563-b371033873b8?w=500&h=375&fit=crop&q=70"
     ],
@@ -849,16 +849,37 @@
     "block": "A.304",
     "area": "Bcons",
     "distance": 200,
-    "category": "Đồ uống",
-    "price": 85000,
+    "category": "Combo",
+    "price": 75000,
     "priceUnit": "combo",
     "rating": 4.4,
     "reviewCount": 5,
     "sold": 67,
     "acceptsXu": true,
-    "template": "drink",
     "agoMin": 10680,
-    "createdAt": "2026-10-10T08:00:00.000Z"
+    "createdAt": "2026-10-10T08:00:00.000Z",
+    "combo": {
+      "items": [
+        {
+          "postId": "4856cac66cb5332fcb85a658",
+          "qty": 2
+        },
+        {
+          "postId": "a6c9f01ff90cb1c2b5d15d00",
+          "qty": 1
+        }
+      ],
+      "comboPrice": 75000,
+      "listPrice": 85000
+    },
+    "promo": {
+      "kind": "percent",
+      "value": 10,
+      "from": "15:00",
+      "to": "18:00",
+      "days": [],
+      "active": true
+    }
   },
   {
     "_id": "19d7a1ab52a8a75503da3436",
@@ -1170,6 +1191,84 @@
       "status": "taken",
       "start": "2026-10-24T00:00:00+07:00",
       "allDay": true
+    }
+  },
+  {
+    "_id": "7a11c0b0c0ffee0000000001",
+    "kind": "food",
+    "title": "Combo trưa: Bowl rau củ + Mì xào hải sản",
+    "description": "Một phần bowl rau củ healthy và một phần mì xào hải sản, giao trưa trong khu.",
+    "images": [
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=375&fit=crop&q=70"
+    ],
+    "sellerId": "d3cb4d4e1a036f3674759c50",
+    "sellerName": "Chị Hoa",
+    "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
+    "block": "Block C",
+    "area": "Bcons",
+    "distance": 320,
+    "category": "Combo",
+    "price": 85000,
+    "priceUnit": "combo",
+    "rating": 4.3,
+    "reviewCount": 10,
+    "sold": 93,
+    "promoted": true,
+    "acceptsXu": true,
+    "agoMin": 3720,
+    "createdAt": "2026-10-10T08:00:00.000Z",
+    "combo": {
+      "items": [
+        {
+          "postId": "b20ba49e579f00d160a29367",
+          "qty": 1
+        },
+        {
+          "postId": "2229ab0ca991c313f731b807",
+          "qty": 1
+        }
+      ],
+      "comboPrice": 85000,
+      "listPrice": 95000
+    }
+  },
+  {
+    "_id": "7a11c0b0c0ffee0000000002",
+    "kind": "food",
+    "title": "Combo bánh: 1 ổ bánh kem dâu + 2 pancake",
+    "description": "Một ổ bánh kem dâu nhà làm và hai phần pancake mật ong, đặt trước 1 ngày.",
+    "images": [
+      "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=500&h=375&fit=crop&q=70"
+    ],
+    "sellerId": "c8fccc0c847821e97624849c",
+    "sellerName": "Tiệm Bánh Nhà Mây",
+    "sellerAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
+    "block": "A.304",
+    "area": "Bcons",
+    "distance": 200,
+    "category": "Combo",
+    "price": 310000,
+    "priceUnit": "combo",
+    "rating": 4.3,
+    "reviewCount": 10,
+    "sold": 60,
+    "promoted": true,
+    "acceptsXu": true,
+    "agoMin": 3000,
+    "createdAt": "2026-10-10T08:00:00.000Z",
+    "combo": {
+      "items": [
+        {
+          "postId": "11faf4fdf593cb5d96cde9e1",
+          "qty": 1
+        },
+        {
+          "postId": "b1c88c532540338a95346b95",
+          "qty": 2
+        }
+      ],
+      "comboPrice": 310000,
+      "listPrice": 350000
     }
   }
 ]
