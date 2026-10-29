@@ -3,6 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AppError } from '../../../core/models/api';
 import { REPORT_REASON_LABEL, ReportReason } from '../../../core/models/social';
+import { Order } from '../../../core/models/order';
 import { OrderService } from '../../../core/services/order';
 import { ReportService } from '../../../core/services/report';
 
@@ -18,26 +19,67 @@ export class ReportForm implements OnInit {
   private readonly orders = inject(OrderService);
   private readonly reports = inject(ReportService);
 
-  protected readonly reasons = Object.entries(REPORT_REASON_LABEL) as [ReportReason, string][];
+  protected readonly order = signal<Order | null>(null);
+  protected readonly pics = signal<string[]>([]);
+  protected readonly picks = signal<ReportReason[]>([]);
+  protected readonly tried = signal(false);
   protected readonly orderId = signal('');
   protected readonly title = signal('');
   protected readonly sent = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly form = new FormGroup({
-    reason: new FormControl<ReportReason | ''>('', { nonNullable: true, validators: [Validators.required] }),
-    detail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(10), Validators.maxLength(1000)] }),
+    detail: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(300)] }),
+    more: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
   });
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
     this.orderId.set(id);
-    this.orders.getOrder(id).subscribe({ next: (o) => this.title.set(`${o.code} · ${o.postTitle}`), error: () => this.title.set('') });
+    this.orders.getOrder(id).subscribe({ next: (o) => { this.order.set(o); this.title.set(`${o.code} · ${o.postTitle}`); }, error: () => this.title.set('') });
+  }
+
+  /** Lý do báo cáo gửi AntGo, câu chữ theo danh mục của đơn (mã gửi lên vẫn là bộ chung) */
+  protected reasons(): [ReportReason, string][] {
+    const o = this.order();
+    const k = o?.type === 'received' ? 'job' : (o?.kind ?? 'goods');
+    const m: Record<string, Record<ReportReason, string>> = {
+      food: { not_received: 'Không nhận được món', quality: 'Món không đúng mô tả / có vấn đề vệ sinh', payment: 'Vấn đề thanh toán', abuse: 'Bên bán có hành vi không phù hợp', other: 'Khác' },
+      goods: { not_received: 'Không nhận được hàng', quality: 'Hàng không đúng mô tả', payment: 'Vấn đề thanh toán', abuse: 'Bên bán có hành vi không phù hợp', other: 'Khác' },
+      service: { not_received: 'Người làm không đến / không thực hiện', quality: 'Làm không đúng thỏa thuận', payment: 'Vấn đề thanh toán / tính thêm tiền', abuse: 'Người làm có hành vi không phù hợp', other: 'Khác' },
+      job: { not_received: 'Người đăng không xuất hiện / hủy sát giờ', quality: 'Công việc không đúng như đã đăng', payment: 'Không được trả công đúng hẹn', abuse: 'Người đăng có hành vi không phù hợp', other: 'Khác' },
+    };
+    return Object.entries(m[k] ?? REPORT_REASON_LABEL) as [ReportReason, string][];
+  }
+
+  /** Chọn được nhiều lý do; "Khác" loại trừ các lý do còn lại và mở ô mô tả */
+  protected toggle(c: ReportReason): void {
+    this.picks.update((l) => (l.includes(c) ? l.filter((x) => x !== c) : c === 'other' ? [c] : [...l.filter((x) => x !== 'other'), c]));
+  }
+
+  protected needText(): boolean {
+    return this.picks().includes('other');
+  }
+
+  protected addPics(input: HTMLInputElement): void {
+    const urls = Array.from(input.files ?? []).map((f) => URL.createObjectURL(f));
+    this.pics.update((l) => [...l, ...urls].slice(0, 4));
+    input.value = '';
+  }
+
+  protected dropPic(u: string): void {
+    this.pics.update((l) => l.filter((x) => x !== u));
   }
 
   submit(): void {
-    if (this.form.invalid) return this.form.markAllAsTouched();
-    const v = this.form.getRawValue();
-    this.reports.create({ targetType: 'order', targetId: this.orderId(), reason: v.reason as ReportReason, detail: v.detail }).subscribe({
+    this.tried.set(true);
+    const text = this.form.controls.detail.value.trim();
+    if (!this.picks().length || (this.needText() && text.length < 10)) return;
+    const labels = new Map(this.reasons());
+    const why = [...this.picks().filter((c) => c !== 'other').map((c) => labels.get(c)), this.needText() ? text : ''].filter(Boolean).join('; ');
+    const more = this.form.controls.more.value.trim();
+    const detail = (why + (more ? '. ' + more : '')).slice(0, 1000);
+    const reason = this.picks().find((c) => c !== 'other') ?? 'other';
+    this.reports.create({ targetType: 'order', targetId: this.orderId(), reason, detail }).subscribe({
       next: () => this.sent.set(true),
       error: (e: Error) => {
         // 422 từ server: gắn lỗi vào đúng field

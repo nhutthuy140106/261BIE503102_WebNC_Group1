@@ -1,27 +1,30 @@
-<article class="item">
-  <div class="ph">
-    <div class="top">
+<article class="item jobc">
+  <a [routerLink]="['/posts/job', slug]" class="ph" [attr.aria-label]="job.title">
+    <div class="jc-top">
       <app-avatar [src]="job.sellerAvatar" [name]="job.sellerName" [size]="30" />
-      <span class="who"><b>{{ job.sellerName }}</b>{{ job.block }}</span>
-      <button type="button" class="save" (click)="toggleSave.emit(job)" [attr.aria-pressed]="saved"
-              [attr.aria-label]="saved ? 'Bỏ lưu' : 'Lưu việc'">
-        <svg class="i"><use [attr.href]="saved ? '#heartFill' : '#heart'" /></svg>
-      </button>
+      <span><b>{{ job.sellerName }}</b>{{ job.createdAt | ago }}</span>
     </div>
-    <a [routerLink]="['/posts/job', slug]" class="desc">{{ job.title }}</a>
-    <p class="detail">{{ job.description }}</p>
-    <div class="foot">
-      <span class="jpay">{{ job.price | number }}đ</span>
+    @if (job.description) { <p class="jc-desc">{{ job.description }}</p> }
+    <div class="jc-foot">
       @if (job.job?.due) {
-        <span class="due"><svg class="i"><use href="#clock" /></svg>{{ job.job?.due }}</span>
+        <span class="jc-due"><svg class="i"><use href="#clock" /></svg>{{ job.job | jobWhen }}</span>
       }
     </div>
-  </div>
+  </a>
+  <button type="button" class="save" [class.on]="savedSvc.has(job._id)" (click)="onSave($event)" [attr.aria-pressed]="savedSvc.has(job._id)"
+          [attr.aria-label]="savedSvc.has(job._id) ? 'Bỏ lưu' : 'Lưu việc'">
+    <svg class="i"><use [attr.href]="savedSvc.has(job._id) ? '#heartFill' : '#heart'" /></svg>
+  </button>
   <div class="body">
-    @if (job.job?.status === 'open') {
-      <span class="jst">Đang mở · {{ job.job?.offers }} đề nghị</span>
-    } @else {
-      <span class="jst closed">Đã có người nhận</span>
-    }
+    <h3><a [routerLink]="['/posts/job', slug]">{{ job.title }}</a></h3>
+    <div class="pr">{{ job.price | vnd }} @if (job | unit; as u) { <span>/ {{ u }}</span> }</div>
+    <div class="meta">
+      <span><svg class="i"><use href="#pin" /></svg>{{ job.block }}@if (job.distance != null) { · {{ job.distance | distance }} }</span>
+      @if (job.job?.status === 'taken') {
+        <span class="jst closed">Đã có người nhận</span>
+      } @else if (job.job) {
+        <span class="jst">{{ job.job?.offers ? job.job?.offers + ' đề nghị' : 'Chưa có đề nghị' }}</span>
+      }
+    </div>
   </div>
 </article>

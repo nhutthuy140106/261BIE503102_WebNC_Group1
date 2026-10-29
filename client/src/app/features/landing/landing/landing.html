@@ -1,0 +1,136 @@
+<div class="landing" [class.intro]="intro()" [class.pre]="pre()" [class.idle]="idle()">
+  <!-- màn mở đầu: lưới kẻ + nhãn góc + chữ AntGo, trời là chính phần .hero bị cắt bởi "cửa sổ" -->
+  <div class="igrid" [class.show]="introUi()"><i class="v1"></i><i class="v2"></i><i class="h1"></i><i class="h2"></i></div>
+  <span class="itag t1" [class.show]="introUi()">Một khu</span>
+  <span class="itag t2" [class.show]="introUi()">Một nhà</span>
+  <div [class]="'iword ' + word()">AntGo</div>
+
+  <section class="hero" [class.hidden]="heroHidden()" id="top">
+    <span class="ring r1"></span><span class="ring r2"></span>
+    <div class="cloud c4" [style.translate]="cloudShift(0.15)"><img src="assets/cloud.png" alt="" /></div>
+    <div class="cloud c3" [style.translate]="cloudShift(0.25)"><img src="assets/cloud.png" alt="" /></div>
+    <span class="flare f1"></span><span class="flare f2"></span><span class="flare f3"></span>
+
+    <div class="flyer" #flyer [class.pointing]="pointing()" [style.opacity]="flyerShown() ? 1 : 0" title="Bấm vào mình nè!" (click)="onFlyerClick()">
+      <div class="bob" #bob>
+        <div class="swapper" #swapper>
+          <div class="iflash" #flash></div>
+          <img class="rider point" src="assets/clean/ride_start.png" alt="" />
+          <img class="rider wave" src="assets/clean/ride_wave.png" alt="Linh vật AntGo cưỡi máy bay giấy" />
+          @for (p of puffs(); track p.id) {
+            <span
+              class="puff"
+              [style.left.px]="p.left"
+              [style.top.px]="p.top"
+              [style.width.px]="p.size"
+              [style.height.px]="p.size"
+              [style.background]="p.color"
+              [style.--vx]="p.vx + 'px'"
+              [style.--vy]="p.vy + 'px'"
+              [style.--dur]="p.dur + 's'"
+              [style.--delay]="p.delay + 's'"
+            ></span>
+          }
+        </div>
+        <div class="bubble" [class.show]="bubbleShow()" [innerHTML]="bubbleHtml()"></div>
+      </div>
+    </div>
+
+    <div class="cloud c1" [style.translate]="cloudShift(0.35)"><img src="assets/cloud.png" alt="" /></div>
+    <div class="cloud c2" [style.translate]="cloudShift(0.3)"><img src="assets/cloud.png" alt="" /></div>
+
+    <nav class="nav">
+      <a routerLink="/welcome"><img src="assets/clean/logo-sm.png" alt="AntGo" /></a>
+      <div class="links">
+        <a routerLink="/">Khám phá</a>
+        <a routerLink="/auth/login">Đăng nhập</a>
+      </div>
+    </nav>
+
+    <div class="hc" [style.opacity]="textOpacity()" [style.transform]="'translateY(' + textShift() + 'px)'">
+      <span class="chip tag">Dành cho cư dân trong khu</span>
+      <h1>Một khu, <span class="ico"><img src="assets/clean/ant-tile.png" alt="" /></span> một nhà.</h1>
+      <p class="sub">Mua bán, đặt dịch vụ, nhận việc vặt, ngay trong khu bạn sống.</p>
+      <div class="ctas">
+        <a class="pill glass" routerLink="/" (mouseenter)="onCtaEnter()" (mouseleave)="onCtaLeave()">Bắt đầu khám phá</a>
+        <a class="pill ghost" routerLink="/seller">Tôi muốn đăng bài</a>
+      </div>
+    </div>
+
+    <a class="next tag" routerLink="/welcome" fragment="about">[01] · AntGo là gì</a>
+    <button class="replay" type="button" (click)="play()">↻ Xem lại</button>
+  </section>
+
+  <section class="about" id="about">
+    <div class="tag rv" appReveal>[01] · AntGo là gì</div>
+    <p class="big rv" appReveal>
+      AntGo là khu chợ nhỏ
+      <span class="pic t1"><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&h=140&fit=crop&q=70" alt="" /></span>
+      của chung cư bạn, nơi hàng xóm bán món nhà làm, nhận giặt sấy, sửa máy
+      <span class="pic t2"><img src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=200&h=140&fit=crop&q=70" alt="" /></span>
+      và nhờ nhau những việc vặt
+      <span class="pic ant"><img src="assets/clean/ant-head.png" alt="" /></span>
+      bằng chút <em>thân quen</em>.
+    </p>
+    <p class="grey rv" appReveal>
+      Người thật trong khu, đăng nhập bằng số điện thoại. Trả tiền trực tiếp cho nhau, AntGo không giữ tiền. Địa chỉ nhà chỉ hiện khi đã chốt đơn.
+    </p>
+  </section>
+
+  <section class="work" id="work">
+    <div class="head">
+      <div class="tag rv" appReveal>[02] · Có gì trong khu</div>
+      <h2 class="rv" appReveal>Bốn thứ hàng xóm hay cần,<br /><span>gom về một chỗ.</span></h2>
+    </div>
+    <div class="tiles">
+      <a class="tile rv" [appReveal]="0" routerLink="/search" [queryParams]="{ kind: 'food' }">
+        <div class="ph"><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&h=790&fit=crop&q=75" alt="Cơm nhà làm" /></div>
+        <div class="cap"><b>Đồ ăn &amp; uống</b><span class="tag">Cơm nhà làm · Trà sữa · Giao tận cửa</span></div>
+      </a>
+      <a class="tile rv" [appReveal]="120" routerLink="/search" [queryParams]="{ kind: 'goods' }">
+        <div class="ph"><img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&h=790&fit=crop&q=75" alt="Sofa" /></div>
+        <div class="cap"><b>Đồ dùng</b><span class="tag">Đồ cũ còn tốt · Tự đến lấy</span></div>
+      </a>
+      <a class="tile rv" [appReveal]="0" routerLink="/search" [queryParams]="{ kind: 'service' }">
+        <div class="ph"><img src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=1200&h=790&fit=crop&q=75" alt="Giặt sấy" /></div>
+        <div class="cap"><b>Dịch vụ</b><span class="tag">Giặt sấy · Sửa máy · Dọn nhà</span></div>
+      </a>
+      <a class="tile rv" [appReveal]="120" routerLink="/search" [queryParams]="{ kind: 'job' }">
+        <div class="ph jobs">
+          <div class="jcard">
+            <div class="who">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70" alt="" />
+              <span><b>Chị Hoa</b><small>Block A · việc mẫu</small></span>
+            </div>
+            <p>Mua đồ chợ sáng giúp nhà mình</p>
+            <div class="row"><span class="pay">50.000đ <small>/ lần</small></span><span class="open">Đang mở</span></div>
+          </div>
+        </div>
+        <div class="cap"><b>Việc làm</b><span class="tag">Việc vặt · Nhận tiền công</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="start" id="start">
+    <div class="cbox rv" appReveal>
+      <span class="flare f1"></span><span class="flare f2"></span>
+      <div class="cloud c1"><img src="assets/cloud.png" alt="" /></div>
+      <div class="cloud c2"><img src="assets/cloud.png" alt="" /></div>
+      <div class="tag">[03] · Bắt đầu</div>
+      <p class="q">Sẵn sàng làm quen hàng xóm?</p>
+      <p class="t">Đặt một phần cơm, nhờ một việc vặt, hay mở một gian hàng nhỏ, mọi thứ bắt đầu từ khu bạn ở.</p>
+      <div class="ctas">
+        <a class="pill glass" routerLink="/">Bắt đầu khám phá</a>
+        <a class="pill ghost" routerLink="/seller">Tôi muốn đăng bài</a>
+      </div>
+      <div class="hang"><img src="assets/clean/spider.png" alt="" /></div>
+    </div>
+  </section>
+
+  <footer class="lfoot">
+    <img src="assets/clean/logo-sm.png" alt="AntGo" />
+    <span>© 2026 AntGo · Ứng dụng kết nối hàng xóm trong khu</span>
+    <span class="sp"></span>
+    <a routerLink="/welcome" fragment="top">Lên đầu trang</a>
+  </footer>
+</div>

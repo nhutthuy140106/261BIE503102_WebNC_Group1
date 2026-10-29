@@ -1,6 +1,14 @@
-<app-header />
-<main class="container page">
+@if (!bare()) {
+  <app-header />
+}
+<main [class]="bare() ? '' : 'container page'">
   <router-outlet />
 </main>
-<app-footer />
-<app-xu-drawer />
+@if (!bare()) {
+  <app-footer />
+  <app-drawers />
+  <app-area-dialog />
+  <app-chat-widget />
+  <app-ant-parade />
+}
+<app-toast />

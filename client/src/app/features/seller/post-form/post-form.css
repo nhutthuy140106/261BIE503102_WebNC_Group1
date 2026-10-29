@@ -14,3 +14,20 @@ h1 { font-size: 28px; letter-spacing: -.02em; }
 .add:hover { border-color: var(--ink); color: var(--ink); }
 .note { font-size: 13px; margin-bottom: 12px; }
 .acts { display: flex; gap: 8px; }
+
+.hint { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--line, #F0E2DC); border-radius: 10px; background: var(--soft, #FBF4F1); display: grid; gap: 4px; justify-items: start; font-size: 14px; }
+.hint .muted { color: #6b7280; }
+.hint .btn-ghost { margin-top: 4px; padding: 6px 12px; border: 1px solid var(--accent, #D85A1C); color: var(--accent, #D85A1C); background: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+.promo { margin: 0 0 16px; padding: 12px 14px; border: 1px solid #F0E2DC; border-radius: 12px; background: #FBF4F1; display: grid; gap: 10px; }
+.promo legend { padding: 0 6px; font-weight: 600; color: #22304A; }
+.promo .prow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.promo .days { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.promo .days button { min-width: 40px; height: 32px; padding: 0 8px; border: 1px solid #e3d3cb; border-radius: 8px; background: #fff; color: #22304A; cursor: pointer; }
+.promo .days button.on { background: #22304A; border-color: #22304A; color: #fff; }
+.promo .pvw { margin: 0; }
+@media (max-width: 640px) { .promo .prow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.combof .citem { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px solid #F0E2DC; }
+.combof .qty { display: inline-flex; align-items: center; gap: 8px; }
+.combof .qty button { width: 30px; height: 30px; border: 1px solid #e3d3cb; border-radius: 8px; background: #fff; color: #22304A; cursor: pointer; }

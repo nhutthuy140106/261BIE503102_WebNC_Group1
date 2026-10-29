@@ -1,0 +1,20 @@
+.pg { max-width: 460px; margin: 0 auto; padding: 12px 0 28px; display: grid; gap: 12px; text-align: center; }
+.back { justify-self: start; display: inline-flex; align-items: center; gap: 4px; color: #22304A; font-size: 14px; }
+h1 { margin: 0; font-size: 26px; color: #22304A; }
+.sub, .cap { margin: 0; color: #4b5563; font-size: 14px; }
+.pet { display: grid; justify-items: center; gap: 6px; padding: 18px; border: 1px solid #F0E2DC; border-radius: 16px; background: #FBF4F1; color: #22304A; }
+.pet img { object-fit: contain; }
+.pet[data-act='feed'] img, .pet[data-act='bath'] img { animation: bounce .6s ease; }
+.pet[data-act='play'] img { animation: spin .8s ease; }
+@keyframes bounce { 40% { transform: translateY(-14px); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; text-align: left; }
+.tasks li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 1px solid #F0E2DC; border-radius: 12px; background: #fff; }
+.tasks small { display: block; color: #6b7280; }
+.tasks li.ok { background: #f1f8f3; border-color: #cfe5d6; }
+.tasks button { padding: 8px 18px; border: 1px solid #D85A1C; border-radius: 10px; background: #fff; color: #D85A1C; font-weight: 600; cursor: pointer; }
+.tasks button:disabled { border-color: #cfe5d6; color: #1f7a4d; cursor: default; }
+.claim { justify-self: center; padding: 12px 28px; background: #D85A1C; color: #fff; font-size: 16px; border: 0; border-radius: 12px; font-weight: 700; cursor: pointer; }
+.claim:disabled { background: #cbbfb8; cursor: not-allowed; }
+.claimed { margin: 0; color: #1f7a4d; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .pet img { animation: none !important; } }

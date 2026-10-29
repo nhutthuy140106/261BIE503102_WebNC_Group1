@@ -98,6 +98,16 @@ const POSTS = [
   { key: 'laptop', type: 'service', category: 'Dịch vụ', title: 'Sửa laptop, điện thoại — kiểm tra tận nơi', description: 'Sửa laptop điện thoại, kiểm tra tận nơi, báo giá trước khi sửa.', price: 50000, unit: 'kiểm tra', seller: 'tung', area: 'Shop 7', distance: 600, images: [IMG.laptop], fulfillmentModes: ['delivery'], needSchedule: true, questions: [{ label: 'Mô tả lỗi', required: true }], daysAgo: 8 },
   { key: 'giaonhan', type: 'service', category: 'Dịch vụ', title: 'Giao nhận hộ trong khu', description: 'Lấy giúp và giao hộ đồ trong khu, đồ dưới 10kg, nhận hộ shipper.', price: 20000, unit: 'lượt', seller: 'minh', area: 'B', distance: 200, images: [IMG.don], fulfillmentModes: ['delivery'], questions: [{ label: 'Kích thước đồ (dưới 10kg?)', required: true }], daysAgo: 9 },
 
+  { key: 'xoi', type: 'food', category: 'Đồ ăn', title: 'Xôi mặn sáng, đủ topping', description: 'Xôi mặn với chà bông, trứng cút, lạp xưởng, ăn sáng no lâu.', price: 20000, unit: 'phần', seller: 'ba', area: 'A', distance: 340, images: [IMG.com], ...DELIVER, deliveryFee: 6000, daysAgo: 1 },
+  { key: 'bunCha', type: 'food', category: 'Đồ ăn', title: 'Bún chả Hà Nội, nem rán giòn', description: 'Bún chả nướng than, nước chấm chua ngọt, nem rán giòn, bữa trưa đầy đủ.', price: 42000, unit: 'suất', seller: 'tu', area: 'D', distance: 270, images: [IMG.mi], ...DELIVER, deliveryFee: 8000, daysAgo: 2 },
+  { key: 'comChay', type: 'food', category: 'Đồ ăn', title: 'Cơm chay thập cẩm', description: 'Cơm chay với đậu hũ, nấm xào, rau luộc, món chay thanh đạm.', price: 32000, unit: 'phần', seller: 'sach', area: 'A', distance: 310, images: [IMG.dau], ...DELIVER, deliveryFee: 6000, daysAgo: 4 },
+  { key: 'suaChua', type: 'food', category: 'Đồ uống', title: 'Sữa chua nếp cẩm tự làm', description: 'Sữa chua nếp cẩm mát lạnh, làm trong ngày, món tráng miệng và đồ uống.', price: 22000, unit: 'hũ', seller: 'may', area: 'Shop 3', distance: 220, images: [IMG.trasua], ...DELIVER, deliveryFee: 5000, daysAgo: 5 },
+  { key: 'banhFlan', type: 'food', category: 'Đồ ăn', title: 'Bánh flan caramel hộp 4 cái', description: 'Bánh flan caramel mềm mịn, hộp bốn cái, tráng miệng cho gia đình.', price: 36000, unit: 'hộp', seller: 'lan', area: 'B', distance: 160, images: [IMG.salad], ...DELIVER, deliveryFee: 7000, daysAgo: 6 },
+  { key: 'bep', type: 'goods', category: 'Đồ dùng', title: 'Bếp từ đơn Sunhouse, còn bảo hành', description: 'Bếp từ đơn đồ gia dụng nhà bếp còn bảo hành, nấu nhanh, tiết kiệm điện.', price: 420000, unit: 'cái', seller: 'ngan', area: 'B', distance: 190, images: [IMG.noi], fulfillmentModes: ['pickup'], oneTime: true, daysAgo: 3 },
+  { key: 'giay', type: 'goods', category: 'Đồ dùng', title: 'Giày chạy bộ size 41, mới đi 3 lần', description: 'Giày chạy bộ thể thao size 41, mới đi ba lần, nhượng lại giá rẻ.', price: 350000, unit: 'đôi', seller: 'tuan', area: 'D', distance: 430, images: [IMG.xeDap], ...DELIVER, deliveryFee: 15000, oneTime: true, daysAgo: 8 },
+  { key: 'cat', type: 'service', category: 'Dịch vụ', title: 'Cắt tóc nam tại nhà', description: 'Cắt tóc nam tại nhà, gọn gàng nhanh chóng, tự mang dụng cụ.', price: 70000, unit: 'lần', seller: 'minh', area: 'B', distance: 210, images: [IMG.don], fulfillmentModes: ['delivery'], needSchedule: true, daysAgo: 7 },
+  { key: 'nail', type: 'service', category: 'Dịch vụ', title: 'Làm móng tay, sơn gel tại nhà', description: 'Làm móng tay sơn gel tại nhà, mẫu đơn giản, dụng cụ vô trùng.', price: 120000, unit: 'bộ', seller: 'phuong', area: 'D', distance: 380, images: [IMG.don], fulfillmentModes: ['delivery'], needSchedule: true, daysAgo: 9 },
+
   // ---- Bài bị gỡ (dữ liệu mẫu cho trang Quản trị) ----
   { key: 'vipham', type: 'goods', category: 'Đồ dùng', title: 'Điện thoại giá rẻ bất ngờ, chuyển khoản trước', description: 'Bài mẫu bị gỡ vì yêu cầu chuyển khoản trước, nghi ngờ lừa đảo.', price: 500000, unit: 'cái', seller: 'vp', area: 'C', distance: 700, images: [IMG.taiNghe], fulfillmentModes: ['pickup'], status: 'hidden', hiddenReason: 'Yêu cầu chuyển khoản trước, nghi ngờ lừa đảo', statusBeforeHidden: 'open', daysAgo: 12 },
 ];
@@ -115,7 +125,36 @@ const JOBS = [
   { key: 'tohop', title: 'Phát tờ rơi quán mới trong khu', category: 'Việc vặt', desc: 'Phát 200 tờ rơi cho các căn hộ trong Block B, có người dẫn đường.', pay: 120000, unit: 'buổi', workTime: 'Chủ nhật · 8:00', area: 'B', distance: 250, poster: 'may', exactAddress: 'Quán Nhà Mây, Shop 5', daysAgo: 3 },
   { key: 'anh', title: 'Chụp ảnh sản phẩm tại nhà', category: 'Việc vặt', desc: 'Chụp khoảng 15 món đồ thủ công để đăng bán, có đèn và phông sẵn.', pay: 250000, unit: 'buổi', workTime: 'Cuối tuần', area: 'A', distance: 480, poster: 'ba', exactAddress: 'Căn A-0204, Block A', daysAgo: 4 },
   { key: 'anhVan', title: 'Dạy tiếng Anh giao tiếp cho bé lớp 3', category: 'Gia sư', desc: 'Bé cần luyện nói tiếng Anh cơ bản, mỗi buổi 60 phút tại nhà.', pay: 120000, unit: 'buổi', workTime: 'Tối T2 & T4', area: 'D', distance: 510, poster: 'khoa', exactAddress: 'Căn D-0501, Block D', daysAgo: 5 },
+  { key: 'nauAn', title: 'Nấu giúp bữa tối cho 4 người', category: 'Việc nhà', desc: 'Nấu 3 món gia đình, nguyên liệu mua sẵn, nấu tại bếp nhà mình.', pay: 150000, unit: 'buổi', workTime: 'Thứ sáu · 17:00', area: 'B', distance: 260, poster: 'ha', exactAddress: 'Căn B-0203, Block B', daysAgo: 2 },
+  { key: 'lapTu', title: 'Lắp giúp tủ quần áo IKEA', category: 'Việc vặt', desc: 'Tủ 2 cánh còn nguyên hộp, cần người có tua vít điện, khoảng 2 giờ.', pay: 180000, unit: 'lần', workTime: 'Thứ bảy · 14:00', area: 'C', distance: 400, poster: 'tung', exactAddress: 'Căn C-0102, Block C', daysAgo: 1 },
   { key: 'xong', title: 'Nhận hộ gói hàng khi vắng nhà', category: 'Mua hộ', desc: 'Nhận hộ một gói hàng lúc 15:00 và để ở sảnh, mình về lấy sau.', pay: 25000, unit: 'lần', workTime: 'Hôm qua · 15:00', area: 'C', distance: 330, poster: 'tung', exactAddress: 'Căn C-0102, Block C', status: 'done', daysAgo: 6 },
 ];
 
-module.exports = { USERS, POSTS, JOBS, img };
+// Combo (cùng người bán, rẻ hơn mua lẻ). items: [key bài thành phần, số lượng]; seed.js tạo SAU các bài thường để có id.
+const COMBOS = [
+  { key: 'comboTrua', seller: 'lan', title: 'Combo bữa trưa nhà làm: cơm + đậu sốt cà chua + bánh flan', description: 'Combo trưa của Bếp Cô Lan: một phần cơm nhà, đậu sốt cà chua và bánh flan tráng miệng, rẻ hơn mua lẻ.', area: 'B', distance: 150, unit: 'combo', comboPrice: 79000, items: [['com', 1], ['dau', 1], ['banhFlan', 1]], image: 'com', deliveryFee: 7000, daysAgo: 1 },
+  { key: 'comboPhoDoi', seller: 'tu', title: 'Combo hai người: phở bò tái + bún chả', description: 'Combo cho hai người của Quán Phở Bà Tư: một tô phở bò tái và một suất bún chả Hà Nội.', area: 'D', distance: 250, unit: 'combo', comboPrice: 79000, items: [['pho', 1], ['bunCha', 1]], image: 'pho', deliveryFee: 8000, daysAgo: 2 },
+  { key: 'comboGiaiKhat', seller: 'may', title: 'Combo giải khát: cà phê sữa đá + trà sữa trân châu', description: 'Hai ly đồ uống của Quán Nhà Mây: cà phê sữa đá và trà sữa trân châu đường đen.', area: 'Shop 3', distance: 200, unit: 'combo', comboPrice: 49000, items: [['cafe', 1], ['trasua', 1]], image: 'cafe', deliveryFee: 5000, acceptsXu: true, daysAgo: 3 },
+  { key: 'comboSang', seller: 'ba', title: 'Combo sáng no bụng: xôi mặn + cháo sườn + 2 bánh mì que', description: 'Bữa sáng của Cô Ba: xôi mặn đủ topping, cháo sườn nóng và hai bánh mì que pate.', area: 'A', distance: 340, unit: 'combo', comboPrice: 55000, items: [['xoi', 1], ['chao', 1], ['banhmi', 2]], image: 'dau', deliveryFee: 6000, daysAgo: 4 },
+];
+// Giờ vàng (giờ Việt Nam). Các khung nối nhau để MỌI giờ trong ngày luôn có 1–2 bài đang giảm (demo luôn thấy):
+// 01–07 giặt sấy · 06–10 sáng · 10–14 trưa · 14–17 giải khát · 17–21 tối · 21–02 ăn khuya (vắt qua nửa đêm). Cuối tuần thêm rau củ.
+const EVERY = [0, 1, 2, 3, 4, 5, 6];
+const PROMOS = {
+  giat: { kind: 'amount', value: 3000, from: '01:00', to: '07:00', days: EVERY },
+  banhmi: { kind: 'percent', value: 20, from: '06:00', to: '10:00', days: EVERY },
+  chao: { kind: 'percent', value: 15, from: '06:00', to: '10:00', days: EVERY },
+  com: { kind: 'percent', value: 15, from: '10:00', to: '14:00', days: EVERY },
+  trasua: { kind: 'percent', value: 20, from: '14:00', to: '17:00', days: EVERY },
+  cafe: { kind: 'amount', value: 5000, from: '14:00', to: '17:00', days: EVERY },
+  pho: { kind: 'percent', value: 10, from: '17:00', to: '21:00', days: EVERY },
+  bunCha: { kind: 'amount', value: 6000, from: '17:00', to: '21:00', days: EVERY },
+  mi: { kind: 'percent', value: 25, from: '21:00', to: '02:00', days: EVERY }, // khung vắt qua nửa đêm
+  rau: { kind: 'percent', value: 10, from: '09:00', to: '12:00', days: [0, 6] },
+};
+for (const p of POSTS) if (PROMOS[p.key]) p.promo = { active: true, ...PROMOS[p.key] };
+
+// Giờ vàng cho combo (khung 17–21, giảm thêm 10%): combo cũng chạy được khuyến mãi
+const COMBO_PROMOS = { comboGiaiKhat: { kind: 'percent', value: 10, from: '15:00', to: '18:00', days: EVERY, active: true } };
+
+module.exports = { USERS, POSTS, JOBS, COMBOS, COMBO_PROMOS, IMG, img };

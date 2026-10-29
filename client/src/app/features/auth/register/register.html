@@ -1,33 +1,139 @@
-<section class="box">
-  <h1>Đăng ký</h1>
-  <p class="sub">Tạo tài khoản để mua, bán và nhận việc trong khu.</p>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-    <div class="field">
-      <label for="name">Họ và tên</label>
-      <input id="name" formControlName="name" [class.is-invalid]="invalid('name')" />
-      @if (invalid('name')) { <small class="error">Bạn chưa nhập họ tên.</small> }
-    </div>
-    <div class="field">
-      <label for="phone">Số điện thoại</label>
-      <input id="phone" formControlName="phone" autocomplete="tel" inputmode="numeric" maxlength="10" [class.is-invalid]="invalid('phone')" />
-      @if (invalid('phone')) { <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small> }
-    </div>
-    <div class="field">
-      <label for="password">Mật khẩu</label>
-      <input id="password" type="password" formControlName="password" autocomplete="new-password" [class.is-invalid]="invalid('password')" />
-      @if (invalid('password')) { <small class="error">Mật khẩu tối thiểu 6 ký tự.</small> }
-    </div>
-    <div class="field">
-      <label for="confirmPass">Nhập lại mật khẩu</label>
-      <input id="confirmPass" type="password" formControlName="confirmPass" autocomplete="new-password"
-             [class.is-invalid]="form.errors?.['mismatch'] && form.controls.confirmPass.touched" />
-      @if (form.errors?.['mismatch'] && form.controls.confirmPass.touched) {
-        <small class="error">Mật khẩu nhập lại không khớp.</small>
-      }
-    </div>
+<app-auth-shell [centered]="true" [wide]="step() === 3" [showAnt]="false" [showGoogle]="false">
+  @if (step() < 4) {
+  <ol class="steps" aria-label="Các bước đăng ký">
+    @for (s of stepNames; track s; let i = $index) {
+      <li [class.on]="step() >= i + 1" [class.now]="step() === i + 1" [class.done]="step() > i + 1">
+        <span class="dot">@if (step() > i + 1) { ✓ } @else { {{ i + 1 }} }</span>
+        <span class="lbl">{{ s }}</span>
+      </li>
+    }
+  </ol>
+  }
 
-    @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
-    <button type="submit" class="btn" [disabled]="form.invalid">Tạo tài khoản</button>
-  </form>
-  <p class="muted alt">Đã có tài khoản? <a routerLink="/auth/login">Đăng nhập</a></p>
-</section>
+  @switch (step()) {
+    @case (1) {
+      <h1>Đăng ký</h1>
+      <p class="why">Nhập số điện thoại, AntGo sẽ gửi mã xác nhận để chắc đây là bạn.</p>
+      <form class="narrow" (ngSubmit)="sendCode()" novalidate>
+        <label for="phone">Số điện thoại</label>
+        <input id="phone" class="tx" [formControl]="phone" autocomplete="tel" inputmode="numeric" maxlength="10" [class.is-invalid]="invalid(phone)" />
+        @if (invalid(phone)) { <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small> }
+        <button type="submit" class="go" [disabled]="phone.invalid">Gửi mã xác nhận</button>
+      </form>
+    }
+    @case (2) {
+      <h1>Nhập mã xác nhận</h1>
+      <p class="why">Mã 6 số đã gửi tới <b>{{ maskedPhone }}</b>.</p>
+      <form class="narrow" (ngSubmit)="verify()" novalidate>
+        <label for="otp">Mã xác nhận</label>
+        <input id="otp" class="tx otp" [formControl]="otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••" [class.is-invalid]="invalid(otp)" />
+        @if (invalid(otp)) { <small class="error">Mã gồm 6 chữ số.</small> }
+        @if (error()) { <small class="error" role="alert">{{ error() }}</small> }
+        <button type="submit" class="go" [disabled]="otp.invalid">Xác nhận</button>
+        <p class="demo">Bản mẫu: chưa gửi SMS thật, bạn nhập 6 số bất kỳ để tiếp tục.</p>
+        <div class="resend">
+          <button type="button" class="lnk plain" (click)="back()">Quay lại</button>
+          @if (countdown() > 0) {
+            <span>Mã hết hạn sau {{ countdown() }} giây</span>
+          } @else {
+            <button type="button" class="lnk" (click)="resend()">Gửi lại mã</button>
+          }
+        </div>
+      </form>
+    }
+    @case (4) {
+      <div class="okbox">
+        <img src="assets/clean/ant-done.png" alt="" />
+        <h1>Đăng ký thành công!</h1>
+        <p class="why">Chào mừng {{ fullName() }} đến với AntGo. Bạn được tặng <b>30 Xu</b> chào hàng xóm mới, dùng để đổi voucher khi đặt hàng.</p>
+        <a routerLink="/auth/login" class="go gobtn">Đăng nhập</a>
+      </div>
+    }
+    @case (3) {
+      <h1>Chào hàng xóm mới!</h1>
+      <p class="why">Chỉ còn vài thông tin để tạo tài khoản cho số {{ phone.value }}.</p>
+      <form [formGroup]="info" (ngSubmit)="onSubmit()" novalidate>
+        <h2 class="grp">Tài khoản</h2>
+        <!-- tên đăng nhập = số điện thoại: để trình duyệt lưu mật khẩu theo số điện thoại chứ không theo họ tên -->
+        <input type="text" class="hid-user" name="username" autocomplete="username" tabindex="-1" aria-hidden="true" [value]="phone.value" readonly />
+        <div class="row">
+          <div class="cell full">
+            <label for="name">Họ và tên</label>
+            <input id="name" class="tx" formControlName="name" autocomplete="name" [class.is-invalid]="invalid(info.controls.name)" />
+            @if (invalid(info.controls.name)) { <small class="error">Bạn chưa nhập họ tên.</small> }
+          </div>
+          <div class="cell">
+            <label for="password">Mật khẩu</label>
+            <app-password-input inputId="password" autocomplete="new-password" formControlName="password" [invalid]="invalid(info.controls.password)" />
+            @if (invalid(info.controls.password) && !info.controls.password.value) { <small class="error">Bạn chưa nhập mật khẩu.</small> }
+          </div>
+          <div class="cell">
+            <label for="confirmPass">Nhập lại mật khẩu</label>
+            <app-password-input inputId="confirmPass" autocomplete="new-password" formControlName="confirmPass" [invalid]="!!info.errors?.['mismatch'] && info.controls.confirmPass.touched" />
+            @if (info.errors?.['mismatch'] && info.controls.confirmPass.touched) {
+              <small class="error">Mật khẩu nhập lại không khớp.</small>
+            }
+          </div>
+        </div>
+        @if (info.controls.password.value) {
+          <div class="meter" [attr.data-level]="strength()" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <p class="meter-label" [attr.data-level]="strength()">Độ mạnh: <b>{{ strengthLabel() }}</b></p>
+          <ul class="rules">
+            @for (r of rules(); track r.key) { <li [class.ok]="r.ok">{{ r.label }}</li> }
+          </ul>
+          @if (guessable()) { <small class="error">Mật khẩu này quá dễ đoán, hãy chọn mật khẩu khác.</small> }
+        }
+
+        <h2 class="grp">Nơi bạn ở</h2>
+        <div class="row three">
+          <div class="cell">
+            <label for="areaId">Khu</label>
+            <app-select inputId="areaId" formControlName="areaId" [options]="areaOptions" placeholder="Chọn khu" [invalid]="invalid(info.controls.areaId)" />
+          </div>
+          <div class="cell">
+            <label for="building">{{ area()?.buildingLabel ?? 'Tòa' }}</label>
+            <app-select inputId="building" formControlName="building" [options]="buildingOptions()" [placeholder]="area() ? 'Chọn' : '—'" [invalid]="invalid(info.controls.building)" />
+          </div>
+          <div class="cell">
+            <label for="unit">{{ area()?.unitLabel ?? 'Phòng' }}</label>
+            <input id="unit" class="tx" formControlName="unit" maxlength="10" [placeholder]="area()?.unitHint ?? '—'" [class.is-invalid]="invalid(info.controls.unit)" />
+          </div>
+        </div>
+        @if (invalid(info.controls.areaId)) { <small class="error">Hãy chọn khu bạn đang ở.</small> }
+        @else if (invalid(info.controls.building)) { <small class="error">Hãy chọn {{ area()?.buildingLabel?.toLowerCase() }} của bạn.</small> }
+        @else if (invalid(info.controls.unit)) { <small class="error">Nhập số {{ area()?.unitLabel?.toLowerCase() }} (chữ và số, không dấu cách).</small> }
+        <p class="fine">Chỉ dùng làm địa chỉ nhận hàng mặc định, không hiện công khai.</p>
+
+        <div class="terms">
+          <label class="check">
+            <input type="checkbox" formControlName="agreeTerms" />
+            <span>Tôi đã đọc và đồng ý với <a routerLink="/legal/terms" target="_blank">Điều khoản sử dụng</a> và <a routerLink="/legal/privacy" target="_blank">Chính sách quyền riêng tư</a> của AntGo, gồm việc AntGo xử lý dữ liệu cá nhân của tôi theo chính sách đó.</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" formControlName="agreeLiability" />
+            <span>Tôi hiểu AntGo chỉ là nền tảng kết nối. Giao dịch diễn ra trực tiếp giữa người dùng với nhau và tôi tự chịu trách nhiệm về các giao dịch, thông tin do tôi cung cấp.</span>
+          </label>
+          <label class="check optional">
+            <input type="checkbox" formControlName="marketing" />
+            <span>Tôi muốn nhận thông tin ưu đãi và tin mới từ AntGo <em>(không bắt buộc)</em>.</span>
+          </label>
+          <label class="check all">
+            <input type="checkbox" [checked]="requiredAgreed()" (change)="agreeRequired($any($event.target).checked)" />
+            <span><b>Đồng ý tất cả các mục bắt buộc</b></span>
+          </label>
+          @if (info.controls.agreeTerms.touched && info.controls.agreeTerms.invalid || info.controls.agreeLiability.touched && info.controls.agreeLiability.invalid) {
+            <small class="error">Bạn cần đồng ý 2 mục đầu để tạo tài khoản.</small>
+          }
+        </div>
+
+        @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+        <button type="submit" class="go narrow" [disabled]="info.invalid || guessable() || submitting()">Tạo tài khoản</button>
+      </form>
+    }
+  }
+
+  @if (step() === 3) {
+    <button type="button" class="lnk back-step" (click)="back()">Quay lại</button>
+  }
+  @if (step() < 4) { <p class="alt" foot>Đã có tài khoản? <a routerLink="/auth/login">Đăng nhập</a></p> }
+</app-auth-shell>

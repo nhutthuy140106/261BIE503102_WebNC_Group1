@@ -1,0 +1,9 @@
+.backdrop { position: fixed; inset: 0; z-index: 90; background: rgba(34, 48, 74, .28); display: flex; align-items: flex-start; justify-content: center; padding: 95px 16px 16px; }
+.dialog { width: 420px; max-width: 100%; background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 24px 60px rgba(34, 48, 74, .22); color: var(--ink); }
+.dialog h2 { font-size: 19px; margin: 0 0 5px; }
+.dialog p { margin: 0 0 18px; color: var(--smoke); }
+.choices { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.choices button { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: #fff; text-align: left; font-weight: 600; }
+.choices button:hover, .choices button.on { border-color: var(--ink); background: var(--soft); }
+.foot { display: flex; justify-content: flex-end; margin-top: 18px; }
+.foot button { padding: 9px 14px; border: 1px solid var(--border); border-radius: 9px; background: #fff; }

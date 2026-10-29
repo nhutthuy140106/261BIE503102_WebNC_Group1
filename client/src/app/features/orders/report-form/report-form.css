@@ -1,6 +1,53 @@
-:host { display: block; max-width: 620px; }
-h1 { font-size: 28px; letter-spacing: -.02em; margin-top: 16px; }
-form { display: grid; gap: 4px; margin-top: 20px; padding: 22px; border: 1px solid var(--border); border-radius: 16px; background: #fff; }
-form .field select, form .field textarea { width: 100%; }
-form .notice { margin: 8px 0; }
-form .btn { justify-self: start; }
+:host { display: block; max-width: 620px; margin: 0 auto; padding-bottom: 40px; }
+.back { display: inline-block; margin-top: 8px; color: var(--smoke); font-size: 14px; }
+.back:hover { color: var(--ink); }
+h1 { font-size: 26px; letter-spacing: -.02em; margin: 10px 0 18px; }
+.rorder { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: #F6F7F9; }
+.rorder app-order-thumb { flex: none; }
+.rorder ::ng-deep .th { width: 64px; height: 56px; border-radius: 8px; }
+.rorder ::ng-deep .ph small { display: none; }
+.rorder > span { display: grid; gap: 2px; min-width: 0; }
+.rorder b { font-size: 14.5px; font-weight: 600; line-height: 1.3; }
+.rorder small { color: var(--smoke); font-size: 12.5px; }
+form { margin-top: 22px; display: grid; gap: 22px; }
+.rnote { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--smoke); }
+.rf { display: grid; gap: 8px; }
+.rf > label { font-weight: 600; font-size: 15px; }
+.rf > label span { font-weight: 400; color: var(--smoke); font-size: 13px; }
+.rlist { border-top: 1px solid #ECEEF2; }
+.rlist button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 52px; padding: 0 2px; border: 0; border-bottom: 1px solid #ECEEF2; background: none; color: var(--ink); font-size: 14.5px; text-align: left; }
+.rlist button::after { content: ''; flex: none; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #B9BEC8; }
+.rlist button:hover::after { border-color: var(--ink); }
+.rlist button.on { font-weight: 600; }
+.rlist button.on::after { border-color: var(--accent); background: radial-gradient(var(--accent) 42%, transparent 46%); }
+.rf.bad .rlist { outline: 2px solid #E8693A; outline-offset: 2px; border-radius: 8px; }
+textarea { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font: inherit; resize: vertical; outline: none; }
+textarea:focus { border-color: var(--ink); }
+.error { color: #C2410C; font-size: 13px; }
+.rpics { display: flex; flex-wrap: wrap; gap: 8px; }
+.rpic { position: relative; width: 72px; height: 72px; border-radius: 8px; overflow: hidden; }
+.rpic img { width: 100%; height: 100%; object-fit: cover; }
+.rpic button { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: rgba(34,48,74,.7); color: #fff; font-size: 14px; line-height: 1; }
+.radd { width: 72px; height: 72px; border: 1px dashed var(--fog); border-radius: 8px; display: grid; place-content: center; justify-items: center; gap: 2px; cursor: pointer; color: var(--smoke); }
+.radd small { font-size: 10px; text-align: center; line-height: 1.1; }
+.radd svg { width: 20px; height: 20px; color: var(--ink); }
+.go { display: grid; place-items: center; width: 100%; height: 50px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 700; font-size: 16px; border: 0; }
+.go:disabled { background: #D9D3CF; }
+.rdone { margin-top: 28px; display: grid; justify-items: center; gap: 10px; text-align: center; }
+.rdone img { width: 120px; }
+.rdone h2 { font-size: 20px; }
+.rdone p { color: var(--smoke); line-height: 1.55; max-width: 440px; }
+.rdone .go { max-width: 260px; margin-top: 8px; }
+
+.rlist button::after { border-radius: 6px; }
+.rlist button.on::after { border-color: var(--accent); background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat; }
+.rlist + textarea { margin-top: 6px; }
+
+.rtip { display: grid; gap: 8px; justify-items: start; }
+.rtip h2 { font-size: 17px; }
+.rtip p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--smoke); }
+.rtip a { margin-top: 4px; font-weight: 600; font-size: 14px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+.rorder { text-decoration: none; color: inherit; }
+.rorder:hover { background: #EFF1F4; }
+.rorder em { margin-left: auto; flex: none; font-style: normal; font-weight: 600; font-size: 13.5px; color: var(--ink); }

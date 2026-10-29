@@ -1,50 +1,64 @@
-<h1>Đơn hàng</h1>
+<header class="ohead"><h1>Đơn hàng</h1></header>
 
-<div class="tabs">
-  <button type="button" class="btn ghost" [class.active]="tab() === 'all'" (click)="setTab('all')">Tất cả</button>
-  <button type="button" class="btn ghost" [class.active]="tab() === 'placed'" (click)="setTab('placed')">Đơn đã đặt</button>
-  <button type="button" class="btn ghost" [class.active]="tab() === 'received'" (click)="setTab('received')">Việc đã nhận</button>
-  <button type="button" class="btn ghost" [class.active]="tab() === 'history'" (click)="setTab('history')">Lịch sử</button>
-</div>
-
-<ng-template #rowTpl let-o>
-  <li class="orow" [class.ended]="false">
-    <a class="orow-in" [routerLink]="['/orders', o._id]">
-      <app-order-thumb [image]="o.image" [category]="o.category" />
-      <span class="main">
-        <span class="otag" [class.rcv]="o.type === 'received'">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span>
-        <span class="code muted">{{ o.code }}</span>
-        <h3>{{ o.postTitle }}</h3>
-        <span class="sub who"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="20" />{{ o.counterpartName }} · {{ fmt(o.createdAt) }}</span>
-      </span>
-      <span class="end"><b>{{ o.total | number }}đ</b><span class="status">{{ label(o) }}</span></span>
-    </a>
-  </li>
-</ng-template>
+<nav class="tabs" aria-label="Lọc đơn">
+  <button type="button" [class.on]="tab() === 'all'" (click)="setTab('all')">Tất cả</button>
+  <button type="button" [class.on]="tab() === 'placed'" (click)="setTab('placed')">Đơn đã đặt</button>
+  <button type="button" [class.on]="tab() === 'received'" (click)="setTab('received')">Việc đã nhận</button>
+  <button type="button" [class.on]="tab() === 'history'" (click)="setTab('history')">Lịch sử</button>
+</nav>
 
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-skeleton variant="rows" [count]="4" />
 } @else if (error()) {
   <div class="notice">Không tải được đơn hàng: {{ error() }}</div>
 } @else {
-  @if (needsAction().length) {
-    <section class="todo">
-      <h2>Cần bạn xử lý</h2>
-      <ul class="list">
-        @for (o of needsAction(); track o._id) {
-          <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: o }" />
-        }
-      </ul>
-    </section>
+  @for (g of groups(); track g.key) {
+  <section class="grp" [class.need]="g.key === 'todo'">
+  @if (g.title) {
+    <h2 class="gh" [class.todo]="g.key === 'todo'">{{ g.title }} </h2>
+    @if (g.key === 'todo') { <p class="nhint">Những đơn đang chờ bạn bấm bước tiếp theo.</p> }
   }
-  <section>
-    @if (needsAction().length && ongoing().length) { <h2>Đang diễn ra</h2> }
-    <ul class="list">
-      @for (o of ongoing(); track o._id) {
-        <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: o }" />
-      } @empty {
-        @if (!needsAction().length) { <li class="empty">Chưa có đơn nào ở mục này.</li> }
-      }
-    </ul>
+  <ul class="list">
+    @for (o of g.items; track o._id) {
+      <li class="order">
+        <div class="oh">
+          @if (o.counterpartId) {
+            <a class="who" [routerLink]="['/shop', o.counterpartId]" title="Xem gian hàng"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="26" /><b>{{ o.counterpartName }}</b></a>
+          } @else {
+            <span class="who"><app-avatar [src]="o.counterpartAvatar" [name]="o.counterpartName" [size]="26" /><b>{{ o.counterpartName }}</b></span>
+          }
+          <span class="kind">{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }}</span>
+          <span class="ost" [ngClass]="'s-' + dot(o)">{{ label(o) }}</span>
+        </div>
+
+        <a class="body" [routerLink]="['/orders', o._id]">
+          <app-order-thumb [image]="o.image" [category]="o.category" [avatar]="o.counterpartAvatar" [name]="o.counterpartName" />
+          <span class="main">
+            <h3>{{ o.postTitle }}</h3>
+            <span class="sub">{{ when(o) }}</span>
+            <span class="code">Mã đơn {{ o.code }}</span>
+          </span>
+          <span class="total">@if (o.newPrice) { <s>{{ o.total | vnd }}</s> }<em>{{ o.type === 'placed' ? 'Tổng tiền' : 'Tiền công' }}</em><b>{{ (o.newPrice?.total ?? o.total) | vnd }}</b></span>
+        </a>
+
+        <div class="of">
+          <span class="hint"></span>
+          <div class="btns">
+            <a class="btn2" routerLink="/messenger" [queryParams]="{ to: o.counterpartName, av: o.counterpartAvatar }">{{ act.chat }}</a>
+            @if (next(o); as n) {
+              <a class="btn2 main" [routerLink]="['/orders', o._id]">{{ n }}</a>
+            } @else if (isEnded(o)) {
+              <a class="btn2 main" [routerLink]="side(o).link" [queryParams]="side(o).params">{{ side(o).label }}</a>
+            } @else {
+              <a class="btn2" [routerLink]="['/orders', o._id]">Xem chi tiết</a>
+            }
+          </div>
+        </div>
+      </li>
+    }
+  </ul>
   </section>
+  } @empty {
+    <div class="empty"><img src="assets/clean/idle.png" alt="" /><p>Không có đơn nào ở đây.</p></div>
+  }
 }

@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import type { Promo } from '../utils/promo';
 import { Observable, map } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
@@ -21,6 +22,10 @@ export interface PostBody {
   acceptsXu?: boolean;
   /** Chỉ cho việc làm: khung thời gian làm */
   due?: string;
+  /** Giờ vàng (khuyến mãi theo khung giờ); null = tắt */
+  promo?: Promo | null;
+  /** Combo: các món cùng người bán + giá combo (server tự tính giá lẻ và kiểm hợp lệ) */
+  combo?: { items: { postId: string; qty: number }[]; comboPrice: number } | null;
 }
 
 /**
@@ -62,7 +67,13 @@ export class SellerService {
         if (!user) throw new AppError('Bạn cần đăng nhập.', 401, 'UNAUTHORIZED');
         const fields: Partial<Post> = {
           kind: body.kind, title: body.title.trim(), description: body.description.trim(), price: body.price,
-          priceUnit: body.priceUnit || undefined, block: body.block, images: body.images, acceptsXu: !!body.acceptsXu,
+          priceUnit: body.priceUnit || undefined, block: body.block, images: body.images, acceptsXu: !!body.acceptsXu, promo: body.promo ?? undefined,
+          ...(body.combo
+            ? {
+                category: 'Combo', priceUnit: body.priceUnit || 'combo',
+                combo: { items: body.combo.items, comboPrice: body.combo.comboPrice, listPrice: body.combo.items.reduce((t, i) => t + (rows.find((r) => r._id === i.postId)?.price ?? 0) * i.qty, 0) },
+              }
+            : {}),
           job: body.kind === 'job' ? { due: body.due ?? '', offers: 0, status: 'open' } : undefined,
         };
         if (id) {

@@ -5,6 +5,9 @@ const { nextCode } = require('../../shared/counter.model');
 const { notify } = require('../../shared/notify');
 const ApiError = require('../../../utils/ApiError');
 const { parsePaging } = require('../../../utils/pagination');
+const xu = require('../xu/xu.service');
+const { effectivePrice } = require('../../../utils/promo');
+const { compute: computeTracking, canTrack } = require('./tracking');
 
 // Voucher AntXu tạm (Q11): sau này lấy từ model Voucher. Chỉ áp cho bài có acceptsXu.
 const VOUCHERS = { XU10: { amount: 10000 }, XU5: { amount: 5000 } };
@@ -13,7 +16,8 @@ const CANCELABLE = ['waiting', 'confirmed', 'preparing'];
 const RETURN_WINDOW_DAYS = 7; // giả định, chờ Q6
 
 /** Tính tiền ở server từ giá bài hiện tại + lựa chọn; ném 422 nếu lựa chọn sai. */
-function priceOrder(post, input) {
+function priceOrder(post, input, xuVoucher = null, now = new Date()) {
+  const eff = effectivePrice(post, now); // giá do SERVER tính theo giờ đặt, kể cả khi bài đang Giờ vàng
   const details = [];
   const selections = [];
   let optionsPerUnit = 0;
@@ -48,18 +52,31 @@ function priceOrder(post, input) {
   if (input.scheduledAt && input.scheduledAt.getTime() < Date.now()) details.push({ field: 'scheduledAt', message: 'Thời gian đã ở quá khứ' });
 
   let discount = 0;
+  let rule = null; // voucher đổi từ Xu (mã XU-…); mã cũ XU10/XU5 vẫn dùng được
   if (input.voucherCode) {
-    const v = VOUCHERS[input.voucherCode.toUpperCase()];
-    if (!v) details.push({ field: 'voucherCode', message: 'Voucher không tồn tại' });
-    else if (!post.acceptsXu) details.push({ field: 'voucherCode', message: 'Bài này không dùng được Xu' });
-    else discount = v.amount;
+    const code = input.voucherCode.toUpperCase();
+    if (xu.XU_CODE.test(code)) {
+      if (!xuVoucher) details.push({ field: 'voucherCode', message: 'Voucher không hợp lệ, đã dùng hoặc đã hết hạn' });
+      else if (!post.acceptsXu) details.push({ field: 'voucherCode', message: 'Bài này không dùng được Xu' });
+      else rule = xuVoucher.def;
+    } else {
+      const v = VOUCHERS[code];
+      if (!v) details.push({ field: 'voucherCode', message: 'Voucher không tồn tại' });
+      else if (!post.acceptsXu) details.push({ field: 'voucherCode', message: 'Bài này không dùng được Xu' });
+      else discount = v.amount;
+    }
   }
   if (details.length) throw ApiError.validation('Đơn chưa hợp lệ', details);
 
-  const items = (post.price + optionsPerUnit) * input.quantity;
+  const items = (eff.price + optionsPerUnit) * input.quantity;
   const deliveryFee = input.fulfillment === 'delivery' ? post.deliveryFee : 0;
+  if (rule) {
+    if (items < rule.min) throw ApiError.validation('Đơn chưa hợp lệ', [{ field: 'voucherCode', message: `Voucher này áp cho đơn từ ${rule.min.toLocaleString('vi-VN')}đ` }]);
+    if (rule.ship && !(input.fulfillment === 'delivery' && post.type === 'food')) throw ApiError.validation('Đơn chưa hợp lệ', [{ field: 'voucherCode', message: 'Voucher miễn phí giao chỉ áp cho đơn đồ ăn giao tận nơi' }]);
+    discount = rule.ship ? deliveryFee : rule.amount;
+  }
   discount = Math.min(discount, items + deliveryFee);
-  return { selections, answers, breakdown: { items, deliveryFee, discount, surcharge: 0 }, total: items + deliveryFee - discount };
+  return { selections, answers, breakdown: { items, deliveryFee, discount, surcharge: 0, promoSaved: (eff.original - eff.price) * input.quantity }, promo: eff.promo ? { label: eff.promo.label, original: eff.original, price: eff.price } : null, total: items + deliveryFee - discount };
 }
 
 // Bước 1: kiểm tra + tính tiền, CHƯA ghi gì vào DB (giỏ nháp gọi bước này cho mọi món trước khi tạo đơn nào)
@@ -70,7 +87,20 @@ async function prepare(user, input) {
   if (post.stock !== null && post.stock < input.quantity) throw ApiError.invalidState('Không đủ số lượng còn lại');
   if (String(post.seller._id) === String(user._id)) throw ApiError.forbidden('Bạn không thể đặt bài của chính mình');
 
-  const priced = priceOrder(post, input);
+  const xuVoucher = await xu.findVoucher(user._id, input.voucherCode);
+  const priced = priceOrder(post, input, xuVoucher);
+
+  // Combo: mọi món thành phần phải còn bán và đủ số lượng cho số combo đặt
+  let components = [];
+  if (post.combo && post.combo.items && post.combo.items.length) {
+    const rows = await Post.find({ _id: { $in: post.combo.items.map((i) => i.postId) } });
+    const byId = new Map(rows.map((p) => [String(p._id), p]));
+    components = post.combo.items.map((i) => ({ post: byId.get(String(i.postId)), qty: i.qty }));
+    for (const { post: p, qty } of components) {
+      if (!p || p.status !== 'open') throw ApiError.invalidState(`Món "${p ? p.title : 'trong combo'}" hiện không còn bán nên chưa đặt được combo này`);
+      if (p.stock !== null && p.stock < qty * input.quantity) throw ApiError.invalidState(`Món "${p.title}" trong combo không đủ số lượng`);
+    }
+  }
 
   let address;
   if (input.addressId) {
@@ -79,11 +109,13 @@ async function prepare(user, input) {
     if (String(a.user) !== String(user._id)) throw ApiError.forbidden('Địa chỉ này không phải của bạn');
     address = { name: a.name, phone: a.phone, block: a.block, unit: a.unit, note: a.note, label: a.label };
   }
-  return { post, priced, address };
+  return { post, priced, address, xuVoucher, components };
 }
 
 // Bước 2: trừ tồn kho nguyên tử + ghi đơn
-async function commit(user, input, { post, priced, address }) {
+async function commit(user, input, { post, priced, address, xuVoucher, components = [] }) {
+  // giữ voucher trước khi trừ kho: mất lượt dùng thì dừng sớm, chưa đụng tới tồn kho
+  if (xuVoucher && !(await xu.claimVoucher(xuVoucher.doc))) throw ApiError.invalidState('Voucher đã được dùng cho đơn khác');
   // trừ tồn kho nguyên tử: tránh hai người cùng đặt món cuối cùng
   if (post.stock !== null) {
     const r = await Post.updateOne({ _id: post._id, stock: { $gte: input.quantity } }, { $inc: { stock: -input.quantity } });
@@ -94,12 +126,30 @@ async function commit(user, input, { post, priced, address }) {
     if (r.modifiedCount === 0) throw ApiError.invalidState('Bài đã được bán');
   }
 
+  // Trừ kho từng món thành phần của combo (nguyên tử); món nào thiếu thì hoàn lại các món đã trừ
+  const taken = [];
+  try {
+    for (const { post: p, qty } of components) {
+      if (p.stock === null) continue;
+      const need = qty * input.quantity;
+      const r = await Post.updateOne({ _id: p._id, stock: { $gte: need } }, { $inc: { stock: -need } });
+      if (r.modifiedCount === 0) throw ApiError.invalidState(`Món "${p.title}" trong combo không đủ số lượng`);
+      taken.push([p._id, need]);
+      if (p.stock - need === 0) await Post.updateOne({ _id: p._id }, { status: 'soldout' });
+    }
+  } catch (e) {
+    for (const [id, n] of taken) await Post.updateOne({ _id: id }, { $inc: { stock: n }, status: 'open' });
+    if (xuVoucher) await xu.restoreVoucher(user._id, xuVoucher.doc.code);
+    throw e;
+  }
+
   const order = await Order.create({
     code: await nextCode('order', 'AG-O'),
     buyer: user._id,
     seller: post.seller._id,
     post: post._id,
-    snapshot: { title: post.title, type: post.type, image: post.images[0], sellerName: post.seller.name, sellerAvatar: post.seller.avatar || null, unitPrice: post.price, unit: post.unit },
+    snapshot: { title: post.title, type: post.type, image: post.images[0], sellerName: post.seller.name, sellerAvatar: post.seller.avatar || null, unitPrice: priced.promo ? priced.promo.price : post.price, originalPrice: priced.promo ? priced.promo.original : undefined, promoLabel: priced.promo ? priced.promo.label : undefined, unit: post.unit,
+      ...(components.length ? { combo: components.map(({ post: p, qty }) => ({ postId: p._id, title: p.title, qty, unitPrice: p.price })), listPrice: post.combo.listPrice } : {}) },
     quantity: input.quantity,
     selections: priced.selections,
     answers: priced.answers,
@@ -114,7 +164,7 @@ async function commit(user, input, { post, priced, address }) {
     total: priced.total,
     state: 'waiting',
     history: [{ state: 'waiting', at: new Date() }],
-  });
+  }).catch(async (e) => { if (xuVoucher) await xu.restoreVoucher(user._id, xuVoucher.doc.code); throw e; });
 
   await notify(post.seller._id, { type: 'order_new', title: `Đơn mới ${order.code}`, body: post.title, link: { type: 'order', id: order._id } });
   return order;
@@ -143,6 +193,14 @@ async function getVisible(user, id) {
   const mine = [o.buyer, o.seller].some((u) => String(u) === String(user._id));
   if (!mine && user.role !== 'admin') throw ApiError.forbidden('Đây không phải đơn của bạn');
   return o;
+}
+
+// Vị trí xe mô phỏng (xem tracking.js); chỉ đơn có giao tận nơi
+async function tracking(user, id) {
+  const o = await getVisible(user, id);
+  if (!canTrack(o)) throw new ApiError(404, 'NO_TRACKING', 'Đơn này không có theo dõi giao hàng');
+  const post = await Post.findById(o.post).select('area');
+  return computeTracking(o, post);
 }
 
 async function getOwned(user, id) {
@@ -185,4 +243,5 @@ async function approveSurcharge(user, id) {
   return o;
 }
 
-module.exports = { create, prepare, commit, list, getVisible, requestCancel, requestReturn, approveSurcharge, priceOrder };
+module.exports = {
+  tracking, create, prepare, commit, list, getVisible, requestCancel, requestReturn, approveSurcharge, priceOrder };

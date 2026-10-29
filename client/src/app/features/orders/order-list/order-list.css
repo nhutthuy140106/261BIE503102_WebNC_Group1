@@ -1,25 +1,121 @@
-h1 { font-size: 28px; letter-spacing: -.02em; }
-.tabs { display: flex; gap: 8px; margin: 0 0 24px; flex-wrap: wrap; }
-.tabs .btn { border-radius: 999px; padding: 8px 18px; }
-.tabs .active { background: var(--ink); color: #fff; border-color: var(--ink); }
-.list { display: grid; gap: 12px; }
-.orow { border: 1px solid var(--border); border-radius: 16px; background: var(--card); transition: background .15s, border-color .15s; }
-.orow:hover { background: var(--soft); }
-.orow-in { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 18px; align-items: center; padding: 14px; }
-.main { min-width: 0; }
-.otag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 700; border: 1px solid var(--border); color: var(--smoke); }
-.otag.rcv { border-color: var(--ink); color: var(--ink); }
-.code { font-size: 12px; margin-left: 6px; }
-.main h3 { margin: 6px 0 0; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sub { margin-top: 3px; color: var(--smoke); font-size: 13px; }
-.end { text-align: right; display: grid; gap: 8px; justify-items: end; }
-.end b { font-size: 16px; }
-.status { font-size: 13px; font-weight: 600; background: var(--soft); padding: 4px 12px; border-radius: 999px; white-space: nowrap; }
-.todo .orow { border-color: #f2d5c5; }
-.empty { padding: 48px 0; }
-@media (max-width: 640px) { .orow-in { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; } .end { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: center; justify-items: start; text-align: left; } .tabs .btn { padding: 8px 14px; } .todo { padding: 14px; } }
-h2 { font-size: 18px; margin: 0 0 12px; }
-.todo { background: var(--accent-soft); border-radius: 16px; padding: 18px 20px; margin-bottom: 28px; }
-.todo .card { border-color: transparent; }
-section + section { margin-top: 4px; }
-.who { display: inline-flex; align-items: center; gap: 6px; }
+/* Danh sách đơn kiểu Shopee: tab trạng thái trên cùng, ô tìm, mỗi đơn là một khối
+   (đầu: người bán + trạng thái · giữa: món · đáy: thành tiền + nút). */
+.ohead h1 { font-size: 28px; letter-spacing: -.02em; }
+.tabs { display: flex; margin-top: 18px; border: 1px solid #DADDE3; border-radius: 12px 12px 0 0; background: #fff; overflow-x: auto; overflow-y: hidden; }
+.tabs button { flex: 1 0 auto; padding: 15px 18px; white-space: nowrap; font-weight: 600; color: var(--smoke); background: none; border-bottom: 2px solid transparent; }
+.tabs button:hover { color: var(--ink); }
+.tabs button.on { color: var(--accent); border-bottom-color: var(--accent); }
+.tabs em { margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: var(--accent); color: #fff; font-style: normal; font-size: 11.5px; font-weight: 700; }
+.search { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 0 14px; height: 44px; border-radius: 10px; background: #fff; border: 1px solid #DADDE3; color: var(--smoke); }
+.search input { flex: 1; border: 0; background: none; outline: none; font: inherit; color: var(--ink); min-width: 0; }
+
+.list { margin-top: 16px; display: grid; gap: 20px; }
+.order { border: 1px solid #DADDE3; border-radius: 14px; background: #fff; box-shadow: 0 2px 0 rgba(34, 48, 74, .04), 0 12px 24px -18px rgba(34, 48, 74, .3); overflow: hidden; }
+.oh { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #DADDE3; font-size: 14px; }
+.oh b { font-weight: 700; }
+.oh .kind { padding: 1px 7px; border-radius: 5px; border: 1px solid #DADDE3; color: var(--smoke); font-size: 11.5px; font-weight: 600; }
+.oh .shop { color: var(--smoke); font-size: 13px; }
+.oh .shop:hover { color: var(--ink); }
+.ost { margin-left: auto; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; color: #B8851A; }
+.s-go { color: #2E7D4F; }
+.s-act { color: var(--accent); }
+.s-end { color: var(--smoke); }
+
+.body { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 16px; align-items: start; padding: 14px 16px; }
+.body:hover { background: #F7F8FA; }
+.main { min-width: 0; display: grid; gap: 4px; align-content: start; }
+.main h3 { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.35; }
+.sub { font-size: 13.5px; color: var(--smoke); }
+.code { font-size: 12px; color: var(--fog); }
+.price { font-size: 15px; white-space: nowrap; }
+
+.of { display: flex; align-items: center; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; padding: 12px 16px; border-top: 1px solid #E6E8EC; }
+.hint { flex: 1 1 260px; min-width: 0; font-size: 13.5px; line-height: 1.45; color: var(--smoke); }
+.total { align-self: end; text-align: right; font-size: 13px; color: var(--smoke); display: grid; gap: 2px; }
+.total b { font-size: 21px; font-weight: 700; color: var(--accent); letter-spacing: -.01em; }
+.btns { display: flex; gap: 8px; flex: none; }
+.btn2 { height: 38px; padding: 0 18px; border-radius: 9px; border: 1px solid #DADDE3; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; font-size: 13.5px; font-weight: 600; background: #fff; transition: background .15s, border-color .15s; }
+.btn2:hover { background: #F7F8FA; border-color: #B9BEC8; }
+.btn2.main { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn2.main:hover { filter: brightness(.94); }
+
+.empty { padding: 48px 0; text-align: center; color: var(--smoke); background: #fff; border: 1px solid #DADDE3; border-radius: 12px; }
+.empty img { width: 110px; }
+
+@media (max-width: 700px) {
+  .body { grid-template-columns: 64px minmax(0, 1fr); }
+  .total { grid-column: 1 / -1; text-align: left; display: flex; justify-content: space-between; align-items: baseline; }
+  .btns { width: 100%; }
+  .btn2 { flex: 1; }
+  .oh .shop { display: none; }
+}
+
+/* Thanh tab dạng viên (giữ như bản đã thấy đẹp): nhóm viên nền xám nhạt, tab đang chọn là viên trắng nổi */
+.tabs { display: inline-flex; margin-top: 18px; padding: 4px; gap: 2px; border: 0; border-radius: 999px; background: #F1F2F5; overflow-x: auto; max-width: 100%; box-shadow: none; }
+.tabs button { flex: none; padding: 10px 22px; border-radius: 999px; border-bottom: 0; font-size: 15px; font-weight: 600; color: var(--smoke); background: none; transition: background .15s, color .15s; }
+.tabs button:hover { background: transparent; color: var(--ink); }
+.tabs button.on { background: #fff; color: var(--ink); border-bottom: 0; box-shadow: 0 1px 3px rgba(34, 48, 74, .16); }
+.tabs em { margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: #fff; font-style: normal; font-size: 12px; font-weight: 700; }
+.list { margin-top: 18px; }
+
+.gh { display: flex; align-items: baseline; gap: 8px; margin: 26px 0 0; font-size: 17px; font-weight: 700; }
+.gh small { font-size: 13px; font-weight: 500; color: var(--smoke); }
+.gh.todo { color: var(--accent); }
+.gh.todo small { color: var(--accent); opacity: .8; }
+.gh + .list { margin-top: 12px; }
+.gh:first-of-type { margin-top: 20px; }
+
+/* Nhóm trong "Tất cả" (theo bản mẫu): tiêu đề nhỏ viết hoa; "Cần bạn xử lý" là khung cam nhạt có tia chớp */
+.grp { margin-top: 26px; }
+.gh { display: flex; align-items: center; gap: 6px; margin: 0 0 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--smoke); }
+.gh small { font-size: inherit; font-weight: 700; color: inherit; }
+.gh svg { width: 15px; height: 15px; }
+.gh.todo { color: var(--accent); }
+.nhint { margin: -4px 0 12px; font-size: 13px; color: var(--smoke); }
+.grp .list { margin-top: 0; }
+.grp.need { padding: 18px 18px 20px; border-radius: 18px; background: #FFF6F1; border: 1px solid #F6DACB; }
+.grp.need .order { border-color: #F2D5C5; }
+.tabs { margin-top: 18px; }
+
+/* bớt đường kẻ: thẻ chỉ còn viền ngoài, các phần cách nhau bằng khoảng trắng */
+.oh, .order .oh { border-bottom: 0; padding-bottom: 4px; }
+.of { border-top: 0; padding-top: 4px; }
+.who { display: inline-flex; align-items: center; gap: 10px; }
+a.who:hover b { text-decoration: underline; text-underline-offset: 3px; }
+
+.total s { font-size: 13px; color: var(--fog); }
+.of { justify-content: flex-end; }
+.of .hint { display: none; }
+
+/* nhãn và số tiền cùng một hàng: nhãn to và đậm, giá cũ (nếu có) nằm hàng trên bên phải */
+.total { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: flex-end; gap: 0 12px; text-align: right; }
+.total s { flex-basis: 100%; order: -1; text-align: right; font-size: 13px; color: var(--fog); }
+.total em { font-style: normal; font-size: 16px; font-weight: 700; color: var(--ink); }
+.total b { font-size: 22px; }
+
+/* bớt chữ in hoa và chữ đậm cho nhẹ nhàng hơn */
+.ost { text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 600; }
+.gh { text-transform: none; letter-spacing: 0; font-size: 16px; font-weight: 600; }
+.gh small { font-weight: 500; }
+.oh b, .who b { font-weight: 600; }
+.oh .kind { font-weight: 500; }
+.main h3 { font-weight: 500; }
+.btn2 { font-weight: 500; }
+.btn2.main { font-weight: 600; }
+.total em { font-size: 15px; font-weight: 600; }
+.total b { font-weight: 700; }
+.tabs button { font-weight: 500; }
+.tabs button.on { font-weight: 600; }
+
+/* số đơn của nhóm: viên nhỏ thay cho dấu chấm + số */
+.gh { gap: 8px; }
+.gh .cnt { min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: #E9EBEF; color: var(--smoke); font-size: 12.5px; font-weight: 600; display: inline-grid; place-items: center; }
+.gh.todo .cnt { background: var(--accent); color: #fff; }
+
+.grp .gh, .grp .gh:first-of-type { margin: 0 0 10px; }
+.grp.need { padding: 20px; }
+
+.gh { font-size: 21px; font-weight: 700; letter-spacing: -.015em; color: var(--ink); margin: 0 0 14px; }
+.gh.todo { color: var(--accent); }
+.grp { margin-top: 32px; }
+.grp.need { margin-top: 24px; }

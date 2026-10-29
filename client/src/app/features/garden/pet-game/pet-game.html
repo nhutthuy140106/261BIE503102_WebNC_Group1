@@ -1,0 +1,26 @@
+<section class="pg">
+  <a routerLink=".." class="back">← Vườn AntGo</a>
+  <h1>Nuôi thú cưng</h1>
+  <p class="sub">Làm đủ {{ tasks.length }} việc mỗi ngày để nhận {{ reward }} Xu.</p>
+
+  <div class="pet" [attr.data-act]="last">
+    <img src="assets/clean/idle.png" alt="Bé kiến, thú cưng của bạn" width="140" height="140" />
+    <b>{{ mood() }}</b>
+  </div>
+
+  <ul class="tasks">
+    @for (t of tasks; track t.key) {
+      <li [class.ok]="done(t.key)">
+        <div><b>{{ t.label }}</b><small>{{ t.hint }}</small></div>
+        <button type="button" (click)="act(t.key)" [disabled]="done(t.key)">{{ done(t.key) ? 'Xong ✓' : t.label }}</button>
+      </li>
+    }
+  </ul>
+
+  @if (garden.petClaimed()) {
+    <p class="claimed" role="status">Hôm nay bạn đã nhận thưởng rồi, mai quay lại nhé.</p>
+  } @else {
+    <button type="button" class="claim" [disabled]="!allDone()" (click)="claim()">{{ allDone() ? 'Nhận ' + reward + ' Xu' : 'Làm đủ ' + tasks.length + ' việc để nhận Xu' }}</button>
+  }
+  <p class="cap">Xu nhận từ game hôm nay: <b>{{ xu.gameToday() }}/30</b></p>
+</section>

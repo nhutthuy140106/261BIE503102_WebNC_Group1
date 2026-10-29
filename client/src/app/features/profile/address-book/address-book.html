@@ -1,8 +1,7 @@
 <section>
-  <h2>Địa chỉ của tôi</h2>
   @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
   @if (loading()) {
-    <p class="muted">Đang tải…</p>
+    <app-loader />
   } @else {
     <ul class="list">
       @for (a of items(); track a._id) {

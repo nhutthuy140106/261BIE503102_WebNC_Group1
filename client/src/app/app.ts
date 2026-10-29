@@ -1,5 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from './core/services/auth';
+import { SavedService } from './core/services/saved';
 
 @Component({
   selector: 'app-root',
@@ -8,9 +11,22 @@ import { AuthService } from './core/services/auth';
 })
 export class App implements OnInit {
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly saved = inject(SavedService);
+
+  /** Trang giới thiệu và đăng nhập tự có bố cục toàn màn hình nên không dùng header/footer chung. */
+  private static readonly BARE_PAGES = ['/welcome', '/auth/login', '/auth/register', '/auth/forgot'];
+  protected readonly bare = signal(false);
 
   /** Khôi phục trạng thái đăng nhập khi mở/tải lại trang (hỏi server, hoặc phiên mock) để header hiện đúng. */
   ngOnInit(): void {
     this.auth.checkSession().subscribe();
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => {
+        this.bare.set(App.BARE_PAGES.includes(e.urlAfterRedirects.split(/[?#]/)[0]));
+        // khách đã bấm ♡ rồi đăng nhập: về lại trang thì lưu bài đó
+        if (this.auth.isLoggedIn()) this.saved.applyResume();
+      });
   }
 }

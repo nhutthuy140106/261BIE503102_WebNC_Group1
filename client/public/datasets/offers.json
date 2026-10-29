@@ -2,18 +2,18 @@
   {
     "_id": "640b187e71d9faa9039f00cc",
     "code": "AG-J1998",
-    "jobId": "640b187e71d9faa9039f000a",
-    "jobTitle": "Cho mèo ăn 2 buổi/ngày trong 3 ngày",
-    "posterName": "Chị Hoa",
+    "jobId": "282a0cf8aca72eb70c1ddf6c",
+    "jobTitle": "Cho mèo ăn 3 ngày khi đi vắng",
+    "posterName": "Chị Ngân",
     "pay": 150000,
-    "block": "Block C",
+    "block": "Block B",
     "intro": "Mình ở cùng block, rảnh cả cuối tuần và có kinh nghiệm chăm mèo.",
     "slots": [
       "Sáng",
       "Chiều"
     ],
     "state": "chosen",
-    "exactAddress": "Căn C-0912, Block C — nhận chìa khóa ở bảo vệ",
+    "exactAddress": "B.1207 · Block B",
     "history": [
       {
         "state": "offered",
@@ -24,16 +24,16 @@
         "at": "2026-10-15T11:30:00.000Z"
       }
     ],
-    "posterAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces&q=70",
-    "posterId": "640b187e71d9faa9039f006e"
+    "posterAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=70",
+    "posterId": "e6890bb00c8b3e431cf80e4d"
   },
   {
     "_id": "640b187e71d9faa9039f00cd",
     "code": "AG-J2010",
-    "jobId": "640b187e71d9faa9039f000c",
-    "jobTitle": "Dắt chó đi dạo buổi sáng",
-    "posterName": "Anh Tuấn",
-    "pay": 60000,
+    "jobId": "435bf30c67bc36e2f466962c",
+    "jobTitle": "Mua đồ chợ sáng giúp nhà mình",
+    "posterName": "Chị Hoa",
+    "pay": 50000,
     "block": "Block A",
     "intro": "Mình dậy sớm, quen dắt chó nhỏ.",
     "slots": [
@@ -46,23 +46,24 @@
         "at": "2026-10-17T07:00:00.000Z"
       }
     ],
-    "posterAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=faces&q=70",
-    "posterId": "640b187e71d9faa9039f0070"
+    "posterAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
+    "posterId": "d3cb4d4e1a036f3674759c50",
+    "exactAddress": "A.304 · Block A"
   },
   {
     "_id": "640b187e71d9faa9039f00ce",
     "code": "AG-J1950",
-    "jobId": "640b187e71d9faa9039f000b",
-    "jobTitle": "Khiêng giúp tủ lạnh lên tầng 5",
-    "posterName": "Chị Mai",
-    "pay": 120000,
+    "jobId": "be5dff4afdedfb6bf5fc77d7",
+    "jobTitle": "Chuyển 2 thùng đồ sang Block A",
+    "posterName": "Anh Tuấn",
+    "pay": 80000,
     "block": "Block D",
     "intro": "Mình có người đi cùng, khiêng được.",
     "slots": [
       "Chiều"
     ],
     "state": "done",
-    "exactAddress": "Căn D-0503, Block D",
+    "exactAddress": "D.302 · Block D",
     "history": [
       {
         "state": "offered",
@@ -85,7 +86,7 @@
         "at": "2026-10-11T16:00:00.000Z"
       }
     ],
-    "posterAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&crop=faces&q=70",
-    "posterId": "640b187e71d9faa9039f006f"
+    "posterAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=70",
+    "posterId": "fce06b0e03638464eae5e2d4"
   }
 ]

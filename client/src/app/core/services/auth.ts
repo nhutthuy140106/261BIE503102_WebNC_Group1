@@ -32,7 +32,7 @@ export class AuthService {
       const user: User = {
         _id: '000000000000000000000001',
         username: body.phone,
-        fullName: body.phone,
+        fullName: this.mockName(body.phone),
         block: 'Block B',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=faces&q=70',
         xu: 120,
@@ -60,9 +60,32 @@ export class AuthService {
     );
   }
 
-  register(body: { phone: string; name: string; password: string }): Observable<void> {
-    if (useMock('auth')) return of(void 0);
+  /** areaId + building + unit (khu, tòa, phòng) dùng làm địa chỉ mặc định — server chưa nhận thì bỏ qua. */
+  register(body: { phone: string; name: string; password: string; areaId?: string; building?: string; unit?: string; termsVersion?: string; marketing?: boolean }): Observable<void> {
+    if (useMock('auth')) {
+      this.saveMockName(body.phone, body.name);
+      return of(void 0);
+    }
     return this.http.post<void>(`${API_BASE}/auth/register`, body, { withCredentials: true }).pipe(catchError(toAppError));
+  }
+
+  /** Mock: họ và tên nhập lúc đăng ký được nhớ theo số điện thoại để lần đăng nhập sau hiện đúng tên (chưa đăng ký thì dùng tên mẫu) */
+  private mockName(phone: string): string {
+    try {
+      return (JSON.parse(localStorage.getItem('antgo_names') ?? '{}') as Record<string, string>)[phone] || 'Ngọc Thủy';
+    } catch {
+      return 'Ngọc Thủy';
+    }
+  }
+
+  private saveMockName(phone: string, name: string): void {
+    try {
+      const m = JSON.parse(localStorage.getItem('antgo_names') ?? '{}') as Record<string, string>;
+      m[phone] = name;
+      localStorage.setItem('antgo_names', JSON.stringify(m));
+    } catch {
+      /* bỏ qua */
+    }
   }
 
   logout(): Observable<void> {
@@ -72,6 +95,32 @@ export class AuthService {
       return of(void 0);
     }
     return this.http.post<void>(`${API_BASE}/auth/logout`, {}, { withCredentials: true });
+  }
+
+  /** Cập nhật hồ sơ (tên, ảnh). Mock lưu trong phiên; API thật chờ máy chủ có điểm cuối. */
+  updateProfile(body: Partial<Pick<User, 'fullName' | 'avatar' | 'email' | 'gender' | 'birthday' | 'bio'>>): Observable<User> {
+    const cur = this.currentUser();
+    if (!cur) return throwError(() => new AppError('Bạn cần đăng nhập.', 401, 'UNAUTHORIZED'));
+    if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
+    const user: User = { ...cur, ...body };
+    if (body.fullName) this.saveMockName(cur.username, body.fullName);
+    sessionStorage.setItem(MOCK_KEY, JSON.stringify(user));
+    this.currentUser.set(user);
+    return of(user);
+  }
+
+  /** Đổi mật khẩu. Mock luôn thành công; API thật chờ máy chủ có điểm cuối. */
+  changePassword(current: string, next: string): Observable<void> {
+    if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
+    if (!current || next.length < 8) return throwError(() => new AppError('Mật khẩu chưa hợp lệ.', 422, 'VALIDATION_ERROR'));
+    return of(void 0);
+  }
+
+  /** Quên mật khẩu: đặt mật khẩu mới sau khi xác nhận mã. Mock luôn thành công; API thật chờ máy chủ có điểm cuối. */
+  resetPassword(phone: string, password: string): Observable<void> {
+    if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
+    if (!phone || password.length < 8) return throwError(() => new AppError('Mật khẩu chưa hợp lệ.', 422, 'VALIDATION_ERROR'));
+    return of(void 0);
   }
 
   /** Hỏi server phiên còn hiệu lực không (GET /api/auth/profile: 200 hay 401). */

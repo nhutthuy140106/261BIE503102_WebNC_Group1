@@ -1,0 +1,22 @@
+<nav class="crumb" aria-label="Vị trí">
+  <a routerLink="/">Trang chủ</a><span>/</span><span class="cur">{{ title() }}</span>
+</nav>
+
+<div class="head">
+  <h1>{{ title() }}</h1>
+  <app-sort-menu [options]="sortOptions()" [value]="sort()" (valueChange)="setSort($event)" />
+</div>
+
+@if (loading()) {
+  <app-skeleton variant="cards" [count]="8" />
+} @else if (error()) {
+  <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
+} @else {
+  <div class="grid">
+    @for (p of items(); track p._id) {
+      @if (p.kind === 'job') { <app-job-card [job]="p" /> } @else { <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" /> }
+    } @empty {
+      <p class="muted">Chưa có bài nào ở mục này.</p>
+    }
+  </div>
+}

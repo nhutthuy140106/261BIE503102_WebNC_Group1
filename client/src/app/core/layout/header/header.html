@@ -1,7 +1,7 @@
 <header class="appbar">
   <div class="wrap bar">
     <div class="left">
-      <a routerLink="/" class="logo">Ant<span>Go</span></a>
+      <a routerLink="/" class="logo" aria-label="AntGo - Trang chủ"><img src="assets/clean/logo-sm.png" alt="AntGo" /></a>
       <nav aria-label="Điều hướng chính">
         <a routerLink="/" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: true }" title="Trang chủ">
           <svg class="i"><use href="#home" /></svg><span class="t">Trang chủ</span>
@@ -15,41 +15,118 @@
       </nav>
     </div>
 
-    <form class="hsearch" (submit)="$event.preventDefault(); onSearch(q.value)" role="search">
-      <svg class="i lead"><use href="#search" /></svg>
-      <input #q type="search" [value]="query()" placeholder="Tìm món ăn, đồ dùng, dịch vụ hoặc việc làm" aria-label="Tìm kiếm" />
+    @if (noSearch()) {
+      <span class="hsp"></span>
+    } @else {
+    <form class="hsearch" [class.away]="onHome() && search.hideCompact()" (submit)="$event.preventDefault(); onSearch()" role="search">
+      <input type="search" [value]="search.text()" (input)="search.text.set($any($event.target).value)" [placeholder]="search.placeholder()" aria-label="Tìm kiếm" />
+      @if (search.recording() || search.searching()) {
+        <button type="button" class="sbtn" title="Hủy" aria-label="Hủy" (click)="search.cancel()"><svg class="i"><use href="#xmark" /></svg></button>
+      }
+      <button type="button" class="sbtn" [class.rec]="search.recording()" title="Tìm bằng giọng nói" (click)="search.voice()"><svg class="i"><use href="#mic" /></svg></button>
+      <button type="button" class="sbtn" title="Tìm bằng hình ảnh" (click)="search.pickImage()"><svg class="i"><use href="#camera" /></svg></button>
       <button type="submit" class="go" aria-label="Tìm"><svg class="i"><use href="#search" /></svg></button>
     </form>
+    }
 
     <div class="right">
       <div class="role" title="Đổi không gian">
         <button type="button" [class.on]="!sellMode()" (click)="setMode(false)">Mua</button>
         <button type="button" [class.on]="sellMode()" (click)="setMode(true)">Bán</button>
       </div>
-      <button type="button" class="hbtn" title="Khu vực đang xem">
+      <button type="button" class="hbtn" title="Khu vực đang xem" (click)="area.open()">
         <svg class="i"><use href="#pin" /></svg>
-        <span class="t">{{ auth.currentUser()?.block ?? 'Block B' }}</span>
+        <span class="t">{{ area.current() }}</span>
         <svg class="i chev"><use href="#chev" /></svg>
       </button>
       <span class="sep"></span>
       @if (auth.isLoggedIn()) {
-        @if (auth.currentUser()?.xu != null) {
-          <button type="button" class="xubtn" title="AntXu của bạn" (click)="xu.show()">
-            <img class="coin" src="assets/clean/antxu.png" alt="" />{{ auth.currentUser()?.xu }} Xu
-          </button>
-        }
+        <a routerLink="/xu" class="xubtn" title="AntXu của bạn">
+          <img class="coin" src="assets/clean/antxu.png" alt="" />{{ xu.balance() }} Xu
+        </a>
       }
       <a routerLink="/search" class="iconbtn msearch" title="Tìm kiếm" aria-label="Tìm kiếm"><svg class="i"><use href="#search" /></svg></a>
-      <a routerLink="/profile" fragment="saved" class="iconbtn" title="Đã lưu">
+      <button type="button" class="iconbtn" id="savedBtn" title="Đã lưu" (click)="openSaved()">
         <svg class="i"><use href="#heart" /></svg>
         @if (saved.ids().length) { <span class="cnt">{{ saved.ids().length }}</span> }
-      </a>
-      <a routerLink="/notifications" class="iconbtn" title="Thông báo"><svg class="i"><use href="#bell" /></svg></a>
+      </button>
       @if (auth.isLoggedIn()) {
-        <a routerLink="/profile" class="av" [title]="auth.currentUser()?.fullName ?? 'Tài khoản'">
-          <app-avatar [src]="auth.currentUser()?.avatar" [name]="auth.currentUser()?.fullName" [size]="34" />
-        </a>
-        <button type="button" class="hbtn" (click)="logout()">Đăng xuất</button>
+        <span class="nwrap">
+          <button type="button" class="iconbtn" [class.on]="notifOpen()" title="Thông báo" (click)="toggleNotif()">
+            <svg class="i"><use href="#bell" /></svg>
+            @if (notifications.unreadCount()) { <span class="d"></span> }
+          </button>
+          @if (notifOpen()) {
+            <div class="npanel">
+              <div class="nhead"><h2>Thông báo</h2>
+                <span class="nmore ntop" [class.open]="nTop()">
+                  <button type="button" class="more" aria-label="Tùy chọn" (click)="nTop.set(!nTop())"><svg class="i"><use href="#dots" /></svg></button>
+                  @if (nTop()) {
+                    <span class="nmenu npointer"><button type="button" [disabled]="!notifications.unreadCount()" (click)="readAll()"><svg class="i"><use href="#check" /></svg><span>Đánh dấu tất cả là đã đọc</span></button></span>
+                  }
+                </span>
+              </div>
+              <div class="ntabs">
+                <button type="button" [class.on]="notifTab() === 'all'" (click)="notifTab.set('all')">Tất cả</button>
+                <button type="button" [class.on]="notifTab() === 'unread'" (click)="notifTab.set('unread')">Chưa đọc</button>
+              </div>
+              <div class="nbody">
+                @for (g of notifGroups(); track g.title) {
+                  <h3>{{ g.title }}</h3>
+                  @for (n of g.items; track n._id) {
+                    <div class="nrow">
+                      <button type="button" class="nitem" [class.unread]="!n.read" (click)="openNotif(n)">
+                        @if (n.avatar) {
+                          <span class="nav"><app-avatar [src]="n.avatar" [size]="52" /><span class="nbadge"><svg class="i"><use [attr.href]="notifIcon(n)" /></svg></span></span>
+                        } @else {
+                          <span class="nic"><svg class="i"><use [attr.href]="notifIcon(n)" /></svg></span>
+                        }
+                        <span class="ntx"><span class="nt">{{ n.text }}</span><small>{{ short(n.createdAt) }}</small></span>
+                        @if (!n.read) { <i class="ndot"></i> }
+                      </button>
+                      <span class="nmore" [class.open]="nMenu() === n._id">
+                        <button type="button" class="more" aria-label="Tùy chọn" (click)="toggleNMenu(n, $event)"><svg class="i"><use href="#dots" /></svg></button>
+                        @if (nMenu() === n._id) {
+                          <span class="nmenu" [class.up]="nUp()"><button type="button" (click)="toggleRead(n)"><svg class="i"><use [attr.href]="n.read ? '#mail-unread' : '#mail'" /></svg><span>{{ n.read ? 'Đánh dấu là chưa đọc' : 'Đánh dấu là đã đọc' }}</span></button></span>
+                        }
+                      </span>
+                    </div>
+                  }
+                } @empty {
+                  <p class="nnone">{{ notifTab() === 'unread' ? 'Không có thông báo chưa đọc.' : 'Chưa có thông báo nào.' }}</p>
+                }
+              </div>
+              <a routerLink="/notifications" class="nfoot" (click)="notifOpen.set(false)">Xem tất cả</a>
+            </div>
+          }
+        </span>
+        <span class="nwrap awrap">
+          <button type="button" class="av" [class.on]="userOpen()" [title]="auth.currentUser()?.fullName ?? 'Tài khoản'" (click)="userOpen.set(!userOpen())">
+            <app-avatar [src]="auth.currentUser()?.avatar" [name]="auth.currentUser()?.fullName" [size]="34" />
+          </button>
+          @if (userOpen()) {
+            <div class="upanel">
+              <a routerLink="/profile" class="ucard" (click)="userOpen.set(false)">
+                <app-avatar [src]="auth.currentUser()?.avatar" [name]="auth.currentUser()?.fullName" [size]="48" />
+                <span><b>{{ auth.currentUser()?.fullName }}</b><small>{{ area.current() }}</small></span>
+              </a>
+              <div class="usep"></div>
+              <a routerLink="/profile" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#p-user" /></svg>Tài khoản của tôi</a>
+              <a routerLink="/profile" [queryParams]="{ tab: 'edit' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#p-pencil" /></svg>Chỉnh sửa hồ sơ</a>
+              <a routerLink="/profile" [queryParams]="{ tab: 'password' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#p-lock" /></svg>Đổi mật khẩu</a>
+              <button type="button" class="uitem" (click)="userOpen.set(false); openSaved()"><svg class="i"><use href="#heart" /></svg>Bài đã lưu</button>
+              <a routerLink="/profile" [queryParams]="{ tab: 'addresses' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#home" /></svg>Địa chỉ của tôi</a>
+              <a routerLink="/xu" class="uitem" (click)="userOpen.set(false)"><img class="uxu" src="assets/clean/antxu.png" alt="" />AntXu &amp; voucher<em>{{ xu.balance() }} Xu</em></a>
+              <a routerLink="/orders" [queryParams]="{ f: 'history' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#receipt" /></svg>Lịch sử đơn hàng</a>
+              <div class="usep"></div>
+              @if (auth.currentUser()?.role === 'admin') {
+                <a routerLink="/admin" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#shield" /></svg>Quản trị</a>
+              }
+              <a routerLink="/help" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#p-help" /></svg>Trợ giúp &amp; hỗ trợ</a>
+              <button type="button" class="uitem" (click)="logout()"><svg class="i"><use href="#p-signout" /></svg>Đăng xuất</button>
+            </div>
+          }
+        </span>
       } @else {
         <a routerLink="/auth/login" class="login">Đăng nhập</a>
       }

@@ -1,0 +1,51 @@
+/* Khung đăng nhập / đăng ký — bố cục từ design/mockups/login.html: nền trời "AntGo", thẻ lệch trái,
+   kiến dựa lưng vào cạnh phải thẻ. */
+:host {
+  position: relative; display: block; min-height: 100vh;
+  background: #f6c9a4 url('/assets/clean/login-bg.jpg') left center / cover no-repeat;
+}
+.top { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 22px 40px; }
+.logo { grid-column: 2; grid-row: 1; }
+.logo img { height: 46px; display: block; }
+.back { grid-column: 3; justify-self: end; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 999px; background: rgba(255,255,255,.72); backdrop-filter: blur(8px); font-weight: 600; color: var(--ink); }
+.back:hover { background: #fff; }
+
+.stage { min-height: 100vh; display: flex; align-items: center; justify-content: flex-start; padding: 96px 9vw 72px; box-sizing: border-box; }
+.scene { --s: .45; position: relative; }
+/* bóng đổ xuống "mặt đất" chung dưới thẻ và chân kiến */
+.scene::after { content: ""; position: absolute; left: 4%; right: calc(-1 * 480px * var(--s)); bottom: -22px; height: 44px; border-radius: 50%; background: radial-gradient(closest-side, rgba(110,50,20,.42), rgba(110,50,20,0)); z-index: -1; filter: blur(3px); }
+/* kiến: lưng ở x≈165 của ảnh 670px, chân ở đáy ảnh */
+.ant { position: absolute; left: calc(100% - 165px * var(--s)); bottom: -4px; width: calc(670px * var(--s)); z-index: 2; pointer-events: none; filter: drop-shadow(-10px 8px 10px rgba(110,50,20,.28)); animation: antIn .7s .25s cubic-bezier(.2,.9,.3,1.1) both; }
+.card {
+  position: relative; z-index: 1; width: 448px; max-width: 100%; padding: 36px 36px 30px; border-radius: 24px; box-sizing: border-box; color: var(--ink);
+  animation: cardIn .5s cubic-bezier(.2,.8,.2,1) both;
+  /* tấm bảng có độ dày: mặt trên sáng, mép dưới dày màu kem đậm, bóng mềm phía sau */
+  background: linear-gradient(180deg, #fff 0%, #fffbf7 55%, #fbf1e8 100%);
+  border: 1px solid rgba(255,255,255,.9);
+  box-shadow: inset 0 1px 0 #fff, inset 0 -7px 0 #f1e0d2, inset 0 -8px 10px -6px rgba(170,110,70,.25),
+    0 2px 0 rgba(200,140,100,.35), 0 26px 40px -18px rgba(120,60,30,.45), 0 60px 90px -40px rgba(34,48,74,.35);
+}
+@keyframes cardIn { from { opacity: 0; transform: translateY(18px) scale(.98); } }
+@keyframes antIn { 0% { opacity: 0; transform: translateX(60px) rotate(6deg); } 70% { opacity: 1; transform: translateX(-4px) rotate(-1.5deg); } 100% { transform: none; } }
+
+/* thẻ ngang căn giữa: kiến vẫn dựa vào mép phải thẻ, màn hẹp thì ẩn kiến */
+.stage.centered { justify-content: center; padding-left: 4vw; padding-right: 4vw; }
+.scene.wide { width: min(780px, 100%); }
+.scene.wide::after { right: 4%; }
+.card.wide { width: 100%; padding: 36px 48px 30px; }
+/* nút Google và dòng "hoặc" không kéo dài hết thẻ ngang */
+.card.wide .or, .card.wide .google, .card.wide .notice { width: min(100%, 380px); margin-left: auto; margin-right: auto; }
+@media (max-width: 1240px) { .scene.wide .ant { display: none; } }
+
+.or { display: flex; align-items: center; gap: 12px; margin: 18px 0 14px; font-size: 12.5px; color: var(--fog); }
+.or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.google { width: 100%; height: 50px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font: 600 14.5px 'Mona Sans', sans-serif; color: var(--ink); transition: background .2s, border-color .2s; }
+.google:hover { background: var(--soft); border-color: var(--ink); }
+.google svg { width: 20px; height: 20px; }
+.notice { margin-top: 10px; font-size: 13px; color: var(--smoke); text-align: center; }
+.foot { position: absolute; right: 40px; bottom: 22px; font-size: 12.5px; color: rgba(34,48,74,.6); }
+
+/* màn thấp (laptop 768px): kiến nhỏ lại, thẻ gọn hơn để không phải cuộn */
+@media (max-height: 820px) and (min-width: 761px) { .stage { padding-top: 84px; padding-bottom: 12px; } .scene { --s: .4; } .card { padding: 30px 30px 22px; } .or { margin: 12px 0 10px; } .google { height: 46px; } }
+@media (max-width: 760px) { .stage { justify-content: center; padding: 90px 16px 40px; } .ant { display: none; } .top { padding: 18px 16px; } .foot { display: none; } }
+@media (prefers-reduced-motion: reduce) { .card, .ant { animation: none !important; } }

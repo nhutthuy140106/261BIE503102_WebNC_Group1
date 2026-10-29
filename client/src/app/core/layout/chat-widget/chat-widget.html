@@ -1,0 +1,73 @@
+<button type="button" class="fab" [class.on]="open()" (click)="toggle()" [attr.aria-expanded]="open()" aria-label="Mở trợ lý AntGo">
+  @if (open()) {
+    <span class="x" aria-hidden="true">×</span>
+  } @else {
+    <img src="assets/clean/ant-assistant.png" alt="" width="50" height="40" />
+    <span class="tip">Hỏi trợ lý</span>
+  }
+</button>
+
+@if (open()) {
+  <section class="panel" role="dialog" aria-label="Trợ lý AntGo">
+    <header>
+      <img src="assets/clean/ant-tile.png" alt="" width="36" height="36" />
+      <div>
+        <strong>Trợ lý AntGo</strong>
+        <small>Tư vấn món, đồ dùng, dịch vụ, việc làm trong khu</small>
+      </div>
+      @if (!empty()) { <button type="button" class="ghost" (click)="clear()" title="Xóa hội thoại">Làm mới</button> }
+      <button type="button" class="ghost" (click)="close()" aria-label="Đóng">×</button>
+    </header>
+
+    <div class="list" #list>
+      @if (empty()) {
+        <div class="hello">
+          <p>Chào bạn! Mình giúp bạn chọn món ngon, tìm đồ dùng, dịch vụ hay việc làm ngay trong khu. Bạn đang cần gì?</p>
+          @if (auth.isLoggedIn()) {
+            <div class="chips">
+              @for (s of suggestions; track s) { <button type="button" (click)="send(s)">{{ s }}</button> }
+              <a routerLink="/quay-mon" class="spinlink" (click)="close()">Chưa biết ăn gì? Quay món</a>
+            </div>
+          }
+        </div>
+      }
+      @for (b of bubbles(); track $index) {
+        <div class="row" [class.me]="b.role === 'user'">
+          <div class="bubble" [class.err]="b.error">{{ b.content }}</div>
+          @if (b.action; as a) { <button type="button" class="act" (click)="go(a.to)">{{ a.label }} →</button> }
+          @if (b.cards?.length) {
+            <div class="cards">
+              @for (c of b.cards; track c.id) {
+                <a class="card" [routerLink]="link(c)" (click)="close()">
+                  @if (c.image) { <img [src]="c.image" alt="" loading="lazy" /> } @else { <span class="ph">Việc</span> }
+                  <span class="meta">
+                    <b>{{ c.title }}</b>
+                    <small>{{ c.sellerName }}@if (c.area) { · Block {{ c.area }} }</small>
+                    <em>{{ c.price | vnd }}@if (c.unit) {<i>/{{ c.unit }}</i>}</em>
+                    @if (c.combo || c.dealLabel) {
+                      <small class="tags">@if (c.combo) { <span class="tg">Combo</span> } @if (c.dealLabel) { <span class="tg">{{ c.dealLabel }}</span> }
+                        @if (c.listPrice && c.listPrice > c.price) { <s>{{ c.listPrice | vnd }}</s> } @else if (c.originalPrice && c.originalPrice > c.price) { <s>{{ c.originalPrice | vnd }}</s> }</small>
+                    }
+                  </span>
+                </a>
+              }
+            </div>
+          }
+        </div>
+      }
+      @if (busy()) { <div class="row"><div class="bubble typing"><app-loader label="Đang nghĩ…" /></div></div> }
+    </div>
+
+    @if (auth.isLoggedIn()) {
+      <div class="quick" aria-label="Gợi ý nhanh">
+        @for (s of quick; track s) { <button type="button" (click)="send(s)" [disabled]="busy()">{{ s }}</button> }
+      </div>
+      <form (submit)="$event.preventDefault(); send()">
+        <input name="q" [(ngModel)]="draft" maxlength="500" placeholder="Hỏi món, giá, dịch vụ…" autocomplete="off" [disabled]="busy()" />
+        <button type="submit" [disabled]="busy() || !draft.trim()" aria-label="Gửi">➤</button>
+      </form>
+    } @else {
+      <div class="login"><a routerLink="/auth/login" (click)="close()">Đăng nhập</a> để hỏi trợ lý nhé.</div>
+    }
+  </section>
+}

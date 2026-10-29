@@ -1,12 +1,16 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { switchMap } from 'rxjs';
 import { Post } from '../../../core/models/post';
 import { PostService } from '../../../core/services/post';
+import { REVIEW_SAMPLES } from '../../../core/config/review-samples';
+import { unsplash } from '../../../core/config/post-templates';
+import { TemplateKey } from '../../../core/models/post-template';
+import { AuthPromptService } from '../../../core/services/auth-prompt';
 import { SavedService } from '../../../core/services/saved';
 
 const FOLLOW_KEY = 'antgo_follow';
-type Tab = 'selling' | 'jobs';
+type Tab = 'selling' | 'jobs' | 'reviews';
 
 /**
  * Gian hàng công khai. Chỉ hiện số liệu tính từ dữ liệu thật của các bài:
@@ -22,6 +26,9 @@ export class Shop implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly postService = inject(PostService);
   protected readonly saved = inject(SavedService);
+  private readonly prompt = inject(AuthPromptService);
+  private readonly router = inject(Router);
+  protected readonly img = unsplash;
 
   protected readonly posts = signal<Post[]>([]);
   protected readonly loading = signal(true);
@@ -32,6 +39,7 @@ export class Shop implements OnInit {
 
   protected readonly name = computed(() => this.posts()[0]?.sellerName ?? '');
   protected readonly block = computed(() => this.posts()[0]?.block ?? '');
+  protected readonly area = computed(() => this.posts()[0]?.area ?? '');
   protected readonly selling = computed(() => this.posts().filter((p) => p.kind !== 'job'));
   protected readonly jobs = computed(() => this.posts().filter((p) => p.kind === 'job'));
   protected readonly rating = computed(() => {
@@ -41,6 +49,21 @@ export class Shop implements OnInit {
     const sum = rated.reduce((s, p) => s + (p.rating ?? 0) * (p.reviewCount ?? 0), 0);
     return { avg: Math.round((sum / n) * 10) / 10, count: n };
   });
+
+  /** Đánh giá mẫu theo loại bài chính của gian hàng (chưa có API đánh giá theo người bán) */
+  protected readonly reviews = computed(() => {
+    const t = (this.selling()[0]?.template ?? (this.jobs().length ? 'trip' : 'food')) as TemplateKey;
+    return REVIEW_SAMPLES[t] ?? [];
+  });
+  /** Dòng "Đã mua: …" dưới mỗi đánh giá (như Shopee): món/dịch vụ khách đã dùng, lấy từ bài đang bán của gian hàng (mock) */
+  protected bought(i: number): string {
+    const l = this.selling();
+    const p = l[i % (l.length || 1)];
+    if (!p) return '';
+    return (p.kind === 'food' ? 'Đã đặt: ' : p.kind === 'service' ? 'Đã dùng dịch vụ: ' : 'Đã mua: ') + p.title;
+  }
+  protected readonly done = computed(() => this.posts().reduce((s, p) => s + (p.reviewCount ?? 0), 0));
+  protected readonly stars = (n: number) => [1, 2, 3, 4, 5].map((i) => (i <= n ? 1 : 0));
 
   ngOnInit(): void {
     this.route.paramMap
@@ -66,6 +89,7 @@ export class Shop implements OnInit {
   }
 
   toggleFollow(): void {
+    if (!this.prompt.require('follow')) return;
     const ids = this.readFollow();
     const next = ids.includes(this.sellerId) ? ids.filter((x) => x !== this.sellerId) : [...ids, this.sellerId];
     this.following.set(next.includes(this.sellerId));
@@ -74,6 +98,10 @@ export class Shop implements OnInit {
     } catch {
       /* chặn lưu trữ: trạng thái vẫn đúng trong phiên */
     }
+  }
+
+  message(): void {
+    if (this.prompt.require('chat')) this.router.navigate(['/messenger'], { queryParams: { to: this.name(), av: this.posts()[0]?.sellerAvatar } });
   }
 
   toggleSave(p: Post): void {

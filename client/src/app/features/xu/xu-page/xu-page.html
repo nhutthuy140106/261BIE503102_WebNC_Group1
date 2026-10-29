@@ -1,0 +1,67 @@
+<h1>AntXu</h1>
+
+<section class="balance">
+  <img src="assets/clean/antxu.png" alt="" />
+  <div>
+    <span class="lbl">Số dư của bạn</span>
+    <b>{{ xu.balance() }} <small>Xu</small></b>
+    @if (xu.expiring(); as ex) { <p><svg class="i"><use href="#clock" /></svg>{{ ex.amount }} Xu hết hạn ngày {{ date(ex.date.getTime()) }}, đổi voucher trước nhé</p> }
+  </div>
+</section>
+
+<section class="blk">
+  <h2>Đổi voucher</h2>
+  <p class="sub">Đổi Xu lấy voucher, rồi chọn voucher ở bước Xác nhận đơn hàng.</p>
+  <div class="vgrid">
+    @for (c of xu.catalog; track c.cid) {
+      <div class="vcard">
+        <span class="ic"><svg class="i"><use href="#ticket" /></svg></span>
+        <div class="t"><b>{{ c.title }}</b><small>{{ c.cond }}</small></div>
+        <button type="button" [disabled]="xu.balance() < c.cost" (click)="redeem(c.cid, c.title, c.cost)">Đổi · {{ c.cost }} Xu</button>
+      </div>
+    }
+  </div>
+</section>
+
+<section class="blk">
+  <h2>Voucher của bạn@if (xu.vouchers().length) { <small>{{ xu.vouchers().length }}</small> }</h2>
+  <div class="vgrid">
+    @for (v of xu.vouchers(); track v.id) {
+      <div class="vcard own">
+        <span class="ic"><svg class="i"><use href="#ticket" /></svg></span>
+        <div class="t"><b>{{ v.title }}</b><small>{{ v.cond }} · hạn {{ date(v.exp) }}</small></div>
+      </div>
+    } @empty {
+      <p class="none">Chưa có voucher. Đổi ở trên rồi chọn khi đặt hàng nhé.</p>
+    }
+  </div>
+</section>
+
+<section class="blk">
+  <h2>Cách nhận thêm Xu</h2>
+  <ul class="earn">
+    @for (e of earnState(); track e.key) {
+      <li [class.ok]="e.done">
+        <span>{{ e.t }}<small>{{ e.done ? 'Đã nhận' : e.note }}@if (!e.once && e.n) { · đã nhận {{ e.n }} lần }</small></span>
+        <b>@if (e.done) { ✓ }+{{ e.d }} Xu</b>
+      </li>
+    }
+  </ul>
+    <a class="gamelink" routerLink="/vuon" >
+      <svg class="i"><use href="#coin" /></svg>
+      <span><b>Chơi game kiếm Xu</b><small>{{ xu.gameToday() }}/{{ gameCap }} Xu hôm nay</small></span>
+      <svg class="i go"><use href="#right" /></svg>
+    </a>
+</section>
+
+<section class="blk">
+  <h2>Lịch sử AntXu</h2>
+  <ul class="ledger">
+    @for (e of ledger(); track e.key) {
+      <li><span>{{ e.t }}<small>{{ date(e.at) }}</small></span><b [class.neg]="e.d < 0">{{ e.d > 0 ? '+' : '' }}{{ e.d }}</b></li>
+    } @empty { <li class="none">Chưa có giao dịch Xu nào.</li> }
+  </ul>
+  @if (xu.ledger().length > 8 && !showAll()) { <button type="button" class="moreb" (click)="showAll.set(true)">Xem tất cả</button> }
+</section>
+
+<p class="note">Xu hết hạn sau 6 tháng kể từ ngày nhận. Xu không mua bằng tiền và không đổi ra tiền. Voucher dùng được ở bài có nhãn "Dùng được Xu", người bán tự chọn tham gia.</p>

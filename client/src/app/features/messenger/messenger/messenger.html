@@ -1,36 +1,93 @@
-<h1>Messenger</h1>
 @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else {
   <div class="chat">
-    <ul class="threads">
-      @for (c of conversations(); track c._id) {
-        <li>
-          <button type="button" class="btn ghost" [class.active]="c._id === selectedId()" (click)="select(c)">
-            <span class="who"><app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="36" /><span>{{ c.withName }}</span></span>
-            @if (c.unread) { <span class="badge">{{ c.unread }}</span> }
-            @if (c.context) { <small class="muted">{{ c.context.label }}</small> }
-          </button>
-        </li>
-      } @empty {
-        <li class="muted">Chưa có cuộc trò chuyện nào.</li>
-      }
-    </ul>
+    <aside class="side">
+      <h1>Đoạn chat</h1>
+      <label class="find"><svg class="i"><use href="#search" /></svg><input [value]="query()" (input)="query.set($any($event.target).value)" placeholder="Tìm kiếm cuộc trò chuyện" /></label>
+      <div class="tabs"><button type="button" [class.on]="!onlyUnread()" (click)="onlyUnread.set(false)">Tất cả</button><button type="button" [class.on]="onlyUnread()" (click)="onlyUnread.set(true)">Chưa đọc</button></div>
+      <ul class="threads">
+        @for (c of shown(); track c._id) {
+          <li>
+            <button type="button" [class.active]="c._id === selectedId()" [class.unread]="c.unread > 0" (click)="select(c)">
+              <app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="48" />
+              <span class="tx">
+                <b>{{ c.withName }}</b>
+                <small><span class="pv">{{ preview(c) }}</span>@if (lastTime(c)) { <span class="tm"> · {{ lastTime(c) }}</span> }</small>
+              </span>
+              @if (c.unread) { <i class="dot" aria-label="Tin chưa đọc"></i> }
+            </button>
+            <span class="rowmore" [class.open]="rowMenu() === c._id">
+              <button type="button" class="more" aria-label="Tùy chọn" (click)="rowMenu.set(rowMenu() === c._id ? null : c._id)"><svg class="i"><use href="#dots" /></svg></button>
+              @if (rowMenu() === c._id) {
+                <span class="rowmenu"><button type="button" (click)="toggleUnread(c)"><svg class="i"><use [attr.href]="c.unread > 0 ? '#mail' : '#mail-unread'" /></svg><span>{{ c.unread > 0 ? 'Đánh dấu là đã đọc' : 'Đánh dấu là chưa đọc' }}</span></button></span>
+              }
+            </span>
+          </li>
+        } @empty {
+          <li class="none">{{ query() ? 'Không tìm thấy cuộc trò chuyện nào.' : onlyUnread() ? 'Không có tin nhắn chưa đọc.' : 'Chưa có cuộc trò chuyện nào.' }}</li>
+        }
+      </ul>
+    </aside>
+
     @if (selected(); as c) {
       <section class="thread">
-        <h2 class="who"><app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="32" /> {{ c.withName }}</h2>
-        @if (c.context) { <p class="muted">{{ c.context.label }} · nhắn tin không tự đổi trạng thái đơn</p> }
+        <header class="top">
+          <app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="42" />
+          <span class="tx"><b>{{ c.withName }}</b>@if (c.context) { <small>{{ ctxOrder() ? ctxOrder()!.code + ' · ' + ctxOrder()!.postTitle : c.context.label }}</small> }</span>
+          @if (c.context) { <a class="ctxlink" [routerLink]="ctxLink(c)">{{ ctxText(c) }}</a> }
+        </header>
         <ul class="messages">
-          @for (m of c.messages; track m._id) {
-            <li [class.mine]="m.mine">{{ m.text }} <small class="muted">{{ fmt(m.createdAt) }}</small></li>
+          @for (m of c.messages; track m._id; let i = $index) {
+            @if (i === 0 || gap(c.messages[i - 1], m)) { <li class="stamp">{{ fmt(m.createdAt) }}</li> }
+            <li class="msg" [class.mine]="m.mine" [ngClass]="pos(c.messages, i)">
+              @if (!m.mine) {
+                <span class="av">@if (pos(c.messages, i) === 'last' || pos(c.messages, i) === 'solo') { <app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="28" /> }</span>
+              }
+              @if (m.media; as md) {
+                @if (md.kind === 'image') { <img class="mimg" [src]="md.url" alt="Hình ảnh" /> }
+                @else if (md.kind === 'video') { <video class="mimg" [src]="md.url" controls preload="metadata"></video> }
+                @else { <audio class="maud" [src]="md.url" controls preload="metadata"></audio> }
+              }
+              @if (m.text) { <span class="bb" [title]="fmt(m.createdAt)">{{ m.text }}</span> }
+            </li>
+            @if (m.mine && i === c.messages.length - 1) { <li class="seen">Đã gửi {{ short(m.createdAt).toLowerCase() === 'vừa xong' ? 'vừa xong' : short(m.createdAt) + ' trước' }}</li> }
           }
         </ul>
-        <form (ngSubmit)="send()">
-          <input [formControl]="input" placeholder="Nhập tin nhắn…" maxlength="2000" />
-          <button type="submit" class="btn" [disabled]="input.invalid">Gửi</button>
-        </form>
+        @if (recording()) {
+          <div class="rec">
+            <button type="button" class="rbtn" aria-label="Hủy ghi âm" (click)="stopRec(true)"><svg class="i"><use href="#xmark" /></svg></button>
+            <span class="pulse"></span><b>Đang ghi âm {{ clock(recSec()) }}</b>
+            <button type="button" class="send" aria-label="Gửi ghi âm" (click)="stopRec()"><svg class="i"><use href="#send" /></svg></button>
+          </div>
+        } @else {
+          <form (ngSubmit)="send()">
+            <button type="button" class="rbtn" aria-label="Ghi âm giọng nói" title="Ghi âm giọng nói" (click)="startRec()"><svg class="i"><use href="#mic-s" /></svg></button>
+            <span class="picwrap">
+              <button type="button" class="rbtn" title="Gửi hình ảnh" aria-label="Gửi hình ảnh" (click)="picMenu.set(!picMenu())"><svg class="i"><use href="#photo" /></svg></button>
+              @if (picMenu()) {
+                <span class="picmenu">
+                  <button type="button" (click)="startCam()"><svg class="i"><use href="#cam-s" /></svg>Chụp ảnh</button>
+                  <label (click)="picMenu.set(false)"><input type="file" accept="image/*,video/*" multiple hidden (change)="attach($any($event.target))" /><svg class="i"><use href="#photo" /></svg>Chọn ảnh trong máy</label>
+                </span>
+              }
+            </span>
+            <input [formControl]="input" placeholder="Aa" maxlength="2000" autocomplete="off" />
+            <button type="submit" class="send" aria-label="Gửi" [disabled]="input.invalid"><svg class="i"><use href="#send" /></svg></button>
+          </form>
+        }
       </section>
+    } @else {
+      <section class="thread blank"><img src="assets/clean/ant-chat.png" alt="" /><p>Chọn một đoạn chat để bắt đầu.</p></section>
     }
+  </div>
+}
+@if (camOn()) {
+  <div class="camscrim" (click)="closeCam()">
+    <div class="cambox" (click)="$event.stopPropagation()">
+      <video #cam autoplay playsinline muted></video>
+      <div class="camact"><button type="button" class="ghost" (click)="closeCam()">Hủy</button><button type="button" class="go" (click)="snap(cam)">Chụp</button></div>
+    </div>
   </div>
 }

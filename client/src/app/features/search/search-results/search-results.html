@@ -1,60 +1,113 @@
-<h1>
-  @if (filter.q) { Kết quả cho “{{ filter.q }}” } @else { Tìm quanh khu }
-</h1>
-
-<div class="filters">
-  <button type="button" class="btn ghost" [class.active]="!filter.kind" (click)="setKind(null)">Tất cả</button>
-  @for (k of kinds; track k) {
-    <button type="button" class="btn ghost" [class.active]="filter.kind === k" (click)="setKind(k)">
-      {{ kindLabel[k] }}
-    </button>
-  }
-  <span class="price-filter">
-    <input #min type="number" min="0" placeholder="Từ" [value]="filter.min ?? ''" />
-    –
-    <input #max type="number" min="0" placeholder="Đến" [value]="filter.max ?? ''" />
-    <button type="button" class="btn ghost" (click)="applyPrice(min.value, max.value)">Lọc giá</button>
-  </span>
-</div>
-
-@if (loading()) {
-  <p class="muted">Đang tìm…</p>
-} @else if (error()) {
-  <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
+@if (term()) {
+  <h1 class="srhead">Kết quả cho “{{ term() }}”<small>{{ matched().length }} bài</small></h1>
 } @else {
-  <p class="muted">{{ results().length }} bài@if (myBlock()) { · ưu tiên {{ myBlock() }} }</p>
+  <h1 class="srhead">Khám phá quanh khu<small>{{ matched().length }} bài</small></h1>
+}
 
-  @if (myBlock() && inArea().length === 0 && results().length > 0) {
-    <div class="notice">Chưa có bài phù hợp trong {{ myBlock() }}. Xem bài ở khu gần đó bên dưới.</div>
-  }
+<div class="layout">
+  <aside class="filters">
+    <div class="fhead"><h2>Bộ lọc</h2>@if (hasFilter()) { <button type="button" class="clear" (click)="clear()">Xóa</button> }</div>
 
-  <div class="grid">
-    @for (p of inArea(); track p._id) {
-      @if (p.kind === 'job') {
-        <app-job-card [job]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
-      } @else {
-        <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
-      }
-    } @empty {
-      @if (results().length === 0) {
-        <div class="empty" style="grid-column: 1 / -1">
-          <h2>Chưa có bài phù hợp</h2>
-          <p>Thử bỏ bớt bộ lọc hoặc đổi từ khóa.</p>
+    <section>
+      <h3>Danh mục</h3>
+      <ul class="cats">
+        @for (t of tabs; track t.key) {
+          <li><button type="button" [class.on]="kind() === t.key" (click)="setKind(t.key)"><i></i><span>{{ t.label }}</span><small>{{ counts()[t.key] }}</small></button></li>
+        }
+      </ul>
+    </section>
+
+    <section>
+      <h3>Khu vực</h3>
+      <button type="button" class="areabtn" (click)="area.open()"><span>{{ area.current() }}</span><svg class="i"><use href="#chev" /></svg></button>
+    </section>
+
+    <section>
+      <h3>{{ isJobs() ? 'Tiền công' : 'Khoảng giá' }}</h3>
+      <ul class="ranges">
+        @for (p of presets(); track p.label) {
+          <li><button type="button" [class.on]="isPreset(p)" (click)="setPreset(p)"><i></i><span>{{ p.label }}</span></button></li>
+        }
+        <li><button type="button" [class.on]="customOn()" (click)="openCustom()"><i></i><span>Khoảng khác</span></button></li>
+      </ul>
+      @if (customOn()) {
+        <div class="range">
+          <input type="number" min="0" step="10000" placeholder="Từ" [value]="draftMin()" (input)="draftMin.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá thấp nhất" />
+          <span>–</span>
+          <input type="number" min="0" step="10000" placeholder="Đến" [value]="draftMax()" (input)="draftMax.set($any($event.target).value)" (keydown.enter)="applyPrice()" aria-label="Giá cao nhất" />
         </div>
+        <button type="button" class="apply" (click)="applyPrice()">Áp dụng</button>
+      }
+    </section>
+
+    @if (!isJobs()) {
+      <section>
+        <h3>Đánh giá</h3>
+        <ul class="rates">
+          @for (r of [5, 4, 3]; track r) {
+            <li>
+              <button type="button" [class.on]="rate() === r" (click)="setRate(r)">
+                <i></i><span class="st">@for (s of stars(r); track $index) { <b [class.off]="!s">★</b> }</span>@if (r < 5) { <span class="up">trở lên</span> }
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section>
+        <h3>Ưu đãi</h3>
+        <button type="button" class="opt" [class.on]="xuOnly()" (click)="toggleXu()"><i class="box"></i><img src="assets/clean/antxu.png" alt="" /><span>Dùng được Xu</span></button>
+      </section>
+    }
+  </aside>
+
+  <div class="main">
+    <div class="sortbar">
+      <span class="lab">Sắp xếp theo:</span>
+      <button type="button" [class.on]="isOn('near')" (click)="toggleSort('near')">Gần nhất</button>
+      <button type="button" [class.on]="isOn('new')" (click)="toggleSort('new')">Mới nhất</button>
+      @if (!isJobs()) { <button type="button" [class.on]="isOn('sold')" (click)="toggleSort('sold')">Bán chạy</button> }
+      <app-sort-menu [bar]="true" [options]="priceOptions()" [value]="priceValue()" [placeholder]="isJobs() ? 'Tiền công' : 'Giá'" (valueChange)="toggleSort($any($event))" />
+    </div>
+
+    @if (loading()) {
+      <app-skeleton variant="cards" [count]="8" />
+    } @else if (error()) {
+      <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
+    } @else {
+      @if (local().length) {
+        <div class="card-grid">
+          @for (p of local(); track p._id) {
+            <app-result-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+          }
+        </div>
+      }
+
+      @if (nearby().length) {
+        <h2 class="near-title" [class.first]="!local().length">
+          @if (!local().length) {
+            <span class="none"><svg class="i"><use href="#pin" /></svg>Chưa có bài phù hợp trong {{ area.current() }}</span>
+          }
+          Ở khu gần đó
+        </h2>
+        <div class="card-grid">
+          @for (p of nearby(); track p._id) {
+            <app-result-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+          }
+        </div>
+      }
+
+      @if (!matched().length) {
+        <div class="empty">
+          <img src="assets/clean/idle.png" alt="" />
+          <h2>Chưa thấy bài phù hợp</h2>
+          <p>Thử từ khóa khác, xóa bớt bộ lọc hoặc đổi khu vực.</p>
+          <button type="button" class="btn" (click)="clear()">Xóa bộ lọc</button>
+        </div>
+      }
+      @if (isMock) {
+        <p class="demo-note">Bài đăng và số kết quả ở đây là dữ liệu mẫu hiện có trong dự án; tìm kiếm ảnh cần máy chủ để nhận dạng.</p>
       }
     }
   </div>
-
-  @if (nearby().length) {
-    <h2>Ở khu gần đó</h2>
-    <div class="grid">
-      @for (p of nearby(); track p._id) {
-        @if (p.kind === 'job') {
-          <app-job-card [job]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
-        } @else {
-          <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
-        }
-      }
-    </div>
-  }
-}
+</div>

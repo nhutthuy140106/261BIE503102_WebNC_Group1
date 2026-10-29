@@ -1,75 +1,168 @@
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else if (job(); as j) {
-  <article class="job">
-    <span class="muted by"><app-avatar [src]="j.sellerAvatar" [name]="j.sellerName" [size]="28" /><span>Việc làm · <a class="seller" [routerLink]="['/shop', j.sellerId]">{{ j.sellerName }}</a> đang cần người</span></span>
-    <h1>{{ j.title }}</h1>
-    <p class="status" [class.closed]="j.job?.status !== 'open'">
-      @if (j.job?.status === 'open') { ● Đang mở · {{ j.job?.offers }} đề nghị } @else { Đã có người nhận }
-    </p>
-    <p class="pay">{{ j.price | number }}đ</p>
-    <div class="facts"><span>{{ j.job?.due }}</span><span>{{ j.block }}</span></div>
-    <p>{{ j.description }}</p>
+  <div class="crumb"><button type="button" class="back" (click)="back()">Quay lại</button><span>·</span><a routerLink="/">Trang chủ</a><span>›</span><span>Việc làm</span>@if (j.category) { <span>›</span><span>{{ j.category }}</span> }</div>
 
-    @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
-
-    @if (myOffer(); as o) {
-      <div class="mine">
-        {{ stateLabel[o.state] }}. Gửi đề nghị chưa phải là đã nhận việc — chờ {{ j.sellerName }} chọn người.
-        <a [routerLink]="['/orders', o._id]">Xem trong Đơn hàng</a>
-        @if (o.state === 'offered') { <button type="button" class="btn ghost" (click)="withdraw()">Rút đề nghị</button> }
+  <div class="jobhero">
+    <div>
+      <div class="kindline">
+        <span class="cat">Việc làm@if (j.category) { · {{ j.category }} }</span>
+        @if (j.job?.status === 'open') { <span class="jst">Đang mở · {{ j.job?.offers }} đề nghị</span> } @else { <span class="jst closed">Đã có người nhận</span> }
       </div>
-    } @else if (j.job?.status === 'open') {
-      <form [formGroup]="offerForm" (ngSubmit)="submitOffer()" class="offer">
-        <h2>Đề nghị nhận việc</h2>
-        <fieldset>
-          <legend>Khung giờ bạn làm được</legend>
-          <div formArrayName="slots">
-            @for (s of slotOptions(); track s.value; let i = $index) {
-              <label><input type="checkbox" [formControlName]="i" /> {{ s.label }}</label>
+      <h1>{{ j.title }}</h1>
+      <div class="meta">
+        <span>{{ j.block }}@if (j.distance != null) { · {{ j.distance | distance }} }</span>
+        <span>Đăng {{ j.createdAt | ago }}</span>
+        <span>Hạn: {{ j.job | jobWhen }}</span>
+      </div>
+    </div>
+    <div class="pay"><small>Tiền công</small><b>{{ j.price | vnd }}</b><span>/ {{ j | unit }}</span>
+      <div class="acts">
+        <button type="button" (click)="share()">Chia sẻ</button>
+        <button type="button" [class.on]="saved.has(j._id)" (click)="toggleSave()">
+          <svg class="i"><use [attr.href]="saved.has(j._id) ? '#heartFill' : '#heart'" /></svg>{{ saved.has(j._id) ? 'Đã lưu' : 'Lưu' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="kfacts">
+    <div><svg class="i"><use href="#clock" /></svg><span><b>Thời gian làm</b>{{ j.job | jobWhen }}</span></div>
+    <div><svg class="i"><use href="#pin" /></svg><span><b>Địa điểm</b>{{ j.block }}</span></div>
+    <div><svg class="i"><use href="#users" /></svg><span><b>Số người cần</b>1 người</span></div>
+    <div><svg class="i"><use href="#receipt" /></svg><span><b>Thanh toán</b>Tiền mặt</span></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <section class="block"><h2>Việc cần làm</h2><div class="desc"><p>{{ j.description }}</p></div></section>
+      <section class="block">
+        <h2>Địa điểm</h2>
+        <div class="mapbox"><div class="pinbig"><svg class="i"><use href="#pin" /></svg><b>{{ j.block }}</b></div></div>
+        <p class="hintp">Địa chỉ chính xác gửi sau khi chủ việc chọn bạn.</p>
+      </section>
+
+      <section class="block" id="qa">
+        <h2>Hỏi đáp <small>({{ qa().length }})</small></h2>
+        <p class="qa-note"><svg class="i"><use href="#shield" /></svg><span>Câu hỏi và trả lời hiện công khai để mọi người cùng xem, nên đừng ghi số điện thoại hay địa chỉ ở đây. Muốn hỏi riêng thì bấm <b>Nhắn tin</b> ở phần Người đăng việc.</span></p>
+        @for (q of qa(); track q._id) {
+          <div class="qa">
+            <app-avatar [name]="q.authorName" [size]="34" />
+            <div>
+              <b>{{ q.authorName }}</b><small>{{ q.createdAt | ago }}</small>
+              <p>{{ q.text }}</p>
+              @if (q.answer) {
+                <div class="qa-a"><app-avatar [src]="j.sellerAvatar" [name]="j.sellerName" [size]="28" /><div><b>{{ j.sellerName }}</b><span class="tagp">Người đăng</span><p>{{ q.answer }}</p></div></div>
+              } @else { <div class="qa-wait">Chờ {{ j.sellerName }} trả lời</div> }
+            </div>
+          </div>
+        }
+        @if (j.job?.status === 'open') {
+          <form class="qa-form" [formGroup]="askForm" (ngSubmit)="ask()">
+            <textarea rows="1" maxlength="300" formControlName="text" placeholder="Hỏi {{ j.sellerName }} về việc này…"></textarea>
+            <button type="submit">Gửi câu hỏi</button>
+          </form>
+          @if (askForm.controls.text.errors?.['server']; as msg) {
+            <div class="qa-err">{{ msg }}</div>
+          } @else if (askForm.controls.text.errors?.['containsPhone']) {
+            <div class="qa-err">Câu hỏi công khai không được có số điện thoại. Muốn trao đổi riêng, bạn bấm Nhắn tin nhé.</div>
+          }
+        } @else {
+          <p class="qa-off">Việc đã có người nhận nên hỏi đáp đã đóng.</p>
+        }
+      </section>
+
+      <section class="block">
+        <h2>Người đăng việc</h2>
+        <div class="pcard2">
+          <div class="pc-top">
+            <a class="shoplink" [routerLink]="['/shop', j.sellerId]">
+              <app-avatar [src]="j.sellerAvatar" [name]="j.sellerName" [size]="56" />
+              <div><b>{{ j.sellerName }}<u>Xem gian hàng ›</u></b><small>Hàng xóm trong khu · {{ j.block }}</small></div>
+            </a>
+            <button type="button" class="btn-msg" (click)="message()"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
+          </div>
+          <div class="pc-stats">
+            <div><b>4,9</b><span>đánh giá</span></div>
+            <div><b>{{ posterStats().posted }}</b><span>việc đã đăng</span></div>
+            <div><b>{{ posterStats().done }}</b><span>việc hoàn thành</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===== Khung đề nghị nhận việc ===== -->
+    <aside class="order offerbox">
+      <div class="price">{{ j.price | vnd }} <span>/ {{ j | unit }}</span></div>
+      <div class="who">{{ j.job?.offers }} người đã đề nghị · cần 1 người</div>
+
+      @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
+
+      @if (myOffer(); as o) {
+        <div class="state"><b>Bạn đã gửi đề nghị</b>Đang chờ {{ j.sellerName }} xem và chọn người. Bạn sẽ nhận thông báo khi có kết quả.</div>
+        <div class="stepper mini" [style.--n]="stepLabels.length">@for (n of stepLabels; track $index) { @if ($index > 0) { <i class="ln"></i> } <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span><span class="slbl">{{ n }}</span></div> }</div>
+        <button type="button" class="primary" (click)="openOrder()">Xem trong Đơn hàng</button>
+        @if (o.state === 'offered') { <button type="button" class="ghostbtn" (click)="withdraw()">Rút đề nghị</button> }
+      } @else if (j.job?.status === 'open') {
+        <form [formGroup]="offerForm" (ngSubmit)="askConfirm()">
+          <div class="field">
+            <label>Bạn làm được lúc nào</label>
+            <div class="slot2" formArrayName="slots">
+              @for (s of slotOptions(); track s.value; let i = $index) {
+                <label class="slot" [class.on]="offerForm.controls.slots.at(i).value">
+                  <input type="checkbox" [formControlName]="i" />{{ s.label }}<small>{{ i === 0 && slotOptions().length > 3 ? 'đúng giờ chủ việc cần' : 'có thể làm' }}</small>
+                </label>
+              }
+            </div>
+          </div>
+          <div class="field" [class.err]="offerForm.controls.intro.invalid && offerForm.controls.intro.touched">
+            <label for="intro">Giới thiệu ngắn <em>*</em></label>
+            <textarea id="intro" rows="4" maxlength="300" formControlName="intro" placeholder="Ví dụ: Mình ở Block B, có xe máy, quen đường. Sáng thứ Bảy mình rảnh."></textarea>
+            <div class="count">{{ offerForm.controls.intro.value.length }}/300</div>
+            @if (offerForm.controls.intro.errors?.['server']; as msg) {
+              <small class="error">{{ msg }}</small>
+            } @else if (offerForm.controls.intro.invalid && offerForm.controls.intro.touched) {
+              <small class="error">Viết 10–300 ký tự giới thiệu để chủ việc dễ chọn bạn nhé.</small>
             }
           </div>
-        </fieldset>
-        <div class="field">
-          <label for="intro">Giới thiệu ngắn</label>
-          <textarea id="intro" rows="4" formControlName="intro"
-                    [class.is-invalid]="offerForm.controls.intro.invalid && offerForm.controls.intro.touched"></textarea>
-          @if (offerForm.controls.intro.errors?.['server']; as msg) {
-            <small class="error">{{ msg }}</small>
-          } @else if (offerForm.controls.intro.invalid && offerForm.controls.intro.touched) {
-            <small class="error">Hãy viết 10–300 ký tự để người đăng biết bạn là ai.</small>
-          }
-        </div>
-        <button type="submit" class="btn" [disabled]="offerForm.invalid || submitting()">Gửi đề nghị</button>
-      </form>
-    } @else {
-      <div class="notice">Việc này đã có người nhận.</div>
-    }
-
-    <section class="qa" id="qa">
-      <h2>Hỏi đáp công khai</h2>
-      @for (q of qa(); track q._id) {
-        <div class="q">
-          <p><strong>{{ q.authorName }}</strong>: {{ q.text }}</p>
-          @if (q.answer) { <p class="a">{{ j.sellerName }}: {{ q.answer }}</p> } @else { <p class="muted">Chờ {{ j.sellerName }} trả lời</p> }
-        </div>
-      } @empty {
-        <p class="muted">Chưa có câu hỏi nào.</p>
-      }
-      @if (j.job?.status === 'open') {
-        <form [formGroup]="askForm" (ngSubmit)="ask()">
-          <textarea rows="2" formControlName="text" placeholder="Hỏi công khai (không ghi số điện thoại)"></textarea>
-          @if (askForm.controls.text.errors?.['server']; as msg) {
-            <small class="error">{{ msg }}</small>
-          } @else if (askForm.controls.text.errors?.['containsPhone']) {
-            <small class="error">Không ghi số điện thoại ở hỏi đáp công khai — hãy nhắn tin riêng.</small>
-          }
-          <button type="submit" class="btn ghost" [disabled]="askForm.invalid">Gửi câu hỏi</button>
+          <button type="submit" class="primary" [disabled]="submitting()">Đề nghị nhận việc</button>
         </form>
+        <div class="rules"><b>Gửi đề nghị chưa phải là đã nhận việc.</b> Chủ việc xem các đề nghị và chọn người. Khi được chọn, bạn mới thấy địa chỉ chính xác và việc chuyển sang mục <b>Đơn hàng → Việc đã nhận</b>.</div>
+      } @else {
+        <div class="state closed"><b>Việc đã có người nhận</b>Chủ việc đã chọn được người. Bạn có thể xem các việc khác quanh khu.</div>
+        <a routerLink="/search" [queryParams]="{ kind: 'job' }" class="ghostbtn">Xem việc khác</a>
       }
-      <a routerLink="/messenger" class="btn ghost">Nhắn tin riêng</a>
+    </aside>
+  </div>
+
+  @if (others().length) {
+    <section class="sec">
+      <h2 class="sech">Việc khác quanh bạn</h2>
+      <div class="grid4">
+        @for (o of others(); track o._id) { <app-job-card [job]="o" /> }
+      </div>
     </section>
-  </article>
+  }
+
+  @if (confirm()) {
+    <div class="scrim" (click)="confirm.set(false)">
+      <div class="modal" role="dialog" (click)="$event.stopPropagation()">
+        @if (sent()) {
+          <div class="done">
+            <h3>Đã gửi đề nghị!</h3>
+            <p>{{ j.sellerName }} sẽ xem và chọn người. Gửi đề nghị <b>chưa phải là đã nhận việc</b>, bạn sẽ nhận thông báo khi có kết quả.</p>
+            <div class="stepper mini" [style.--n]="stepLabels.length">@for (n of stepLabels; track $index) { @if ($index > 0) { <i class="ln"></i> } <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span><span class="slbl">{{ n }}</span></div> }</div>
+            <div class="btns"><button type="button" class="ghost" (click)="confirm.set(false)">Quay lại</button><button type="button" class="go" (click)="openOrder()">Xem trong Đơn hàng</button></div>
+          </div>
+        } @else {
+          <h3>Gửi đề nghị nhận việc</h3>
+          <div class="line"><span class="jb">Việc</span><span><b>{{ j.title }}</b><small>{{ j.sellerName }} · {{ j.block }}</small></span></div>
+          <dl><dt>Tiền công</dt><dd>{{ j.price | vnd }} / {{ j | unit }}</dd><dt>Bạn làm được</dt><dd>{{ chosenSlots() }}</dd><dt>Giới thiệu</dt><dd>{{ offerForm.controls.intro.value }}</dd></dl>
+          <div class="btns"><button type="button" class="ghost" (click)="confirm.set(false)">Sửa lại</button><button type="button" class="go" [disabled]="submitting()" (click)="submitOffer()">Gửi đề nghị</button></div>
+        }
+      </div>
+    </div>
+  }
 } @else {
   <div class="empty">
     <h1>Việc không tồn tại</h1>

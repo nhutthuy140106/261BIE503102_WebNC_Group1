@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const ApiError = require('../utils/ApiError');
-const { isProd } = require('../config/env');
 
 // eslint-disable-next-line no-unused-vars
 module.exports = (err, req, res, next) => {
@@ -13,7 +12,7 @@ module.exports = (err, req, res, next) => {
 
   if (!(e instanceof ApiError)) {
     console.error(err);
-    e = new ApiError(500, 'INTERNAL_ERROR', isProd ? 'Lỗi máy chủ' : `Lỗi máy chủ: ${err.message}`);
+    e = new ApiError(500, 'INTERNAL_ERROR', 'Lỗi máy chủ');
   }
   res.status(e.status).json({ error: { code: e.code, message: e.message, ...(e.details ? { details: e.details } : {}) } });
 };

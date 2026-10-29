@@ -12,6 +12,14 @@
 - `server/` **chưa làm — chờ hướng dẫn của thầy** (Express + MongoDB).
 - Git: nhánh mặc định `dev`, `main` ổn định, tính năng ở `feature/*` — xem `docs/git-workflow.md`. Tri thức môn học: `docs/tham-khao/kien-thuc-mon-hoc-angular-express-mongodb.md`.
 
+## 0b. Tiến độ FE không gian Mua theo mockup (22/10, nhánh dev)
+
+- **Xong (theo `design/mockups/` nhánh main):** landing, đăng nhập/đăng ký, trang chủ, tìm kiếm, **chi tiết bài** (mô hình 7 khối: `core/models/post-template.ts`, `core/config/post-templates.ts`, `review-samples.ts`; ghép bài+mẫu ở `core/utils/template-for.ts`; trạng thái đơn đang chọn ở `core/utils/order-draft.ts`; đặt 2 bước + hộp Xác nhận + voucher AntXu + xem ảnh lớn + tất cả đánh giá), **chi tiết việc làm** (hỏi đáp công khai, thẻ người đăng, đề nghị + hộp xác nhận), chi tiết đơn (thanh bước đơn đã đặt, nội dung đã đặt `Order.detail`, cộng Xu khi xong việc/đánh giá), gian hàng (tab Đánh giá, theo dõi cần đăng nhập), Messenger (`?to=<tên>` mở/tạo cuộc trò chuyện), trang Tôi (hoạt động, khu vực & AntXu, lịch sử Xu, đăng xuất).
+- **Chưa kiểm chứng trong trình duyệt:** chỉ chạy `ngc --noEmit` (biên dịch sạch), chưa chụp ảnh so với mockup; hoạt ảnh chưa kiểm.
+- **Còn thiếu / lệch mockup:** hộp chọn địa chỉ chỉ chọn (thêm/sửa ở trang Tôi); mô tả + đánh giá mẫu của bài mock lấy theo mẫu loại bài nên có thể lệch tên; chưa có trang Hỗ trợ riêng (chỉ có Báo cáo vấn đề theo đơn); đề nghị kèm giá, báo phụ thu phía bán, trả lời hỏi đáp phía người đăng chờ phía Bán; Xu +10 khi đơn đã đặt hoàn thành cần phía bán đổi trạng thái.
+- **Đơn hàng (22/10):** danh sách thanh tab chữ + dòng phẳng + chấm trạng thái; chi tiết đủ luồng theo `orders.html` — đơn đã đặt: hủy/yêu cầu hủy, duyệt giá (ước tính/báo giá/phụ thu), đổi lịch hai chiều, xác nhận đã nhận, báo vấn đề/trả hàng (2 giờ đồ ăn, 24 giờ đồ dùng/dịch vụ), đánh giá; việc đã nhận: sửa giới thiệu, rút, bắt đầu, báo hoàn thành, xin hủy, xác nhận nhận tiền, đánh giá. Xu: +10 xong đơn ≥30.000đ, +5 đánh giá có chữ, +15 xong việc, trả voucher khi hủy, thu lại Xu khi hoàn tiền hết. Mọi bước mới chỉ chạy ở mock (`OrderService.update`, `JobOfferService.patch`; thật thì báo 501) + nút "Mô phỏng phía người bán". Dữ liệu mẫu đổi (`datasets/orders.json`): xóa khóa `antgo_mock_orders` trong localStorage để thấy bản mới.
+- Mặc định dùng dữ liệu mẫu (chưa có server); gọi API thật thì mở `?mock=0`, quay lại mẫu bằng `?mock=1`. Server thật thiếu: sổ Xu, đánh giá theo người bán, hội thoại theo id người nhận.
+
 ## 1. Cách làm việc với người dùng (bắt buộc)
 
 - **Trao đổi trước, làm sau.** Đề xuất ngắn → chờ "ok" → mới làm. Không tự cài công cụ khi chưa hỏi.

@@ -87,6 +87,17 @@ const { auth } = require('../../../middlewares/auth');
  *       200: { description: Đã ghi yêu cầu }
  *       409: { description: Không đủ điều kiện trả hàng }
  *       422: { description: Thiếu lý do }
+ * /orders/{id}/tracking:
+ *   get:
+ *     tags: [Đơn hàng]
+ *     summary: Vị trí xe giao hàng (MÔ PHỎNG, tính từ mốc thời gian của đơn)
+ *     description: Chỉ người mua, người bán của đơn hoặc admin. Chỉ đơn đồ ăn/đồ dùng giao tận nơi chưa hủy; đơn tự lấy, dịch vụ → 404 NO_TRACKING. Hai thiết bị gọi cùng lúc thấy xe cùng một chỗ.
+ *     security: [{ cookieAuth: [] }]
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+ *     responses:
+ *       200: { description: "{ data: { simulated, note, shop:{lat,lng}, home:{lat,lng}, courier:{lat,lng,phase,etaMin,distanceKm} } }; phase = waiting | preparing | delivering | delivered" }
+ *       403: { description: Không phải đơn của bạn }
+ *       404: { description: Không có đơn, hoặc NO_TRACKING }
  * /orders/{id}/approve-surcharge:
  *   post:
  *     tags: [Đơn hàng]
@@ -106,6 +117,8 @@ router.get('/', query(v.list), asyncHandler(async (req, res) => {
 }));
 router.get('/:id', ids('id'), asyncHandler(async (req, res) =>
   res.json({ data: await service.getVisible(req.user, req.params.id) })));
+router.get('/:id/tracking', ids('id'), asyncHandler(async (req, res) =>
+  res.json({ data: await service.tracking(req.user, req.params.id) })));
 router.post('/:id/cancel-request', ids('id'), body(v.reason), asyncHandler(async (req, res) =>
   res.json({ data: await service.requestCancel(req.user, req.params.id, req.body.reason) })));
 router.post('/:id/return-request', ids('id'), body(v.reason), asyncHandler(async (req, res) =>

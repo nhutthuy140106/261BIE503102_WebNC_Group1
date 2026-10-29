@@ -5,3 +5,11 @@ h2 { font-size: 20px; letter-spacing: -.015em; }
 .filters .active { background: var(--ink); color: #fff; border-color: var(--ink); }
 .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+.sempty { grid-column: 1 / -1; text-align: center; padding: 30px 10px; color: var(--smoke); line-height: 1.5; }
+.sempty img { width: 220px; margin: 0 auto 8px; display: block; }
+.sempty p { margin: 0; }
+.sempty .hrt { width: 18px; height: 18px; color: var(--accent); vertical-align: -3px; }
+.sempty { padding: 44px 16px 30px; line-height: 1.8; font-size: 14.5px; }
+.sempty img { margin: 0 auto 20px; }
+.sempty img { width: 280px; }
+.sempty img { width: 190px; }

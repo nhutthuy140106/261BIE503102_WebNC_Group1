@@ -28,6 +28,8 @@ export interface Message {
   _id: string;
   mine: boolean;
   text: string;
+  /** Hình / video / ghi âm đính kèm (mock: ảnh lưu dạng data URL, video và ghi âm chỉ sống trong phiên) */
+  media?: { kind: 'image' | 'video' | 'audio'; url: string; sec?: number };
   createdAt: string;
 }
 
@@ -47,6 +49,8 @@ export interface AppNotification {
   /** Đường dẫn nội bộ để mở đúng đơn/hội thoại */
   link: string;
   read: boolean;
+  /** Ảnh người liên quan (người bán / người đăng việc); không có thì hiện icon theo loại */
+  avatar?: string;
   createdAt: string;
 }
 
@@ -58,7 +62,7 @@ export interface Report {
   targetId: string;
   reason: ReportReason;
   detail: string;
-  state: 'open';
+  state: 'open' | 'resolved';
   createdAt: string;
 }
 

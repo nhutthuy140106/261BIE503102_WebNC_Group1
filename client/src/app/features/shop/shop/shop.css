@@ -12,3 +12,38 @@
 .tabs .btn { border-radius: 999px; padding: 8px 18px; }
 .tabs .active { background: var(--ink); color: #fff; border-color: var(--ink); }
 @media (max-width: 700px) { .head { flex-wrap: wrap; } }
+
+.revs { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 36px; }
+.rwho { display: flex; align-items: center; gap: 10px; }
+.rwho img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+.rwho b { display: block; font-size: 14px; }
+.rwho small { color: var(--smoke); font-size: 12px; }
+.rstars { margin-top: 8px; color: #E39B1A; font-size: 12px; letter-spacing: 1px; }
+.rstars .off { color: #E5DED6; }
+.rev p { margin-top: 4px; line-height: 1.55; color: #3C4660; }
+.reply { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: var(--soft); font-size: 13.5px; line-height: 1.5; }
+.reply b { display: block; font-size: 12px; margin-bottom: 2px; }
+@media (max-width: 700px) { .revs { grid-template-columns: 1fr; } }
+
+.addr { display: flex; align-items: center; gap: 6px; margin: 2px 0 0; color: var(--smoke); font-size: 14px; }
+.addr svg { width: 15px; height: 15px; }
+
+.stats .star { color: #E39B1A; }
+.bought { margin-top: 6px; font-size: 12.5px; color: var(--smoke); }
+
+/* số liệu: một khung ba ô bằng nhau, số to */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 16px 0 28px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.stats div { min-width: 0; padding: 20px 24px; border: 0; border-radius: 0; gap: 4px; }
+.stats div + div { border-left: 1px solid var(--border); }
+.stats strong { font-size: 32px; letter-spacing: -.02em; line-height: 1.1; }
+.stats span { font-size: 14px; }
+.stats .star { font-size: 26px; vertical-align: 2px; }
+@media (max-width: 700px) { .stats strong { font-size: 26px; } .stats div { padding: 14px 16px; } }
+
+/* nút đầu trang: cùng cỡ, Theo dõi nổi bật */
+.cta { gap: 10px; }
+.cta .btn, .cta .btn-msg { height: 46px; padding: 0 22px; border-radius: 12px; font-size: 15px; font-weight: 600; }
+.cta .btn.ghost { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cta .btn.ghost:hover { filter: brightness(.95); }
+.cta .btn.ghost.on { background: #fff; border-color: var(--ink); color: var(--ink); }
+.stats .of5 { font-style: normal; font-size: 16px; font-weight: 500; color: var(--smoke); letter-spacing: 0; margin-left: 2px; }

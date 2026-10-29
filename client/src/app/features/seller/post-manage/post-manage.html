@@ -5,7 +5,7 @@
 
 @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-skeleton variant="rows" [count]="4" />
 } @else {
   <ul class="list">
     @for (p of posts(); track p._id) {
@@ -16,7 +16,7 @@
         <div class="main">
           <span class="muted">{{ kindLabel[p.kind] }} · {{ p.block }} @if (p.closed) { · Đã ẩn }</span>
           <strong>{{ p.title }}</strong>
-          <span class="price">{{ p.price | number }}đ@if (p.priceUnit) {<small>/{{ p.priceUnit }}</small>}</span>
+          <span class="price">{{ p.price | vnd }}@if (p.priceUnit) {<small>/{{ p.priceUnit }}</small>}</span>
         </div>
         <div class="acts">
           <a [routerLink]="[p.kind === 'job' ? '/posts/job' : '/posts', slugOf(p)]" class="btn ghost">Xem</a>

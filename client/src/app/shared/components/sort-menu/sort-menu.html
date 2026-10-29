@@ -1,0 +1,10 @@
+<div class="sortbox" [class.open]="open()" [class.bar]="bar" [class.on]="bar && !!current">
+  <button type="button" class="sortbtn" (click)="open.set(!open())" aria-haspopup="listbox" [attr.aria-expanded]="open()">
+    @if (prefix && !bar) { {{ prefix }} }<b>{{ current ? current.label : placeholder }}</b><svg class="i"><use href="#chev" /></svg>
+  </button>
+  <div class="sortmenu" role="listbox">
+    @for (o of options; track o.key) {
+      <button type="button" role="option" [class.on]="o.key === value" (click)="choose(o)">{{ o.label }}</button>
+    }
+  </div>
+</div>

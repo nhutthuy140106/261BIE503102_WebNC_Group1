@@ -8,25 +8,24 @@
     @if (post.promoted) {
       <span class="kind ad">QUẢNG BÁ</span>
     } @else {
-      <span class="kind">{{ kindLabel[post.kind] }}</span>
+      <span class="kind">{{ post.category ?? kindLabel[post.kind] }}</span>
     }
-    <button type="button" class="save" (click)="toggleSave.emit(post)" [attr.aria-pressed]="saved"
+    <app-deal-tag class="deal" [post]="post" />
+    @if (post.acceptsXu) { <span class="xuico" title="Dùng được Xu"><img src="assets/clean/antxu.png" alt="Dùng được Xu" /></span> }
+    <button type="button" class="save" [class.on]="saved" (click)="onSave($event)" [attr.aria-pressed]="saved"
             [attr.aria-label]="saved ? 'Bỏ lưu' : 'Lưu bài'">
       <svg class="i"><use [attr.href]="saved ? '#heartFill' : '#heart'" /></svg>
     </button>
   </div>
   <div class="body">
     <h3><a [routerLink]="['/posts', slug]">{{ post.title }}</a></h3>
-    <div class="pr">{{ post.price | number }}đ@if (post.priceUnit) {<span> /{{ post.priceUnit }}</span>}</div>
-    @if (post.acceptsXu) {
-      <div class="xu"><img class="coin" src="assets/clean/antxu.png" alt="" />Dùng được Xu</div>
-    }
+    <div class="prrow"><div class="pr"><app-price [post]="post" /> @if (post | unit; as u) { <span>/ {{ u }}</span> }</div>@if (post.sold) { <span class="sold">{{ post.kind === 'service' ? 'Đã đặt' : 'Đã bán' }} {{ post.sold | count }}</span> }</div>
+    @if (post.combo) { <div class="comborow"><app-combo-saving [post]="post" /></div> }
     <div class="meta">
-      <span>{{ post.sellerName }}</span>
-      <span>
-        @if (post.rating) { <svg class="i star"><use href="#star" /></svg>{{ post.rating }} · }
-        {{ post.block }}
-      </span>
+      <span><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</span>
+      @if (post.rating) {
+        <span class="star"><svg class="i"><use href="#star" /></svg><b>{{ rating }}</b>@if (post.reviewCount) { <i>({{ post.reviewCount }})</i> }</span>
+      }
     </div>
   </div>
 </article>

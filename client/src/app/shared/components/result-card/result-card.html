@@ -1,0 +1,42 @@
+<article class="result-card">
+  <a [routerLink]="link">
+    @if (isJob) {
+      <div class="jobphoto">
+        <div class="jc-top">
+          <app-avatar [src]="post.sellerAvatar" [name]="post.sellerName" [size]="30" />
+          <span><b>{{ post.sellerName || 'Hàng xóm' }}</b>{{ post.createdAt | ago }}</span>
+        </div>
+        @if (post.description) { <p>{{ post.description }}</p> }
+        <div class="jc-foot">
+          @if (post.job?.due) { <span class="due"><svg class="i"><use href="#clock" /></svg>{{ post.job | jobWhen }}</span> }
+        </div>
+      </div>
+    } @else {
+      <div class="photo">
+        @if (post.images.length) { <img [src]="post.images[0]" alt="" loading="lazy" /> }
+      </div>
+    }
+    <div class="body">
+    <span class="kind">{{ kindText }}</span>
+    <app-deal-tag [post]="post" />
+    <h3>{{ post.title }}</h3>
+    @if (true) {
+      <div class="prrow"><div class="price"><app-price [post]="post" /> @if (post | unit; as u) { <small>/ {{ u }}</small> }</div>@if (post.sold) { <span class="sold">{{ post.kind === 'service' ? 'Đã đặt' : 'Đã bán' }} {{ post.sold | count }}</span> }</div>
+    }
+    @if (post.combo) { <div style="margin: -2px 0 4px"><app-combo-saving [post]="post" /></div> }
+    <div class="area">
+      <span class="loc"><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</span>
+      @if (isJob && post.job) {
+        <span class="jst" [class.closed]="post.job.status === 'taken'">@if (post.job.status === 'taken') { Đã có người nhận } @else { {{ post.job.offers ? post.job.offers + ' đề nghị' : 'Chưa có đề nghị' }} }</span>
+      } @else if (post.rating) {
+        <span class="rate"><svg class="i"><use href="#star" /></svg>{{ post.rating }}@if (post.reviewCount) { <i>({{ post.reviewCount }})</i> }</span>
+      }
+    </div>
+    </div>
+  </a>
+  @if (post.promoted) { <span class="ad">QUẢNG BÁ</span> }
+  @if (post.acceptsXu) { <span class="xuico" title="Dùng được Xu"><img src="assets/clean/antxu.png" alt="Dùng được Xu" /></span> }
+  <button type="button" class="save" [class.on]="saved" (click)="onSave($event)" [attr.aria-label]="saved ? 'Bỏ lưu' : 'Lưu bài'">
+    <svg class="i"><use [attr.href]="saved ? '#heartFill' : '#heart'" /></svg>
+  </button>
+</article>

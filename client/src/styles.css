@@ -69,3 +69,42 @@ input, select, textarea {
   .sh { flex-wrap: wrap; gap: 4px 12px; }
   .sh h2 { font-size: 20px; }
 }
+
+/* trái tim bay từ ♡ trên thẻ lên nút Đã lưu ở header (core/utils/fly-heart.ts) */
+.flyheart { position: fixed; z-index: 60; width: 22px; height: 22px; color: var(--accent); pointer-events: none; }
+.flyheart svg { fill: currentColor; }
+
+/* khối chung của các trang nội dung (bê từ design/mockups/shared/base.css) */
+.pagehead { padding: 36px 0 24px; }
+.pagehead h1 { font-size: 30px; line-height: 1.2; letter-spacing: -.025em; margin: 0; }
+.pagehead p { margin: 7px 0 0; color: var(--smoke); }
+.input { border: 1px solid var(--border); border-radius: 10px; background: #fff; padding: 10px 12px; outline: none; color: var(--ink); }
+.input:focus { border-color: var(--ink); }
+.empty img { width: 125px; height: auto; display: block; margin: 0 auto 14px; }
+.demo-note { margin: 24px 0 40px; color: var(--fog); font-size: 12px; }
+
+/* Nút "Nhắn tin" dùng chung (chi tiết bài, chi tiết việc, gian hàng, chi tiết đơn): viền xanh đen, bo 10, icon chat */
+.btn-msg { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px; border: 1px solid var(--ink); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background .15s; }
+.btn-msg:hover { background: #F4F5F7; }
+.btn-msg svg { width: 18px; height: 18px; }
+
+/* chọn ảnh: một khung nét đứt chung cho mọi nơi thêm hình + hàng ảnh xem trước */
+.photo-add { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 48px; border: 1px dashed var(--fog); border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--ink); }
+.photo-add:hover { border-color: var(--ink); }
+.photo-add svg { width: 18px; height: 18px; }
+.photo-add.full { opacity: .5; pointer-events: none; }
+.photo-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.photo-thumb { position: relative; width: 64px; height: 64px; border-radius: 8px; overflow: hidden; }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-thumb button { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%; background: rgba(34,48,74,.7); color: #fff; font-size: 14px; line-height: 1; }
+.photo-add { text-transform: none !important; letter-spacing: 0 !important; font-size: 14px !important; font-weight: 600 !important; color: var(--ink) !important; margin: 0; }
+.rvtext + .photo-add { margin-top: 12px; }
+
+/* khung thêm hình to hơn, kiểu Shopee: biểu tượng trên, chữ dưới */
+.photo-add { flex-direction: column; gap: 6px; height: 96px; }
+.photo-add svg { width: 26px; height: 26px; }
+.photo-thumb { width: 84px; height: 84px; }
+.photo-add { display: flex !important; flex-direction: column; align-items: center; justify-content: center; height: 96px !important; margin-bottom: 0 !important; }
+
+/* trang Messenger chiếm trọn khung, không hiện chân trang */
+body.no-footer app-footer { display: none; }

@@ -1,18 +1,24 @@
 <section class="hero">
   <div class="shot">
     <div class="grain"></div>
+    <img class="cloud cl1" src="assets/cloud.png" alt="" />
+    <img class="cloud cl2" src="assets/cloud.png" alt="" />
+    <img class="cloud sm s1" src="assets/cloud.png" alt="" />
+    <img class="cloud sm s2" src="assets/cloud.png" alt="" />
+    <img class="cloud sm s3" src="assets/cloud.png" alt="" />
+    <img class="cloud sm s4" src="assets/cloud.png" alt="" />
     <svg class="arc" viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid slice" aria-label="AntGo">
       <defs><path id="arcPath" d="M60,410 Q560,250 1060,410" /></defs>
       <text text-anchor="middle"><textPath href="#arcPath" startOffset="50%">AntGo</textPath></text>
     </svg>
-    <img class="ant" src="assets/clean/ride_wave.png" alt="Linh vật AntGo" />
+    <div class="hang" (click)="nextGreeting()" title="Bấm vào mình nè!"><img src="assets/clean/spider.png" alt="Linh vật AntGo đu tơ" /></div>
+    <div class="bubble" [class.show]="greetingShown()" [innerHTML]="greeting()"></div>
     <div class="heroText">
-      <p>Mua bán, đặt dịch vụ, nhận việc vặt với AntGo.</p>
+      <p>Mua bán, đặt dịch vụ, nhận việc vặt, ngay trong khu bạn sống.</p>
       <div class="ctas">
-        <button type="button" class="c1" (click)="s.scrollIntoView({ behavior: 'smooth' })">
-          Tìm quanh khu <svg class="i"><use href="#right" /></svg>
+        <button type="button" class="c1" (click)="scrollTo(explore)">
+          Khám phá ngay <svg class="i"><use href="#right" /></svg>
         </button>
-        <button type="button" class="c2" (click)="goSearch('job')">Tìm việc gần nhà</button>
       </div>
       <div class="trust">
         <span><svg class="i"><use href="#bolt" /></svg>Nhanh chóng</span>
@@ -23,29 +29,43 @@
   </div>
 </section>
 
-<section class="explore" #s>
-  <form class="bigsearch" (submit)="$event.preventDefault(); search(q.value)" role="search">
-    <svg class="i lead"><use href="#search" /></svg>
-    <input #q placeholder="Tìm món ăn, đồ dùng, dịch vụ hoặc việc làm" aria-label="Tìm kiếm" />
+<section class="explore" #explore>
+  <form #bigSearch class="bigsearch" [class.drag]="dragging()" (submit)="$event.preventDefault(); submitSearch()" role="search"
+        (dragenter)="$event.preventDefault(); dragging.set(true)" (dragover)="$event.preventDefault(); dragging.set(true)"
+        (dragleave)="dragging.set(false)" (drop)="onDrop($event)">
+    @if (search.imageUrl(); as img) {
+      <span class="imgchip">
+        <img [src]="img" alt="" /><span>{{ search.searching() ? 'Đang tìm theo ảnh…' : 'Tìm theo ảnh' }}</span>
+        <button type="button" (click)="search.cancel()" aria-label="Hủy tìm theo ảnh"><svg class="i"><use href="#xmark" /></svg></button>
+      </span>
+    }
+    @if (search.recording() || search.searching()) {
+      <button type="button" class="sbtn" title="Hủy" aria-label="Hủy" (click)="search.cancel()"><svg class="i"><use href="#xmark" /></svg></button>
+    }
+    <input #q [value]="search.text()" (input)="search.text.set($any($event.target).value)" [placeholder]="search.placeholder()" aria-label="Tìm kiếm" />
+    <button type="button" class="sbtn" [class.rec]="search.recording()" title="Tìm bằng giọng nói" (click)="search.voice()"><svg class="i"><use href="#mic" /></svg></button>
+    <button type="button" class="sbtn" title="Tìm bằng hình ảnh" (click)="onPickImage()"><svg class="i"><use href="#camera" /></svg></button>
     <button type="submit" class="go" aria-label="Tìm"><svg class="i"><use href="#search" /></svg></button>
   </form>
   <div class="popline">
     <b>Phổ biến:</b>
     @for (w of popular; track w) {
-      <button type="button" (click)="search(w)">{{ w }}</button>
+      <button type="button" (click)="fill(w, q)">{{ w }}</button>
     }
+    <a routerLink="/quay-mon" class="spinlink">Chưa biết ăn gì? Quay món</a>
+    <a routerLink="/vuon" class="spinlink">Hái xu nhận giảm giá</a>
   </div>
 </section>
 
 @if (loading()) {
-  <p class="muted sec">Đang tải…</p>
+  <app-skeleton variant="cards" [count]="8" />
 } @else if (error()) {
   <div class="notice sec">Không tải được dữ liệu: {{ error() }}</div>
 } @else {
   <section class="sec">
     <div class="sh">
-      <h2>Nổi bật trong khu</h2><span class="info">Bài được người bán quảng bá</span>
-      <a class="more" routerLink="/search">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+      <h2>Nổi bật trong khu</h2>
+      <a class="more" routerLink="/search/section/featured">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
     </div>
     <div class="grid">
       @for (p of featured(); track p._id) {
@@ -56,21 +76,44 @@
     </div>
   </section>
 
-  @if (forYou().length) {
+  @if (auth.isLoggedIn() && forYouShown().length) {
     <section class="sec">
-      <div class="sh"><h2>Gợi ý cho bạn</h2><p>Dựa trên bài bạn đã lưu và đã đặt</p></div>
+      <div class="sh">
+        <h2>Gợi ý cho bạn</h2>
+        <a class="more" routerLink="/search/section/foryou">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+      </div>
       <div class="grid">
-        @for (p of forYou(); track p._id) {
+        @for (p of forYouShown(); track p._id) {
           <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
         }
       </div>
     </section>
   }
 
+  @if (dealsNow().length) {
+    <section class="sec gold">
+      <div class="sh">
+        <h2>Đang giảm giá lúc này <span class="goldclock" role="timer" aria-label="Thời gian còn lại"><svg class="i"><use href="#clock" /></svg>còn {{ dealsLeft() }}</span></h2>
+        <a class="more" routerLink="/search">Xem thêm <svg class="i"><use href="#right" /></svg></a>
+      </div>
+      <div class="grid">
+        @for (x of dealsNow(); track x.p._id) {
+          <app-post-card [post]="x.p" [saved]="saved.has(x.p._id)" (toggleSave)="toggleSave($event)" />
+        }
+      </div>
+    </section>
+  } @else if (dealsNext(); as nx) {
+    <a class="goldnext" [routerLink]="['/posts', nx.p._id]">
+      <svg class="i"><use href="#clock" /></svg>
+      <span><b>Sắp tới:</b> {{ nx.p.title }} giảm giá lúc {{ nx.u.from }} (còn {{ nx.u.inMin }} phút)</span>
+      <svg class="i"><use href="#right" /></svg>
+    </a>
+  }
+
   <section class="sec">
     <div class="sh">
-      <h2>Gần bạn</h2><p>Món đồ và dịch vụ trong khu của bạn</p>
-      <a class="more" routerLink="/search">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+      <h2>Gần bạn</h2>
+      <a class="more" routerLink="/search/section/nearby">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
     </div>
     <div class="grid">
       @for (p of nearby(); track p._id) {
@@ -81,7 +124,14 @@
     </div>
   </section>
 
-  <!-- Kiếm thêm gần nhà: dải xanh đen khác nhịp, giới thiệu nhận việc vặt -->
+  <!-- Kiếm thêm Xu: dải gọn dẫn vào Vườn AntGo -->
+  <a class="gband" routerLink="/vuon">
+    <img src="assets/clean/antxu.png" alt="" width="44" height="44" />
+    <span><b>Vườn AntGo · chơi vui, nhận Xu mỗi ngày</b><small>Hái xu, tưới cây, nuôi thú cưng — Xu đổi voucher giảm giá khi đặt đơn.</small></span>
+    <span class="gobtn">Chơi ngay <svg class="i"><use href="#right" /></svg></span>
+  </a>
+
+  <!-- Kiếm thêm gần nhà: dải xanh đen khác nhịp, giới thiệu nhận việc vặt (điểm khác biệt của AntGo) -->
   <section class="kband">
     <img class="earn-ant" src="assets/clean/point.png" alt="" />
     <div>
@@ -89,7 +139,6 @@
       <h2>Rảnh tay? Giúp hàng xóm,<br />nhận tiền công ngay trong khu.</h2>
       <div class="earn-btns">
         <a class="earn-go" routerLink="/search" [queryParams]="{ kind: 'job' }">Xem việc gần nhà <svg class="i"><use href="#right" /></svg></a>
-        <a class="earn-ghost" routerLink="/seller/posts/new">Đăng việc cần người</a>
       </div>
     </div>
     <ol class="earn-steps">
@@ -101,40 +150,54 @@
 
   <section class="sec">
     <div class="sh">
-      <h2>Việc mới quanh bạn</h2><p>Yêu cầu mới nhất từ hàng xóm trong khu</p>
-      <a class="more" routerLink="/search" [queryParams]="{ kind: 'job' }">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
+      <h2>Việc mới quanh bạn</h2>
+      <a class="more" routerLink="/search/section/jobs">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
     </div>
     <div class="grid">
       @for (j of jobs(); track j._id) {
-        <app-job-card [job]="j" [saved]="saved.has(j._id)" (toggleSave)="toggleSave($event)" />
+        <app-job-card [job]="j" />
       } @empty {
         <p class="muted">Chưa có việc mới.</p>
       }
     </div>
   </section>
 
-  <section class="sec">
-    <div class="sh"><h2>Khám phá quanh khu</h2><p>Lướt thêm món đồ, dịch vụ và việc trong khu</p></div>
+  <section class="sec" #feedSec>
+    <div class="sh"><h2>Khám phá quanh khu</h2></div>
     <div class="ffilter">
       @for (f of feedFilters; track f.key) {
-        <button type="button" [class.on]="feedFilter() === f.key" (click)="feedFilter.set(f.key)">{{ f.label }}</button>
+        <button type="button" [class.on]="feedFilter() === f.key" (click)="setFilter(f.key)">{{ f.label }}</button>
       }
-      <label class="sortbox">Sắp xếp:
-        <select [value]="feedSort()" (change)="feedSort.set($any($event.target).value)" aria-label="Sắp xếp">
-          @for (o of feedSorts; track o.key) { <option [value]="o.key">{{ o.label }}</option> }
-        </select>
-      </label>
+      <div class="sortbox" [class.open]="sortMenuOpen()">
+        <button type="button" class="sortbtn" (click)="$event.stopPropagation(); sortMenuOpen.set(!sortMenuOpen())">
+          Sắp xếp: <b>{{ sortLabel() }}</b><svg class="i"><use href="#chev" /></svg>
+        </button>
+        <div class="sortmenu" (click)="$event.stopPropagation()">
+          @for (o of sortMenu(); track o.key) {
+            <button type="button" [class.on]="feedSort() === o.key" (click)="setSort(o.key)">{{ o.label }}</button>
+          }
+        </div>
+      </div>
     </div>
     <div class="grid">
       @for (p of feed(); track p._id) {
         @if (p.kind === 'job') {
-          <app-job-card [job]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+          <app-job-card class="rise" [job]="p" />
         } @else {
-          <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+          <app-post-card class="rise" [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
         }
-      } @empty {
-        <p class="muted">Chưa có bài ở nhóm này.</p>
+      }
+      @if (loadingMore()) {
+        @for (n of [1, 2, 3, 4]; track n) { <div class="skel"></div> }
       }
     </div>
+    @if (!feed().length && !loadingMore()) {
+      <p class="muted">Không còn bài nào khác ở nhóm này.</p>
+    }
+    @if (showMoreButton()) {
+      <div class="feedmore"><button type="button" (click)="loadMoreClick()">Xem thêm</button></div>
+    }
   </section>
 }
+<!-- mốc để biết đã cuộn gần tới cuối khối Khám phá -->
+<div #sentinel></div>

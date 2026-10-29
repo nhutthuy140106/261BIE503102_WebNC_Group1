@@ -3,7 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of, retry, throwError } from 'rxjs';
 import { API_BASE, useMock } from '../config/api.config';
 import { Post, PostKind } from '../models/post';
-import { stripAccents } from '../utils/slug-helper';
+import { buildComboDetail } from '../utils/combo';
+import { textMatches } from '../utils/text-match';
 import { jobFromApi, postFromApi } from '../utils/api-mappers';
 import { ApiService } from './api';
 import { MockDb } from './mock-db';
@@ -24,7 +25,7 @@ export class PostService {
 
   /** Mock: kho `posts` (nạp từ datasets/posts.json, phía Bán ghi thêm vào đây). Bài đã đóng không hiện. */
   getPosts(): Observable<Post[]> {
-    if (useMock('post')) return this.db.list<Post>('posts').pipe(map((l) => l.filter((p) => !p.closed)));
+    if (useMock('post')) return this.db.list<Post>('posts').pipe(map((l) => l.filter((p) => !p.closed).map(freshen)));
     // API thật: bài (đồ ăn/đồ dùng/dịch vụ) và việc làm ở hai endpoint riêng → gộp lại
     return forkJoin([
       this.api.get<unknown[]>('/posts', { limit: 100 }),
@@ -41,7 +42,19 @@ export class PostService {
         catchError(() => of(undefined)),
       );
     }
-    return this.getPosts().pipe(map((list) => list.find((p) => p._id === id)));
+    return this.getPosts().pipe(
+      map((list) => {
+        const p = list.find((x) => x._id === id);
+        return p?.combo ? { ...p, comboDetail: buildComboDetail(p, list, Date.now()) } : p;
+      }),
+    );
+  }
+
+  /** Các bài theo danh sách id, kể cả bài đã đóng (ngăn kéo Đã lưu cần hiện "Tạm ngưng nhận"). */
+  getByIds(ids: string[]): Observable<Post[]> {
+    if (!ids.length) return of([]);
+    if (useMock('post')) return this.db.list<Post>('posts').pipe(map((l) => ids.map((id) => l.find((p) => p._id === id)).filter((p): p is Post => !!p)));
+    return forkJoin(ids.map((id) => this.getPostById(id))).pipe(map((l) => l.filter((p): p is Post => !!p)));
   }
 
   /** Bài của một người bán/người đăng việc (gian hàng). Thật: GET /posts?seller=<id>. */
@@ -59,16 +72,16 @@ export class PostService {
   }
 }
 
+/** Mock: đổi `agoMin` thành createdAt thật để "đăng 2 giờ trước" đúng theo thời điểm đang xem. */
+function freshen(p: Post): Post {
+  return p.agoMin == null ? p : { ...p, createdAt: new Date(Date.now() - p.agoMin * 60_000).toISOString() };
+}
+
 export function matches(p: Post, f: PostFilter): boolean {
   if (f.kind && p.kind !== f.kind) return false;
   if (f.block && p.block !== f.block) return false;
   if (f.min != null && p.price < f.min) return false;
   if (f.max != null && p.price > f.max) return false;
-  if (f.q) {
-    const q = stripAccents(f.q);
-    if (!stripAccents(p.title).includes(q) && !stripAccents(p.description).includes(q)) {
-      return false;
-    }
-  }
+  if (f.q && !textMatches(`${p.title} ${p.description} ${p.category ?? ''} ${p.block}`, f.q)) return false;
   return true;
 }

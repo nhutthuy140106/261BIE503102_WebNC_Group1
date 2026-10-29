@@ -2,7 +2,7 @@
 @if (error()) {
   <div class="notice" role="alert">{{ error() }}</div>
 } @else if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else {
   <div class="stats">
     @for (s of stats(); track s.label) {

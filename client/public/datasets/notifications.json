@@ -1,23 +1,53 @@
 [
   {
-    "_id": "640b187e71d9faa9039f0501",
-    "text": "Chị Hoa đã chọn bạn cho việc \"Cho mèo ăn 2 buổi/ngày trong 3 ngày\".",
-    "link": "/orders/640b187e71d9faa9039f00cc",
+    "_id": "640b187e71d9faa9039f0504",
+    "text": "Tiệm Sạch Thơm đã báo giá cuối 117.000đ cho đơn AG-O3009, chờ bạn duyệt.",
+    "link": "/orders/640b187e71d9faa9039f00ca",
     "read": false,
-    "createdAt": "2026-10-15T11:30:00.000Z"
+    "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
+    "createdAt": "2026-10-16T18:45:00.000Z",
+    "agoMin": 25
+  },
+  {
+    "_id": "640b187e71d9faa9039f0506",
+    "text": "Minh báo phụ thu 10.000đ cho đơn giao nhận hộ AG-O3018.",
+    "link": "/orders/640b187e71d9faa9039f00d2",
+    "read": true,
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70",
+    "createdAt": "2026-10-16T18:45:00.000Z",
+    "agoMin": 300
   },
   {
     "_id": "640b187e71d9faa9039f0502",
     "text": "Bếp Cô Lan đang chuẩn bị đơn AG-O3012.",
     "link": "/orders/640b187e71d9faa9039f00c9",
     "read": false,
-    "createdAt": "2026-10-16T10:10:00.000Z"
+    "createdAt": "2026-10-16T10:10:00.000Z",
+    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70"
   },
   {
     "_id": "640b187e71d9faa9039f0503",
     "text": "Bếp Cô Lan: \"Ok con, cô nhớ rồi.\"",
     "link": "/messenger",
     "read": true,
-    "createdAt": "2026-10-16T10:08:00.000Z"
+    "createdAt": "2026-10-16T10:08:00.000Z",
+    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0505",
+    "text": "Anh Tùng đã xác nhận đơn sửa máy AG-O3015, hẹn kiểm tra lúc 19:00.",
+    "link": "/orders/640b187e71d9faa9039f00d1",
+    "read": false,
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&q=70",
+    "createdAt": "2026-10-16T18:45:00.000Z",
+    "agoMin": 150
+  },
+  {
+    "_id": "640b187e71d9faa9039f0501",
+    "text": "Chị Ngân đã chọn bạn cho việc \"Cho mèo ăn 3 ngày khi đi vắng\".",
+    "link": "/orders/640b187e71d9faa9039f00cc",
+    "read": false,
+    "createdAt": "2026-10-15T11:30:00.000Z",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=70"
   }
 ]

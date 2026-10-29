@@ -110,6 +110,20 @@ export class JobOfferService {
     });
   }
 
+  /**
+   * Mock: áp thay đổi tùy ý vào đề nghị — nút "Mô phỏng phía người đăng" (chọn bạn / xác nhận hoàn thành…),
+   * xác nhận đã nhận tiền công, đánh giá. Đổi `state` thì ghi thêm một mốc vào `history`.
+   * Máy chủ chưa có endpoint cho các bước này (docs/handoff.md).
+   */
+  patch(id: string, patch: Partial<Offer>, _line?: string): Observable<Offer> {
+    if (!useMock('offer')) throw new AppError('Bước này cần máy chủ hỗ trợ, chưa có API.', 501, 'NOT_IMPLEMENTED');
+    return this.mutate(id, (o) => ({
+      ...o,
+      ...patch,
+      history: patch.state && patch.state !== o.state ? [...o.history, { state: patch.state, at: new Date().toISOString() }] : o.history,
+    }));
+  }
+
   private mutate(id: string, fn: (o: Offer) => Offer): Observable<Offer> {
     return this.list().pipe(
       map((rows) => {

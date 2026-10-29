@@ -50,7 +50,7 @@ module.exports = swaggerJsdoc({
     tags: [
       { name: 'Health' }, { name: 'Auth' }, { name: 'Địa chỉ' }, { name: 'Đã lưu' }, { name: 'Khám phá' },
       { name: 'Đơn hàng' }, { name: 'Đề nghị nhận việc' }, { name: 'Hỏi đáp' }, { name: 'Đánh giá' },
-      { name: 'Hội thoại' }, { name: 'Thông báo' }, { name: 'Báo cáo' }, { name: 'Giỏ nháp' }, { name: 'Upload' }, { name: 'Gợi ý' }, { name: 'Admin' }, { name: 'Dev (tạm)' },
+      { name: 'Hội thoại' }, { name: 'Thông báo' }, { name: 'Báo cáo' }, { name: 'Giỏ nháp' }, { name: 'Upload' }, { name: 'Gợi ý' }, { name: 'Assistant' }, { name: 'AntXu' }, { name: 'Admin' }, { name: 'Dev (tạm)' },
     ],
   },
   // glob cần dấu / (Windows trả \)

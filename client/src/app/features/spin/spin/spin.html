@@ -1,0 +1,104 @@
+<section class="spin">
+  <header class="head">
+    <h1>Chưa biết ăn gì?</h1>
+    <p class="muted">Chọn nhóm món và ngân sách, bấm <b>Quay ngay</b> để AntGo chọn giúp bạn một món đang bán trong khu.</p>
+  </header>
+
+  @if (loading()) {
+    <app-loader label="Đang mở kho món…" />
+  } @else if (error()) {
+    <div class="notice" role="alert">Không tải được món: {{ error() }}</div>
+  } @else {
+    <div class="tabs" role="tablist">
+      @for (t of tabs; track t.key) {
+        <button type="button" role="tab" class="chip" [class.on]="tab() === t.key" [attr.aria-selected]="tab() === t.key" [disabled]="spinning()" (click)="setTab(t.key)">{{ t.label }}</button>
+      }
+    </div>
+
+    <div class="stage" [class.busy]="spinning()">
+      <img class="cloud c1" src="assets/garden/cloud1.png" alt="" />
+      <img class="cloud c2" src="assets/garden/cloud2.png" alt="" />
+      <span class="petals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+
+      <div class="board" [style.--t]="trackH() + 'px'">
+        <div class="view" #view>
+          <div class="strip" [class.instant]="instant()" [style.transform]="'translateX(' + offset() + 'px)'">
+            @for (p of reel(); track $index) {
+              <div class="item" [class.win]="!spinning() && result() === p && $index === 33" [style.width.px]="itemW()">
+                <div class="card">
+                  @if (p.images.length) { <img class="food" [src]="p.images[0]" [alt]="p.title" loading="lazy" /> } @else { <span class="food ph"></span> }
+                  <img class="rim" src="assets/garden/rim.png" alt="" />
+                </div>
+              </div>
+            } @empty {
+              <p class="empty-reel">Chưa có món nào ở nhóm này.</p>
+            }
+          </div>
+        </div>
+        <img class="frame" src="assets/garden/frame.png" alt="" />
+        <div class="selbox" [class.on]="spinning()" [class.hit]="!spinning() && result()">
+          <img class="sel" src="assets/garden/sel.png" alt="" />
+          <img class="pin top" src="assets/garden/pin.png" alt="" />
+          <img class="pin bot" src="assets/garden/pin.png" alt="" />
+        </div>
+      </div>
+
+      <div class="base">
+        <img class="plat" src="assets/garden/platform.png" alt="" />
+        <button type="button" class="go" aria-label="Quay ngay" [disabled]="spinning() || pool().length === 0" (click)="spin()">
+          <img src="assets/garden/button.png" alt="" />
+        </button>
+      </div>
+
+      <img class="ant" [class.show]="!spinning() && result()" src="assets/garden/ant-joy.png" alt="" />
+    </div>
+    <div class="foot">
+      @if (spinning()) { <app-loader [compact]="true" label="Đang chọn món cho bạn…" /> } @else { <span class="muted">Bấm <b>Quay ngay</b> để AntGo chọn món cho bạn</span> }
+    </div>
+
+    <div class="controls">
+      <label class="budget">
+        <span class="muted">Ngân sách</span>
+        <select [value]="budget()" (change)="setBudget($any($event.target).value)" [disabled]="spinning()" aria-label="Ngân sách">
+          @for (b of budgets; track b.value) { <option [value]="b.value" [selected]="b.value === budget()">{{ b.label }}</option> }
+        </select>
+      </label>
+    </div>
+    <p class="count muted" aria-live="polite">
+      @if (pool().length) { Đang có <b>{{ pool().length }}</b> món hợp điều kiện. } @else { Không có món nào hợp điều kiện — thử nâng ngân sách hoặc đổi nhóm. }
+    </p>
+
+    @if (result(); as r) {
+      <div class="result" role="status">
+        <span class="kick">Hôm nay ăn</span>
+        <a class="rcard" [routerLink]="link(r)">
+          @if (r.images.length) { <img [src]="r.images[0]" [alt]="r.title" /> }
+          <span class="rmeta">
+            <strong>{{ r.title }}</strong>
+            <span class="muted">{{ r.sellerName }}@if (r.block) { · {{ r.block }} }</span>
+            <em>{{ r.price | vnd }}@if (r.priceUnit) {<i>/{{ r.priceUnit }}</i>}</em>
+          </span>
+        </a>
+        <div class="acts">
+          <a class="btn" [routerLink]="link(r)">Xem & đặt món</a>
+          <button type="button" class="btn ghost" (click)="spin()">Quay lại</button>
+        </div>
+      </div>
+    }
+
+    @if (pool().length) {
+      <section class="shelf">
+        <h2>Trong kho có gì?</h2>
+        <div class="grid">
+          @for (p of pool().slice(0, 8); track p._id) {
+            <a class="mini" [routerLink]="link(p)">
+              @if (p.images.length) { <img [src]="p.images[0]" [alt]="p.title" loading="lazy" /> }
+              <b>{{ p.title }}</b>
+              <span class="muted">{{ p.price | vnd }}@if (p.priceUnit) {/{{ p.priceUnit }}}</span>
+            </a>
+          }
+        </div>
+      </section>
+    }
+  }
+</section>

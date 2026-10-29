@@ -1,0 +1,35 @@
+<section class="tg">
+  <a routerLink=".." class="back">← Vườn AntGo</a>
+  <h1>Tưới cây xoài</h1>
+  <p class="sub">Tưới {{ perDay }} lần mỗi ngày. Đủ {{ full }} lần cây ra trái — thu hoạch nhận {{ reward }} Xu.</p>
+
+  <div class="stage" [class.splash]="splash">
+    <svg viewBox="0 0 200 200" role="img" [attr.aria-label]="'Cây xoài giai đoạn ' + stage()">
+      <rect x="0" y="150" width="200" height="50" fill="#e9d9c8" />
+      <ellipse cx="100" cy="152" rx="60" ry="9" fill="#d9c3ac" />
+      @switch (stage()) {
+        @case (0) { <ellipse cx="100" cy="146" rx="9" ry="6" fill="#8a5a33" /> }
+        @case (1) { <path d="M100 150 V128" stroke="#5b8a3c" stroke-width="4" stroke-linecap="round" /><ellipse cx="93" cy="126" rx="9" ry="5" fill="#6aa043" transform="rotate(-25 93 126)" /><ellipse cx="108" cy="124" rx="9" ry="5" fill="#6aa043" transform="rotate(25 108 124)" /> }
+        @case (2) { <rect x="96" y="104" width="8" height="46" rx="3" fill="#8a5a33" /><circle cx="100" cy="96" r="26" fill="#6aa043" /><circle cx="84" cy="106" r="16" fill="#5b8a3c" /><circle cx="117" cy="106" r="16" fill="#5b8a3c" /> }
+        @case (3) { <rect x="94" y="88" width="12" height="62" rx="4" fill="#8a5a33" /><circle cx="100" cy="72" r="38" fill="#6aa043" /><circle cx="74" cy="92" r="24" fill="#5b8a3c" /><circle cx="127" cy="92" r="24" fill="#5b8a3c" /> }
+        @default {
+          <rect x="94" y="88" width="12" height="62" rx="4" fill="#8a5a33" /><circle cx="100" cy="72" r="38" fill="#6aa043" /><circle cx="74" cy="92" r="24" fill="#5b8a3c" /><circle cx="127" cy="92" r="24" fill="#5b8a3c" />
+          <ellipse cx="82" cy="78" rx="7" ry="10" fill="#f2b632" /><ellipse cx="116" cy="66" rx="7" ry="10" fill="#f2b632" /><ellipse cx="124" cy="96" rx="7" ry="10" fill="#e8a020" /><ellipse cx="70" cy="100" rx="7" ry="10" fill="#f2b632" />
+        }
+      }
+    </svg>
+    <span class="drops" aria-hidden="true"><i></i><i></i><i></i></span>
+  </div>
+
+  <div class="bar" role="progressbar" [attr.aria-valuenow]="garden.tree()" aria-valuemin="0" [attr.aria-valuemax]="full"><i [style.width.%]="garden.tree() / full * 100"></i></div>
+  <p class="meta">Cây lớn {{ garden.tree() }}/{{ full }} · Còn {{ garden.waterLeft() }}/{{ perDay }} lượt tưới hôm nay</p>
+
+  @if (garden.tree() >= full) {
+    <button type="button" class="act" (click)="harvest()">Thu hoạch +{{ reward }} Xu</button>
+  } @else {
+    <button type="button" class="act" [disabled]="garden.waterLeft() <= 0" (click)="water()">
+      <svg class="i"><use href="#bolt" /></svg> {{ garden.waterLeft() > 0 ? 'Tưới nước' : 'Mai tưới tiếp nhé' }}
+    </button>
+  }
+  <p class="cap">Xu nhận từ game hôm nay: <b>{{ xu.gameToday() }}/30</b></p>
+</section>

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { Conversation, Message } from '../models/social';
@@ -32,22 +32,45 @@ export class ChatService {
     return this.db.list<Conversation>(COLLECTION).pipe(map((rows) => rows.find((c) => c._id === conversationId)?.messages ?? []));
   }
 
-  send(conversationId: string, text: string): Observable<Message> {
+  send(conversationId: string, text: string, media?: Message['media']): Observable<Message> {
     if (!useMock('chat')) return this.api.post<unknown>(`/conversations/${conversationId}/messages`, { text }).pipe(
       map((m) => messageFromApi(m, this.auth.currentUser()?._id ?? '')),
     );
     return this.db.list<Conversation>(COLLECTION).pipe(
       map((rows) => {
         const t = text.trim();
-        if (!t || t.length > 2000) {
+        if ((!t && !media) || t.length > 2000) {
           throw new AppError('Dữ liệu chưa hợp lệ.', 422, 'VALIDATION_ERROR', [{ field: 'text', message: 'Tin nhắn dài 1–2000 ký tự.' }]);
         }
-        const msg: Message = { _id: this.db.newId(), mine: true, text: t, createdAt: new Date().toISOString() };
+        const msg: Message = { _id: this.db.newId(), mine: true, text: t, ...(media ? { media } : {}), createdAt: new Date().toISOString() };
         this.db.save(
           COLLECTION,
           rows.map((c) => (c._id === conversationId ? { ...c, messages: [...c.messages, msg] } : c)),
         );
         return msg;
+      }),
+    );
+  }
+
+  /** Mở cuộc trò chuyện mới với một người (mock). Có rồi thì trả lại cuộc cũ. API thật: tạo theo id người nhận ở bước nối server. */
+  start(withName: string, withAvatar?: string): Observable<Conversation> {
+    return this.db.list<Conversation>(COLLECTION).pipe(
+      map((rows) => {
+        const cur = rows.find((c) => c.withName === withName);
+        if (cur) return cur;
+        const c: Conversation = { _id: this.db.newId(), withName, withAvatar, unread: 0, messages: [] };
+        this.db.save(COLLECTION, [c, ...rows]);
+        return c;
+      }),
+    );
+  }
+
+  /** Đánh dấu chưa đọc (chỉ phía mình). API thật chưa có điểm cuối riêng nên chỉ lưu ở mock. */
+  markUnread(conversationId: string): Observable<void> {
+    if (!useMock('chat')) return of(undefined);
+    return this.db.list<Conversation>(COLLECTION).pipe(
+      map((rows) => {
+        this.db.save(COLLECTION, rows.map((c) => (c._id === conversationId ? { ...c, unread: Math.max(1, c.unread) } : c)));
       }),
     );
   }

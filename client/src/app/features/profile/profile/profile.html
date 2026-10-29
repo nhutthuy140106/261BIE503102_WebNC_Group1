@@ -1,14 +1,154 @@
-<h1>Tôi</h1>
 @if (auth.currentUser(); as u) {
-  <div class="me">
-    <span class="avatar">{{ u.fullName.charAt(0).toUpperCase() }}</span>
-    <dl>
-      <dt>Họ tên</dt><dd>{{ u.fullName }}</dd>
-      <dt>Khu vực</dt><dd>{{ u.block }}</dd>
-      <dt>AntXu</dt><dd>{{ u.xu }}</dd>
-    </dl>
+  @if (tab() === 'overview') {
+    <!-- Tổng quan: thẻ danh tính ngang, hàng số liệu, danh sách mục tài khoản -->
+    <div class="acct">
+      <section class="idcard">
+        <div class="avbig">
+          <app-avatar [src]="u.avatar" [name]="u.fullName" [size]="136" />
+          <button type="button" class="avcam" aria-label="Đổi ảnh đại diện" (click)="avMenu.set(!avMenu())"><svg class="i"><use href="#cam-s" /></svg></button>
+          @if (avMenu()) {
+            <span class="avmenu">
+              <button type="button" (click)="viewAvatar()"><svg class="i"><use href="#p-user" /></svg>Xem ảnh đại diện</button>
+              <label (click)="avMenu.set(false)"><input type="file" accept="image/*" hidden (change)="pickAvatar($any($event.target))" /><svg class="i"><use href="#photo" /></svg>Chọn ảnh đại diện</label>
+            </span>
+          }
+        </div>
+        <div class="idtx">
+          <h1>{{ u.fullName }}</h1>
+          <p><svg class="i"><use href="#p-phone" /></svg>{{ u.username }}</p>
+          <p><svg class="i"><use href="#pin" /></svg>{{ area.current() }}</p>
+          <a routerLink="/xu" class="xupill"><img src="assets/clean/antxu.png" alt="" />{{ xu.balance() }} Xu</a>
+        </div>
+        <div class="wbtn">
+          <button type="button" class="pbtn2" (click)="go('edit')"><svg class="i"><use href="#p-pencil" /></svg>Chỉnh sửa hồ sơ</button>
+          <span class="nmore2">
+            <button type="button" class="pbtn2 sq" aria-label="Thêm" (click)="moreMenu.set(!moreMenu())"><svg class="i"><use href="#dots" /></svg></button>
+            @if (moreMenu()) {
+              <span class="avmenu right">
+                <button type="button" (click)="moreMenu.set(false); go('password')"><svg class="i"><use href="#p-lock" /></svg>Đổi mật khẩu</button>
+                <button type="button" (click)="logout()"><svg class="i"><use href="#p-signout" /></svg>Đăng xuất</button>
+              </span>
+            }
+          </span>
+        </div>
+      </section>
+
+      <section class="stats3">
+        <a routerLink="/orders" [queryParams]="{ f: 'placed' }"><b>{{ stats().placed }}</b><span>Đơn đã đặt</span></a>
+        <a routerLink="/orders" [queryParams]="{ f: 'received' }"><b>{{ stats().received }}</b><span>Việc đã nhận</span></a>
+        <a routerLink="/orders" [queryParams]="{ f: 'history' }"><b>{{ stats().history }}</b><span>Trong lịch sử</span></a>
+      </section>
+
+      <section class="mlist">
+        <button type="button" (click)="go('saved')"><span class="mi"><svg class="i"><use href="#heart" /></svg></span><span class="mt"><b>Bài đã lưu</b><small>{{ saved.ids().length }} bài</small></span><svg class="i ar"><use href="#right" /></svg></button>
+        <button type="button" (click)="go('addresses')"><span class="mi"><svg class="i"><use href="#home" /></svg></span><span class="mt"><b>Địa chỉ của tôi</b><small>Nơi nhận hàng và đặt hộ</small></span><svg class="i ar"><use href="#right" /></svg></button>
+        <button type="button" (click)="go('area')"><span class="mi"><svg class="i"><use href="#pin" /></svg></span><span class="mt"><b>Khu vực</b><small>{{ area.current() }}</small></span><svg class="i ar"><use href="#right" /></svg></button>
+        <a routerLink="/xu"><span class="mi"><img src="assets/clean/antxu.png" alt="" /></span><span class="mt"><b>AntXu &amp; voucher</b><small>{{ xu.balance() }} Xu</small></span><svg class="i ar"><use href="#right" /></svg></a>
+        <button type="button" (click)="go('password')"><span class="mi"><svg class="i"><use href="#p-lock" /></svg></span><span class="mt"><b>Đổi mật khẩu</b><small>Bảo vệ tài khoản</small></span><svg class="i ar"><use href="#right" /></svg></button>
+        <a routerLink="/help"><span class="mi"><svg class="i"><use href="#p-help" /></svg></span><span class="mt"><b>Trợ giúp &amp; hỗ trợ</b><small>Câu hỏi thường gặp</small></span><svg class="i ar"><use href="#right" /></svg></a>
+      </section>
+    </div>
+  } @else {
+    <div class="subhead" [class.narrow]="tab() === 'password'">
+      <button type="button" class="backt" (click)="go('overview')"><svg class="i"><use href="#right" /></svg>Tài khoản</button>
+      <h1>{{ titleOf(tab()) }}</h1>
+    </div>
+  }
+
+  <div class="stage">
+    @switch (tab()) {
+      @case ('edit') {
+        <div class="one">
+          <form class="fcard" [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+            <h2>Thông tin cá nhân</h2>
+            <div class="fgrid">
+              <div class="field">
+                <label for="fullName">Họ và tên</label>
+                <input id="fullName" class="tx" formControlName="fullName" maxlength="40" />
+                @if (profileForm.controls.fullName.invalid && profileForm.controls.fullName.touched) { <small class="error">Tên dài 2–40 ký tự.</small> }
+              </div>
+              <div class="field">
+                <label for="phone">Số điện thoại</label>
+                <input id="phone" class="tx" [value]="u.username" disabled />
+                <small class="hint">Số điện thoại là tên đăng nhập. Cần đổi số, vui lòng <a routerLink="/help" class="hl">liên hệ hỗ trợ</a>.</small>
+              </div>
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" class="tx" type="email" formControlName="email" placeholder="ban@example.com" maxlength="80" />
+                @if (profileForm.controls.email.invalid && profileForm.controls.email.touched) { <small class="error">Email chưa đúng định dạng.</small> }
+              </div>
+              <div class="field">
+                <label for="birthday">Ngày sinh</label>
+                <input id="birthday" class="tx" type="date" formControlName="birthday" [max]="maxBirthday" />
+              </div>
+              <div class="field">
+                <label for="gender">Giới tính</label>
+                <app-select inputId="gender" formControlName="gender" [options]="genderOptions" placeholder="Chọn giới tính" />
+              </div>
+              <div class="field span2">
+                <label for="bio">Giới thiệu bản thân <span class="opt">(không bắt buộc)</span></label>
+                <textarea id="bio" class="tx ta" rows="3" maxlength="200" formControlName="bio" placeholder="Ví dụ: Ở Block B, hay nấu ăn cuối tuần, nhận việc dắt chó…"></textarea>
+                <small class="hint cnt">{{ profileForm.controls.bio.value.length }}/200 · hiện trên gian hàng và khi bạn gửi đề nghị nhận việc</small>
+              </div>
+            </div>
+            <div class="ffoot"><button type="submit" class="go" [disabled]="saving()">Lưu thay đổi</button></div>
+          </form>
+          <section class="fcard">
+            <h2>Địa chỉ và khu vực</h2>
+            <ul class="kv">
+              <li><span>Khu vực đang xem</span><b>{{ area.current() }}</b><button type="button" class="linkb" (click)="go('area')">Đổi</button></li>
+              <li><span>Địa chỉ nhận hàng</span><b>Quản lý trong sổ địa chỉ</b><button type="button" class="linkb" (click)="go('addresses')">Mở</button></li>
+            </ul>
+          </section>
+          <section class="fcard">
+            <h2>Bảo mật</h2>
+            <ul class="kv">
+              <li><span>Mật khẩu</span><b>••••••••</b><button type="button" class="linkb" (click)="go('password')">Đổi</button></li>
+            </ul>
+          </section>
+        </div>
+      }
+      @case ('password') {
+        <div class="one">
+          <form class="fcard pwform" [formGroup]="passForm" (ngSubmit)="savePassword()" novalidate>
+            <div class="field">
+              <label for="pcur">Mật khẩu hiện tại</label>
+              <app-password-input inputId="pcur" autocomplete="current-password" formControlName="current" [invalid]="passTried() && passForm.controls.current.invalid" />
+              @if (passTried() && passForm.controls.current.invalid) { <small class="error">Nhập mật khẩu hiện tại.</small> }
+            </div>
+            <div class="field">
+              <label for="pnew">Mật khẩu mới</label>
+              <app-password-input inputId="pnew" autocomplete="new-password" formControlName="next" [invalid]="passTried() && passForm.controls.next.invalid" />
+              @if (passTried() && passForm.controls.next.invalid) { <small class="error">Mật khẩu mới cần đạt mức Khá trở lên (ít nhất 3 trong 4 điều kiện: 8 ký tự, chữ hoa và chữ thường, chữ số, ký tự đặc biệt).</small> }
+              @else if (passTried() && passForm.controls.next.value === passForm.controls.current.value) { <small class="error">Mật khẩu mới phải khác mật khẩu hiện tại.</small> }
+            </div>
+            <div class="field">
+              <label for="pagain">Nhập lại mật khẩu mới</label>
+              <app-password-input inputId="pagain" autocomplete="new-password" formControlName="again" [invalid]="passTried() && (passForm.controls.again.invalid || passMismatch())" />
+              @if (passTried() && passMismatch()) { <small class="error">Hai mật khẩu chưa giống nhau.</small> }
+            </div>
+            <button type="submit" class="go" [disabled]="saving()">Đổi mật khẩu</button>
+          </form>
+        </div>
+      }
+      @case ('saved') { <div class="one wide"><div class="fcard"><app-saved-list id="saved" /></div></div> }
+      @case ('addresses') { <div class="one wide"><div class="fcard"><app-address-book id="addresses" /></div></div> }
+      @case ('area') {
+        <div class="one">
+          <section class="fcard">
+            <p class="lead">Bài đăng trong khu bạn chọn được xếp lên trước khi tìm kiếm.</p>
+            <ul class="areas">
+              @for (n of area.names; track n) {
+                <li><button type="button" [class.on]="area.current() === n" (click)="area.set(n)"><i></i>{{ n }}</button></li>
+              }
+            </ul>
+          </section>
+        </div>
+      }
+    }
   </div>
+
+  @if (avView()) {
+    <div class="avscrim" (click)="avView.set(false)"><img [src]="u.avatar" alt="Ảnh đại diện" (click)="$event.stopPropagation()" /><button type="button" class="avx" aria-label="Đóng" (click)="avView.set(false)"><svg class="i"><use href="#xmark" /></svg></button></div>
+  }
 }
-<app-saved-list id="saved" />
-<app-address-book />
-<p class="muted">Bài đã lưu và hoạt động sẽ bổ sung tiếp theo mockup <code>profile.html</code>.</p>

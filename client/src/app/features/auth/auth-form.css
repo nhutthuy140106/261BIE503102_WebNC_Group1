@@ -1,0 +1,32 @@
+/* Kiểu form dùng chung cho đăng nhập và đăng ký (nằm trong thẻ của auth-shell) */
+h1 { margin: 0; font-size: 26px; letter-spacing: -.025em; line-height: 1.2; }
+.why { margin: 8px 0 0; color: var(--smoke); font-size: 14.5px; line-height: 1.5; }
+label { display: block; margin: 18px 0 7px; font-size: 13px; font-weight: 700; }
+.tx { width: 100%; height: 48px; border: 1px solid var(--border); border-radius: 12px; padding: 0 14px; font: 500 15px 'Mona Sans', sans-serif; color: inherit; outline: none; box-sizing: border-box; background: #fff; }
+.tx:focus { border-color: var(--ink); }
+.tx.is-invalid { border-color: #c2451a; }
+small.error { display: block; margin-top: 6px; }
+.remember { display: flex; gap: 8px; align-items: center; margin: 16px 0 0; font-weight: 500; color: var(--smoke); cursor: pointer; }
+.remember input { accent-color: var(--accent); padding: 0; }
+.error[role='alert'] { margin: 12px 0 0; font-size: 13px; font-weight: 600; color: #c2451a; }
+.go { width: 100%; height: 52px; margin-top: 18px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font: 700 15.5px 'Mona Sans', sans-serif; cursor: pointer; }
+.go:hover { filter: brightness(.95); }
+.go:disabled { opacity: .45; cursor: default; }
+.alt { margin-top: 16px; text-align: center; font-size: 13.5px; color: var(--smoke); }
+.alt a { color: var(--accent); font-weight: 600; }
+
+@media (max-height: 820px) and (min-width: 761px) { h1 { font-size: 23px; } label { margin-top: 12px; } .tx { height: 44px; } .go { height: 48px; margin-top: 14px; } }
+
+/* hàng "Ghi nhớ đăng nhập" + "Quên mật khẩu?" */
+.rmrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.rmrow .remember { margin: 0; }
+.forgot { font-size: 13.5px; font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.forgot:hover { color: var(--accent); }
+.forgot { font-weight: 500; color: var(--smoke); text-decoration: none; }
+.forgot:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+.demo { margin-top: 14px; padding: 10px 12px; border: 1px dashed #F0E2DC; border-radius: 12px; background: #FBF4F1; display: grid; gap: 8px; }
+.demo small { color: #6b7280; }
+.demo .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.demo .chips button { border: 1px solid #F0E2DC; background: #fff; border-radius: 999px; padding: 5px 10px; font-size: 12.5px; cursor: pointer; }
+.demo .chips button:hover { border-color: #22304A; }

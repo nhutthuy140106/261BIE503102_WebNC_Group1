@@ -1,13 +1,28 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { KIND_LABEL, Post, PostKind } from '../../../core/models/post';
-import { AuthService } from '../../../core/services/auth';
-import { PostFilter, PostService } from '../../../core/services/post';
+import { USE_MOCK } from '../../../core/config/api.config';
+import { Post, PostKind } from '../../../core/models/post';
+import { AreaService } from '../../../core/services/area';
+import { PostService, matches } from '../../../core/services/post';
 import { SavedService } from '../../../core/services/saved';
 
-const KINDS: PostKind[] = ['food', 'goods', 'service', 'job'];
+type Tab = 'all' | PostKind;
+type Sort = 'near' | 'new' | 'sold' | 'low' | 'high';
+const SORTS: Sort[] = ['near', 'new', 'sold', 'low', 'high'];
 
-/** Bộ lọc nằm trên query params nên copy URL là giữ nguyên kết quả lọc. */
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'all', label: 'Tất cả' },
+  { key: 'food', label: 'Đồ ăn & uống' },
+  { key: 'goods', label: 'Đồ dùng' },
+  { key: 'service', label: 'Dịch vụ' },
+  { key: 'job', label: 'Việc làm' },
+];
+
+/**
+ * Kết quả tìm kiếm — bố cục kiểu Shopee: cột "Bộ lọc tìm kiếm" bên trái (danh mục, khu vực, khoảng giá, đánh giá, ưu đãi),
+ * thanh "Sắp xếp theo" phía trên danh sách. Mọi bộ lọc nằm trên query params (q, kind, min, max, rate, xu, sort)
+ * nên copy URL là giữ nguyên kết quả. Bài trong khu đang xem xếp trước, bài khu khác gom vào "Ở khu gần đó".
+ */
 @Component({
   selector: 'app-search-results',
   standalone: false,
@@ -19,69 +34,166 @@ export class SearchResults implements OnInit {
   private readonly router = inject(Router);
   private readonly postService = inject(PostService);
   protected readonly saved = inject(SavedService);
-  private readonly auth = inject(AuthService);
+  protected readonly area = inject(AreaService);
 
-  protected readonly kinds = KINDS;
-  protected readonly kindLabel = KIND_LABEL;
-  protected readonly results = signal<Post[]>([]);
+  protected readonly tabs = TABS;
+  protected readonly isMock = USE_MOCK;
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
-  protected filter: PostFilter = {};
+  private readonly all = signal<Post[]>([]);
 
-  /** Khu của tôi (nếu đã đăng nhập) — bài cùng khu xếp trước, khu khác gom vào "Ở khu gần đó". */
-  protected readonly myBlock = computed(() => this.auth.currentUser()?.block ?? null);
-  protected readonly inArea = computed(() => {
-    const b = this.myBlock();
-    return b ? this.results().filter((p) => p.block === b) : this.results();
+  // bộ lọc (nguồn là URL)
+  protected readonly term = signal('');
+  protected readonly kind = signal<Tab>('all');
+  protected readonly min = signal<number | null>(null);
+  protected readonly max = signal<number | null>(null);
+  protected readonly rate = signal(0);
+  protected readonly xuOnly = signal(false);
+  /** Các kiểu sắp xếp đang bật (chọn được nhiều nút cùng lúc, nút bật trước ưu tiên trước). Rỗng = không sắp xếp. */
+  protected readonly sorts = signal<Sort[]>([]);
+  /** Ô nhập khoảng giá (chỉ áp dụng khi bấm "Áp dụng", như Shopee) */
+  protected readonly draftMin = signal('');
+  protected readonly draftMax = signal('');
+
+  private readonly byTerm = computed(() => this.all().filter((p) => matches(p, { q: this.term() || undefined })));
+  protected readonly counts = computed(() => {
+    const list = this.byTerm();
+    return Object.fromEntries(TABS.map((t) => [t.key, t.key === 'all' ? list.length : list.filter((p) => p.kind === t.key).length])) as Record<Tab, number>;
   });
-  protected readonly nearby = computed(() => {
-    const b = this.myBlock();
-    return b ? this.results().filter((p) => p.block !== b) : [];
+  protected readonly isJobs = computed(() => this.kind() === 'job');
+  /** Mức giá gợi ý (bấm một lần là lọc, không phải gõ số) */
+  protected readonly presets = computed<{ label: string; min: number | null; max: number | null }[]>(() =>
+    this.isJobs()
+      ? [{ label: 'Dưới 50.000đ', min: null, max: 50000 }, { label: '50.000đ – 100.000đ', min: 50000, max: 100000 }, { label: 'Trên 100.000đ', min: 100000, max: null }]
+      : [{ label: 'Dưới 50.000đ', min: null, max: 50000 }, { label: '50.000đ – 150.000đ', min: 50000, max: 150000 }, { label: '150.000đ – 300.000đ', min: 150000, max: 300000 }, { label: 'Trên 300.000đ', min: 300000, max: null }],
+  );
+  protected readonly priceOptions = computed(() => {
+    const w = this.isJobs() ? 'Tiền công' : 'Giá';
+    return [{ key: 'low', label: w + ': Thấp đến cao' }, { key: 'high', label: w + ': Cao đến thấp' }];
   });
+
+  protected readonly matched = computed(() => {
+    const lo = this.min() ?? 0;
+    const hi = this.max() ?? Infinity;
+    const k = this.kind();
+    const xu = this.xuOnly() && !this.isJobs();
+    const r = this.rate();
+    const far = Number.MAX_SAFE_INTEGER;
+    const list = this.byTerm().filter(
+      (p) => (k === 'all' || p.kind === k) && p.price >= lo && p.price <= hi && (!xu || p.acceptsXu) && (!r || (p.rating ?? 0) >= r),
+    );
+    const cmp: Record<Sort, (a: Post, b: Post) => number> = {
+      near: (a, b) => (a.distance ?? far) - (b.distance ?? far),
+      new: (a, b) => b.createdAt.localeCompare(a.createdAt),
+      sold: (a, b) => (b.sold ?? 0) - (a.sold ?? 0),
+      low: (a, b) => a.price - b.price,
+      high: (a, b) => b.price - a.price,
+    };
+    const chain = this.sorts();
+    if (!chain.length) return list; // chưa chọn gì: giữ thứ tự gốc
+    return [...list].sort((a, b) => {
+      for (const k of chain) {
+        const r = cmp[k](a, b);
+        if (r) return r;
+      }
+      return 0;
+    });
+  });
+  protected readonly local = computed(() => this.matched().filter((p) => p.area === this.area.current()));
+  protected readonly nearby = computed(() => this.matched().filter((p) => p.area !== this.area.current()));
+  /** Ô nhập khoảng giá tự gõ: ẩn sau liên kết "Tự nhập" cho đỡ rối */
+  protected readonly manual = signal(false);
+  protected readonly hasFilter = computed(() => this.min() != null || this.max() != null || this.rate() > 0 || this.xuOnly() || this.kind() !== 'all');
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
-      const kind = params.get('kind') as PostKind | null;
-      const num = (k: string) => (params.get(k) ? Number(params.get(k)) : undefined);
-      this.filter = {
-        q: params.get('q') ?? undefined,
-        kind: kind && KINDS.includes(kind) ? kind : undefined,
-        min: num('min'),
-        max: num('max'),
-      };
-      this.load();
+      const kind = params.get('kind') as Tab | null;
+      const num = (k: string) => (params.get(k) ? Number(params.get(k)) : null);
+      this.term.set(params.get('q') ?? '');
+      this.kind.set(kind && TABS.some((t) => t.key === kind) ? kind : 'all');
+      this.min.set(num('min'));
+      this.max.set(num('max'));
+      this.draftMin.set(params.get('min') ?? '');
+      this.draftMax.set(params.get('max') ?? '');
+      if ((this.min() != null || this.max() != null) && !this.presets().some((p) => this.isPreset(p))) this.manual.set(true);
+      this.rate.set(num('rate') ?? 0);
+      this.xuOnly.set(params.get('xu') === '1');
+      this.sorts.set((params.get('sort') ?? '').split(',').filter((k): k is Sort => SORTS.includes(k as Sort)));
     });
-  }
-
-  setKind(kind: PostKind | null): void {
-    this.navigate({ kind });
-  }
-
-  applyPrice(min: string, max: string): void {
-    this.navigate({ min: min || null, max: max || null });
-  }
-
-  toggleSave(p: Post): void {
-    this.saved.toggle(p._id);
-  }
-
-  private navigate(queryParams: Record<string, string | null>): void {
-    this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
-  }
-
-  private load(): void {
-    this.loading.set(true);
-    this.postService.search(this.filter).subscribe({
+    this.postService.getPosts().subscribe({
       next: (list) => {
-        this.results.set(list);
-        this.error.set(null);
+        this.all.set(list);
         this.loading.set(false);
       },
       error: (e: Error) => {
-        this.results.set([]);
         this.error.set(e.message);
         this.loading.set(false);
       },
     });
+  }
+
+  protected setKind(k: Tab): void {
+    const keep = this.sorts().filter((x) => !(k === 'job' && x === 'sold'));
+    this.navigate({ kind: k === 'all' ? null : k, sort: keep.length ? keep.join(',') : null });
+  }
+
+  protected isPreset(p: { min: number | null; max: number | null }): boolean {
+    return this.min() === p.min && this.max() === p.max;
+  }
+
+  /** "Khoảng khác" chỉ sáng khi không có mức gợi ý nào đang chọn (chọn một trong các mục, không chọn hai) */
+  protected readonly customOn = computed(() => this.manual() && !this.presets().some((p) => this.isPreset(p)));
+
+  protected openCustom(): void {
+    this.manual.set(true);
+    if (this.min() != null || this.max() != null) this.navigate({ min: null, max: null });
+  }
+
+  protected setPreset(p: { min: number | null; max: number | null }): void {
+    this.manual.set(false);
+    const off = this.isPreset(p);
+    this.navigate({ min: off || p.min == null ? null : String(p.min), max: off || p.max == null ? null : String(p.max) });
+  }
+
+  protected applyPrice(): void {
+    this.navigate({ min: this.draftMin().trim() || null, max: this.draftMax().trim() || null });
+  }
+
+  protected setRate(r: number): void {
+    this.navigate({ rate: this.rate() === r ? null : String(r) });
+  }
+
+  protected toggleXu(): void {
+    this.navigate({ xu: this.xuOnly() ? null : '1' });
+  }
+
+  protected isOn(k: Sort): boolean {
+    return this.sorts().includes(k);
+  }
+
+  /** Giá đang chọn (thấp đến cao / cao đến thấp) cho menu Giá; rỗng nếu chưa chọn */
+  protected readonly priceValue = computed(() => this.sorts().find((k) => k === 'low' || k === 'high') ?? '');
+
+  /** Bấm một nút = bật; bấm lần nữa = bỏ. Bật nhiều nút được; "thấp đến cao" và "cao đến thấp" loại trừ nhau. */
+  protected toggleSort(k: Sort): void {
+    let list = this.sorts().includes(k) ? this.sorts().filter((x) => x !== k) : [...this.sorts().filter((x) => !((k === 'low' || k === 'high') && (x === 'low' || x === 'high'))), k];
+    if (this.isJobs()) list = list.filter((x) => x !== 'sold');
+    this.navigate({ sort: list.length ? list.join(',') : null });
+  }
+
+  protected clear(): void {
+    this.navigate({ kind: null, min: null, max: null, rate: null, xu: null, sort: null });
+  }
+
+  protected toggleSave(p: Post): void {
+    this.saved.toggle(p._id);
+  }
+
+  protected stars(n: number): number[] {
+    return [1, 2, 3, 4, 5].map((i) => (i <= n ? 1 : 0));
+  }
+
+  private navigate(queryParams: Record<string, string | null>): void {
+    this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
   }
 }

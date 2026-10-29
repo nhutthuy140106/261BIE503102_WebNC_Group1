@@ -1,9 +1,78 @@
-h1 { font-size: 28px; letter-spacing: -.02em; }
-h2 { font-size: 22px; letter-spacing: -.015em; margin: 40px 0 16px; }
-.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0 20px; }
-.filters .btn { border-radius: 999px; padding: 8px 16px; }
-.filters .active { background: var(--ink); color: #fff; border-color: var(--ink); }
-.price-filter { display: flex; gap: 6px; align-items: center; margin-left: auto; }
-.price-filter input { width: 96px; padding: 8px 10px; }
-.price-filter .btn { border-radius: 10px; padding: 8px 14px; }
-.notice { margin-bottom: 16px; }
+/* Kết quả tìm kiếm: cột bộ lọc bên trái, thanh sắp xếp phía trên danh sách — nhẹ, không khung nặng */
+.srhead { display: flex; align-items: baseline; gap: 12px; margin: 14px 0 0; font-size: 26px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); }
+.srhead small { font-size: 14px; font-weight: 500; letter-spacing: 0; color: var(--smoke); }
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 36px; padding-top: 22px; align-items: start; }
+
+.filters { position: sticky; top: 84px; font-size: 14px; }
+.fhead { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid #E6E8EC; }
+.fhead h2 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+.clear { background: none; font: inherit; font-size: 13px; color: var(--accent); font-weight: 600; }
+.clear:hover { text-decoration: underline; text-underline-offset: 3px; }
+.filters section { padding: 18px 0; border-bottom: 1px solid #E6E8EC; }
+.filters h3 { margin: 0 0 12px; font-size: 14px; font-weight: 700; color: var(--ink); }
+
+/* danh mục, đánh giá, ưu đãi: hàng chọn có ô tròn/vuông nhỏ bên trái */
+.cats button, .rates button, .opt { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 0; background: none; font: inherit; font-size: 14px; color: var(--ink); text-align: left; }
+.cats button span { flex: 1; }
+.cats button small { color: var(--fog); font-size: 12.5px; }
+.cats button i, .rates button i { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #B9BEC8; flex: none; transition: border-color .15s; }
+.cats button:hover i, .rates button:hover i { border-color: var(--ink); }
+.cats button.on, .rates button.on { font-weight: 600; }
+.cats button.on i, .rates button.on i { border-color: var(--ink); background: radial-gradient(var(--ink) 42%, transparent 46%); }
+.rates .st { letter-spacing: 1px; font-size: 14px; color: #E39B1A; }
+.rates .st b { font-weight: 400; }
+.rates .st .off { color: #D9DCE2; }
+.rates .up { color: var(--smoke); font-size: 13px; }
+.opt i.box { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #B9BEC8; flex: none; transition: border-color .15s; }
+.opt:hover i.box { border-color: var(--ink); }
+.opt.on { font-weight: 600; }
+.opt.on i.box { border-color: var(--ink); background: radial-gradient(var(--ink) 42%, transparent 46%); }
+.opt img { width: 18px; height: 18px; }
+
+.areabtn { width: 100%; display: flex; align-items: center; justify-content: space-between; height: 40px; padding: 0 12px; border: 1px solid #DADDE3; border-radius: 8px; background: #fff; font: inherit; }
+.areabtn svg { width: 13px; height: 13px; color: var(--smoke); }
+.areabtn:hover { border-color: #B9BEC8; }
+.range { display: flex; align-items: center; gap: 8px; }
+.range input { width: 100%; min-width: 0; height: 40px; padding: 0 12px; border: 1px solid #DADDE3; border-radius: 8px; background: #fff; font: inherit; font-size: 14px; }
+.range input::placeholder { color: var(--fog); }
+.range input:focus { outline: none; border-color: var(--ink); }
+.range i { width: 8px; height: 1px; background: #B9BEC8; flex: none; }
+.apply { width: 100%; height: 40px; margin-top: 12px; border-radius: 8px; background: var(--ink); color: #fff; font: inherit; font-weight: 600; }
+.apply:hover { filter: brightness(1.15); }
+
+.sortbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-bottom: 16px; margin-bottom: 22px; border-bottom: 1px solid #E6E8EC; }
+.sortbar .lab { margin-right: 6px; font-size: 13px; color: var(--fog); }
+.sortbar > button { height: 36px; padding: 0 16px; border: 1px solid #E3E5EA; border-radius: 999px; background: #fff; font: inherit; font-size: 14px; color: var(--ink); }
+.sortbar > button:hover { border-color: #B9BEC8; }
+.sortbar > button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+.card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; }
+.near-title { font-size: 16px; margin: 34px 0 14px; padding-top: 22px; border-top: 1px solid #E6E8EC; }
+.near-title.first { margin-top: 0; padding-top: 0; border-top: 0; }
+.near-title .none { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 14px; font-weight: 400; color: var(--smoke); }
+.near-title .none svg { width: 15px; height: 15px; }
+.empty { background: transparent; padding: 56px 0 40px; }
+.empty img { width: 120px; }
+.empty h2 { margin-bottom: 6px; }
+.empty p { color: var(--smoke); }
+.empty .btn { margin-top: 18px; height: 42px; padding: 0 24px; border-radius: 999px; background: var(--ink); border: 0; color: #fff; font-weight: 600; }
+
+@media (max-width: 1180px) { .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 800px) {
+  .layout { grid-template-columns: 1fr; gap: 16px; }
+  .filters { position: static; }
+  .sortbar .lab { display: none; }
+}
+@media (max-width: 560px) { .card-grid { gap: 18px 12px; } }
+
+/* mức giá gợi ý: các nút có cùng chiều rộng, xếp 2 cột cho đều */
+
+
+/* mức giá: cùng kiểu hàng chọn tròn như Danh mục và Đánh giá */
+.ranges button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 0; background: none; font: inherit; font-size: 14px; color: var(--ink); text-align: left; }
+.ranges button i { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #B9BEC8; flex: none; transition: border-color .15s; }
+.ranges button:hover i { border-color: var(--ink); }
+.ranges button.on { font-weight: 600; }
+.ranges button.on i { border-color: var(--ink); background: radial-gradient(var(--ink) 42%, transparent 46%); }
+.ranges + .range { margin-top: 10px; }

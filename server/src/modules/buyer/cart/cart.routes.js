@@ -8,6 +8,7 @@ const ApiError = require('../../../utils/ApiError');
 const asyncHandler = require('../../../utils/asyncHandler');
 const { body, ids } = require('../../../middlewares/validate');
 const { auth } = require('../../../middlewares/auth');
+const { effectivePrice } = require('../../../utils/promo');
 
 const MAX_ITEMS = 20;
 const oid = z.string().regex(/^[a-f\d]{24}$/i, 'Mã sai định dạng');
@@ -38,12 +39,13 @@ async function present(cart) {
   const items = cart.map((i) => {
     const p = byId.get(i.postId);
     if (!p) return { ...i, title: '(Bài không còn)', available: false, lineEstimate: 0 };
-    let perUnit = p.price;
+    const eff = effectivePrice(p);
+    let perUnit = eff.price;
     for (const sel of i.selections) {
       const g = p.optionGroups.find((x) => x.name === sel.group);
       for (const label of sel.choices) perUnit += ((g && g.choices.find((c) => c.label === label)) || {}).price || 0;
     }
-    return { ...i, title: p.title, image: p.images[0], unitPrice: p.price, available: p.status === 'open', lineEstimate: perUnit * i.quantity };
+    return { ...i, title: p.title, image: p.images[0], unitPrice: eff.price, originalPrice: eff.promo ? eff.original : undefined, available: p.status === 'open', lineEstimate: perUnit * i.quantity };
   });
   return { items, estimate: items.reduce((n, i) => n + i.lineEstimate, 0) }; // chưa gồm phí giao/voucher: tính khi checkout
 }

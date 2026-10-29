@@ -1,0 +1,7 @@
+/* phủ toàn màn hình nhưng không bắt chuột; z-index thấp hơn nút chat và hộp thoại */
+.field { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 40; }
+.w { position: absolute; left: 0; top: 0; width: 34px; height: 34px; will-change: transform; transform: translate(-100px, -100px); }
+/* sprite 9 khung chạy, thu nhỏ còn khoảng nửa kích thước hiệu ứng tải trang */
+.ant { display: block; width: 30px; height: 32px; background: url('/assets/clean/ant-run.png') 0 0 / 270px 32px no-repeat; animation: run .8s steps(9) infinite; filter: drop-shadow(0 2px 2px rgba(150, 70, 20, .2)); }
+@keyframes run { to { background-position: -270px 0; } }
+@media (prefers-reduced-motion: reduce) { .field { display: none; } }

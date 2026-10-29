@@ -4,6 +4,12 @@ export interface User {
   fullName: string;
   block: string;
   avatar?: string;
+  /** Thông tin hồ sơ tự khai (không bắt buộc) */
+  email?: string;
+  gender?: 'male' | 'female' | 'other';
+  /** Ngày sinh dạng yyyy-MM-dd */
+  birthday?: string;
+  bio?: string;
   /** Số dư AntXu */
   xu?: number;
   /** Vai trò do SERVER quyết định, client không được tự gán */

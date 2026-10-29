@@ -1,0 +1,42 @@
+<h1>Tổng quan</h1>
+<p class="lead">Số liệu hiện tại của khu.</p>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+
+@if (stats(); as s) {
+  <div class="cards">
+    <div class="card"><span>Người dùng</span><b>{{ s.users.total }}</b><small>{{ s.users.locked }} bị khóa</small></div>
+    <div class="card"><span>Bài đang mở</span><b>{{ s.posts.open }}</b><small>{{ s.posts.hidden }} bị ẩn</small></div>
+    <div class="card" [class.hot]="s.reports.pending > 0"><span>Báo cáo chờ xử lý</span><b>{{ s.reports.pending }}</b><small>trên tổng {{ s.reports.total }}</small></div>
+    <div class="card"><span>Tổng đơn</span><b>{{ s.orders.total }}</b><small>mọi trạng thái</small></div>
+  </div>
+
+  <section class="blk">
+    <h2>Đơn theo trạng thái</h2>
+    @if (bars(s).length) {
+      <ul class="chart" role="list">
+        @for (b of bars(s); track b.key) {
+          <li>
+            <span class="v">{{ b.n }}</span>
+            <i [style.height.%]="b.pct" [attr.aria-label]="b.label + ': ' + b.n"></i>
+            <span class="l">{{ b.label }}</span>
+          </li>
+        }
+      </ul>
+    } @else { <p class="empty">Chưa có đơn nào.</p> }
+  </section>
+} @else if (!error()) {
+  <div class="cards"><div class="sk big"></div><div class="sk big"></div><div class="sk big"></div><div class="sk big"></div></div>
+  <div class="sk" style="height: 220px"></div>
+}
+
+<section class="blk">
+  <h2>Báo cáo mới nhất <a routerLink="/admin/reports">Xem tất cả</a></h2>
+  <ul class="list">
+    @for (r of recent(); track r._id) {
+      <li>
+        <div><b>{{ reason(r.reason) }}</b><small class="sub">{{ r.reporterName }} · {{ r.createdAt | date: 'dd/MM/yyyy' }}</small></div>
+        <span class="pill" [class.warn]="r.state === 'open'" [class.ok]="r.state === 'resolved'" [class.mute]="r.state === 'rejected'">{{ r.state === 'open' ? 'Mới' : r.state === 'reviewing' ? 'Đang xem xét' : r.state === 'resolved' ? 'Đã xử lý' : 'Từ chối' }}</span>
+      </li>
+    } @empty { <li class="empty">Chưa có báo cáo nào.</li> }
+  </ul>
+</section>
