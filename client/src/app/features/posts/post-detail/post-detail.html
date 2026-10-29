@@ -82,8 +82,11 @@
 
     <!-- ===== Khung đặt — bước 1: chỉ chọn món ===== -->
     <aside class="order">
-      <div class="price">{{ priceLabel() }} @if (v.tpl.price.type !== 'quote' && v.tpl.price.unit) { <span>/ {{ v.tpl.price.unit }}</span> }@if (v.tpl.xuOk) { <img class="xuico" src="assets/clean/antxu.png" alt="Dùng được Xu" title="Đơn này dùng được voucher AntXu" /> }</div>
+      <div class="price">@if (deal(); as dl) { <strong class="dnow">{{ fmt(dl.price) }}</strong> <s class="dwas">{{ fmt(dl.original) }}</s> } @else { {{ priceLabel() }} } @if (v.tpl.price.type !== 'quote' && v.tpl.price.unit) { <span>/ {{ v.tpl.price.unit }}</span> }@if (v.tpl.xuOk) { <img class="xuico" src="assets/clean/antxu.png" alt="Dùng được Xu" title="Đơn này dùng được voucher AntXu" /> }</div>
       @if (priceSub()) { <div class="psub">{{ priceSub() }}</div> }
+      @if (deal(); as dl) {
+        <div class="goldhour" role="status"><b>{{ dl.label }}</b><span>đến {{ dealEnds() }} · còn <time class="cd">{{ dealLeft() }}</time></span></div>
+      }
       @if (stockLine(); as s) {
         <div class="avail" [class.off]="s.off"><i></i><b>{{ s.text }}</b>@if (s.sub) { <span>{{ s.sub }}</span> }</div>
       }
@@ -364,7 +367,8 @@
             <section class="cs pay">
               <h4>Chi tiết thanh toán</h4>
               <dl>
-                <div><dt>Thành tiền</dt><dd>{{ fmt(d.subtotal()) }}</dd></div>
+                <div><dt>Thành tiền</dt><dd>{{ fmt(d.gross()) }}</dd></div>
+                @if (d.promoOff()) { <div class="disc"><dt>Giảm giờ vàng</dt><dd>−{{ fmt(d.promoOff()) }}</dd></div> }
                 @if (d.placeFee()) { <div><dt>Phí vận chuyển</dt><dd>{{ fmt(d.placeFee()) }}</dd></div> }
                 @if (d.discount()) { <div class="disc"><dt>Voucher</dt><dd>−{{ fmt(d.discount()) }}</dd></div> }
                 @if (v.tpl.price.type === 'quote') { <div><dt>Tiền sửa</dt><dd>báo giá sau khi kiểm tra</dd></div> }

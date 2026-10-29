@@ -1,3 +1,4 @@
+import type { Promo } from '../utils/promo';
 /** 4 nhóm phía Mua (xem docs/handoff.md): Đồ ăn · Đồ dùng · Dịch vụ · Việc làm */
 export type PostKind = 'food' | 'goods' | 'service' | 'job';
 
@@ -63,6 +64,8 @@ export interface Post {
   price: number;
   /** "phần", "giờ", "lần"… — bỏ trống nếu giá cố định */
   priceUnit?: string;
+  /** Giờ vàng (khuyến mãi theo khung giờ); giá thật do server tính, mock tự tính cùng quy tắc */
+  promo?: Promo;
   rating?: number;
   reviewCount?: number;
   /** Số lượt đã bán / đã đặt (chỉ bài bán, không có ở việc làm) */

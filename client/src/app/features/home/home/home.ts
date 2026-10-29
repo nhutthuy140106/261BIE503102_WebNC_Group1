@@ -1,4 +1,6 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { ClockService } from '../../../core/services/clock';
+import { countdown, dealAt, upcomingAt } from '../../../core/utils/promo';
 import { Router } from '@angular/router';
 import { Post, PostKind } from '../../../core/models/post';
 import { AuthPromptService } from '../../../core/services/auth-prompt';
@@ -46,6 +48,30 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
    * Các khối chọn bài theo thứ tự Nổi bật → Gợi ý → Gần bạn → Việc mới → Khám phá,
    * mỗi khối bỏ những bài khối trước đã hiện, nên một bài chỉ xuất hiện một lần.
    */
+  protected readonly clock = inject(ClockService);
+  /** Bài đang trong Giờ vàng (kết thúc sớm nhất xếp trước), tối đa 4 */
+  protected readonly dealsNow = computed(() => {
+    const now = this.clock.now();
+    return this.posts()
+      .filter((p) => p.kind !== 'job' && !p.closed)
+      .map((p) => ({ p, d: dealAt(p, now) }))
+      .filter((x): x is { p: Post; d: NonNullable<typeof x.d> } => x.d !== null)
+      .sort((a, b) => a.d.endsAt - b.d.endsAt)
+      .slice(0, 4);
+  });
+  protected readonly dealsLeft = computed(() => {
+    const first = this.dealsNow()[0];
+    return first ? countdown(first.d.endsAt - this.clock.now()) : '';
+  });
+  /** Chưa có bài nào đang giảm: bài sắp giảm trong 3 giờ tới */
+  protected readonly dealsNext = computed(() => {
+    const now = this.clock.now();
+    return this.posts()
+      .filter((p) => p.kind !== 'job' && !p.closed)
+      .map((p) => ({ p, u: upcomingAt(p, now) }))
+      .filter((x): x is { p: Post; u: NonNullable<typeof x.u> } => x.u !== null)
+      .sort((a, b) => a.u.inMin - b.u.inMin)[0] ?? null;
+  });
   protected readonly featured = computed(() => this.posts().filter((p) => p.promoted).slice(0, 4));
   protected readonly forYouShown = computed(() => {
     const taken = new Set(this.featured().map((p) => p._id));
@@ -89,7 +115,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected readonly sortLabel = computed(() => this.sortLabels[this.feedSort()]);
 
   private readonly feedAll = computed(() => {
-    const shown = new Set([...this.featured(), ...this.forYouShown(), ...this.nearby(), ...this.jobs()].map((p) => p._id));
+    const shown = new Set([...this.dealsNow().map((x) => x.p), ...this.featured(), ...this.forYouShown(), ...this.nearby(), ...this.jobs()].map((p) => p._id));
     const f = this.feedFilter();
     // hết bài chưa hiện thì để trống (có thông báo), không lấy lại bài đã hiện ở trên
     const pool = this.posts().filter((p) => (f === 'all' || p.kind === f) && !shown.has(p._id));

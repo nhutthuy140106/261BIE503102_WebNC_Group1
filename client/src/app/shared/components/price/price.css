@@ -1,0 +1,3 @@
+:host { display: inline; }
+.now { color: #D85A1C; }
+.was { font-size: .8em; font-weight: 400; color: #8b8f98; text-decoration: line-through; }

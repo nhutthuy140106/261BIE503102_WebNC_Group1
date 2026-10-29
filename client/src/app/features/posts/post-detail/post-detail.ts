@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, of, switchMap } from 'rxjs';
@@ -19,6 +19,8 @@ import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
 import { formatDateTime } from '../../../core/utils/status-label';
+import { ClockService } from '../../../core/services/clock';
+import { countdown, clockVN, dealAt } from '../../../core/utils/promo';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
 import { placedStepNames } from '../../../core/utils/placed-steps';
 import { resolveId } from '../../../core/utils/slug-helper';
@@ -47,6 +49,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   private readonly toast = inject(ToastService);
   private readonly notifications = inject(NotificationService);
   protected readonly xu = inject(XuService);
+  protected readonly clock = inject(ClockService);
   protected readonly drawer = inject(DrawerService);
   protected readonly saved = inject(SavedService);
 
@@ -266,6 +269,29 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     if (s.mode === 'once') return { text: 'Còn hàng', sub: 'Bán một lần, ai đặt trước được trước.', off: false };
     if (s.mode === 'limit') return { text: 'Còn ' + s.left + ' phần hôm nay', sub: s.sched ?? '', off: false };
     return { text: 'Đang nhận đặt', sub: s.sched ?? '', off: false };
+  }
+
+  /** Giờ vàng đang chạy của bài này (tự hết khi qua giờ, không cần tải lại) */
+  protected readonly deal = computed(() => {
+    const p = this.post();
+    return p ? dealAt(p, this.clock.now()) : null;
+  });
+  protected readonly dealLeft = computed(() => {
+    const d = this.deal();
+    return d ? countdown(d.endsAt - this.clock.now()) : '';
+  });
+  constructor() {
+    // Giờ vàng vào/ra theo đồng hồ → cập nhật tiền trong đơn đang chọn
+    effect(() => {
+      const d = this.draft();
+      const dl = this.deal();
+      d?.promo.set(dl ? this.post()?.promo ?? null : null);
+    });
+  }
+
+  protected dealEnds(): string {
+    const d = this.deal();
+    return d ? clockVN(d.endsAt) : '';
   }
 
   protected priceLabel(): string {

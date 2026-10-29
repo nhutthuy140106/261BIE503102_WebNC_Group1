@@ -1,0 +1,5 @@
+@if (deal(); as d) {
+  <span class="now" [attr.aria-label]="'Giá giờ vàng ' + (d.price | vnd) + ', giá gốc ' + (d.original | vnd)">{{ d.price | vnd }}</span> <s class="was">{{ d.original | vnd }}</s>
+} @else {
+  {{ price() | vnd }}
+}

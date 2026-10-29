@@ -138,3 +138,9 @@
 .gband .gobtn svg { width: 14px; height: 14px; fill: currentColor; }
 .gband:hover { background: #f6e8e1; }
 @media (max-width: 640px) { .gband { flex-wrap: wrap; } .gband .gobtn { margin-left: 58px; } }
+
+.goldclock { display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; padding: 3px 10px; border-radius: 999px; background: #FBF4F1; border: 1px solid #F0E2DC; color: #22304A; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; vertical-align: middle; }
+.goldclock .i { width: 14px; height: 14px; fill: currentColor; }
+.goldnext { margin-top: 36px; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid #F0E2DC; border-radius: 12px; background: #FBF4F1; color: #22304A; }
+.goldnext span { flex: 1; min-width: 0; font-size: 14px; }
+.goldnext .i { width: 16px; height: 16px; fill: currentColor; flex: none; }

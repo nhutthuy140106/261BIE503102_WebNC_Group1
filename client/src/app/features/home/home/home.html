@@ -90,6 +90,26 @@
     </section>
   }
 
+  @if (dealsNow().length) {
+    <section class="sec gold">
+      <div class="sh">
+        <h2>Đang giảm giá lúc này <span class="goldclock" role="timer" aria-label="Thời gian còn lại"><svg class="i"><use href="#clock" /></svg>còn {{ dealsLeft() }}</span></h2>
+        <a class="more" routerLink="/search">Xem thêm <svg class="i"><use href="#right" /></svg></a>
+      </div>
+      <div class="grid">
+        @for (x of dealsNow(); track x.p._id) {
+          <app-post-card [post]="x.p" [saved]="saved.has(x.p._id)" (toggleSave)="toggleSave($event)" />
+        }
+      </div>
+    </section>
+  } @else if (dealsNext(); as nx) {
+    <a class="goldnext" [routerLink]="['/posts', nx.p._id]">
+      <svg class="i"><use href="#clock" /></svg>
+      <span><b>Sắp tới:</b> {{ nx.p.title }} giảm giá lúc {{ nx.u.from }} (còn {{ nx.u.inMin }} phút)</span>
+      <svg class="i"><use href="#right" /></svg>
+    </a>
+  }
+
   <section class="sec">
     <div class="sh">
       <h2>Gần bạn</h2>
