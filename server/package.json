@@ -7,7 +7,8 @@
     "test": "node --test \"test/**/*.test.js\"",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "seed": "node src/seeds/seed.js"
+    "seed": "node src/seeds/seed.js",
+    "eval:recommend": "node scripts/eval-recommend.js"
   },
   "keywords": [],
   "author": "",

@@ -241,7 +241,7 @@ Làm **một màn một lần** (đúng luật `CLAUDE.md`): tạo component b�
   *Xong khi:* `npm run seed` chạy lại sạch; câu hỏi chatbot "ăn gì dưới 50k" luôn ra ≥ 3 món.
 - [x] **7.4 Rà bảo mật (6.1):** `helmet`, `saveUninitialized: false`, rate limit đăng nhập/đăng ký, không lộ `err.message` ở production, kiểm `ObjectId` mọi route `:id`, kiểm quyền sở hữu đơn/đề nghị/hội thoại. Ghi bảng KT 9.3 đạt/hoãn vào `server/README.md`.
 - [x] **7.5 Tài liệu:** `api-buyer-job.md` thêm `/assistant/chat`, `/pricing/suggest`, `/me/xu*`, `/orders/:id/tracking`; Swagger đủ tag; `server/README.md` (biến `.env` mới: `LLM_*`, `GEMINI_*`, `ASSISTANT_MODE`).
-- [ ] **7.6 (tùy chọn, nếu còn thời gian) Máy học:** thêm đánh giá offline cho gợi ý (Precision@k trên seed) vào `docs/thuat-toan-goi-y.md` để có số liệu khi vấn đáp.
+- [x] **7.6 (tùy chọn, nếu còn thời gian) Máy học:** thêm đánh giá offline cho gợi ý (Precision@k trên seed) vào `docs/thuat-toan-goi-y.md` để có số liệu khi vấn đáp.
 
 ### 7B — Frontend **[FE]** (terminal `client`)
 - [x] **7.7 Bản đồ theo dõi cho MỌI đơn có giao** (không chỉ đang giao): hiện từ trạng thái *Đã xác nhận* trở đi cho đơn đồ ăn/đồ dùng "Giao tận nơi"; *Hoàn tất* hiện thẻ "Đã giao" thu gọn. Thêm dòng **"Cách bạn X km"** (khoảng cách còn lại, cập nhật theo xe) bên cạnh "Dự kiến N phút". Toạ độ cửa hàng/nhà **khác nhau theo Block của người bán và địa chỉ nhận** (bảng Block A–D) thay vì một tuyến cố định. Khi BE xong 7.2 thì gọi `/orders/:id/tracking` (mock giữ nguyên).
