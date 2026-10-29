@@ -1,8 +1,10 @@
 import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { StepItem } from '../../../../core/models/seller';
 
 /**
  * Hộp "Bạn chắc chắn…?" trước khi đổi bước một đơn / việc:
- * hiện quy trình (bước hiện tại màu cam, bước sắp chuyển màu xanh đen) + tóm tắt đơn.
+ * thanh bước giống chi tiết đơn (bước sắp chuyển tới viền cam) + câu giải thích.
+ * Có `icon` thì hiện kiểu thông báo giữa: vòng icon to → tiêu đề → lưu ý → hai nút căn giữa (nhân bản / xóa bài).
  */
 @Component({
   selector: 'app-seller-confirm-dialog',
@@ -14,14 +16,11 @@ export class SellerConfirmDialog {
   @Input({ required: true }) heading = '';
   /** Câu giải thích, có thể chứa <b> */
   @Input() message = '';
-  @Input() flow: readonly string[] = [];
-  /** Vị trí bước hiện tại trong flow */
-  @Input() step = 0;
-  @Input() thumb?: string;
-  @Input() round = false;
-  @Input() title = '';
-  @Input() sub = '';
+  @Input() steps: readonly StepItem[] = [];
   @Input() okLabel = 'Xác nhận';
+  /** symbol trong index.html; `danger` = vòng đỏ (xóa) */
+  @Input() icon = '';
+  @Input() danger = false;
   @Output() readonly ok = new EventEmitter<void>();
   @Output() readonly closed = new EventEmitter<void>();
 

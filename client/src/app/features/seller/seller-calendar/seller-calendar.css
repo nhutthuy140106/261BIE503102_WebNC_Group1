@@ -38,9 +38,6 @@
 .col.today { background: #fffbf8; }
 .hl { position: absolute; left: 0; right: 0; border-top: 1px solid #f3ece8; }
 .openb { position: absolute; left: 0; right: 0; background: #eef7f1; }
-.offday { position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, #f4f3f6, #f4f3f6 8px, #efedf2 8px, #efedf2 16px); display: flex; justify-content: center; padding-top: 14px; }
-.offday.soft { opacity: .6; }
-.offday span { height: 24px; padding: 0 10px; border-radius: 999px; background: #fff; font-size: 11.5px; font-weight: 600; color: var(--smoke); display: flex; align-items: center; }
 .nowl { position: absolute; left: 0; right: 0; border-top: 2px solid #e5484d; z-index: 20; }
 .nowl::before { content: ""; position: absolute; left: -5px; top: -6px; width: 10px; height: 10px; border-radius: 50%; background: #e5484d; }
 
@@ -58,7 +55,11 @@
 .mc .l { display: flex; align-items: center; gap: 3px; font-size: 10px; color: var(--smoke); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; }
 .mc .l svg { width: 10px; height: 10px; }
 .ev.deck .cnt { position: absolute; right: 2px; top: -9px; z-index: 15; padding: 1px 7px; border-radius: 999px; background: var(--ink); color: #fff; font-size: 10.5px; font-weight: 700; }
-.ev.deck:hover { z-index: 40; }
-.ev.deck:hover .mc { transform: translateY(calc(var(--i) * 70px)); box-shadow: 0 10px 24px rgba(34, 48, 74, .16); }
+/* chồng nhiều đơn: rê chuột thì bung xuống; vùng rê chuột phủ hết danh sách đã bung (kể cả khe giữa các thẻ)
+   và nằm trên các khung giờ bên dưới, nên rê xuống đơn dưới cùng không bị thu lại; rời chuột thì trễ một nhịp mới thu */
+.ev.deck { transition: height 0s .18s, z-index 0s .18s; }
+.ev.deck .mc { transition: transform .22s cubic-bezier(.2, .8, .2, 1) .12s, box-shadow .2s; }
+.ev.deck:hover { z-index: 40; height: calc(var(--n) * 70px) !important; transition-delay: 0s; }
+.ev.deck:hover .mc { transform: translateY(calc(var(--i) * 70px)); box-shadow: 0 10px 24px rgba(34, 48, 74, .16); transition-delay: 0s; }
 .ev.deck:hover .cnt { opacity: 0; }
 @media (max-width: 760px) { .week-box { overflow-x: auto; } .whead, .wcols { min-width: 900px; } }

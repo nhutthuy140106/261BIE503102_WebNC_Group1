@@ -1,6 +1,7 @@
 <!-- Cùng thông tin với dòng "Cần bạn xử lý" ở Đơn hàng phía Mua, chỉ khác dạng thẻ vuông:
      đầu (người kia · trạng thái + hạn) → thân (ảnh · tên · ngày giờ · mã đơn) → tiền → nút.
-     Nút: đơn chờ = Từ chối + Xác nhận · khách xin hủy = Nhắn tin + Xác nhận hủy · việc = Xác nhận · hỏi đáp / đánh giá = Phản hồi -->
+     Nhãn trạng thái = việc phải làm (Xác nhận đơn · Xác nhận thực hiện · Xác nhận giao · Xác nhận hoàn thành · Xác nhận hủy (đỏ) · Chọn người · Hỏi đáp · Đánh giá).
+     Nút: đơn mới = Từ chối + Xác nhận · khách xin hủy = Nhắn tin + Xác nhận · còn lại = Xác nhận · hỏi đáp / đánh giá = Phản hồi -->
 <div class="ocard" (click)="opened.emit()">
   <div class="oh">
     <span class="who">
@@ -11,7 +12,7 @@
       }
       <b>{{ task.person }}</b>
     </span>
-    <span class="ost">{{ task.status }}</span>
+    <span class="ost" [class.red]="task.type === 'cancel'">{{ task.status }}</span>
     @if (task.due) { <span class="due"><svg class="i"><use href="#clock" /></svg>{{ task.due }}</span> }
   </div>
 
@@ -31,10 +32,9 @@
   <div class="total">
     @if (task.amount) {
       <em>{{ task.amountLabel }}</em><b>{{ task.amount | vnd }}</b>
-    } @else if (task.stars) {
-      <em>Khách chấm</em><b class="gold">{{ '★'.repeat(task.stars) }}</b>
     } @else {
-      <em>Câu hỏi công khai</em>
+      <!-- hỏi đáp / đánh giá: nội dung câu hỏi hoặc điểm + lời đánh giá thay chỗ tiền -->
+      <span class="qt">@if (task.stars) { <b class="gold">{{ '★'.repeat(task.stars) }}</b> }{{ task.note }}</span>
     }
   </div>
 

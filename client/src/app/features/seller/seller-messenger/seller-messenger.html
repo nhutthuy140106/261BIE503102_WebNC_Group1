@@ -31,9 +31,6 @@
       <div class="chat-top">
         <img [src]="c.avatar" alt="" />
         <div><h2>{{ c.name }}</h2><small>{{ c.ctx?.type === 'job' ? 'Người nhận việc' : 'Khách' }} · hàng xóm trong khu</small></div>
-        @if (ctxOf(c); as x) {
-          <a class="btn open" [routerLink]="x.link"><svg class="i"><use href="#receipt" /></svg>{{ c.ctx?.type === 'job' ? 'Mở việc' : 'Mở đơn' }}</a>
-        }
       </div>
       <div class="messages" #msgs>
         @if (ctxOf(c); as x) {
@@ -55,7 +52,7 @@
       </div>
       <form class="compose" (submit)="send($event)">
         <textarea #draft class="input" [placeholder]="'Nhắn cho ' + c.name" maxlength="2000" (keydown)="key($event)" (input)="grow(draft)"></textarea>
-        <button type="submit" class="btn primary"><svg class="i"><use href="#right" /></svg>Gửi</button>
+        <button type="submit" class="btn primary">Gửi</button>
       </form>
     } @else {
       <div class="empty-chat"><img src="assets/clean/peek.png" alt="" />Chưa có cuộc trò chuyện nào.</div>

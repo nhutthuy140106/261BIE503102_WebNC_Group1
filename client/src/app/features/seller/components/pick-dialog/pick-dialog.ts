@@ -1,7 +1,10 @@
-import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Output, computed, input, signal } from '@angular/core';
 import { SellerJobView } from '../../../../core/services/seller-space';
 
-/** Hộp chọn người nhận việc: so sánh các đề nghị (★, số việc đã làm, khu, khung giờ, lời giới thiệu) kiểu Airtasker. */
+/**
+ * Hộp chọn người nhận việc. Mỗi đề nghị chỉ giữ thứ giúp quyết định: ★ (số việc đã làm), khu ở và lời giới thiệu.
+ * Người đề nghị đã cam kết khung giờ trong bài nên không cần so giờ. Bấm thẻ để chọn, nút cam ở cuối xác nhận.
+ */
 @Component({
   selector: 'app-seller-pick-dialog',
   standalone: false,
@@ -9,9 +12,12 @@ import { SellerJobView } from '../../../../core/services/seller-space';
   styleUrls: ['../../seller-ui.css', './pick-dialog.css'],
 })
 export class SellerPickDialog {
-  @Input({ required: true }) job!: SellerJobView;
+  readonly job = input.required<SellerJobView>();
   @Output() readonly chosen = new EventEmitter<string>();
   @Output() readonly closed = new EventEmitter<void>();
+
+  protected readonly sel = signal<string | null>(null);
+  protected readonly picked = computed(() => this.job().waiting.find((o) => o.id === this.sel()) ?? null);
 
   @HostListener('document:keydown.escape')
   onEsc(): void {
@@ -20,5 +26,10 @@ export class SellerPickDialog {
 
   protected backdrop(e: MouseEvent): void {
     if (e.target === e.currentTarget) this.closed.emit();
+  }
+
+  protected confirm(): void {
+    const id = this.sel();
+    if (id) this.chosen.emit(id);
   }
 }

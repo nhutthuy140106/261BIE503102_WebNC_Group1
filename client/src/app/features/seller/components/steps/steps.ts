@@ -1,59 +1,72 @@
-import { Component, Input } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, inject } from '@angular/core';
+import { StepItem } from '../../../../core/models/seller';
 
-export interface StepCut {
-  /** vị trí bước bị cắt (hiện ✕) */
-  at: number;
-  label: string;
-  time: string;
-}
-
-/** Thanh tiến trình đơn / việc: bước đã qua ✓ xanh đen, bước hiện tại viền cam, giờ dưới từng bước, nhánh hủy hiện ✕. */
+/**
+ * Thanh tiến trình đơn / việc — cùng tên bước và cùng kiểu với .stepper ở chi tiết đơn phía Mua:
+ * bước đã qua ✓ xanh đen, bước hiện tại viền cam có quầng, bước hủy ✕, giờ dưới từng bước.
+ * Đường nối vẽ trong từng cột (nửa trái theo bước này, nửa phải theo bước sau) nên cột rộng hẹp khác nhau vẫn nối liền.
+ */
 @Component({
   selector: 'app-seller-steps',
   standalone: false,
-  template: `<div class="steps">
-    @for (s of steps; track s[0]; let i = $index) {
-      <div class="stp" [class]="'stp ' + cls(i)">
-        <i>@switch (cls(i)) { @case ('ok') { <svg class="i"><use href="#check" /></svg> } @case ('cut') { ✕ } @default { {{ i + 1 }} } }</i>
-        {{ cut && i === cut.at ? cut.label : s[1] }}
-        @if (timeOf(i); as t) { <small>{{ t }}</small> }
+  template: `<div class="stepper">
+    @for (s of items; track $index) {
+      @let nx = items[$index + 1];
+      <div class="s" [class.ok]="s.cls === 'ok'" [class.cur]="s.cls === 'cur'" [class.cut]="s.cls === 'cut'" [class.nx]="nx?.cls === 'ok' || nx?.cls === 'cur'">
+        <span class="dot">{{ s.cls === 'ok' ? '✓' : s.cls === 'cut' ? '✕' : $index + 1 }}</span><span class="lb">{{ s.label }}</span>
+        @if (s.time) { <small>{{ s.time }}</small> }
       </div>
     }
   </div>`,
   styles: [`
-    .steps { display: flex; align-items: flex-start; }
-    .stp { flex: 1; position: relative; text-align: center; font-size: 12.5px; color: var(--fog); }
-    .stp::before { content: ""; position: absolute; top: 13px; left: -50%; right: 50%; height: 2px; background: var(--border); }
-    .stp:first-child::before { display: none; }
-    .stp i { position: relative; z-index: 1; width: 28px; height: 28px; margin: 0 auto 6px; border-radius: 50%; border: 2px solid var(--border); background: #fff; display: grid; place-items: center; font-style: normal; font-weight: 700; font-size: 12px; }
-    .stp.ok { color: var(--ink); }
-    .stp.ok::before, .stp.now::before { background: var(--ink); }
-    .stp.ok i { background: var(--ink); border-color: var(--ink); color: #fff; }
-    .stp.ok i svg { width: 14px; height: 14px; }
-    .stp.now { color: var(--ink); font-weight: 700; }
-    .stp.now i { border-color: var(--accent); color: var(--accent); }
-    .stp small { display: block; font-size: 11.5px; color: var(--smoke); font-weight: 400; margin-top: 2px; }
-    .stp.cut i { border-color: var(--fog); color: var(--fog); }
-    @media (max-width: 700px) { .steps { overflow-x: auto; } .stp { min-width: 84px; } }
+    .stepper { display: flex; }
+    .s { position: relative; flex: 1; display: grid; align-content: start; justify-items: center; text-align: center; gap: 6px; font-size: 13px; color: var(--fog); }
+    .s::before, .s::after { content: ""; position: absolute; top: 14px; width: 50%; height: 2px; background: var(--border); z-index: 0; }
+    .s::before { left: 0; }
+    .s::after { right: 0; }
+    .s:first-child::before, .s:last-child::after { display: none; }
+    .s.ok::before, .s.cur::before, .s.nx::after { background: var(--ink); }
+    .dot { position: relative; z-index: 1; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #fff; border: 2px solid var(--border); font-weight: 700; font-size: 13px; }
+    .s.ok, .s.cur { color: var(--ink); }
+    .s.ok .dot { background: var(--ink); border-color: var(--ink); color: #fff; }
+    .s.cur { font-weight: 700; }
+    .s.cur .dot { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); }
+    .s.cut .dot { border-color: var(--fog); color: var(--fog); }
+    small { font-size: 12px; font-weight: 400; color: var(--smoke); }
+    /* bản trong hộp xác nhận: chữ bước đầu / cuối sát hai lề (thẳng tiêu đề), chấm giữa chữ, các chấm cách đều (lề âm tính ở fit()) */
+    :host(.sm) .s { font-size: 12px; white-space: nowrap; }
+    :host(.sm) .stepper { margin: 0 var(--mr, 0px) 0 var(--ml, 0px); }
+    @media (max-width: 640px) { .s { font-size: 11px; } }
   `],
 })
-export class SellerSteps {
-  @Input({ required: true }) steps: readonly (readonly [string, string])[] = [];
-  @Input() current = '';
-  @Input() history: readonly (readonly [string, string])[] = [];
-  @Input() cut: StepCut | null = null;
+export class SellerSteps implements AfterViewInit, OnDestroy {
+  @Input({ required: true }) items: readonly StepItem[] = [];
 
-  protected cls(i: number): string {
-    if (this.cut) return i < this.cut.at ? 'ok' : i === this.cut.at ? 'cut' : '';
-    const idx = this.steps.findIndex((s) => s[0] === this.current);
-    if (i < idx) return 'ok';
-    if (i === idx) return this.steps[i][0] === 'done' ? 'ok' : 'now';
-    return '';
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private ro?: ResizeObserver;
+
+  ngAfterViewInit(): void {
+    if (!this.host.classList.contains('sm')) return;
+    this.ro = new ResizeObserver(() => this.fit());
+    this.ro.observe(this.host);
   }
 
-  protected timeOf(i: number): string {
-    if (this.cut && i === this.cut.at) return this.cut.time;
-    const key = this.steps[i][0];
-    return [...this.history].reverse().find((h) => h[0] === key)?.[1] ?? '';
+  ngOnDestroy(): void {
+    this.ro?.disconnect();
+  }
+
+  /**
+   * Cột bằng nhau thì chấm cách đều; kéo hai đầu thanh ra (lề âm) sao cho chữ bước đầu chạm lề trái,
+   * chữ bước cuối chạm lề phải: a, b = nửa bề rộng chữ hai đầu, d = khoảng giữa hai chấm.
+   */
+  private fit(): void {
+    const lb = this.host.querySelectorAll<HTMLElement>('.lb');
+    const n = lb.length;
+    if (n < 2) return;
+    const a = Math.max(15, lb[0].offsetWidth / 2);
+    const b = Math.max(15, lb[n - 1].offsetWidth / 2);
+    const d = (this.host.clientWidth - a - b) / (n - 1);
+    this.host.style.setProperty('--ml', `${a - d / 2}px`);
+    this.host.style.setProperty('--mr', `${b - d / 2}px`);
   }
 }

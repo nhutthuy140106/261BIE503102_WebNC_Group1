@@ -1,4 +1,5 @@
-import { OfferState } from './offer';
+import { placedStepNames } from '../utils/placed-steps';
+import { OFFER_STATE_LABEL, OFFER_STEPS, OfferState } from './offer';
 import { PaymentMethod } from './order';
 import { PostKind } from './post';
 
@@ -22,8 +23,11 @@ export interface SellerPost {
   image?: string;
   /** icon thay ảnh (bài không có ảnh): tên symbol trong index.html */
   icon?: string;
+  /** giá thấp nhất của bài (nhiều món / size / dịch vụ con thì là giá rẻ nhất) */
   price: number;
   unit?: string;
+  /** bài có nhiều mức giá khác nhau: thẻ ghi "từ {price}" và không sửa nhanh giá trên thẻ */
+  priceFrom?: boolean;
   stock: number;
   max: number;
   on: boolean;
@@ -221,22 +225,38 @@ export interface SellerSpace {
   chats: SellerChat[];
 }
 
-/** Tên bước hiển thị cho đơn, theo cách nhận */
-export const SELLER_STEPS: Record<Fulfil, [SellerOrderState, string][]> = {
-  delivery: [['waiting', 'Chờ xác nhận'], ['confirmed', 'Đã xác nhận'], ['preparing', 'Đang chuẩn bị'], ['delivering', 'Đang giao'], ['done', 'Hoàn thành']],
-  pickup: [['waiting', 'Chờ xác nhận'], ['confirmed', 'Đã xác nhận'], ['preparing', 'Đang chuẩn bị'], ['ready', 'Chờ khách lấy'], ['done', 'Hoàn thành']],
-  home: [['waiting', 'Chờ xác nhận'], ['confirmed', 'Đã nhận lịch'], ['preparing', 'Đang làm'], ['done', 'Hoàn thành']],
-};
+/**
+ * Thanh bước dùng CHUNG tên với phía Mua (placedStepNames / OFFER_STEPS), hai bên nhìn cùng một đơn thấy cùng bước:
+ * đồ ăn & uống 5 bước, đồ dùng 4 (không có "Đang thực hiện"), dịch vụ 4 (không có "Đang giao"), việc làm theo đề nghị.
+ */
+export const orderStepNames = (kind: SellerOrder['kind']): string[] => placedStepNames(kind);
+export const JOB_STEP_NAMES = OFFER_STEPS.map((s) => OFFER_STATE_LABEL[s]);
 
-/** Quy trình rút gọn hiện trong hộp "Bạn chắc chắn…" (khớp tên bước trên thanh tiến trình) */
-export const SELLER_FLOW = {
-  delivery: ['Đã đặt', 'Chờ xác nhận', 'Đang giao', 'Hoàn thành'],
-  pickup: ['Đã đặt', 'Chờ xác nhận', 'Chờ khách lấy', 'Hoàn thành'],
-  home: ['Đã đặt', 'Chờ xác nhận', 'Đang thực hiện', 'Hoàn thành'],
-  job: ['Đã yêu cầu', 'Chờ xác nhận', 'Đang thực hiện', 'Đã báo xong', 'Hoàn thành'],
-  cancel: ['Khách xin hủy', 'Đã hủy'],
-} as const;
-export type FlowKey = keyof typeof SELLER_FLOW;
+/** Trạng thái đơn → vị trí trên thanh bước (khớp posMap ở chi tiết đơn phía Mua) */
+const ORDER_POS: Record<SellerOrder['kind'], Partial<Record<SellerOrderState, number>>> = {
+  food: { waiting: 0, confirmed: 1, preparing: 2, delivering: 3, ready: 3, done: 4 },
+  goods: { waiting: 0, confirmed: 1, preparing: 2, delivering: 2, ready: 2, done: 3 },
+  service: { waiting: 0, confirmed: 1, preparing: 2, delivering: 2, ready: 2, done: 3 },
+};
+export const orderPos = (kind: SellerOrder['kind'], state: SellerOrderState): number | undefined => ORDER_POS[kind][state];
+
+/** Một bước trên thanh tiến trình: ok ✓ xanh đen · cur viền cam · cut ✕ (hủy / từ chối) */
+export interface StepItem {
+  label: string;
+  cls: '' | 'ok' | 'cur' | 'cut';
+  time: string;
+}
+
+/** Dựng thanh bước: trước `pos` là ✓, `pos` là bước hiện tại (bước cuối thì ✓ luôn, trừ khi `endOk = false`). */
+export function stepItems(names: readonly string[], pos: number, opts: { times?: string[]; cut?: { at: number; label: string }; endOk?: boolean } = {}): StepItem[] {
+  const { times = [], cut, endOk = true } = opts;
+  return names.map((n, i) => {
+    const cls: StepItem['cls'] = cut
+      ? i < cut.at ? 'ok' : i === cut.at ? 'cut' : ''
+      : i < pos || (endOk && i === pos && i === names.length - 1) ? 'ok' : i === pos ? 'cur' : '';
+    return { label: cut && i === cut.at ? cut.label : n, cls, time: cls ? times[i] ?? '' : '' };
+  });
+}
 
 /** Nhãn từng mảng ở Tình trạng bán / Bài đăng */
 /** Nhãn từng mảng ở Tình trạng bán / Bài đăng. Ô số lượng ghi chung "Còn n", công tắc chung "Đang mở"; `unit` chỉ dùng trong thông báo */

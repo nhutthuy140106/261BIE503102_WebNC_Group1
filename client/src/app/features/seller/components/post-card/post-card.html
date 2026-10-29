@@ -13,25 +13,33 @@
     }
   </div>
   <div class="body">
-    <h3><a [routerLink]="link">{{ post.title }}</a></h3>
+    <div class="tl">
+      <h3><a [routerLink]="link">{{ post.title }}</a></h3>
+      @if (manage) { <span class="sv" title="Lượt lưu">♡ {{ post.saves }}</span> }
+    </div>
     @if (manage && editing()) {
       <form class="pedit" (submit)="savePrice($event, pin.value)">
         <input #pin class="input" type="number" min="0" step="1000" [value]="post.price" required autofocus />
         <button type="submit" class="btn dark">Lưu</button>
       </form>
     } @else if (manage) {
-      <button type="button" class="price" title="Bấm để sửa giá" (click)="editing.set(true)">{{ post.price | vnd }}@if (post.unit) { <small>{{ post.unit }}</small> }<svg class="i"><use href="#pencil" /></svg></button>
+      <div class="prow">
+        @if (post.priceFrom) {
+          <!-- nhiều mức giá: sửa trong bài, không sửa nhanh một con số -->
+          <a class="price" title="Nhiều mức giá, sửa trong bài" [routerLink]="['/seller/posts', post.id, 'edit']">từ {{ post.price | vnd }}@if (post.unit) { <small>{{ post.unit }}</small> }<svg class="i"><use href="#pencil" /></svg></a>
+        } @else {
+          <button type="button" class="price" title="Bấm để sửa giá" (click)="editing.set(true)">{{ post.price | vnd }}@if (post.unit) { <small>{{ post.unit }}</small> }<svg class="i"><use href="#pencil" /></svg></button>
+        }
+        <span class="sold">{{ soldText }}</span>
+      </div>
     } @else {
-      <div class="pr">{{ post.price | vnd }}@if (post.unit) { <span> {{ post.unit }}</span> }</div>
-    }
-    @if (manage) {
-      <div class="meta"><span>{{ post.category || kindLabel[post.kind] }}</span><span>♡ {{ post.saves }} · {{ soldText }}</span></div>
+      <div class="pr">@if (post.priceFrom) { từ }{{ post.price | vnd }}@if (post.unit) { <span> {{ post.unit }}</span> }</div>
     }
   </div>
   <div class="ctl">
     <span class="step">
       <button type="button" aria-label="Bớt" [disabled]="st.locked || post.stock <= min" (click)="step(-1)">−</button>
-      <span>Còn {{ post.stock }}</span>
+      <span title="Số lượng còn">{{ post.stock }}</span>
       <button type="button" aria-label="Thêm" [disabled]="st.locked || post.stock >= post.max" (click)="step(1)">+</button>
     </span>
     <label class="togl">Đang mở
@@ -48,14 +56,14 @@
     }
     @if (manage) {
       <a class="ib" [routerLink]="editLink" title="Sửa bài"><svg class="i"><use href="#pencil" /></svg></a>
-      <button type="button" class="ib more" title="Thêm" (click)="menuOpen.set(!menuOpen()); confirmDel.set(false)"><svg class="i"><use href="#dots" /></svg></button>
+      <button type="button" class="ib more" title="Thêm" (click)="menuOpen.set(!menuOpen())"><svg class="i"><use href="#dots" /></svg></button>
     }
   </div>
   @if (menuOpen()) {
     <div class="menu">
       <button type="button" (click)="menuOpen.set(false); duplicated.emit()"><svg class="i"><use href="#copy" /></svg>Nhân bản bài</button>
       <a [routerLink]="['/shop', myId()]"><svg class="i"><use href="#out" /></svg>Xem như khách</a>
-      <button type="button" class="danger" (click)="del()"><svg class="i"><use href="#xmark" /></svg>{{ confirmDel() ? 'Bấm lần nữa để xóa' : 'Xóa bài' }}</button>
+      <button type="button" class="danger" (click)="menuOpen.set(false); removed.emit()"><svg class="i"><use href="#xmark" /></svg>Xóa bài</button>
     </div>
   }
 </div>

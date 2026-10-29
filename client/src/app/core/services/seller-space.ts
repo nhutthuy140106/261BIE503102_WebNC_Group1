@@ -5,8 +5,8 @@ import { DATASET_BASE } from '../config/api.config';
 import { OFFER_STATE_LABEL } from '../models/offer';
 import { PostKind } from '../models/post';
 import {
-  DayHours, FlowKey, SELLER_LANE, SELLER_STEPS, SellerJob, SellerOffer, SellerOrder, SellerOrderState, SellerPause, SellerPerson, SellerPost,
-  SellerSpace, StatsRange, SellerChat, SellerShop,
+  DayHours, JOB_STEP_NAMES, SELLER_LANE, SellerJob, SellerOffer, SellerOrder, SellerOrderState, SellerPause, SellerPerson, SellerPost,
+  SellerSpace, StatsRange, SellerChat, SellerShop, StepItem, orderPos, orderStepNames, stepItems,
 } from '../models/seller';
 import { MockDb } from './mock-db';
 import { XuService } from './xu';
@@ -35,7 +35,8 @@ export interface SellerJobView extends Omit<SellerJob, 'offers'> {
 }
 
 /** Một việc trong khối "Cần bạn xử lý" của trang Hôm nay */
-export type TaskType = 'order' | 'cancel' | 'pick' | 'done' | 'question' | 'review';
+/** order = đơn mới · step = đơn đã nhận tới lúc làm bước tiếp (thực hiện / giao / hoàn thành) */
+export type TaskType = 'order' | 'step' | 'cancel' | 'pick' | 'done' | 'question' | 'review';
 export interface SellerTask {
   key: string;
   type: TaskType;
@@ -69,9 +70,9 @@ export interface SellerTask {
   when: string;
   /** "Tổng tiền" / "Tiền công" */
   amountLabel?: string;
-  /** hỏi lại trước khi làm: quy trình + bước hiện tại */
-  ask?: [FlowKey, number];
   orderId?: string;
+  /** bước tiếp của đơn (thẻ "step") */
+  act?: SellerOrderAct;
   jobId?: string;
   offerId?: string;
   questionId?: string;
@@ -132,7 +133,7 @@ export class SellerSpaceService {
   private readonly xuSvc = inject(XuService);
   private static readonly NAME = 'seller-space';
   /** khớp trường `version` trong datasets/seller-space.json */
-  private static readonly VERSION = '2026-10-25-b';
+  private static readonly VERSION = '2026-10-27-a';
 
   private readonly state = signal<SellerSpace | null>(null);
   readonly ready = computed(() => this.state() !== null);
@@ -151,7 +152,7 @@ export class SellerSpaceService {
       const need = o.state === 'waiting' || !!o.cancelRequest;
       const ended = ['done', 'declined', 'cancelled'].includes(o.state);
       const total = o.items.reduce((n, i) => n + i.qty * i.price, 0) + (o.ship || 0) + (o.surcharge?.ok ? o.surcharge.amount : 0);
-      const label = END_LABEL[o.state] ?? SELLER_STEPS[o.fulfil].find((s) => s[0] === o.state)?.[1] ?? o.state;
+      const label = END_LABEL[o.state] ?? (o.state === 'waiting' ? 'Chờ xác nhận' : orderStepNames(o.kind)[orderPos(o.kind, o.state) ?? 0]);
       return { ...o, total, label, need, ended, cls: need ? 'act' : ended ? (o.state === 'done' ? 'done' : 'off') : 'go' };
     }),
   );
@@ -185,32 +186,35 @@ export class SellerSpaceService {
         person: o.buyer.name, personAvatar: o.buyer.avatar, kindTag: 'Đơn khách đặt', when: at(o.day, o.time),
       };
       if (o.cancelRequest) {
-        out.push({ ...base, key: 'c-' + o.id, type: 'cancel', status: 'Khách xin hủy', note: `Lý do: ${o.cancelRequest}`, noteIcon: 'question', ask: ['cancel', 0], rank: 2 });
+        out.push({ ...base, key: 'c-' + o.id, type: 'cancel', status: 'Xác nhận hủy', note: `Lý do: ${o.cancelRequest}`, noteIcon: 'question', rank: 2 });
       } else if (o.state === 'waiting') {
-        out.push({ ...base, key: 'o-' + o.id, type: 'order', status: 'Chờ xác nhận', due: o.kind === 'service' ? undefined : o.due, note: o.note, ask: [o.fulfil, 1], rank: o.day === 0 ? 0 : 3 });
+        out.push({ ...base, key: 'o-' + o.id, type: 'order', status: 'Xác nhận đơn', due: o.kind === 'service' ? undefined : o.due, note: o.note, rank: o.day === 0 ? 0 : 3 });
+      } else {
+        const next = this.nextStep(o);
+        if (next) out.push({ ...base, key: 's-' + o.id, type: 'step', status: next[1], act: next[0], due: `${o.kind === 'service' ? 'Hẹn' : 'Giao'} lúc ${o.time}`, rank: 2.5 });
       }
     }
     for (const j of this.jobs()) {
       const jobBase = { kind: 'job' as PostKind, top: j.code, title: j.title, amount: j.pay, amountLabel: 'Tiền công', unit: j.unit, jobId: j.id, icon: 'hand', kindTag: 'Việc bạn đăng', when: at(j.day, j.time) };
       if (!j.closed && j.waiting.length && j.active.length < j.head) {
         out.push({
-          ...jobBase, key: 'p-' + j.id, type: 'pick', status: 'Chờ xác nhận', due: j.due,
+          ...jobBase, key: 'p-' + j.id, type: 'pick', status: 'Chọn người', due: j.due,
           person: `${j.waiting.length} đề nghị`, faces: j.waiting.map((o) => o.worker.avatar), who: `${j.waiting.length} người đề nghị · ${j.waiting.map((o) => o.worker.name).join(', ')}`,
           where: `${j.exact.split(' (')[0]} · ${j.time}–${hmAdd(j.time, j.duration)} ${j.day === 0 ? 'hôm nay' : dayText(j.day, { weekday: 'short' })}`, rank: 1,
         });
       }
       for (const o of j.offers.filter((x) => x.state === 'reported')) {
         out.push({
-          ...jobBase, key: 'd-' + o.id, type: 'done', status: 'Đã báo xong', due: j.due, offerId: o.id, when: at(o.day ?? j.day, j.time),
+          ...jobBase, key: 'd-' + o.id, type: 'done', status: 'Xác nhận hoàn thành', due: j.due, offerId: o.id, when: at(o.day ?? j.day, j.time),
           person: o.worker.name, personAvatar: o.worker.avatar, avatar: o.worker.avatar, who: `${o.worker.name} (${o.worker.phone})`,
           where: `${j.category === 'Mua hộ' ? 'Chợ đầu mối' : j.exact.split(' (')[0]} · báo xong ${o.report?.at ?? ''}`,
-          note: o.report ? `${o.report.note.split(',')[0]}${o.report.photos ? `, kèm ${o.report.photos} ảnh` : ''}` : undefined, buyer: o.worker.name, ask: ['job', 3], rank: 4,
+          note: o.report ? `${o.report.note.split(',')[0]}${o.report.photos ? `, kèm ${o.report.photos} ảnh` : ''}` : undefined, buyer: o.worker.name, rank: 4,
         });
       }
       for (const q of j.questions.filter((x) => !x.answer)) {
         out.push({
-          key: 'q-' + q.id, type: 'question', kind: 'job', tag: 'Hỏi đáp', status: 'Chờ phản hồi', top: j.code, title: `“${q.text}”`, icon: 'chat',
-          person: q.by.name, personAvatar: q.by.avatar, kindTag: 'Hỏi đáp', when: `${q.at} · ${j.title}`,
+          key: 'q-' + q.id, type: 'question', kind: 'job', tag: 'Hỏi đáp', status: 'Hỏi đáp', top: j.code, title: j.title, icon: 'hand',
+          person: q.by.name, personAvatar: q.by.avatar, kindTag: 'Hỏi đáp', when: q.at,
           avatar: q.by.avatar, note: `“${q.text}”`, noteIcon: 'chat', jobId: j.id, questionId: q.id, rank: 5,
         });
       }
@@ -218,13 +222,27 @@ export class SellerSpaceService {
     for (const r of this.reviews().filter((x) => !x.reply)) {
       const ord = this.orders().find((o) => o.id === r.orderId);
       out.push({
-        key: 'r-' + r.id, type: 'review', kind: 'food', tag: 'Đánh giá', status: 'Chờ phản hồi', top: ord?.code ?? r.post, title: `“${r.text}”`,
-        image: ord?.image, icon: 'star', person: r.by.name, personAvatar: r.by.avatar, kindTag: 'Đánh giá', when: `${r.at} · ${r.post}`,
+        key: 'r-' + r.id, type: 'review', kind: 'food', tag: 'Đánh giá', status: 'Đánh giá', top: ord?.code ?? r.post, title: ord?.title ?? r.post,
+        image: ord?.image, icon: 'star', person: r.by.name, personAvatar: r.by.avatar, kindTag: 'Đánh giá', when: r.at,
         stars: r.stars, avatar: r.by.avatar, note: `“${r.text}”`, noteIcon: 'chat', reviewId: r.id, rank: 6,
       });
     }
     return out.sort((a, b) => a.rank - b.rank).map(({ rank: _r, ...t }) => t);
   });
+
+  /**
+   * Bước người bán phải làm tiếp với đơn đã nhận, chỉ khi gần tới giờ hẹn (đồ ăn trước 60 phút, dịch vụ trước 2 giờ,
+   * đồ dùng trong ngày hẹn; quá giờ vẫn hiện). "Đang giao → Hoàn thành" do phía Mua bấm nên không có ở đây.
+   */
+  private nextStep(o: SellerOrder): [SellerOrderAct, string] | null {
+    const left = (dateOf(o.day).getTime() + toMin(o.time) * 60000 - Date.now()) / 60000;
+    const soon = o.kind === 'goods' ? o.day <= 0 : left <= (o.kind === 'food' ? 60 : 120);
+    if (!soon) return null;
+    const give: SellerOrderAct = o.fulfil === 'pickup' ? 'ready' : 'deliver';
+    if (o.state === 'confirmed') return o.kind === 'goods' ? [give, 'Xác nhận giao'] : ['prepare', 'Xác nhận thực hiện'];
+    if (o.state === 'preparing') return o.kind === 'service' ? ['complete', 'Xác nhận hoàn thành'] : [give, 'Xác nhận giao'];
+    return null;
+  }
 
   /** Nạp dữ liệu (lần đầu đọc JSON, sau đó lấy bản đã lưu trong trình duyệt) */
   load(): Observable<SellerSpace> {
@@ -339,7 +357,10 @@ export class SellerSpaceService {
     const svc = o.fulfil === 'home';
     switch (o.state) {
       case 'waiting': return [['confirm', 'Xác nhận', true], ['decline', 'Từ chối', false]];
-      case 'confirmed': return [['prepare', svc ? 'Bắt đầu làm' : 'Bắt đầu chuẩn bị', true], ...(svc || o.kind === 'goods' ? ([['surcharge', 'Báo phụ thu', false]] as [SellerOrderAct, string, boolean][]) : [])];
+      case 'confirmed':
+        // đồ dùng không có bước "Đang thực hiện": xác nhận xong là giao / hẹn khách lấy
+        if (o.kind === 'goods') return [[o.fulfil === 'pickup' ? 'ready' : 'deliver', o.fulfil === 'pickup' ? 'Báo khách đến lấy' : 'Bắt đầu giao', true], ['surcharge', 'Báo phụ thu', false]];
+        return [['prepare', svc ? 'Bắt đầu làm' : 'Bắt đầu chuẩn bị', true], ...(svc ? ([['surcharge', 'Báo phụ thu', false]] as [SellerOrderAct, string, boolean][]) : [])];
       case 'preparing': return svc
         ? [['complete', 'Báo hoàn thành', true], ['surcharge', 'Báo phụ thu', false]]
         : [[o.fulfil === 'pickup' ? 'ready' : 'deliver', o.fulfil === 'pickup' ? 'Báo khách đến lấy' : 'Bắt đầu giao', true]];
@@ -347,6 +368,71 @@ export class SellerSpaceService {
       case 'ready': return [['complete', 'Khách đã lấy', true]];
       default: return [];
     }
+  }
+
+  /** Thanh bước của một đơn (cùng tên bước với chi tiết đơn phía Mua) */
+  orderSteps(o: SellerOrder): StepItem[] {
+    const names = orderStepNames(o.kind);
+    const times: string[] = [];
+    let reached = 0;
+    for (const [st, t] of o.history) {
+      const p = orderPos(o.kind, st);
+      if (p !== undefined) [times[p], reached] = [t, Math.max(reached, p)];
+    }
+    const end = o.history.find((h) => h[0] === o.state)?.[1] ?? '';
+    if (o.state === 'declined') {
+      times[1] = end;
+      return stepItems(names, 0, { times, cut: { at: 1, label: 'Đã từ chối' } });
+    }
+    if (o.state === 'cancelled') {
+      const at = Math.min(names.length - 1, reached + 1);
+      times[at] = end;
+      return stepItems(names, 0, { times, cut: { at, label: 'Đã hủy' } });
+    }
+    return stepItems(names, orderPos(o.kind, o.state) ?? 0, { times });
+  }
+
+  /** Thanh bước của việc mình đăng, theo người làm đầu tiên (cùng tên bước với phía người nhận việc) */
+  jobSteps(j: SellerJobView): StepItem[] {
+    const order = ['offered', 'chosen', 'working', 'reported', 'done'];
+    const a = j.active[0];
+    const times: string[] = [];
+    if (a?.report) times[3] = a.report.at;
+    return stepItems(JOB_STEP_NAMES, a ? Math.max(0, order.indexOf(a.state)) : 0, { times });
+  }
+
+  /**
+   * Nội dung hộp "Bạn chắc chắn…?" trước khi xác nhận đơn / xác nhận hủy / xác nhận việc xong.
+   * Thanh bước giống chi tiết đơn; bước sắp chuyển tới là bước hiện tại (viền cam).
+   */
+  askView(a: SellerOrderAct | 'confirmDone', id: string, offerId?: string): { heading: string; message: string; steps: StepItem[]; ok: string } | null {
+    if (a === 'confirmDone') {
+      const j = this.jobs().find((x) => x.id === id);
+      const of = j?.offers.find((x) => x.id === offerId);
+      if (!j || !of) return null;
+      return {
+        heading: 'Xác nhận việc đã hoàn thành?', ok: 'Xác nhận',
+        message: `Việc chuyển sang <b>Hoàn thành</b>. Bạn trả ${money(j.pay)} trực tiếp cho ${of.worker.name}.`,
+        steps: stepItems(JOB_STEP_NAMES, JOB_STEP_NAMES.length - 1, { endOk: false }),
+      };
+    }
+    const o = this.orders().find((x) => x.id === id);
+    if (!o) return null;
+    const names = orderStepNames(o.kind);
+    if (a === 'approveCancel') {
+      const at = Math.min(names.length - 1, (orderPos(o.kind, o.state) ?? 0) + 1);
+      return {
+        heading: 'Bạn chắc chắn xác nhận hủy?', ok: 'Xác nhận',
+        message: `Đơn ${o.code} sẽ chuyển sang <b>Đã hủy</b>, ${o.buyer.name} được báo.`,
+        steps: stepItems(names, 0, { cut: { at, label: 'Đã hủy' } }),
+      };
+    }
+    const to = orderPos(o.kind, NEXT[a]) ?? 1;
+    return {
+      heading: `Xác nhận chuyển sang “${names[to]}”?`, ok: 'Xác nhận',
+      message: `Đơn chuyển sang <b>${names[to]}</b>, ${o.buyer.name} được báo ngay.`,
+      steps: stepItems(names, to, { endOk: false }),
+    };
   }
 
   /** Người bán đổi bước đơn. Trả về câu báo cho toast. */
@@ -374,7 +460,7 @@ export class SellerSpaceService {
     });
     return {
       confirm: `Đã xác nhận ${o.code} — ${o.buyer.name} được báo, đơn vào lịch`, decline: `Đã từ chối ${o.code} — khách được báo và có thể đặt nơi khác`,
-      prepare: 'Đã chuyển sang Đang chuẩn bị', deliver: 'Đã báo khách: đơn đang được giao', ready: 'Đã báo khách đến lấy', complete: `${o.code} đã hoàn thành`,
+      prepare: 'Đã chuyển sang Đang thực hiện', deliver: 'Đã báo khách: đơn đang được giao', ready: 'Đã báo khách đến lấy', complete: `${o.code} đã hoàn thành`,
       approveCancel: `Đã hủy ${o.code} — ${o.buyer.name} được báo`, keepOrder: 'Đã báo khách: đơn vẫn giữ nguyên',
       surcharge: `Đã gửi phụ thu ${money(data.amount ?? 0)} — chờ khách đồng ý`,
     }[a];

@@ -24,10 +24,10 @@ export class SellerTaskCard {
   protected readonly replying = signal(false);
   protected readonly kindLabel = KIND_LABEL;
 
-  /** Nhãn nút chính: chỉ "Xác nhận", riêng khách xin hủy là "Xác nhận hủy", hỏi đáp / đánh giá là "Phản hồi" */
+  /** Nút chính chỉ có hai chữ: "Phản hồi" (hỏi đáp / đánh giá) và "Xác nhận" (mọi việc còn lại) — nhãn trạng thái nói rõ xác nhận gì */
   protected get primaryLabel(): string {
     const t = this.task.type;
-    return t === 'cancel' ? 'Xác nhận hủy' : t === 'question' || t === 'review' ? 'Phản hồi' : 'Xác nhận';
+    return t === 'question' || t === 'review' ? 'Phản hồi' : 'Xác nhận';
   }
 
   protected get placeholder(): string {

@@ -1,19 +1,9 @@
 <div class="modal" (click)="backdrop($event)">
-  <div class="dlg sm" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="dlg" [class.center]="icon" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    @if (icon) { <span class="ring" [class.danger]="danger"><svg class="i"><use [attr.href]="'#' + icon" /></svg></span> }
     <h2 id="confirmTitle">{{ heading }}</h2>
     @if (message) { <p [innerHTML]="message"></p> }
-    @if (flow.length) {
-      <div class="flow">
-        @for (f of flow; track f; let i = $index) {
-          @if (i) { <svg class="i"><use href="#right" /></svg> }
-          <span [class.now]="i === step" [class.next]="i === step + 1">{{ f }}</span>
-        }
-      </div>
-    }
-    <div class="csum">
-      @if (thumb) { <img [src]="thumb" alt="" [class.round]="round" /> }
-      <div><b>{{ title }}</b><span>{{ sub }}</span></div>
-    </div>
+    @if (steps.length) { <app-seller-steps class="sm" [items]="steps" /> }
     <div class="cbtns">
       <button type="button" class="btn" (click)="closed.emit()">Để sau</button>
       <button type="button" class="btn dark" (click)="ok.emit()">{{ okLabel }}</button>

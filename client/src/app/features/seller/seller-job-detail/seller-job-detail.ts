@@ -5,8 +5,6 @@ import { map } from 'rxjs';
 import { SellerOfferView, SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 
-const FLOW: [string, string][] = [['open', 'Nhận đề nghị'], ['chosen', 'Đã chọn người'], ['reported', 'Đã báo xong'], ['done', 'Hoàn thành']];
-
 /**
  * Chi tiết một việc mình đăng: so sánh người đề nghị → chọn / từ chối → người làm báo xong (kèm ảnh) → xác nhận → đánh giá người làm.
  * Hỏi đáp công khai trả lời tại chỗ (chặn số điện thoại). Đóng / mở lại việc, ghim bằng Xu.
@@ -23,17 +21,9 @@ export class SellerJobDetail implements OnInit, AfterViewInit {
   private readonly route = inject(ActivatedRoute);
   private readonly id = toSignal(this.route.paramMap.pipe(map((p) => p.get('id') ?? '')), { initialValue: '' });
 
-  protected readonly flow = FLOW;
   protected readonly ready = this.seller.ready;
   protected readonly j = computed(() => this.seller.jobs().find((x) => x.id === this.id()) ?? null);
-  protected readonly current = computed(() => {
-    const a = this.j()?.active[0];
-    return !a ? 'open' : a.state === 'working' ? 'chosen' : a.state;
-  });
-  protected readonly history = computed<[string, string][]>(() => {
-    const a = this.j()?.active[0];
-    return a?.report ? [['reported', a.report.at]] : [];
-  });
+  protected readonly steps = computed(() => (this.j() ? this.seller.jobSteps(this.j()!) : []));
 
   /** Đề nghị đang mở form đánh giá + số sao đang chọn */
   protected readonly rating = signal<string | null>(null);

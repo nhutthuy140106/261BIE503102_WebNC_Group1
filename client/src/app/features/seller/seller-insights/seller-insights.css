@@ -3,9 +3,9 @@
 .ohead h1 { font-size: 30px; letter-spacing: -.02em; margin: 0; }
 .ohead p { margin: 6px 0 0; color: var(--smoke); }
 .ranges { display: flex; gap: 6px; flex-wrap: wrap; }
-.ranges button { height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-weight: 600; font-size: 13px; }
-.ranges button:hover { border-color: var(--ink); }
-.ranges button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.ranges > button, .rbtn { height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-weight: 600; font-size: 13px; }
+.ranges > button:hover, .rbtn:hover { border-color: var(--ink); }
+.ranges > button.on, .rbtn.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 
 .kpis { margin-top: 22px; display: grid; gap: 12px; }
 .kduo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -89,3 +89,27 @@
 
 @media (max-width: 1100px) { .grid2 { grid-template-columns: 1fr; } .kq { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 600px) { .kduo { grid-template-columns: 1fr; } }
+
+/* khoảng thời gian tự chọn */
+.ranges { align-items: center; }
+.rpick { position: relative; }
+.rbtn { display: inline-flex; align-items: center; gap: 7px; }
+.rbtn svg { width: 15px; height: 15px; }
+.rcal { position: absolute; z-index: 30; right: 0; top: calc(100% + 8px); width: 330px; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: #fff; box-shadow: 0 18px 40px rgba(34, 48, 74, .16); }
+.rcal .calh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.rcal .calh b { font-size: 14px; }
+.rcal .calnav { width: 32px; height: 32px; padding: 0; border-radius: 9px; display: grid; place-items: center; }
+.rcal .calnav svg { width: 14px; height: 14px; }
+.rcal .calnav.prev svg { transform: rotate(180deg); }
+.rcal .calnav:disabled { opacity: .35; }
+.rcal .calg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.rcal .wd { text-align: center; font-size: 11.5px; font-weight: 600; color: var(--smoke); padding: 4px 0; }
+.rcal .calg button { height: 36px; padding: 0; border: 1px solid transparent; border-radius: 9px; background: none; font-size: 13px; font-weight: 600; color: var(--ink); }
+.rcal .calg button:hover:not(:disabled) { border-color: var(--border); background: var(--soft); }
+.rcal .calg button.today { border-color: var(--accent); }
+.rcal .calg button.in { background: var(--soft); border-radius: 0; }
+.rcal .calg button.end { background: var(--ink); border-color: var(--ink); color: #fff; }
+.rcal .calg button:disabled { color: var(--fog); font-weight: 400; cursor: not-allowed; }
+.rcal .calf { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--smoke); }
+.rcal .cb { display: flex; gap: 6px; }
+.rcal .cb .btn { height: 34px; padding: 0 14px; font-size: 13px; border-radius: 10px; }

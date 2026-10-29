@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { KIND_LABEL, PostKind } from '../../../core/models/post';
-import { SELLER_FLOW, SELLER_LANE, SELLER_NEW_KINDS, SellerPause, SellerPost, StatsRange } from '../../../core/models/seller';
+import { SELLER_LANE, SELLER_NEW_KINDS, SellerPause, SellerPost, StatsRange } from '../../../core/models/seller';
 import { AuthService } from '../../../core/services/auth';
 import { SellerSpaceService, SellerTask } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
@@ -95,21 +95,10 @@ export class SellerToday implements OnInit {
 
   protected readonly askView = computed(() => {
     const t = this.ask();
-    if (!t?.ask) return null;
-    const [fk, i] = t.ask;
-    const fl = SELLER_FLOW[fk];
-    return {
-      heading: fk === 'cancel' ? 'Bạn chắc chắn xác nhận hủy?' : `Xác nhận chuyển sang “${fl[i + 1]}”?`,
-      message:
-        fk === 'cancel' ? `Đơn ${t.top} sẽ chuyển sang <b>Đã hủy</b>, ${t.buyer} được báo.`
-        : fk === 'job' ? 'Việc chuyển sang <b>Hoàn thành</b>. Bạn trả công trực tiếp cho người làm.'
-        : `Đơn chuyển sang <b>${fl[i + 1]}</b>, ${t.buyer} được báo ngay.`,
-      flow: fl, step: i,
-      thumb: t.image ?? t.avatar, round: !t.image,
-      title: t.title,
-      sub: [t.top, t.amount ? `${t.amount.toLocaleString('vi-VN')}đ` : '', t.who, t.where].filter(Boolean).join(' · '),
-      ok: fk === 'cancel' ? 'Xác nhận hủy' : 'Xác nhận',
-    };
+    if (!t) return null;
+    if (t.type === 'done') return this.seller.askView('confirmDone', t.jobId!, t.offerId);
+    const a = t.type === 'cancel' ? 'approveCancel' : t.type === 'step' ? t.act : 'confirm';
+    return t.orderId && a ? this.seller.askView(a, t.orderId) : null;
   });
 
   protected onTask(t: SellerTask, a: TaskAction): void {
@@ -132,6 +121,7 @@ export class SellerToday implements OnInit {
     let msg = '';
     if (t.type === 'order' && t.orderId) msg = this.seller.orderAct(t.orderId, 'confirm');
     if (t.type === 'cancel' && t.orderId) msg = this.seller.orderAct(t.orderId, 'approveCancel');
+    if (t.type === 'step' && t.orderId && t.act) msg = this.seller.orderAct(t.orderId, t.act);
     if (t.type === 'done' && t.jobId && t.offerId) msg = this.seller.offerAct(t.jobId, t.offerId, 'confirmDone');
     if (msg) this.toast.show(msg);
   }

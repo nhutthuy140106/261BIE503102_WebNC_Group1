@@ -8,7 +8,8 @@ import { ToastService } from '../../../../core/services/toast';
 /**
  * Thẻ một bài ở "Tình trạng bán" (trang Hôm nay) và trang Bài đăng:
  * nhãn trạng thái · lượt xem / QUẢNG BÁ · tên · giá · nút ± số lượng · công tắc bật/tắt · nút dùng Xu.
- * `manage` (trang Bài đăng): thêm sửa giá tại chỗ, dòng danh mục · lượt lưu · đã bán, nút sửa và menu (nhân bản, xem như khách, xóa 2 bước).
+ * `manage` (trang Bài đăng): ♡ lượt lưu cạnh tên, sửa giá tại chỗ + "Đã bán / Đã đặt n" cùng hàng giá, nút sửa và menu
+ * (nhân bản, xem như khách, xóa — trang cha hỏi lại trước khi làm).
  */
 @Component({
   selector: 'app-seller-post-card',
@@ -36,7 +37,6 @@ export class SellerPostCard {
 
   protected readonly editing = signal(false);
   protected readonly menuOpen = signal(false);
-  protected readonly confirmDel = signal(false);
 
   protected get st() {
     return this.seller.postState(this.post);
@@ -52,7 +52,7 @@ export class SellerPostCard {
   }
 
   protected get soldText(): string {
-    if (this.post.kind !== 'job') return `${this.post.sold} đã bán`;
+    if (this.post.kind !== 'job') return `${this.post.kind === 'service' ? 'Đã đặt' : 'Đã bán'} ${this.post.sold}`;
     return `${this.seller.jobs().find((j) => j.id === this.post.jobId)?.offers.length ?? 0} đề nghị`;
   }
 
@@ -80,24 +80,14 @@ export class SellerPostCard {
     this.priced.emit(Math.max(0, Math.round(+v || 0)));
   }
 
-  protected del(): void {
-    if (!this.confirmDel()) return this.confirmDel.set(true);
-    this.menuOpen.set(false);
-    this.removed.emit();
-  }
-
   @HostListener('document:click', ['$event'])
   onDoc(e: Event): void {
-    if (this.menuOpen() && !(e.target as HTMLElement).closest('.menu, .more')) {
-      this.menuOpen.set(false);
-      this.confirmDel.set(false);
-    }
+    if (this.menuOpen() && !(e.target as HTMLElement).closest('.menu, .more')) this.menuOpen.set(false);
   }
 
   @HostListener('document:keydown.escape')
   onEsc(): void {
     this.editing.set(false);
     this.menuOpen.set(false);
-    this.confirmDel.set(false);
   }
 }

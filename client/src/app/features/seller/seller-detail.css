@@ -47,9 +47,9 @@ app-seller-steps { display: block; margin-top: 22px; }
 .prow { margin-top: 14px; display: flex; gap: 8px; }
 .prow .btn { flex: 1; height: 40px; }
 .prow .btn + .btn { margin-top: 0; }
-.reportlink { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--smoke); }
-.reportlink:hover { color: var(--ink); }
-.reportlink svg { width: 15px; height: 15px; }
+/* "Báo cáo vấn đề…": chữ gạch chân căn giữa cuối khung hành động, như chi tiết đơn phía Mua */
+.panel .lbtn { display: block; margin-top: 16px; text-align: center; font-size: 13px; color: var(--smoke); text-decoration: underline; text-underline-offset: 3px; }
+.panel .lbtn:hover { color: var(--ink); }
 
 .form { display: grid; gap: 10px; margin-top: 4px; }
 .form .rd { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; cursor: pointer; }

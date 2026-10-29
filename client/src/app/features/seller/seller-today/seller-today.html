@@ -138,8 +138,7 @@
   <p class="demo-note">Bản mẫu · tài khoản Bếp Cô Lan · <a href="#" (click)="resetData($event)">Đặt lại dữ liệu mẫu</a></p>
 
   @if (askView(); as v) {
-    <app-seller-confirm-dialog [heading]="v.heading" [message]="v.message" [flow]="v.flow" [step]="v.step" [thumb]="v.thumb" [round]="v.round"
-      [title]="v.title" [sub]="v.sub" [okLabel]="v.ok" (ok)="confirmAsk()" (closed)="ask.set(null)" />
+    <app-seller-confirm-dialog [heading]="v.heading" [message]="v.message" [steps]="v.steps" [okLabel]="v.ok" (ok)="confirmAsk()" (closed)="ask.set(null)" />
   }
   @if (pickJob(); as j) {
     <app-seller-pick-dialog [job]="j" (chosen)="choose($event)" (closed)="pickId.set(null)" />

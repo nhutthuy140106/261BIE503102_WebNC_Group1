@@ -37,8 +37,8 @@
 @media (max-width: 700px) { .cards { grid-template-columns: 1fr; } }
 
 /* Hộp thoại */
-.modal { position: fixed; inset: 0; z-index: 80; background: rgba(34, 48, 74, .32); display: flex; align-items: flex-start; justify-content: center; padding: 70px 16px 16px; overflow: auto; }
-.dlg { width: 620px; max-width: 100%; background: #fff; border-radius: 18px; padding: 22px; box-shadow: 0 24px 60px rgba(34, 48, 74, .22); }
+.modal { position: fixed; inset: 0; z-index: 80; background: rgba(34, 48, 74, .32); display: flex; padding: 16px; overflow: auto; }
+.dlg { margin: auto; width: 620px; max-width: 100%; background: #fff; border-radius: 18px; padding: 22px; box-shadow: 0 24px 60px rgba(34, 48, 74, .22); }
 .dlg.sm { width: 480px; }
 .dlg h2 { margin: 0; font-size: 20px; }
 .dlg > p { margin: 4px 0 14px; color: var(--smoke); font-size: 13.5px; }

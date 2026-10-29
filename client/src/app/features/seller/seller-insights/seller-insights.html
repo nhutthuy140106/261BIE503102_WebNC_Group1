@@ -1,8 +1,34 @@
 @if (d(); as d) {
   <div class="ohead">
-    <div><h1>Hiệu quả</h1><p>Số liệu tổng hợp từ đơn và việc đã hoàn thành. Tiền khách trả trực tiếp cho bạn, AntGo không giữ tiền.</p></div>
+    <h1>Hiệu quả</h1>
     <div class="ranges">
-      @for (r of ranges; track r) { <button type="button" [class.on]="r === range()" (click)="setRange(r)">{{ seller.statsFor(r)?.label }}</button> }
+      @for (r of ranges; track r) { <button type="button" [class.on]="!custom() && r === range()" (click)="setRange(r)">{{ seller.statsFor(r)?.label }}</button> }
+      <!-- khoảng ngày tự chọn: bấm ngày đầu rồi ngày cuối trên lịch -->
+      <div class="rpick">
+        <button type="button" class="rbtn" [class.on]="!!custom()" [attr.aria-expanded]="pickOpen()" (click)="togglePick()">
+          <svg class="i"><use href="#calendar" /></svg>{{ custom() ? customText() : 'Khoảng thời gian' }}
+        </button>
+        @if (pickOpen()) {
+          <div class="rcal" role="dialog" aria-label="Chọn khoảng thời gian">
+            <div class="calh">
+              <button type="button" class="calnav prev" aria-label="Tháng trước" (click)="moveMonth(-1)"><svg class="i"><use href="#right" /></svg></button>
+              <b>{{ calTitle() }}</b>
+              <button type="button" class="calnav" aria-label="Tháng sau" [disabled]="!calCanNext()" (click)="moveMonth(1)"><svg class="i"><use href="#right" /></svg></button>
+            </div>
+            <div class="calg">
+              @for (w of weekDays; track w) { <span class="wd">{{ w }}</span> }
+              @for (x of calCells(); track $index) {
+                @if (x) {
+                  <button type="button" [class.in]="x.in" [class.end]="x.end" [class.today]="x.today" [disabled]="x.future" (click)="pickDay(x.key)">{{ x.d }}</button>
+                } @else { <span></span> }
+              }
+            </div>
+            <div class="calf"><span>{{ pickText() }}</span>
+              <span class="cb"><button type="button" class="btn" (click)="pickOpen.set(false)">Hủy</button><button type="button" class="btn dark" [disabled]="!pickA()" (click)="applyPick()">Áp dụng</button></span>
+            </div>
+          </div>
+        }
+      </div>
     </div>
   </div>
 

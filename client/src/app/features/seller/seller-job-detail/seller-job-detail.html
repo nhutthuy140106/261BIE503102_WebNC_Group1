@@ -9,7 +9,7 @@
     <div class="amt"><small>Tiền công · trả trực tiếp</small><b>{{ j.pay | vnd }}<span class="u"> {{ j.unit }}</span></b></div>
   </div>
 
-  <app-seller-steps [steps]="flow" [current]="current()" [history]="history()" />
+  <app-seller-steps [items]="steps()" />
 
   <div class="dgrid">
     <div>
@@ -21,8 +21,7 @@
             <div>
               <b>{{ o.worker.name }}</b>
               <div class="m">
-                <span><svg class="i gold"><use href="#star" /></svg>{{ o.worker.rating }}</span>
-                <span><svg class="i"><use href="#check" /></svg>{{ o.worker.jobs }} việc đã làm</span>
+                <span><svg class="i gold"><use href="#star" /></svg>{{ o.worker.rating }} ({{ o.worker.jobs }})</span>
                 <span><svg class="i"><use href="#pin" /></svg>{{ o.worker.distance }}</span>
                 <span><svg class="i"><use href="#clock" /></svg>{{ o.slot }}</span>
               </div>
@@ -116,8 +115,8 @@
         @if (!j.closed && !j.active.length) {
           <button type="button" class="btn" (click)="pin()"><img class="coin" src="assets/clean/antxu.png" alt="" />Ghim đầu danh sách · 20 Xu</button>
         }
+        <a class="lbtn" routerLink="/help">Báo cáo vấn đề với việc này</a>
       </div>
-      <a class="reportlink" routerLink="/help"><svg class="i"><use href="#shield" /></svg>Báo cáo vấn đề với việc này</a>
     </aside>
   </div>
 } @else if (ready()) {

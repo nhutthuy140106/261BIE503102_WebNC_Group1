@@ -1,7 +1,7 @@
 /* Bài đăng — chuyển từ design/mockups/seller-posts.html */
-.ohead { margin-top: 6px; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
-.ohead h1 { font-size: 30px; letter-spacing: -.02em; margin: 0; }
-.ohead p { margin: 6px 0 0; color: var(--smoke); }
+/* đầu trang cùng kiểu Giao dịch / Đơn hàng phía Mua: tiêu đề 28px, nút đăng bài bên phải */
+.ohead { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.ohead h1 { font-size: 28px; letter-spacing: -.02em; margin: 0; }
 .newwrap { position: relative; }
 .newwrap > .btn { height: 44px; padding: 0 18px; }
 .newmenu { position: absolute; right: 0; top: calc(100% + 8px); width: 290px; padding: 6px; border-radius: 14px; background: #fff; border: 1px solid var(--border); box-shadow: 0 18px 40px rgba(34, 48, 74, .14); display: grid; z-index: 30; }
@@ -11,25 +11,18 @@
 .newmenu b { display: block; font-size: 14px; }
 .newmenu small { display: block; font-size: 12px; color: var(--smoke); }
 
-.tools { margin-top: 22px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.ptoggles { display: flex; gap: 6px; flex-wrap: wrap; }
-.ptoggles button { height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
-.ptoggles button:hover { border-color: var(--ink); }
-.ptoggles button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
-.ptoggles small { opacity: .6; font-size: 12px; }
-.grow { flex: 1; }
-.sel { height: 36px; padding: 0 30px 0 12px; border: 1px solid var(--border); border-radius: 999px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%236A6879' d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E") no-repeat right 10px center / 13px; font-size: 13px; font-weight: 600; color: var(--ink); appearance: none; cursor: pointer; }
-.srch { height: 36px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: #fff; width: 240px; }
-.srch svg { width: 16px; height: 16px; color: var(--smoke); }
-.srch input { border: 0; outline: 0; flex: 1; min-width: 0; font-size: 13.5px; background: none; padding: 0; }
-.summary { margin-top: 14px; display: flex; gap: 18px; flex-wrap: wrap; color: var(--smoke); font-size: 13px; }
-.summary b { color: var(--ink); }
-.summary svg { width: 13px; height: 13px; vertical-align: -2px; }
+.tools { margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.tabs { display: inline-flex; padding: 4px; gap: 2px; border-radius: 999px; background: #F1F2F5; overflow-x: auto; max-width: 100%; }
+.tabs button { flex: none; padding: 10px 22px; border: 0; border-radius: 999px; font-size: 15px; font-weight: 500; color: var(--smoke); background: none; transition: background .15s, color .15s; }
+.tabs button:hover { color: var(--ink); }
+.tabs button.on { background: #fff; color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(34, 48, 74, .16); }
 
 .grp { min-width: 0; }
-.lgh { display: flex; align-items: center; gap: 8px; margin: 18px 0 10px; }
-.lgh b { font-size: 15px; }
-.lgh small { color: var(--smoke); font-size: 13px; }
+/* tên mảng cùng cấp tiêu đề nhóm ở Giao dịch ("Cần bạn xử lý", "Đang diễn ra") */
+.grp { margin-top: 32px; }
+.lgh { margin: 0 0 14px; }
+.lgh b { font-size: 21px; font-weight: 700; letter-spacing: -.015em; color: var(--ink); }
 .empty2 { padding: 46px 0; text-align: center; color: var(--smoke); }
 .empty2 img { width: 100px; display: block; margin: 0 auto 12px; }
-@media (max-width: 700px) { .srch { width: 100%; } }
+/* nút trạng thái nằm sát lề phải: menu mở canh phải để không tràn ra ngoài trang */
+.tools app-sort-menu ::ng-deep .sortbox.bar .sortmenu.sortmenu { left: auto; right: 0; }

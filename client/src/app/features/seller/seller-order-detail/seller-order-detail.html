@@ -12,7 +12,7 @@
     <div class="amt"><small>Tổng tiền · {{ o.pay === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</small><b>{{ o.total | vnd }}</b></div>
   </div>
 
-  <app-seller-steps [steps]="steps()" [current]="o.state" [history]="o.history" [cut]="cut()" />
+  <app-seller-steps [items]="steps()" />
 
   <div class="dgrid">
     <div>
@@ -101,6 +101,7 @@
             }
           }
         }
+        <a class="lbtn" routerLink="/help">Báo cáo vấn đề với đơn này</a>
       </div>
       <div class="panel">
         <div class="person"><img [src]="o.buyer.avatar" alt="" /><div><b>{{ o.buyer.name }}</b><small>Khách · {{ o.buyer.phone }}</small></div></div>
@@ -109,12 +110,10 @@
           <a class="btn" [href]="tel(o.buyer.phone)"><svg class="i"><use href="#phone" /></svg>Gọi</a>
         </div>
       </div>
-      <a class="reportlink" routerLink="/help"><svg class="i"><use href="#shield" /></svg>Báo cáo vấn đề với đơn này</a>
     </aside>
   </div>
   @if (askView(); as v) {
-    <app-seller-confirm-dialog [heading]="v.heading" [message]="v.message" [flow]="v.flow" [step]="v.step" [thumb]="o.image ?? o.buyer.avatar" [round]="!o.image"
-      [title]="o.title" [sub]="v.sub" [okLabel]="v.ok" (ok)="confirmAsk()" (closed)="ask.set(null)" />
+    <app-seller-confirm-dialog [heading]="v.heading" [message]="v.message" [steps]="v.steps" [okLabel]="v.ok" (ok)="confirmAsk()" (closed)="ask.set(null)" />
   }
 } @else if (ready()) {
   <div class="empty2"><img src="assets/clean/peek.png" alt="" />Không tìm thấy giao dịch này.<br /><a class="btn" routerLink="/seller/orders">Về Giao dịch</a></div>

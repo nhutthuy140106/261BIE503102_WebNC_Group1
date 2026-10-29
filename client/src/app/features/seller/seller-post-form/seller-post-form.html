@@ -1,10 +1,10 @@
 <a class="crumb" routerLink="/seller/posts"><svg class="i"><use href="#right" /></svg>Bài đăng</a>
-<div class="fhead"><h1>{{ editId() ? 'Sửa bài' : 'Đăng bài mới' }}</h1><p>{{ intro[type()] }}</p></div>
+<div class="fhead"><h1>{{ editId() ? 'Sửa bài' : 'Đăng bài mới' }}</h1></div>
 
 <div class="tpl">
   @for (t of types; track t.t) {
     <button type="button" [class.on]="isOn(t.t)" [disabled]="!!editId() && !isOn(t.t)" (click)="pickType(t.t)">
-      <span class="pi"><svg class="i"><use [attr.href]="'#' + t.icon" /></svg></span><span><b>{{ t.label }}</b><small>{{ t.sub }}</small></span>
+      <span class="pi"><svg class="i"><use [attr.href]="'#' + t.icon" /></svg></span><span><b>{{ t.label }}</b></span>
     </button>
   }
 </div>
@@ -15,62 +15,62 @@
   <div>
     <!-- ===== 1. Thông tin chung (mọi loại) ===== -->
     <section class="sec" formGroupName="common">
-      <header><span class="no">1</span><span><b>{{ type() === 'job' ? 'Việc cần làm' : type() === 'service' ? 'Giới thiệu dịch vụ' : type() === 'goods' ? 'Món đồ & hình ảnh' : 'Món & hình ảnh' }}</b><small>Phần khách đọc đầu tiên</small></span></header>
-      <div class="bd">
-        @if (type() === 'food' || type() === 'drink') {
-          <div class="fld"><span class="lbl">Bạn bán</span>
-            <div class="pills">
-              <button type="button" [class.on]="type() === 'food'" (click)="setType('food', false)">Món ăn theo phần</button>
-              <button type="button" [class.on]="type() === 'drink'" (click)="setType('drink', false)">Đồ uống pha theo ly</button>
-            </div>
-            <span class="hint">Đồ uống có bảng size và các mức pha chế (nóng/lạnh, độ ngọt, đá, topping).</span>
+      <header><span class="no">1</span><span><b>{{ type() === 'job' ? 'Việc cần làm' : type() === 'service' ? 'Giới thiệu dịch vụ' : type() === 'goods' ? 'Thông tin đồ dùng' : 'Thông tin món' }}</b></span>
+        @if (foodish()) {
+          <div class="seg hseg" role="group" aria-label="Bạn bán">
+            <button type="button" [class.on]="type() === 'food'" (click)="setType('food', false)">Đồ ăn</button>
+            <button type="button" [class.on]="type() === 'drink'" (click)="setType('drink', false)">Đồ uống</button>
           </div>
         }
+      </header>
+      <div class="bd">
         @if (type() === 'service') {
-          <div class="fld"><span class="lbl">Loại dịch vụ</span>
+          <div class="fld"><span class="lbl">Điền nhanh theo mẫu</span>
             <div class="pills">@for (p of svcPresets; track p) { <button type="button" [class.on]="c('spec.preset').value === p" (click)="applyPreset(p)">{{ p }}</button> }</div>
-            <span class="hint">Chọn loại chỉ điền sẵn gợi ý (gói, câu hỏi, lịch, nơi làm) — sửa lại thoải mái.</span>
           </div>
         }
 
-        <div class="fld" [class.bad]="tried() && type() !== 'job' && !images.length">
-          <span class="lbl">Ảnh {{ type() === 'job' ? 'minh họa (không bắt buộc, ' : '(' }}tối đa {{ maxImages }}, PNG/JPG/WebP ≤ 2 MB)</span>
+        @if (type() !== 'job') {
+        <div class="fld" [class.bad]="tried() && !images.length">
+          <span class="lbl">Ảnh <span class="hint">(tối đa {{ maxImages }})</span></span>
           <div class="imgs">
             @for (im of images; track $index; let i = $index) {
               <div class="im"><img [src]="im" alt="" /><button type="button" class="x" aria-label="Bỏ ảnh" (click)="removeImage(i)">×</button>@if (i === 0) { <span class="cover">Ảnh bìa</span> }</div>
             }
-            @if (images.length < maxImages) { <button type="button" class="addimg" (click)="file.click()"><svg class="i"><use href="#camera" /></svg>Thêm ảnh</button> }
+            @if (images.length < maxImages) { <button type="button" class="addimg" (click)="file.click()"><svg class="i"><use href="#camera" /></svg>Thêm ảnh<small>PNG, JPG, WebP<br />≤ 2MB</small></button> }
           </div>
-          <span class="hint">{{ type() === 'goods' ? 'Đồ đã dùng nên có ít nhất 2 góc, chụp rõ chỗ trầy xước nếu có.' : type() === 'service' ? 'Ảnh bạn đang làm việc, dụng cụ, kết quả.' : 'Ảnh đầu tiên là ảnh bìa trên thẻ bài.' }}</span>
+          <span class="hint">Ảnh đầu tiên là ảnh bìa trên thẻ bài.</span>
           <span class="err">Thêm ít nhất 1 ảnh</span>
         </div>
+        }
 
         <div class="fld" [class.bad]="bad('common.title')">
-          <label for="title">{{ type() === 'job' ? 'Tên việc' : type() === 'service' ? 'Tên dịch vụ' : type() === 'goods' ? 'Tên món đồ' : 'Tên món' }}</label>
+          <label for="title">{{ type() === 'job' ? 'Tên việc' : type() === 'service' ? 'Tiêu đề bài đăng' : type() === 'goods' ? 'Tên món đồ' : 'Tên bài đăng' }}</label>
           <input id="title" class="input" formControlName="title" maxlength="100"
             [placeholder]="type() === 'job' ? 'Ví dụ: Mua đồ chợ sáng giúp nhà mình' : type() === 'service' ? 'Ví dụ: Giặt sấy gấp, lấy và trả tận cửa' : type() === 'goods' ? 'Ví dụ: Nồi chiên không dầu 5L, dùng 6 tháng' : type() === 'drink' ? 'Ví dụ: Trà sữa trân châu đường đen' : 'Ví dụ: Cơm gà kho gừng'" />
           <span class="err">Tên 5–100 ký tự</span>
         </div>
-        <div class="row">
-          <div class="fld"><label for="cat">{{ type() === 'job' ? 'Loại việc' : 'Danh mục' }}</label>
-            <select id="cat" class="input" formControlName="category">@for (k of cats(); track k) { <option [value]="k">{{ k }}</option> }</select></div>
-          <div class="fld"><label for="area">Khu vực{{ type() === 'job' ? ' hiện công khai' : '' }}</label>
-            <select id="area" class="input" formControlName="area">@for (b of blocks; track b) { <option [value]="b">{{ b }}</option> }</select></div>
-        </div>
+        <!-- không chọn danh mục con; bài bán chọn được nhiều khu, việc làm ở một khu -->
+        @if (type() === 'job') {
+          <div class="fld"><span class="lbl">Khu vực</span>
+            <div class="pills">@for (b of blocks; track b) { <button type="button" [class.on]="c('common.area').value === b" (click)="set('common.area', b)">{{ b }}</button> }</div>
+          </div>
+          <!-- địa chỉ: tòa hiện trên bài, số căn / tầng chỉ gửi cho người được chọn (ô thuộc spec) -->
+          <div class="row">
+            <div class="fld" [class.bad]="tried() && !c('spec.building').value?.trim()"><label for="bd">Tòa nhà</label><input id="bd" class="input" [formControl]="$any(c('spec.building'))" maxlength="40" placeholder="Ví dụ: Tòa S2.01" /><span class="err">Nhập tòa nhà</span></div>
+            <div class="fld" [class.bad]="tried() && !c('spec.exact').value?.trim()"><label for="ex">Số nhà, tầng</label><input id="ex" class="input" [formControl]="$any(c('spec.exact'))" maxlength="60" placeholder="Ví dụ: 0512, tầng 5" /><span class="err">Nhập số nhà, tầng</span></div>
+          </div>
+          <div class="note"><svg class="i"><use href="#shield" /></svg>Bài đăng chỉ hiện khu vực và tòa nhà, địa chỉ cụ thể như số nhà, tầng chỉ gửi cho người bạn chọn.</div>
+        } @else {
+          <div class="fld"><span class="lbl">Khu vực bán <span class="hint">(chọn được nhiều khu)</span></span>
+            <div class="pills">@for (b of blocks; track b) { <button type="button" [class.on]="has('common.areas', b)" (click)="toggleArea(b)">{{ b }}</button> }</div>
+          </div>
+        }
         <div class="fld" [class.bad]="bad('common.desc')">
           <label for="desc">{{ type() === 'job' ? 'Mô tả việc' : 'Mô tả' }}</label>
           <textarea id="desc" class="input" formControlName="desc" maxlength="1000"
             [placeholder]="type() === 'job' ? 'Vì sao cần, làm gì, ở đâu…' : type() === 'service' ? 'Bạn làm gì, làm thế nào, khách cần chuẩn bị gì…' : type() === 'goods' ? 'Mua khi nào, dùng ra sao, vì sao bán…' : 'Mỗi phần gồm gì, nấu thế nào, thực đơn đổi ra sao…'"></textarea>
           <span class="err">Mô tả 10–1000 ký tự</span>
-        </div>
-        <div class="fld"><span class="lbl">Lưu ý cho khách <span class="hint">(hiện thành danh sách dưới mô tả)</span></span>
-          <div formArrayName="notes" class="lines">
-            @for (n of arr('common.notes').controls; track $index; let i = $index) {
-              <div class="line2"><input class="input" [formControlName]="i" placeholder="Ví dụ: hộp giấy dùng một lần, có thể mang hộp riêng" maxlength="120" />
-                <button type="button" class="rm" aria-label="Bỏ dòng" (click)="removeAt('common.notes', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
-            }
-          </div>
-          <button type="button" class="mini" (click)="addStr('common.notes')"><svg class="i"><use href="#plus" /></svg>Thêm dòng</button>
         </div>
       </div>
     </section>
@@ -80,460 +80,352 @@
         <!-- ================= ĐỒ ĂN ================= -->
         @case ('food') {
           <section class="sec">
-            <header><span class="no">2</span><span><b>Giá & số phần</b><small>Khách thấy giá trên thẻ và trong hộp đặt</small></span></header>
+            <header><span class="no">2</span><span><b>Thực đơn</b></span></header>
             <div class="bd">
-              <div class="row3">
-                <div class="fld" [class.bad]="bad('spec.price')"><label for="fprice">Giá mỗi phần</label><span class="money"><input id="fprice" class="input" type="number" min="1000" step="1000" formControlName="price" placeholder="35000" /></span><span class="err">Nhập giá từ 1.000đ</span></div>
-                <div class="fld"><label for="funit">Đơn vị</label><select id="funit" class="input" formControlName="unit">@for (u of ['phần', 'hộp', 'suất', 'kg']; track u) { <option [value]="u">{{ u }}</option> }</select></div>
-                <div class="fld"><label for="flim">Số phần mỗi ngày</label><input id="flim" class="input" type="number" min="1" formControlName="dailyLimit" /></div>
-              </div>
-              <div class="row">
-                <div class="fld"><span class="lbl">Khẩu phần</span><div class="pills">@for (p of ['1 người', '2–3 người', 'Gia đình']; track p) { <button type="button" [class.on]="c('spec.portion').value === p" (click)="set('spec.portion', p)">{{ p }}</button> }</div></div>
-                <div class="fld"><label for="fmin">Đặt tối thiểu</label><input id="fmin" class="input" type="number" min="1" formControlName="minOrder" /></div>
-              </div>
-              <div class="fld"><span class="lbl">Nhãn lưu ý</span><div class="pills">@for (t of foodTags; track t) { <button type="button" [class.on]="has('spec.tags', t)" (click)="toggleIn('spec.tags', t)">{{ t }}</button> }</div></div>
+              <!-- thực đơn: mỗi món một giá, số phần mỗi ngày và tùy chọn cộng giá riêng (topping, cỡ phần…); bài 1 món thì chỉ 1 dòng -->
+              <ng-container *ngTemplateOutlet="itemTable; context: { list: foodUnits, nameLabel: 'Tên món', namePh: 'Ví dụ: Xôi bắp', pricePh: '15000', addLabel: 'Thêm món', ph: 'khay', qty: true, opts: true }" />
+              <span class="hint">Mỗi món có giá, số phần bán mỗi ngày và tùy chọn cộng giá riêng. Khách chọn một hoặc nhiều món trong cùng một đơn; thẻ bài hiện giá món rẻ nhất, ví dụ “từ 15.000đ”.</span>
             </div>
           </section>
           <section class="sec">
-            <header><span class="no">3</span><span><b>Tùy chọn cộng giá</b><small>Nhóm chọn 1 (cỡ phần) hoặc chọn nhiều (thêm món)</small></span></header>
+            <header><span class="no">3</span><span><b>Tùy chọn cho khách</b></span></header>
             <div class="bd">
-              <ng-container *ngTemplateOutlet="optGroups" />
               <div class="checks">
-                <label class="ck"><input type="checkbox" formControlName="spicy" /><span>Cho khách chọn mức cay</span></label>
                 <label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú cho bếp<small>Ví dụ: ít cơm, không hành</small></span></label>
               </div>
+              <ng-container *ngTemplateOutlet="quickList; context: { ph: 'Ví dụ: Để sốt riêng' }" />
             </div>
           </section>
           <ng-container *ngTemplateOutlet="sellSchedule; context: { n: 4 }" />
           <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 5 }" />
           <section class="sec">
-            <header><span class="no">6</span><span><b>Thanh toán & cam kết</b><small>Tiền khách trả trực tiếp cho bạn</small></span></header>
-            <div class="bd">
-              <ng-container *ngTemplateOutlet="payPills" />
-              <label class="ck" [class.badck]="bad('spec.fresh')"><input type="checkbox" formControlName="fresh" /><span>Tôi cam kết nấu trong ngày, đảm bảo vệ sinh<small>Bắt buộc với đồ ăn</small></span></label>
-            </div>
+            <header><span class="no">6</span><span><b>Thanh toán</b></span></header>
+            <div class="bd"><ng-container *ngTemplateOutlet="payPills" /></div>
           </section>
+          <!-- cam kết cho cả bài, nằm ngoài khung thanh toán -->
+          <label class="ck pledge" [class.badck]="bad('spec.fresh')"><input type="checkbox" formControlName="fresh" /><span>Tôi cam kết món ăn được chế biến trong ngày và đảm bảo an toàn vệ sinh thực phẩm.</span></label>
         }
 
         <!-- ================= ĐỒ UỐNG ================= -->
         @case ('drink') {
           <section class="sec">
-            <header><span class="no">2</span><span><b>Size & giá</b><small>Mỗi size một giá riêng; bán 1 size thì chỉ để 1 dòng</small></span></header>
+            <header><span class="no">2</span><span><b>Thực đơn</b></span></header>
             <div class="bd">
-              <div formArrayName="sizes" class="lines">
-                @for (z of arr('spec.sizes').controls; track $index; let i = $index) {
-                  <div class="line sizeline" [formGroupName]="i">
-                    <input class="input" formControlName="label" placeholder="S / M / L" maxlength="20" />
-                    <span class="money"><input class="input" type="number" min="0" step="1000" formControlName="price" placeholder="30000" /></span>
-                    <label class="reqck"><input type="radio" name="defsize" [checked]="c('spec.defaultSize').value === i" (change)="set('spec.defaultSize', i)" />Mặc định</label>
-                    <button type="button" class="rm" aria-label="Bỏ size" [disabled]="arr('spec.sizes').length === 1" (click)="removeAt('spec.sizes', i)"><svg class="i"><use href="#xmark" /></svg></button>
-                  </div>
-                }
-              </div>
-              <button type="button" class="mini" (click)="addChoice('spec.sizes')"><svg class="i"><use href="#plus" /></svg>Thêm size</button>
+              <!-- mỗi loại nước một giá, số ly mỗi ngày và tùy chọn riêng (size, topping…) như thực đơn đồ ăn -->
+              <ng-container *ngTemplateOutlet="itemTable; context: { list: drinkUnits, nameLabel: 'Tên đồ uống', namePh: 'Ví dụ: Trà sữa trân châu', pricePh: '30000', addLabel: 'Thêm đồ uống', ph: 'bình', qty: true, qtyPh: '∞', opts: true }" />
+              <span class="hint">Mỗi loại nước có giá, số ly mỗi ngày (để trống = không giới hạn) và tùy chọn cộng giá riêng như size, topping. Khách chọn nhiều loại trong cùng một đơn.</span>
             </div>
           </section>
           <section class="sec">
-            <header><span class="no">3</span><span><b>Pha chế</b><small>Bật / tắt từng nhóm và chọn các mức khách được chọn</small></span></header>
+            <header><span class="no">3</span><span><b>Pha chế</b></span></header>
             <div class="bd">
-              <label class="ck"><input type="checkbox" formControlName="hotCold" /><span>Cho chọn nóng / lạnh</span></label>
               <div class="fld"><span class="lbl">Độ ngọt <span class="hint">(bỏ hết = không cho chọn)</span></span><div class="pills">@for (l of sweetLevels; track l) { <button type="button" [class.on]="has('spec.sweet', l)" (click)="toggleIn('spec.sweet', l)">{{ l }}</button> }</div></div>
               <div class="fld"><span class="lbl">Đá</span><div class="pills">@for (l of iceLevels; track l) { <button type="button" [class.on]="has('spec.ice', l)" (click)="toggleIn('spec.ice', l)">{{ l }}</button> }</div></div>
+              <!-- các ô tick cho khách đặt cùng một chỗ -->
+              <div class="checks">
+                <label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú cho quán<small>Ví dụ: ít ngọt hơn, đá để riêng</small></span></label>
+                <label class="ck"><input type="checkbox" formControlName="hotCold" /><span>Cho chọn nóng / lạnh</span></label>
+              </div>
+              <ng-container *ngTemplateOutlet="quickList; context: { ph: 'Ví dụ: Đóng nắp riêng' }" />
             </div>
           </section>
+          <ng-container *ngTemplateOutlet="sellSchedule; context: { n: 4 }" />
+          <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 5 }" />
           <section class="sec">
-            <header><span class="no">4</span><span><b>Topping</b><small>Khách chọn thêm, cộng vào giá ly</small></span></header>
-            <div class="bd">
-              <div formArrayName="toppings" class="lines">
-                @for (z of arr('spec.toppings').controls; track $index; let i = $index) {
-                  <div class="line" [formGroupName]="i">
-                    <input class="input" formControlName="label" placeholder="Tên topping" maxlength="40" />
-                    <span class="money"><input class="input" type="number" min="0" step="1000" formControlName="price" placeholder="+ giá" /></span>
-                    <button type="button" class="rm" aria-label="Bỏ topping" (click)="removeAt('spec.toppings', i)"><svg class="i"><use href="#xmark" /></svg></button>
-                  </div>
-                }
-              </div>
-              <div class="row">
-                <button type="button" class="mini" (click)="addChoice('spec.toppings')"><svg class="i"><use href="#plus" /></svg>Thêm topping</button>
-                <div class="fld inline"><label for="maxt">Tối đa mỗi ly</label><input id="maxt" class="input" type="number" min="0" formControlName="maxToppings" /></div>
-              </div>
-              <label class="ck"><input type="checkbox" formControlName="unlimited" /><span>Không giới hạn số ly mỗi ngày</span>
-                @if (!c('spec.unlimited').value) { <input class="input extra" type="number" min="1" formControlName="dailyLimit" placeholder="Số ly mỗi ngày" (click)="$event.stopPropagation()" /> }</label>
-            </div>
-          </section>
-          <ng-container *ngTemplateOutlet="sellSchedule; context: { n: 5 }" />
-          <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 6 }" />
-          <section class="sec">
-            <header><span class="no">7</span><span><b>Thanh toán</b><small>Tiền khách trả trực tiếp cho bạn</small></span></header>
+            <header><span class="no">6</span><span><b>Thanh toán</b></span></header>
             <div class="bd"><ng-container *ngTemplateOutlet="payPills" /></div>
           </section>
         }
 
-        <!-- ================= ĐỒ DÙNG ================= -->
+        <!-- ================= ĐỒ DÙNG (theo trang chi tiết phía Mua: Tình trạng · Cách nhận · giá · hẹn qua lấy · còn hàng) ================= -->
         @case ('goods') {
           <section class="sec">
-            <header><span class="no">2</span><span><b>Tình trạng</b><small>Khách thấy ở ô “Tình trạng” ngay dưới tên</small></span></header>
+            <header><span class="no">2</span><span><b>Tình trạng</b></span></header>
             <div class="bd">
-              <div class="pills">@for (k of conditions; track k[0]) { <button type="button" [class.on]="c('spec.condition').value === k[0]" (click)="set('spec.condition', k[0])">{{ k[1] }}</button> }</div>
-              @if (c('spec.condition').value === 'usedFlaw') {
-                <div class="fld" [class.bad]="tried() && !c('spec.flaw').value"><label for="flaw">Mô tả lỗi</label><textarea id="flaw" class="input small" formControlName="flaw" placeholder="Ví dụ: trầy góc trái, nút hẹn giờ hơi lỏng" maxlength="300"></textarea><span class="hint">Kèm ảnh chụp rõ chỗ lỗi ở phần ảnh.</span><span class="err">Đồ có lỗi cần mô tả lỗi</span></div>
-              }
-              <div class="row3">
-                <div class="fld"><label for="brand">Thương hiệu / model</label><input id="brand" class="input" formControlName="brand" placeholder="Không bắt buộc" /></div>
-                <div class="fld"><label for="used">Đã dùng</label><input id="used" class="input" formControlName="usedFor" placeholder="Ví dụ: 6 tháng" /></div>
-                <div class="fld"><label for="war">Bảo hành còn</label><input id="war" class="input" formControlName="warranty" placeholder="Ví dụ: đến 04/2027" /></div>
-              </div>
-              <div class="row">
-                <div class="fld"><label for="acc">Đi kèm</label><input id="acc" class="input" formControlName="accessories" placeholder="Ví dụ: hộp, sạc, sách hướng dẫn" /></div>
-                <div class="fld"><label for="why">Lý do bán</label><input id="why" class="input" formControlName="reason" placeholder="Ví dụ: chuyển nhà, mua máy mới" /></div>
+              <div class="pills cond4">@for (k of conditions; track k[0]) { <button type="button" [class.on]="c('spec.condition').value === k[0]" (click)="set('spec.condition', k[0])">{{ k[1] }}</button> }</div>
+              <div class="fld">
+                <label for="flaw">Mô tả tình trạng <span class="hint">(không bắt buộc)</span></label>
+                <input id="flaw" class="input" formControlName="flaw" maxlength="120" placeholder="Ví dụ: còn hộp, đủ phụ kiện, có xước nhẹ ở nắp" />
               </div>
             </div>
           </section>
           <section class="sec">
-            <header><span class="no">3</span><span><b>Giá & số lượng</b><small>Còn 1 cái = bán một lần, bán xong bài tự ẩn</small></span></header>
+            <header><span class="no">3</span><span><b>Cài đặt giá</b></span></header>
             <div class="bd">
               <div class="row3">
                 <div class="fld" [class.bad]="bad('spec.price')"><label for="gprice">Giá bán</label><span class="money"><input id="gprice" class="input" type="number" min="1000" step="1000" formControlName="price" placeholder="650000" /></span><span class="err">Nhập giá từ 1.000đ</span></div>
-                <div class="fld"><label for="gnew">Giá mua mới (tham khảo)</label><span class="money"><input id="gnew" class="input" type="number" min="0" step="1000" formControlName="newPrice" placeholder="Không bắt buộc" /></span></div>
+                <div class="fld"><label for="gunit">Đơn vị</label><ng-container *ngTemplateOutlet="unitPick; context: { path: 'spec.unit', list: goodsUnits, id: 'gunit', ph: 'thùng' }" /></div>
                 <div class="fld" [class.bad]="bad('spec.stock')"><label for="gstock">Số lượng</label><input id="gstock" class="input" type="number" min="1" formControlName="stock" /><span class="err">Ít nhất 1</span></div>
               </div>
-              <div class="fld half"><label for="gunit">Tính theo</label><select id="gunit" class="input" formControlName="unit">@for (u of ['cái', 'bộ', 'đôi', 'chiếc']; track u) { <option [value]="u">{{ u }}</option> }</select></div>
             </div>
           </section>
           <section class="sec">
-            <header><span class="no">4</span><span><b>Giao nhận</b><small>Đồ dùng thường là khách qua lấy; giao tận cửa là tùy chọn</small></span></header>
+            <header><span class="no">4</span><span><b>Lịch hẹn lấy</b></span></header>
             <div class="bd">
-              <div class="fld"><span class="lbl">Ngày khách qua lấy được</span><ng-container *ngTemplateOutlet="dayPicker; context: { path: 'spec.days' }" /></div>
-              <div class="row">
-                <div class="fld"><label for="gpf">Hẹn qua lấy từ</label><input id="gpf" class="input" type="time" formControlName="pickFrom" /></div>
-                <div class="fld"><label for="gpt">Đến</label><input id="gpt" class="input" type="time" formControlName="pickTo" /></div>
+              <div class="drow">
+                <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: 'Ngày hẹn lấy' }" />
+                <div class="fld"><label for="gpf">Từ</label><app-time-input inputId="gpf" formControlName="pickFrom" /></div>
+                <div class="fld"><label for="gpt">Đến</label><app-time-input inputId="gpt" formControlName="pickTo" /></div>
               </div>
-              <div class="checks">
-                <label class="ck"><input type="checkbox" formControlName="tryFirst" /><span>Cho khách xem / thử trước khi lấy</span></label>
-                <label class="ck"><input type="checkbox" formControlName="delivery" /><span>Có giao tận cửa trong khu</span>
-                  @if (c('spec.delivery').value) { <span class="money extra" (click)="$event.stopPropagation()"><input class="input" type="number" min="0" step="1000" formControlName="fee" placeholder="Phí giao" /></span> }</label>
-                <label class="ck"><input type="checkbox" formControlName="bulky" /><span>Đồ cồng kềnh<small>Khách cần người khiêng / xe chở</small></span></label>
-              </div>
-              <div class="fld"><span class="lbl">Đổi trả</span><div class="pills">
-                <button type="button" [class.on]="c('spec.returns').value === 'none'" (click)="set('spec.returns', 'none')">Không đổi trả</button>
-                <button type="button" [class.on]="c('spec.returns').value === '24h'" (click)="set('spec.returns', '24h')">Đổi trong 24 giờ nếu có lỗi chưa báo</button>
-              </div></div>
-              <div class="note"><svg class="i"><use href="#shield" /></svg>Địa chỉ lấy hàng chính xác chỉ gửi cho khách sau khi bạn xác nhận đơn.</div>
             </div>
+          </section>
+          <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 5, title: 'Nhận hàng' }" />
+          <section class="sec">
+            <header><span class="no">6</span><span><b>Thanh toán</b></span></header>
+            <div class="bd"><ng-container *ngTemplateOutlet="payPills" /></div>
           </section>
         }
 
-        <!-- ================= DỊCH VỤ ================= -->
+        <!-- ================= DỊCH VỤ (đủ 7 khối của trang chi tiết phía Mua + 3 ô thông tin nhanh) ================= -->
         @case ('service') {
+          @if (!svcPreset().noQuick) {
           <section class="sec">
-            <header><span class="no">2</span><span><b>Phạm vi & kinh nghiệm</b><small>Nói rõ làm gì — không làm gì để khách khỏi hiểu nhầm</small></span></header>
+            <header><span class="no">{{ svcNo('quick') }}</span><span><b>Thông tin nhanh</b></span></header>
             <div class="bd">
-              <div class="row">
-                <div class="fld"><label for="do">Làm gì</label><textarea id="do" class="input small" formControlName="doList" placeholder="Ví dụ: giặt, sấy, gấp, trả tận cửa"></textarea></div>
-                <div class="fld"><label for="dont">Không làm gì</label><textarea id="dont" class="input small" formControlName="dontList" placeholder="Ví dụ: không nhận đồ da, đồ cần giặt khô"></textarea></div>
-              </div>
-              <div class="row">
-                <div class="fld"><label for="exp">Kinh nghiệm / chứng chỉ</label><input id="exp" class="input" formControlName="experience" placeholder="Ví dụ: 3 năm mở tiệm giặt" /></div>
-                <div class="fld"><span class="lbl">Dụng cụ</span><div class="pills">
-                  <button type="button" [class.on]="c('spec.tools').value === 'mine'" (click)="set('spec.tools', 'mine')">Tôi mang theo</button>
-                  <button type="button" [class.on]="c('spec.tools').value === 'customer'" (click)="set('spec.tools', 'customer')">Khách chuẩn bị</button>
-                </div></div>
+              <div class="row3">
+                <div class="fld"><label for="ta">Thời gian hoàn thành</label><input id="ta" class="input" formControlName="turnaround" maxlength="40" placeholder="Ví dụ: trong ngày" /></div>
+                <div class="fld"><label for="sa">Phạm vi phục vụ</label><input id="sa" class="input" formControlName="serviceArea" maxlength="40" placeholder="Ví dụ: trong khu" /></div>
+                <div class="fld"><label for="sw">Bảo hành</label><input id="sw" class="input" formControlName="warranty" maxlength="40" placeholder="Không bắt buộc" /></div>
               </div>
             </div>
           </section>
+          }
+          <!-- bảng giá: mỗi dịch vụ con một giá + đơn vị; khách chọn nhiều dòng trong cùng một đơn, mỗi dòng một số lượng -->
           <section class="sec">
-            <header><span class="no">3</span><span><b>Gói & giá</b><small>Một hoặc nhiều gói; mỗi gói một cách tính giá</small></span></header>
+            <header><span class="no">{{ svcNo('price') }}</span><span><b>Cài đặt giá</b></span></header>
             <div class="bd">
-              <div formArrayName="packages" class="pkgs">
-                @for (k of arr('spec.packages').controls; track $index; let i = $index) {
-                  <div class="grp" [formGroupName]="i">
-                    <div class="top">
-                      <input class="input" formControlName="name" placeholder="Tên gói" maxlength="60" />
-                      <select class="input" formControlName="priceType">@for (p of priceTypes; track p[0]) { <option [value]="p[0]">{{ p[1] }}</option> }</select>
-                      <button type="button" class="rm" aria-label="Bỏ gói" [disabled]="arr('spec.packages').length === 1" (click)="removeAt('spec.packages', i)"><svg class="i"><use href="#xmark" /></svg></button>
-                    </div>
-                    @if (grp(k).get('priceType')!.value !== 'quote') {
-                      <div class="row3">
-                        <span class="money"><input class="input" type="number" min="0" step="1000" formControlName="price" placeholder="Giá" /></span>
-                        <input class="input" formControlName="unit" placeholder="Đơn vị: kg, giờ, m², món, lượt" />
-                        <input class="input" formControlName="duration" placeholder="Thời lượng ước tính" />
-                      </div>
-                    } @else {
-                      <div class="row"><input class="input" formControlName="duration" placeholder="Thời gian kiểm tra, ví dụ 30 phút" /><span class="hint">Khách gửi yêu cầu, bạn kiểm tra rồi báo giá — khách duyệt trước khi làm.</span></div>
-                    }
-                  </div>
+              <div class="pills">@for (m of priceTypes; track m[0]) { <button type="button" [class.on]="c('spec.priceType').value === m[0]" (click)="set('spec.priceType', m[0])">{{ m[1] }}</button> }</div>
+              @if (c('spec.priceType').value === 'quote') {
+                <div class="row3">
+                  <div class="fld"><label for="insp">Phí kiểm tra</label><span class="money"><input id="insp" class="input" type="number" min="0" step="1000" formControlName="inspect" placeholder="50000" /></span></div>
+                </div>
+                <span class="hint">Khách gửi yêu cầu, bạn kiểm tra rồi báo giá. Phí kiểm tra trừ vào tiền làm nếu khách đồng ý.</span>
+              } @else {
+                @if (svcPreset().stay) {
+                  <ng-container *ngTemplateOutlet="itemTable; context: { list: svcUnits, nameLabel: 'Loại phòng', namePh: 'Ví dụ: Phòng đôi có ban công', pricePh: '500000', addLabel: 'Thêm loại phòng', ph: 'tuần', qty: true, qtyLabel: 'Số phòng', qtyPh: '1', guests: true }" />
+                } @else {
+                  <ng-container *ngTemplateOutlet="itemTable; context: { list: svcUnits, nameLabel: 'Tên dịch vụ', namePh: 'Ví dụ: Giặt chăn, ga', pricePh: '40000', addLabel: 'Thêm dịch vụ', ph: 'phòng' }" />
                 }
-              </div>
-              <button type="button" class="mini" (click)="addPackage()"><svg class="i"><use href="#plus" /></svg>Thêm gói</button>
-              <div class="row">
-                <div class="fld"><label for="insp">Phí kiểm tra / đi lại</label><span class="money"><input id="insp" class="input" type="number" min="0" step="1000" formControlName="inspect" placeholder="Không có" /></span><span class="hint">Trừ vào tiền làm nếu khách đồng ý làm.</span></div>
-                <label class="ck"><input type="checkbox" formControlName="estimate" /><span>Giá ước tính — cân / đo xong mới báo chính xác</span></label>
-              </div>
+                @if (svcPreset().stay) {
+                  <span class="hint">Giá mỗi đêm cho từng loại phòng. Khách chọn loại phòng, số phòng và ngày nhận – trả phòng; tổng tiền = giá × số đêm × số phòng.</span>
+                } @else {
+                  <label class="ck"><input type="checkbox" formControlName="estimate" /><span>Giá ước tính, cân / đếm thực tế khi nhận đồ</span></label>
+                }
+              }
             </div>
           </section>
+          @if (svcPreset().stay) {
           <section class="sec">
-            <header><span class="no">4</span><span><b>Khách cần cho biết</b><small>Số lượng ước tính, câu hỏi riêng, tùy chọn cộng giá</small></span></header>
+            <header><span class="no">{{ svcNo('stay') }}</span><span><b>Tiện nghi & nội quy</b></span></header>
             <div class="bd">
-              <div formGroupName="qty" class="qtyrow">
-                <label class="ck"><input type="checkbox" formControlName="on" /><span>Khách nhập số lượng / khối lượng ước tính</span></label>
-                @if (c('spec.qty.on').value) {
-                  <div class="row3"><input class="input" formControlName="label" placeholder="Nhãn, ví dụ: Khối lượng (kg)" /><input class="input" type="number" formControlName="min" placeholder="Ít nhất" /><input class="input" type="number" formControlName="max" placeholder="Nhiều nhất" /></div>
-                }
+              <div class="fld"><span class="lbl">Tiện nghi <span class="hint">(chọn được nhiều)</span></span>
+                <div class="pills">@for (a of amenities; track a) { <button type="button" [class.on]="has('spec.amenities', a)" (click)="toggleIn('spec.amenities', a)">{{ a }}</button> }</div>
               </div>
+              <div class="fld"><span class="lbl">Nội quy</span>
+                <ng-container *ngTemplateOutlet="quickList; context: { ph: 'Ví dụ: Không tổ chức tiệc', name: 'rules', add: 'Thêm nội quy' }" />
+              </div>
+              <div class="row3">
+                <div class="fld"><label for="fc">Hủy miễn phí trước (ngày)</label><input id="fc" class="input" type="number" min="0" formControlName="freeCancelDays" /></div>
+                <div class="fld"><label for="dp">Đặt cọc (%)</label><input id="dp" class="input" type="number" min="0" max="100" formControlName="deposit" /></div>
+              </div>
+              <label class="ck"><input type="checkbox" formControlName="idRequired" /><span>Khách xuất trình CCCD khi nhận phòng<small>Để khai báo tạm trú theo quy định</small></span></label>
+              <div class="row">
+                <div class="fld" [class.bad]="tried() && !c('spec.building').value?.trim()"><label for="sb">Tòa nhà</label><input id="sb" class="input" formControlName="building" maxlength="40" placeholder="Ví dụ: Tòa S2.01" /><span class="err">Nhập tòa nhà</span></div>
+                <div class="fld"><label for="sr">Số phòng, tầng</label><input id="sr" class="input" formControlName="room" maxlength="60" placeholder="Ví dụ: 1205, tầng 12" /></div>
+              </div>
+              <div class="note"><svg class="i"><use href="#shield" /></svg>Bài đăng chỉ hiện khu vực và tòa nhà; số phòng, tầng chỉ gửi cho khách sau khi bạn xác nhận đặt phòng.</div>
+            </div>
+          </section>
+          }
+          <section class="sec">
+            <header><span class="no">{{ svcNo('ask') }}</span><span><b>Khách chọn khi đặt</b></span></header>
+            <div class="bd">
+              <span class="lbl">Tùy chọn cộng giá</span>
+              <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options' }" />
+              @if (!svcPreset().noQuestions) {
               <span class="lbl">Câu hỏi riêng</span>
               <div formArrayName="questions" class="pkgs">
                 @for (q of arr('spec.questions').controls; track $index; let i = $index) {
                   <div class="grp" [formGroupName]="i">
                     <div class="top">
-                      <input class="input" formControlName="label" placeholder="Câu hỏi, ví dụ: Ảnh chỗ hỏng" maxlength="80" />
-                      <select class="input" formControlName="type">@for (t of qTypes; track t[0]) { <option [value]="t[0]">{{ t[1] }}</option> }</select>
+                      <input class="input" formControlName="label" placeholder="Câu hỏi, ví dụ: Máy bị sao?" maxlength="80" />
+                      <app-select formControlName="type" [options]="qTypeOpts" />
                       <label class="reqck"><input type="checkbox" formControlName="required" />Bắt buộc</label>
                       <button type="button" class="rm" aria-label="Bỏ câu hỏi" (click)="removeAt('spec.questions', i)"><svg class="i"><use href="#xmark" /></svg></button>
                     </div>
                     @if (grp(q).get('type')!.value === 'choice' || grp(q).get('type')!.value === 'multi') {
-                      <input class="input" formControlName="opts" placeholder="Các lựa chọn, cách nhau bằng dấu phẩy" />
+                      <input class="input sub" formControlName="opts" placeholder="Các lựa chọn, cách nhau bằng dấu phẩy" />
                     }
                   </div>
                 }
               </div>
               <button type="button" class="mini" (click)="addQuestion()"><svg class="i"><use href="#plus" /></svg>Thêm câu hỏi</button>
-              <span class="lbl">Tùy chọn cộng giá</span>
-              <div formArrayName="addons" class="lines">
-                @for (a of arr('spec.addons').controls; track $index; let i = $index) {
-                  <div class="line" [formGroupName]="i">
-                    <input class="input" formControlName="label" placeholder="Ví dụ: Giặt hấp" maxlength="40" />
-                    <span class="money"><input class="input" type="number" min="0" step="1000" formControlName="price" placeholder="+ giá" /></span>
-                    <button type="button" class="rm" aria-label="Bỏ tùy chọn" (click)="removeAt('spec.addons', i)"><svg class="i"><use href="#xmark" /></svg></button>
-                  </div>
-                }
-              </div>
-              <button type="button" class="mini" (click)="addChoice('spec.addons')"><svg class="i"><use href="#plus" /></svg>Thêm tùy chọn</button>
-            </div>
-          </section>
-          <section class="sec">
-            <header><span class="no">5</span><span><b>Lịch</b><small>Cách khách đặt giờ với bạn</small></span></header>
-            <div class="bd">
-              <div class="pills">
-                @for (m of [['slot', 'Khách chọn giờ hẹn'], ['datedur', 'Chọn ngày + số giờ'], ['weekly', 'Định kỳ hằng tuần'], ['request', 'Theo yêu cầu']]; track m[0]) {
-                  <button type="button" [class.on]="c('spec.schedMode').value === m[0]" (click)="set('spec.schedMode', m[0])">{{ m[1] }}</button>
-                }
-              </div>
-              <div class="fld"><span class="lbl">Ngày nhận lịch</span><ng-container *ngTemplateOutlet="dayPicker; context: { path: 'spec.days' }" /></div>
-              <div class="row3">
-                <div class="fld"><label for="sf">Nhận từ</label><input id="sf" class="input" type="time" formControlName="from" /></div>
-                <div class="fld"><label for="st">Đến</label><input id="st" class="input" type="time" formControlName="to" /></div>
-                <div class="fld"><label for="sn">Báo trước tối thiểu (giờ)</label><input id="sn" class="input" type="number" min="0" formControlName="notice" /></div>
-              </div>
-              <div class="row">
-                <div class="fld"><label for="sp">Số khách tối đa mỗi khung giờ</label><input id="sp" class="input" type="number" min="1" formControlName="perSlot" /></div>
-                <div class="fld"><label for="ta">Thời gian hoàn thành</label><input id="ta" class="input" formControlName="turnaround" placeholder="Ví dụ: trả đồ sau 24 giờ" /></div>
-              </div>
-            </div>
-          </section>
-          <section class="sec">
-            <header><span class="no">6</span><span><b>Nơi làm & cam kết</b><small>Khách thấy ở ô chọn địa điểm khi đặt</small></span></header>
-            <div class="bd">
-              <div class="pills">
-                @for (m of [['buyer', 'Tại nhà khách'], ['seller', 'Khách mang tới'], ['pickup', 'Lấy & trả tận nơi'], ['choice', 'Khách chọn']]; track m[0]) {
-                  <button type="button" [class.on]="c('spec.place').value === m[0]" (click)="set('spec.place', m[0])">{{ m[1] }}</button>
-                }
-              </div>
-              <div class="row3">
-                <div class="fld"><label for="sa">Khu phục vụ</label><input id="sa" class="input" formControlName="serviceArea" /></div>
-                <div class="fld"><label for="sw">Bảo hành</label><input id="sw" class="input" formControlName="warranty" placeholder="Ví dụ: 3 tháng linh kiện" /></div>
-                <div class="fld"><label for="sc">Hủy miễn phí trước (giờ)</label><input id="sc" class="input" type="number" min="0" formControlName="cancelHours" /></div>
-              </div>
-              @if (c('spec.place').value === 'buyer') {
-                <label class="ck"><input type="checkbox" formControlName="safety" /><span>Hiện lưu ý an toàn khi làm tại nhà khách<small>Nhắc khách để đồ có giá trị, báo trước người ở nhà</small></span></label>
               }
             </div>
+          </section>
+          <section class="sec">
+            <header><span class="no">{{ svcNo('time') }}</span><span><b>{{ svcPreset().stay ? 'Lịch nhận phòng' : 'Lịch hẹn' }}</b></span></header>
+            <div class="bd">
+              @if (svcPreset().stay) {
+                <div class="drow">
+                  <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: 'Ngày còn phòng' }" />
+                  <div class="fld"><label for="ci">Nhận phòng từ</label><app-time-input inputId="ci" formControlName="checkIn" /></div>
+                  <div class="fld"><label for="co">Trả phòng trước</label><app-time-input inputId="co" formControlName="checkOut" /></div>
+                </div>
+                <div class="row3">
+                  <div class="fld"><label for="mn">Ở tối thiểu (đêm)</label><input id="mn" class="input" type="number" min="1" formControlName="minNights" /></div>
+                </div>
+              } @else {
+              <div class="pills">@for (m of svcTimes; track m[0]) { <button type="button" [class.on]="c('spec.timeMode').value === m[0]" (click)="set('spec.timeMode', m[0])">{{ m[1] }}</button> }</div>
+              <div class="drow">
+                <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: 'Ngày nhận lịch' }" />
+                <div class="fld"><label for="sf">Từ</label><app-time-input inputId="sf" formControlName="from" /></div>
+                <div class="fld"><label for="st">Đến</label><app-time-input inputId="st" formControlName="to" /></div>
+              </div>
+              @if (c('spec.timeMode').value === 'datedur') {
+                <div class="row3">
+                  <div class="fld"><label for="dmin">Ít nhất (giờ)</label><input id="dmin" class="input" type="number" min="1" formControlName="durMin" /></div>
+                  <div class="fld"><label for="dmax">Nhiều nhất (giờ)</label><input id="dmax" class="input" type="number" min="1" formControlName="durMax" /></div>
+                </div>
+              }
+              <label class="ck"><input type="checkbox" formControlName="repeat" /><span>Cho khách đặt lặp lại hằng tuần</span></label>
+              }
+            </div>
+          </section>
+          @if (!svcPreset().noPlace) {
+          <section class="sec">
+            <header><span class="no">{{ svcNo('place') }}</span><span><b>Nơi làm</b></span></header>
+            <div class="bd">
+              <div class="pills">@for (m of svcPlaces; track m[0]) { <button type="button" [class.on]="c('spec.place').value === m[0]" (click)="set('spec.place', m[0])">{{ m[1] }}</button> }</div>
+              @if (c('spec.place').value === 'seller' || c('spec.place').value === 'choice') {
+                <div class="row">
+                  <div class="fld" [class.bad]="tried() && !c('spec.where').value?.trim()"><label for="wh">Nơi khách mang tới</label><input id="wh" class="input" formControlName="where" maxlength="60" placeholder="Ví dụ: Shop 7, Bcons" /><span class="err">Nhập nơi khách mang tới</span></div>
+                  @if (c('spec.place').value === 'choice') {
+                    <div class="fld"><label for="hf">Phụ phí đến nhà khách</label><span class="money"><input id="hf" class="input" type="number" min="0" step="1000" formControlName="homeFee" placeholder="0" /></span></div>
+                  }
+                </div>
+              }
+              @if (c('spec.place').value === 'buyer') {
+                <label class="ck"><input type="checkbox" formControlName="safety" /><span>Hiện lưu ý an toàn khi làm tại nhà khách</span></label>
+              }
+            </div>
+          </section>
+          }
+          <section class="sec">
+            <header><span class="no">{{ svcNo('pay') }}</span><span><b>Thanh toán</b></span></header>
+            <div class="bd"><ng-container *ngTemplateOutlet="payPills" /></div>
           </section>
         }
 
-        <!-- ================= VIỆC LÀM ================= -->
+        <!-- ================= VIỆC LÀM (theo trang chi tiết việc phía Mua) ================= -->
         @case ('job') {
           <section class="sec">
-            <header><span class="no">2</span><span><b>Danh sách việc & kết quả</b><small>Làm xong thế nào là đạt — căn cứ khi bạn xác nhận hoàn thành</small></span></header>
+            <header><span class="no">2</span><span><b>Thời gian</b></span></header>
             <div class="bd">
-              <div formArrayName="checklist" class="lines">
-                @for (n of arr('spec.checklist').controls; track $index; let i = $index) {
-                  <div class="line2"><input class="input" [formControlName]="i" placeholder="Ví dụ: mua 2kg thịt ba chỉ ở chợ Tân Mỹ" maxlength="120" />
-                    <button type="button" class="rm" aria-label="Bỏ dòng" (click)="removeAt('spec.checklist', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
-                }
-              </div>
-              <button type="button" class="mini" (click)="addStr('spec.checklist')"><svg class="i"><use href="#plus" /></svg>Thêm việc</button>
-              <div class="fld"><label for="dc">Làm xong thế nào là đạt</label><textarea id="dc" class="input small" formControlName="doneCriteria" placeholder="Ví dụ: đồ mang về bếp trước 7:30, kèm hóa đơn"></textarea></div>
-            </div>
-          </section>
-          <section class="sec">
-            <header><span class="no">3</span><span><b>Thời gian</b><small>Người đề nghị chọn khung giờ họ làm được</small></span></header>
-            <div class="bd">
-              <div class="pills">
-                @for (m of [['once', 'Một lần'], ['flex', 'Linh hoạt (xong trước hạn)'], ['weekly', 'Lặp hằng tuần']]; track m[0]) {
-                  <button type="button" [class.on]="c('spec.timeMode').value === m[0]" (click)="set('spec.timeMode', m[0])">{{ m[1] }}</button>
-                }
-              </div>
-              @switch (c('spec.timeMode').value) {
-                @case ('flex') { <div class="fld half"><label for="dl">Cần xong trước</label><input id="dl" class="input" type="date" formControlName="deadline" /></div> }
-                @case ('weekly') {
-                  <div class="fld"><span class="lbl">Các thứ cần làm</span><ng-container *ngTemplateOutlet="dayPicker; context: { path: 'spec.weekDays' }" /></div>
-                  <div class="row"><div class="fld"><label for="sd">Từ ngày</label><input id="sd" class="input" type="date" formControlName="startDate" /></div><div class="fld"><label for="ed">Đến ngày</label><input id="ed" class="input" type="date" formControlName="endDate" /></div></div>
-                }
-                @default { <div class="fld half"><label for="jd">Ngày làm</label><input id="jd" class="input" type="date" formControlName="date" /></div> }
-              }
-              @if (c('spec.timeMode').value !== 'flex') {
-                <div class="row3">
-                  <div class="fld"><label for="jf">Từ</label><input id="jf" class="input" type="time" formControlName="from" /></div>
-                  <div class="fld"><label for="jt">Đến</label><input id="jt" class="input" type="time" formControlName="to" /></div>
-                  <div class="fld"><label for="jh">Thời lượng ước tính (giờ)</label><input id="jh" class="input" type="number" min="0.5" step="0.5" formControlName="hours" /></div>
+              <div class="tcols">
+                <div class="tcol">
+                  <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: 'Ngày làm' }" />
                 </div>
-              }
-              <span class="lbl">Khung giờ khác bạn chấp nhận <span class="hint">(người đề nghị có thể chọn)</span></span>
-              <div formArrayName="altWindows" class="lines">
-                @for (n of arr('spec.altWindows').controls; track $index; let i = $index) {
-                  <div class="line2"><input class="input" [formControlName]="i" placeholder="Ví dụ: Thứ Bảy 8:00 – 10:00" />
-                    <button type="button" class="rm" aria-label="Bỏ khung giờ" (click)="removeAt('spec.altWindows', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
-                }
-              </div>
-              <button type="button" class="mini" (click)="addStr('spec.altWindows')"><svg class="i"><use href="#plus" /></svg>Thêm khung giờ</button>
-              <div class="row">
-                <div class="fld"><label for="od">Hạn nhận đề nghị · ngày</label><input id="od" class="input" type="date" formControlName="offerDate" /></div>
-                <div class="fld"><label for="ot">Giờ</label><input id="ot" class="input" type="time" formControlName="offerTime" /><span class="hint">Sau hạn này việc tự đóng nhận đề nghị</span></div>
-              </div>
-            </div>
-          </section>
-          <section class="sec">
-            <header><span class="no">4</span><span><b>Địa điểm</b><small>Mọi người chỉ thấy khu; địa chỉ chính xác gửi khi bạn chọn người</small></span></header>
-            <div class="bd">
-              <div class="pills">
-                @for (m of [['one', 'Tại một nơi'], ['ab', 'Từ điểm A đến điểm B'], ['remote', 'Làm từ xa']]; track m[0]) {
-                  <button type="button" [class.on]="c('spec.placeMode').value === m[0]" (click)="set('spec.placeMode', m[0])">{{ m[1] }}</button>
-                }
-              </div>
-              @switch (c('spec.placeMode').value) {
-                @case ('ab') { <div class="row"><div class="fld"><label for="pa">Điểm A</label><input id="pa" class="input" formControlName="pointA" placeholder="Ví dụ: chợ Tân Mỹ" /></div><div class="fld"><label for="pb">Điểm B</label><input id="pb" class="input" formControlName="pointB" placeholder="Ví dụ: Bếp B-0512" /></div></div> }
-                @case ('one') { <div class="fld"><label for="ex">Địa chỉ chính xác</label><input id="ex" class="input" formControlName="exact" placeholder="Ví dụ: Bếp B-0512 (cửa xanh, tầng 5)" /></div> }
-                @default { <span class="hint">Ví dụ: hỗ trợ cài máy tính qua điện thoại, sửa file từ xa.</span> }
-              }
-              <div class="note"><svg class="i"><use href="#shield" /></svg>Hỏi đáp công khai trên trang việc chặn số điện thoại; ai cần hỏi riêng thì nhắn tin cho bạn.</div>
-            </div>
-          </section>
-          <section class="sec">
-            <header><span class="no">5</span><span><b>Người cần</b><small>Yêu cầu và những gì mỗi bên chuẩn bị</small></span></header>
-            <div class="bd">
-              <div class="fld half" [class.bad]="bad('spec.head')"><label for="hd">Số người cần</label><input id="hd" class="input" type="number" min="1" formControlName="head" /><span class="err">Ít nhất 1 người</span></div>
-              <span class="lbl">Yêu cầu với người nhận</span>
-              <div formArrayName="reqs" class="lines">
-                @for (n of arr('spec.reqs').controls; track $index; let i = $index) {
-                  <div class="line2"><input class="input" [formControlName]="i" placeholder="Ví dụ: có xe máy, đã từng làm" maxlength="80" />
-                    <button type="button" class="rm" aria-label="Bỏ dòng" (click)="removeAt('spec.reqs', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
-                }
-              </div>
-              <button type="button" class="mini" (click)="addStr('spec.reqs')"><svg class="i"><use href="#plus" /></svg>Thêm yêu cầu</button>
-              <div class="row">
-                <div class="fld"><label for="pv">Bạn cung cấp</label><input id="pv" class="input" formControlName="provide" placeholder="Ví dụ: túi đựng, danh sách mua" /></div>
-                <div class="fld"><label for="br">Người làm tự mang</label><input id="br" class="input" formControlName="bring" placeholder="Ví dụ: xe máy, áo mưa" /></div>
+                <div class="tcol">
+                  <!-- "Không cố định giờ" bật thì Từ / Đến vẫn ở chỗ cũ nhưng mờ đi, không bấm được -->
+                  <div class="row" [class.dim]="c('spec.allDay').value" [attr.aria-disabled]="c('spec.allDay').value">
+                    <div class="fld"><label for="jf">Từ</label><app-time-input inputId="jf" formControlName="from" /></div>
+                    <div class="fld"><label for="jt">Đến</label><app-time-input inputId="jt" formControlName="to" /></div>
+                  </div>
+                  <label class="ck"><input type="checkbox" formControlName="allDay" /><span>Không cố định giờ, làm trong ngày là được</span></label>
+                  @if (!c('spec.allDay').value) {
+                    <span class="lbl">Khung giờ khác bạn chấp nhận</span>
+                    <div formArrayName="altWindows" class="lines">
+                      @for (n of arr('spec.altWindows').controls; track $index; let i = $index) {
+                        <div class="line2"><input class="input" [formControlName]="i" placeholder="Ví dụ: 14:00 – 16:00" />
+                          <button type="button" class="rm" aria-label="Bỏ khung giờ" (click)="removeAt('spec.altWindows', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
+                      }
+                    </div>
+                    <button type="button" class="mini" (click)="addStr('spec.altWindows')"><svg class="i"><use href="#plus" /></svg>Thêm khung giờ</button>
+                  }
+                </div>
               </div>
             </div>
           </section>
           <section class="sec">
-            <header><span class="no">6</span><span><b>Tiền công & thanh toán</b><small>Trả trực tiếp cho người làm, AntGo không giữ tiền</small></span></header>
+            <header><span class="no">3</span><span><b>Tiền công & thanh toán</b></span></header>
             <div class="bd">
-              <div class="pills">
-                @for (m of [['fixed', 'Cố định cả việc'], ['hour', 'Theo giờ'], ['trip', 'Theo lượt']]; track m[0]) {
-                  <button type="button" [class.on]="c('spec.payType').value === m[0]" (click)="set('spec.payType', m[0])">{{ m[1] }}</button>
-                }
-              </div>
               <div class="row3">
                 <div class="fld" [class.bad]="bad('spec.pay')"><label for="pay">Tiền công</label><span class="money"><input id="pay" class="input" type="number" min="1000" step="1000" formControlName="pay" placeholder="50000" /></span><span class="err">Nhập tiền công từ 1.000đ</span></div>
-                <div class="fld"><span class="lbl">Thanh toán bằng</span><div class="pills">
-                  <button type="button" [class.on]="c('spec.payBy').value === 'cash'" (click)="set('spec.payBy', 'cash')">Tiền mặt</button>
-                  <button type="button" [class.on]="c('spec.payBy').value === 'transfer'" (click)="set('spec.payBy', 'transfer')">Chuyển khoản</button>
-                </div></div>
-                <div class="fld"><span class="lbl">Trả khi</span><div class="pills">
-                  <button type="button" [class.on]="c('spec.payWhen').value === 'done'" (click)="set('spec.payWhen', 'done')">Xong việc</button>
-                  <button type="button" [class.on]="c('spec.payWhen').value === 'start'" (click)="set('spec.payWhen', 'start')">Khi bắt đầu</button>
-                </div></div>
+                <div class="fld"><label for="ptp">Đơn vị</label><ng-container *ngTemplateOutlet="unitPick; context: { path: 'spec.payUnit', list: jobUnits, id: 'ptp', ph: 'buổi' }" /></div>
+                <div class="fld" [class.bad]="bad('spec.head')"><label for="hd">Số người cần</label><input id="hd" class="input" type="number" min="1" formControlName="head" /><span class="err">Ít nhất 1 người</span></div>
               </div>
-              <label class="ck"><input type="checkbox" formControlName="advance" /><span>Có ứng tiền trước cho người làm<small>Ví dụ: tiền chợ, tiền mua đồ — người làm giữ hóa đơn</small></span>
-                @if (c('spec.advance').value) { <span class="money extra" (click)="$event.stopPropagation()"><input class="input" type="number" min="0" step="1000" formControlName="advanceAmount" placeholder="Số tiền ứng" /></span> }</label>
-              <div class="fld half"><label for="alw">Phụ cấp đi lại</label><span class="money"><input id="alw" class="input" type="number" min="0" step="1000" formControlName="allowance" placeholder="Không có" /></span></div>
-              <span class="lbl">Câu hỏi cho người đề nghị</span>
-              <div formArrayName="offerQuestions" class="lines">
-                @for (n of arr('spec.offerQuestions').controls; track $index; let i = $index) {
-                  <div class="line2"><input class="input" [formControlName]="i" placeholder="Ví dụ: Bạn có xe không?" maxlength="80" />
-                    <button type="button" class="rm" aria-label="Bỏ câu hỏi" (click)="removeAt('spec.offerQuestions', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
-                }
+              <div class="fld"><span class="lbl">Thanh toán bằng</span>
+                <div class="paytiles two">
+                  @for (m of [['cash', 'Tiền mặt', 'wallet', 'Trả tận tay khi xong việc'], ['transfer', 'Chuyển khoản', 'bank', 'Chuyển vào tài khoản người làm']]; track m[0]) {
+                    <button type="button" class="pt" [class.on]="c('spec.payBy').value === m[0]" [attr.aria-pressed]="c('spec.payBy').value === m[0]" (click)="set('spec.payBy', m[0])">
+                      <span class="pti"><svg class="i"><use [attr.href]="'#' + m[2]" /></svg></span><span><b>{{ m[1] }}</b><small>{{ m[3] }}</small></span><span class="tick"></span>
+                    </button>
+                  }
+                </div>
               </div>
-              <button type="button" class="mini" (click)="addStr('spec.offerQuestions')"><svg class="i"><use href="#plus" /></svg>Thêm câu hỏi</button>
+              <span class="hint">Trả trực tiếp cho người làm, AntGo không giữ tiền.</span>
             </div>
           </section>
         }
       }
 
-      <!-- ===== khối dùng chung: nhóm tùy chọn (đồ ăn) ===== -->
-      <ng-template #optGroups>
-        <div formArrayName="options" class="pkgs">
-          @for (g of arr('spec.options').controls; track $index; let gi = $index) {
-            <div class="grp" [formGroupName]="gi">
+      <!-- ===== khối dùng chung: nhóm tùy chọn cộng giá (đồ ăn, dịch vụ) ===== -->
+      <!-- gắn thẳng vào từng nhóm ([formGroup]) vì khối này dùng cho cả spec.options (dịch vụ) lẫn tùy chọn của từng món -->
+      <ng-template #optGroups let-base="base">
+        <div class="pkgs">
+          @for (g of arr(base).controls; track $index; let gi = $index) {
+            <div class="grp" [formGroup]="grp(g)">
               <div class="top">
                 <input class="input" formControlName="name" placeholder="Tên nhóm, ví dụ: Phần cơm" maxlength="40" />
-                <span class="seg"><button type="button" [class.on]="!grp(g).get('multi')!.value" (click)="grp(g).get('multi')!.setValue(false)">Chọn 1</button><button type="button" [class.on]="grp(g).get('multi')!.value" (click)="grp(g).get('multi')!.setValue(true)">Chọn nhiều</button></span>
+                <span class="seg"><button type="button" [class.on]="!grp(g).get('multi')!.value" (click)="grp(g).get('multi')!.setValue(false)">Chọn một</button><button type="button" [class.on]="grp(g).get('multi')!.value" (click)="grp(g).get('multi')!.setValue(true)">Chọn nhiều</button></span>
                 <label class="reqck"><input type="checkbox" formControlName="required" />Bắt buộc</label>
-                <button type="button" class="rm" aria-label="Bỏ nhóm" (click)="removeAt('spec.options', gi)"><svg class="i"><use href="#xmark" /></svg></button>
+                <button type="button" class="rm" aria-label="Bỏ nhóm" (click)="removeAt(base, gi)"><svg class="i"><use href="#xmark" /></svg></button>
               </div>
-              <div formArrayName="choices" class="lines">
-                @for (ch of arr('spec.options.' + gi + '.choices').controls; track $index; let ci = $index) {
+              <div formArrayName="choices" class="lines sub">
+                @for (ch of arr(base + '.' + gi + '.choices').controls; track $index; let ci = $index) {
                   <div class="line" [formGroupName]="ci">
                     <input class="input" formControlName="label" placeholder="Lựa chọn" maxlength="40" />
                     <span class="money"><input class="input" type="number" min="0" step="1000" formControlName="price" placeholder="+ giá" /></span>
-                    <button type="button" class="rm" aria-label="Bỏ lựa chọn" (click)="removeAt('spec.options.' + gi + '.choices', ci)"><svg class="i"><use href="#xmark" /></svg></button>
+                    <button type="button" class="rm" aria-label="Bỏ lựa chọn" (click)="removeAt(base + '.' + gi + '.choices', ci)"><svg class="i"><use href="#xmark" /></svg></button>
                   </div>
                 }
               </div>
-              <button type="button" class="mini" (click)="addChoice('spec.options.' + gi + '.choices')"><svg class="i"><use href="#plus" /></svg>Thêm lựa chọn</button>
+              <button type="button" class="mini sub" (click)="addChoice(base + '.' + gi + '.choices')"><svg class="i"><use href="#plus" /></svg>Thêm lựa chọn</button>
             </div>
           }
         </div>
-        <button type="button" class="mini" (click)="addOptGroup()"><svg class="i"><use href="#plus" /></svg>Thêm nhóm tùy chọn</button>
+        <button type="button" class="mini" (click)="addOptGroup(base)"><svg class="i"><use href="#plus" /></svg>Thêm nhóm tùy chọn</button>
       </ng-template>
 
       <!-- ===== lịch bán (đồ ăn / đồ uống) ===== -->
       <ng-template #sellSchedule let-n="n">
         <section class="sec" formGroupName="schedule">
-          <header><span class="no">{{ n }}</span><span><b>Lịch bán</b><small>Khi nào khách đặt được, bao lâu thì xong</small></span></header>
+          <header><span class="no">{{ n }}</span><span><b>Lịch bán</b></span></header>
           <div class="bd">
-            <div class="pills">
-              @for (m of [['daily', 'Bán hằng ngày'], ['preorder', 'Đặt trước (khách chọn ngày nhận)'], ['batch', 'Theo đợt (một ngày cụ thể)']]; track m[0]) {
-                <button type="button" [class.on]="c('spec.schedule.mode').value === m[0]" (click)="set('spec.schedule.mode', m[0])">{{ m[1] }}</button>
-              }
-            </div>
-            @if (c('spec.schedule.mode').value === 'batch') {
-              <div class="fld half"><label for="bd">Ngày bán</label><input id="bd" class="input" type="date" formControlName="batchDate" /><span class="hint">Ví dụ: bánh Trung thu, mâm cúng rằm</span></div>
-            } @else {
-              <div class="fld"><span class="lbl">Ngày bán</span><ng-container *ngTemplateOutlet="dayPicker; context: { path: 'spec.schedule.days' }" /></div>
-            }
+            <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.schedule.dates', label: 'Ngày bán' }" />
             <div class="row3">
-              <div class="fld"><label for="of">Nhận đặt từ</label><input id="of" class="input" type="time" formControlName="orderFrom" /></div>
-              <div class="fld"><label for="ot2">Chốt đơn lúc</label><input id="ot2" class="input" type="time" formControlName="orderTo" /></div>
+              <div class="fld"><label for="of">Nhận đặt từ</label><app-time-input inputId="of" formControlName="orderFrom" /></div>
+              <div class="fld"><label for="ot2">Đóng đơn lúc</label><app-time-input inputId="ot2" formControlName="orderTo" /></div>
               <div class="fld"><label for="pp">Thời gian chuẩn bị (phút)</label><input id="pp" class="input" type="number" min="0" formControlName="prep" /></div>
             </div>
-            <div class="row">
-              <div class="fld"><label for="pf">Giao / nhận từ</label><input id="pf" class="input" type="time" formControlName="pickFrom" /></div>
-              <div class="fld"><label for="pt">Đến</label><input id="pt" class="input" type="time" formControlName="pickTo" /></div>
+            <!-- cùng lưới 3 cột với hàng trên để hai khung giờ thẳng cột -->
+            <div class="row3">
+              <div class="fld"><label for="pf">Giao từ</label><app-time-input inputId="pf" formControlName="pickFrom" /></div>
+              <div class="fld"><label for="pt">Đến</label><app-time-input inputId="pt" formControlName="pickTo" /></div>
             </div>
           </div>
         </section>
       </ng-template>
 
-      <!-- ===== cách nhận (đồ ăn / đồ uống) ===== -->
-      <ng-template #fulfilBlock let-n="n">
+      <!-- ===== cách nhận (đồ ăn, đồ uống, đồ dùng) ===== -->
+      <ng-template #fulfilBlock let-n="n" let-title="title">
         <section class="sec" formGroupName="fulfil">
-          <header><span class="no">{{ n }}</span><span><b>Nhận món</b><small>Địa chỉ chính xác chỉ gửi sau khi bạn xác nhận đơn</small></span></header>
+          <header><span class="no">{{ n }}</span><span><b>{{ title || 'Nhận món' }}</b><small>Địa chỉ chính xác chỉ gửi sau khi bạn xác nhận đơn</small></span></header>
           <div class="bd">
             <label class="ck"><input type="checkbox" formControlName="delivery" /><span>Giao trong khu</span>
               @if (c('spec.fulfil.delivery').value) { <span class="money extra" (click)="$event.stopPropagation()"><input class="input" type="number" min="0" step="1000" formControlName="fee" placeholder="Phí giao" /></span> }</label>
-            @if (c('spec.fulfil.delivery').value) {
+            @if (c('spec.fulfil.delivery').value && type() !== 'goods') {
               <div class="fld half"><label for="ff">Miễn phí giao cho đơn từ</label><span class="money"><input id="ff" class="input" type="number" min="0" step="1000" formControlName="freeFrom" /></span></div>
             }
             <label class="ck"><input type="checkbox" formControlName="pickup" /><span>Khách tự đến lấy</span></label>
@@ -541,15 +433,114 @@
         </section>
       </ng-template>
 
+      <!-- ===== thanh toán (đồ ăn, đồ uống, đồ dùng, dịch vụ): hai ô chọn lớn; bật Chuyển khoản thì nhập tài khoản + mã QR ===== -->
       <ng-template #payPills>
-        <div class="fld"><span class="lbl">Nhận tiền bằng</span><div class="pills">
-          <button type="button" [class.on]="has('spec.pay', 'cash')" (click)="toggleIn('spec.pay', 'cash')">Tiền mặt</button>
-          <button type="button" [class.on]="has('spec.pay', 'transfer')" (click)="toggleIn('spec.pay', 'transfer')">Chuyển khoản</button>
-        </div></div>
+        <div class="paytiles">
+          <button type="button" class="pt" [class.on]="has('spec.pay', 'cash')" [attr.aria-pressed]="has('spec.pay', 'cash')" (click)="toggleIn('spec.pay', 'cash')">
+            <span class="pti"><svg class="i"><use href="#wallet" /></svg></span><span><b>Tiền mặt</b><small>Khách trả khi {{ foodish() ? 'nhận món' : type() === 'goods' ? 'nhận hàng' : 'xong việc' }}</small></span><span class="tick"></span>
+          </button>
+          <button type="button" class="pt" [class.on]="has('spec.pay', 'transfer')" [attr.aria-pressed]="has('spec.pay', 'transfer')" (click)="toggleIn('spec.pay', 'transfer')">
+            <span class="pti"><svg class="i"><use href="#bank" /></svg></span><span><b>Chuyển khoản</b><small>Khách quét QR hoặc chuyển vào tài khoản</small></span><span class="tick"></span>
+          </button>
+          <button type="button" class="pt" [class.on]="has('spec.pay', 'xu')" [attr.aria-pressed]="has('spec.pay', 'xu')" (click)="toggleIn('spec.pay', 'xu')">
+            <span class="pti xu"><img src="assets/clean/antxu.png" alt="" /></span><span><b>AntXu</b><small>Khách dùng Xu để trả một phần</small></span><span class="tick"></span>
+          </button>
+        </div>
+        @if (has('spec.pay', 'transfer')) {
+          <div class="bankbox" formGroupName="bank">
+            <div class="row">
+              <div class="fld"><label for="bname">Ngân hàng</label><app-bank-select inputId="bname" formControlName="name" /></div>
+              <div class="fld"><label for="bno">Số tài khoản</label><input id="bno" class="input" formControlName="no" inputmode="numeric" maxlength="20" placeholder="Ví dụ: 0123456789" /></div>
+            </div>
+            <div class="fld"><label for="bholder">Tên chủ tài khoản</label><input id="bholder" class="input" formControlName="holder" maxlength="50" placeholder="Viết hoa không dấu, ví dụ: NGUYEN THI LAN" /></div>
+            <div class="fld"><span class="lbl">Mã QR</span>
+              <input #qrIn type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="pickQr(qrIn)" />
+              @if (c('spec.bank.qr').value; as qr) {
+                <div class="qrbox"><img [src]="qr" alt="Mã QR" /><button type="button" class="x" aria-label="Bỏ mã QR" (click)="set('spec.bank.qr', '')">×</button></div>
+              } @else {
+                <button type="button" class="addimg qradd" (click)="qrIn.click()"><svg class="i"><use href="#camera" /></svg>Thêm mã QR<small>PNG, JPG, WebP<br />≤ 2MB</small></button>
+              }
+            </div>
+          </div>
+        }
       </ng-template>
 
-      <ng-template #dayPicker let-path="path">
-        <div class="days">@for (d of days; track d; let i = $index) { <button type="button" [class.on]="has(path, i)" (click)="toggleIn(path, i)">{{ d }}</button> }</div>
+      <!-- ===== bảng giá nhiều dòng (thực đơn đồ ăn, bảng giá dịch vụ): tên · giá · đơn vị ===== -->
+      <ng-template #itemTable let-list="list" let-nameLabel="nameLabel" let-namePh="namePh" let-pricePh="pricePh" let-addLabel="addLabel" let-ph="ph" let-qty="qty" let-qtyLabel="qtyLabel" let-qtyPh="qtyPh" let-guests="guests" let-opts="opts">
+        <div class="items" [class.q]="qty" [class.g]="guests" formArrayName="items">
+          <div class="ihead"><span>{{ nameLabel }}</span><span>Giá</span><span>Đơn vị</span>@if (qty) { <span>{{ qtyLabel || 'Mỗi ngày' }}</span> }@if (guests) { <span>Khách tối đa</span> }<span></span></div>
+          @for (it of arr('spec.items').controls; track $index; let i = $index) {
+            <div class="irow" [formGroupName]="i">
+            <div class="iline" [class.bad]="tried() && i === 0 && !itemsOk()">
+              <input class="input" formControlName="name" maxlength="50" [attr.aria-label]="nameLabel + ' ' + (i + 1)" [placeholder]="namePh" />
+              <span class="money"><input class="input" type="number" min="0" step="1000" formControlName="price" [attr.aria-label]="'Giá ' + (i + 1)" [placeholder]="pricePh" /></span>
+              <ng-container *ngTemplateOutlet="unitPick; context: { path: 'spec.items.' + i + '.unit', list: list, id: 'iu' + i, ph: ph }" />
+              @if (qty) { <input class="input" type="number" min="0" formControlName="qty" [attr.aria-label]="(qtyLabel || 'Số lượng mỗi ngày') + ' ' + (i + 1)" [placeholder]="qtyPh || '20'" /> }
+              @if (guests) { <input class="input" type="number" min="1" formControlName="guests" [attr.aria-label]="'Khách tối đa ' + (i + 1)" placeholder="2" /> }
+              <button type="button" class="rm" aria-label="Bỏ dòng" [disabled]="arr('spec.items').length === 1" (click)="removeAt('spec.items', i)"><svg class="i"><use href="#xmark" /></svg></button>
+            </div>
+            @if (opts) {
+              @if (arr('spec.items.' + i + '.options').length) {
+                <div class="iopts"><ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.items.' + i + '.options' }" /></div>
+              } @else {
+                <button type="button" class="ioadd" (click)="addOptGroup('spec.items.' + i + '.options')"><svg class="i"><use href="#plus" /></svg>Tùy chọn cộng giá cho món này</button>
+              }
+            }
+            </div>
+          }
+        </div>
+        <button type="button" class="mini" (click)="addItem()"><svg class="i"><use href="#plus" /></svg>{{ addLabel }}</button>
+      </ng-template>
+
+      <!-- ===== tùy chọn nhanh (đồ ăn, đồ uống): người bán tự đặt; bật thì khách tick được khi đặt, không tính tiền ===== -->
+      <ng-template #quickList let-ph="ph" let-name="name" let-add="add">
+        <div class="fld">
+          <div class="quick" [formArrayName]="name || 'quick'">
+            @for (q of arr('spec.' + (name || 'quick')).controls; track $index; let i = $index) {
+              <div class="ck qk" [formGroupName]="i" [class.off]="!grp(q).get('on')!.value">
+                <input type="checkbox" formControlName="on" [attr.aria-label]="'Bật tùy chọn ' + (i + 1)" />
+                <input class="input" formControlName="label" maxlength="60" [placeholder]="ph" [attr.aria-label]="'Tùy chọn nhanh ' + (i + 1)" />
+                <button type="button" class="rm" aria-label="Bỏ tùy chọn" (click)="removeAt('spec.' + (name || 'quick'), i)"><svg class="i"><use href="#xmark" /></svg></button>
+              </div>
+            }
+          </div>
+          <button type="button" class="mini" (click)="addQuick('spec.' + (name || 'quick'))"><svg class="i"><use href="#plus" /></svg>{{ add || 'Thêm tùy chọn nhanh' }}</button>
+        </div>
+      </ng-template>
+
+      <ng-template #unitPick let-path="path" let-list="list" let-id="id" let-ph="ph">
+        <div class="unitrow" [class.other]="unitSel(path, list) === 'other'">
+          <app-select [inputId]="id" [options]="unitOpts(list)" [ngModel]="unitSel(path, list)" [ngModelOptions]="{ standalone: true }" (ngModelChange)="pickUnit(path, $event)" />
+          @if (unitSel(path, list) === 'other') { <input class="input" [formControl]="$any(c(path))" maxlength="15" [placeholder]="'ví dụ: ' + (ph || 'khay')" aria-label="Đơn vị khác" /> }
+        </div>
+      </ng-template>
+
+      <!-- ===== chọn ngày trên lịch (chọn nhiều ngày): bấm ô mới mở lịch ===== -->
+      <ng-template #datePick let-path="path" let-label="label">
+        <div class="fld datefld" [class.bad]="tried() && !c(path).value?.length"><label [for]="'d-' + path">{{ label }} <span class="hint">(chọn được nhiều ngày)</span></label>
+          <button type="button" [id]="'d-' + path" class="input datebtn" [class.open]="calOpen() === path" aria-haspopup="dialog" [attr.aria-expanded]="calOpen() === path" (click)="calOpen.set(calOpen() === path ? null : path)">
+            <svg class="i"><use href="#calendar" /></svg><span>{{ datesText(path, label) }}</span><svg class="i chev"><use href="#chev" /></svg>
+          </button>
+          @if (calOpen() === path) {
+          <div class="cal" role="dialog" [attr.aria-label]="label">
+            <div class="calh">
+              <button type="button" class="calnav prev" aria-label="Tháng trước" [disabled]="!calCanBack()" (click)="moveMonth(-1)"><svg class="i"><use href="#right" /></svg></button>
+              <b>{{ calTitle() }}</b>
+              <button type="button" class="calnav" aria-label="Tháng sau" (click)="moveMonth(1)"><svg class="i"><use href="#right" /></svg></button>
+            </div>
+            <div class="calg">
+              @for (d of days; track d) { <span class="wd">{{ d }}</span> }
+              @for (x of calCells(); track $index) {
+                @if (x) {
+                  <button type="button" [class.on]="has(path, x.key)" [class.today]="x.today" [disabled]="x.past" (click)="toggleDate(path, x.key)">{{ x.d }}</button>
+                } @else { <span></span> }
+              }
+            </div>
+            <div class="calf"><span>Đã chọn {{ c(path).value?.length || 0 }} ngày</span><button type="button" class="btn dark" (click)="calOpen.set(null)">Xong</button></div>
+          </div>
+          }
+          <span class="err">Chọn ít nhất một ngày</span>
+        </div>
       </ng-template>
     </div>
   </div>
@@ -561,36 +552,33 @@
       <h3>Thẻ bài khách thấy</h3>
       @if (type() === 'job') {
         <div class="jcard">
-          <div class="jt">@if (myAvatar()) { <img [src]="myAvatar()" alt="" /> }<span><b>{{ myName() }}</b>vừa đăng</span><span class="jcat">{{ v()['common']['category'] }}</span></div>
+          <div class="jt">@if (myAvatar()) { <img [src]="myAvatar()" alt="" /> }<span><b>{{ myName() }}</b>vừa đăng</span></div>
           <p class="jd">{{ v()['common']['desc'] || 'Mô tả việc sẽ hiện ở đây.' }}</p>
           <div class="jf"><span class="jpay">{{ p.price }}<small>/ {{ p.unit }}</small></span><span class="due"><svg class="i"><use href="#clock" /></svg>{{ p.facts[0][2] }}</span></div>
         </div>
-        <div class="cbody"><h4>{{ v()['common']['title'] || 'Tên việc' }}</h4><div class="meta"><span><svg class="i"><use href="#pin" /></svg>{{ v()['common']['area'] }}</span><span class="jst">Đang mở · chưa có đề nghị</span></div></div>
+        <div class="cbody"><h4>{{ v()['common']['title'] || 'Tên việc' }}</h4><div class="meta"><span><svg class="i"><use href="#pin" /></svg>{{ v()['common']['area'] }}{{ v()['spec']['building'] ? ' · ' + v()['spec']['building'] : '' }}</span><span class="jst">Đang mở · chưa có đề nghị</span></div></div>
       } @else {
         <div class="ph">
           @if (images[0]) { <img [src]="images[0]" alt="" /> } @else { <span class="phempty"><svg class="i"><use href="#camera" /></svg>Ảnh bìa</span> }
-          <span class="kind">{{ p.kind }}</span><span class="save"><svg class="i"><use href="#heart" /></svg></span>
+          <span class="kind">{{ p.kind }}</span>@if (p.xu) { <span class="xuico" title="Dùng được Xu"><img src="assets/clean/antxu.png" alt="Dùng được Xu" /></span> }<span class="save"><svg class="i"><use href="#heart" /></svg></span>
         </div>
         <div class="cbody">
           <h4>{{ v()['common']['title'] || 'Tên bài của bạn' }}</h4>
           <div class="pr">{{ p.price }}@if (p.unit) { <span> / {{ p.unit }}</span> }</div>
-          @if (p.xu) { <span class="xuok"><img src="assets/clean/antxu.png" alt="" />Dùng được Xu</span> }
-          <div class="meta"><span><svg class="i"><use href="#pin" /></svg>{{ v()['common']['area'] }} · 0m</span><span>Mới</span></div>
+          <div class="meta"><span><svg class="i"><use href="#pin" /></svg>{{ areaText() }} · 0m</span><span>Mới</span></div>
         </div>
       }
     </div>
     <div class="pv dp">
       <h3>Đầu trang bài</h3>
-      <div class="kl"><svg class="i"><use [attr.href]="'#' + previewIcon()" /></svg>{{ p.kind }} · {{ v()['common']['category'] }}</div>
+      <div class="kl"><svg class="i"><use [attr.href]="'#' + previewIcon()" /></svg>{{ p.kind }}</div>
       <div class="facts">@for (f of p.facts; track f[1]) { <div><svg class="i"><use [attr.href]="'#' + f[0]" /></svg><span><b>{{ f[1] }}</b>{{ f[2] }}</span></div> }</div>
-      <div class="sched">{{ p.sched }}</div>
-      <button type="button" class="act" tabindex="-1">{{ p.action }}</button>
-      <div class="stp">@for (s of p.steps; track s) { <span>{{ s }}</span> }</div>
+      @if (p.sched) { <div class="sched">{{ p.sched }}</div> }
     </div>
     <div class="pub">
+      <button type="button" class="btn" title="Lưu lại, chưa hiện cho khách" (click)="submit(true)">Lưu nháp</button>
       <button type="submit" class="btn primary">{{ editId() ? 'Lưu thay đổi' : type() === 'job' ? 'Đăng việc' : 'Đăng bài' }}</button>
-      <button type="button" class="btn" (click)="submit(true)">Lưu nháp (chưa hiện cho khách)</button>
-      <small>Đăng xong, hàng xóm trong {{ v()['common']['area'] }} thấy ngay ở “{{ type() === 'job' ? 'Việc mới quanh bạn' : 'Gần bạn' }}”.</small>
+      <small>Đăng xong, hàng xóm trong {{ areaText() }} thấy ngay ở “{{ type() === 'job' ? 'Việc mới quanh bạn' : 'Gần bạn' }}”.</small>
     </div>
   </aside>
 </form>

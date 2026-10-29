@@ -12,7 +12,6 @@ interface DayCol {
   items: CalItem[];
   stacks: Stack[];
   open: { top: number; h: number } | null;
-  off: string | null;
   now: number | null;
 }
 
@@ -61,15 +60,13 @@ export class SellerCalendar implements OnInit, AfterViewChecked {
         if (last && y < last.top + this.CH) last.items.push(a);
         else stacks.push({ top: y, items: [a] });
       }
-      const h = this.seller.openOf(d);
       const hrs = this.seller.hours()[this.seller.weekday(d)];
-      const offNote = this.seller.offNote(d);
+      const h = hrs?.on ? hrs : null;
       const n = new Date();
       const mm = n.getHours() * 60 + n.getMinutes();
       return {
         d, date: dateOf(d).getDate(), today: d === 0, items, stacks,
         open: h ? { top: this.yOf(h.from), h: this.yOf(h.to) - this.yOf(h.from) } : null,
-        off: offNote !== null ? `Nghỉ · ${offNote || 'Tạm nghỉ'}` : hrs && !hrs.on ? 'Không nhận đơn' : null,
         now: d === 0 && mm >= this.H0 * 60 && mm <= this.H1 * 60 ? ((mm - this.H0 * 60) / 60) * this.PX : null,
       };
     });

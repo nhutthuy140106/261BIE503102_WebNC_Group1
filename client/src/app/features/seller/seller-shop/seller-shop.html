@@ -2,12 +2,6 @@
   <input #avFile type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="pickImage(avFile, 'avatar')" />
   <input #cvFile type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="pickImage(cvFile, 'cover')" />
 
-  <div class="ownbar">
-    <svg class="i"><use href="#store" /></svg>
-    <span><b>Bạn đang xem gian hàng của mình</b> ở chế độ người bán — sửa được hồ sơ, bài và phản hồi đánh giá. Khách thấy bản không có các nút sửa.</span>
-    <a class="btn" [routerLink]="['/shop', myId()]"><svg class="i"><use href="#eye" /></svg>Xem như khách</a>
-  </div>
-
   <div class="shophead">
     <div class="sh-top" [class.cover]="sh.cover" [style.background-image]="sh.cover ? 'url(' + sh.cover + ')' : null">
       <button type="button" class="coverbtn" (click)="cvFile.click()"><svg class="i"><use href="#camera" /></svg>{{ sh.cover ? 'Đổi ảnh bìa' : 'Thêm ảnh bìa' }}</button>
@@ -17,14 +11,18 @@
         <span class="kd">{{ sh.kind }}</span>
         <p><span><svg class="i"><use href="#pin" /></svg>{{ sh.at }}</span><span><svg class="i"><use href="#home" /></svg>{{ sh.since }}</span><span><svg class="i"><use href="#chat" /></svg>{{ sh.reply }}</span></p>
       </div>
-      <div class="sh-acts"><button type="button" class="btn dark" (click)="editing.set(true)"><svg class="i"><use href="#pencil" /></svg>Sửa hồ sơ</button></div>
+      <!-- 2 nút xếp dọc, cùng bề rộng; nút ảnh bìa nằm góc trái trên để không thành 3 nút một cột -->
+      <div class="sh-acts">
+        <button type="button" class="btn dark" (click)="editing.set(true)"><svg class="i"><use href="#pencil" /></svg>Sửa hồ sơ</button>
+        <a class="btn" [routerLink]="['/shop', myId()]"><svg class="i"><use href="#eye" /></svg>Xem như khách</a>
+      </div>
     </div>
     <div class="sh-stats">
       <div><b><svg class="i"><use href="#star" /></svg>{{ sh.rating }}</b><span>{{ seller.reviews().length }} đánh giá</span></div>
       <div><b>{{ openCount() }}</b><span>bài đang đăng</span></div>
       <div><b>{{ sh.doneCount }}</b><span>đơn đã hoàn thành</span></div>
-      <div class="own"><b>{{ sh.shopViews }}</b><span>lượt xem tuần này</span></div>
-      <div class="own"><b>{{ sh.followers }}</b><span>người theo dõi</span></div>
+      <div><b>{{ sh.shopViews }}</b><span>lượt xem tuần này</span></div>
+      <div><b>{{ sh.followers }}</b><span>người theo dõi</span></div>
     </div>
   </div>
 
@@ -48,47 +46,11 @@
       } @else {
         <p class="bio">{{ sh.bio }}</p>
       }
-
-      @if (hoursOpen()) {
-        <div class="hours" id="hours">
-          <h3>Giờ nhận đơn</h3>
-          <p class="muted">Ngoài giờ này khách vẫn xem bài nhưng chưa đặt được. Lịch và trang Hôm nay tô đúng khung giờ này.</p>
-          @for (h of seller.hours(); track $index; let i = $index) {
-            <div class="hr">
-              <b>{{ days[i] }}</b>
-              <button type="button" class="tog" [class.on]="h.on" [attr.aria-label]="'Nhận đơn ' + days[i]" (click)="setDay(i, { on: !h.on })"></button>
-              @if (h.on) {
-                <span class="t">
-                  <select class="input" (change)="setDay(i, { from: $any($event.target).value })">@for (t of times; track t) { <option [selected]="t === h.from">{{ t }}</option> }</select>
-                  <span>–</span>
-                  <select class="input" (change)="setDay(i, { to: $any($event.target).value })">@for (t of times; track t) { <option [selected]="t === h.to">{{ t }}</option> }</select>
-                </span>
-              } @else {
-                <span class="closed">Nghỉ</span>
-              }
-            </div>
-          }
-          <h3 class="offt">Ngày nghỉ</h3>
-          <p class="muted">Bài hiện “Tạm nghỉ” trong ngày này, khách không đặt được.</p>
-          <div class="offs">
-            @for (o of seller.offs(); track o.day) {
-              <div class="offrow"><b>{{ offLabel(o.day) }}</b><span>{{ o.note || 'Nghỉ bán' }}</span><button type="button" aria-label="Bỏ ngày nghỉ" (click)="seller.setOff(o.day, null)">×</button></div>
-            } @empty {
-              <span class="muted">Chưa đặt ngày nghỉ nào.</span>
-            }
-          </div>
-          <form class="addoff" (submit)="addOff($event, od, on)">
-            <input #od class="input" type="date" required [min]="today" />
-            <input #on class="input" placeholder="Ghi chú, ví dụ: về quê" maxlength="40" />
-            <button type="submit" class="btn dark">Thêm</button>
-          </form>
-        </div>
-      }
     </div>
 
     <div class="check">
-      <h3>Hồ sơ hoàn thiện {{ done() }}/{{ checklist().length + 1 }}</h3>
-      <div class="prog"><i [style.width.%]="(done() / (checklist().length + 1)) * 100"></i></div>
+      <h3>Hồ sơ hoàn thiện {{ done() }}/{{ checklist().length }}</h3>
+      <div class="prog"><i [style.width.%]="(done() / checklist().length) * 100"></i></div>
       <ul>
         @for (c of checklist(); track c.t) {
           <li [class.ok]="c.ok">
@@ -98,7 +60,6 @@
             }
           </li>
         }
-        <li class="ok"><svg class="i"><use href="#clock" /></svg>Giờ nhận đơn<button type="button" (click)="hoursOpen.set(!hoursOpen())">{{ hoursOpen() ? 'Đóng' : 'Sửa' }}</button></li>
       </ul>
     </div>
   </div>
@@ -131,7 +92,7 @@
   } @else {
     <div class="grid4">
       @for (p of tab() === 'sell' ? sell() : jobs(); track p.id) {
-        <div class="pc" [class.off]="!p.on">
+        <div class="pc">
           <a [routerLink]="['/seller/posts', p.id, 'edit']">
             <div class="ph">
               @if (p.image) { <img [src]="p.image" alt="" /> } @else { <span class="cream"><svg class="i"><use [attr.href]="'#' + (p.icon || kindIcon[p.kind])" /></svg></span> }
@@ -139,9 +100,9 @@
               <span class="edit"><svg class="i"><use href="#pencil" /></svg>Sửa</span>
             </div>
           </a>
-          <span class="k"><span>{{ kindLabel[p.kind] }}{{ p.category ? ' · ' + p.category : '' }}</span><span class="stat" [class]="'stat ' + postState(p).cls">{{ postState(p).text }}</span></span>
+          <span class="k"><span>{{ kindLabel[p.kind] }}</span>@if (postState(p).cls === 'wait') { <span class="stat wait">{{ postState(p).text }}</span> }</span>
           <h3>{{ p.title }}</h3>
-          <div class="pr">{{ p.price | vnd }}@if (p.unit) { <small> {{ p.unit }}</small> }</div>
+          <div class="pr">@if (p.priceFrom) { từ }{{ p.price | vnd }}@if (p.unit) { <small> {{ p.unit }}</small> }</div>
         </div>
       }
       <a class="addc" routerLink="/seller/posts/new" [queryParams]="{ type: tab() === 'sell' ? 'food' : 'job' }"><svg class="i"><use href="#plus" /></svg>{{ tab() === 'sell' ? 'Đăng bài bán' : 'Đăng việc cần người' }}</a>

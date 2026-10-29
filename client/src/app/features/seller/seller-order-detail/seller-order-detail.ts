@@ -3,10 +3,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
 import { KIND_LABEL } from '../../../core/models/post';
-import { SELLER_FLOW, SELLER_KIND_ICON, SELLER_STEPS, SellerOrderState } from '../../../core/models/seller';
+import { SELLER_KIND_ICON, SellerOrderState } from '../../../core/models/seller';
 import { SellerOrderAct, SellerSpaceService, dayLabel } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
-import { StepCut } from '../components/steps/steps';
 
 /** Câu hướng dẫn ở khung hành động, theo bước hiện tại */
 const GUIDE: Record<SellerOrderState, string> = {
@@ -41,18 +40,7 @@ export class SellerOrderDetail implements OnInit {
   protected readonly ready = this.seller.ready;
 
   protected readonly o = computed(() => this.seller.orders().find((x) => x.id === this.id()) ?? null);
-  protected readonly steps = computed(() => (this.o() ? SELLER_STEPS[this.o()!.fulfil] : []));
-  protected readonly cut = computed<StepCut | null>(() => {
-    const o = this.o();
-    if (!o) return null;
-    const at = (s: string) => o.history.find((h) => h[0] === s)?.[1] ?? '';
-    if (o.state === 'declined') return { at: 1, label: 'Đã từ chối', time: at('declined') };
-    if (o.state === 'cancelled') {
-      const flow = SELLER_STEPS[o.fulfil];
-      return { at: Math.max(1, o.history.filter((h) => flow.some((s) => s[0] === h[0])).length), label: 'Đã hủy', time: at('cancelled') };
-    }
-    return null;
-  });
+  protected readonly steps = computed(() => (this.o() ? this.seller.orderSteps(this.o()!) : []));
   protected readonly actions = computed(() => (this.o() ? this.seller.orderActions(this.o()!) : []));
   protected readonly review = computed(() => {
     const o = this.o();
@@ -76,15 +64,7 @@ export class SellerOrderDetail implements OnInit {
   protected readonly ask = signal<SellerOrderAct | null>(null);
   protected readonly askView = computed(() => {
     const a = this.ask(), o = this.o();
-    if (!a || !o) return null;
-    const cancel = a === 'approveCancel';
-    const flow = cancel ? SELLER_FLOW.cancel : SELLER_FLOW[o.fulfil];
-    return {
-      heading: cancel ? 'Bạn chắc chắn xác nhận hủy?' : `Xác nhận chuyển sang “${flow[2]}”?`,
-      message: cancel ? `Đơn ${o.code} sẽ chuyển sang <b>Đã hủy</b>, ${o.buyer.name} được báo.` : `Đơn chuyển sang <b>${flow[2]}</b>, ${o.buyer.name} được báo ngay.`,
-      flow, step: cancel ? 0 : 1, ok: cancel ? 'Xác nhận hủy' : 'Xác nhận',
-      sub: [o.code, `${o.total.toLocaleString('vi-VN')}đ`, `${o.buyer.name} (${o.buyer.phone})`].join(' · '),
-    };
+    return a === 'confirm' || a === 'approveCancel' ? (o ? this.seller.askView(a, o.id) : null) : null;
   });
 
   protected confirmAsk(): void {

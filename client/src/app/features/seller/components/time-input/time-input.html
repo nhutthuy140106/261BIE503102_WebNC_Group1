@@ -1,0 +1,21 @@
+<button type="button" class="trigger" [id]="inputId ?? ''" [class.open]="open()" [class.empty]="!h()" [disabled]="disabled"
+        aria-haspopup="dialog" [attr.aria-expanded]="open()" (click)="toggle()">
+  <span class="text">{{ h() ? h() + ':' + m() : '--:--' }}</span>
+  <svg class="i"><use href="#clock" /></svg>
+</button>
+@if (open()) {
+  <div class="pop" role="dialog" aria-label="Chọn giờ">
+    <div class="col">
+      <span class="ttl">Giờ</span>
+      <ul>
+        @for (x of hours; track x) { <li [class.sel]="x === h()" (click)="pickH(x)">{{ x }}</li> }
+      </ul>
+    </div>
+    <div class="col">
+      <span class="ttl">Phút</span>
+      <ul>
+        @for (x of minutes; track x) { <li [class.sel]="x === m()" (click)="pickM(x)">{{ x }}</li> }
+      </ul>
+    </div>
+  </div>
+}

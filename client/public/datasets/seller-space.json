@@ -1,6 +1,6 @@
 [
   {
-    "version": "2026-10-25-b",
+    "version": "2026-10-27-a",
     "posts": [
       {
         "id": "f1",
@@ -138,6 +138,38 @@
         "sold": 0,
         "category": "Mua hộ",
         "jobId": "j-cho"
+      },
+      {
+        "id": "j3",
+        "kind": "job",
+        "title": "Dọn bếp cuối tuần",
+        "icon": "hand",
+        "price": 80000,
+        "unit": "/ buổi",
+        "stock": 1,
+        "max": 10,
+        "on": true,
+        "views": 9,
+        "saves": 0,
+        "sold": 0,
+        "category": "Dọn dẹp",
+        "jobId": "j-don"
+      },
+      {
+        "id": "j4",
+        "kind": "job",
+        "title": "Phụ bếp nấu cỗ 8 người",
+        "icon": "hand",
+        "price": 150000,
+        "unit": "/ buổi",
+        "stock": 1,
+        "max": 10,
+        "on": true,
+        "views": 21,
+        "saves": 2,
+        "sold": 0,
+        "category": "Phụ việc",
+        "jobId": "j-pho"
       }
     ],
     "orders": [
@@ -697,6 +729,175 @@
             "10:15"
           ]
         ]
+      },
+      {
+        "id": "o3027",
+        "code": "AG-O3027",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop&q=70",
+        "title": "Canh chua cá ×1",
+        "items": [
+          {
+            "name": "Canh chua cá",
+            "qty": 1,
+            "option": "",
+            "price": 25000
+          }
+        ],
+        "buyer": {
+          "name": "Chị Ngân",
+          "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 011"
+        },
+        "fulfil": "delivery",
+        "address": "B-1101, Block B",
+        "day": 0,
+        "time": "12:45",
+        "ship": 0,
+        "pay": "cash",
+        "note": "",
+        "state": "delivering",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "9:50"
+          ],
+          [
+            "confirmed",
+            "9:55"
+          ],
+          [
+            "preparing",
+            "12:10"
+          ],
+          [
+            "delivering",
+            "12:35"
+          ]
+        ]
+      },
+      {
+        "id": "o3028",
+        "code": "AG-O3028",
+        "kind": "goods",
+        "icon": "package",
+        "title": "Bộ hộp cơm inox ×6",
+        "items": [
+          {
+            "name": "Bộ hộp cơm inox ×6",
+            "qty": 1,
+            "option": "",
+            "price": 180000
+          }
+        ],
+        "buyer": {
+          "name": "Ngọc Thủy",
+          "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 001"
+        },
+        "fulfil": "pickup",
+        "address": "Tự đến lấy tại bếp B-0512",
+        "day": 0,
+        "time": "17:30",
+        "ship": 0,
+        "pay": "transfer",
+        "note": "Chiều mình ghé lấy nha cô",
+        "state": "ready",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "8:40"
+          ],
+          [
+            "confirmed",
+            "8:52"
+          ],
+          [
+            "ready",
+            "9:30"
+          ]
+        ]
+      },
+      {
+        "id": "o3029",
+        "code": "AG-O3029",
+        "kind": "food",
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=70",
+        "title": "Cơm gà kho gừng ×3",
+        "items": [
+          {
+            "name": "Cơm gà kho gừng",
+            "qty": 3,
+            "option": "",
+            "price": 35000
+          }
+        ],
+        "buyer": {
+          "name": "Minh",
+          "avatar": "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 007"
+        },
+        "fulfil": "delivery",
+        "address": "B-0812, Block B",
+        "day": 1,
+        "time": "11:30",
+        "ship": 0,
+        "pay": "cash",
+        "note": "Mai giao giúp con 3 phần cho cả nhà",
+        "state": "confirmed",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "14:05"
+          ],
+          [
+            "confirmed",
+            "14:12"
+          ]
+        ]
+      },
+      {
+        "id": "o3030",
+        "code": "AG-O3030",
+        "kind": "service",
+        "icon": "wrench",
+        "title": "Nấu cơm theo tuần · 5 buổi",
+        "items": [
+          {
+            "name": "Nấu cơm theo tuần",
+            "qty": 5,
+            "option": "Bữa tối cho 4 người",
+            "price": 600000
+          }
+        ],
+        "buyer": {
+          "name": "Chị Hoa",
+          "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 004"
+        },
+        "fulfil": "home",
+        "address": "B-0910, Block B",
+        "day": 3,
+        "time": "16:30",
+        "duration": 120,
+        "ship": 0,
+        "pay": "transfer",
+        "note": "Nhà ăn nhạt, không cay",
+        "state": "confirmed",
+        "cancelRequest": null,
+        "history": [
+          [
+            "waiting",
+            "Hôm qua"
+          ],
+          [
+            "confirmed",
+            "Hôm qua"
+          ]
+        ]
       }
     ],
     "jobs": [
@@ -898,6 +1099,69 @@
         ],
         "questions": [],
         "closed": true
+      },
+      {
+        "id": "j-don",
+        "code": "AG-J2064",
+        "postId": "j3",
+        "title": "Dọn bếp cuối tuần",
+        "category": "Dọn dẹp",
+        "pay": 80000,
+        "unit": "/ buổi",
+        "when": "Thứ Bảy · 14:00 – 16:00",
+        "day": 4,
+        "time": "14:00",
+        "duration": 120,
+        "head": 1,
+        "area": "Block B",
+        "exact": "Bếp B-0512 (cửa xanh, tầng 5)",
+        "desc": "Lau bếp, rửa máy hút mùi, sắp lại tủ đồ khô. Dụng cụ có sẵn ở bếp.",
+        "reqs": [
+          "Cẩn thận với đồ điện",
+          "Làm xong chụp ảnh gửi bếp"
+        ],
+        "offers": [],
+        "questions": []
+      },
+      {
+        "id": "j-pho",
+        "code": "AG-J2066",
+        "postId": "j4",
+        "title": "Phụ bếp nấu cỗ 8 người",
+        "category": "Phụ việc",
+        "pay": 150000,
+        "unit": "/ buổi",
+        "when": "Thứ Sáu · 7:00 – 11:00",
+        "day": 3,
+        "time": "7:00",
+        "duration": 240,
+        "head": 1,
+        "area": "Block A",
+        "exact": "Nhà chị Hoa, A-0806",
+        "desc": "Sơ chế rau củ, rửa dọn trong lúc nấu cỗ tại nhà khách.",
+        "reqs": [
+          "Biết sơ chế cơ bản"
+        ],
+        "questions": [],
+        "offers": [
+          {
+            "id": "of-2067",
+            "code": "AG-J2067",
+            "worker": {
+              "name": "Minh Khoa",
+              "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop&q=70&crop=faces",
+              "phone": "0900 000 013",
+              "rating": "4,9",
+              "jobs": 6,
+              "distance": "Block D"
+            },
+            "slot": "Thứ Sáu · 7:00",
+            "intro": "Em từng phụ bếp quán cơm 6 tháng.",
+            "state": "chosen",
+            "day": 3,
+            "rated": null
+          }
+        ]
       }
     ],
     "reviews": [

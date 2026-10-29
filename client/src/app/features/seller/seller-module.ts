@@ -20,11 +20,13 @@ import { SellerDayAgenda } from './components/day-agenda/day-agenda';
 import { SellerPostCard } from './components/post-card/post-card';
 import { SellerConfirmDialog } from './components/confirm-dialog/confirm-dialog';
 import { SellerPickDialog } from './components/pick-dialog/pick-dialog';
+import { SellerTimeInput } from './components/time-input/time-input';
+import { SellerBankSelect } from './components/bank-select/bank-select';
 
 @NgModule({
   declarations: [
     SellerLayout, SellerToday, SellerInsights, SellerMessenger, SellerShop, SellerPosts, SellerCalendar, SellerPostForm, SellerVerify, SellerOrders, SellerOrderDetail, SellerJobDetail,
-    SellerTaskCard, SellerDayAgenda, SellerPostCard, SellerConfirmDialog, SellerPickDialog, SellerSteps,
+    SellerTaskCard, SellerDayAgenda, SellerPostCard, SellerConfirmDialog, SellerPickDialog, SellerSteps, SellerTimeInput, SellerBankSelect,
   ],
   imports: [SharedModule, SellerRoutingModule],
 })
