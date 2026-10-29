@@ -5,6 +5,7 @@ const { nextCode } = require('../../shared/counter.model');
 const { notify } = require('../../shared/notify');
 const ApiError = require('../../../utils/ApiError');
 const { parsePaging } = require('../../../utils/pagination');
+const xu = require('../xu/xu.service');
 const { compute: computeTracking, canTrack } = require('./tracking');
 
 // Voucher AntXu tạm (Q11): sau này lấy từ model Voucher. Chỉ áp cho bài có acceptsXu.
@@ -14,7 +15,7 @@ const CANCELABLE = ['waiting', 'confirmed', 'preparing'];
 const RETURN_WINDOW_DAYS = 7; // giả định, chờ Q6
 
 /** Tính tiền ở server từ giá bài hiện tại + lựa chọn; ném 422 nếu lựa chọn sai. */
-function priceOrder(post, input) {
+function priceOrder(post, input, xuVoucher = null) {
   const details = [];
   const selections = [];
   let optionsPerUnit = 0;
@@ -49,16 +50,29 @@ function priceOrder(post, input) {
   if (input.scheduledAt && input.scheduledAt.getTime() < Date.now()) details.push({ field: 'scheduledAt', message: 'Thời gian đã ở quá khứ' });
 
   let discount = 0;
+  let rule = null; // voucher đổi từ Xu (mã XU-…); mã cũ XU10/XU5 vẫn dùng được
   if (input.voucherCode) {
-    const v = VOUCHERS[input.voucherCode.toUpperCase()];
-    if (!v) details.push({ field: 'voucherCode', message: 'Voucher không tồn tại' });
-    else if (!post.acceptsXu) details.push({ field: 'voucherCode', message: 'Bài này không dùng được Xu' });
-    else discount = v.amount;
+    const code = input.voucherCode.toUpperCase();
+    if (xu.XU_CODE.test(code)) {
+      if (!xuVoucher) details.push({ field: 'voucherCode', message: 'Voucher không hợp lệ, đã dùng hoặc đã hết hạn' });
+      else if (!post.acceptsXu) details.push({ field: 'voucherCode', message: 'Bài này không dùng được Xu' });
+      else rule = xuVoucher.def;
+    } else {
+      const v = VOUCHERS[code];
+      if (!v) details.push({ field: 'voucherCode', message: 'Voucher không tồn tại' });
+      else if (!post.acceptsXu) details.push({ field: 'voucherCode', message: 'Bài này không dùng được Xu' });
+      else discount = v.amount;
+    }
   }
   if (details.length) throw ApiError.validation('Đơn chưa hợp lệ', details);
 
   const items = (post.price + optionsPerUnit) * input.quantity;
   const deliveryFee = input.fulfillment === 'delivery' ? post.deliveryFee : 0;
+  if (rule) {
+    if (items < rule.min) throw ApiError.validation('Đơn chưa hợp lệ', [{ field: 'voucherCode', message: `Voucher này áp cho đơn từ ${rule.min.toLocaleString('vi-VN')}đ` }]);
+    if (rule.ship && !(input.fulfillment === 'delivery' && post.type === 'food')) throw ApiError.validation('Đơn chưa hợp lệ', [{ field: 'voucherCode', message: 'Voucher miễn phí giao chỉ áp cho đơn đồ ăn giao tận nơi' }]);
+    discount = rule.ship ? deliveryFee : rule.amount;
+  }
   discount = Math.min(discount, items + deliveryFee);
   return { selections, answers, breakdown: { items, deliveryFee, discount, surcharge: 0 }, total: items + deliveryFee - discount };
 }
@@ -71,7 +85,8 @@ async function prepare(user, input) {
   if (post.stock !== null && post.stock < input.quantity) throw ApiError.invalidState('Không đủ số lượng còn lại');
   if (String(post.seller._id) === String(user._id)) throw ApiError.forbidden('Bạn không thể đặt bài của chính mình');
 
-  const priced = priceOrder(post, input);
+  const xuVoucher = await xu.findVoucher(user._id, input.voucherCode);
+  const priced = priceOrder(post, input, xuVoucher);
 
   let address;
   if (input.addressId) {
@@ -80,11 +95,13 @@ async function prepare(user, input) {
     if (String(a.user) !== String(user._id)) throw ApiError.forbidden('Địa chỉ này không phải của bạn');
     address = { name: a.name, phone: a.phone, block: a.block, unit: a.unit, note: a.note, label: a.label };
   }
-  return { post, priced, address };
+  return { post, priced, address, xuVoucher };
 }
 
 // Bước 2: trừ tồn kho nguyên tử + ghi đơn
-async function commit(user, input, { post, priced, address }) {
+async function commit(user, input, { post, priced, address, xuVoucher }) {
+  // giữ voucher trước khi trừ kho: mất lượt dùng thì dừng sớm, chưa đụng tới tồn kho
+  if (xuVoucher && !(await xu.claimVoucher(xuVoucher.doc))) throw ApiError.invalidState('Voucher đã được dùng cho đơn khác');
   // trừ tồn kho nguyên tử: tránh hai người cùng đặt món cuối cùng
   if (post.stock !== null) {
     const r = await Post.updateOne({ _id: post._id, stock: { $gte: input.quantity } }, { $inc: { stock: -input.quantity } });
@@ -115,7 +132,7 @@ async function commit(user, input, { post, priced, address }) {
     total: priced.total,
     state: 'waiting',
     history: [{ state: 'waiting', at: new Date() }],
-  });
+  }).catch(async (e) => { if (xuVoucher) await xu.restoreVoucher(user._id, xuVoucher.doc.code); throw e; });
 
   await notify(post.seller._id, { type: 'order_new', title: `Đơn mới ${order.code}`, body: post.title, link: { type: 'order', id: order._id } });
   return order;

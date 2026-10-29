@@ -339,7 +339,9 @@ Body `{ messages: [{ role: 'user'|'assistant', content }] }` (tin cuối phải 
 | `POST /me/xu/game` `{ game:'hai-xu', score }` | Server tính Xu = `floor(score/8)`, cắt theo trần. Trả `{ granted, capLeft, playsLeft, balance }`. Điểm > 80 hoặc game lạ → 422; hết 3 lượt hoặc hết trần 30 Xu/ngày (giờ VN) → **429 `GAME_LIMIT`**. |
 | `POST /me/xu/redeem` `{ cid:'v10'\|'v20'\|'ship' }` | 201 `{ id, cid, code, title, expiresAt, balance }` (mã `XU-XXXXXX`, hạn 30 ngày). Thiếu Xu → 409, cid lạ → 404. |
 
-Voucher đổi ra hiện chưa dùng được ở `POST /orders` (đơn vẫn nhận `XU10`/`XU5` tạm) — CẦN CHỐT, xem `decisions.md` F10.
+**Dùng voucher:** truyền `voucherCode: 'XU-XXXXXX'` ở `POST /orders` và giỏ nháp. Server kiểm voucher là của chính người đặt, chưa dùng, chưa hết hạn, bài có nhãn `acceptsXu`; `v10`/`v20` cần tiền hàng từ 50.000đ/150.000đ; `ship` chỉ áp cho đơn đồ ăn giao tận nơi (giảm đúng phí giao). Sai → 422 ở field `voucherCode`. Đơn bị hủy/từ chối thì voucher được trả lại. Mã cũ `XU10`/`XU5` vẫn dùng được để tương thích.
+
+**Tự cộng Xu (server):** +10 khi đơn từ 30.000đ chuyển `done` (tối đa 3 đơn/ngày), +5 khi đánh giá có nhận xét, +15 khi đề nghị nhận việc thành `done` (người đăng xác nhận hoặc tự hoàn thành sau 24 giờ). Mỗi đơn/đánh giá/đề nghị chỉ cộng một lần; hiện ở `GET /me/xu` với `kind` = `order`/`review`/`job`.
 
 ### 18.4 `GET /orders/:id/tracking` (chủ đơn / người bán / admin)
 `{ data: { simulated: true, note, shop:{lat,lng}, home:{lat,lng}, courier:{lat,lng,phase,etaMin,distanceKm} } }`. **Vị trí xe là mô phỏng**, tính từ mốc thời gian trong `history` (không có GPS thật) nên mọi thiết bị thấy cùng một chỗ. `phase`: `waiting` (chờ/đã xác nhận) · `preparing` (xe còn ở quán) · `delivering` (đang chạy shop→nhà, ~6 phút/km, tối thiểu 4 phút) · `delivered`. Toạ độ quanh tâm Block A–D. Đơn tự lấy, dịch vụ hoặc đã hủy/từ chối → 404 `NO_TRACKING`; người ngoài đơn → 403; id sai → 400.

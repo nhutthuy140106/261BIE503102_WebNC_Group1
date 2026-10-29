@@ -10,7 +10,7 @@ const { isTest } = require('../../config/env');
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
-  skip: () => isTest,
+  skip: () => isTest && !process.env.FORCE_RATE_LIMIT, // test riêng bật cờ này để kiểm giới hạn
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => res.status(429).json({ error: { code: 'TOO_MANY_REQUESTS', message: 'Bạn thử đăng nhập quá nhiều lần, vui lòng đợi ít phút' } }),
@@ -20,7 +20,7 @@ const loginLimiter = rateLimit({
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 20,
-  skip: () => isTest,
+  skip: () => isTest && !process.env.FORCE_RATE_LIMIT, // test riêng bật cờ này để kiểm giới hạn
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => res.status(429).json({ error: { code: 'TOO_MANY_REQUESTS', message: 'Bạn đăng ký quá nhiều lần, vui lòng thử lại sau' } }),

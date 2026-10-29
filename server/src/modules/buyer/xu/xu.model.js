@@ -5,7 +5,7 @@ const xuEntrySchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   delta: { type: Number, required: true },
   title: { type: String, required: true },
-  kind: { type: String, enum: ['welcome', 'game', 'redeem', 'other'], default: 'other' },
+  kind: { type: String, enum: ['welcome', 'game', 'redeem', 'order', 'review', 'job', 'other'], default: 'other' },
   key: { type: String, required: true },
   day: { type: String, index: true },        // yyyy-mm-dd theo giờ Việt Nam, dùng đếm lượt/trần mỗi ngày
 }, { timestamps: { createdAt: true, updatedAt: false } });

@@ -83,4 +83,34 @@ async function redeem(userId, cid) {
   return { id: v._id, cid, code, title: def.title, expiresAt: v.expiresAt, balance: await balance(userId) };
 }
 
-module.exports = { overview, playGame, redeem, balance, GAME, CATALOG, today };
+const XU_CODE = /^XU-[0-9A-F]{6}$/;
+const EARN = { order: { xu: 10, minTotal: 30000, perDay: 3, title: 'Hoàn thành đơn đã đặt' }, review: { xu: 5, title: 'Đánh giá có nhận xét' }, job: { xu: 15, title: 'Hoàn thành việc đã nhận' } };
+
+// Cộng Xu theo sự kiện nghiệp vụ. `key` gắn với đơn/đánh giá/đề nghị nên mỗi sự kiện chỉ cộng một lần dù gọi lại.
+// Lỗi ở đây không được làm hỏng nghiệp vụ chính (đổi trạng thái đơn, đăng đánh giá) nên chỉ ghi log.
+async function award(userId, kind, refId, ctx = {}) {
+  try {
+    const rule = EARN[kind];
+    if (!rule) return null;
+    if (kind === 'order') {
+      if ((ctx.total || 0) < rule.minTotal) return null;
+      const day = today();
+      if ((await XuEntry.countDocuments({ user: userId, kind: 'order', day })) >= rule.perDay) return null;
+      return await addEntry(userId, { delta: rule.xu, title: rule.title, kind, key: `order:${refId}`, day });
+    }
+    return await addEntry(userId, { delta: rule.xu, title: rule.title, kind, key: `${kind}:${refId}`, day: today() });
+  } catch (e) { console.error('Không cộng được Xu:', e.message); return null; }
+}
+
+// Voucher của chính người dùng, còn hạn, chưa dùng; trả { doc, def } hoặc null
+async function findVoucher(userId, code) {
+  if (!code || !XU_CODE.test(String(code).toUpperCase())) return null;
+  const doc = await XuVoucher.findOne({ user: userId, code: String(code).toUpperCase(), usedAt: { $exists: false }, expiresAt: { $gt: new Date() } });
+  return doc ? { doc, def: CATALOG.find((c) => c.cid === doc.cid) } : null;
+}
+// Đánh dấu đã dùng nguyên tử (hai đơn cùng lúc không dùng được một voucher hai lần)
+const claimVoucher = (doc) => XuVoucher.findOneAndUpdate({ _id: doc._id, usedAt: { $exists: false } }, { usedAt: new Date() });
+// Đơn bị hủy/từ chối thì trả lại voucher
+const restoreVoucher = (userId, code) => (code && XU_CODE.test(code) ? XuVoucher.updateOne({ user: userId, code }, { $unset: { usedAt: 1 } }) : null);
+
+module.exports = { overview, playGame, redeem, balance, award, findVoucher, claimVoucher, restoreVoucher, XU_CODE, GAME, CATALOG, today };

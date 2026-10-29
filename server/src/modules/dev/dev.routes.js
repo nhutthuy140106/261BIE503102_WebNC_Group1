@@ -1,6 +1,7 @@
 // TẠM THỜI — thay cho phía Bán / Đăng việc để thử trọn luồng. Chỉ bật khi không phải production.
 // Khi hai module kia xong thì xóa thư mục này (và dòng mount ở app.js).
 const router = require('express').Router();
+const xu = require('../buyer/xu/xu.service');
 const { z } = require('zod');
 const Order = require('../buyer/order/order.model');
 const Offer = require('../buyer/offer/offer.model');
@@ -86,6 +87,8 @@ router.post('/orders/:id/advance', ids('id'), body(z.object({ to: z.string().opt
   o.history.push({ state: to, at: new Date() });
   if (to === 'cancelled' && o.cancelRequest) o.cancelRequest.status = 'accepted';
   await o.save();
+  if (to === 'done') await xu.award(o.buyer, 'order', o._id, { total: o.total });
+  if (to === 'cancelled' || to === 'declined') await xu.restoreVoucher(o.buyer, o.voucherCode);
   await notify(o.buyer, { type: 'order_state', title: `Đơn ${o.code}: ${to}`, link: { type: 'order', id: o._id } });
   res.json({ data: o });
 }));
@@ -138,6 +141,7 @@ router.post('/offers/:id/confirm-done', ids('id'), asyncHandler(async (req, res)
   if (offer.state !== 'reported') throw ApiError.invalidState('Chỉ xác nhận được khi người làm đã báo hoàn thành');
   offers.push(offer, 'done');
   await offer.save();
+  await xu.award(offer.worker, 'job', offer._id);
   await notify(offer.worker, { type: 'offer_done', title: 'Việc đã được xác nhận hoàn thành', link: { type: 'offer', id: offer._id } });
   res.json({ data: offer });
 }));
