@@ -110,6 +110,8 @@ export class SellerToday implements OnInit {
       this.toast.show(this.seller.orderAct(t.orderId, 'decline', { reason: 'Bếp không nhận kịp' }));
       return;
     }
+    // báo giá giặt sấy cần nhập số cân thực tế: mở chi tiết đơn với khung báo giá
+    if (t.type === 'step' && t.act === 'quote' && t.orderId) return void this.router.navigate(['/seller/orders', t.orderId], { queryParams: { quote: 1 } });
     if (t.type === 'pick') this.pickId.set(t.jobId ?? null);
     else this.ask.set(t);
   }

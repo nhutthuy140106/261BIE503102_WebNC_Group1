@@ -1,6 +1,6 @@
 [
   {
-    "version": "2026-10-27-a",
+    "version": "2026-10-30-a",
     "posts": [
       {
         "id": "f1",
@@ -896,6 +896,199 @@
           [
             "confirmed",
             "Hôm qua"
+          ]
+        ]
+      },
+      {
+        "kind": "service",
+        "icon": "wrench",
+        "flow": "laundry",
+        "fulfil": "delivery",
+        "ship": 0,
+        "cancelRequest": null,
+        "answers": [],
+        "id": "l3031",
+        "code": "AG-O3031",
+        "title": "Giặt sấy · 4 kg quần áo + 1 đôi giày",
+        "items": [
+          {
+            "name": "Giặt sấy quần áo",
+            "qty": 4,
+            "option": "ước tính · kg",
+            "price": 18000
+          },
+          {
+            "name": "Vệ sinh giày",
+            "qty": 1,
+            "option": "đôi",
+            "price": 60000
+          }
+        ],
+        "buyer": {
+          "name": "Ngọc Thủy",
+          "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 001"
+        },
+        "address": "B-1204, Block B",
+        "day": 0,
+        "time": "17:30",
+        "pay": "transfer",
+        "note": "Áo trắng giặt riêng giúp mình",
+        "state": "confirmed",
+        "history": [
+          [
+            "waiting",
+            "8:10"
+          ],
+          [
+            "confirmed",
+            "8:25"
+          ]
+        ]
+      },
+      {
+        "kind": "service",
+        "icon": "wrench",
+        "flow": "laundry",
+        "fulfil": "delivery",
+        "ship": 0,
+        "cancelRequest": null,
+        "answers": [],
+        "id": "l3032",
+        "code": "AG-O3032",
+        "title": "Giặt sấy · 3 kg quần áo",
+        "items": [
+          {
+            "name": "Giặt sấy quần áo",
+            "qty": 3,
+            "option": "ước tính · kg",
+            "price": 18000
+          },
+          {
+            "name": "Giặt chăn, ga",
+            "qty": 1,
+            "option": "bộ",
+            "price": 40000
+          }
+        ],
+        "buyer": {
+          "name": "Thu Hà",
+          "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 014"
+        },
+        "address": "B-0405, Block B",
+        "day": 0,
+        "time": "9:00",
+        "pay": "cash",
+        "note": "",
+        "state": "pricing",
+        "quote": {
+          "lines": [
+            {
+              "name": "Giặt sấy quần áo",
+              "qty": 3.6,
+              "price": 18000
+            },
+            {
+              "name": "Giặt chăn, ga",
+              "qty": 1,
+              "price": 40000
+            }
+          ],
+          "total": 104800,
+          "ok": false
+        },
+        "history": [
+          [
+            "waiting",
+            "7:40"
+          ],
+          [
+            "confirmed",
+            "7:45"
+          ],
+          [
+            "picked",
+            "9:05"
+          ],
+          [
+            "pricing",
+            "9:40"
+          ]
+        ]
+      },
+      {
+        "kind": "service",
+        "icon": "wrench",
+        "flow": "laundry",
+        "fulfil": "pickup",
+        "ship": 0,
+        "cancelRequest": null,
+        "answers": [],
+        "id": "l3033",
+        "code": "AG-O3033",
+        "title": "Giặt sấy · thú bông + gối",
+        "items": [
+          {
+            "name": "Giặt thú bông",
+            "qty": 2,
+            "option": "cái",
+            "price": 30000
+          },
+          {
+            "name": "Giặt gối",
+            "qty": 2,
+            "option": "cái",
+            "price": 25000
+          }
+        ],
+        "buyer": {
+          "name": "Minh",
+          "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 007"
+        },
+        "address": "B-0812, Block B",
+        "day": -1,
+        "time": "18:00",
+        "pay": "transfer",
+        "note": "",
+        "state": "preparing",
+        "quote": {
+          "lines": [
+            {
+              "name": "Giặt thú bông",
+              "qty": 2,
+              "price": 30000
+            },
+            {
+              "name": "Giặt gối",
+              "qty": 2,
+              "price": 25000
+            }
+          ],
+          "total": 110000,
+          "ok": true
+        },
+        "history": [
+          [
+            "waiting",
+            "17:20"
+          ],
+          [
+            "confirmed",
+            "17:22"
+          ],
+          [
+            "picked",
+            "18:05"
+          ],
+          [
+            "pricing",
+            "18:30"
+          ],
+          [
+            "preparing",
+            "18:42"
           ]
         ]
       }

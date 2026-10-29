@@ -138,6 +138,8 @@ export class SellerOrders implements OnInit {
     if (t.type === 'question') this.router.navigate(['/seller/jobs', t.jobId], { fragment: 'qa' });
     else if (t.type === 'review') this.router.navigate(r.link);
     else if (t.type === 'pick') this.pickId.set(t.jobId ?? null);
+    // báo giá giặt sấy cần nhập số cân thực tế: mở chi tiết đơn với khung báo giá
+    else if (t.type === 'step' && t.act === 'quote' && t.orderId) this.router.navigate(['/seller/orders', t.orderId], { queryParams: { quote: 1 } });
     else this.ask.set(t);
   }
 

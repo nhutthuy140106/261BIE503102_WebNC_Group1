@@ -10,6 +10,8 @@ import { ToastService } from '../../../core/services/toast';
 /** Câu hướng dẫn ở khung hành động, theo bước hiện tại */
 const GUIDE: Record<SellerOrderState, string> = {
   waiting: 'Khách đang chờ bạn xác nhận. Đơn không được xác nhận trước hạn sẽ tự hủy để khách đặt nơi khác.',
+  picked: 'Đã lấy đồ. Cân / đếm thực tế rồi báo giá để khách duyệt.',
+  pricing: 'Đã gửi báo giá, chờ khách đồng ý. Khách đồng ý xong mới bắt đầu giặt.',
   confirmed: 'Bạn đã nhận đơn. Bấm bắt đầu khi bắt tay vào chuẩn bị để khách theo dõi được.',
   preparing: 'Đơn đang được chuẩn bị. Xong thì báo giao hoặc báo khách đến lấy.',
   delivering: 'Đơn đang trên đường tới khách. Thu tiền mặt khi giao (nếu khách trả tiền mặt).',
@@ -17,6 +19,12 @@ const GUIDE: Record<SellerOrderState, string> = {
   done: 'Đơn đã hoàn thành. Tiền khách trả trực tiếp cho bạn; AntGo không giữ tiền.',
   declined: 'Bạn đã từ chối đơn này. Khách đã được báo.',
   cancelled: 'Đơn đã hủy theo yêu cầu của khách.',
+};
+/** Giặt sấy: câu hướng dẫn riêng ở các bước dùng chung tên trạng thái */
+const LAUNDRY_GUIDE: Partial<Record<SellerOrderState, string>> = {
+  confirmed: 'Bạn đã nhận đơn. Qua lấy đồ đúng giờ khách hẹn rồi bấm xác nhận đã lấy đồ.',
+  preparing: 'Khách đã đồng ý giá, đồ đang giặt. Giặt xong trả đồ theo hình thức khách chọn rồi bấm xác nhận.',
+  done: 'Đã trả đồ. Tiền khách trả trực tiếp cho bạn; AntGo không giữ tiền.',
 };
 const DECLINE_REASONS = ['Hết món / hết hàng', 'Không kịp giờ khách hẹn', 'Ngoài khu vực giao', 'Khác'];
 
@@ -30,7 +38,8 @@ const DECLINE_REASONS = ['Hết món / hết hàng', 'Không kịp giờ khách 
 export class SellerOrderDetail implements OnInit {
   private readonly seller = inject(SellerSpaceService);
   private readonly toast = inject(ToastService);
-  private readonly id = toSignal(inject(ActivatedRoute).paramMap.pipe(map((p) => p.get('id') ?? '')), { initialValue: '' });
+  private readonly route = inject(ActivatedRoute);
+  private readonly id = toSignal(this.route.paramMap.pipe(map((p) => p.get('id') ?? '')), { initialValue: '' });
 
   protected readonly kindLabel = KIND_LABEL;
   protected readonly kindIcon = SELLER_KIND_ICON;
@@ -48,23 +57,51 @@ export class SellerOrderDetail implements OnInit {
   });
 
   /** Khung hành động đang mở form nào */
-  protected readonly form = signal<'decline' | 'surcharge' | null>(null);
+  protected readonly form = signal<'decline' | 'surcharge' | 'quote' | null>(null);
+  /** Báo giá giặt sấy: số cân / đếm thực tế từng dòng */
+  protected readonly quoteQty = signal<number[]>([]);
+  protected readonly quoteTotal = computed(() => {
+    const o = this.o();
+    return o ? Math.round(o.items.reduce((n, it, i) => n + (this.quoteQty()[i] ?? it.qty) * it.price, 0)) : 0;
+  });
   protected reason = DECLINE_REASONS[0];
 
   ngOnInit(): void {
-    this.seller.load().subscribe();
+    // ?quote=1 (bấm "Báo giá" trên thẻ Cần xử lý): mở sẵn khung báo giá
+    const openQuote = this.route.snapshot.queryParamMap.get('quote') === '1';
+    this.seller.load().subscribe(() => {
+      if (openQuote && this.o()?.state === 'picked') this.act('quote');
+    });
+  }
+
+  protected guideText(): string {
+    const o = this.o()!;
+    return (o.flow === 'laundry' ? LAUNDRY_GUIDE[o.state] : undefined) ?? this.guide[o.state];
+  }
+
+  protected setQuoteQty(i: number, v: string): void {
+    this.quoteQty.update((l) => l.map((x, k) => (k === i ? Math.max(0, +v || 0) : x)));
+  }
+
+  protected sendQuote(e: Event): void {
+    e.preventDefault();
+    const o = this.o()!;
+    const lines = o.items.map((it, i) => ({ name: it.name, qty: this.quoteQty()[i] ?? it.qty, price: it.price }));
+    if (lines.some((l) => !(l.qty > 0))) return this.toast.show('Nhập số lượng thực tế cho từng dịch vụ');
+    this.form.set(null);
+    this.toast.show(this.seller.orderAct(o.id, 'quote', { lines }));
   }
 
   protected whenText(): string {
     const o = this.o()!;
-    return `${o.fulfil === 'pickup' ? 'Tự lấy' : o.fulfil === 'home' ? 'Làm tại nhà' : 'Giao'} ${o.time} · ${dayLabel(o.day).toLowerCase()}`;
+    return `${o.flow === 'laundry' ? 'Hẹn lấy đồ' : o.fulfil === 'pickup' ? 'Tự lấy' : o.fulfil === 'home' ? 'Làm tại nhà' : 'Giao'} ${o.time} · ${dayLabel(o.day).toLowerCase()}`;
   }
 
   /** Hộp hỏi lại trước khi xác nhận đơn / xác nhận hủy (giống trang Hôm nay) */
   protected readonly ask = signal<SellerOrderAct | null>(null);
   protected readonly askView = computed(() => {
     const a = this.ask(), o = this.o();
-    return a === 'confirm' || a === 'approveCancel' ? (o ? this.seller.askView(a, o.id) : null) : null;
+    return a === 'confirm' || a === 'approveCancel' || a === 'pickUp' || a === 'returned' ? (o ? this.seller.askView(a, o.id) : null) : null;
   });
 
   protected confirmAsk(): void {
@@ -75,6 +112,11 @@ export class SellerOrderDetail implements OnInit {
 
   protected act(a: SellerOrderAct): void {
     if (a === 'decline' || a === 'surcharge') return this.form.set(a);
+    if (a === 'quote') {
+      this.quoteQty.set(this.o()!.items.map((i) => i.qty));
+      return this.form.set('quote');
+    }
+    if (a === 'pickUp' || a === 'returned') return this.ask.set(a);
     if (a === 'confirm' || a === 'approveCancel') return this.ask.set(a);
     this.toast.show(this.seller.orderAct(this.o()!.id, a));
   }

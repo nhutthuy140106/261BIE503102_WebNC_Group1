@@ -20,8 +20,8 @@
         <h2>Thông tin đơn</h2>
         <dl class="info">
           <div><dt><svg class="i"><use href="#user" /></svg>Khách</dt><dd>{{ o.buyer.name }}<small>{{ o.buyer.phone }}</small></dd></div>
-          <div><dt><svg class="i"><use href="#pin" /></svg>{{ o.fulfil === 'home' ? 'Làm tại' : 'Nhận hàng' }}</dt>
-            <dd>{{ o.fulfil === 'pickup' ? 'Khách tự đến lấy' : o.fulfil === 'home' ? 'Tại nhà khách' : 'Giao tận cửa' }}<small>{{ o.address }}</small></dd></div>
+          <div><dt><svg class="i"><use href="#pin" /></svg>{{ o.fulfil === 'home' ? 'Làm tại' : 'Hình thức nhận' }}</dt>
+            <dd>{{ o.fulfil === 'pickup' ? 'Khách tự đến lấy' : o.fulfil === 'home' ? 'Tại nhà khách' : 'Giao tận tòa' }}<small>{{ o.address }}</small></dd></div>
           <div><dt><svg class="i"><use href="#clock" /></svg>Thời gian</dt><dd>{{ o.time }} · {{ dayLabel(o.day) }}@if (o.duration) { <small>Khoảng {{ o.duration / 60 }} giờ</small> }</dd></div>
           <div><dt><svg class="i"><use href="#bag" /></svg>{{ o.fulfil === 'home' ? 'Dịch vụ' : 'Món' }}</dt>
             <dd>@for (i of o.items; track $index) { {{ i.name }} × {{ i.qty }}@if (i.option) { <small>{{ i.option }}</small> } }</dd></div>
@@ -36,8 +36,15 @@
       <div class="box">
         <h2>Chi tiết thanh toán</h2>
         <div class="lines">
-          @for (i of o.items; track $index) {
-            <div><span>{{ i.name }} × {{ i.qty }}@if (i.option) { · {{ i.option }} }</span><b>{{ i.qty * i.price | vnd }}</b></div>
+          @if (o.quote) {
+            <!-- giặt sấy đã báo giá: theo cân / đếm thực tế -->
+            @for (l of o.quote.lines; track $index) {
+              <div><span>{{ l.name }} × {{ l.qty }} · thực tế</span><b>{{ l.qty * l.price | vnd }}</b></div>
+            }
+          } @else {
+            @for (i of o.items; track $index) {
+              <div><span>{{ i.name }} × {{ i.qty }}@if (i.option) { · {{ i.option }} }</span><b>{{ i.qty * i.price | vnd }}</b></div>
+            }
           }
           @if (o.ship) { <div><span>Phí giao</span><b>{{ o.ship | vnd }}</b></div> }
           @if (o.surcharge; as s) { <div><span>Phụ thu · {{ s.reason }}</span><b>{{ s.amount | vnd }}{{ s.ok ? '' : ' · chờ khách' }}</b></div> }
@@ -74,7 +81,7 @@
         @if (o.cancelRequest) {
           <div class="warn"><b>Khách xin hủy đơn</b>“{{ o.cancelRequest }}”</div>
         } @else {
-          <p>{{ guide[o.state] }}@if (o.state === 'waiting' && o.due) { <b class="due"> {{ o.due }}.</b> }</p>
+          <p>{{ guideText() }}@if (o.state === 'waiting' && o.due) { <b class="due"> {{ o.due }}.</b> }</p>
         }
         @switch (form()) {
           @case ('decline') {
@@ -95,7 +102,28 @@
               <div class="row2"><button type="button" class="btn" (click)="form.set(null)">Thôi</button><button type="submit" class="btn primary">Gửi khách</button></div>
             </form>
           }
+          @case ('quote') {
+            <!-- giặt sấy: nhập số cân / đếm thực tế, khách duyệt giá mới -->
+            <form class="form" (submit)="sendQuote($event)">
+              <span class="ftitle">Báo giá theo cân / đếm thực tế</span>
+              @for (it of o.items; track $index; let i = $index) {
+                <label class="qline"><span>{{ it.name }}<small>{{ it.price | vnd }} / {{ it.option.replace('ước tính · ', '') }} · khách ước tính {{ it.qty }}</small></span>
+                  <input class="input" type="number" min="0" step="0.1" [value]="quoteQty()[i]" (input)="setQuoteQty(i, $any($event.target).value)" [attr.aria-label]="'Số thực tế ' + it.name" /></label>
+              }
+              <div class="qtotal"><span>Tổng mới</span><b>{{ quoteTotal() | vnd }}</b></div>
+              <span class="muted small">Khách luôn phải đồng ý giá này thì bạn mới bắt đầu giặt.</span>
+              <div class="row2"><button type="button" class="btn" (click)="form.set(null)">Thôi</button><button type="submit" class="btn primary">Gửi báo giá</button></div>
+            </form>
+          }
           @default {
+            @if (o.flow === 'laundry' && o.quote && o.state === 'pricing') {
+              <div class="qbox">
+                @for (l of o.quote.lines; track $index) { <div><span>{{ l.name }} × {{ l.qty }}</span><b>{{ l.qty * l.price | vnd }}</b></div> }
+                <div class="tot"><span>Giá báo khách</span><b>{{ o.quote.total | vnd }}</b></div>
+              </div>
+              <!-- phía Mua chưa có nút duyệt: giả lập khách đồng ý để thử luồng -->
+              <button type="button" class="btn demo" (click)="act('approveQuote')">Bản mẫu: khách đồng ý giá</button>
+            }
             @for (a of actions(); track a[0]) {
               <button type="button" class="btn" [class.primary]="a[2]" (click)="act(a[0])">{{ a[1] }}</button>
             }

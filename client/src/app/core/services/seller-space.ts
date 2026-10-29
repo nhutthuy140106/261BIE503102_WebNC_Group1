@@ -98,8 +98,11 @@ export interface CalItem {
 const END_LABEL: Partial<Record<SellerOrderState, string>> = { declined: 'Đã từ chối', cancelled: 'Đã hủy' };
 const NEXT: Record<string, SellerOrderState> = {
   confirm: 'confirmed', prepare: 'preparing', deliver: 'delivering', ready: 'ready', complete: 'done', decline: 'declined', approveCancel: 'cancelled',
+  // giặt sấy
+  pickUp: 'picked', quote: 'pricing', approveQuote: 'preparing', returned: 'done',
 };
-export type SellerOrderAct = 'confirm' | 'decline' | 'prepare' | 'deliver' | 'ready' | 'complete' | 'approveCancel' | 'keepOrder' | 'surcharge';
+/** pickUp / quote / approveQuote / returned: luồng giặt sấy (approveQuote = khách đồng ý giá, phía Mua bấm; bản mẫu giả lập) */
+export type SellerOrderAct = 'confirm' | 'decline' | 'prepare' | 'deliver' | 'ready' | 'complete' | 'approveCancel' | 'keepOrder' | 'surcharge' | 'pickUp' | 'quote' | 'approveQuote' | 'returned';
 
 export const toMin = (t: string): number => {
   const m = /^(\d+):(\d+)/.exec(t || '');
@@ -133,7 +136,7 @@ export class SellerSpaceService {
   private readonly xuSvc = inject(XuService);
   private static readonly NAME = 'seller-space';
   /** khớp trường `version` trong datasets/seller-space.json */
-  private static readonly VERSION = '2026-10-27-a';
+  private static readonly VERSION = '2026-10-30-a';
 
   private readonly state = signal<SellerSpace | null>(null);
   readonly ready = computed(() => this.state() !== null);
@@ -151,8 +154,10 @@ export class SellerSpaceService {
     (this.state()?.orders ?? []).map((o) => {
       const need = o.state === 'waiting' || !!o.cancelRequest;
       const ended = ['done', 'declined', 'cancelled'].includes(o.state);
-      const total = o.items.reduce((n, i) => n + i.qty * i.price, 0) + (o.ship || 0) + (o.surcharge?.ok ? o.surcharge.amount : 0);
-      const label = END_LABEL[o.state] ?? (o.state === 'waiting' ? 'Chờ xác nhận' : orderStepNames(o.kind)[orderPos(o.kind, o.state) ?? 0]);
+      // giặt sấy đã báo giá: tính theo số cân / đếm thực tế
+      const goods = o.quote ? o.quote.total : o.items.reduce((n, i) => n + i.qty * i.price, 0);
+      const total = goods + (o.ship || 0) + (o.surcharge?.ok ? o.surcharge.amount : 0);
+      const label = END_LABEL[o.state] ?? (o.state === 'waiting' ? 'Chờ xác nhận' : o.state === 'pricing' ? 'Chờ khách duyệt giá' : orderStepNames(o.kind, o.flow)[orderPos(o.kind, o.state, o.flow) ?? 0]);
       return { ...o, total, label, need, ended, cls: need ? 'act' : ended ? (o.state === 'done' ? 'done' : 'off') : 'go' };
     }),
   );
@@ -191,7 +196,7 @@ export class SellerSpaceService {
         out.push({ ...base, key: 'o-' + o.id, type: 'order', status: 'Xác nhận đơn', due: o.kind === 'service' ? undefined : o.due, note: o.note, rank: o.day === 0 ? 0 : 3 });
       } else {
         const next = this.nextStep(o);
-        if (next) out.push({ ...base, key: 's-' + o.id, type: 'step', status: next[1], act: next[0], due: `${o.kind === 'service' ? 'Hẹn' : 'Giao'} lúc ${o.time}`, rank: 2.5 });
+        if (next) out.push({ ...base, key: 's-' + o.id, type: 'step', status: next[1], act: next[0], due: `${o.flow === 'laundry' ? 'Hẹn lấy' : o.kind === 'service' ? 'Hẹn' : 'Giao'} lúc ${o.time}`, rank: 2.5 });
       }
     }
     for (const j of this.jobs()) {
@@ -235,9 +240,15 @@ export class SellerSpaceService {
    * đồ dùng trong ngày hẹn; quá giờ vẫn hiện). "Đang giao → Hoàn thành" do phía Mua bấm nên không có ở đây.
    */
   private nextStep(o: SellerOrder): [SellerOrderAct, string] | null {
+    // giặt sấy: lấy đồ khi gần giờ hẹn; báo giá và trả đồ thì luôn hiện (không theo giờ hẹn)
+    if (o.flow === 'laundry') {
+      if (o.state === 'picked') return ['quote', 'Báo giá'];
+      if (o.state === 'preparing') return ['returned', 'Xác nhận trả đồ'];
+    }
     const left = (dateOf(o.day).getTime() + toMin(o.time) * 60000 - Date.now()) / 60000;
     const soon = o.kind === 'goods' ? o.day <= 0 : left <= (o.kind === 'food' ? 60 : 120);
     if (!soon) return null;
+    if (o.flow === 'laundry') return o.state === 'confirmed' ? ['pickUp', 'Xác nhận lấy đồ'] : null;
     const give: SellerOrderAct = o.fulfil === 'pickup' ? 'ready' : 'deliver';
     if (o.state === 'confirmed') return o.kind === 'goods' ? [give, 'Xác nhận giao'] : ['prepare', 'Xác nhận thực hiện'];
     if (o.state === 'preparing') return o.kind === 'service' ? ['complete', 'Xác nhận hoàn thành'] : [give, 'Xác nhận giao'];
@@ -249,15 +260,16 @@ export class SellerSpaceService {
     const cur = this.state();
     if (cur) return of(cur);
     return this.db.list<SellerSpace>(SellerSpaceService.NAME).pipe(
-      switchMap((rows) => (rows[0]?.version === SellerSpaceService.VERSION ? of(structuredClone(rows[0])) : this.reset())),
+      switchMap((rows) => (rows[0]?.version === SellerSpaceService.VERSION ? of(structuredClone(rows[0])) : this.reset(rows[0]?.posts))),
       tap((s) => this.state.set(s)),
     );
   }
 
-  /** Xóa thao tác bấm thử, quay về dữ liệu mẫu gốc */
-  reset(): Observable<SellerSpace> {
+  /** Xóa thao tác bấm thử, quay về dữ liệu mẫu gốc. `keepPosts`: khi đổi phiên bản dữ liệu mẫu thì giữ lại bài người dùng đã đăng */
+  reset(keepPosts?: SellerPost[]): Observable<SellerSpace> {
     return this.http.get<SellerSpace[]>(`${DATASET_BASE}/${SellerSpaceService.NAME}.json`).pipe(
       map((rows) => structuredClone(rows[0])),
+      map((s) => (keepPosts?.length ? { ...s, posts: [...keepPosts.filter((p) => !s.posts.some((x) => x.id === p.id)), ...s.posts] } : s)),
       tap((s) => {
         this.state.set(s);
         this.db.save(SellerSpaceService.NAME, [s]);
@@ -355,6 +367,15 @@ export class SellerSpaceService {
   orderActions(o: SellerOrderView): [SellerOrderAct, string, boolean][] {
     if (o.cancelRequest) return [['approveCancel', 'Xác nhận hủy', true], ['keepOrder', 'Không đồng ý', false]];
     const svc = o.fulfil === 'home';
+    if (o.flow === 'laundry') {
+      switch (o.state) {
+        case 'waiting': return [['confirm', 'Xác nhận', true], ['decline', 'Từ chối', false]];
+        case 'confirmed': return [['pickUp', 'Xác nhận đã lấy đồ', true]];
+        case 'picked': return [['quote', 'Báo giá', true]];
+        case 'preparing': return [['returned', 'Xác nhận đã trả đồ', true]];
+        default: return [];
+      }
+    }
     switch (o.state) {
       case 'waiting': return [['confirm', 'Xác nhận', true], ['decline', 'Từ chối', false]];
       case 'confirmed':
@@ -372,11 +393,11 @@ export class SellerSpaceService {
 
   /** Thanh bước của một đơn (cùng tên bước với chi tiết đơn phía Mua) */
   orderSteps(o: SellerOrder): StepItem[] {
-    const names = orderStepNames(o.kind);
+    const names = orderStepNames(o.kind, o.flow);
     const times: string[] = [];
     let reached = 0;
     for (const [st, t] of o.history) {
-      const p = orderPos(o.kind, st);
+      const p = orderPos(o.kind, st, o.flow);
       if (p !== undefined) [times[p], reached] = [t, Math.max(reached, p)];
     }
     const end = o.history.find((h) => h[0] === o.state)?.[1] ?? '';
@@ -389,7 +410,7 @@ export class SellerSpaceService {
       times[at] = end;
       return stepItems(names, 0, { times, cut: { at, label: 'Đã hủy' } });
     }
-    return stepItems(names, orderPos(o.kind, o.state) ?? 0, { times });
+    return stepItems(names, orderPos(o.kind, o.state, o.flow) ?? 0, { times });
   }
 
   /** Thanh bước của việc mình đăng, theo người làm đầu tiên (cùng tên bước với phía người nhận việc) */
@@ -418,16 +439,16 @@ export class SellerSpaceService {
     }
     const o = this.orders().find((x) => x.id === id);
     if (!o) return null;
-    const names = orderStepNames(o.kind);
+    const names = orderStepNames(o.kind, o.flow);
     if (a === 'approveCancel') {
-      const at = Math.min(names.length - 1, (orderPos(o.kind, o.state) ?? 0) + 1);
+      const at = Math.min(names.length - 1, (orderPos(o.kind, o.state, o.flow) ?? 0) + 1);
       return {
         heading: 'Bạn chắc chắn xác nhận hủy?', ok: 'Xác nhận',
         message: `Đơn ${o.code} sẽ chuyển sang <b>Đã hủy</b>, ${o.buyer.name} được báo.`,
         steps: stepItems(names, 0, { cut: { at, label: 'Đã hủy' } }),
       };
     }
-    const to = orderPos(o.kind, NEXT[a]) ?? 1;
+    const to = orderPos(o.kind, NEXT[a], o.flow) ?? 1;
     return {
       heading: `Xác nhận chuyển sang “${names[to]}”?`, ok: 'Xác nhận',
       message: `Đơn chuyển sang <b>${names[to]}</b>, ${o.buyer.name} được báo ngay.`,
@@ -436,7 +457,7 @@ export class SellerSpaceService {
   }
 
   /** Người bán đổi bước đơn. Trả về câu báo cho toast. */
-  orderAct(id: string, a: SellerOrderAct, data: { reason?: string; amount?: number } = {}): string {
+  orderAct(id: string, a: SellerOrderAct, data: { reason?: string; amount?: number; lines?: { name: string; qty: number; price: number }[] } = {}): string {
     const o = this.orders().find((x) => x.id === id);
     if (!o) return '';
     this.patch((s) => {
@@ -449,6 +470,11 @@ export class SellerSpaceService {
       };
       if (a === 'keepOrder') return void (t.cancelRequest = null);
       if (a === 'surcharge') return void (t.surcharge = { amount: data.amount ?? 0, reason: data.reason ?? '', ok: false });
+      if (a === 'quote') {
+        const lines = data.lines ?? t.items.map((i) => ({ name: i.name, qty: i.qty, price: i.price }));
+        t.quote = { lines, total: Math.round(lines.reduce((n, l) => n + l.qty * l.price, 0)), ok: false };
+      }
+      if (a === 'approveQuote' && t.quote) t.quote.ok = true;
       const to = NEXT[a];
       t.state = to;
       t.cancelRequest = null;
@@ -463,6 +489,10 @@ export class SellerSpaceService {
       prepare: 'Đã chuyển sang Đang thực hiện', deliver: 'Đã báo khách: đơn đang được giao', ready: 'Đã báo khách đến lấy', complete: `${o.code} đã hoàn thành`,
       approveCancel: `Đã hủy ${o.code} — ${o.buyer.name} được báo`, keepOrder: 'Đã báo khách: đơn vẫn giữ nguyên',
       surcharge: `Đã gửi phụ thu ${money(data.amount ?? 0)} — chờ khách đồng ý`,
+      pickUp: `Đã lấy đồ của ${o.buyer.name} — cân xong thì báo giá`,
+      quote: `Đã gửi báo giá cho ${o.buyer.name} — chờ khách đồng ý`,
+      approveQuote: `${o.buyer.name} đã đồng ý giá — bắt đầu giặt`,
+      returned: `Đã trả đồ ${o.code} — ${o.buyer.name} được báo`,
     }[a];
   }
 
