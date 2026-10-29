@@ -1,0 +1,50 @@
+<h1>Bài đăng</h1>
+<p class="lead">Ẩn bài vi phạm (người bán sẽ nhận được lý do) hoặc hiện lại khi đã sửa.</p>
+<div class="bar">
+  <input type="search" name="q" [(ngModel)]="q" (ngModelChange)="filter(300)" placeholder="Tìm theo tiêu đề hoặc người bán" aria-label="Tìm bài đăng" />
+  <select name="type" [(ngModel)]="type" (ngModelChange)="filter()" aria-label="Lọc loại">
+    <option value="">Mọi loại</option><option value="food">Đồ ăn</option><option value="goods">Đồ dùng</option><option value="service">Dịch vụ</option>
+  </select>
+  <select name="status" [(ngModel)]="status" (ngModelChange)="filter()" aria-label="Lọc trạng thái">
+    <option value="">Mọi trạng thái</option><option value="open">Đang mở</option><option value="soldout">Hết hàng</option><option value="closed">Đã đóng</option><option value="hidden">Bị ẩn</option>
+  </select>
+</div>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+
+@if (rows(); as list) {
+  @if (list.length) {
+    <table class="tbl">
+      <thead><tr><th>Bài đăng</th><th>Loại</th><th>Người bán</th><th>Giá</th><th>Trạng thái</th><th></th></tr></thead>
+      <tbody>
+        @for (p of list; track p._id) {
+          <tr>
+            <td data-l="Bài đăng"><div class="who">
+              @if (p.image) { <img [src]="p.image" alt="" width="40" height="40" style="border-radius: 8px; object-fit: cover" /> }
+              <div><a [routerLink]="['/posts', p._id]" target="_blank" rel="noopener"><b>{{ p.title }}</b></a>@if (p.hiddenReason) { <small>Lý do ẩn: {{ p.hiddenReason }}</small> }</div>
+            </div></td>
+            <td data-l="Loại">{{ typeLabel(p.type) }}</td>
+            <td data-l="Người bán">{{ p.sellerName }}</td>
+            <td data-l="Giá">{{ p.price | vnd }}</td>
+            <td data-l="Trạng thái"><span class="pill" [class.ok]="p.status === 'open'" [class.warn]="p.status === 'hidden'" [class.mute]="p.status === 'closed' || p.status === 'soldout'">{{ statusLabel(p.status) }}</span></td>
+            <td class="act">
+              @if (p.status === 'hidden') { <button type="button" class="btn" [disabled]="busy()" (click)="unhide(p)">Hiện lại</button> }
+              @else { <button type="button" class="btn danger" (click)="target.set(p)">Ẩn bài</button> }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <div class="pager">
+      <span>{{ total() }} bài · Trang {{ page }}/{{ pages() }}</span>
+      <button type="button" class="btn" [disabled]="page <= 1" (click)="go(page - 1)">Trước</button>
+      <button type="button" class="btn" [disabled]="page >= pages()" (click)="go(page + 1)">Sau</button>
+    </div>
+  } @else { <p class="empty">Không có bài phù hợp.</p> }
+} @else {
+  <div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div>
+}
+
+@if (target(); as p) {
+  <app-admin-dialog title="Ẩn bài này?" [message]="'“' + p.title + '” sẽ không còn hiện với người dùng khác.'" confirmLabel="Ẩn bài" [danger]="true"
+    [withReason]="true" reasonLabel="Lý do ẩn (gửi cho người bán)" [busy]="busy()" (confirmed)="confirmHide($event)" (cancelled)="target.set(null)" />
+}

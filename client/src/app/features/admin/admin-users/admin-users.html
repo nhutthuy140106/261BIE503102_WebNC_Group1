@@ -1,0 +1,56 @@
+<h1>Người dùng</h1>
+<p class="lead">Khóa tài khoản vi phạm hoặc mở khóa khi đã xử lý xong.</p>
+<div class="bar">
+  <input type="search" name="q" [(ngModel)]="q" (ngModelChange)="filter(300)" placeholder="Tìm theo tên hoặc số điện thoại" aria-label="Tìm người dùng" />
+  <select name="role" [(ngModel)]="role" (ngModelChange)="filter()" aria-label="Lọc vai trò">
+    <option value="">Mọi vai trò</option><option value="user">Người dùng</option><option value="admin">Quản trị</option>
+  </select>
+  <select name="status" [(ngModel)]="status" (ngModelChange)="filter()" aria-label="Lọc trạng thái">
+    <option value="">Mọi trạng thái</option><option value="active">Đang hoạt động</option><option value="locked">Bị khóa</option>
+  </select>
+</div>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+
+@if (rows(); as list) {
+  @if (list.length) {
+    <table class="tbl">
+      <thead><tr><th>Người dùng</th><th>Số điện thoại</th><th>Block</th><th>Vai trò</th><th>Trạng thái</th><th>Ngày tạo</th><th></th></tr></thead>
+      <tbody>
+        @for (u of list; track u._id) {
+          <tr>
+            <td data-l="Người dùng"><div class="who"><app-avatar [name]="u.name" [src]="u.avatar ?? ''" [size]="34" /><div><b>{{ u.name }}</b>@if (u.lockedReason) { <small>Lý do khóa: {{ u.lockedReason }}</small> }</div></div></td>
+            <td data-l="Số điện thoại">{{ u.phone }}</td>
+            <td data-l="Block">{{ u.block }}</td>
+            <td data-l="Vai trò">{{ u.role === 'admin' ? 'Quản trị' : 'Người dùng' }}</td>
+            <td data-l="Trạng thái"><span class="pill" [class.ok]="u.status === 'active'" [class.warn]="u.status === 'locked'">{{ u.status === 'active' ? 'Hoạt động' : 'Bị khóa' }}</span></td>
+            <td data-l="Ngày tạo">{{ u.createdAt | date: 'dd/MM/yyyy' }}</td>
+            <td class="act">
+              @if (u.status === 'locked') {
+                <button type="button" class="btn" (click)="target.set({ user: u, lock: false })">Mở khóa</button>
+              } @else if (isSelf(u) || u.role === 'admin') {
+                <span class="sub">Không khóa được</span>
+              } @else {
+                <button type="button" class="btn danger" (click)="target.set({ user: u, lock: true })">Khóa</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <div class="pager">
+      <span>{{ total() }} người dùng · Trang {{ page }}/{{ pages() }}</span>
+      <button type="button" class="btn" [disabled]="page <= 1" (click)="go(page - 1)">Trước</button>
+      <button type="button" class="btn" [disabled]="page >= pages()" (click)="go(page + 1)">Sau</button>
+    </div>
+  } @else { <p class="empty">Không có người dùng phù hợp.</p> }
+} @else {
+  <div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div>
+}
+
+@if (target(); as t) {
+  <app-admin-dialog
+    [title]="t.lock ? 'Khóa tài khoản ' + t.user.name + '?' : 'Mở khóa ' + t.user.name + '?'"
+    [message]="t.lock ? 'Người này sẽ bị đăng xuất và không đăng nhập lại được cho đến khi mở khóa.' : 'Tài khoản sẽ đăng nhập lại được bình thường.'"
+    [confirmLabel]="t.lock ? 'Khóa tài khoản' : 'Mở khóa'" [danger]="t.lock" [withReason]="t.lock" reasonLabel="Lý do khóa" [busy]="busy()"
+    (confirmed)="confirm($event)" (cancelled)="target.set(null)" />
+}

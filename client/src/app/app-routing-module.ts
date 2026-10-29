@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { adminGuard } from './core/guards/admin-guard';
 import { authGuard } from './core/guards/auth-guard';
 import { sellerMatchGuard } from './core/guards/seller-match-guard';
 import { NotFound } from './core/not-found/not-found';
@@ -59,7 +58,7 @@ const routes: Routes = [
   },
   {
     path: 'admin',
-    canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard],
     loadChildren: () => import('./features/admin/admin-module').then((m) => m.AdminModule),
   },
   { path: '**', component: NotFound },

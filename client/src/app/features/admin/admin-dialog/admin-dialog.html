@@ -1,0 +1,15 @@
+<div class="ov" (click)="cancelled.emit()" (keydown.escape)="cancelled.emit()">
+  <div class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="title" (click)="$event.stopPropagation()">
+    <h2>{{ title }}</h2>
+    @if (message) { <p>{{ message }}</p> }
+    @if (withReason) {
+      <label for="adReason">{{ reasonLabel }}</label>
+      <textarea id="adReason" rows="3" name="reason" [(ngModel)]="reason" maxlength="300" placeholder="Ít nhất 5 ký tự"></textarea>
+      @if (touched && reason.trim().length < 5) { <small class="e" role="alert">Vui lòng nhập ít nhất 5 ký tự.</small> }
+    }
+    <div class="row">
+      <button type="button" class="btn" (click)="cancelled.emit()">Hủy</button>
+      <button type="button" class="btn" [class.danger]="danger" [class.main]="!danger" [disabled]="busy" (click)="ok()">{{ confirmLabel }}</button>
+    </div>
+  </div>
+</div>

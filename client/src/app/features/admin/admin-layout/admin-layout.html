@@ -1,0 +1,10 @@
+<div class="adm">
+  <nav class="side" aria-label="Quản trị">
+    <h2>Quản trị</h2>
+    <a routerLink="/admin" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: true }"><svg class="i"><use href="#grid" /></svg>Tổng quan</a>
+    <a routerLink="/admin/users" routerLinkActive="on"><svg class="i"><use href="#users" /></svg>Người dùng</a>
+    <a routerLink="/admin/posts" routerLinkActive="on"><svg class="i"><use href="#bag" /></svg>Bài đăng</a>
+    <a routerLink="/admin/reports" routerLinkActive="on"><svg class="i"><use href="#shield" /></svg>Báo cáo vi phạm</a>
+  </nav>
+  <section class="content"><router-outlet /></section>
+</div>
