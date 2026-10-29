@@ -1,5 +1,5 @@
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else if (post(); as p) {
   @if (view(); as v) {
   @if (draft(); as d) {
@@ -53,7 +53,30 @@
         </div>
       </section>
 
-      <section class="block desc">
+      @if (post(); as cp) {
+          @if (cp.comboDetail; as cd) {
+            <section class="block combo">
+              <h2>Trong combo này</h2>
+              <ul class="citems">
+                @for (it of cd.items; track it.postId) {
+                  <li [class.na]="!it.available">
+                    @if (it.image) { <img [src]="it.image" alt="" width="48" height="48" loading="lazy" /> }
+                    <a [routerLink]="['/posts', it.postId]"><b>{{ it.title }}</b></a>
+                    <span class="q">× {{ it.qty }}</span>
+                    <span class="u">{{ fmt(it.unitPrice) }}{{ it.unit ? '/' + it.unit : '' }}</span>
+                    @if (!it.available) { <em>Tạm hết</em> }
+                  </li>
+                }
+              </ul>
+              <dl class="csum">
+                <div><dt>Giá lẻ</dt><dd><s>{{ fmt(cd.listPrice) }}</s></dd></div>
+                <div class="sv"><dt>Tiết kiệm</dt><dd>{{ fmt(saving()) }}</dd></div>
+              </dl>
+              @if (comboUnavailable()) { <p class="cwarn" role="alert">Có món trong combo đang tạm hết, bạn có thể chưa đặt được.</p> }
+            </section>
+          }
+        }
+        <section class="block desc">
         <h2>Mô tả</h2>
         @for (t of v.tpl.desc; track t) { <p>{{ t }}</p> }
         @if (v.tpl.list.length) {
@@ -82,8 +105,11 @@
 
     <!-- ===== Khung đặt — bước 1: chỉ chọn món ===== -->
     <aside class="order">
-      <div class="price">{{ priceLabel() }} @if (v.tpl.price.type !== 'quote' && v.tpl.price.unit) { <span>/ {{ v.tpl.price.unit }}</span> }@if (v.tpl.xuOk) { <img class="xuico" src="assets/clean/antxu.png" alt="Dùng được Xu" title="Đơn này dùng được voucher AntXu" /> }</div>
+      <div class="price">@if (deal(); as dl) { <strong class="dnow">{{ fmt(dl.price) }}</strong> <s class="dwas">{{ fmt(dl.original) }}</s> } @else { {{ priceLabel() }} } @if (v.tpl.price.type !== 'quote' && v.tpl.price.unit) { <span>/ {{ v.tpl.price.unit }}</span> }@if (v.tpl.xuOk) { <img class="xuico" src="assets/clean/antxu.png" alt="Dùng được Xu" title="Đơn này dùng được voucher AntXu" /> }</div>
       @if (priceSub()) { <div class="psub">{{ priceSub() }}</div> }
+      @if (deal(); as dl) {
+        <div class="goldhour" role="status"><b>{{ dl.label }}</b><span>đến {{ dealEnds() }} · còn <time class="cd">{{ dealLeft() }}</time></span></div>
+      }
       @if (stockLine(); as s) {
         <div class="avail" [class.off]="s.off"><i></i><b>{{ s.text }}</b>@if (s.sub) { <span>{{ s.sub }}</span> }</div>
       }
@@ -364,7 +390,8 @@
             <section class="cs pay">
               <h4>Chi tiết thanh toán</h4>
               <dl>
-                <div><dt>Thành tiền</dt><dd>{{ fmt(d.subtotal()) }}</dd></div>
+                <div><dt>Thành tiền</dt><dd>{{ fmt(d.gross()) }}</dd></div>
+                @if (d.promoOff()) { <div class="disc"><dt>Giảm giờ vàng</dt><dd>−{{ fmt(d.promoOff()) }}</dd></div> }
                 @if (d.placeFee()) { <div><dt>Phí vận chuyển</dt><dd>{{ fmt(d.placeFee()) }}</dd></div> }
                 @if (d.discount()) { <div class="disc"><dt>Voucher</dt><dd>−{{ fmt(d.discount()) }}</dd></div> }
                 @if (v.tpl.price.type === 'quote') { <div><dt>Tiền sửa</dt><dd>báo giá sau khi kiểm tra</dd></div> }

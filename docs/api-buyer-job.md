@@ -322,3 +322,47 @@ Mọi hành động ghi vào `auditlogs` (ai, làm gì, đối tượng, lúc n�
 | `GET /orders`, `/orders/:id`, `POST /orders`, `POST /cart/checkout` | `snapshot.sellerAvatar` | Có (bản chụp lúc đặt; `seller` vẫn là id) |
 
 Người rút gọn (`UserSummary`) luôn có `_id`, `name`, `avatar`, `area`. Chưa có endpoint để người dùng tự đổi ảnh (upload ở Mục 13 có thể dùng cho việc này) — xem `decisions.md` B1.
+
+
+## 18. Phase 7A — chatbot, gợi ý giá, AntXu, theo dõi giao hàng (29/10)
+
+### 18.1 `POST /assistant/chat` (đăng nhập)
+Body `{ messages: [{ role: 'user'|'assistant', content }] }` (tin cuối phải của `user`, ≤ 500 ký tự). Trả `{ data: { reply, cards: [{ id, kind, title, price, unit, sellerName, area, image, slug }] } }`. Chế độ do `ASSISTANT_MODE` (xem `server/README.md`); thiếu khóa ở chế độ ép buộc → 503 `ASSISTANT_UNAVAILABLE`; nhà cung cấp lỗi → 503 thân thiện.
+
+**Giờ vàng trong chatbot (7.20):** thẻ bài (`cards[]`) của bài đang giảm có `price` = giá thực trả, kèm `originalPrice`, `dealLabel`, `dealEndsAt`. Công cụ `deals_now` (Gemini/Groq) và bộ luật nhận câu "đang giảm giá gì", "khuyến mãi", "giờ vàng", "ưu đãi"; kết quả nêu giá gốc, % giảm, còn bao lâu và bài sắp giảm trong 3 giờ tới. `pick_dish` ưu tiên (~70%) món đang giảm, tìm kiếm bộ luật xếp bài đang giảm lên trước khi ngang điểm.
+
+### 18.2 `GET /pricing/suggest?kind=&title=&category=` (đăng nhập)
+`kind` ∈ food|goods|service|job. Trả `{ data: { low, suggested, high, samples, confidence, basis } | null }` (kNN TF-IDF, xem `thuat-toan-goi-y.md`).
+
+### 18.3 AntXu — sổ Xu và game (đăng nhập)
+| Route | Mô tả |
+|---|---|
+| `GET /me/xu` | `{ balance, ledger[{id,delta,title,kind,at}], vouchers[{id,cid,code,title,cond,expiresAt,status}], catalog[{cid,title,cond,cost}], game{id,playsLeft,capLeft,maxPlays,dailyCap} }`. Lần đầu gọi cộng 30 Xu chào mừng (một lần). |
+| `POST /me/xu/game` `{ game:'hai-xu', score }` | Server tính Xu = `floor(score/8)`, cắt theo trần. Trả `{ granted, capLeft, playsLeft, balance }`. Điểm > 80 hoặc game lạ → 422; hết 3 lượt hoặc hết trần 30 Xu/ngày (giờ VN) → **429 `GAME_LIMIT`**. |
+| `POST /me/xu/redeem` `{ cid:'v10'\|'v20'\|'ship' }` | 201 `{ id, cid, code, title, expiresAt, balance }` (mã `XU-XXXXXX`, hạn 30 ngày). Thiếu Xu → 409, cid lạ → 404. |
+
+**Dùng voucher:** truyền `voucherCode: 'XU-XXXXXX'` ở `POST /orders` và giỏ nháp. Server kiểm voucher là của chính người đặt, chưa dùng, chưa hết hạn, bài có nhãn `acceptsXu`; `v10`/`v20` cần tiền hàng từ 50.000đ/150.000đ; `ship` chỉ áp cho đơn đồ ăn giao tận nơi (giảm đúng phí giao). Sai → 422 ở field `voucherCode`. Đơn bị hủy/từ chối thì voucher được trả lại. Mã cũ `XU10`/`XU5` vẫn dùng được để tương thích.
+
+**Tự cộng Xu (server):** +10 khi đơn từ 30.000đ chuyển `done` (tối đa 3 đơn/ngày), +5 khi đánh giá có nhận xét, +15 khi đề nghị nhận việc thành `done` (người đăng xác nhận hoặc tự hoàn thành sau 24 giờ). Mỗi đơn/đánh giá/đề nghị chỉ cộng một lần; hiện ở `GET /me/xu` với `kind` = `order`/`review`/`job`.
+
+### 18.4 `GET /orders/:id/tracking` (chủ đơn / người bán / admin)
+`{ data: { simulated: true, note, shop:{lat,lng}, home:{lat,lng}, courier:{lat,lng,phase,etaMin,distanceKm} } }`. **Vị trí xe là mô phỏng**, tính từ mốc thời gian trong `history` (không có GPS thật) nên mọi thiết bị thấy cùng một chỗ. `phase`: `waiting` (chờ/đã xác nhận) · `preparing` (xe còn ở quán) · `delivering` (đang chạy shop→nhà, ~6 phút/km, tối thiểu 4 phút) · `delivered`. Toạ độ quanh tâm Block A–D. Đơn tự lấy, dịch vụ hoặc đã hủy/từ chối → 404 `NO_TRACKING`; người ngoài đơn → 403; id sai → 400.
+
+### 18.5 Giờ vàng — giảm giá theo khung giờ (29/10)
+`Post.promo = { kind:'percent'|'amount', value, from:'HH:mm', to:'HH:mm', days:[0-6], active }`. `days` là ngày **bắt đầu** khung (0 = Chủ nhật); khung `from > to` vắt qua nửa đêm (vd 21:00–02:00 bắt đầu thứ Năm kéo tới 02:00 thứ Sáu). Giờ tính theo **Asia/Ho_Chi_Minh**. `percent` 1–90, `amount` là số đồng; giá làm tròn 100đ, không âm. Schema kiểm tra: `promoSchema` (zod) ở `server/src/utils/promo.js` cho phía Bán dùng khi đăng/sửa bài.
+
+- **Danh sách/chi tiết bài** (`GET /posts`, `/posts/:id`, `/me/recommendations`…) trả thêm `promo` (cấu hình) và `deal` = `{ price, original, label, endsAt }` khi Giờ vàng **đang chạy**, ngược lại `deal: null`. `price` của bài vẫn là giá gốc.
+- **Giá do server tính** bằng `effectivePrice(post, now)` ở `priceOrder`, `POST /orders`, giỏ nháp (`/cart`, `/cart/checkout`); giá/`total` từ trình duyệt bị bỏ qua. Hết khung giờ thì về giá gốc ngay lúc đặt. Đơn ghi `snapshot.unitPrice` (giá đã giảm), `snapshot.originalPrice`, `snapshot.promoLabel`, `breakdown.promoSaved`.
+- **Cộng dồn với voucher Xu:** Giờ vàng giảm trước, voucher tính **sau** trên giá đã giảm; mức tối thiểu của voucher (`v10` ≥ 50.000đ, `v20` ≥ 150.000đ) cũng so với tiền hàng **đã giảm**.
+- **`GET /deals?now=&area=&type=`** (công khai): `{ data: { now, active: [Post + deal], upcoming: [Post + upcoming{label,startsAt}] } }`. `active` xếp bài sắp hết giờ lên trước; `upcoming` là bài bắt đầu giảm trong 3 giờ tới. `now` (ISO có múi giờ) chỉ để demo/test, mặc định giờ server; sai định dạng → 422.
+- Seed: 10 bài có Giờ vàng, các khung nối nhau để **mọi giờ trong ngày** luôn có 1–2 bài đang giảm (01–07 giặt sấy · 06–10 sáng · 10–14 trưa · 14–17 giải khát · 17–21 tối · 21–02 ăn khuya).
+
+### 18.6 Combo — gói nhiều món cùng người bán (29/10)
+`Post.combo = { items: [{ postId, qty }], comboPrice, listPrice }`. Combo là một `Post` thường (type `food`, `category: 'Combo'`), nên danh sách/tìm kiếm/lọc giá/Giờ vàng dùng như bài khác; `price` của bài **luôn bằng `comboPrice`**.
+
+- **Server kiểm khi lưu bài** (mọi đường tạo/sửa; lỗi → 422 field `combo`): ≥ 2 món **khác nhau** (qty 1–10), tất cả **cùng người bán**, còn bán (`open`), không phải hàng bán một lần, không phải combo khác, không chứa chính nó, `comboPrice` **thấp hơn** tổng giá lẻ. `listPrice` do server tính (tổng giá lẻ lúc lưu), FE không gửi.
+- `GET /posts`, `/posts/:id`: có `combo.{items,comboPrice,listPrice}`. **Chi tiết** thêm `comboDetail = { items:[{postId,qty,title,unitPrice,unit,image,available}], listPrice, saving }`; `saving = listPrice − giá đang trả` (tính cả Giờ vàng) → dòng "Tiết kiệm X đ". Bài thường không có `comboDetail`.
+- **Đặt combo** (`POST /orders` hoặc giỏ nháp, giống bài thường; combo không có tùy chọn riêng trừ khi bài tự khai `optionGroups`): một đơn, `breakdown.items = giá combo × số lượng`. `snapshot.combo = [{postId,title,qty,unitPrice}]` (chụp **từng món cho MỘT combo**) và `snapshot.listPrice`. Giờ vàng áp lên combo như bài thường (`snapshot.originalPrice/promoLabel`).
+- **Kho:** trước khi đặt, mỗi món thành phần phải `open` và đủ `qty × số combo` (nếu có `stock`) → thiếu thì **409** nêu tên món; khi tạo đơn trừ kho từng món nguyên tử (một món thiếu thì hoàn lại các món đã trừ). Món hết hàng thì `soldout` như bình thường.
+- Chatbot: thẻ combo có `combo: true`, `listPrice`; câu "combo dưới 80k" tìm được combo.
+- Seed: 4 combo (Bếp Cô Lan, Quán Phở Bà Tư, Quán Nhà Mây, Cô Ba); combo giải khát có Giờ vàng 15:00–18:00.

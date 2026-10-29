@@ -14,9 +14,9 @@ export function tokenize(text: string): string[] {
     .filter((t) => t.length >= 3 && !STOP.has(t));
 }
 
-type Vec = Map<string, number>;
+export type Vec = Map<string, number>;
 
-function tfidf(docs: string[][]): Vec[] {
+export function tfidf(docs: string[][]): Vec[] {
   const df = new Map<string, number>();
   for (const d of docs) for (const t of new Set(d)) df.set(t, (df.get(t) ?? 0) + 1);
   return docs.map((d) => {
@@ -27,7 +27,7 @@ function tfidf(docs: string[][]): Vec[] {
   });
 }
 
-function cosine(a: Vec, b: Vec): number {
+export function cosine(a: Vec, b: Vec): number {
   let dot = 0;
   for (const [t, w] of a) dot += w * (b.get(t) ?? 0);
   const norm = (v: Vec) => Math.sqrt([...v.values()].reduce((s, w) => s + w * w, 0));

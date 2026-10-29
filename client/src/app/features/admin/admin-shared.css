@@ -1,0 +1,42 @@
+/* Kiểu dùng chung cho các trang Quản trị: bảng phẳng bo 12px, viên trạng thái, thẻ trên di động */
+:host { display: block; }
+h1 { margin: 0 0 4px; font-size: 26px; color: #22304A; }
+.lead { margin: 0 0 18px; color: #6b7280; font-size: 14px; }
+.bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.bar input, .bar select { height: 40px; padding: 0 12px; border: 1px solid #F0E2DC; border-radius: 10px; background: #fff; font: inherit; color: #22304A; }
+.bar input { flex: 1; min-width: 180px; }
+.tbl { width: 100%; border: 1px solid #F0E2DC; border-radius: 12px; border-collapse: separate; border-spacing: 0; overflow: hidden; background: #fff; font-size: 14px; }
+.tbl th { text-align: left; padding: 10px 14px; background: #FBF4F1; color: #6b7280; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.tbl td { padding: 12px 14px; border-top: 1px solid #F0E2DC; vertical-align: middle; color: #22304A; }
+.tbl tr:first-child td { border-top: 0; }
+.who { display: flex; align-items: center; gap: 10px; }
+.who b { display: block; }
+.who small, .sub { color: #6b7280; font-size: 12.5px; }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #eef0f3; color: #4b5563; }
+.pill.ok { background: #e6f4ec; color: #1f7a4d; }
+.pill.warn { background: #fdeee4; color: #b4440f; }
+.pill.mute { background: #eef0f3; color: #6b7280; }
+.btn { height: 34px; padding: 0 14px; border: 1px solid #e3d3cb; border-radius: 9px; background: #fff; color: #22304A; font: inherit; font-weight: 600; cursor: pointer; }
+.btn:hover { background: #FBF4F1; }
+.btn.main { background: #D85A1C; border-color: #D85A1C; color: #fff; }
+.btn.danger { color: #b42318; border-color: #f1c9c4; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.act { text-align: right; white-space: nowrap; }
+.empty { padding: 28px; text-align: center; color: #6b7280; border: 1px dashed #F0E2DC; border-radius: 12px; }
+.err { padding: 12px 14px; margin-bottom: 12px; border-radius: 10px; background: #fdeee4; color: #b4440f; }
+.pager { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 12px; color: #6b7280; font-size: 14px; }
+.sk { height: 44px; margin-bottom: 8px; border-radius: 10px; background: linear-gradient(90deg, #f4ece8 25%, #fbf6f3 50%, #f4ece8 75%); background-size: 200% 100%; animation: sk 1.2s infinite; }
+@keyframes sk { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+@media (max-width: 760px) {
+  .tbl, .tbl tbody, .tbl tr, .tbl td { display: block; width: 100%; }
+  .tbl { border: 0; background: transparent; }
+  .tbl thead { display: none; }
+  .tbl tr { margin-bottom: 10px; border: 1px solid #F0E2DC; border-radius: 12px; background: #fff; padding: 6px 0; }
+  .tbl td { border: 0; padding: 6px 14px; display: flex; justify-content: space-between; gap: 12px; text-align: right; }
+  .tbl td::before { content: attr(data-l); color: #6b7280; font-size: 12.5px; text-align: left; }
+  .tbl td.act { justify-content: flex-end; }
+  .tbl td.act::before { content: none; }
+}
+.pill { white-space: nowrap; }
+@media (min-width: 761px) { .tbl td:not(:first-child):not(.act) { white-space: nowrap; } }

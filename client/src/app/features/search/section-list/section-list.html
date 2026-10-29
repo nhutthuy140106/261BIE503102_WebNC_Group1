@@ -8,7 +8,7 @@
 </div>
 
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-skeleton variant="cards" [count]="8" />
 } @else if (error()) {
   <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
 } @else {

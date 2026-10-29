@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth';
 import { OrderService } from '../../../core/services/order';
 import { SavedService } from '../../../core/services/saved';
 import { ToastService } from '../../../core/services/toast';
+import { strongPasswordValidator } from '../../../core/utils/validators';
 import { XuService } from '../../../core/services/xu';
 
 const FINISHED = ['done', 'cancelled', 'rejected', 'withdrawn'];
@@ -160,7 +161,7 @@ export class Profile implements OnInit {
   // ----- đổi mật khẩu -----
   protected readonly passForm = new FormGroup({
     current: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    next: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(8)] }),
+    next: new FormControl('', { nonNullable: true, validators: [Validators.required, strongPasswordValidator] }),
     again: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
   protected readonly passTried = signal(false);

@@ -6,15 +6,21 @@
  * ví dụ `{ address: false }` khi endpoint /me/addresses đã "Xong" trong api-buyer-job.md.
  */
 /**
- * Mặc định dùng DỮ LIỆU MẪU (public/datasets) vì máy chủ Express chưa chạy: mở `http://localhost:4200` là có dữ liệu.
- * Khi đã có backend thật, mở `?mock=0` để gọi API (trình duyệt nhớ lựa chọn); `?mock=1` để quay lại dữ liệu mẫu.
- * Không cần sửa mã.
+ * Tự nhận diện (main.ts): có máy chủ → dữ liệu thật, không có → DỮ LIỆU MẪU (public/datasets).
+ * Ép thủ công: `?mock=0` (API thật), `?mock=1` (dữ liệu mẫu), `?mock=auto` (về tự nhận diện). Không cần sửa mã.
  */
 function mockFlag(): boolean {
   try {
     const q = new URLSearchParams(location.search).get('mock');
-    if (q === '1') localStorage.removeItem('antgo_mock_off');
-    if (q === '0') localStorage.setItem('antgo_mock_off', '1');
+    // ?mock=0|1 là lựa chọn rõ ràng của người dùng: ghi nhớ (antgo_mock_pref) để không bị tự nhận diện máy chủ ghi đè (xem main.ts)
+    if (q === '1') {
+      localStorage.removeItem('antgo_mock_off');
+      localStorage.setItem('antgo_mock_pref', '1');
+    }
+    if (q === '0') {
+      localStorage.setItem('antgo_mock_off', '1');
+      localStorage.setItem('antgo_mock_pref', '1');
+    }
     return localStorage.getItem('antgo_mock_off') !== '1';
   } catch {
     return true; // trình duyệt chặn localStorage: dùng dữ liệu mẫu
@@ -26,7 +32,7 @@ export const DATASET_BASE = '/datasets';
 
 export type ServiceName =
   | 'auth' | 'post' | 'order' | 'offer' | 'address' | 'saved' | 'question'
-  | 'review' | 'chat' | 'seller' | 'notification' | 'report' | 'upload' | 'recommend' | 'xu';
+  | 'review' | 'chat' | 'seller' | 'notification' | 'report' | 'upload' | 'recommend' | 'xu' | 'assistant' | 'admin';
 
 /** `false` = service đó gọi API thật dù USE_MOCK còn bật; `true` = ép mock. */
 export const MOCK_OVERRIDES: Partial<Record<ServiceName, boolean>> = {

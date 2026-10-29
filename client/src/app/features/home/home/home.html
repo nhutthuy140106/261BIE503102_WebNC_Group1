@@ -35,9 +35,12 @@
         (dragleave)="dragging.set(false)" (drop)="onDrop($event)">
     @if (search.imageUrl(); as img) {
       <span class="imgchip">
-        <img [src]="img" alt="" /><span>Tìm theo ảnh</span>
-        <button type="button" (click)="search.clearImage()" aria-label="Bỏ ảnh"><svg class="i"><use href="#xmark" /></svg></button>
+        <img [src]="img" alt="" /><span>{{ search.searching() ? 'Đang tìm theo ảnh…' : 'Tìm theo ảnh' }}</span>
+        <button type="button" (click)="search.cancel()" aria-label="Hủy tìm theo ảnh"><svg class="i"><use href="#xmark" /></svg></button>
       </span>
+    }
+    @if (search.recording() || search.searching()) {
+      <button type="button" class="sbtn" title="Hủy" aria-label="Hủy" (click)="search.cancel()"><svg class="i"><use href="#xmark" /></svg></button>
     }
     <input #q [value]="search.text()" (input)="search.text.set($any($event.target).value)" [placeholder]="search.placeholder()" aria-label="Tìm kiếm" />
     <button type="button" class="sbtn" [class.rec]="search.recording()" title="Tìm bằng giọng nói" (click)="search.voice()"><svg class="i"><use href="#mic" /></svg></button>
@@ -49,11 +52,13 @@
     @for (w of popular; track w) {
       <button type="button" (click)="fill(w, q)">{{ w }}</button>
     }
+    <a routerLink="/quay-mon" class="spinlink">Chưa biết ăn gì? Quay món</a>
+    <a routerLink="/vuon" class="spinlink">Hái xu nhận giảm giá</a>
   </div>
 </section>
 
 @if (loading()) {
-  <p class="muted sec">Đang tải…</p>
+  <app-skeleton variant="cards" [count]="8" />
 } @else if (error()) {
   <div class="notice sec">Không tải được dữ liệu: {{ error() }}</div>
 } @else {
@@ -85,6 +90,26 @@
     </section>
   }
 
+  @if (dealsNow().length) {
+    <section class="sec gold">
+      <div class="sh">
+        <h2>Đang giảm giá lúc này <span class="goldclock" role="timer" aria-label="Thời gian còn lại"><svg class="i"><use href="#clock" /></svg>còn {{ dealsLeft() }}</span></h2>
+        <a class="more" routerLink="/search">Xem thêm <svg class="i"><use href="#right" /></svg></a>
+      </div>
+      <div class="grid">
+        @for (x of dealsNow(); track x.p._id) {
+          <app-post-card [post]="x.p" [saved]="saved.has(x.p._id)" (toggleSave)="toggleSave($event)" />
+        }
+      </div>
+    </section>
+  } @else if (dealsNext(); as nx) {
+    <a class="goldnext" [routerLink]="['/posts', nx.p._id]">
+      <svg class="i"><use href="#clock" /></svg>
+      <span><b>Sắp tới:</b> {{ nx.p.title }} giảm giá lúc {{ nx.u.from }} (còn {{ nx.u.inMin }} phút)</span>
+      <svg class="i"><use href="#right" /></svg>
+    </a>
+  }
+
   <section class="sec">
     <div class="sh">
       <h2>Gần bạn</h2>
@@ -98,6 +123,13 @@
       }
     </div>
   </section>
+
+  <!-- Kiếm thêm Xu: dải gọn dẫn vào Vườn AntGo -->
+  <a class="gband" routerLink="/vuon">
+    <img src="assets/clean/antxu.png" alt="" width="44" height="44" />
+    <span><b>Vườn AntGo · chơi vui, nhận Xu mỗi ngày</b><small>Hái xu, tưới cây, nuôi thú cưng — Xu đổi voucher giảm giá khi đặt đơn.</small></span>
+    <span class="gobtn">Chơi ngay <svg class="i"><use href="#right" /></svg></span>
+  </a>
 
   <!-- Kiếm thêm gần nhà: dải xanh đen khác nhịp, giới thiệu nhận việc vặt (điểm khác biệt của AntGo) -->
   <section class="kband">

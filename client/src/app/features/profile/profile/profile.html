@@ -119,7 +119,7 @@
             <div class="field">
               <label for="pnew">Mật khẩu mới</label>
               <app-password-input inputId="pnew" autocomplete="new-password" formControlName="next" [invalid]="passTried() && passForm.controls.next.invalid" />
-              @if (passTried() && passForm.controls.next.invalid) { <small class="error">Mật khẩu mới tối thiểu 8 ký tự.</small> }
+              @if (passTried() && passForm.controls.next.invalid) { <small class="error">Mật khẩu mới cần đạt mức Khá trở lên (ít nhất 3 trong 4 điều kiện: 8 ký tự, chữ hoa và chữ thường, chữ số, ký tự đặc biệt).</small> }
               @else if (passTried() && passForm.controls.next.value === passForm.controls.current.value) { <small class="error">Mật khẩu mới phải khác mật khẩu hiện tại.</small> }
             </div>
             <div class="field">

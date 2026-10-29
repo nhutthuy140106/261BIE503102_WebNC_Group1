@@ -1,5 +1,5 @@
 @if (loading()) {
-  <p class="muted">Đang tải…</p>
+  <app-loader />
 } @else if (error()) {
   <div class="notice">Không tải được gian hàng: {{ error() }}</div>
 } @else if (posts().length === 0) {

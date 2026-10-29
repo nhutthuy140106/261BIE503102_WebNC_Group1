@@ -116,6 +116,13 @@ export class AuthService {
     return of(void 0);
   }
 
+  /** Quên mật khẩu: đặt mật khẩu mới sau khi xác nhận mã. Mock luôn thành công; API thật chờ máy chủ có điểm cuối. */
+  resetPassword(phone: string, password: string): Observable<void> {
+    if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
+    if (!phone || password.length < 8) return throwError(() => new AppError('Mật khẩu chưa hợp lệ.', 422, 'VALIDATION_ERROR'));
+    return of(void 0);
+  }
+
   /** Hỏi server phiên còn hiệu lực không (GET /api/auth/profile: 200 hay 401). */
   checkSession(): Observable<boolean> {
     if (useMock('auth')) {

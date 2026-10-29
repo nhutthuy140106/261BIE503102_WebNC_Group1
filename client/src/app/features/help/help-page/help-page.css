@@ -19,3 +19,11 @@ details p { margin: 0 0 16px; padding: 0 2px; line-height: 1.65; color: var(--sm
 .foot { margin-top: 34px; color: var(--smoke); font-size: 14px; }
 .foot a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 640px) { .cta { grid-template-columns: 1fr; } }
+
+.fb { margin: 28px 0 8px; padding: 16px 18px; border: 1px solid #F0E2DC; border-radius: 14px; background: #FBF4F1; max-width: 560px; }
+.fb form { display: grid; gap: 6px; }
+.fb label { font-weight: 600; font-size: 14px; color: #22304A; }
+.fb select, .fb textarea { padding: 10px 12px; border: 1px solid #e3d3cb; border-radius: 10px; background: #fff; font: inherit; }
+.fb button { justify-self: start; margin-top: 6px; padding: 10px 22px; border: 0; border-radius: 10px; background: #D85A1C; color: #fff; font-weight: 700; cursor: pointer; }
+.fb .err { color: #b42318; } .fb .cnt { color: #6b7280; text-align: right; }
+.fb .okmsg { margin: 6px 0 0; color: #1f7a4d; font-weight: 600; }

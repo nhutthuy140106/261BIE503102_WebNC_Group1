@@ -16,11 +16,22 @@
       <small class="error">Mật khẩu tối thiểu 6 ký tự.</small>
     }
 
-    <label class="remember"><input type="checkbox" formControlName="rememberMe" /> Ghi nhớ đăng nhập</label>
+    <div class="rmrow">
+      <label class="remember"><input type="checkbox" formControlName="rememberMe" /> Ghi nhớ đăng nhập</label>
+      <a routerLink="/auth/forgot" class="forgot">Quên mật khẩu?</a>
+    </div>
 
     @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
 
     <button type="submit" class="go" [disabled]="form.invalid || submitting()">Đăng nhập</button>
   </form>
+  @if (demoAccounts.length) {
+    <div class="demo" aria-label="Tài khoản dùng thử">
+      <small>Tài khoản dùng thử (dữ liệu seed) — bấm để điền sẵn</small>
+      <div class="chips">
+        @for (a of demoAccounts; track a.phone) { <button type="button" (click)="fillDemo(a.phone)"><b>{{ a.name }}</b> · {{ a.role }}</button> }
+      </div>
+    </div>
+  }
   <p class="alt" foot>Chưa có tài khoản? <a routerLink="/auth/register">Đăng ký</a></p>
 </app-auth-shell>

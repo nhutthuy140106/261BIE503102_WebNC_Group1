@@ -55,7 +55,7 @@ describe('api-mappers', () => {
 
   it('thông báo: link {type,id} thành đường dẫn FE, ghép tiêu đề + nội dung', () => {
     const n = notificationFromApi({ _id: 'n', title: 'Đơn đang giao', body: 'Trà sữa', link: { type: 'order', id: '9' }, read: false, createdAt: 't' });
-    expect(n).toMatchObject({ text: 'Đơn đang giao — Trà sữa', link: '/orders/9', read: false });
+    expect(n).toMatchObject({ text: 'Đơn đang giao, Trà sữa', link: '/orders/9', read: false });
     expect(notificationFromApi({ _id: 'n', title: 't', link: { type: 'job', id: '3' } }).link).toBe('/posts/job/3');
   });
 });

@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const xu = require('../xu/xu.service');
 const mongoose = require('mongoose');
 const { z } = require('zod');
 const Review = require('./review.model');
@@ -98,6 +99,7 @@ router.post('/', auth, body(createSchema), asyncHandler(async (req, res) => {
     .catch((e) => { if (e.code === 11000) throw ApiError.duplicate('Bạn đã đánh giá rồi'); throw e; });
   source.reviewed = true;
   await source.save();
+  if (comment && comment.trim()) await xu.award(req.user._id, 'review', review._id);
   await notify(target, { type: 'review_new', title: `${req.user.name} đã đánh giá ${rating} sao`, body: comment, link: { type: targetType, id: targetId } });
   res.status(201).json({ data: review });
 }));

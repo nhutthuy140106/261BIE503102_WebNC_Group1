@@ -15,6 +15,7 @@ const routes: Routes = [
   { path: 'legal', loadChildren: () => import('./features/legal/legal-module').then((m) => m.LegalModule) },
   { path: 'search', loadChildren: () => import('./features/search/search-module').then((m) => m.SearchModule) },
   { path: 'posts', loadChildren: () => import('./features/posts/posts-module').then((m) => m.PostsModule) },
+  { path: 'quay-mon', loadChildren: () => import('./features/spin/spin-module').then((m) => m.SpinModule) },
   { path: 'shop', loadChildren: () => import('./features/shop/shop-module').then((m) => m.ShopModule) },
   { path: 'help', loadChildren: () => import('./features/help/help-module').then((m) => m.HelpModule) },
   { path: 'auth', loadChildren: () => import('./features/auth/auth-module').then((m) => m.AuthModule) },
@@ -35,6 +36,11 @@ const routes: Routes = [
       import('./features/notifications/notifications-module').then((m) => m.NotificationsModule),
   },
   {
+    path: 'vuon',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/garden/garden-module').then((m) => m.GardenModule),
+  },
+  {
     path: 'xu',
     canActivate: [authGuard],
     loadChildren: () => import('./features/xu/xu-module').then((m) => m.XuModule),
@@ -49,6 +55,11 @@ const routes: Routes = [
     canMatch: [sellerMatchGuard],
     canActivate: [authGuard],
     loadChildren: () => import('./features/seller/seller-module').then((m) => m.SellerModule),
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/admin/admin-module').then((m) => m.AdminModule),
   },
   { path: '**', component: NotFound },
 ];

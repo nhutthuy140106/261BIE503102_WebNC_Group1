@@ -1,3 +1,4 @@
+const xu = require('../xu/xu.service');
 const Offer = require('./offer.model');
 const Job = require('../../shared/job.model');
 const { nextCode } = require('../../shared/counter.model');
@@ -21,6 +22,7 @@ async function applyAutoDone(offer) {
   if (at && Date.now() - new Date(at).getTime() >= AUTO_DONE_MS) {
     push(offer, 'done');
     await offer.save();
+    await xu.award(offer.worker, 'job', offer._id);
   }
   return offer;
 }

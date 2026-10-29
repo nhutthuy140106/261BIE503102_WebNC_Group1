@@ -17,11 +17,11 @@
         @if (p.images.length) {
           <img [src]="p.images[0]" alt="" />
         } @else {
-          <span class="jb"><app-avatar [src]="p.sellerAvatar" [name]="p.sellerName" [size]="44" /><i class="jbadge"><svg class="i"><use href="#hand" /></svg></i></span>
+          <span class="jb"><img class="jobic" src="assets/clean/job-icon.png" alt="Việc làm" /></span>
         }
         <div class="t">
           <b>{{ p.title }}</b>
-          <span class="pr">{{ p.price | vnd }}</span>
+          <span class="pr"><app-price [post]="p" /></span>
           <small>@if (p.priceUnit) { /{{ p.priceUnit }} · } {{ p.block }}</small>
           @if (p.closed) { <span class="offtag">· Tạm ngưng nhận</span> }
         </div>
@@ -87,6 +87,11 @@
         </li>
       }
     </ul>
+    <a class="gamelink" routerLink="/vuon" (click)="goAll()">
+      <svg class="i"><use href="#coin" /></svg>
+      <span><b>Chơi game kiếm Xu</b><small>{{ xu.gameToday() }}/{{ gameCap }} Xu hôm nay</small></span>
+      <svg class="i go"><use href="#right" /></svg>
+    </a>
     <p class="dnote">Xu hết hạn sau 6 tháng kể từ ngày nhận. Xu không mua bằng tiền và không đổi ra tiền. Voucher dùng được ở bài có nhãn "Dùng được Xu", người bán tự chọn tham gia.</p>
     <a class="xuhist" routerLink="/xu" (click)="goAll()">Lịch sử Xu<svg class="i"><use href="#right" /></svg></a>
   </div>

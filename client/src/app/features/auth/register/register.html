@@ -1,4 +1,5 @@
-<app-auth-shell [centered]="true" [wide]="step() === 3" [showAnt]="step() !== 3" [showGoogle]="step() === 1">
+<app-auth-shell [centered]="true" [wide]="step() === 3" [showAnt]="false" [showGoogle]="false">
+  @if (step() < 4) {
   <ol class="steps" aria-label="Các bước đăng ký">
     @for (s of stepNames; track s; let i = $index) {
       <li [class.on]="step() >= i + 1" [class.now]="step() === i + 1" [class.done]="step() > i + 1">
@@ -7,6 +8,7 @@
       </li>
     }
   </ol>
+  }
 
   @switch (step()) {
     @case (1) {
@@ -39,6 +41,14 @@
         </div>
       </form>
     }
+    @case (4) {
+      <div class="okbox">
+        <img src="assets/clean/ant-done.png" alt="" />
+        <h1>Đăng ký thành công!</h1>
+        <p class="why">Chào mừng {{ fullName() }} đến với AntGo. Bạn được tặng <b>30 Xu</b> chào hàng xóm mới, dùng để đổi voucher khi đặt hàng.</p>
+        <a routerLink="/auth/login" class="go gobtn">Đăng nhập</a>
+      </div>
+    }
     @case (3) {
       <h1>Chào hàng xóm mới!</h1>
       <p class="why">Chỉ còn vài thông tin để tạo tài khoản cho số {{ phone.value }}.</p>
@@ -66,7 +76,7 @@
           </div>
         </div>
         @if (info.controls.password.value) {
-          <div class="meter" [attr.data-level]="strength()" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="meter" [attr.data-level]="strength()" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           <p class="meter-label" [attr.data-level]="strength()">Độ mạnh: <b>{{ strengthLabel() }}</b></p>
           <ul class="rules">
             @for (r of rules(); track r.key) { <li [class.ok]="r.ok">{{ r.label }}</li> }
@@ -123,7 +133,7 @@
   }
 
   @if (step() === 3) {
-    <button type="button" class="lnk back-step" (click)="back()">Quay lại bước trước</button>
+    <button type="button" class="lnk back-step" (click)="back()">Quay lại</button>
   }
-  <p class="alt" foot>Đã có tài khoản? <a routerLink="/auth/login">Đăng nhập</a></p>
+  @if (step() < 4) { <p class="alt" foot>Đã có tài khoản? <a routerLink="/auth/login">Đăng nhập</a></p> }
 </app-auth-shell>

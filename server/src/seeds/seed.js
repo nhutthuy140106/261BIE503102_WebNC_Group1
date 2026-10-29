@@ -17,7 +17,7 @@ const Notification = require('../modules/buyer/notification/notification.model')
 const Report = require('../modules/buyer/report/report.model');
 const orders = require('../modules/buyer/order/order.service');
 const offers = require('../modules/buyer/offer/offer.service');
-const { USERS, POSTS, JOBS, img } = require('./data');
+const { USERS, POSTS, JOBS, COMBOS, COMBO_PROMOS, IMG, img } = require('./data');
 
 // Mật khẩu tài khoản mẫu lấy từ biến môi trường SEED_PASSWORD (.env), không viết cứng trong repo
 const getPassword = () => {
@@ -74,9 +74,22 @@ async function seed() {
 
   /* ---------- Bài đăng ---------- */
   const p = {};
-  for (const [i, { key, seller, daysAgo, images, ...d }] of POSTS.entries()) {
+  const promos = {}; // Giờ vàng gán SAU khi tạo đơn mẫu, để tổng tiền đơn mẫu không đổi theo giờ chạy seed
+  for (const [i, { key, seller, daysAgo, images, promo, ...d }] of POSTS.entries()) {
+    if (promo) promos[key] = promo;
     p[key] = await Post.create({ ...d, seller: u[seller]._id, images: (images || []).map(img) });
     await backdate(Post, p[key]._id, ago(daysAgo * DAY + i * 17 * 60000));
+  }
+
+  /* ---------- Combo (tạo sau bài thường vì cần id món thành phần; model tự kiểm giá và tính listPrice) ---------- */
+  for (const [i, c] of COMBOS.entries()) {
+    p[c.key] = await Post.create({
+      type: 'food', category: 'Combo', title: c.title, description: c.description, unit: c.unit, seller: u[c.seller]._id, area: c.area, distance: c.distance,
+      images: [img(IMG[c.image])], fulfillmentModes: ['delivery', 'pickup'], deliveryFee: c.deliveryFee, acceptsXu: !!c.acceptsXu,
+      price: c.comboPrice, combo: { items: c.items.map(([k, qty]) => ({ postId: p[k]._id, qty })), comboPrice: c.comboPrice },
+    });
+    await backdate(Post, p[c.key]._id, ago(c.daysAgo * DAY + i * 13 * 60000));
+    if (COMBO_PROMOS[c.key]) promos[c.key] = COMBO_PROMOS[c.key];
   }
 
   /* ---------- Việc làm ---------- */
@@ -108,7 +121,8 @@ async function seed() {
     const start = Date.now() - daysAgo * DAY;
     const last = order.fulfillment === 'delivery' ? 'delivering' : 'ready';
     const path = to === 'cancelled' ? ['waiting', 'cancelled']
-      : to === 'done' ? ['waiting', 'confirmed', 'preparing', last, 'done']
+      : to === 'ready' ? ['waiting', 'confirmed', 'preparing', 'ready']
+        : to === 'done' ? ['waiting', 'confirmed', 'preparing', last, 'done']
         : ['waiting', 'confirmed', 'preparing', 'delivering'].slice(0, ['waiting', 'confirmed', 'preparing', 'delivering'].indexOf(to) + 1);
     const history = path.map((state, i) => ({ state, at: new Date(start + i * 25 * 60000) }));
     await Order.collection.updateOne({ _id: order._id }, { $set: { state: to, history, createdAt: new Date(start), updatedAt: history[history.length - 1].at, ...extra } });
@@ -130,6 +144,17 @@ async function seed() {
   o.sur = await place('thuy', 'giaonhan', { fulfillment: 'delivery', addressId: addr.thuy, answers: [{ question: 'Kích thước đồ (dưới 10kg?)', value: 'Dưới 10kg' }], note: 'Lấy ở cổng sau' });
   await Order.collection.updateOne({ _id: o.sur._id }, { $set: { state: 'confirmed', history: [{ state: 'waiting', at: ago(5 * HOUR) }, { state: 'confirmed', at: ago(4.5 * HOUR) }], surcharge: { amount: 15000, reason: 'Đồ nặng hơn đã chọn (khoảng 14kg)', status: 'pending' } } });
   o.giat = await place('thuy', 'giat', { fulfillment: 'delivery', addressId: addr.thuy, scheduledAt: inDays(1, 9), answers: [{ question: 'Khối lượng ước tính (kg)', value: '5' }] });
+
+  // Thêm đơn cho đủ mọi trạng thái; hai đơn giao tận nơi tới Block A (địa chỉ của mẹ) để bản đồ có tuyến khác nhau
+  const addrMe = String((await Address.findOne({ user: u.thuy._id, isDefault: { $ne: true } }))._id);
+  o.prep = await place('thuy', 'bunCha', { fulfillment: 'delivery', addressId: addr.thuy });
+  await advance(o.prep, 'preparing', 0.02);
+  o.deliver2 = await place('thuy', 'comChay', { fulfillment: 'delivery', addressId: addrMe, note: 'Đưa cho mẹ' });
+  await advance(o.deliver2, 'delivering', 0.03);
+  o.ready = await place('thuy', 'banhFlan', {});
+  await advance(o.ready, 'ready', 0.5);
+  o.declined = await place('thuy', 'bep', {});
+  await Order.collection.updateOne({ _id: o.declined._id }, { $set: { state: 'declined', history: [{ state: 'waiting', at: ago(2 * DAY) }, { state: 'declined', at: ago(2 * DAY - HOUR) }] } });
 
   // Người mua khác — để các bài có đánh giá thật
   const doneOrder = async (buyer, post, daysAgo, input = {}) => {
@@ -290,6 +315,8 @@ async function seed() {
   await audit('report.resolved', 'report', resolved, 'Đã gỡ bài và khóa tài khoản đăng bài.', 12);
 
   const n = (M) => M.countDocuments({});
+  for (const [key, promo] of Object.entries(promos)) await Post.updateOne({ _id: p[key]._id }, { promo });
+
   return {
     users: await n(User), posts: await n(Post), jobs: await n(Job), orders: await n(Order), offers: await n(Offer),
     reviews: await n(Review), questions: await n(Question), conversations: await n(Conversation),

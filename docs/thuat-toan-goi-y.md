@@ -37,3 +37,40 @@ Hai bài "giống nhau" khi nói về cùng thứ (từ khóa chung), cùng lo�
 - Không dùng hành vi của người dùng khác (collaborative filtering) vì dữ liệu đồ án quá ít.
 - Tính lại vector mỗi lần gọi (≤ 500 bài, vài chục ms); nếu dữ liệu lớn thì cần lưu sẵn vector hoặc dùng dịch vụ tìm kiếm.
 - Trọng số `0.6/0.15/0.15/0.1` là chọn tay, chưa được tinh chỉnh bằng dữ liệu thật.
+
+---
+
+## Bổ sung: tìm kiếm thông minh, gợi ý giá, công cụ cho trợ lý
+
+### Tìm kiếm thông minh — `server/src/utils/smart-search.js`
+- Chỉ chạy khi tìm thường (regex trên `searchText`) **không ra bài nào**; kết quả có `meta.smart = true`.
+- Từ khóa được **mở rộng đồng nghĩa** (bảng nhóm từ trong file: "lau nhà" ↔ "dọn nhà", "cf" ↔ "cà phê"…), rồi so với từ vựng của kho bài: khớp đúng (1.0), **gõ lặp chữ kiểu Telex** ("coom", "gaa") 0.8, tiền tố 0.8, **sai ≤ 1–2 ký tự (Levenshtein)** 0.7, đồng nghĩa 0.6.
+- Điểm bài = Σ trọng số × idf (từ hiếm quan trọng hơn), xếp giảm dần. Không dịch vụ ngoài, chạy trên tối đa 500 bài.
+
+### Gợi ý giá khi đăng — `GET /api/pricing/suggest?kind=&title=&category=`
+- **kNN hồi quy**: vector TF-IDF của tên bài đang soạn so với bài cùng loại (`Post`, hoặc `Job` với tiền công); lấy k = 7 bài giống nhất (cosine ≥ 0.12).
+- Giá gợi ý = **trung vị có trọng số** theo độ giống; khoảng thường gặp = phân vị 25%–75%; làm tròn theo thang giá VN.
+- `confidence`: high (≥5 mẫu giống), medium (3–4), low (ít mẫu giống → dùng mặt bằng chung của loại). Bản FE cho chế độ dữ liệu mẫu: `client/src/app/core/utils/price-suggest.ts`.
+
+### Trợ lý (chatbot) — công cụ gọi được
+`search_catalog` (tìm bài, lọc giá/loại/khu), `my_orders` (đơn của chính người đang chat), `pick_dish` (chọn ngẫu nhiên một món trong ngân sách). Bộ trả lời cơ bản (không cần khóa AI) hiểu thêm: "đơn của tôi", "chọn giúp tôi…", "ngân sách 150k cho cả ngày" (thực đơn sáng–trưa–tối, mỗi bữa ≤ 1/3 ngân sách).
+
+---
+
+## Đánh giá offline (Precision@k) — để có số liệu khi vấn đáp
+
+Chạy: `cd server && npm run eval:recommend` (script `server/scripts/eval-recommend.js`, dùng MongoDB trong bộ nhớ + dữ liệu seed, không đụng DB thật).
+
+- **Cách đo:** với mỗi bài mở trong seed (32 bài), lấy `k` bài "tương tự" từ `similar()`; một bài được tính **đúng** khi **cùng danh mục** (Đồ ăn / Đồ uống / Đồ dùng / Dịch vụ) với bài gốc. Precision@k = số bài đúng / số bài gợi ý. Đường cơ sở = chọn ngẫu nhiên (trung bình tỉ lệ bài còn lại cùng danh mục).
+- **Kết quả (seed 29/10):**
+
+| k | Thuật toán | Ngẫu nhiên |
+|---|---|---|
+| 1 | 100,0% | 25,8% |
+| 3 | 96,9% | 25,8% |
+| 5 | 91,9% | 25,8% |
+
+- **Lưu ý khi trình bày (không nói quá):** (1) nhãn "cùng danh mục" chỉ là xấp xỉ, không phải đánh giá của người dùng thật; (2) danh mục cũng nằm trong văn bản bài và trong điểm "cùng loại" nên có phần **rò nhãn**, con số thực tế khó đạt cao như vậy với nhãn độc lập; (3) kho chỉ 32 bài. Số này chỉ cho thấy thuật toán hơn hẳn ngẫu nhiên, chưa phải bằng chứng chất lượng cuối cùng.
+
+### Trợ lý "lai": luật trả câu quen thuộc, AI xử lý câu lạ (29/10)
+`assistant.service.js` (chế độ `auto`): bộ luật `assistant.local.js` trả lời trước và gắn cờ `confident`. **Quen thuộc** (chào hỏi, "đơn của tôi", "chọn giúp tôi", thực đơn theo ngân sách, hoặc tìm món khớp ≥ 60% từ khóa, không phải nới giá, câu ≤ 5 từ khóa) → trả ngay, `engine: "local"`, không tốn lượt AI. **Lạ / mơ hồ / không khớp bài nào** → nhờ AI (Gemini → Groq, công cụ `search_catalog`, `my_orders`, `pick_dish`), `engine: "gemini" | "llm"`; AI lỗi thì dùng chính câu trả lời của bộ luật. Chế độ `gemini` / `llm` vẫn bắt buộc dùng AI; `local` chỉ dùng luật.

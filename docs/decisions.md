@@ -270,3 +270,40 @@ Hai phần này dựa vào schema chung nên **Q1–Q8** nên được chốt tr
 - Người ghi: FE
 - Nội dung: `USE_MOCK = false` (trừ khu Bán). FE đăng nhập/đăng ký bằng **SĐT** (`phone`, `name`) đúng BE, bỏ `username`. Lớp `api-mappers.ts` đổi `type→kind`, `seller/poster→sellerName/sellerAvatar/sellerId`, `unit→priceUnit`, `pay/desc→price/description`, `area "B"→"Block B"`, `Order.snapshot→postTitle/image/counterpart*`, đơn `waiting→pending`, `Offer.job` lồng, v.v. Nếu BE đổi tên field thì sửa một chỗ này. Điểm cần BE/Planning xác nhận: (1) `User` không có `xu` → ẩn nút Xu ở header; (2) `Post` không có `promoted`/`rating`/`reviewCount` nên "Nổi bật trong khu" trống và gian hàng không có điểm ★; (3) API chỉ có **đồng ý** phụ thu, không có từ chối (F7) → nút "Không đồng ý" chỉ hiện ở mock; (4) `Message` không kèm tên người gửi, FE dùng `sender === mình`.
 - Quyết định: (điền khi chốt)
+
+
+### [29/10] F10 — Luật game Hái xu và sổ Xu ở server
+- Trạng thái: CẦN CHỐT (Planning)
+- Người ghi: BE
+- Nội dung: server tự kiểm để chống gian lận (FE lưu localStorage thì sửa được): **tối đa 3 lượt/ngày** cho game `hai-xu`, **trần 30 Xu/ngày từ game**, **điểm ≤ 80/lượt**, **8 điểm = 1 Xu** (một lượt tối đa 10 Xu), ngày tính theo giờ Việt Nam; vượt giới hạn trả 429 `GAME_LIMIT`. Xu chào mừng 30 (một lần). Voucher đổi bằng Xu có hạn **30 ngày**, danh mục `v10` (20 Xu), `v20` (50 Xu), `ship` (30 Xu) khớp FE. Đã làm (29/10): cộng Xu ở server khi xong đơn (+10, đơn ≥ 30.000đ, tối đa 3 đơn/ngày), đánh giá có chữ (+5), việc xong (+15); mã `XU-…` dùng được ở `POST /orders` và được trả lại khi đơn hủy. Chưa làm: Xu hết hạn sau 6 tháng, thu lại Xu khi hoàn tiền, voucher hết hạn thì không tự dọn.
+- Quyết định: (điền khi chốt)
+
+### [29/10] F11 — Hoãn giỏ hàng theo session ở FE (7.9b)
+- Trạng thái: ĐÃ GHI (FE)
+- Người ghi: FE
+- Nội dung: `CartService` có sẵn nhưng chưa nối giao diện. Luồng đặt hiện tại là "đặt 2 bước" (chọn món → hộp Xác nhận đơn hàng → đặt ngay) cho **một bài mỗi đơn**, nên giỏ nhiều bài làm luồng rối thêm và phải đổi cả đơn/Xu/voucher.
+- Quyết định: hoãn; chỉ nối giỏ khi nhóm chốt cho đặt nhiều bài một đơn. Khi đó nối `POST /api/cart/add` (session phía server) thay cho bộ nhớ trình duyệt.
+
+### [29/10] F11 — Giờ vàng: cộng dồn với voucher và múi giờ
+- Trạng thái: CẦN CHỐT (Planning)
+- Người ghi: BE
+- Nội dung: (1) **Thứ tự giảm:** Giờ vàng giảm giá món trước, **voucher Xu tính sau** trên tiền hàng đã giảm; mức tối thiểu của voucher so với tiền hàng đã giảm (nên có đơn đủ điều kiện theo giá gốc nhưng hết đủ sau Giờ vàng). Tùy chọn cộng giá (topping…) **không** bị giảm, chỉ giảm giá gốc của bài. (2) **Múi giờ:** cố định Asia/Ho_Chi_Minh (UTC+7), không phụ thuộc giờ máy người dùng; khung vắt qua nửa đêm tính theo ngày bắt đầu. (3) **Chốt giá lúc đặt:** giá lưu vào đơn tại thời điểm tạo đơn; đặt trước 17:00 nhưng giao sau vẫn giữ giá đã giảm, hết khung là về giá gốc ngay cho đơn mới. (4) Làm tròn 100đ. (5) Bộ lọc giá `minPrice/maxPrice` của danh sách bài vẫn so với giá gốc.
+- Quyết định: (điền khi chốt)
+
+### [29/10] F12 — Ô Giờ vàng trong form đăng bài khu Bán (7.21)
+- Trạng thái: CẦN CHỐT (bạn phụ trách phía Bán)
+- Người ghi: FE
+- Nội dung: `features/seller/post-form` thêm khối "Giờ vàng" gọn (bật/tắt, %/tiền, giá trị, giờ từ–đến có thể qua nửa đêm, ngày trong tuần, xem trước giá). Ẩn với việc làm. Gửi trong thân `POST/PUT /seller/posts` thành `promo: { kind, value, from, to, days, active }` (đúng dạng trường `Post.promo` của server 7.18). Mock lưu thẳng vào bài nên phía Mua thấy ngay. Endpoint `/seller/posts` thật chưa có trong api-buyer-job.md — cần xác nhận cùng schema; giao diện nằm trong thiết kế của phía Bán nên nếu họ muốn đổi chỗ đặt/giao diện thì chỉ cần dời khối `<fieldset class="promo">`.
+- Quyết định: (điền khi chốt)
+
+### [29/10] F12 — Combo: quy tắc giá, kho và đơn
+- Trạng thái: CẦN CHỐT (Planning)
+- Người ghi: BE
+- Nội dung: (1) Combo là một `Post` (price = comboPrice) gồm ≥ 2 món **cùng người bán**, rẻ hơn tổng giá lẻ; không lồng combo trong combo, không chứa hàng bán một lần. (2) `listPrice` chụp lúc lưu combo; nếu người bán đổi giá món lẻ sau đó thì `listPrice` cũ cho tới khi lưu lại combo (đơn vẫn tính theo `comboPrice`, nên không ảnh hưởng tiền). (3) Đặt combo trừ kho **từng món thành phần**; combo không có kho riêng trừ khi bài đặt `stock`. (4) Đơn combo là **một đơn**, snapshot ghi từng món; hủy/hoàn đơn **chưa** trả lại kho món thành phần (giống bài thường: chưa có luật hoàn kho). (5) Giờ vàng áp lên combo và "Tiết kiệm" tính trên giá đang trả. (6) Tùy chọn cộng giá chỉ có ở bài thường; combo mặc định không có tùy chọn.
+- Quyết định: (điền khi chốt)
+
+### [29/10] F13 — Ô tạo combo trong form đăng bài khu Bán (7.22)
+- Trạng thái: CẦN CHỐT (bạn phụ trách phía Bán)
+- Người ghi: FE
+- Nội dung: `features/seller/post-form` thêm khối "Combo" gọn (chỉ khi loại = đồ ăn): chọn từ các bài đồ ăn khác của chính người bán + số lượng mỗi món; giá combo = ô Giá hiện có; kiểm FE ≥ 2 món và giá < tổng lẻ (server vẫn kiểm lại). Gửi `combo: { items: [{ postId, qty }], comboPrice }` trong thân `POST/PUT /seller/posts`; server tự tính `listPrice`. Chỉ cần dời `<fieldset class="promo combof">` nếu phía Bán muốn đổi chỗ đặt.
+- Quyết định: (điền khi chốt)

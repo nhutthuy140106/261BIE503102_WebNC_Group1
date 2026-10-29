@@ -52,6 +52,16 @@ export function postFromApi(p: Raw): Post {
     fulfillmentModes: p.fulfillmentModes ?? [],
     deliveryFee: p.deliveryFee ?? 0,
     needSchedule: !!p.needSchedule,
+    category: p.category || undefined,
+    promo: p.promo && p.promo.active !== false ? { kind: p.promo.kind, value: p.promo.value, from: p.promo.from, to: p.promo.to, days: p.promo.days ?? [], active: true } : undefined,
+    combo: p.combo?.items?.length ? { items: p.combo.items.map((i: Raw) => ({ postId: String(i.postId), qty: i.qty })), comboPrice: p.combo.comboPrice, listPrice: p.combo.listPrice } : undefined,
+    comboDetail: p.comboDetail
+      ? {
+          items: p.comboDetail.items.map((i: Raw) => ({ postId: String(i.postId), qty: i.qty, title: i.title, unitPrice: i.unitPrice, unit: i.unit || undefined, image: i.image || undefined, available: i.available !== false })),
+          listPrice: p.comboDetail.listPrice,
+          saving: p.comboDetail.saving,
+        }
+      : undefined,
   };
 }
 

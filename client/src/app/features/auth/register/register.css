@@ -34,15 +34,17 @@ h1, .why, label[for='otp'] { text-align: center; }
 .cell label { margin-top: 14px; }
 
 /* độ mạnh mật khẩu: 3 vạch + nhãn + 4 điều kiện tick */
-.meter { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 12px; }
+.meter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 12px; }
 .meter i { height: 5px; border-radius: 3px; background: var(--border); }
 .meter[data-level='1'] i:nth-child(-n + 1) { background: #c2451a; }
 .meter[data-level='2'] i:nth-child(-n + 2) { background: #e0a021; }
-.meter[data-level='3'] i { background: #2e9e5e; }
+.meter[data-level='3'] i:nth-child(-n + 3) { background: #7fae3a; }
+.meter[data-level='4'] i { background: #2e9e5e; }
 .meter-label { margin: 6px 0 0; font-size: 12.5px; color: var(--smoke); }
 .meter-label[data-level='1'] b { color: #c2451a; }
 .meter-label[data-level='2'] b { color: #b9801a; }
-.meter-label[data-level='3'] b { color: #2e7d4f; }
+.meter-label[data-level='3'] b { color: #5f8a24; }
+.meter-label[data-level='4'] b { color: #2e7d4f; }
 .rules { display: grid; grid-template-columns: repeat(4, auto); justify-content: space-between; gap: 4px 10px; margin: 8px 0 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--fog); }
 .rules li::before { content: '○ '; }
 .rules li.ok { color: #2e7d4f; }
@@ -60,3 +62,7 @@ h1, .why, label[for='otp'] { text-align: center; }
 .check.all { margin-top: 2px; color: var(--ink); }
 
 .hid-user { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; }
+
+.okbox { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 8px 0; }
+.okbox img { width: 140px; }
+.okbox .gobtn { display: grid; place-items: center; width: auto; min-width: 200px; padding: 0 32px; text-decoration: none; }

@@ -1,5 +1,9 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { Observable, catchError, map, of, tap } from 'rxjs';
 import { useMock } from '../config/api.config';
+import { AppError } from '../models/api';
+import { ApiService } from './api';
+import { AuthService } from './auth';
 import { ToastService } from './toast';
 
 /*
@@ -14,6 +18,8 @@ import { ToastService } from './toast';
 const KEY = 'antgo_xu';
 const DAY = 864e5;
 const HALF_YEAR = 182 * DAY;
+/** Trần Xu nhận từ mini game mỗi ngày (chống cày Xu lấy voucher). */
+export const GAME_DAILY_CAP = 30;
 
 export interface XuEntry {
   /** Số Xu: + nhận, − tiêu / hết hạn */
@@ -47,6 +53,11 @@ export interface VoucherRow {
 
 export type Voucher = VoucherDef & VoucherRow;
 
+interface RemoteXu {
+  ledger: { id: string; delta: number; title: string; kind: string; at: string }[];
+  vouchers: { id?: string; cid: string; code: string; status: string; expiresAt: string }[];
+}
+
 interface XuState {
   v: 2;
   ledger: XuEntry[];
@@ -69,7 +80,45 @@ export const XU_EARN: { key: string; t: string; d: number; once?: boolean; note?
 @Injectable({ providedIn: 'root' })
 export class XuService {
   private readonly toast = inject(ToastService);
+  private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
   private readonly state = signal<XuState>(this.read());
+
+  constructor() {
+    // Có server thật (?mock=0): sổ Xu và voucher lấy từ GET /me/xu mỗi khi đăng nhập
+    effect(() => {
+      if (!useMock('xu') && this.auth.currentUser()) this.sync();
+    });
+  }
+
+  /** Kéo sổ Xu từ server thay cho bản local (chỉ khi dùng API thật). */
+  sync(): void {
+    if (useMock('xu')) return;
+    this.api.get<RemoteXu>('/me/xu').pipe(catchError(() => of(null))).subscribe((r) => {
+      if (!r) return;
+      this.state.set({
+        v: 2,
+        ledger: r.ledger.map((x) => ({ d: x.delta, t: x.title, key: (x.delta > 0 && x.kind === 'game' ? 'game:' : 'srv:') + x.id, at: Date.parse(x.at), exp: null, note: x.delta > 0 })),
+        vch: r.vouchers.map((v) => ({ id: v.id ?? v.code, cid: v.cid, at: Date.parse(v.expiresAt) - 30 * DAY, exp: Date.parse(v.expiresAt), used: v.status === 'active' || v.status === 'unused' ? null : 'srv' })),
+      });
+    });
+  }
+
+  /**
+   * Kết thúc một lượt Hái xu. Mock: cộng ở local. Server thật: POST /me/xu/game (server tự tính 8 điểm = 1 Xu,
+   * tối đa 3 lượt/ngày và 30 Xu/ngày; hết lượt/trần → 429 GAME_LIMIT). Trả về số Xu được cộng.
+   */
+  playCoin(score: number, key: string): Observable<number> {
+    if (useMock('xu')) return of(this.earnGame(score, 'Hái xu', key));
+    return this.api.post<{ granted: number }>('/me/xu/game', { game: 'hai-xu', score: Math.min(80, Math.max(0, score)) }).pipe(
+      tap(() => this.sync()),
+      map((r) => r.granted),
+      catchError((e: unknown) => {
+        this.toast.show(e instanceof AppError && e.code === 'GAME_LIMIT' ? 'Hôm nay bạn đã hết lượt hoặc đủ Xu từ game rồi' : 'Chưa ghi nhận được Xu, bạn thử lại sau nhé');
+        return of(0);
+      }),
+    );
+  }
 
   readonly catalog = XU_CATALOG;
   readonly earnRules = XU_EARN;
@@ -127,6 +176,7 @@ export class XuService {
 
   /** Cộng Xu (chống trùng theo key; đơn: tối đa 3 lần/ngày). Trả về số Xu vừa cộng. */
   earn(d: number, t: string, key: string): number {
+    if (!useMock('xu')) return 0; // server tự cộng khi đơn/đánh giá/việc hoàn thành
     const s = this.state();
     const now = Date.now();
     if (s.ledger.some((x) => x.key === key)) return 0;
@@ -143,6 +193,30 @@ export class XuService {
     return d;
   }
 
+  /** Xu nhận từ game hôm nay (khóa bắt đầu bằng "game:"). Xu là tiền giảm giá thật nên có trần mỗi ngày. */
+  readonly gameToday = computed(() => {
+    const today = new Date().toDateString();
+    return this.state().ledger.filter((x) => x.d > 0 && x.key.startsWith('game:') && new Date(x.at).toDateString() === today).reduce((a, x) => a + x.d, 0);
+  });
+
+  /** Cộng Xu từ game, cắt theo trần ngày. Trả về số Xu thật sự được cộng (0 nếu đã đủ trần). */
+  earnGame(d: number, t: string, key: string): number {
+    if (d <= 0) return 0;
+    if (!useMock('xu')) {
+      this.toast.show('Game này chưa tính Xu thật khi dùng máy chủ');
+      return 0;
+    }
+    const give = Math.min(d, GAME_DAILY_CAP - this.gameToday());
+    if (give <= 0) {
+      this.toast.show(`Hôm nay bạn đã nhận đủ ${GAME_DAILY_CAP} Xu từ game`);
+      return 0;
+    }
+    const s = this.state();
+    const now = Date.now();
+    this.write({ ...s, ledger: [...s.ledger, { d: give, t, key: 'game:' + key, at: now, exp: now + HALF_YEAR, note: true }] });
+    return give;
+  }
+
   /** Thu lại Xu đã cộng (đơn hủy / hoàn tiền). */
   revoke(key: string, t: string): number {
     const s = this.state();
@@ -157,6 +231,10 @@ export class XuService {
     const c = XU_CATALOG.find((x) => x.cid === cid);
     const s = this.state();
     if (!c || this.balance() < c.cost) return false;
+    if (!useMock('xu')) {
+      this.api.post<unknown>('/me/xu/redeem', { cid }).subscribe({ next: () => this.sync(), error: () => this.toast.show('Chưa đổi được voucher, bạn thử lại sau nhé') });
+      return true;
+    }
     const id = 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     const now = Date.now();
     this.write({

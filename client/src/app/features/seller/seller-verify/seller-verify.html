@@ -1,6 +1,6 @@
 <div class="wrap-verify">
   @if (loading()) {
-    <p class="muted">Đang tải…</p>
+    <app-loader />
   } @else {
     @switch (verify.current().status) {
       @case ('approved') {

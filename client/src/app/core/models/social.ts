@@ -62,7 +62,7 @@ export interface Report {
   targetId: string;
   reason: ReportReason;
   detail: string;
-  state: 'open';
+  state: 'open' | 'resolved';
   createdAt: string;
 }
 

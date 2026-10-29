@@ -1,0 +1,21 @@
+.cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 22px; }
+.card { display: grid; gap: 2px; padding: 14px 16px; border: 1px solid #F0E2DC; border-radius: 12px; background: #fff; }
+.card span { color: #6b7280; font-size: 13px; }
+.card b { font-size: 30px; color: #22304A; line-height: 1.1; }
+.card small { color: #6b7280; font-size: 12.5px; }
+.card.hot { background: #FBF4F1; }
+.card.hot b { color: #D85A1C; }
+.sk.big { height: 92px; margin: 0; }
+.blk { margin-bottom: 22px; }
+.blk h2 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 10px; font-size: 17px; color: #22304A; }
+.blk h2 a { font-size: 13px; font-weight: 500; color: #D85A1C; }
+.chart { list-style: none; margin: 0; padding: 14px 14px 10px; display: flex; align-items: flex-end; gap: 12px; height: 220px; border: 1px solid #F0E2DC; border-radius: 12px; background: #fff; }
+.chart li { flex: 1; min-width: 0; height: 100%; display: grid; grid-template-rows: auto 1fr auto; justify-items: center; align-items: end; gap: 4px; }
+.chart i { display: block; width: 100%; max-width: 44px; min-height: 4px; border-radius: 6px 6px 0 0; background: #22304A; }
+.chart li:nth-child(odd) i { background: #3d4d6b; }
+.chart .v { font-size: 13px; font-weight: 700; color: #22304A; }
+.chart .l { font-size: 11px; color: #6b7280; text-align: center; line-height: 1.2; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 1px solid #F0E2DC; border-radius: 12px; background: #fff; }
+.list b { display: block; }
+@media (max-width: 760px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .chart { gap: 6px; padding: 12px 8px 8px; } .chart .l { font-size: 10px; } }

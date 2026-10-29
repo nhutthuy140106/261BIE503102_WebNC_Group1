@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { ToastService } from './toast';
 
 const DEFAULT_PLACEHOLDER = 'Tìm món ăn, đồ dùng, dịch vụ hoặc việc làm';
@@ -21,10 +22,13 @@ interface SpeechRec {
 @Injectable({ providedIn: 'root' })
 export class SearchUiService {
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
 
   readonly text = signal('');
   readonly recording = signal(false);
-  readonly placeholder = computed(() => (this.recording() ? 'Đang nghe… bạn nói đi' : this.imageUrl() ? 'Thêm mô tả (không bắt buộc)…' : DEFAULT_PLACEHOLDER));
+  /** Đang chờ kết quả tìm theo ảnh (tự chạy ngay khi chọn/thả ảnh) */
+  readonly searching = signal(false);
+  readonly placeholder = computed(() => (this.searching() ? 'Đang tìm theo ảnh…' : this.recording() ? 'Đang nghe… bạn nói đi' : this.imageUrl() ? 'Thêm mô tả (không bắt buộc)…' : DEFAULT_PLACEHOLDER));
   /** Ảnh đang dùng để tìm (object URL) — hiện thành viên nhỏ trong ô lớn */
   readonly imageUrl = signal<string | null>(null);
   /** Ô lớn ở trang chủ đang hiện → ẩn ô gọn trên header */
@@ -32,6 +36,8 @@ export class SearchUiService {
 
   private rec: SpeechRec | null = null;
   private picker?: HTMLInputElement;
+  private imgTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastRun = { q: '', at: 0 };
 
   /** Bấm mic: bắt đầu nghe; bấm lần nữa thì dừng. */
   voice(): void {
@@ -39,7 +45,7 @@ export class SearchUiService {
     const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
     if (!SR) return this.toast.show('Trình duyệt này chưa hỗ trợ tìm bằng giọng nói. Hãy thử Chrome hoặc Edge.', 3200);
     if (this.rec) {
-      this.rec.stop();
+      this.rec.stop(); // dừng nói → onend sẽ tự tìm
       return;
     }
     const rec = new SR();
@@ -49,11 +55,19 @@ export class SearchUiService {
     this.recording.set(true);
     this.text.set('');
     rec.onresult = (e) => this.text.set(Array.from(e.results).map((r) => r[0].transcript).join(''));
-    rec.onerror = (e) => this.toast.show(e.error === 'not-allowed' ? 'Bạn cần cho phép dùng micro để tìm bằng giọng nói.' : 'Chưa nghe rõ, bạn thử lại nhé.', 3200);
+    let failed = false;
+    rec.onerror = (e) => {
+      failed = true;
+      this.toast.show(e.error === 'not-allowed' ? 'Bạn cần cho phép dùng micro để tìm bằng giọng nói.' : 'Mình chưa nghe rõ, bạn thử lại nhé', 3200);
+    };
     rec.onend = () => {
+      const cancelled = this.rec !== rec; // bấm ✕ → không tự tìm
       this.rec = null;
       this.recording.set(false);
-      if (this.text()) this.toast.show(`Đang tìm “${this.text()}”…`, 1800);
+      if (cancelled || failed) return;
+      const q = this.text().trim();
+      if (q) this.run(q);
+      else this.toast.show('Mình chưa nghe rõ, bạn thử lại nhé', 3200);
     };
     rec.start();
   }
@@ -79,7 +93,35 @@ export class SearchUiService {
     if (old) URL.revokeObjectURL(old);
     this.imageUrl.set(URL.createObjectURL(file));
     this.text.set('');
-    this.toast.show('Bản mẫu: tìm bằng hình ảnh cần máy chủ nhận dạng ảnh, hiện mới mô phỏng giao diện.', 3200);
+    // Tự tìm ngay khi có ảnh (mô phỏng: chưa có máy chủ nhận dạng ảnh)
+    this.searching.set(true);
+    if (this.imgTimer) clearTimeout(this.imgTimer);
+    this.imgTimer = setTimeout(() => {
+      this.imgTimer = null;
+      this.searching.set(false);
+      this.run('');
+      this.toast.show('Bản mẫu: tìm bằng hình ảnh chưa có máy chủ nhận dạng, đang hiện bài trong khu.', 3200);
+    }, 1200);
+  }
+
+  /** Tìm ngay (giọng nói / ảnh); bỏ qua lần gọi trùng trong 1,5 giây. */
+  run(q: string): void {
+    const now = Date.now();
+    if (q === this.lastRun.q && now - this.lastRun.at < 1500) return;
+    this.lastRun = { q, at: now };
+    void this.router.navigate(['/search'], { queryParams: { q: q || null }, queryParamsHandling: 'merge' });
+  }
+
+  /** Nút ✕: hủy nghe / hủy tìm ảnh / bỏ ảnh */
+  cancel(): void {
+    const rec = this.rec;
+    this.rec = null;
+    rec?.stop();
+    this.recording.set(false);
+    if (this.imgTimer) clearTimeout(this.imgTimer);
+    this.imgTimer = null;
+    this.searching.set(false);
+    this.clearImage();
   }
 
   clearImage(): void {

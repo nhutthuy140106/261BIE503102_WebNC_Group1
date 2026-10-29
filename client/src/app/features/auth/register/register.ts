@@ -11,9 +11,9 @@ import { isGuessablePassword, passwordRules, passwordStrength, phoneValidator, s
 const passwordMatchValidator: ValidatorFn = (g: AbstractControl): ValidationErrors | null =>
   g.get('password')?.value === g.get('confirmPass')?.value ? null : { mismatch: true };
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 const OTP_SECONDS = 60;
-const STRENGTH_LABEL = ['', 'Yếu', 'Vừa', 'Mạnh'];
+const STRENGTH_LABEL = ['', 'Yếu', 'Trung bình', 'Khá', 'Mạnh'];
 
 /**
  * Đăng ký 3 bước: số điện thoại → mã xác nhận (OTP) → thông tin tài khoản.
@@ -36,6 +36,7 @@ export class Register implements OnDestroy {
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
   protected readonly countdown = signal(0);
+  protected readonly fullName = computed(() => this.info.controls.name.value.trim());
 
   protected readonly phone = new FormControl('', { nonNullable: true, validators: [Validators.required, phoneValidator] });
   protected readonly otp = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^\d{6}$/)] });
@@ -160,7 +161,10 @@ export class Register implements OnDestroy {
     this.error.set(null);
     const { name, password, areaId, building, unit, marketing } = this.info.getRawValue();
     this.auth.register({ name, phone: this.phone.value, password, areaId, building, unit, termsVersion: LEGAL_VERSION, marketing }).subscribe({
-      next: () => this.router.navigate(['/auth/login']),
+      next: () => {
+        this.submitting.set(false);
+        this.step.set(4);
+      },
       error: (e: Error) => {
         this.error.set(e.message || 'Không đăng ký được. Số điện thoại có thể đã được dùng.');
         this.submitting.set(false);

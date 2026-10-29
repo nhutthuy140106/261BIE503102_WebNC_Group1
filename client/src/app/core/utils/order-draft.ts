@@ -1,6 +1,7 @@
 import { computed, signal } from '@angular/core';
 import { PostTemplate } from '../models/post-template';
 import type { Voucher } from '../services/xu';
+import { Promo, discounted } from './promo';
 
 /** "Nhiều cơm|+5.000đ" → { name, add } */
 export function parseChoice(raw: string): { name: string; add: number } {
@@ -99,7 +100,20 @@ export class OrderDraft {
 
   /** Phụ giá của tùy chọn/câu hỏi, nhân theo số lượng phần */
   readonly extra = computed(() => (this.optAdd() + this.qsAdd()) * (this.tpl.qty ? this.qty() : 1) + this.dishRows().reduce((s, r) => s + r.add * r.qty, 0));
-  readonly subtotal = computed(() => (this.tpl.price.type === 'quote' ? this.tpl.price.inspect ?? 0 : this.unit() + this.extra()));
+  /** Giờ vàng đang áp (null khi hết giờ / không có) — do trang chi tiết cập nhật theo đồng hồ */
+  readonly promo = signal<Promo | null>(null);
+  /** Số tiền được giảm nhờ Giờ vàng: chỉ giảm giá chính (không giảm tùy chọn cộng giá), nhân theo số lượng/giờ */
+  readonly promoOff = computed(() => {
+    const p = this.promo();
+    const price = this.tpl.price;
+    if (!p || price.type === 'quote') return 0;
+    const mult = this.tpl.time.mode === 'datedur' ? this.hours() : this.tpl.qty ? this.qty() : 1;
+    return ((price.amount ?? 0) - discounted(price.amount ?? 0, p)) * mult;
+  });
+  /** Thành tiền trước khi trừ Giờ vàng và voucher */
+  readonly gross = computed(() => (this.tpl.price.type === 'quote' ? this.tpl.price.inspect ?? 0 : this.unit() + this.extra()));
+  /** Sau Giờ vàng; voucher Xu tính trên số này (voucher tính SAU) */
+  readonly subtotal = computed(() => Math.max(0, this.gross() - this.promoOff()));
   readonly placeFee = computed(() => (this.tpl.place.mode === 'choice' ? this.tpl.place.choices?.[this.place()]?.[1] ?? 0 : 0));
   /** Cách nhận có phụ phí (giao tận cửa / thợ đến nhà) thì cần địa chỉ người nhận */
   readonly needsAddress = computed(() => {
@@ -133,8 +147,10 @@ export class OrderDraft {
   }
 
   /** Các lựa chọn đã chọn, dạng "Nhóm: lựa chọn" để hiện trong hộp xác nhận và ghi vào đơn */
+  /** Combo: các món trong một combo (hiện thành dòng "Gồm: …" ở hộp xác nhận và ghi vào đơn) */
+  readonly comboItems = signal<string[]>([]);
   readonly lines = computed(() => {
-    const out: string[] = [];
+    const out: string[] = this.comboItems().length ? ['Gồm: ' + this.comboItems().join(', ')] : [];
     for (const g of this.tpl.opts) {
       if (g === this.dishGroup) continue;
       const c = parseChoice(this.opt()[g.name] ?? '');

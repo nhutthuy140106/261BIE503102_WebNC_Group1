@@ -88,6 +88,18 @@
   <symbol id="play" viewBox="0 0 256 256"><path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"/></symbol>
   <symbol id="moon" viewBox="0 0 256 256"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></symbol>
 </svg>
-  <app-root></app-root>
+  <app-root>
+    <!-- Màn chờ lúc tải ứng dụng: Angular thay thế nội dung này khi khởi động xong -->
+    <style>
+      .boot { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 8px; font-family: 'Mona Sans', system-ui, sans-serif; color: #6a6879; font-size: 13px; }
+      .boot .tr { position: relative; width: 190px; height: 74px; overflow: hidden; background: radial-gradient(circle, rgba(34,48,74,.22) 1.6px, transparent 2px) 0 calc(100% - 6px) / 14px 6px repeat-x; }
+      .boot .wk { position: absolute; left: 0; bottom: 4px; animation: bootwalk 2.6s linear infinite; }
+      .boot img { display: block; height: 62px; width: auto; transform-origin: 50% 100%; animation: bootstep .42s ease-in-out infinite; }
+      @keyframes bootwalk { from { transform: translateX(-34px); } to { transform: translateX(190px); } }
+      @keyframes bootstep { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
+      @media (prefers-reduced-motion: reduce) { .boot .wk, .boot img { animation: none; } .boot .wk { left: 75px; } }
+    </style>
+    <div class="boot" role="status"><div class="tr"><span class="wk"><img src="assets/clean/lean-sm.png" alt=""></span></div>Đang tải AntGo…</div>
+  </app-root>
 </body>
 </html>

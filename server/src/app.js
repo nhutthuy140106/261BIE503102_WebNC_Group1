@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const morgan = require('morgan');
 const session = require('express-session');
 const MongoStore = require('connect-mongo').default || require('connect-mongo');
@@ -12,6 +13,8 @@ const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 
+// Header an toàn. CSP tắt vì đây là API JSON (Swagger UI cần script nội tuyến); ảnh /images được FE khác origin nhúng nên cho cross-origin
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 // FE (Angular) gọi kèm cookie => phải chỉ đích danh origin và bật credentials
 app.use(cors({ origin: clientOrigin, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
@@ -22,7 +25,7 @@ app.use(session({
   name: 'connect.sid',
   secret: sessionSecret,
   resave: false,
-  saveUninitialized: true, // khách chưa đăng nhập vẫn cần phiên để giữ giỏ nháp
+  saveUninitialized: false, // chỉ tạo phiên khi có dữ liệu (đăng nhập hoặc giỏ nháp), khách đọc trang không sinh phiên rác
   store: isTest ? undefined : MongoStore.create({ mongoUrl: mongoUri, ttl: sessionMaxAgeMs / 1000 }),
   cookie: { httpOnly: true, sameSite: 'lax', secure: isProd, maxAge: sessionMaxAgeMs },
 }));

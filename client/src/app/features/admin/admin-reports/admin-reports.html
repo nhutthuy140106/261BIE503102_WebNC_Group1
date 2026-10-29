@@ -1,0 +1,50 @@
+<h1>Báo cáo vi phạm</h1>
+<p class="lead">Xem xét từng báo cáo rồi ghi chú kết quả; người báo cáo sẽ được thông báo.</p>
+<div class="tabs" role="tablist">
+  @for (t of tabs; track t.key) {
+    <button type="button" role="tab" [attr.aria-selected]="tab() === t.key" [class.on]="tab() === t.key" (click)="tab.set(t.key)">{{ t.label }} <em>{{ count(t.key) }}</em></button>
+  }
+</div>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+
+@if (all() !== null) {
+  <div class="cards">
+    @for (r of list(); track r._id) {
+      <article class="rc">
+        <header>
+          <b>{{ reason(r.reason) }}</b>
+          <span class="sub">{{ r.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </header>
+        <p class="meta">{{ r.reporterName }} báo cáo · {{ target(r.targetType) }} <code>{{ r.targetId }}</code></p>
+        <p class="detail">{{ r.detail }}</p>
+
+        @if (r.state === 'open' || r.state === 'reviewing') {
+          <label [for]="'n' + r._id">Ghi chú của admin</label>
+          <textarea [id]="'n' + r._id" rows="2" [name]="'n' + r._id" [(ngModel)]="notes[r._id]" maxlength="300" [placeholder]="r.state === 'reviewing' ? 'Bắt buộc khi kết thúc báo cáo' : 'Không bắt buộc'"></textarea>
+          @if (noteErr === r._id) { <small class="e" role="alert">Vui lòng ghi chú kết quả xử lý (ít nhất 3 ký tự).</small> }
+        } @else if (r.adminNote) {
+          <p class="note"><b>Ghi chú:</b> {{ r.adminNote }}</p>
+        }
+
+        <footer>
+          @if (r.targetType === 'post' && r.state !== 'resolved' && r.state !== 'rejected') {
+            <button type="button" class="btn danger" (click)="hideFor.set(r)">Ẩn bài này</button>
+          }
+          @if (r.state === 'open') {
+            <button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'reviewing')">Bắt đầu xem xét</button>
+          } @else if (r.state === 'reviewing') {
+            <button type="button" class="btn" [disabled]="busy()" (click)="move(r, 'rejected')">Từ chối</button>
+            <button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'resolved')">Đã xử lý</button>
+          }
+        </footer>
+      </article>
+    } @empty { <p class="empty">Không có báo cáo ở mục này.</p> }
+  </div>
+} @else {
+  <div class="sk"></div><div class="sk"></div><div class="sk"></div>
+}
+
+@if (hideFor(); as r) {
+  <app-admin-dialog title="Ẩn bài bị báo cáo?" message="Bài sẽ không còn hiện với người dùng khác; người bán nhận được lý do." confirmLabel="Ẩn bài" [danger]="true"
+    [withReason]="true" reasonLabel="Lý do ẩn (gửi cho người bán)" [busy]="busy()" (confirmed)="confirmHide($event)" (cancelled)="hideFor.set(null)" />
+}

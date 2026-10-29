@@ -7,6 +7,7 @@ const assert = require('node:assert/strict');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const seed = require('../src/seeds/seed');
+const Post = require('../src/modules/shared/post.model');
 
 let mongod; let server; let base;
 const M = (n) => mongoose.model(n);
@@ -41,7 +42,7 @@ const snapshot = async () => Object.fromEntries(await Promise.all(MODELS.map(asy
 
 test('seed đầy đủ: đủ vai trò, nhiều bài/việc, có dữ liệu giao dịch', async () => {
   const r = await seed();
-  assert.ok(r.posts >= 20 && r.jobs >= 10 && r.users >= 15);
+  assert.ok(r.posts >= 30 && r.jobs >= 12 && r.users >= 15);
   const User = M('User');
   assert.equal(await User.countDocuments({ role: 'admin' }), 1);
   assert.ok((await User.countDocuments({ role: 'enduser' })) >= 10);
@@ -92,10 +93,18 @@ test('seed dùng được qua API: Thủy thấy đơn, việc, đánh giá; bà
   assert.equal((await api('GET', '/me/addresses', jar)).body.data.length, 2);
   assert.ok((await api('GET', '/me/recommendations', jar)).body.data.length > 0);
 
-  const com = (await api('GET', '/posts?q=com nha')).body.data[0];
+  const com = (await api('GET', '/posts?q=com nha')).body.data.find((x) => /^Cơm nhà làm/.test(x.title));
   const rv = (await api('GET', `/reviews?postId=${com._id}`)).body.data;
   assert.ok(rv.count >= 3 && rv.average >= 4 && rv.items.some((i) => i.reply));
-  assert.equal((await api('GET', '/posts?limit=100')).body.data.length, 24); // 25 bài, trừ bài đã bị ẩn
+  assert.equal((await api('GET', '/posts?limit=100')).body.data.length, 36); // 38 bài (34 + 4 combo) trừ 2 bài bị ẩn/đóng
+  const cheap = (await api('POST', '/assistant/chat', jar, { messages: [{ role: 'user', content: 'ăn gì dưới 50k' }] })).body;
+  assert.ok((cheap.data.items || cheap.data.posts || []).length >= 3 || (await api('GET', '/posts?type=food&maxPrice=50000', jar)).body.data.length >= 3);
+  // Giờ vàng: >= 6 bài có khung giờ, và mọi giờ trong ngày (giờ VN) đều có ít nhất 1 bài đang giảm để demo
+  assert.ok((await Post.countDocuments({ 'promo.active': true })) >= 6);
+  for (let h = 0; h < 24; h++) {
+    const iso = encodeURIComponent(`2026-10-29T${String(h).padStart(2, '0')}:30:00+07:00`);
+    assert.ok((await api('GET', `/deals?now=${iso}`)).body.data.active.length >= 1, `không có bài giảm lúc ${h}h`);
+  }
   const jobs = (await api('GET', '/jobs?limit=100')).body.data;
   assert.ok(jobs.every((j) => j.exactAddress === undefined));
   assert.equal(jobs.find((j) => j.title.startsWith('Lấy giúp')).offerCount, 2, 'thẻ việc đếm đúng số đề nghị đang chờ');
