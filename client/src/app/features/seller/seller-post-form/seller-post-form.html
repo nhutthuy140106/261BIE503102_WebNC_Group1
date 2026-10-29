@@ -83,8 +83,15 @@
             <header><span class="no">2</span><span><b>Thực đơn</b></span></header>
             <div class="bd">
               <!-- thực đơn: mỗi món một giá, số phần mỗi ngày và tùy chọn cộng giá riêng (topping, cỡ phần…); bài 1 món thì chỉ 1 dòng -->
-              <ng-container *ngTemplateOutlet="itemTable; context: { list: foodUnits, nameLabel: 'Tên món', namePh: 'Ví dụ: Xôi bắp', pricePh: '15000', addLabel: 'Thêm món', ph: 'khay', qty: true, opts: true }" />
-              <span class="hint">Mỗi món có giá, số phần bán mỗi ngày và tùy chọn cộng giá riêng. Khách chọn một hoặc nhiều món trong cùng một đơn; thẻ bài hiện giá món rẻ nhất, ví dụ “từ 15.000đ”.</span>
+              <label class="ck"><input type="checkbox" [formControl]="$any(c('spec.combo.on'))" /><span>Bài này là combo<small>Gói các món bạn đang bán, khách mua trọn gói với giá combo</small></span></label>
+              @if (c('spec.combo.on').value) {
+                <ng-container *ngTemplateOutlet="comboBox" />
+              } @else {
+                <ng-container *ngTemplateOutlet="itemTable; context: { list: foodUnits, nameLabel: 'Tên món', namePh: 'Ví dụ: Xôi bắp', pricePh: '15000', addLabel: 'Thêm món', ph: 'khay', qty: true, opts: true }" />
+                <span class="hint">Mỗi món có giá, số phần bán mỗi ngày và tùy chọn cộng giá riêng. Khách chọn một hoặc nhiều món trong cùng một đơn; thẻ bài hiện giá món rẻ nhất, ví dụ “từ 15.000đ”.</span>
+              }
+              <ng-container *ngTemplateOutlet="priceHintBox" />
+              <ng-container *ngTemplateOutlet="promoBox" />
             </div>
           </section>
           <section class="sec">
@@ -114,6 +121,8 @@
               <!-- mỗi loại nước một giá, số ly mỗi ngày và tùy chọn riêng (size, topping…) như thực đơn đồ ăn -->
               <ng-container *ngTemplateOutlet="itemTable; context: { list: drinkUnits, nameLabel: 'Tên đồ uống', namePh: 'Ví dụ: Trà sữa trân châu', pricePh: '30000', addLabel: 'Thêm đồ uống', ph: 'bình', qty: true, qtyPh: '∞', opts: true }" />
               <span class="hint">Mỗi loại nước có giá, số ly mỗi ngày (để trống = không giới hạn) và tùy chọn cộng giá riêng như size, topping. Khách chọn nhiều loại trong cùng một đơn.</span>
+              <ng-container *ngTemplateOutlet="priceHintBox" />
+              <ng-container *ngTemplateOutlet="promoBox" />
             </div>
           </section>
           <section class="sec">
@@ -157,6 +166,8 @@
                 <div class="fld"><label for="gunit">Đơn vị</label><ng-container *ngTemplateOutlet="unitPick; context: { path: 'spec.unit', list: goodsUnits, id: 'gunit', ph: 'thùng' }" /></div>
                 <div class="fld" [class.bad]="bad('spec.stock')"><label for="gstock">Số lượng</label><input id="gstock" class="input" type="number" min="1" formControlName="stock" /><span class="err">Ít nhất 1</span></div>
               </div>
+              <ng-container *ngTemplateOutlet="priceHintBox" />
+              <ng-container *ngTemplateOutlet="promoBox" />
             </div>
           </section>
           <section class="sec">
@@ -211,7 +222,9 @@
                 } @else {
                   <label class="ck"><input type="checkbox" formControlName="estimate" /><span>Giá ước tính, cân / đếm thực tế khi nhận đồ</span></label>
                 }
+                <ng-container *ngTemplateOutlet="priceHintBox" />
               }
+              <ng-container *ngTemplateOutlet="promoBox" />
             </div>
           </section>
           @if (svcPreset().stay) {
@@ -365,6 +378,7 @@
                 </div>
               </div>
               <span class="hint">Trả trực tiếp cho người làm, AntGo không giữ tiền.</span>
+              <ng-container *ngTemplateOutlet="priceHintBox" />
             </div>
           </section>
         }
@@ -505,6 +519,66 @@
             }
           </div>
           <button type="button" class="mini" (click)="addQuick('spec.' + (name || 'quick'))"><svg class="i"><use href="#plus" /></svg>{{ add || 'Thêm tùy chọn nhanh' }}</button>
+        </div>
+      </ng-template>
+
+      <!-- ===== Gợi ý giá (PricingService, kNN trên bài tương tự) ===== -->
+      <ng-template #priceHintBox>
+        @if (priceHint(); as h) {
+          <div class="phint" role="status">
+            <div class="pht"><b>Gợi ý: {{ h.suggested | vnd }}</b><span>thường {{ h.low | vnd }} – {{ h.high | vnd }}</span>
+              <button type="button" class="btn" (click)="applyHint(h.suggested)">Dùng giá này</button></div>
+            <small>Dựa trên {{ h.samples }} {{ type() === 'job' ? 'việc' : 'bài' }} tương tự{{ h.confidence === 'low' ? ', ít mẫu giống nên chỉ tham khảo' : '' }}{{ h.basis[0] ? ': ' + h.basis[0].title + '…' : '' }}</small>
+          </div>
+        }
+      </ng-template>
+
+      <!-- ===== Combo (đồ ăn): gói các món đồ ăn khác của chính mình ===== -->
+      <ng-template #comboBox>
+        <div class="combo">
+          @for (p of comboCandidates(); track p._id) {
+            <div class="cline">
+              <span class="cn"><b>{{ p.title }}</b><small>{{ p.price | vnd }}</small></span>
+              <span class="step">
+                <button type="button" aria-label="Bớt" [disabled]="!comboQty(p._id)" (click)="setComboQty(p._id, comboQty(p._id) - 1)">−</button>
+                <b>{{ comboQty(p._id) }}</b>
+                <button type="button" aria-label="Thêm" (click)="setComboQty(p._id, comboQty(p._id) + 1)">+</button>
+              </span>
+            </div>
+          } @empty { <span class="hint">Bạn chưa có bài đồ ăn nào khác đang bán để gói thành combo.</span> }
+          <div class="row3">
+            <div class="fld" [class.bad]="tried() && !!comboError()"><label for="cbp">Giá combo</label><span class="money"><input id="cbp" class="input" type="number" min="0" step="1000" [formControl]="$any(c('spec.combo.price'))" placeholder="50000" /></span></div>
+          </div>
+          @if (comboError(); as ce) { <span class="hint warn">{{ ce }}</span> }
+          @else if (comboList() > 0) { <span class="hint">Giá lẻ {{ comboList() | vnd }} → giá combo <b>{{ +c('spec.combo.price').value | vnd }}</b>, khách tiết kiệm {{ comboList() - c('spec.combo.price').value | vnd }}.</span> }
+        </div>
+      </ng-template>
+
+      <!-- ===== Giờ vàng: giảm giá trong khung giờ, tự về giá gốc khi hết giờ (core/utils/promo.ts) ===== -->
+      <ng-template #promoBox>
+        <div class="promo">
+          <label class="ck"><input type="checkbox" [formControl]="$any(c('common.promo.on'))" /><span>Giờ vàng<small>Giảm giá trong khung giờ, tự về giá gốc khi hết giờ</small></span></label>
+          @if (c('common.promo.on').value) {
+            <div class="pbody">
+              <div class="row3">
+                <div class="fld"><span class="lbl">Kiểu giảm</span><div class="pills">
+                  <button type="button" [class.on]="c('common.promo.kind').value === 'percent'" (click)="set('common.promo.kind', 'percent')">Giảm %</button>
+                  <button type="button" [class.on]="c('common.promo.kind').value === 'amount'" (click)="set('common.promo.kind', 'amount')">Giảm tiền</button>
+                </div></div>
+                <div class="fld"><label for="pmv">{{ c('common.promo.kind').value === 'percent' ? 'Mức giảm (%)' : 'Số tiền giảm' }}</label>
+                  <span [class.money]="c('common.promo.kind').value === 'amount'"><input id="pmv" class="input" type="number" min="1" [formControl]="$any(c('common.promo.value'))" /></span></div>
+              </div>
+              <div class="row3">
+                <div class="fld"><label for="pmf">Từ</label><app-time-input inputId="pmf" [formControl]="$any(c('common.promo.from'))" /></div>
+                <div class="fld"><label for="pmt">Đến</label><app-time-input inputId="pmt" [formControl]="$any(c('common.promo.to'))" /></div>
+              </div>
+              <div class="fld"><span class="lbl">Ngày áp dụng <span class="hint">({{ c('common.promo.days').value?.length ? 'các ngày đã chọn' : 'để trống = mọi ngày' }})</span></span>
+                <div class="days">@for (w of promoWeek; track w.d) { <button type="button" [class.on]="has('common.promo.days', w.d)" (click)="toggleIn('common.promo.days', w.d)">{{ w.l }}</button> }</div>
+              </div>
+              @if (promoError(); as pe) { <span class="hint warn">{{ pe }}</span> }
+              @else if (promoPreview(); as pv) { <span class="hint">Giá trong giờ vàng: <b>{{ pv.price | vnd }}</b> (giảm {{ pv.off | vnd }}{{ pv.from ? ', tính trên giá rẻ nhất' : '' }}). Giờ Việt Nam, khung có thể qua nửa đêm.</span> }
+            </div>
+          }
         </div>
       </ng-template>
 

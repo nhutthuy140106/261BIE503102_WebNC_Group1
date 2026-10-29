@@ -1,6 +1,11 @@
 import { SelectOption } from '../../../shared/components/select/select';
 import { Component, DestroyRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { EMPTY, catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
+import { Post } from '../../../core/models/post';
+import { PricingService } from '../../../core/services/pricing';
+import { PriceSuggestion } from '../../../core/utils/price-suggest';
+import { Promo, discounted, promoLabel } from '../../../core/utils/promo';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CanComponentDeactivate } from '../../../core/guards/pending-changes-guard';
@@ -50,6 +55,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroy = inject(DestroyRef);
+  private readonly pricing = inject(PricingService);
 
   protected readonly types = TYPES;
   protected readonly days = DAYS;
@@ -156,7 +162,97 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   /** Giá trị form hiện tại (để vẽ cột xem trước) */
   protected readonly v = signal<V>(this.form.getRawValue());
 
+  // ---------------- Gợi ý giá · Combo · Giờ vàng (tính năng của HoangKhai, logic dùng lại từ core) ----------------
+
+  /** Gợi ý giá theo tên + loại (kNN trên bài tương tự); null khi chưa đủ dữ liệu */
+  protected readonly priceHint = signal<PriceSuggestion | null>(null);
+  private readonly hintKey = computed(() => {
+    const t = this.type();
+    return `${t === 'drink' ? 'food' : t}|${String((this.v()['common'] as V)['title'] ?? '').trim()}`;
+  });
+  private readonly hintSub = toObservable(this.hintKey)
+    .pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap((k) => {
+        const [kind, title] = [k.slice(0, k.indexOf('|')), k.slice(k.indexOf('|') + 1)];
+        return title.length >= 5 ? this.pricing.suggest(kind as PostKind, title).pipe(catchError(() => EMPTY)) : of(null);
+      }),
+      takeUntilDestroyed(),
+    )
+    .subscribe((h) => this.priceHint.set(h));
+
+  /** Dùng giá gợi ý: đồ ăn / đồ uống / dịch vụ điền vào dòng đầu chưa có giá (hoặc dòng đầu), đồ dùng vào Giá bán, việc vào Tiền công */
+  protected applyHint(n: number): void {
+    const t = this.type();
+    if (t === 'goods') return this.set('spec.price', n);
+    if (t === 'job') return this.set('spec.pay', n);
+    const rows = this.arr('spec.items').controls;
+    const row = rows.find((r) => !(+r.get('price')!.value > 0)) ?? rows[0];
+    row?.get('price')!.setValue(n);
+    this.form.markAsDirty();
+  }
+
+  /** Combo: bài đồ ăn đang bán của chính mình (SellerService.myPosts) */
+  protected readonly comboCandidates = signal<Post[]>([]);
+  protected comboQty(id: string): number {
+    return ((this.v()['spec'] as V)['combo']?.['qty'] as Record<string, number> | undefined)?.[id] ?? 0;
+  }
+  protected setComboQty(id: string, n: number): void {
+    const ctrl = this.form.get('spec.combo.qty')!;
+    ctrl.setValue({ ...(ctrl.value ?? {}), [id]: Math.max(0, Math.min(10, n)) });
+    ctrl.markAsDirty();
+  }
+  protected comboList(): number {
+    return this.comboCandidates().reduce((t, p) => t + p.price * this.comboQty(p._id), 0);
+  }
+  protected comboError(): string | null {
+    const cb = (this.v()['spec'] as V)['combo'] as V | undefined;
+    if (this.type() !== 'food' || !cb?.['on']) return null;
+    if (Object.values((cb['qty'] ?? {}) as Record<string, number>).filter((x) => x > 0).length < 2) return 'Combo cần ít nhất 2 món khác nhau.';
+    const price = +cb['price'];
+    if (!(price > 0) || price >= this.comboList()) return `Giá combo phải thấp hơn tổng giá lẻ (${this.comboList().toLocaleString('vi-VN')}đ).`;
+    return null;
+  }
+
+  protected readonly promoWeek = [{ d: 1, l: 'T2' }, { d: 2, l: 'T3' }, { d: 3, l: 'T4' }, { d: 4, l: 'T5' }, { d: 5, l: 'T6' }, { d: 6, l: 'T7' }, { d: 0, l: 'CN' }];
+  /** giá dùng để xem trước / kiểm Giờ vàng: combo → giá combo; bài nhiều giá → giá rẻ nhất */
+  private basePrice(): { price: number; from: boolean } {
+    const s = this.v()['spec'] as V;
+    if (this.type() === 'goods') return { price: +s['price'] || 0, from: false };
+    if (s['combo']?.['on']) return { price: +s['combo']['price'] || 0, from: false };
+    const { low, from } = this.lowest(this.items(s));
+    return { price: low ? +low['price'] : 0, from };
+  }
+  protected promoError(): string | null {
+    const p = (this.v()['common'] as V)['promo'] as V;
+    if (!p?.['on'] || this.type() === 'job') return null;
+    const { price } = this.basePrice();
+    if (!(+p['value'] > 0)) return 'Giờ vàng: nhập mức giảm lớn hơn 0.';
+    if (p['kind'] === 'percent' && +p['value'] > 90) return 'Giờ vàng: giảm tối đa 90%.';
+    if (p['kind'] === 'amount' && price > 0 && +p['value'] >= price) return 'Giờ vàng: số tiền giảm phải nhỏ hơn giá bán.';
+    if (!p['from'] || !p['to'] || p['from'] === p['to']) return 'Giờ vàng: giờ bắt đầu và kết thúc phải khác nhau (khung có thể qua nửa đêm).';
+    return null;
+  }
+  protected promoPreview(): { price: number; off: number; from: boolean } | null {
+    const p = (this.v()['common'] as V)['promo'] as V;
+    const { price, from } = this.basePrice();
+    if (!p?.['on'] || !(+p['value'] > 0) || !(price > 0)) return null;
+    const now = discounted(price, { kind: p['kind'], value: +p['value'] });
+    return { price: now, off: price - now, from };
+  }
+  /** Promo gửi lên server (null = tắt) */
+  private promoOf(c: V, kind: PostKind): Promo | null {
+    const p = c['promo'] as V | undefined;
+    if (!p?.['on'] || kind === 'job') return null;
+    return { kind: p['kind'], value: +p['value'], from: p['from'], to: p['to'], days: [...((p['days'] as number[]) ?? [])].sort(), active: true };
+  }
+
   ngOnInit(): void {
+    this.sellerApi.myPosts().subscribe({
+      next: (l) => this.comboCandidates.set(l.filter((p) => p.kind === 'food' && !p.combo && !p.closed)),
+      error: () => this.comboCandidates.set([]),
+    });
     this.seller.load().subscribe(() => {
       const id = this.route.snapshot.paramMap.get('id');
       const p = id ? this.seller.posts().find((x) => x.id === id) : undefined;
@@ -380,6 +476,17 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         const sc = s['schedule'] as V;
         const its = this.items(s);
         const { low, from } = this.lowest(its);
+        if (s['combo']?.['on']) {
+          return {
+            price: money(s['combo']['price']), unit: 'combo', kind: 'Combo', action: `Đặt combo · ${money(s['combo']['price'])}`, xu: (s['pay'] ?? []).includes('xu'),
+            facts: [
+              ['clock', 'Giờ nhận đặt', `${sc['orderFrom']} – ${sc['orderTo']}, ${dateList(sc['dates'])}`],
+              ['pin', 'Cách nhận', how(s['fulfil'])],
+              ['fork', 'Trong combo', this.comboCandidates().filter((p) => this.comboQty(p._id) > 0).map((p) => `${this.comboQty(p._id)} ${p.title}`).join(', ') || 'Chưa chọn món'],
+            ] as [string, string, string][],
+            sched: this.promoText(), steps: orderStepNames('food'),
+          };
+        }
         return {
           price: low ? `${from ? 'từ ' : ''}${money(low['price'])}` : '—', unit: low?.['unit'] ?? 'phần', kind: 'Đồ ăn', action: `Đặt món · ${money(low?.['price'])}`, xu: (s['pay'] ?? []).includes('xu'),
           facts: [
@@ -388,7 +495,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
             ['bolt', 'Thời gian chuẩn bị', `Khoảng ${sc['prep']} phút · nhận ${sc['pickFrom']} – ${sc['pickTo']}`],
             ...(its.length > 1 ? [['fork', 'Thực đơn', `${its.map((x) => x['name']).slice(0, 3).join(', ')}${its.length > 3 ? ` +${its.length - 3}` : ''}`] as [string, string, string]] : []),
           ],
-          sched: '', steps: orderStepNames('food'),
+          sched: this.promoText(), steps: orderStepNames('food'),
         };
       }
       case 'drink': {
@@ -402,7 +509,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
             ['bolt', 'Thời gian pha', `Khoảng ${(s['schedule'] as V)['prep']} phút · ${how(s['fulfil'])}`],
             ...(its.length > 1 ? [['fork', 'Thực đơn', `${its.map((x) => x['name']).slice(0, 3).join(', ')}${its.length > 3 ? ` +${its.length - 3}` : ''}`] as [string, string, string]] : []),
           ],
-          sched: '', steps: orderStepNames('food'),
+          sched: this.promoText(), steps: orderStepNames('food'),
         };
       }
       case 'goods': {
@@ -414,7 +521,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
             ['pin', 'Cách nhận', how(s['fulfil'])],
             ['clock', 'Ngày đăng', 'Vừa đăng'],
           ],
-          sched: '', steps: orderStepNames('goods'),
+          sched: this.promoText(), steps: orderStepNames('goods'),
         };
       }
       case 'service': {
@@ -432,7 +539,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
               ['check', 'Tiện nghi', am.length ? `${am.slice(0, 3).join(', ')}${am.length > 3 ? ` +${am.length - 3}` : ''}` : 'Chưa chọn'],
               ['shield', 'Hủy & cọc', `${+s['freeCancelDays'] ? `Hủy miễn phí trước ${s['freeCancelDays']} ngày` : 'Không hoàn tiền khi hủy'}${+s['deposit'] ? ` · cọc ${s['deposit']}%` : ''}`],
             ] as [string, string, string][],
-            sched: '', steps: orderStepNames('service'),
+            sched: this.promoText(), steps: orderStepNames('service'),
           };
         }
         // 3 ô thông tin nhanh: lấy 3 ô đầu có nội dung
@@ -445,7 +552,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         ] as [string, string, string][]).filter((x) => String(x[2] ?? '').trim()).slice(0, 3);
         return {
           price: pr, unit: pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ', action: 'Đặt lịch', xu: (s['pay'] ?? []).includes('xu'),
-          facts, sched: '', steps: orderStepNames('service'),
+          facts, sched: this.promoText(), steps: orderStepNames('service'),
         };
       }
       default: {
@@ -465,6 +572,14 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     }
   });
 
+  /** "Giờ vàng −20% · 11:00 – 13:00 · T2, T3" ở đầu trang bài xem trước */
+  private promoText(): string {
+    const p = (this.v()['common'] as V)['promo'] as V;
+    if (!p?.['on'] || !(+p['value'] > 0) || this.type() === 'job') return '';
+    const days = ((p['days'] as number[]) ?? []).map((d) => this.promoWeek.find((w) => w.d === d)?.l).filter(Boolean);
+    return `${promoLabel({ kind: p['kind'], value: +p['value'] })} · ${p['from']} – ${p['to']}${days.length ? ' · ' + days.join(', ') : ''}`;
+  }
+
   // ---------------- lưu ----------------
 
   /** Kiểm tra thêm ngoài validator của từng ô; trả về câu báo lỗi đầu tiên */
@@ -473,7 +588,11 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     const s = this.form.get('spec')!.getRawValue() as V;
     if (t !== 'job' && !this.images.length) return 'Thêm ít nhất 1 ảnh để khách tin hơn';
     if (t === 'drink' && !this.items(s).length) return 'Thực đơn: nhập ít nhất một đồ uống có tên và giá';
-    if (t === 'food' && !this.items(s).length) return 'Thực đơn: nhập ít nhất một món có tên và giá';
+    if (t === 'food' && !s['combo']?.['on'] && !this.items(s).length) return 'Thực đơn: nhập ít nhất một món có tên và giá';
+    const comboErr = this.comboError();
+    if (comboErr) return comboErr;
+    const promoErr = this.promoError();
+    if (promoErr) return promoErr;
     if (t === 'service' && s['priceType'] !== 'quote' && !this.items(s).length) return 'Bảng giá: nhập ít nhất một dịch vụ có tên và giá (hoặc chọn “Báo giá sau”)';
     if (t === 'service' && this.svcPreset().stay && !String(s['building']).trim()) return 'Lưu trú: nhập tòa nhà';
     if (t === 'service' && !this.svcPreset().noPlace && (s['place'] === 'seller' || s['place'] === 'choice') && !String(s['where']).trim()) return 'Nhập nơi khách mang tới';
@@ -516,6 +635,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   private priceOf(s: V): { price: number; unit: string; stock: number; max: number; priceFrom?: boolean } {
     switch (this.type()) {
       case 'food': {
+        if (s['combo']?.['on']) return { price: +s['combo']['price'] || 0, unit: '/ combo', priceFrom: false, stock: 20, max: 20 };
         const { low, from } = this.lowest(this.items(s));
         // tồn mỗi ngày của bài = cộng số phần các món
         const day = this.items(s).reduce((n, x) => n + (+x['qty'] || 0), 0);
@@ -570,7 +690,11 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     const c = (p.form as V)['common'] as V;
     if (!this.auth.currentUser()) return;
     this.sellerApi
-      .savePost({ kind: p.kind, title: p.title, description: c['desc'], price: p.price, priceUnit: p.unit?.replace('/ ', ''), block: this.auth.currentUser()?.block ?? 'B', images: c['images'], acceptsXu: p.kind !== 'job' && ((((p.form as V)['spec'] as V)['pay'] as string[]) ?? []).includes('xu'), due: p.kind === 'job' ? this.preview().facts[0][2] : undefined })
+      .savePost({ kind: p.kind, title: p.title, description: c['desc'], price: p.price, priceUnit: p.unit?.replace('/ ', ''), block: this.auth.currentUser()?.block ?? 'B', images: c['images'], acceptsXu: p.kind !== 'job' && ((((p.form as V)['spec'] as V)['pay'] as string[]) ?? []).includes('xu'), due: p.kind === 'job' ? this.preview().facts[0][2] : undefined,
+        promo: this.promoOf(c, p.kind),
+        combo: p.kind === 'food' && (((p.form as V)['spec'] as V)['combo'] as V | undefined)?.['on']
+          ? { items: Object.entries((((p.form as V)['spec'] as V)['combo'] as V)['qty'] as Record<string, number>).filter(([, n]) => n > 0).map(([postId, qty]) => ({ postId, qty })), comboPrice: p.price }
+          : null })
       .subscribe({ error: () => undefined });
   }
 

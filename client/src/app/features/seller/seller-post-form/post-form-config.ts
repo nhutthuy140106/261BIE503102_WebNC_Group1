@@ -147,6 +147,8 @@ export function commonGroup(fb: FormBuilder, type: FormType) {
     areas: fb.control<string[]>([DEFAULT_AREA]),
     desc: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
     notes: strList(fb, ['']),
+    /** Giờ vàng (khuyến mãi theo khung giờ) — gửi lên server dạng `Promo` (core/utils/promo.ts); days: 0 = CN … 6 = T7, rỗng = mọi ngày */
+    promo: fb.group({ on: [false], kind: ['percent'], value: [10], from: ['11:00'], to: ['13:00'], days: fb.control<number[]>([]) }),
   });
 }
 
@@ -173,6 +175,8 @@ export function foodGroup(fb: FormBuilder) {
     minOrder: [1, Validators.min(1)],
     spicy: [false],
     kitchenNote: [true],
+    /** Combo: bài này gói các món đồ ăn khác của chính mình (postId → số lượng), giá combo < tổng giá lẻ */
+    combo: fb.group({ on: [false], price: [null as number | null], qty: fb.control<Record<string, number>>({}) }),
     /** tùy chọn nhanh người bán tự đặt (khách bật / tắt khi đặt, không tính tiền): lấy dụng cụ, để sốt riêng… */
     quick: fb.array([quickGroup(fb, 'Lấy dụng cụ ăn uống (muỗng, đũa, khăn giấy)')]),
     schedule: sellSchedule(fb, 30),
