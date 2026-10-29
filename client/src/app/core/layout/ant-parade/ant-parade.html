@@ -1,9 +1,7 @@
-@if (parade(); as p) {
-  <div class="lane" aria-hidden="true">
-    @for (a of p.ants; track $index) {
-      <span class="go" [class.rtl]="p.rtl" [style.animation-duration.s]="p.duration" [style.animation-delay.s]="a.delay" [style.bottom.px]="8 + a.lane">
-        <span class="ant" [style.--s]="a.size"></span>
-      </span>
+@if (ants().length) {
+  <div class="field" aria-hidden="true">
+    @for (a of ants(); track a) {
+      <span class="w"><span class="ant"></span></span>
     }
   </div>
 }
