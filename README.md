@@ -35,7 +35,7 @@ Mở 3 cửa sổ terminal, chạy **theo thứ tự**:
 # 2) API  → http://localhost:3000  (tài liệu Swagger: http://localhost:3000/api-docs)
 cd server
 npm install
-cp .env.example .env        # lần đầu: sửa .env, đặt SESSION_SECRET và SEED_PASSWORD (mật khẩu cho tài khoản mẫu)
+cp .env.example .env        # lần đầu: sửa .env, đặt SESSION_SECRET (SEED_PASSWORD đã có mật khẩu chung của nhóm: Antgo@2026)
 npm run seed                # nạp dữ liệu mẫu (chạy lại được để đưa dữ liệu về như ban đầu)
 npm start                   # hoặc `npm run dev` (tự khởi động lại khi sửa code)
 
@@ -45,7 +45,7 @@ npm install
 npm start                   # ng serve; /api được chuyển sang http://localhost:3000 qua proxy.conf.json
 ```
 
-Giao diện **mặc định dùng dữ liệu mẫu** (xem Cách 2). Để nối với API thật, mở **http://localhost:4200/?mock=0** một lần (trình duyệt nhớ lựa chọn); mở `?mock=1` để quay lại dữ liệu mẫu. Sau đó đăng nhập bằng **số điện thoại + mật khẩu** (mật khẩu = giá trị `SEED_PASSWORD` bạn đặt trong `server/.env`):
+Giao diện **tự nhận diện máy chủ** khi mở: server (`localhost:3000`) đang chạy thì dùng **dữ liệu thật + AI chatbot**; không có server thì dùng dữ liệu mẫu. Ép thủ công bằng `?mock=0` (dữ liệu thật), `?mock=1` (dữ liệu mẫu), `?mock=auto` (về tự nhận diện). Ở chế độ dữ liệu thật, đăng nhập bằng **số điện thoại + mật khẩu** — mật khẩu chung của nhóm là `Antgo@2026` (giá trị `SEED_PASSWORD` trong `server/.env.example`; trang đăng nhập có sẵn các nút chọn tài khoản dùng thử khi chạy dev):
 
 | Số điện thoại | Vai trò |
 |---|---|
@@ -98,7 +98,7 @@ cd server && npm test                   # test API (dùng MongoDB trong bộ nh�
 
 | Hiện tượng | Cách xử lý |
 |---|---|
-| Đăng nhập báo **"Số điện thoại hoặc mật khẩu không đúng"** (HTTP 401) | Đã mở `?mock=0` chưa? Phải nhập **số điện thoại** (không phải tên), mật khẩu là `SEED_PASSWORD` trong `server/.env`. Nếu đổi `SEED_PASSWORD` sau khi đã seed thì chạy lại `npm run seed`. |
+| Đăng nhập báo **"Số điện thoại hoặc mật khẩu không đúng"** (HTTP 401) | Đang ở chế độ dữ liệu thật chưa (server có chạy không)? Phải nhập **số điện thoại** (không phải tên), mật khẩu mặc định `Antgo@2026` (= `SEED_PASSWORD` trong `server/.env`). Nếu đổi `SEED_PASSWORD` sau khi đã seed thì chạy lại `npm run seed`. |
 | Trang trắng / "Không kết nối được máy chủ" | Server chưa chạy hoặc MongoDB chưa bật: kiểm tra `http://localhost:3000/api/health` trả `{"ok":true}`. |
 | Terminal ghi `ECONNREFUSED 127.0.0.1:3000` (proxy) | Chưa bật `server` — chạy `npm start` trong `server/` rồi tải lại trang. |
 | `Port 4200 is already in use` | Đã có một `ng serve` khác đang chạy: tắt nó, hoặc `npm start -- --port 4300` (nhớ đổi `CLIENT_ORIGIN` trong `server/.env` nếu gọi API trực tiếp). |

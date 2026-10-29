@@ -16,7 +16,7 @@ npm test                  # test luồng chính; dùng MongoDB trong bộ nhớ,
 
 - **Dữ liệu mẫu** (`src/seeds/data.js` + `seed.js`): 18 tài khoản (1 admin, 1 bị khóa, 16 người dùng), 38 bài (16 đồ ăn/uống, 4 combo, 9 đồ dùng + 1 bị gỡ, 8 dịch vụ; 11 bài có Giờ vàng phủ mọi giờ trong ngày), 14 việc, và dữ liệu giao dịch để xem được ngay: đơn đủ trạng thái (waiting → declined, có 2 đơn `delivering` giao tận nơi tới Block khác nhau), 13 đề nghị nhận việc, 12 đánh giá (có phản hồi), hỏi đáp, tin nhắn (1 tin chưa đọc), thông báo, báo cáo + nhật ký admin. Tài khoản chính để thử: `0900000001` (Ngọc Thủy). Seed chỉ xóa và tạo lại dữ liệu của chính các tài khoản mẫu, không đụng người dùng thật.
 - Cần MongoDB đang chạy (local hoặc Atlas). Không kết nối được thì server in lỗi rõ ràng và thoát.
-- Tài khoản seed (mật khẩu = `SEED_PASSWORD` trong `.env`, không viết cứng trong repo): `0900000001` Ngọc Thủy (người mua), `0900000002` Bếp Cô Lan, `0900000004` Chị Hoa, `0900000005` Quốc Anh, `0900000099` **admin**.
+- Tài khoản seed (mật khẩu = `SEED_PASSWORD` trong `.env`; `.env.example` đặt sẵn mật khẩu chung của nhóm `Antgo@2026` chỉ để demo/dev): `0900000001` Ngọc Thủy (người mua), `0900000002` Bếp Cô Lan, `0900000004` Chị Hoa, `0900000005` Quốc Anh, `0900000099` **admin**.
 - Xác thực bằng **session cookie** (`connect.sid`, httpOnly, lưu phiên trong MongoDB bằng `connect-mongo`). FE gọi kèm `withCredentials`; CORS chỉ cho `CLIENT_ORIGIN`.
 - `requests.http` là bộ request mẫu (VS Code "REST Client").
 
