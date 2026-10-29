@@ -252,6 +252,9 @@ Làm **một màn một lần** (đúng luật `CLAUDE.md`): tạo component b�
 - [ ] **7.10 Gắn API thật khi BE báo xong:** Xu/game (7.1), tracking (7.2); tắt mock tương ứng, thử `?mock=0`.
 - [ ] **7.11 Rà giao diện tổng thể** các trang mới (chatbot, skeleton, tracking, Vườn AntGo) trên 1440px và 390px; không để chữ tràn, ảnh vỡ, khoảng trắng thừa.
 
+- [ ] **7.15 Tìm bằng giọng nói / hình ảnh: tự tìm ngay, không cần bấm nút Tìm.** (a) **Giọng nói:** khi nhận dạng giọng nói *kết thúc* (sự kiện `onend`/có kết quả cuối `isFinal`), tự điền chữ vào ô và chạy tìm luôn (chuyển sang `/search?q=…`); nếu không nghe được gì thì báo "Mình chưa nghe rõ, bạn thử lại nhé" và không tìm. (b) **Hình ảnh:** vừa chọn xong hoặc thả ảnh vào là tự tìm theo ảnh, không chờ bấm; hiện trạng thái "Đang tìm theo ảnh…" (skeleton) rồi ra kết quả. (c) Áp dụng cho **cả hai ô tìm** (ô lớn ở trang chủ và ô gọn trên header). (d) Có nút ✕ để hủy/xóa ảnh hoặc chữ; chống gọi trùng (bỏ qua nếu đang tìm cùng nội dung); thân thiện bàn phím (Enter vẫn tìm thủ công). (e) Tìm bằng ảnh hiện chỉ mô phỏng — ghi rõ trong giao diện hoặc để BE bổ sung nhận dạng ảnh (có thể dùng mô hình thị giác qua `LLM_*` ở `server/`, ghi vào `decisions.md` nếu làm).
+  *Xong khi:* nói xong một câu hoặc chọn một ảnh thì trang kết quả hiện ra ngay mà không bấm thêm nút nào; ảnh chụp/quay thao tác ở 1440px và 390px.
+
 ### 7C — Planning/nhóm **[PL]** (phiên này)
 - [ ] **7.12** Chốt trần Xu game 30/ngày + 3 lượt (đã đề xuất, ghi `decisions.md` mục F10).
 - [ ] **7.13** Đối chiếu 6.6 (bảng yêu cầu môn học) sau khi 7A/7B xong; chuẩn bị kịch bản demo (xem dưới).
