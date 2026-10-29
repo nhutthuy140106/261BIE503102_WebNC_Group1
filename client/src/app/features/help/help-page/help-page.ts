@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { NgForm } from '@angular/forms';
 
 interface Faq {
   group: string;
@@ -57,4 +58,20 @@ export class HelpPage {
       ],
     },
   ];
+
+  /** Form góp ý (template-driven + [(ngModel)]): demo lưu ở trình duyệt, chưa gửi tới máy chủ. */
+  protected fb = { topic: '', text: '' };
+  protected sent = false;
+
+  protected send(f: NgForm): void {
+    if (f.invalid) return;
+    try {
+      const all = JSON.parse(localStorage.getItem('antgo_feedback') ?? '[]') as unknown[];
+      localStorage.setItem('antgo_feedback', JSON.stringify([...all, { ...this.fb, at: new Date().toISOString() }]));
+    } catch {
+      /* trình duyệt chặn lưu: vẫn báo đã ghi nhận trong phiên */
+    }
+    this.sent = true;
+    f.resetForm({ topic: '', text: '' });
+  }
 }

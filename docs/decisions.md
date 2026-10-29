@@ -275,5 +275,11 @@ Hai phần này dựa vào schema chung nên **Q1–Q8** nên được chốt tr
 ### [29/10] F10 — Luật game Hái xu và sổ Xu ở server
 - Trạng thái: CẦN CHỐT (Planning)
 - Người ghi: BE
-- Nội dung: server tự kiểm để chống gian lận (FE lưu localStorage thì sửa được): **tối đa 3 lượt/ngày** cho game `hai-xu`, **trần 30 Xu/ngày từ game**, **điểm ≤ 80/lượt**, **8 điểm = 1 Xu** (một lượt tối đa 10 Xu), ngày tính theo giờ Việt Nam; vượt giới hạn trả 429 `GAME_LIMIT`. Xu chào mừng 30 (một lần). Voucher đổi bằng Xu có hạn **30 ngày**, danh mục `v10` (20 Xu), `v20` (50 Xu), `ship` (30 Xu) khớp FE. Chưa làm: Xu hết hạn sau 6 tháng, cộng Xu khi hoàn thành đơn/việc/đánh giá ở server, dùng mã `XU-…` khi đặt đơn (hiện `POST /orders` vẫn nhận `XU10`/`XU5` tạm).
+- Nội dung: server tự kiểm để chống gian lận (FE lưu localStorage thì sửa được): **tối đa 3 lượt/ngày** cho game `hai-xu`, **trần 30 Xu/ngày từ game**, **điểm ≤ 80/lượt**, **8 điểm = 1 Xu** (một lượt tối đa 10 Xu), ngày tính theo giờ Việt Nam; vượt giới hạn trả 429 `GAME_LIMIT`. Xu chào mừng 30 (một lần). Voucher đổi bằng Xu có hạn **30 ngày**, danh mục `v10` (20 Xu), `v20` (50 Xu), `ship` (30 Xu) khớp FE. Đã làm (29/10): cộng Xu ở server khi xong đơn (+10, đơn ≥ 30.000đ, tối đa 3 đơn/ngày), đánh giá có chữ (+5), việc xong (+15); mã `XU-…` dùng được ở `POST /orders` và được trả lại khi đơn hủy. Chưa làm: Xu hết hạn sau 6 tháng, thu lại Xu khi hoàn tiền, voucher hết hạn thì không tự dọn.
 - Quyết định: (điền khi chốt)
+
+### [29/10] F11 — Hoãn giỏ hàng theo session ở FE (7.9b)
+- Trạng thái: ĐÃ GHI (FE)
+- Người ghi: FE
+- Nội dung: `CartService` có sẵn nhưng chưa nối giao diện. Luồng đặt hiện tại là "đặt 2 bước" (chọn món → hộp Xác nhận đơn hàng → đặt ngay) cho **một bài mỗi đơn**, nên giỏ nhiều bài làm luồng rối thêm và phải đổi cả đơn/Xu/voucher.
+- Quyết định: hoãn; chỉ nối giỏ khi nhóm chốt cho đặt nhiều bài một đơn. Khi đó nối `POST /api/cart/add` (session phía server) thay cho bộ nhớ trình duyệt.

@@ -118,6 +118,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   /** Kiến người nhện chào hàng xóm: các câu đổi dần, bấm vào kiến để nghe câu khác (giống kiến ở trang giới thiệu). */
   protected readonly greeting = signal('');
   protected readonly greetingShown = signal(false);
+  /** Chuỗi cố định do code viết (không chứa dữ liệu người dùng) nên an toàn khi dùng [innerHTML]. */
   private readonly chat = ['Chào <i>hàng xóm</i>!', 'Cần gì <i>cứ gọi</i>!', 'Có <i>mình</i> đây!', 'Ghé chơi <i>nha</i>!'];
   private chatIndex = 0;
   private timers: ReturnType<typeof setTimeout>[] = [];

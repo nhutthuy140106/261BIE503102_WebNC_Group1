@@ -50,6 +50,7 @@ export class Landing implements AfterViewInit, OnDestroy {
   protected readonly introUi = signal(false);
   protected readonly word = signal<WordState>('hidden');
   protected readonly flyerShown = signal(false);
+  /** Chỉ nhận chuỗi cố định do code viết, không chứa dữ liệu người dùng → an toàn với [innerHTML]. */
   protected readonly bubbleHtml = signal('Chào <i>hàng xóm</i>!');
   protected readonly bubbleShow = signal(false);
   protected readonly puffs = signal<Puff[]>([]);

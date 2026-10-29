@@ -10,7 +10,7 @@
 
 | Terminal | Đang làm | Tiếp theo |
 |---|---|---|
-| **BE** | Xong 2.0–2.18 + chatbot/tìm thông minh/gợi ý giá (commit `9a310be`). | **Phase 7A: 7.1 → 7.5** (sổ Xu + game chống gian lận, `/orders/:id/tracking`, seed giàu, bảo mật, tài liệu) |
+| **BE** | Xong Phase 7A (7.1 → 7.6). Đang làm thêm (29/10): server cộng Xu khi xong đơn/việc/đánh giá + dùng mã `XU-…` ở `POST /orders` + test rate limit (xong, chờ push). | Chờ chốt F10 (hết hạn Xu 6 tháng, luật cộng Xu) |
 | **FE** | Xong giao diện trang chính + chatbot, skeleton, bản đồ theo dõi, Vườn AntGo/Hái xu (commit `8a5f959`, `77669b6`). | **Phase 7B: 7.7 → 7.11** (bản đồ cho mọi đơn giao + "Cách bạn X km", làm đẹp + 2 game còn lại, lấp lỗ hổng môn học, `/admin`) |
 | **PL / nhóm** | Phase 7 (29/10) | 7.12–7.14 · F1–F4 · **0.6/Q0** quyền ghi repo |
 
@@ -248,7 +248,7 @@ Làm **một màn một lần** (đúng luật `CLAUDE.md`): tạo component b�
   *Xong khi:* mở 3 đơn khác nhau thấy 3 tuyến khác nhau; có "Cách bạn X km"; ảnh chụp desktop + 390px.
 - [x] **7.8 Làm đẹp & hoàn thiện Vườn AntGo:** (a) rà giao diện hub + Hái xu theo phong cách trang chủ (bớt "mùi game", khớp màu/chữ/bo góc, icon Phosphor), vật phẩm Hái xu rõ hơn trên nền sáng, hiệu ứng bắt xu; (b) **Tưới cây** (cây xoài 4 giai đoạn, ≤ 3 lần tưới/ngày, thu hoạch nhận Xu); (c) **Nuôi thú cưng** (đói/vui, điểm danh liên tiếp); (d) mọi thưởng đi qua `XuService.earnGame` (trần 30 Xu/ngày chung); (e) kiểm mobile 390px, `prefers-reduced-motion`; (f) khi BE xong 7.1 thì gọi API thay localStorage.
   *Xong khi:* 3 game chơi được trọn vòng, trần ngày hoạt động, ảnh chụp từng game.
-- [ ] **7.9 Lấp lỗ hổng yêu cầu môn học:** (a) thêm **ít nhất một form template-driven + two-way binding `[(ngModel)]`** có `ngForm` + validation (gợi ý: ô góp ý/Hỗ trợ hoặc chỉnh hồ sơ); (b) **giỏ hàng theo session** nối UI (`CartService`) nếu còn phù hợp với đặt 2 bước, hoặc ghi lý do hoãn vào `decisions.md`; (c) **`/admin`** (3.10–3.11: danh sách người dùng, ẩn/hiện bài, xử lý báo cáo) có `adminGuard`; (d) sửa test `api-mappers.spec.ts` đang đỏ (mapper thông báo dùng ", " thay vì " — "); (e) rà `[innerHTML]` với dữ liệu người dùng.
+- [x] **7.9 Lấp lỗ hổng yêu cầu môn học:** (a) thêm **ít nhất một form template-driven + two-way binding `[(ngModel)]`** có `ngForm` + validation (gợi ý: ô góp ý/Hỗ trợ hoặc chỉnh hồ sơ); (b) **giỏ hàng theo session** nối UI (`CartService`) nếu còn phù hợp với đặt 2 bước, hoặc ghi lý do hoãn vào `decisions.md`; (c) **`/admin`** (3.10–3.11: danh sách người dùng, ẩn/hiện bài, xử lý báo cáo) có `adminGuard`; (d) sửa test `api-mappers.spec.ts` đang đỏ (mapper thông báo dùng ", " thay vì " — "); (e) rà `[innerHTML]` với dữ liệu người dùng.
 - [ ] **7.10 Gắn API thật khi BE báo xong:** Xu/game (7.1), tracking (7.2); tắt mock tương ứng, thử `?mock=0`.
 - [ ] **7.11 Rà giao diện tổng thể** các trang mới (chatbot, skeleton, tracking, Vườn AntGo) trên 1440px và 390px; không để chữ tràn, ảnh vỡ, khoảng trắng thừa.
 

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { Report, ReportReason } from '../models/social';
@@ -24,6 +24,22 @@ export class ReportService {
         const r: Report = { _id: this.db.newId(), ...body, state: 'open', createdAt: new Date().toISOString() };
         this.db.save(COLLECTION, [r, ...rows]);
         return r;
+      }),
+    );
+  }
+
+  /** Quản trị: danh sách báo cáo (mock; thật gọi GET /admin/reports). */
+  list(): Observable<Report[]> {
+    if (!useMock('report')) return this.api.get<Report[]>('/admin/reports');
+    return this.db.list<Report>(COLLECTION);
+  }
+
+  /** Quản trị: đánh dấu đã xử lý. */
+  resolve(id: string): Observable<void> {
+    if (!useMock('report')) return this.api.patch<unknown>('/admin/reports/' + id, { state: 'resolved' }).pipe(map(() => undefined));
+    return this.db.list<Report>(COLLECTION).pipe(
+      map((rows) => {
+        this.db.save(COLLECTION, rows.map((r) => (r._id === id ? { ...r, state: 'resolved' as const } : r)));
       }),
     );
   }

@@ -18,4 +18,24 @@
   </section>
 }
 
+<section class="fb">
+  <h2>Góp ý cho AntGo</h2>
+  <form #f="ngForm" (ngSubmit)="send(f)" novalidate>
+    <label for="fbTopic">Chủ đề</label>
+    <select id="fbTopic" name="topic" [(ngModel)]="fb.topic" required>
+      <option value="">Chọn chủ đề</option>
+      <option>Giao diện khó dùng</option>
+      <option>Lỗi khi đặt hàng / nhận việc</option>
+      <option>Đề xuất tính năng</option>
+      <option>Khác</option>
+    </select>
+    <label for="fbText">Nội dung</label>
+    <textarea id="fbText" name="text" rows="4" [(ngModel)]="fb.text" #text="ngModel" required minlength="10" maxlength="500" placeholder="Bạn gặp gì, mong muốn gì? (ít nhất 10 ký tự)"></textarea>
+    @if (text.invalid && (text.touched || f.submitted)) { <small class="err" role="alert">Vui lòng nhập ít nhất 10 ký tự.</small> }
+    <small class="cnt">{{ fb.text.length }}/500</small>
+    <button type="submit" [disabled]="f.invalid && f.submitted">Gửi góp ý</button>
+    @if (sent) { <p class="okmsg" role="status">Đã ghi nhận góp ý của bạn (bản demo lưu trong trình duyệt). Cảm ơn bạn!</p> }
+  </form>
+</section>
+
 <p class="foot">Không tìm thấy câu trả lời? <a routerLink="/legal">Xem điều khoản & chính sách</a></p>
