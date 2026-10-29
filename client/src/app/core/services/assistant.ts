@@ -1,7 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 import { useMock } from '../config/api.config';
+import { localAssistant } from '../utils/assistant-local';
 import { ApiService } from './api';
+import { OrderService } from './order';
+import { PostService } from './post';
 
 /** Thẻ bài trợ lý gợi ý (server trả từ kho bài đăng thật). */
 export interface AssistantCard {
@@ -30,10 +33,20 @@ export interface AssistantTurn {
 @Injectable({ providedIn: 'root' })
 export class AssistantService {
   private readonly api = inject(ApiService);
+  private readonly posts = inject(PostService);
+  private readonly orders = inject(OrderService);
 
   ask(history: AssistantTurn[]): Observable<AssistantReply> {
     if (useMock('assistant')) {
-      return of({ reply: 'Chế độ dữ liệu mẫu: trợ lý chỉ trả lời khi chạy cùng máy chủ (bật server và đặt USE_MOCK = false).', cards: [] });
+      // Dữ liệu mẫu: trả lời ngay trên trình duyệt (không cần máy chủ). Mở `?mock=0` để dùng trợ lý AI của máy chủ.
+      const users = history.filter((t) => t.role === 'user');
+      const last = users[users.length - 1]?.content ?? '';
+      const prev = users[users.length - 2]?.content;
+      return forkJoin({ posts: this.posts.getPosts(), orders: this.orders.getOrders() }).pipe(
+        map(({ posts, orders }) =>
+          localAssistant(last, prev, posts, orders.filter((o) => o.type === 'placed' && !['done', 'cancelled', 'declined'].includes(o.status)).slice(0, 5).map((o) => `• ${o.code} · ${o.postTitle} — ${o.total.toLocaleString('vi-VN')}đ`)),
+        ),
+      );
     }
     return this.api.post<AssistantReply>('/assistant/chat', { messages: history });
   }

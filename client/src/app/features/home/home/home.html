@@ -35,9 +35,12 @@
         (dragleave)="dragging.set(false)" (drop)="onDrop($event)">
     @if (search.imageUrl(); as img) {
       <span class="imgchip">
-        <img [src]="img" alt="" /><span>Tìm theo ảnh</span>
-        <button type="button" (click)="search.clearImage()" aria-label="Bỏ ảnh"><svg class="i"><use href="#xmark" /></svg></button>
+        <img [src]="img" alt="" /><span>{{ search.searching() ? 'Đang tìm theo ảnh…' : 'Tìm theo ảnh' }}</span>
+        <button type="button" (click)="search.cancel()" aria-label="Hủy tìm theo ảnh"><svg class="i"><use href="#xmark" /></svg></button>
       </span>
+    }
+    @if (search.recording() || search.searching()) {
+      <button type="button" class="sbtn" title="Hủy" aria-label="Hủy" (click)="search.cancel()"><svg class="i"><use href="#xmark" /></svg></button>
     }
     <input #q [value]="search.text()" (input)="search.text.set($any($event.target).value)" [placeholder]="search.placeholder()" aria-label="Tìm kiếm" />
     <button type="button" class="sbtn" [class.rec]="search.recording()" title="Tìm bằng giọng nói" (click)="search.voice()"><svg class="i"><use href="#mic" /></svg></button>
