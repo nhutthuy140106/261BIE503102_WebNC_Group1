@@ -5,6 +5,7 @@ const { nextCode } = require('../../shared/counter.model');
 const { notify } = require('../../shared/notify');
 const ApiError = require('../../../utils/ApiError');
 const { parsePaging } = require('../../../utils/pagination');
+const { compute: computeTracking, canTrack } = require('./tracking');
 
 // Voucher AntXu tạm (Q11): sau này lấy từ model Voucher. Chỉ áp cho bài có acceptsXu.
 const VOUCHERS = { XU10: { amount: 10000 }, XU5: { amount: 5000 } };
@@ -145,6 +146,14 @@ async function getVisible(user, id) {
   return o;
 }
 
+// Vị trí xe mô phỏng (xem tracking.js); chỉ đơn có giao tận nơi
+async function tracking(user, id) {
+  const o = await getVisible(user, id);
+  if (!canTrack(o)) throw new ApiError(404, 'NO_TRACKING', 'Đơn này không có theo dõi giao hàng');
+  const post = await Post.findById(o.post).select('area');
+  return computeTracking(o, post);
+}
+
 async function getOwned(user, id) {
   const o = await getVisible(user, id);
   if (String(o.buyer) !== String(user._id)) throw ApiError.forbidden('Chỉ người đặt mới thực hiện được thao tác này');
@@ -185,4 +194,5 @@ async function approveSurcharge(user, id) {
   return o;
 }
 
-module.exports = { create, prepare, commit, list, getVisible, requestCancel, requestReturn, approveSurcharge, priceOrder };
+module.exports = {
+  tracking, create, prepare, commit, list, getVisible, requestCancel, requestReturn, approveSurcharge, priceOrder };
