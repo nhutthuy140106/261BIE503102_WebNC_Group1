@@ -87,6 +87,11 @@
         </li>
       }
     </ul>
+    <a class="gamelink" routerLink="/vuon" (click)="goAll()">
+      <svg class="i"><use href="#coin" /></svg>
+      <span><b>Chơi game kiếm Xu</b><small>{{ xu.gameToday() }}/{{ gameCap }} Xu hôm nay</small></span>
+      <svg class="i go"><use href="#right" /></svg>
+    </a>
     <p class="dnote">Xu hết hạn sau 6 tháng kể từ ngày nhận. Xu không mua bằng tiền và không đổi ra tiền. Voucher dùng được ở bài có nhãn "Dùng được Xu", người bán tự chọn tham gia.</p>
     <a class="xuhist" routerLink="/xu" (click)="goAll()">Lịch sử Xu<svg class="i"><use href="#right" /></svg></a>
   </div>

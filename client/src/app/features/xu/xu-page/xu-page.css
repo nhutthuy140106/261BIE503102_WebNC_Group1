@@ -29,3 +29,10 @@ h1 { font-size: 28px; letter-spacing: -.02em; margin: 8px 0 18px; }
 .none { color: var(--smoke); font-size: 14px; padding: 12px 2px; margin: 0; }
 .moreb { margin-top: 12px; background: none; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .note { margin-top: 26px; font-size: 13px; line-height: 1.6; color: var(--smoke); }
+.gamelink { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 12px 14px; border: 1px dashed #D85A1C; border-radius: 12px; background: #FBF4F1; color: #22304A; }
+.gamelink .i { width: 22px; height: 22px; fill: currentColor; color: #D85A1C; flex: none; }
+.gamelink span { flex: 1; font-size: 14px; }
+.gamelink b { display: block; }
+.gamelink small { color: #6b7280; font-size: 12px; }
+.gamelink .go { width: 16px; height: 16px; color: #22304A; }
+.gamelink:hover { background: #f6e8e1; }

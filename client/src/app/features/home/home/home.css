@@ -128,3 +128,13 @@
 
 .popline .spinlink { padding: 6px 14px; border: 1px dashed var(--accent); border-radius: 999px; color: var(--accent); font-size: 13px; font-weight: 600; }
 .popline .spinlink:hover { background: var(--accent-soft); }
+
+.gband { margin-top: 48px; display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1px solid var(--line, #F0E2DC); border-radius: 14px; background: #FBF4F1; color: #22304A; }
+.gband img { flex: none; }
+.gband span:nth-of-type(1) { flex: 1; min-width: 0; font-size: 14px; }
+.gband b { display: block; font-size: 16px; }
+.gband small { color: #6b7280; }
+.gband .gobtn { flex: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #D85A1C; }
+.gband .gobtn svg { width: 14px; height: 14px; fill: currentColor; }
+.gband:hover { background: #f6e8e1; }
+@media (max-width: 640px) { .gband { flex-wrap: wrap; } .gband .gobtn { margin-left: 58px; } }

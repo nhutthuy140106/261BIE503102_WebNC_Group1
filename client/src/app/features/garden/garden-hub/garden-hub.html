@@ -1,11 +1,14 @@
 <section class="hub">
-  <header>
+  <header class="hd">
+    <img src="assets/clean/ride_point2.png" alt="" width="96" height="96" />
+    <div>
     <h1>Vườn AntGo</h1>
     <p>Chơi vui mỗi ngày để nhận thêm Xu — dùng đổi voucher giảm giá khi đặt đơn.</p>
     <div class="cap" role="status">
       <span>Xu nhận từ game hôm nay</span>
       <div class="bar"><i [style.width.%]="xu.gameToday() / cap * 100"></i></div>
       <b>{{ xu.gameToday() }}/{{ cap }}</b>
+    </div>
     </div>
   </header>
 
@@ -16,18 +19,18 @@
       <p>30 giây hứng xu rơi từ cây xoài. Xu vàng +5, tránh bọ xít!</p>
       <span class="meta">Còn {{ garden.coinPlaysLeft() }}/{{ maxPlays }} lượt hôm nay · Kỷ lục {{ garden.best() }}</span>
     </a>
-    <div class="game soon">
+    <a routerLink="tuoi-cay" class="game">
       <div class="art"><svg class="i" width="34" height="34"><use href="#bolt" /></svg></div>
       <h2>Tưới cây</h2>
-      <p>Chăm cây xoài lớn dần mỗi ngày, thu hoạch nhận Xu.</p>
-      <span class="meta">Sắp ra mắt</span>
-    </div>
-    <div class="game soon">
+      <p>Chăm cây xoài lớn dần mỗi ngày, thu hoạch nhận {{ treeReward }} Xu.</p>
+      <span class="meta">Cây {{ garden.tree() }}/{{ treeFull }} · Còn {{ garden.waterLeft() }} lượt tưới hôm nay</span>
+    </a>
+    <a routerLink="thu-cung" class="game">
       <div class="art"><svg class="i" width="34" height="34"><use href="#heart" /></svg></div>
       <h2>Nuôi thú cưng</h2>
-      <p>Cho ăn, vui chơi và điểm danh để nhận thưởng.</p>
-      <span class="meta">Sắp ra mắt</span>
-    </div>
+      <p>Cho ăn, chơi cùng và tắm cho bé mỗi ngày để nhận thưởng.</p>
+      <span class="meta">{{ garden.petClaimed() ? 'Hôm nay đã nhận thưởng' : garden.petDone().length + '/3 việc hôm nay' }}</span>
+    </a>
   </div>
 
   @if (garden.codes().length) {

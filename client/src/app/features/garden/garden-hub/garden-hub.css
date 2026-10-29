@@ -20,3 +20,7 @@ a.game:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(34, 48, 
 .codes code { background: #fff; padding: 2px 8px; border: 1px dashed #D85A1C; border-radius: 6px; color: #D85A1C; font-weight: 700; }
 .foot { margin: 0; color: #6b7280; font-size: 13px; }
 @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+.hd { display: flex; align-items: center; gap: 18px; padding: 16px 18px; border: 1px solid #F0E2DC; border-radius: 16px; background: #FBF4F1; }
+.hd > div { flex: 1; min-width: 0; }
+.hd img { object-fit: contain; flex: none; }
+@media (max-width: 520px) { .hd img { width: 64px; height: 64px; } }

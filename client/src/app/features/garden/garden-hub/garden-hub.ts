@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { COIN_MAX_PLAYS, COIN_MILESTONES, GardenService } from '../../../core/services/garden';
+import { COIN_MAX_PLAYS, COIN_MILESTONES, GardenService, TREE_FULL, TREE_REWARD } from '../../../core/services/garden';
 import { GAME_DAILY_CAP, XuService } from '../../../core/services/xu';
 
 /** Trang chủ "Vườn AntGo": các mini game kiếm Xu (phần thưởng mô phỏng, có trần mỗi ngày). */
@@ -14,5 +14,7 @@ export class GardenHub {
   protected readonly xu = inject(XuService);
   protected readonly cap = GAME_DAILY_CAP;
   protected readonly maxPlays = COIN_MAX_PLAYS;
+  protected readonly treeFull = TREE_FULL;
+  protected readonly treeReward = TREE_REWARD;
   protected readonly milestones = COIN_MILESTONES;
 }

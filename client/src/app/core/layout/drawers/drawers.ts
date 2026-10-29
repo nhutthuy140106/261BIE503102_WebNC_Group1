@@ -5,7 +5,7 @@ import { DrawerService } from '../../services/drawer';
 import { PostService } from '../../services/post';
 import { SavedService } from '../../services/saved';
 import { ToastService } from '../../services/toast';
-import { XuService } from '../../services/xu';
+import { GAME_DAILY_CAP, XuService } from '../../services/xu';
 import { createSlug } from '../../utils/slug-helper';
 
 type SavedFilter = 'all' | PostKind;
@@ -21,6 +21,7 @@ export class Drawers {
   protected readonly drawer = inject(DrawerService);
   protected readonly saved = inject(SavedService);
   protected readonly xu = inject(XuService);
+  protected readonly gameCap = GAME_DAILY_CAP;
   private readonly posts = inject(PostService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);

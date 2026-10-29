@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ToastService } from '../../../core/services/toast';
-import { XuService } from '../../../core/services/xu';
+import { GAME_DAILY_CAP, XuService } from '../../../core/services/xu';
 
 /** Trang AntXu riêng: số dư, đổi voucher, voucher của bạn, cách nhận thêm Xu, lịch sử. */
 @Component({
@@ -11,6 +11,7 @@ import { XuService } from '../../../core/services/xu';
 })
 export class XuPage {
   protected readonly xu = inject(XuService);
+  protected readonly gameCap = GAME_DAILY_CAP;
   private readonly toast = inject(ToastService);
 
   protected readonly showAll = signal(false);
