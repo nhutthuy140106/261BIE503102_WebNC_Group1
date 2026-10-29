@@ -63,7 +63,7 @@ Nút con kiến ở góc phải dưới mở khung chat tư vấn món ăn, đ�
 
 | Chế độ | Cách hoạt động | Chi phí |
 |---|---|---|
-| `auto` (mặc định) | Thử lần lượt **Gemini** (`GEMINI_API_KEY`) → **nhà cung cấp kiểu OpenAI như Groq** (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, ví dụ `openai/gpt-oss-120b`) → **bộ trả lời cơ bản**; bước nào thiếu khóa hoặc lỗi thì chuyển sang bước sau | Gói miễn phí của Google / Groq |
+| `auto` (mặc định) | **Lai:** câu quen thuộc (chào hỏi, đơn của tôi, chọn giúp, tìm món khớp rõ) bộ luật trả ngay; câu lạ/gõ sai/mơ hồ mới gọi AI. Thứ tự AI:  **Gemini** (`GEMINI_API_KEY`) → **nhà cung cấp kiểu OpenAI như Groq** (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, ví dụ `openai/gpt-oss-120b`) → **bộ trả lời cơ bản**; bước nào thiếu khóa hoặc lỗi thì chuyển sang bước sau | Gói miễn phí của Google / Groq |
 | `llm` | Chỉ dùng nhà cung cấp kiểu OpenAI, lỗi thì báo lỗi | Gói miễn phí của Groq |
 | `gemini` | Bắt buộc dùng Gemini; thiếu khóa hoặc lỗi thì báo lỗi | Gói miễn phí của Google |
 | `local` | Luôn dùng **bộ cơ bản**: hiểu câu hỏi bằng quy tắc (loại bài, khoảng giá "dưới 50k", bữa ăn, từ khóa), tìm và xếp hạng trong bài đăng thật | Miễn phí, không cần khóa |

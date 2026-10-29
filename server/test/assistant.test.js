@@ -70,7 +70,7 @@ test('Gemini gọi search_catalog → server chạy tìm thật → trả câu t
     assert.ok(last.parts[0].functionResponse, 'lượt 2 phải gửi kết quả công cụ');
     return jsonRes(200, { candidates: [{ content: { role: 'model', parts: [{ text: 'Mình gợi ý món cơm này nhé.' }] } }] });
   });
-  const r = await ask('trưa nay ăn cơm dưới 100k');
+  const r = await ask('bầu trời hôm nay màu gì');
   assert.equal(r.status, 200);
   assert.equal(r.body.data.engine, 'gemini');
   assert.equal(r.body.data.reply, 'Mình gợi ý món cơm này nhé.');
@@ -151,7 +151,7 @@ test('LLM kiểu OpenAI (Groq/OpenRouter…): gọi công cụ → trả thẻ b
     assert.equal(last.tool_call_id, 'c1');
     return jsonRes(200, { choices: [{ message: { role: 'assistant', content: 'Gợi ý món cơm cho bạn nhé.' } }] });
   });
-  const r = await ask('trưa nay ăn cơm dưới 100k');
+  const r = await ask('bầu trời hôm nay màu gì');
   assert.equal(r.status, 200);
   assert.equal(r.body.data.engine, 'llm');
   assert.equal(r.body.data.reply, 'Gợi ý món cơm cho bạn nhé.');
@@ -165,10 +165,10 @@ test('Gemini lỗi → thử LLM kiểu OpenAI → nếu cũng lỗi thì bộ c
   process.env.GEMINI_API_KEY = 'g'; process.env.LLM_API_KEY = 'l'; delete process.env.ASSISTANT_MODE;
   assistant.setGeminiFetch(async () => jsonRes(403, { error: 'denied' }));
   assistant.setLlmFetch(async () => jsonRes(200, { choices: [{ message: { role: 'assistant', content: 'Từ LLM' } }] }));
-  let r = await ask('xin chào');
+  let r = await ask('bầu trời hôm nay màu gì');
   assert.equal(r.body.data.engine, 'llm');
   assistant.setLlmFetch(async () => jsonRes(500, {}));
-  r = await ask('xin chào');
+  r = await ask('bầu trời hôm nay màu gì');
   assert.equal(r.status, 200);
   assert.equal(r.body.data.engine, 'local');
 });
@@ -205,7 +205,7 @@ test('LLM gọi my_orders: chỉ đọc đơn của chính người đang chat',
     seen = last.content;
     return jsonRes(200, { choices: [{ message: { role: 'assistant', content: 'ok' } }] });
   });
-  const r = await ask('đơn của tôi');
+  const r = await ask('bầu trời hôm nay màu gì');
   assert.equal(r.body.data.engine, 'llm');
   assert.ok(seen.length > 0);
 });
@@ -215,4 +215,29 @@ test('tìm kiếm gõ sai ("coom gaa") vẫn ra bài qua API công khai, có c�
   assert.equal(r.status, 200);
   assert.ok(r.body.data.length >= 1, 'phải ra bài cơm dù gõ sai');
   assert.equal(r.body.meta.smart, true);
+});
+
+test('lai: câu quen thuộc bộ luật trả ngay (không gọi AI); câu lạ mới nhờ AI', async () => {
+  delete process.env.GEMINI_API_KEY; delete process.env.GOOGLE_API_KEY; delete process.env.ASSISTANT_MODE;
+  process.env.LLM_API_KEY = 'k';
+  let calls = 0;
+  assistant.setLlmFetch(async () => { calls++; return jsonRes(200, { choices: [{ message: { role: 'assistant', content: 'AI trả lời' } }] }); });
+  let r = await ask('xin chào');
+  assert.equal(r.body.data.engine, 'local');
+  r = await ask('trưa nay ăn cơm dưới 100k');
+  assert.equal(r.body.data.engine, 'local');
+  assert.equal(calls, 0, 'câu quen thuộc không được tốn lượt AI');
+  r = await ask('bầu trời hôm nay màu gì');
+  assert.equal(r.body.data.engine, 'llm');
+  assert.equal(r.body.data.reply, 'AI trả lời');
+  assert.equal(calls, 1);
+});
+
+test('lai: AI lỗi thì câu lạ vẫn có câu trả lời từ bộ luật', async () => {
+  delete process.env.GEMINI_API_KEY; delete process.env.GOOGLE_API_KEY; delete process.env.ASSISTANT_MODE;
+  process.env.LLM_API_KEY = 'k';
+  assistant.setLlmFetch(async () => jsonRes(500, {}));
+  const r = await ask('bầu trời hôm nay màu gì');
+  assert.equal(r.status, 200);
+  assert.equal(r.body.data.engine, 'local');
 });

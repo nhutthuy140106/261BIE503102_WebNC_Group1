@@ -123,7 +123,7 @@ async function plan(q) {
 }
 
 /** Trả lời một câu hỏi. `prev` là câu hỏi trước đó của người dùng (để hiểu câu nối tiếp như "rẻ hơn"). */
-async function answer(text, prev, user) {
+async function answerCore(text, prev, user) {
   let q = parse(text);
 
   if (q.intent === 'greet') return { reply: 'Chào bạn! Mình là trợ lý AntGo. Bạn muốn tìm món ăn, đồ uống, đồ dùng, dịch vụ hay việc làm trong khu? Cứ nói ngân sách hoặc món bạn thích nhé.', cards: [] };
@@ -182,6 +182,7 @@ Chưa ưng thì nói "chọn món khác" hoặc mở trang Quay món.` : r.text,
         ? 'Hiện chưa có bài nào khớp với yêu cầu này. Bạn thử đổi từ khóa, nâng ngân sách hoặc bỏ bớt điều kiện nhé — hoặc hỏi "món gì đang có" để mình gợi ý.'
         : 'Bạn muốn tìm món ăn, đồ uống, đồ dùng, dịch vụ hay việc làm? Cho mình biết món hoặc ngân sách để gợi ý nhé.',
       cards: [],
+      confident: false, // không khớp bài nào: câu lạ hoặc gõ sai, nhường cho AI
     };
   }
 
@@ -192,7 +193,21 @@ Chưa ưng thì nói "chọn món khác" hoặc mở trang Quay món.` : r.text,
   const head = relaxed
     ? `Chưa có ${label}${budget} đúng ý, nhưng đây là vài lựa chọn gần nhất:`
     : `Mình tìm được ${pick.length} ${label}${budget} cho bạn:`;
-  return { reply: `${head}\n${lines}\nBấm vào thẻ bên dưới để xem chi tiết và đặt nhé.`, cards };
+  // "Quen thuộc" = bài khớp phần lớn từ khóa, không phải nới giá, câu không quá dài; còn lại để AI xử lý
+  const top = pick[0];
+  const hit = q.tokens.filter((w) => scoreOf(top.hay, [w], []) > 0).length;
+  const coverage = q.tokens.length ? hit / q.tokens.length : 1;
+  const confident = !relaxed && coverage >= 0.6 && q.tokens.length <= 5;
+  return { reply: `${head}\n${lines}\nBấm vào thẻ bên dưới để xem chi tiết và đặt nhé.`, cards, confident };
+}
+
+const KNOWN_INTENTS = new Set(['greet', 'thanks', 'help', 'orders', 'pick', 'plan']);
+
+/** Trả lời bằng luật. `confident` = câu quen thuộc, bộ luật tự tin trả lời; false = nên nhờ AI. */
+async function answer(text, prev, user) {
+  const r = await answerCore(text, prev, user);
+  if (KNOWN_INTENTS.has(parse(text).intent)) r.confident = true;
+  return { ...r, confident: !!r.confident };
 }
 
 module.exports = { parse, answer };

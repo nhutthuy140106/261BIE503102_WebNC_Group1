@@ -71,3 +71,6 @@ Chạy: `cd server && npm run eval:recommend` (script `server/scripts/eval-recom
 | 5 | 91,9% | 25,8% |
 
 - **Lưu ý khi trình bày (không nói quá):** (1) nhãn "cùng danh mục" chỉ là xấp xỉ, không phải đánh giá của người dùng thật; (2) danh mục cũng nằm trong văn bản bài và trong điểm "cùng loại" nên có phần **rò nhãn**, con số thực tế khó đạt cao như vậy với nhãn độc lập; (3) kho chỉ 32 bài. Số này chỉ cho thấy thuật toán hơn hẳn ngẫu nhiên, chưa phải bằng chứng chất lượng cuối cùng.
+
+### Trợ lý "lai": luật trả câu quen thuộc, AI xử lý câu lạ (29/10)
+`assistant.service.js` (chế độ `auto`): bộ luật `assistant.local.js` trả lời trước và gắn cờ `confident`. **Quen thuộc** (chào hỏi, "đơn của tôi", "chọn giúp tôi", thực đơn theo ngân sách, hoặc tìm món khớp ≥ 60% từ khóa, không phải nới giá, câu ≤ 5 từ khóa) → trả ngay, `engine: "local"`, không tốn lượt AI. **Lạ / mơ hồ / không khớp bài nào** → nhờ AI (Gemini → Groq, công cụ `search_catalog`, `my_orders`, `pick_dish`), `engine: "gemini" | "llm"`; AI lỗi thì dùng chính câu trả lời của bộ luật. Chế độ `gemini` / `llm` vẫn bắt buộc dùng AI; `local` chỉ dùng luật.

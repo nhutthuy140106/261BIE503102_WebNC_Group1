@@ -115,9 +115,13 @@ async function chat({ messages, user }) {
   const mode = MODE();
   const lastUser = messages[messages.length - 1].content;
   const prevUser = [...messages].slice(0, -1).reverse().find((m) => m.role === 'user');
-  const useLocal = () => local.answer(lastUser, prevUser && prevUser.content, user).then((r) => ({ ...r, engine: 'local' }));
+  const localAnswer = local.answer(lastUser, prevUser && prevUser.content, user);
+  const useLocal = () => localAnswer.then(({ confident, ...r }) => ({ ...r, engine: 'local' }));
 
   if (mode === 'local') return useLocal();
+  // Lai: câu quen thuộc (chào hỏi, đơn của tôi, chọn giúp, tìm món khớp rõ) → bộ luật trả ngay, nhanh và không tốn lượt AI;
+  // câu lạ / gõ sai / mơ hồ → nhờ AI (Gemini → Groq). Chế độ gemini hoặc llm vẫn bắt buộc dùng AI.
+  if (mode === 'auto' && (await localAnswer).confident) return useLocal();
 
   // Thứ tự ưu tiên: Gemini → LLM kiểu OpenAI (Groq/OpenRouter…) → bộ cơ bản.
   // Chế độ cố định (gemini | llm) thì lỗi báo thẳng; auto thì rơi xuống bước sau.
