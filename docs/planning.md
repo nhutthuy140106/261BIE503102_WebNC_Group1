@@ -258,6 +258,15 @@ Làm **một màn một lần** (đúng luật `CLAUDE.md`): tạo component b�
 - [x] **7.16 Lối vào Vườn AntGo dễ thấy (kiếm thêm Xu).** Hiện chỉ có một nút nhỏ ở hàng "Phổ biến" trang chủ. Thêm: (a) trong **ngăn kéo Xu** (nút "N Xu" ở header) mục "Cách nhận Xu" có dòng **"Chơi game kiếm Xu"** + thanh tiến độ "x/30 Xu hôm nay" bấm mở `/vuon`; (b) trang `/xu` có thẻ/nút tương tự; (c) trang chủ có **một dải/banner gọn** (kiểu dải "Kiếm thêm gần nhà", không lòe loẹt, dùng kiến + icon Phosphor, không emoji) nói "Hái xu nhận giảm giá"; (d) thêm "Vườn AntGo" vào menu hồ sơ/footer cột Khám phá. Giữ nguyên quy tắc một màu nhấn cam, không rối trang chủ.
   *Xong khi:* từ trang chủ và từ ngăn kéo Xu đều vào được Vườn AntGo trong 1 cú bấm; ảnh chụp từng chỗ.
 
+- [ ] **7.17 Làm lại giao diện `/admin` theo thiết kế (hiện chỉ là khung chức năng `admin-page`).** Bố cục như khu Bán để cùng phong cách (chữ xanh đen `#22304A`, cam `#D85A1C` chỉ cho nút chính, nền kem `#FBF4F1`, viền `#F0E2DC`, icon Phosphor, không emoji, không nhiều màu):
+  - **Khung:** `AdminLayout` (lazy, `adminGuard`) có **thanh bên**: *Tổng quan · Người dùng · Bài đăng · Báo cáo vi phạm*; user thường vào `/admin` → trang "Không có quyền" (403). Header chung giữ nguyên, thêm mục **Quản trị** chỉ cho admin.
+  - **Tổng quan** (`GET /admin/stats`): 4 ô số (người dùng · bài đang mở · báo cáo chờ xử lý · tổng đơn) + biểu đồ cột **đơn theo trạng thái** (SVG/CSS thuần, không thư viện) + danh sách 5 báo cáo mới nhất. Dùng skeleton khi tải.
+  - **Người dùng** (`/admin/users`): bảng (ảnh · tên · SĐT · Block · vai trò · trạng thái · ngày tạo), ô tìm + lọc vai trò/trạng thái, phân trang; nút **Khóa/Mở khóa** có hộp xác nhận; không khóa được chính mình/admin cuối (hiện lý do).
+  - **Bài đăng** (`/admin/posts`): bảng (ảnh nhỏ · tiêu đề · loại · người bán · giá · trạng thái), lọc loại/trạng thái, nút **Ẩn/Hiện** + hộp nhập **lý do** bắt buộc khi ẩn; bấm tiêu đề mở bài gốc ở tab mới.
+  - **Báo cáo** (`/admin/reports`): hai cột/tab theo trạng thái *mở → đang xem xét → đã xử lý / từ chối*, thẻ báo cáo hiện người báo, đối tượng, lý do, **ô ghi chú** của admin, nút chuyển trạng thái; có liên kết nhanh "Ẩn bài này".
+  - **Chung:** bảng phẳng bo 12px, trạng thái bằng viên chữ nhỏ (xanh/xám/cam nhạt), responsive (≤ 760px bảng chuyển thành thẻ), `[innerHTML]` không dùng cho dữ liệu người dùng, lỗi hiện thông báo thân thiện. Chế độ mock có vài dữ liệu mẫu admin; `?mock=0` gọi API thật (đăng nhập 0900000099).
+  *Xong khi:* 4 mục đều thao tác được (khóa người dùng, ẩn bài kèm lý do, xử lý báo cáo) với server thật; ảnh chụp 1440px + 390px từng mục; `ng build` + `ng test` qua.
+
 ### 7C — Planning/nhóm **[PL]** (phiên này)
 - [ ] **7.12** Chốt trần Xu game 30/ngày + 3 lượt (đã đề xuất, ghi `decisions.md` mục F10).
 - [ ] **7.13** Đối chiếu 6.6 (bảng yêu cầu môn học) sau khi 7A/7B xong; chuẩn bị kịch bản demo (xem dưới).
