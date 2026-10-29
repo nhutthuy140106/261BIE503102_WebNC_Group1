@@ -295,3 +295,9 @@ Hai phần này dựa vào schema chung nên **Q1–Q8** nên được chốt tr
 - Người ghi: FE
 - Nội dung: `features/seller/post-form` thêm khối "Giờ vàng" gọn (bật/tắt, %/tiền, giá trị, giờ từ–đến có thể qua nửa đêm, ngày trong tuần, xem trước giá). Ẩn với việc làm. Gửi trong thân `POST/PUT /seller/posts` thành `promo: { kind, value, from, to, days, active }` (đúng dạng trường `Post.promo` của server 7.18). Mock lưu thẳng vào bài nên phía Mua thấy ngay. Endpoint `/seller/posts` thật chưa có trong api-buyer-job.md — cần xác nhận cùng schema; giao diện nằm trong thiết kế của phía Bán nên nếu họ muốn đổi chỗ đặt/giao diện thì chỉ cần dời khối `<fieldset class="promo">`.
 - Quyết định: (điền khi chốt)
+
+### [29/10] F12 — Combo: quy tắc giá, kho và đơn
+- Trạng thái: CẦN CHỐT (Planning)
+- Người ghi: BE
+- Nội dung: (1) Combo là một `Post` (price = comboPrice) gồm ≥ 2 món **cùng người bán**, rẻ hơn tổng giá lẻ; không lồng combo trong combo, không chứa hàng bán một lần. (2) `listPrice` chụp lúc lưu combo; nếu người bán đổi giá món lẻ sau đó thì `listPrice` cũ cho tới khi lưu lại combo (đơn vẫn tính theo `comboPrice`, nên không ảnh hưởng tiền). (3) Đặt combo trừ kho **từng món thành phần**; combo không có kho riêng trừ khi bài đặt `stock`. (4) Đơn combo là **một đơn**, snapshot ghi từng món; hủy/hoàn đơn **chưa** trả lại kho món thành phần (giống bài thường: chưa có luật hoàn kho). (5) Giờ vàng áp lên combo và "Tiết kiệm" tính trên giá đang trả. (6) Tùy chọn cộng giá chỉ có ở bài thường; combo mặc định không có tùy chọn.
+- Quyết định: (điền khi chốt)

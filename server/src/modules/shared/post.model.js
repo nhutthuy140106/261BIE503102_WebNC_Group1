@@ -1,5 +1,7 @@
 // Model Post do phía Bán sở hữu — đây là bản tối thiểu để module Mua đọc/đặt đơn. Đổi field phải báo nhóm.
-const { Schema, model } = require('mongoose');
+const mongoose = require('mongoose');
+
+const { Schema, model } = mongoose;
 const { stripAccents, createSlug } = require('../../utils/text');
 const { effectivePrice } = require('../../utils/promo');
 
@@ -42,6 +44,16 @@ const postSchema = new Schema({
     }, { _id: false }),
     default: undefined,
   },
+  // Combo: gói nhiều món CÙNG người bán với giá rẻ hơn mua lẻ. `price` của bài = comboPrice (để lọc/sắp giá như bài thường);
+  // `listPrice` = tổng giá lẻ lúc lưu (server tự tính, FE hiện "Tiết kiệm"). Giờ vàng áp lên combo như bài thường.
+  combo: {
+    type: new Schema({
+      items: [{ postId: { type: Schema.Types.ObjectId, ref: 'Post', required: true }, qty: { type: Number, required: true, min: 1, max: 10 }, _id: false }],
+      comboPrice: { type: Number, required: true, min: 1 },
+      listPrice: { type: Number, default: 0 },
+    }, { _id: false }),
+    default: undefined,
+  },
   status: { type: String, enum: ['open', 'soldout', 'closed', 'hidden'], default: 'open', index: true },
   hiddenReason: { type: String, default: '' },        // Admin gỡ bài: lý do
   statusBeforeHidden: String,                         // để mở lại đúng trạng thái cũ
@@ -50,6 +62,27 @@ const postSchema = new Schema({
 
 postSchema.pre('validate', function buildSearchText() {
   this.searchText = stripAccents([this.title, this.description, this.category].filter(Boolean).join(' '));
+});
+// Kiểm combo ở MỌI đường tạo/sửa bài: >= 2 món khác nhau, cùng người bán, còn bán, giá combo thấp hơn tổng lẻ (CẦN CHỐT: decisions F12)
+postSchema.pre('validate', async function validateCombo() {
+  const c = this.combo;
+  if (!c || !c.items || !c.items.length) { this.combo = undefined; return; }
+  const bad = (msg) => this.invalidate('combo', msg);
+  this.price = c.comboPrice;
+  const ids = c.items.map((i) => String(i.postId));
+  if (ids.length < 2 || new Set(ids).size !== ids.length) return bad('Combo cần ít nhất 2 món khác nhau');
+  if (ids.includes(String(this._id))) return bad('Combo không được chứa chính nó');
+  const comps = await mongoose.model('Post').find({ _id: { $in: ids } }).select('seller price status combo oneTime title');
+  if (comps.length !== ids.length) return bad('Có món trong combo không tồn tại');
+  for (const p of comps) {
+    if (String(p.seller) !== String(this.seller)) return bad(`"${p.title}" không phải của người bán này`);
+    if (p.combo && p.combo.items && p.combo.items.length) return bad(`"${p.title}" đã là combo, không đưa vào combo khác`);
+    if (p.oneTime) return bad(`"${p.title}" là hàng bán một lần, không đưa vào combo`);
+    if (p.status !== 'open') return bad(`"${p.title}" hiện không bán`);
+  }
+  const byId = new Map(comps.map((p) => [String(p._id), p]));
+  c.listPrice = c.items.reduce((n, i) => n + byId.get(String(i.postId)).price * i.qty, 0);
+  if (c.comboPrice >= c.listPrice) return bad(`Giá combo phải thấp hơn tổng giá lẻ (${c.listPrice}đ)`);
 });
 // Giá đang áp dụng lúc đọc: { price, original, label, endsAt } khi có Giờ vàng đang chạy, ngược lại null
 postSchema.virtual('deal').get(function deal() {

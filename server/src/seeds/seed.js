@@ -17,7 +17,7 @@ const Notification = require('../modules/buyer/notification/notification.model')
 const Report = require('../modules/buyer/report/report.model');
 const orders = require('../modules/buyer/order/order.service');
 const offers = require('../modules/buyer/offer/offer.service');
-const { USERS, POSTS, JOBS, img } = require('./data');
+const { USERS, POSTS, JOBS, COMBOS, COMBO_PROMOS, IMG, img } = require('./data');
 
 // Mật khẩu tài khoản mẫu lấy từ biến môi trường SEED_PASSWORD (.env), không viết cứng trong repo
 const getPassword = () => {
@@ -79,6 +79,17 @@ async function seed() {
     if (promo) promos[key] = promo;
     p[key] = await Post.create({ ...d, seller: u[seller]._id, images: (images || []).map(img) });
     await backdate(Post, p[key]._id, ago(daysAgo * DAY + i * 17 * 60000));
+  }
+
+  /* ---------- Combo (tạo sau bài thường vì cần id món thành phần; model tự kiểm giá và tính listPrice) ---------- */
+  for (const [i, c] of COMBOS.entries()) {
+    p[c.key] = await Post.create({
+      type: 'food', category: 'Combo', title: c.title, description: c.description, unit: c.unit, seller: u[c.seller]._id, area: c.area, distance: c.distance,
+      images: [img(IMG[c.image])], fulfillmentModes: ['delivery', 'pickup'], deliveryFee: c.deliveryFee, acceptsXu: !!c.acceptsXu,
+      price: c.comboPrice, combo: { items: c.items.map(([k, qty]) => ({ postId: p[k]._id, qty })), comboPrice: c.comboPrice },
+    });
+    await backdate(Post, p[c.key]._id, ago(c.daysAgo * DAY + i * 13 * 60000));
+    if (COMBO_PROMOS[c.key]) promos[c.key] = COMBO_PROMOS[c.key];
   }
 
   /* ---------- Việc làm ---------- */

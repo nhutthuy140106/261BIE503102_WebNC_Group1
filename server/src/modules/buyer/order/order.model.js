@@ -11,6 +11,8 @@ const orderSchema = new Schema({
   // bản chụp lúc đặt: sửa/xóa bài sau đó không làm đổi đơn
   snapshot: new Schema({
     title: String, type: { type: String }, image: String, sellerName: String, sellerAvatar: { type: String, default: null }, unitPrice: Number, originalPrice: Number, promoLabel: String, unit: String,
+    // combo: chụp từng món (cho MỘT combo) và tổng giá lẻ lúc đặt
+    combo: [{ postId: Schema.Types.ObjectId, title: String, qty: Number, unitPrice: Number, _id: false }], listPrice: Number,
   }, { _id: false }),
   quantity: { type: Number, required: true, min: 1 },
   selections: [{ group: String, choices: [{ label: String, price: Number, _id: false }], _id: false }],

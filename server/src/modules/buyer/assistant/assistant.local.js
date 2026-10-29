@@ -10,7 +10,7 @@ const tools = require('./assistant.tools');
  */
 
 const TYPE_WORDS = {
-  food: ['an', 'com', 'pho', 'bun', 'mi', 'banh', 'chao', 'xoi', 'mon', 'doi', 'bua', 'tra', 'sua', 'nuoc', 'cafe', 'uong', 'mat', 'khat', 'salad', 'canh', 'tra sua', 'ca phe', 'do an', 'do uong', 'thuc an', 'nau'],
+  food: ['an', 'combo', 'com', 'pho', 'bun', 'mi', 'banh', 'chao', 'xoi', 'mon', 'doi', 'bua', 'tra', 'sua', 'nuoc', 'cafe', 'uong', 'mat', 'khat', 'salad', 'canh', 'tra sua', 'ca phe', 'do an', 'do uong', 'thuc an', 'nau'],
   goods: ['mua', 'do dung', 'tai nghe', 'sofa', 'xe dap', 'ghe', 'tu lanh', 'ban ghe', 'quat', 'noi chien', 'dien thoai', 'laptop', 'do cu', 'thanh ly'],
   service: ['dich vu', 'giat', 'say', 'don nha', 've sinh', 'sua', 'tho', 'giao nhan', 'lay ho', 'mua ho', 'may lanh', 'dien nuoc'],
   job: ['viec', 'kiem them', 'lam them', 'nhan viec', 'cong viec', 'dat chung', 'viec vat', 'dat cho', 'dat meo', 'cho meo', 'dan cho', 'khieng', 'tuoi cay'],
@@ -82,6 +82,7 @@ const toCard = (kind, p) => ({
   title: p.title,
   price: kind === 'job' ? p.pay : (p.deal ? p.deal.price : p.price),
   ...(kind !== 'job' && p.deal ? { originalPrice: p.deal.original, dealLabel: p.deal.label, dealEndsAt: p.deal.endsAt } : {}),
+  ...(p.combo && p.combo.listPrice ? { combo: true, listPrice: p.combo.listPrice } : {}),
   unit: p.unit || undefined,
   sellerName: (p.seller || p.poster || {}).name || '',
   area: (p.seller || p.poster || {}).area || p.area || '',

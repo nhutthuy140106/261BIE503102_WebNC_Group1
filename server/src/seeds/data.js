@@ -130,6 +130,13 @@ const JOBS = [
   { key: 'xong', title: 'Nhận hộ gói hàng khi vắng nhà', category: 'Mua hộ', desc: 'Nhận hộ một gói hàng lúc 15:00 và để ở sảnh, mình về lấy sau.', pay: 25000, unit: 'lần', workTime: 'Hôm qua · 15:00', area: 'C', distance: 330, poster: 'tung', exactAddress: 'Căn C-0102, Block C', status: 'done', daysAgo: 6 },
 ];
 
+// Combo (cùng người bán, rẻ hơn mua lẻ). items: [key bài thành phần, số lượng]; seed.js tạo SAU các bài thường để có id.
+const COMBOS = [
+  { key: 'comboTrua', seller: 'lan', title: 'Combo bữa trưa nhà làm: cơm + đậu sốt cà chua + bánh flan', description: 'Combo trưa của Bếp Cô Lan: một phần cơm nhà, đậu sốt cà chua và bánh flan tráng miệng, rẻ hơn mua lẻ.', area: 'B', distance: 150, unit: 'combo', comboPrice: 79000, items: [['com', 1], ['dau', 1], ['banhFlan', 1]], image: 'com', deliveryFee: 7000, daysAgo: 1 },
+  { key: 'comboPhoDoi', seller: 'tu', title: 'Combo hai người: phở bò tái + bún chả', description: 'Combo cho hai người của Quán Phở Bà Tư: một tô phở bò tái và một suất bún chả Hà Nội.', area: 'D', distance: 250, unit: 'combo', comboPrice: 79000, items: [['pho', 1], ['bunCha', 1]], image: 'pho', deliveryFee: 8000, daysAgo: 2 },
+  { key: 'comboGiaiKhat', seller: 'may', title: 'Combo giải khát: cà phê sữa đá + trà sữa trân châu', description: 'Hai ly đồ uống của Quán Nhà Mây: cà phê sữa đá và trà sữa trân châu đường đen.', area: 'Shop 3', distance: 200, unit: 'combo', comboPrice: 49000, items: [['cafe', 1], ['trasua', 1]], image: 'cafe', deliveryFee: 5000, acceptsXu: true, daysAgo: 3 },
+  { key: 'comboSang', seller: 'ba', title: 'Combo sáng no bụng: xôi mặn + cháo sườn + 2 bánh mì que', description: 'Bữa sáng của Cô Ba: xôi mặn đủ topping, cháo sườn nóng và hai bánh mì que pate.', area: 'A', distance: 340, unit: 'combo', comboPrice: 55000, items: [['xoi', 1], ['chao', 1], ['banhmi', 2]], image: 'dau', deliveryFee: 6000, daysAgo: 4 },
+];
 // Giờ vàng (giờ Việt Nam). Các khung nối nhau để MỌI giờ trong ngày luôn có 1–2 bài đang giảm (demo luôn thấy):
 // 01–07 giặt sấy · 06–10 sáng · 10–14 trưa · 14–17 giải khát · 17–21 tối · 21–02 ăn khuya (vắt qua nửa đêm). Cuối tuần thêm rau củ.
 const EVERY = [0, 1, 2, 3, 4, 5, 6];
@@ -147,4 +154,7 @@ const PROMOS = {
 };
 for (const p of POSTS) if (PROMOS[p.key]) p.promo = { active: true, ...PROMOS[p.key] };
 
-module.exports = { USERS, POSTS, JOBS, img };
+// Giờ vàng cho combo (khung 17–21, giảm thêm 10%): combo cũng chạy được khuyến mãi
+const COMBO_PROMOS = { comboGiaiKhat: { kind: 'percent', value: 10, from: '15:00', to: '18:00', days: EVERY, active: true } };
+
+module.exports = { USERS, POSTS, JOBS, COMBOS, COMBO_PROMOS, IMG, img };

@@ -275,7 +275,7 @@ Làm **một màn một lần** (đúng luật `CLAUDE.md`): tạo component b�
   *Xong khi:* ảnh chụp trong và ngoài khung giờ (đổi giờ giả lập bằng `?now=` hoặc dữ liệu mẫu), 1440px + 390px.
 - [x] **7.20 [BE] Chatbot biết khuyến mãi.** Công cụ `deals_now` (bài đang giảm + còn bao lâu) cho Gemini/Groq và bộ luật ("đang giảm giá gì", "khuyến mãi", "giờ vàng"); `pick_dish` và gợi ý ưu tiên bài đang giảm khi ngang điểm.
 - [x] **7.21 [FE] Form đăng bài (phía Bán) thêm ô khuyến mãi tối thiểu:** bật/tắt Giờ vàng, kiểu giảm (%/tiền), giá trị, giờ bắt đầu–kết thúc, ngày trong tuần; xem trước "Giá trong giờ vàng". *Báo bạn phụ trách phía Bán trước khi sửa `features/seller/`* (ghi `decisions.md` nhãn CẦN CHỐT nếu họ đã có thiết kế).
-- [ ] **7.22 [BE+FE] Combo** *(làm sau khi 7.18–7.19 xong)*: `Post.combo = { items:[{ postId, qty }], comboPrice }` (món cùng người bán, giá combo < tổng lẻ, server kiểm); chi tiết combo liệt kê món + dòng "Tiết kiệm X đ"; đặt như một đơn có danh sách món (snapshot từng món); thẻ combo trên trang chủ/tìm kiếm; chatbot "combo dưới 80k". Giờ vàng áp được lên combo.
+- [ ] **7.22 [BE+FE] Combo** *(BE xong 29/10, chờ FE nối — xem api-buyer-job.md 18.6)* *(làm sau khi 7.18–7.19 xong)*: `Post.combo = { items:[{ postId, qty }], comboPrice }` (món cùng người bán, giá combo < tổng lẻ, server kiểm); chi tiết combo liệt kê món + dòng "Tiết kiệm X đ"; đặt như một đơn có danh sách món (snapshot từng món); thẻ combo trên trang chủ/tìm kiếm; chatbot "combo dưới 80k". Giờ vàng áp được lên combo.
   *Xong khi:* đặt combo ra đúng tiền; sửa/xóa món lẻ sau đó không làm đổi đơn cũ.
 
 ### 7C — Planning/nhóm **[PL]** (phiên này)

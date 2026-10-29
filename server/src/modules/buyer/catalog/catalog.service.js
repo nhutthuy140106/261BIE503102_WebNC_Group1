@@ -49,7 +49,18 @@ async function getPost(identity, user) {
   if (!id) throw ApiError.badRequest('Mã hoặc slug bài sai định dạng');
   const post = await Post.findById(id).populate('seller', SELLER_FIELDS);
   if (!post || (post.status === 'hidden' && !(user && user.role === 'admin'))) throw ApiError.notFound('Không tìm thấy bài');
-  return post;
+  if (!(post.combo && post.combo.items && post.combo.items.length)) return post;
+  // combo: kèm danh sách món (tên, giá lẻ, ảnh) và số tiền tiết kiệm so với mua lẻ (tính trên giá đang áp dụng, cả Giờ vàng)
+  const comps = await Post.find({ _id: { $in: post.combo.items.map((i) => i.postId) } }).select('title price unit images status');
+  const byId = new Map(comps.map((p) => [String(p._id), p]));
+  const out = post.toJSON();
+  const pay = post.deal ? post.deal.price : post.price;
+  out.comboDetail = {
+    items: post.combo.items.map((i) => { const p = byId.get(String(i.postId)); return { postId: String(i.postId), qty: i.qty, title: p && p.title, unitPrice: p && p.price, unit: p && p.unit, image: p && p.images[0], available: !!p && p.status === 'open' }; }),
+    listPrice: post.combo.listPrice,
+    saving: Math.max(0, post.combo.listPrice - pay),
+  };
+  return out;
 }
 
 async function listJobs(q) {

@@ -356,3 +356,13 @@ Body `{ messages: [{ role: 'user'|'assistant', content }] }` (tin cuối phải 
 - **Cộng dồn với voucher Xu:** Giờ vàng giảm trước, voucher tính **sau** trên giá đã giảm; mức tối thiểu của voucher (`v10` ≥ 50.000đ, `v20` ≥ 150.000đ) cũng so với tiền hàng **đã giảm**.
 - **`GET /deals?now=&area=&type=`** (công khai): `{ data: { now, active: [Post + deal], upcoming: [Post + upcoming{label,startsAt}] } }`. `active` xếp bài sắp hết giờ lên trước; `upcoming` là bài bắt đầu giảm trong 3 giờ tới. `now` (ISO có múi giờ) chỉ để demo/test, mặc định giờ server; sai định dạng → 422.
 - Seed: 10 bài có Giờ vàng, các khung nối nhau để **mọi giờ trong ngày** luôn có 1–2 bài đang giảm (01–07 giặt sấy · 06–10 sáng · 10–14 trưa · 14–17 giải khát · 17–21 tối · 21–02 ăn khuya).
+
+### 18.6 Combo — gói nhiều món cùng người bán (29/10)
+`Post.combo = { items: [{ postId, qty }], comboPrice, listPrice }`. Combo là một `Post` thường (type `food`, `category: 'Combo'`), nên danh sách/tìm kiếm/lọc giá/Giờ vàng dùng như bài khác; `price` của bài **luôn bằng `comboPrice`**.
+
+- **Server kiểm khi lưu bài** (mọi đường tạo/sửa; lỗi → 422 field `combo`): ≥ 2 món **khác nhau** (qty 1–10), tất cả **cùng người bán**, còn bán (`open`), không phải hàng bán một lần, không phải combo khác, không chứa chính nó, `comboPrice` **thấp hơn** tổng giá lẻ. `listPrice` do server tính (tổng giá lẻ lúc lưu), FE không gửi.
+- `GET /posts`, `/posts/:id`: có `combo.{items,comboPrice,listPrice}`. **Chi tiết** thêm `comboDetail = { items:[{postId,qty,title,unitPrice,unit,image,available}], listPrice, saving }`; `saving = listPrice − giá đang trả` (tính cả Giờ vàng) → dòng "Tiết kiệm X đ". Bài thường không có `comboDetail`.
+- **Đặt combo** (`POST /orders` hoặc giỏ nháp, giống bài thường; combo không có tùy chọn riêng trừ khi bài tự khai `optionGroups`): một đơn, `breakdown.items = giá combo × số lượng`. `snapshot.combo = [{postId,title,qty,unitPrice}]` (chụp **từng món cho MỘT combo**) và `snapshot.listPrice`. Giờ vàng áp lên combo như bài thường (`snapshot.originalPrice/promoLabel`).
+- **Kho:** trước khi đặt, mỗi món thành phần phải `open` và đủ `qty × số combo` (nếu có `stock`) → thiếu thì **409** nêu tên món; khi tạo đơn trừ kho từng món nguyên tử (một món thiếu thì hoàn lại các món đã trừ). Món hết hàng thì `soldout` như bình thường.
+- Chatbot: thẻ combo có `combo: true`, `listPrice`; câu "combo dưới 80k" tìm được combo.
+- Seed: 4 combo (Bếp Cô Lan, Quán Phở Bà Tư, Quán Nhà Mây, Cô Ba); combo giải khát có Giờ vàng 15:00–18:00.

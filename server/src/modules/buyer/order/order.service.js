@@ -90,6 +90,18 @@ async function prepare(user, input) {
   const xuVoucher = await xu.findVoucher(user._id, input.voucherCode);
   const priced = priceOrder(post, input, xuVoucher);
 
+  // Combo: mọi món thành phần phải còn bán và đủ số lượng cho số combo đặt
+  let components = [];
+  if (post.combo && post.combo.items && post.combo.items.length) {
+    const rows = await Post.find({ _id: { $in: post.combo.items.map((i) => i.postId) } });
+    const byId = new Map(rows.map((p) => [String(p._id), p]));
+    components = post.combo.items.map((i) => ({ post: byId.get(String(i.postId)), qty: i.qty }));
+    for (const { post: p, qty } of components) {
+      if (!p || p.status !== 'open') throw ApiError.invalidState(`Món "${p ? p.title : 'trong combo'}" hiện không còn bán nên chưa đặt được combo này`);
+      if (p.stock !== null && p.stock < qty * input.quantity) throw ApiError.invalidState(`Món "${p.title}" trong combo không đủ số lượng`);
+    }
+  }
+
   let address;
   if (input.addressId) {
     const a = await Address.findById(input.addressId);
@@ -97,11 +109,11 @@ async function prepare(user, input) {
     if (String(a.user) !== String(user._id)) throw ApiError.forbidden('Địa chỉ này không phải của bạn');
     address = { name: a.name, phone: a.phone, block: a.block, unit: a.unit, note: a.note, label: a.label };
   }
-  return { post, priced, address, xuVoucher };
+  return { post, priced, address, xuVoucher, components };
 }
 
 // Bước 2: trừ tồn kho nguyên tử + ghi đơn
-async function commit(user, input, { post, priced, address, xuVoucher }) {
+async function commit(user, input, { post, priced, address, xuVoucher, components = [] }) {
   // giữ voucher trước khi trừ kho: mất lượt dùng thì dừng sớm, chưa đụng tới tồn kho
   if (xuVoucher && !(await xu.claimVoucher(xuVoucher.doc))) throw ApiError.invalidState('Voucher đã được dùng cho đơn khác');
   // trừ tồn kho nguyên tử: tránh hai người cùng đặt món cuối cùng
@@ -114,12 +126,30 @@ async function commit(user, input, { post, priced, address, xuVoucher }) {
     if (r.modifiedCount === 0) throw ApiError.invalidState('Bài đã được bán');
   }
 
+  // Trừ kho từng món thành phần của combo (nguyên tử); món nào thiếu thì hoàn lại các món đã trừ
+  const taken = [];
+  try {
+    for (const { post: p, qty } of components) {
+      if (p.stock === null) continue;
+      const need = qty * input.quantity;
+      const r = await Post.updateOne({ _id: p._id, stock: { $gte: need } }, { $inc: { stock: -need } });
+      if (r.modifiedCount === 0) throw ApiError.invalidState(`Món "${p.title}" trong combo không đủ số lượng`);
+      taken.push([p._id, need]);
+      if (p.stock - need === 0) await Post.updateOne({ _id: p._id }, { status: 'soldout' });
+    }
+  } catch (e) {
+    for (const [id, n] of taken) await Post.updateOne({ _id: id }, { $inc: { stock: n }, status: 'open' });
+    if (xuVoucher) await xu.restoreVoucher(user._id, xuVoucher.doc.code);
+    throw e;
+  }
+
   const order = await Order.create({
     code: await nextCode('order', 'AG-O'),
     buyer: user._id,
     seller: post.seller._id,
     post: post._id,
-    snapshot: { title: post.title, type: post.type, image: post.images[0], sellerName: post.seller.name, sellerAvatar: post.seller.avatar || null, unitPrice: priced.promo ? priced.promo.price : post.price, originalPrice: priced.promo ? priced.promo.original : undefined, promoLabel: priced.promo ? priced.promo.label : undefined, unit: post.unit },
+    snapshot: { title: post.title, type: post.type, image: post.images[0], sellerName: post.seller.name, sellerAvatar: post.seller.avatar || null, unitPrice: priced.promo ? priced.promo.price : post.price, originalPrice: priced.promo ? priced.promo.original : undefined, promoLabel: priced.promo ? priced.promo.label : undefined, unit: post.unit,
+      ...(components.length ? { combo: components.map(({ post: p, qty }) => ({ postId: p._id, title: p.title, qty, unitPrice: p.price })), listPrice: post.combo.listPrice } : {}) },
     quantity: input.quantity,
     selections: priced.selections,
     answers: priced.answers,

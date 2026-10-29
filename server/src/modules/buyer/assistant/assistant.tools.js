@@ -25,6 +25,7 @@ const shortCard = (kind, p) => {
     image: kind === 'job' ? undefined : (p.images || [])[0],
     slug: p.slug,
     ...(deal ? { originalPrice: deal.original, dealLabel: deal.label, dealEndsAt: deal.endsAt } : {}),
+    ...(p.combo && p.combo.listPrice ? { combo: true, listPrice: p.combo.listPrice } : {}), // combo: giá lẻ cộng lại, để hiện "tiết kiệm"
   };
 };
 

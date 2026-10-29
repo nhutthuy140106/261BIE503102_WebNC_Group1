@@ -93,10 +93,10 @@ test('seed dùng được qua API: Thủy thấy đơn, việc, đánh giá; bà
   assert.equal((await api('GET', '/me/addresses', jar)).body.data.length, 2);
   assert.ok((await api('GET', '/me/recommendations', jar)).body.data.length > 0);
 
-  const com = (await api('GET', '/posts?q=com nha')).body.data[0];
+  const com = (await api('GET', '/posts?q=com nha')).body.data.find((x) => /^Cơm nhà làm/.test(x.title));
   const rv = (await api('GET', `/reviews?postId=${com._id}`)).body.data;
   assert.ok(rv.count >= 3 && rv.average >= 4 && rv.items.some((i) => i.reply));
-  assert.equal((await api('GET', '/posts?limit=100')).body.data.length, 32); // 33 bài, trừ bài đã bị ẩn (limit tối đa 100)
+  assert.equal((await api('GET', '/posts?limit=100')).body.data.length, 36); // 38 bài (34 + 4 combo) trừ 2 bài bị ẩn/đóng
   const cheap = (await api('POST', '/assistant/chat', jar, { messages: [{ role: 'user', content: 'ăn gì dưới 50k' }] })).body;
   assert.ok((cheap.data.items || cheap.data.posts || []).length >= 3 || (await api('GET', '/posts?type=food&maxPrice=50000', jar)).body.data.length >= 3);
   // Giờ vàng: >= 6 bài có khung giờ, và mọi giờ trong ngày (giờ VN) đều có ít nhất 1 bài đang giảm để demo
