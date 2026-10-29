@@ -245,3 +245,7 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
   - **5. Lịch nhận phòng** (`timeMode: 'stay'`): ngày còn phòng (lịch chọn nhiều ngày) + Nhận phòng từ / Trả phòng trước (`checkIn` / `checkOut`), ở tối thiểu n đêm (`minNights`). Ẩn "Thông tin nhanh" và "Nơi làm".
   - Xem trước: "từ 350.000đ / đêm"; đầu trang bài 3 ô Nhận / trả phòng · Tiện nghi · Hủy & cọc; nút đặt "Đặt phòng".
 - **29/10 — dịch vụ, mẫu Giặt sấy:** bỏ phần **Câu hỏi riêng** (cờ mẫu `noQuestions`, bỏ câu "Có đồ trắng cần giặt riêng?") vì trùng với tùy chọn cộng giá; bỏ dòng ghi chú dưới bảng giá "Khách chọn một hoặc nhiều dịch vụ…" (mọi mẫu trừ Lưu trú).
+- **30/10 — gộp `dev` vào `feature/seller-ui`:** khu Bán dùng bộ trang mới (Hôm nay, Giao dịch, Bài đăng, Lịch, Hiệu quả, Messenger, Gian hàng, form `seller-post-form`); bỏ bộ trang cũ `seller-dashboard`, `post-manage`, `post-form`, `transactions`. **Giờ vàng, Combo, Gợi ý giá** (HoangKhai, form cũ) chuyển sang form mới, giữ nguyên logic `core/utils/promo.ts`, `PricingService`, `SellerService.myPosts()` và trường `PostBody.promo` / `PostBody.combo`:
+  - Gợi ý giá: khung cuối mục giá của mọi loại bài, nút "Dùng giá này" (đồ ăn / đồ uống / dịch vụ điền dòng đầu chưa có giá; đồ dùng vào Giá bán; việc vào Tiền công).
+  - Giờ vàng: `common.promo` (on, kind, value, from, to, days), khối cuối mục giá của đồ ăn, đồ uống, đồ dùng, dịch vụ; xem trước tính trên giá rẻ nhất của bài.
+  - Combo (đồ ăn): `spec.combo` (on, price, qty theo postId), bật thì thay bảng thực đơn.
