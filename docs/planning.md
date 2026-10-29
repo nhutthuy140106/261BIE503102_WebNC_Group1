@@ -2,7 +2,7 @@
 
 > Phạm vi: **hai loại người dùng — `user` (Người mua + Nhận việc; phía Bán/Đăng việc do thành viên khác phụ trách) và `admin` (quản trị)**. Kế hoạch có đủ cả hai vai trò (xem "Vai trò & phân quyền"); phần Bán chỉ ghi ranh giới để **không trùng endpoint và model** (xem `decisions.md`).
 > Cách phối hợp 3 phiên (Planning / BE / FE): `HUONG-DAN-LAM-VIEC.md`. Hợp đồng API: `api-buyer-job.md`. Quyết định + câu hỏi mở: `decisions.md`.
-> Bám đúng bài dạy: `docs/tham-khao/kien-thuc-mon-hoc-angular-express-mongodb.md` (viết tắt **KT**, kèm mục/chương). Cập nhật: 18/10/2026 (Planning, sau khi BE xong 2.0–2.11 và FE xong Phase 3 + trang chủ).
+> Bám đúng bài dạy: `docs/tham-khao/kien-thuc-mon-hoc-angular-express-mongodb.md` (viết tắt **KT**, kèm mục/chương). Cập nhật: 29/10/2026 (Planning: thêm **Phase 7** — AI/ML, theo dõi đơn, Vườn AntGo, lấp lỗ hổng môn học).
 >
 > **Quy ước thẻ:** `[BE]` = terminal BE, chỉ sửa `server/` · `[FE]` = terminal FE, chỉ sửa `client/` · `[PL]` = Planning/nhóm chốt, ghi vào `docs/`. Mỗi bước nhỏ, có "Xong khi" kiểm tra được; xong thì đổi `[ ]` → `[x]`. **Số thứ tự Phase/bước giữ nguyên** để `decisions.md` và `api-buyer-job.md` còn tham chiếu đúng.
 
@@ -10,9 +10,9 @@
 
 | Terminal | Đang làm | Tiếp theo |
 |---|---|---|
-| **BE** | **Xong 2.0–2.18** (session cookie + `connect-mongo`, giỏ nháp, upload, gợi ý, admin; 71 endpoint trong Swagger; `npm test` 17/17; DB `DoAnWeb` đã seed lại: 7 user gồm 1 admin, 8 bài, 5 việc; CORS đã bật `credentials` cho `CLIENT_ORIGIN`). | Chờ nhóm xác nhận giả định ở `decisions.md` Mục 4 · **4.1** phía FE (`withCredentials`, proxy) · **4.4** chạy thử 2 tài khoản cùng DB · dọn route `/api/dev` khi phía Bán/Đăng việc xong |
-| **FE** | Xong Phase 3 (mock) + **giao diện theo mockup: nền chung, header, footer, thẻ bài/việc, trang chủ** (18/10). | **5.6 → 5.7** ảnh đại diện + ô ảnh Đơn hàng (ưu tiên, xem mục "Thêm hình ảnh") · **5.3** chuyển tiếp các màn: Tìm kiếm → Chi tiết bài → Chi tiết việc → Đơn hàng → Messenger/Thông báo/Tôi → Gian hàng · **3.10–3.11** vai trò + `/admin` · **4.2** gắn API khi BE báo "Xong" (cần D1 trước) · **0.7** push (chờ quyền ghi) |
-| **PL / nhóm** | — | ~~D1~~, ~~D6~~ đã chốt 18/10 · F1–F4 · **0.6/Q0** quyền ghi repo |
+| **BE** | Xong 2.0–2.18 + chatbot/tìm thông minh/gợi ý giá (commit `9a310be`). | **Phase 7A: 7.1 → 7.5** (sổ Xu + game chống gian lận, `/orders/:id/tracking`, seed giàu, bảo mật, tài liệu) |
+| **FE** | Xong giao diện trang chính + chatbot, skeleton, bản đồ theo dõi, Vườn AntGo/Hái xu (commit `8a5f959`, `77669b6`). | **Phase 7B: 7.7 → 7.11** (bản đồ cho mọi đơn giao + "Cách bạn X km", làm đẹp + 2 game còn lại, lấp lỗ hổng môn học, `/admin`) |
+| **PL / nhóm** | Phase 7 (29/10) | 7.12–7.14 · F1–F4 · **0.6/Q0** quyền ghi repo |
 
 ## Trạng thái hiện tại
 
@@ -24,7 +24,7 @@
 - [ ] Chưa push được lên GitHub (tài khoản `KhaiNgo2811` chỉ có quyền đọc repo `nhutthuy140106/…`).
 
 ## Vai trò & phân quyền (`admin` và `user`)
-
+  
 Một collection `users`, trường `role`. Quyền thật **do server kiểm tra** (`requireAuth` → `requireRole`); FE chỉ ẩn/hiện cho dễ dùng (KT 5.8, 9.3).
 
 | Việc | Khách (chưa đăng nhập) | `user` | `admin` |
@@ -226,6 +226,36 @@ Làm **một màn một lần** (đúng luật `CLAUDE.md`): tạo component b�
 - [ ] **6.5 Merge vào `dev`, rồi `dev` → `main`** qua Pull Request; trước merge: chạy server + kiểm Swagger, `ng build` + `ng test` qua, xem lại diff không lọt file thừa (`.env`, `node_modules`, `dist`).
   *Xong khi:* `main` chạy được sau merge (cả `server` và `client`).
 - [ ] **6.6 [PL] Đối chiếu yêu cầu môn học** (bảng dưới) trước ngày nộp / vấn đáp; ai chưa đạt thì thêm việc vào Phase tương ứng.
+
+## Phase 7 — Nâng cấp cuối: AI/ML, theo dõi đơn, Vườn AntGo, lấp lỗ hổng môn học *(chốt 29/10)*
+
+> Bối cảnh: đã có trên `dev` (commit 9a310be…77669b6): chatbot (Gemini → Groq → bộ cơ bản), tìm kiếm thông minh, gợi ý giá, skeleton, Quay món, **bản đồ theo dõi giao hàng (mô phỏng, FE)**, **Vườn AntGo + game Hái xu (Three.js, Xu lưu localStorage)**. Chi tiết thuật toán: `docs/thuat-toan-goi-y.md`.
+> Quy tắc chung: mỗi bước nhỏ, **xong thì tick `[x]` + build/test qua + commit lên `dev`** (không đụng `main`); BE chỉ sửa `server/`, FE chỉ sửa `client/`; đổi hợp đồng API thì ghi `decisions.md` nhãn `CẦN CHỐT`. Mỗi thay đổi giao diện: chụp ảnh đối chiếu mockup, **đổi từng thứ một**.
+
+### 7A — Backend **[BE]** (terminal `server`)
+- [ ] **7.1 Sổ Xu & game ở server (chống gian lận).** Model `XuEntry` (hoặc mở rộng ví hiện có) + `GET /api/me/xu` (số dư, lịch sử, voucher), `POST /api/me/xu/game` `{ game: 'hai-xu', score }`: server tự kiểm **tối đa 3 lượt/ngày/game**, **trần 30 Xu/ngày từ game**, giới hạn điểm hợp lý (≤ 80/lượt), trả `{ granted, capLeft, playsLeft }`. Đổi voucher: `POST /api/me/xu/redeem`. Test bằng `mongodb-memory-server`.
+  *Xong khi:* gọi quá 3 lượt/ngày hoặc vượt trần → 429/`GAME_LIMIT`; `npm test` qua.
+- [ ] **7.2 Theo dõi giao hàng thống nhất giữa thiết bị:** `GET /api/orders/:id/tracking` (chỉ chủ đơn/người bán/admin) trả `{ shop:{lat,lng}, home:{lat,lng}, courier:{lat,lng,phase,etaMin,distanceKm} }`. Vị trí **mô phỏng tính từ mốc thời gian** trong `history` của đơn (không cần lưu từng điểm): toạ độ cửa hàng/nhà lấy theo bảng Block A–D (đặt hằng số, nêu rõ là mô phỏng). Đơn tự lấy/dịch vụ → 404 `NO_TRACKING`.
+  *Xong khi:* hai tab cùng thấy xe ở cùng một chỗ; test cho 4 giai đoạn.
+- [ ] **7.3 Làm giàu dữ liệu seed** (để gợi ý, tìm thông minh, gợi ý giá có chất): ≥ 30 bài (đủ 4 nhóm, giá thực tế), ≥ 12 việc, đơn ở **mọi trạng thái** (kể cả vài đơn `delivering` có giao tận nơi), vài đánh giá. Giữ ObjectId khớp `client/public/datasets/` nếu có thể.
+  *Xong khi:* `npm run seed` chạy lại sạch; câu hỏi chatbot "ăn gì dưới 50k" luôn ra ≥ 3 món.
+- [ ] **7.4 Rà bảo mật (6.1):** `helmet`, `saveUninitialized: false`, rate limit đăng nhập/đăng ký, không lộ `err.message` ở production, kiểm `ObjectId` mọi route `:id`, kiểm quyền sở hữu đơn/đề nghị/hội thoại. Ghi bảng KT 9.3 đạt/hoãn vào `server/README.md`.
+- [ ] **7.5 Tài liệu:** `api-buyer-job.md` thêm `/assistant/chat`, `/pricing/suggest`, `/me/xu*`, `/orders/:id/tracking`; Swagger đủ tag; `server/README.md` (biến `.env` mới: `LLM_*`, `GEMINI_*`, `ASSISTANT_MODE`).
+- [ ] **7.6 (tùy chọn, nếu còn thời gian) Máy học:** thêm đánh giá offline cho gợi ý (Precision@k trên seed) vào `docs/thuat-toan-goi-y.md` để có số liệu khi vấn đáp.
+
+### 7B — Frontend **[FE]** (terminal `client`)
+- [ ] **7.7 Bản đồ theo dõi cho MỌI đơn có giao** (không chỉ đang giao): hiện từ trạng thái *Đã xác nhận* trở đi cho đơn đồ ăn/đồ dùng "Giao tận nơi"; *Hoàn tất* hiện thẻ "Đã giao" thu gọn. Thêm dòng **"Cách bạn X km"** (khoảng cách còn lại, cập nhật theo xe) bên cạnh "Dự kiến N phút". Toạ độ cửa hàng/nhà **khác nhau theo Block của người bán và địa chỉ nhận** (bảng Block A–D) thay vì một tuyến cố định. Khi BE xong 7.2 thì gọi `/orders/:id/tracking` (mock giữ nguyên).
+  *Xong khi:* mở 3 đơn khác nhau thấy 3 tuyến khác nhau; có "Cách bạn X km"; ảnh chụp desktop + 390px.
+- [ ] **7.8 Làm đẹp & hoàn thiện Vườn AntGo:** (a) rà giao diện hub + Hái xu theo phong cách trang chủ (bớt "mùi game", khớp màu/chữ/bo góc, icon Phosphor), vật phẩm Hái xu rõ hơn trên nền sáng, hiệu ứng bắt xu; (b) **Tưới cây** (cây xoài 4 giai đoạn, ≤ 3 lần tưới/ngày, thu hoạch nhận Xu); (c) **Nuôi thú cưng** (đói/vui, điểm danh liên tiếp); (d) mọi thưởng đi qua `XuService.earnGame` (trần 30 Xu/ngày chung); (e) kiểm mobile 390px, `prefers-reduced-motion`; (f) khi BE xong 7.1 thì gọi API thay localStorage.
+  *Xong khi:* 3 game chơi được trọn vòng, trần ngày hoạt động, ảnh chụp từng game.
+- [ ] **7.9 Lấp lỗ hổng yêu cầu môn học:** (a) thêm **ít nhất một form template-driven + two-way binding `[(ngModel)]`** có `ngForm` + validation (gợi ý: ô góp ý/Hỗ trợ hoặc chỉnh hồ sơ); (b) **giỏ hàng theo session** nối UI (`CartService`) nếu còn phù hợp với đặt 2 bước, hoặc ghi lý do hoãn vào `decisions.md`; (c) **`/admin`** (3.10–3.11: danh sách người dùng, ẩn/hiện bài, xử lý báo cáo) có `adminGuard`; (d) sửa test `api-mappers.spec.ts` đang đỏ (mapper thông báo dùng ", " thay vì " — "); (e) rà `[innerHTML]` với dữ liệu người dùng.
+- [ ] **7.10 Gắn API thật khi BE báo xong:** Xu/game (7.1), tracking (7.2); tắt mock tương ứng, thử `?mock=0`.
+- [ ] **7.11 Rà giao diện tổng thể** các trang mới (chatbot, skeleton, tracking, Vườn AntGo) trên 1440px và 390px; không để chữ tràn, ảnh vỡ, khoảng trắng thừa.
+
+### 7C — Planning/nhóm **[PL]** (phiên này)
+- [ ] **7.12** Chốt trần Xu game 30/ngày + 3 lượt (đã đề xuất, ghi `decisions.md` mục F10).
+- [ ] **7.13** Đối chiếu 6.6 (bảng yêu cầu môn học) sau khi 7A/7B xong; chuẩn bị kịch bản demo (xem dưới).
+- [ ] **7.14** Kịch bản demo vấn đáp (5 phút): đăng nhập → tìm "coom gaa" (tìm thông minh) → Gợi ý cho bạn → đặt đơn giao tận nơi → xem bản đồ + "Cách bạn X km" → chatbot "đơn của tôi / chọn giúp tôi món" → Hái xu nhận Xu → đổi voucher → đăng bài (gợi ý giá) → admin ẩn bài.
 
 ---
 
