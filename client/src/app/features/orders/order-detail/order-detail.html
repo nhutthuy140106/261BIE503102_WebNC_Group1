@@ -46,7 +46,7 @@
   </div>
 
   @if (trackable(o)) {
-    <app-order-tracking class="trk-slot" [orderId]="o._id" [shopName]="o.counterpartName" [address]="o.detail?.address ?? ''" />
+    <app-order-tracking class="trk-slot" [orderId]="o._id" [shopName]="o.counterpartName" [address]="o.detail?.address ?? ''" [status]="o.status" />
   }
 
   <div class="cols">

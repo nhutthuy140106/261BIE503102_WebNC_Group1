@@ -24,3 +24,32 @@ export function distanceKm(a: LatLng, b: LatLng): number {
   const dx = (b[1] - a[1]) * 111.2 * Math.cos((a[0] * Math.PI) / 180);
   return Math.hypot(dx, dy);
 }
+
+/** Tâm bốn Block A–D (mẫu, TP.HCM) — cửa hàng và nhà người mua đặt quanh các tâm này nên mỗi đơn một tuyến khác nhau. */
+export const BLOCK_POS: Record<string, LatLng> = {
+  A: [10.7873, 106.7052],
+  B: [10.7935, 106.7121],
+  C: [10.8046, 106.7215],
+  D: [10.7981, 106.6988],
+};
+
+/** Lấy chữ Block (A–D) trong địa chỉ, ví dụ "Căn C-0912, Block C"; không thấy thì trả `fallback`. */
+export function blockOf(text: string | undefined, fallback = 'B'): string {
+  const m = /block\s*([A-D])(?![A-Za-z])/i.exec(text ?? '');
+  return m ? m[1].toUpperCase() : fallback;
+}
+
+/** Chọn Block ổn định theo chuỗi (dùng cho cửa hàng khi đơn chưa ghi Block của người bán). */
+export function blockFromSeed(seed: string): string {
+  let h = 0;
+  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return 'ABCD'[h % 4];
+}
+
+/** Điểm cụ thể trong Block: lệch nhẹ theo `seed` để hai đơn cùng Block vẫn không trùng điểm. */
+export function pointIn(block: string, seed: string): LatLng {
+  const c = BLOCK_POS[block] ?? BLOCK_POS['B'];
+  let h = 7;
+  for (const ch of seed) h = (h * 33 + ch.charCodeAt(0)) >>> 0;
+  return [c[0] + ((h % 21) - 10) * 0.00022, c[1] + (((h >> 5) % 21) - 10) * 0.00022];
+}

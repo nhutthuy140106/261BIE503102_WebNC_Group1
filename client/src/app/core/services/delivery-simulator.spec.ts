@@ -1,5 +1,5 @@
 import { DeliverySimulator } from './delivery-simulator';
-import { distanceKm, interpolate } from '../utils/tracking-route';
+import { blockFromSeed, blockOf, distanceKm, interpolate, pointIn } from '../utils/tracking-route';
 
 describe('tuyến giao hàng giả lập', () => {
   it('nội suy: đủ n điểm, hai đầu khớp đúng cửa hàng và nhà', () => {
@@ -17,6 +17,25 @@ describe('tuyến giao hàng giả lập', () => {
     const km = distanceKm(sim.path[sim.shopIndex], sim.path[sim.lastIndex]);
     expect(km).toBeGreaterThan(2);
     expect(km).toBeLessThan(3.5);
+  });
+});
+
+describe('tuyến theo Block', () => {
+  it('đọc Block trong địa chỉ, không có thì dùng mặc định', () => {
+    expect(blockOf('Căn C-0912, Block D')).toBe('D');
+    expect(blockOf('Số 5 đường X', 'A')).toBe('A');
+    expect(['A', 'B', 'C', 'D']).toContain(blockFromSeed('Bếp Cô Lan'));
+  });
+
+  it('mỗi đơn một tuyến khác nhau và có "Cách bạn X km"', () => {
+    const a = new DeliverySimulator();
+    const b = new DeliverySimulator();
+    a.start('o1', pointIn('A', 'o1s'), pointIn('C', 'o1h'));
+    b.start('o2', pointIn('D', 'o2s'), pointIn('B', 'o2h'));
+    expect(a.path[a.lastIndex]).not.toEqual(b.path[b.lastIndex]);
+    expect(a.remainingKm()).toBeGreaterThan(0);
+    a.stop();
+    b.stop();
   });
 });
 

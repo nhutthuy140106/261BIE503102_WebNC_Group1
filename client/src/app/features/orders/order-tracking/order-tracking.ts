@@ -1,6 +1,8 @@
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, effect, inject, signal } from '@angular/core';
 import { MARKER_PATH } from '../../../core/models/tracking';
-import { DeliverySimulator, HOME_POS, SHOP_POS } from '../../../core/services/delivery-simulator';
+import { DeliverySimulator } from '../../../core/services/delivery-simulator';
+import { LatLng } from '../../../core/models/tracking';
+import { blockFromSeed, blockOf, pointIn } from '../../../core/utils/tracking-route';
 import { ToastService } from '../../../core/services/toast';
 
 type Leaflet = typeof import('leaflet');
@@ -26,6 +28,15 @@ export class OrderTracking implements OnInit, AfterViewInit, OnDestroy {
   @Input({ required: true }) orderId!: string;
   @Input() shopName = 'Cửa hàng';
   @Input() address = '';
+  /** Khối Block (A–D) của cửa hàng — không có thì suy ra ổn định từ tên cửa hàng */
+  @Input() shopBlock = '';
+  /** Trạng thái đơn: 'done' → chỉ hiện thẻ "Đã giao" thu gọn */
+  @Input() status = '';
+
+  protected shopPos: LatLng = [0, 0];
+  protected homePos: LatLng = [0, 0];
+  protected shopLabel = '';
+  protected homeLabel = '';
 
   @ViewChild('map', { static: true }) private mapEl!: ElementRef<HTMLElement>;
 
@@ -59,10 +70,22 @@ export class OrderTracking implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.sim.start(this.orderId);
+    const sb = this.shopBlock || blockFromSeed(this.shopName);
+    let hb = blockOf(this.address, 'C');
+    if (hb === sb) hb = 'ABCD'[('ABCD'.indexOf(sb) + 2) % 4]; // cùng Block thì vẫn cho tuyến đủ dài để xem
+    this.shopPos = pointIn(sb, this.orderId + 's');
+    this.homePos = pointIn(hb, this.orderId + 'h');
+    this.shopLabel = 'Block ' + sb;
+    this.homeLabel = 'Block ' + hb;
+    this.sim.start(this.orderId, this.shopPos, this.homePos);
+  }
+
+  protected get finished(): boolean {
+    return this.status === 'done';
   }
 
   async ngAfterViewInit(): Promise<void> {
+    if (this.finished) return;
     try {
       this.L = await import('leaflet');
       this.drawMap(this.L);
@@ -97,8 +120,8 @@ export class OrderTracking implements OnInit, AfterViewInit, OnDestroy {
     this.rest = L.polyline(path, { color: '#8b8f98', weight: 4, dashArray: '4 10', opacity: 0.45, className: 'trk-rest' }).addTo(map);
     this.done = L.polyline([path[0]], { color: '#D85A1C', weight: 6, opacity: 1, className: 'trk-done' }).addTo(map);
     this.flow = L.polyline([path[0]], { color: '#fff', weight: 2, dashArray: '2 14', opacity: 0.85, className: 'trk-flow' }).addTo(map);
-    L.marker(SHOP_POS, { icon: mk('shop', MARKER_PATH.shop), title: this.shopName }).addTo(map);
-    L.marker(HOME_POS, { icon: mk('home', MARKER_PATH.home), title: 'Nhà bạn' }).addTo(map);
+    L.marker(this.shopPos, { icon: mk('shop', MARKER_PATH.shop), title: this.shopName }).addTo(map);
+    L.marker(this.homePos, { icon: mk('home', MARKER_PATH.home), title: 'Nhà bạn' }).addTo(map);
     this.courierMarker = L.marker(this.sim.position(), { icon: mk('courier', MARKER_PATH.courier), title: 'Người giao', zIndexOffset: 500 }).addTo(map);
     map.fitBounds(L.latLngBounds(path), { padding: [32, 32] }); // thấy đủ ba điểm ngay khi tải
     this.map = map;
