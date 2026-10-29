@@ -289,3 +289,9 @@ Hai phần này dựa vào schema chung nên **Q1–Q8** nên được chốt tr
 - Người ghi: BE
 - Nội dung: (1) **Thứ tự giảm:** Giờ vàng giảm giá món trước, **voucher Xu tính sau** trên tiền hàng đã giảm; mức tối thiểu của voucher so với tiền hàng đã giảm (nên có đơn đủ điều kiện theo giá gốc nhưng hết đủ sau Giờ vàng). Tùy chọn cộng giá (topping…) **không** bị giảm, chỉ giảm giá gốc của bài. (2) **Múi giờ:** cố định Asia/Ho_Chi_Minh (UTC+7), không phụ thuộc giờ máy người dùng; khung vắt qua nửa đêm tính theo ngày bắt đầu. (3) **Chốt giá lúc đặt:** giá lưu vào đơn tại thời điểm tạo đơn; đặt trước 17:00 nhưng giao sau vẫn giữ giá đã giảm, hết khung là về giá gốc ngay cho đơn mới. (4) Làm tròn 100đ. (5) Bộ lọc giá `minPrice/maxPrice` của danh sách bài vẫn so với giá gốc.
 - Quyết định: (điền khi chốt)
+
+### [29/10] F12 — Ô Giờ vàng trong form đăng bài khu Bán (7.21)
+- Trạng thái: CẦN CHỐT (bạn phụ trách phía Bán)
+- Người ghi: FE
+- Nội dung: `features/seller/post-form` thêm khối "Giờ vàng" gọn (bật/tắt, %/tiền, giá trị, giờ từ–đến có thể qua nửa đêm, ngày trong tuần, xem trước giá). Ẩn với việc làm. Gửi trong thân `POST/PUT /seller/posts` thành `promo: { kind, value, from, to, days, active }` (đúng dạng trường `Post.promo` của server 7.18). Mock lưu thẳng vào bài nên phía Mua thấy ngay. Endpoint `/seller/posts` thật chưa có trong api-buyer-job.md — cần xác nhận cùng schema; giao diện nằm trong thiết kế của phía Bán nên nếu họ muốn đổi chỗ đặt/giao diện thì chỉ cần dời khối `<fieldset class="promo">`.
+- Quyết định: (điền khi chốt)

@@ -57,6 +57,37 @@
       </div>
     }
 
+    @if (!isJob()) {
+      <fieldset class="promo">
+        <legend>Giờ vàng (khuyến mãi theo khung giờ)</legend>
+        <label class="check"><input type="checkbox" formControlName="promoOn" /> Giảm giá trong khung giờ, tự về giá gốc khi hết giờ</label>
+        @if (form.controls.promoOn.value) {
+          <div class="prow">
+            <div class="field">
+              <label for="pk">Kiểu giảm</label>
+              <select id="pk" formControlName="promoKind"><option value="percent">Giảm %</option><option value="amount">Giảm tiền (đ)</option></select>
+            </div>
+            <div class="field">
+              <label for="pv">{{ form.controls.promoKind.value === 'percent' ? 'Mức giảm (%)' : 'Số tiền giảm (đ)' }}</label>
+              <input id="pv" type="number" min="1" formControlName="promoValue" />
+            </div>
+            <div class="field"><label for="pf">Từ</label><input id="pf" type="time" formControlName="promoFrom" /></div>
+            <div class="field"><label for="pt">Đến</label><input id="pt" type="time" formControlName="promoTo" /></div>
+          </div>
+          <div class="days" role="group" aria-label="Ngày áp dụng">
+            <span class="muted">Ngày áp dụng ({{ promoDays().length ? '' : 'mọi ngày' }}):</span>
+            @for (w of weekdays; track w.d) {
+              <button type="button" [class.on]="promoDays().includes(w.d)" [attr.aria-pressed]="promoDays().includes(w.d)" (click)="toggleDay(w.d)">{{ w.l }}</button>
+            }
+          </div>
+          @if (promoError(); as pe) { <small class="error" role="alert">{{ pe }}</small> }
+          @else if (promoPreview(); as pv) {
+            <p class="pvw">Giá trong giờ vàng: <b>{{ pv.price | vnd }}</b> <span class="muted">(giảm {{ pv.off | vnd }}, giờ Việt Nam; khung có thể qua nửa đêm)</span></p>
+          }
+        }
+      </fieldset>
+    }
+
     <div class="field">
       <label for="block">Khu vực</label>
       <select id="block" formControlName="block">
