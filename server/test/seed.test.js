@@ -7,6 +7,7 @@ const assert = require('node:assert/strict');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const seed = require('../src/seeds/seed');
+const Post = require('../src/modules/shared/post.model');
 
 let mongod; let server; let base;
 const M = (n) => mongoose.model(n);
@@ -98,6 +99,12 @@ test('seed dùng được qua API: Thủy thấy đơn, việc, đánh giá; bà
   assert.equal((await api('GET', '/posts?limit=100')).body.data.length, 32); // 33 bài, trừ bài đã bị ẩn (limit tối đa 100)
   const cheap = (await api('POST', '/assistant/chat', jar, { messages: [{ role: 'user', content: 'ăn gì dưới 50k' }] })).body;
   assert.ok((cheap.data.items || cheap.data.posts || []).length >= 3 || (await api('GET', '/posts?type=food&maxPrice=50000', jar)).body.data.length >= 3);
+  // Giờ vàng: >= 6 bài có khung giờ, và mọi giờ trong ngày (giờ VN) đều có ít nhất 1 bài đang giảm để demo
+  assert.ok((await Post.countDocuments({ 'promo.active': true })) >= 6);
+  for (let h = 0; h < 24; h++) {
+    const iso = encodeURIComponent(`2026-10-29T${String(h).padStart(2, '0')}:30:00+07:00`);
+    assert.ok((await api('GET', `/deals?now=${iso}`)).body.data.active.length >= 1, `không có bài giảm lúc ${h}h`);
+  }
   const jobs = (await api('GET', '/jobs?limit=100')).body.data;
   assert.ok(jobs.every((j) => j.exactAddress === undefined));
   assert.equal(jobs.find((j) => j.title.startsWith('Lấy giúp')).offerCount, 2, 'thẻ việc đếm đúng số đề nghị đang chờ');

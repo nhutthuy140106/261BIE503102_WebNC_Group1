@@ -10,7 +10,7 @@ const orderSchema = new Schema({
   post: { type: Schema.Types.ObjectId, ref: 'Post', required: true },
   // bản chụp lúc đặt: sửa/xóa bài sau đó không làm đổi đơn
   snapshot: new Schema({
-    title: String, type: { type: String }, image: String, sellerName: String, sellerAvatar: { type: String, default: null }, unitPrice: Number, unit: String,
+    title: String, type: { type: String }, image: String, sellerName: String, sellerAvatar: { type: String, default: null }, unitPrice: Number, originalPrice: Number, promoLabel: String, unit: String,
   }, { _id: false }),
   quantity: { type: Number, required: true, min: 1 },
   selections: [{ group: String, choices: [{ label: String, price: Number, _id: false }], _id: false }],
@@ -22,7 +22,7 @@ const orderSchema = new Schema({
   note: { type: String, default: '' },
   voucherCode: String,
   payment: { type: String, enum: ['cash', 'transfer'], required: true },
-  breakdown: { items: Number, deliveryFee: Number, discount: Number, surcharge: { type: Number, default: 0 }, _id: false },
+  breakdown: { items: Number, deliveryFee: Number, discount: Number, surcharge: { type: Number, default: 0 }, promoSaved: { type: Number, default: 0 }, _id: false },
   total: { type: Number, required: true },
   state: { type: String, enum: ORDER_STATES, default: 'waiting', index: true },
   history: [{ state: String, at: Date, _id: false }],

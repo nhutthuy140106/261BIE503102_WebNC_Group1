@@ -130,4 +130,21 @@ const JOBS = [
   { key: 'xong', title: 'Nhận hộ gói hàng khi vắng nhà', category: 'Mua hộ', desc: 'Nhận hộ một gói hàng lúc 15:00 và để ở sảnh, mình về lấy sau.', pay: 25000, unit: 'lần', workTime: 'Hôm qua · 15:00', area: 'C', distance: 330, poster: 'tung', exactAddress: 'Căn C-0102, Block C', status: 'done', daysAgo: 6 },
 ];
 
+// Giờ vàng (giờ Việt Nam). Các khung nối nhau để MỌI giờ trong ngày luôn có 1–2 bài đang giảm (demo luôn thấy):
+// 01–07 giặt sấy · 06–10 sáng · 10–14 trưa · 14–17 giải khát · 17–21 tối · 21–02 ăn khuya (vắt qua nửa đêm). Cuối tuần thêm rau củ.
+const EVERY = [0, 1, 2, 3, 4, 5, 6];
+const PROMOS = {
+  giat: { kind: 'amount', value: 3000, from: '01:00', to: '07:00', days: EVERY },
+  banhmi: { kind: 'percent', value: 20, from: '06:00', to: '10:00', days: EVERY },
+  chao: { kind: 'percent', value: 15, from: '06:00', to: '10:00', days: EVERY },
+  com: { kind: 'percent', value: 15, from: '10:00', to: '14:00', days: EVERY },
+  trasua: { kind: 'percent', value: 20, from: '14:00', to: '17:00', days: EVERY },
+  cafe: { kind: 'amount', value: 5000, from: '14:00', to: '17:00', days: EVERY },
+  pho: { kind: 'percent', value: 10, from: '17:00', to: '21:00', days: EVERY },
+  bunCha: { kind: 'amount', value: 6000, from: '17:00', to: '21:00', days: EVERY },
+  mi: { kind: 'percent', value: 25, from: '21:00', to: '02:00', days: EVERY }, // khung vắt qua nửa đêm
+  rau: { kind: 'percent', value: 10, from: '09:00', to: '12:00', days: [0, 6] },
+};
+for (const p of POSTS) if (PROMOS[p.key]) p.promo = { active: true, ...PROMOS[p.key] };
+
 module.exports = { USERS, POSTS, JOBS, img };

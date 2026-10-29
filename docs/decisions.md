@@ -283,3 +283,9 @@ Hai phần này dựa vào schema chung nên **Q1–Q8** nên được chốt tr
 - Người ghi: FE
 - Nội dung: `CartService` có sẵn nhưng chưa nối giao diện. Luồng đặt hiện tại là "đặt 2 bước" (chọn món → hộp Xác nhận đơn hàng → đặt ngay) cho **một bài mỗi đơn**, nên giỏ nhiều bài làm luồng rối thêm và phải đổi cả đơn/Xu/voucher.
 - Quyết định: hoãn; chỉ nối giỏ khi nhóm chốt cho đặt nhiều bài một đơn. Khi đó nối `POST /api/cart/add` (session phía server) thay cho bộ nhớ trình duyệt.
+
+### [29/10] F11 — Giờ vàng: cộng dồn với voucher và múi giờ
+- Trạng thái: CẦN CHỐT (Planning)
+- Người ghi: BE
+- Nội dung: (1) **Thứ tự giảm:** Giờ vàng giảm giá món trước, **voucher Xu tính sau** trên tiền hàng đã giảm; mức tối thiểu của voucher so với tiền hàng đã giảm (nên có đơn đủ điều kiện theo giá gốc nhưng hết đủ sau Giờ vàng). Tùy chọn cộng giá (topping…) **không** bị giảm, chỉ giảm giá gốc của bài. (2) **Múi giờ:** cố định Asia/Ho_Chi_Minh (UTC+7), không phụ thuộc giờ máy người dùng; khung vắt qua nửa đêm tính theo ngày bắt đầu. (3) **Chốt giá lúc đặt:** giá lưu vào đơn tại thời điểm tạo đơn; đặt trước 17:00 nhưng giao sau vẫn giữ giá đã giảm, hết khung là về giá gốc ngay cho đơn mới. (4) Làm tròn 100đ. (5) Bộ lọc giá `minPrice/maxPrice` của danh sách bài vẫn so với giá gốc.
+- Quyết định: (điền khi chốt)

@@ -6,6 +6,7 @@ const { notify } = require('../../shared/notify');
 const ApiError = require('../../../utils/ApiError');
 const { parsePaging } = require('../../../utils/pagination');
 const xu = require('../xu/xu.service');
+const { effectivePrice } = require('../../../utils/promo');
 const { compute: computeTracking, canTrack } = require('./tracking');
 
 // Voucher AntXu tạm (Q11): sau này lấy từ model Voucher. Chỉ áp cho bài có acceptsXu.
@@ -15,7 +16,8 @@ const CANCELABLE = ['waiting', 'confirmed', 'preparing'];
 const RETURN_WINDOW_DAYS = 7; // giả định, chờ Q6
 
 /** Tính tiền ở server từ giá bài hiện tại + lựa chọn; ném 422 nếu lựa chọn sai. */
-function priceOrder(post, input, xuVoucher = null) {
+function priceOrder(post, input, xuVoucher = null, now = new Date()) {
+  const eff = effectivePrice(post, now); // giá do SERVER tính theo giờ đặt, kể cả khi bài đang Giờ vàng
   const details = [];
   const selections = [];
   let optionsPerUnit = 0;
@@ -66,7 +68,7 @@ function priceOrder(post, input, xuVoucher = null) {
   }
   if (details.length) throw ApiError.validation('Đơn chưa hợp lệ', details);
 
-  const items = (post.price + optionsPerUnit) * input.quantity;
+  const items = (eff.price + optionsPerUnit) * input.quantity;
   const deliveryFee = input.fulfillment === 'delivery' ? post.deliveryFee : 0;
   if (rule) {
     if (items < rule.min) throw ApiError.validation('Đơn chưa hợp lệ', [{ field: 'voucherCode', message: `Voucher này áp cho đơn từ ${rule.min.toLocaleString('vi-VN')}đ` }]);
@@ -74,7 +76,7 @@ function priceOrder(post, input, xuVoucher = null) {
     discount = rule.ship ? deliveryFee : rule.amount;
   }
   discount = Math.min(discount, items + deliveryFee);
-  return { selections, answers, breakdown: { items, deliveryFee, discount, surcharge: 0 }, total: items + deliveryFee - discount };
+  return { selections, answers, breakdown: { items, deliveryFee, discount, surcharge: 0, promoSaved: (eff.original - eff.price) * input.quantity }, promo: eff.promo ? { label: eff.promo.label, original: eff.original, price: eff.price } : null, total: items + deliveryFee - discount };
 }
 
 // Bước 1: kiểm tra + tính tiền, CHƯA ghi gì vào DB (giỏ nháp gọi bước này cho mọi món trước khi tạo đơn nào)
@@ -117,7 +119,7 @@ async function commit(user, input, { post, priced, address, xuVoucher }) {
     buyer: user._id,
     seller: post.seller._id,
     post: post._id,
-    snapshot: { title: post.title, type: post.type, image: post.images[0], sellerName: post.seller.name, sellerAvatar: post.seller.avatar || null, unitPrice: post.price, unit: post.unit },
+    snapshot: { title: post.title, type: post.type, image: post.images[0], sellerName: post.seller.name, sellerAvatar: post.seller.avatar || null, unitPrice: priced.promo ? priced.promo.price : post.price, originalPrice: priced.promo ? priced.promo.original : undefined, promoLabel: priced.promo ? priced.promo.label : undefined, unit: post.unit },
     quantity: input.quantity,
     selections: priced.selections,
     answers: priced.answers,

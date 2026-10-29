@@ -74,7 +74,9 @@ async function seed() {
 
   /* ---------- Bài đăng ---------- */
   const p = {};
-  for (const [i, { key, seller, daysAgo, images, ...d }] of POSTS.entries()) {
+  const promos = {}; // Giờ vàng gán SAU khi tạo đơn mẫu, để tổng tiền đơn mẫu không đổi theo giờ chạy seed
+  for (const [i, { key, seller, daysAgo, images, promo, ...d }] of POSTS.entries()) {
+    if (promo) promos[key] = promo;
     p[key] = await Post.create({ ...d, seller: u[seller]._id, images: (images || []).map(img) });
     await backdate(Post, p[key]._id, ago(daysAgo * DAY + i * 17 * 60000));
   }
@@ -302,6 +304,8 @@ async function seed() {
   await audit('report.resolved', 'report', resolved, 'Đã gỡ bài và khóa tài khoản đăng bài.', 12);
 
   const n = (M) => M.countDocuments({});
+  for (const [key, promo] of Object.entries(promos)) await Post.updateOne({ _id: p[key]._id }, { promo });
+
   return {
     users: await n(User), posts: await n(Post), jobs: await n(Job), orders: await n(Order), offers: await n(Offer),
     reviews: await n(Review), questions: await n(Question), conversations: await n(Conversation),
