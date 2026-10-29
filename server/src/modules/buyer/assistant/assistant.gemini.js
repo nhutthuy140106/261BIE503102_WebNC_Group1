@@ -7,7 +7,7 @@ const ApiError = require('../../../utils/ApiError');
  */
 const MODEL = () => process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 const KEY = () => process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-const MAX_TOOL_ROUNDS = 4;
+const MAX_TOOL_ROUNDS = 5;
 const TIMEOUT_MS = 25000;
 
 let injectedFetch = null;
@@ -64,6 +64,8 @@ async function chat({ messages, user }, deps) {
       systemInstruction: { parts: [{ text: deps.system + known }] },
       contents,
       tools: toDeclarations(deps.tools),
+      // vòng cuối cấm gọi thêm công cụ để mô hình buộc phải trả lời bằng chữ
+      ...(round === MAX_TOOL_ROUNDS - 1 ? { toolConfig: { functionCallingConfig: { mode: 'NONE' } } } : {}),
       generationConfig: { maxOutputTokens: 1024, temperature: 0.4, thinkingConfig: { thinkingBudget: 0 } },
     });
     const cand = data.candidates && data.candidates[0];

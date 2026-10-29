@@ -241,3 +241,19 @@ test('lai: AI lỗi thì câu lạ vẫn có câu trả lời từ bộ luật',
   assert.equal(r.status, 200);
   assert.equal(r.body.data.engine, 'local');
 });
+
+test('LLM: model chính hết hạn mức (429) thì thử model dự phòng', async () => {
+  delete process.env.GEMINI_API_KEY; delete process.env.GOOGLE_API_KEY; delete process.env.ASSISTANT_MODE;
+  process.env.LLM_API_KEY = 'k'; process.env.LLM_MODEL = 'main-model'; process.env.LLM_FALLBACK_MODELS = 'backup-model';
+  const used = [];
+  assistant.setLlmFetch(async (url, init) => {
+    const model = JSON.parse(init.body).model;
+    used.push(model);
+    return model === 'main-model' ? jsonRes(429, { error: 'rate' }) : jsonRes(200, { choices: [{ message: { role: 'assistant', content: 'Từ model dự phòng' } }] });
+  });
+  const r = await ask('bầu trời hôm nay màu gì');
+  delete process.env.LLM_MODEL; delete process.env.LLM_FALLBACK_MODELS;
+  assert.equal(r.body.data.engine, 'llm');
+  assert.equal(r.body.data.reply, 'Từ model dự phòng');
+  assert.deepEqual(used, ['main-model', 'backup-model']);
+});
