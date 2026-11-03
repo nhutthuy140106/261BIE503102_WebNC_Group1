@@ -9,7 +9,7 @@
 .tpl button:hover:not(:disabled) { border-color: #e2cfc6; }
 .tpl button:disabled { opacity: .45; cursor: not-allowed; }
 .tpl button.on { border-color: var(--accent); background: #fff6f1; box-shadow: 0 0 0 1px var(--accent) inset; opacity: 1; }
-.pi { width: 40px; height: 40px; border-radius: 11px; background: var(--soft); display: grid; place-items: center; flex: none; }
+.pi { width: 40px; height: 40px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; flex: none; }
 .tpl button.on .pi { background: var(--accent); color: #fff; }
 .tpl svg { width: 20px; height: 20px; }
 .tpl b { display: block; font-size: 14.5px; }

@@ -42,7 +42,7 @@
   <!-- 4 nút đăng bài -->
   <div class="posts4">
     @for (n of newKinds; track n[0]) {
-      <a [routerLink]="['/seller/posts/new']" [queryParams]="{ type: n[0] }"><span class="pi"><svg class="i"><use [attr.href]="'#' + n[1]" /></svg></span>{{ n[2] }}<svg class="i plus"><use href="#plus" /></svg></a>
+      <a [routerLink]="['/seller/posts/new']" [queryParams]="{ type: n[0] }"><span class="pi"><svg class="i"><use [attr.href]="'#' + n[1]" /></svg></span>{{ n[2] }}</a>
     }
   </div>
 

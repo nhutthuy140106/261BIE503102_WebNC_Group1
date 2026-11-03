@@ -34,13 +34,13 @@ section.sec { margin-top: 36px; }
 .row2 select { flex: 1; }
 .pfoot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 
-/* 4 nút đăng bài */
+/* 4 nút đăng bài: cùng kiểu ô chọn loại bài ở form đăng bài (nền trắng, viền nhạt, biểu tượng trong ô kem), giữ kích thước cũ */
 .posts4 { margin-top: 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.posts4 a { display: flex; align-items: center; gap: 14px; height: 90px; padding: 0 20px; border-radius: 16px; background: var(--accent); color: #fff; font-weight: 700; font-size: 15.5px; letter-spacing: -.01em; white-space: nowrap; transition: filter .15s, transform .15s; }
-.posts4 a:hover { filter: brightness(.95); transform: translateY(-1px); }
-.pi { width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, .2); display: grid; place-items: center; flex: none; }
+.posts4 a { display: flex; align-items: center; gap: 14px; height: 90px; padding: 0 20px; border: 1px solid var(--border); border-radius: 16px; background: #fff; color: var(--ink); font-weight: 700; font-size: 15.5px; letter-spacing: -.01em; white-space: nowrap; transition: border-color .15s, background .15s, box-shadow .15s; }
+.posts4 a:hover { border-color: var(--accent); background: #fff6f1; box-shadow: 0 0 0 1px var(--accent) inset; }
+.posts4 a:hover .pi { background: var(--accent); color: #fff; }
+.pi { width: 44px; height: 44px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; flex: none; transition: background .15s, color .15s; }
 .pi svg { width: 22px; height: 22px; }
-.posts4 .plus { margin-left: auto; width: 18px; height: 18px; opacity: .85; }
 
 /* Banner AntXu */
 .xuband { margin-top: 14px; display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 16px; background: #fff1e4; border: 1px solid #f8dcc4; }
