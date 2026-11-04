@@ -6,7 +6,8 @@ import { Order } from '../../../core/models/order';
 import { OrderService } from '../../../core/services/order';
 import { ChatService } from '../../../core/services/chat';
 import { stripAccents } from '../../../core/utils/slug-helper';
-import { formatDateTime } from '../../../core/utils/status-label';
+import { formatDateTime, statusLabel } from '../../../core/utils/status-label';
+import { isEnded, needsAction } from '../../orders/order-list/order-list';
 
 /** Messenger: danh sách hội thoại + khung chat. Nhắn tin không đổi trạng thái đơn. */
 @Component({
@@ -30,6 +31,55 @@ export class Messenger implements OnInit, OnDestroy {
 
   /** Đơn gắn với cuộc trò chuyện đang mở: lấy từ dữ liệu đơn thật để hiện ảnh + tên như trang Đơn hàng */
   protected readonly ctxOrder = signal<Order | null>(null);
+  /** Mọi đơn/việc của người dùng (nạp một lần) — để hiện hết các đơn với người đang nhắn, không chỉ một đơn. */
+  private readonly allOrders = signal<Order[]>([]);
+  protected readonly showAllOrders = signal(false);
+  private static readonly VISIBLE = 2;
+
+  /** Các đơn giữa mình và người đang nhắn: đơn đang trao đổi lên đầu, rồi đơn còn chạy, rồi đơn đã xong (mới trước). */
+  protected readonly related = computed(() => {
+    const c = this.selected();
+    if (!c) return [];
+    const ctxId = c.context?.id;
+    const rank = (o: Order) => (o._id === ctxId ? 0 : isEnded(o) ? 2 : 1);
+    return this.allOrders()
+      .filter((o) => o.counterpartName === c.withName)
+      .sort((a, b) => rank(a) - rank(b) || b.createdAt.localeCompare(a.createdAt));
+  });
+  protected readonly relatedShown = computed(() => (this.showAllOrders() ? this.related() : this.related().slice(0, Messenger.VISIBLE)));
+  protected readonly relatedHidden = computed(() => Math.max(0, this.related().length - Messenger.VISIBLE));
+
+  /** Các đơn với người đang nhắn, cũ trước mới sau: mỗi đơn hiện trong luồng chat đúng lúc đặt */
+  private readonly orderTimeline = computed(() => [...this.related()].sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt)));
+
+  /** Đơn đặt trong khoảng giữa tin liền trước và tin thứ i */
+  protected cardsBefore(ms: Message[], i: number): Order[] {
+    const prev = i > 0 ? Date.parse(ms[i - 1].createdAt) : -Infinity;
+    const cur = Date.parse(ms[i].createdAt);
+    return this.orderTimeline().filter((o) => Date.parse(o.createdAt) > prev && Date.parse(o.createdAt) <= cur);
+  }
+
+  /** Đơn đặt sau tin cuối cùng (hoặc chưa có tin nào) */
+  protected cardsAfter(ms: Message[]): Order[] {
+    const last = ms.length ? Date.parse(ms[ms.length - 1].createdAt) : -Infinity;
+    return this.orderTimeline().filter((o) => Date.parse(o.createdAt) > last);
+  }
+
+  protected statusOf(o: Order): string {
+    return statusLabel(o);
+  }
+
+  /** Chấm trạng thái giống danh sách đơn: cam = cần bạn làm, xanh = đang chạy, vàng = chờ người kia, xám = đã xong */
+  protected dotOf(o: Order): string {
+    if (needsAction(o)) return 'act';
+    if (isEnded(o)) return 'end';
+    return ['chosen', 'working', 'confirmed', 'preparing', 'delivering', 'ready'].includes(o.status as string) ? 'go' : 'wait';
+  }
+
+  protected orderLink(o: Order): string[] {
+    return ['/orders', o._id];
+  }
+
   protected readonly query = signal('');
   protected readonly onlyUnread = signal(false);
   protected readonly unreadCount = computed(() => this.conversations().filter((c) => c.unread > 0).length);
@@ -88,6 +138,7 @@ export class Messenger implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     document.body.classList.add('no-footer');
+    this.orders.getOrders().subscribe({ next: (l) => this.allOrders.set(l), error: () => undefined });
     this.chat.list().subscribe({
       next: (rows) => {
         this.conversations.set(rows);
@@ -115,6 +166,7 @@ export class Messenger implements OnInit, OnDestroy {
   select(c: Conversation, keepUrl = false): void {
     this.selectedId.set(c._id);
     this.ctxOrder.set(null);
+    this.showAllOrders.set(false);
     if (c.context && (c.context.type === 'order' || c.context.type === 'offer')) {
       this.orders.getOrder(c.context.id).subscribe({ next: (o) => this.selectedId() === c._id && this.ctxOrder.set(o), error: () => undefined });
     }

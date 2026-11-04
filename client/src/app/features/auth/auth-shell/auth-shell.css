@@ -34,18 +34,22 @@
 .scene.wide::after { right: 4%; }
 .card.wide { width: 100%; padding: 36px 48px 30px; }
 /* nút Google và dòng "hoặc" không kéo dài hết thẻ ngang */
-.card.wide .or, .card.wide .google, .card.wide .notice { width: min(100%, 380px); margin-left: auto; margin-right: auto; }
+.card.wide .or, .card.wide .google-wrap, .card.wide .notice { width: min(100%, 380px); margin-left: auto; margin-right: auto; }
 @media (max-width: 1240px) { .scene.wide .ant { display: none; } }
 
 .or { display: flex; align-items: center; gap: 12px; margin: 18px 0 14px; font-size: 12.5px; color: var(--fog); }
 .or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-.google { width: 100%; height: 50px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font: 600 14.5px 'Mona Sans', sans-serif; color: var(--ink); transition: background .2s, border-color .2s; }
-.google:hover { background: var(--soft); border-color: var(--ink); }
+/* Nút Google: .google là hình để nhìn (kiểu AntGo); .google-slot là nút Google thật (Google Identity Services vẽ vào),
+   trong suốt và đè đúng lên .google. Nút Google cao 40px nên kéo giãn theo chiều dọc cho phủ hết nút 50px. */
+.google-wrap { position: relative; height: 50px; }
+.google { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font: 600 14.5px 'Mona Sans', sans-serif; color: var(--ink); transition: background .2s, border-color .2s; pointer-events: none; }
+.google-wrap:hover .google, .google-wrap:focus-within .google { background: var(--soft); border-color: var(--ink); }
 .google svg { width: 20px; height: 20px; }
+.google-slot { position: absolute; top: 0; left: 0; width: 100%; height: 40px; display: flex; justify-content: center; overflow: hidden; opacity: .01; cursor: pointer; transform: scaleY(1.25); transform-origin: top; }
 .notice { margin-top: 10px; font-size: 13px; color: var(--smoke); text-align: center; }
 .foot { position: absolute; right: 40px; bottom: 22px; font-size: 12.5px; color: rgba(34,48,74,.6); }
 
 /* màn thấp (laptop 768px): kiến nhỏ lại, thẻ gọn hơn để không phải cuộn */
-@media (max-height: 820px) and (min-width: 761px) { .stage { padding-top: 84px; padding-bottom: 12px; } .scene { --s: .4; } .card { padding: 30px 30px 22px; } .or { margin: 12px 0 10px; } .google { height: 46px; } }
+@media (max-height: 820px) and (min-width: 761px) { .stage { padding-top: 84px; padding-bottom: 12px; } .scene { --s: .4; } .card { padding: 30px 30px 22px; } .or { margin: 12px 0 10px; } .google-wrap { height: 46px; } .google-slot { transform: scaleY(1.15); } }
 @media (max-width: 760px) { .stage { justify-content: center; padding: 90px 16px 40px; } .ant { display: none; } .top { padding: 18px 16px; } .foot { display: none; } }
 @media (prefers-reduced-motion: reduce) { .card, .ant { animation: none !important; } }

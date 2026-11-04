@@ -69,6 +69,42 @@ const registerLimiter = rateLimit({
  *       403: { description: "Tài khoản bị khóa (code ACCOUNT_LOCKED)" }
  *       422: { description: Dữ liệu sai kiểu (vd gửi object thay chuỗi) }
  *       429: { description: Thử quá nhiều lần }
+ * /auth/google:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Đăng nhập bằng Google (bước 1) — gửi ID token từ Google Identity Services
+ *     description: "Đã có tài khoản thì đăng nhập luôn (`{ data: User }` + cookie). Lần đầu thì trả `{ needPhone: true, name }` và nhớ tạm thông tin Google trong phiên 10 phút; gọi tiếp `/auth/google/complete`."
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [credential]
+ *             properties:
+ *               credential: { type: string, description: ID token (JWT) do Google cấp }
+ *     responses:
+ *       200: { description: "{ data: User } hoặc { needPhone: true, name }" }
+ *       401: { description: Token Google không hợp lệ }
+ *       403: { description: Tài khoản bị khóa }
+ *       503: { description: Server chưa cấu hình GOOGLE_CLIENT_ID }
+ * /auth/google/complete:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Đăng nhập bằng Google (bước 2) — nhập SĐT để tạo tài khoản
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [phone]
+ *             properties:
+ *               phone: { type: string, example: "0901234567" }
+ *     responses:
+ *       201: { description: "{ data: User } + Set-Cookie" }
+ *       409: { description: Hết phiên chờ (INVALID_STATE) hoặc SĐT đã đăng ký (DUPLICATE) }
+ *       422: { description: SĐT không hợp lệ }
  * /auth/logout:
  *   post:
  *     tags: [Auth]
@@ -87,6 +123,8 @@ const registerLimiter = rateLimit({
  */
 router.post('/register', registerLimiter, body(v.register), c.register);
 router.post('/login', loginLimiter, body(v.login), c.login);
+router.post('/google', loginLimiter, body(v.google), c.google);
+router.post('/google/complete', loginLimiter, body(v.googleComplete), c.googleComplete);
 router.post('/logout', c.logout);
 router.get('/profile', auth, c.profile);
 

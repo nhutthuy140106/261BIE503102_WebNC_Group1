@@ -45,6 +45,7 @@ export function postFromApi(p: Raw): Post {
     price: p.price ?? 0,
     priceUnit: p.unit || undefined,
     acceptsXu: !!p.acceptsXu,
+    spinPromo: p.spinPromo ? true : undefined, // server chưa có trường này → luôn undefined cho tới khi phía Bán nối
     closed: p.status !== undefined && p.status !== 'open',
     createdAt: p.createdAt,
     optionGroups: p.optionGroups ?? [],
@@ -53,6 +54,7 @@ export function postFromApi(p: Raw): Post {
     deliveryFee: p.deliveryFee ?? 0,
     needSchedule: !!p.needSchedule,
     category: p.category || undefined,
+    orderWindow: p.orderWindow?.from && p.orderWindow?.to ? { from: p.orderWindow.from, to: p.orderWindow.to, days: p.orderWindow.days ?? [] } : undefined,
     promo: p.promo && p.promo.active !== false ? { kind: p.promo.kind, value: p.promo.value, from: p.promo.from, to: p.promo.to, days: p.promo.days ?? [], active: true } : undefined,
     combo: p.combo?.items?.length ? { items: p.combo.items.map((i: Raw) => ({ postId: String(i.postId), qty: i.qty })), comboPrice: p.combo.comboPrice, listPrice: p.combo.listPrice } : undefined,
     comboDetail: p.comboDetail

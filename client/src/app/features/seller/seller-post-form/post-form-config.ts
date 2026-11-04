@@ -170,6 +170,8 @@ export function commonGroup(fb: FormBuilder, type: FormType) {
     desc: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
     notes: strList(fb, ['']),
     /** Giờ vàng (khuyến mãi theo khung giờ) — gửi lên server dạng `Promo` (core/utils/promo.ts); days: 0 = CN … 6 = T7, rỗng = mọi ngày */
+    /** Khung giờ nhận đơn của bài: ngoài khung bài tự khóa với người mua. on=false → không giới hạn. days rỗng = mọi ngày */
+    hours: fb.group({ on: [false], from: ['06:00'], to: ['12:00'], days: fb.control<number[]>([]) }),
     promo: fb.group({ on: [false], kind: ['percent'], value: [10], from: ['11:00'], to: ['13:00'], days: fb.control<number[]>([]) }),
   });
 }

@@ -43,6 +43,22 @@ export class SellerPostCard {
     return this.seller.postState(this.post);
   }
 
+  /**
+   * Đồ ăn & uống có chọn ngày bán: lịch sắp hết (còn ≤ 2 ngày) hoặc đã hết thì nhắc người bán gia hạn —
+   * hết lịch thì bài tự khóa với khách, người bán không biết vì sao nếu không được báo.
+   */
+  protected get saleNote(): string {
+    if (this.post.kind !== 'food') return '';
+    const dates = (((this.post.form?.['spec'] as Record<string, unknown> | undefined)?.['schedule'] as Record<string, unknown> | undefined)?.['dates'] as string[] | undefined) ?? [];
+    if (!dates.length) return '';
+    const last = [...dates].sort().pop()!;
+    const t = new Date();
+    const today = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+    if (last < today) return 'Hết lịch bán — bài đang khóa. Bấm để gia hạn';
+    const left = Math.round((new Date(last).getTime() - new Date(today).getTime()) / 86400000);
+    return left <= 2 ? `Lịch bán còn đến ${last.slice(8)}/${last.slice(5, 7)}. Bấm để gia hạn` : '';
+  }
+
   /** Bài việc làm mở chi tiết việc, bài bán mở form sửa */
   protected get link(): string[] {
     return this.post.kind === 'job' && this.post.jobId ? ['/seller/jobs', this.post.jobId] : this.editLink;

@@ -5,6 +5,7 @@ import { EMPTY, catchError, debounceTime, distinctUntilChanged, of, switchMap } 
 import { PricingService } from '../../../core/services/pricing';
 import { PriceSuggestion } from '../../../core/utils/price-suggest';
 import { Promo, discounted, promoLabel } from '../../../core/utils/promo';
+import { OrderWindow } from '../../../core/utils/order-window';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CanComponentDeactivate } from '../../../core/guards/pending-changes-guard';
@@ -12,6 +13,7 @@ import { KIND_LABEL, PostKind } from '../../../core/models/post';
 import { JOB_STEP_NAMES, SELLER_KIND_ICON, SellerPost, orderStepNames } from '../../../core/models/seller';
 import { AuthService } from '../../../core/services/auth';
 import { SellerService } from '../../../core/services/seller';
+import { formToPostFields } from './post-mapper';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import {
@@ -229,6 +231,20 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     return { price: now, off: price - now, from };
   }
   /** Promo gửi lên server (null = tắt) */
+  protected hoursError(): string | null {
+    const h = (this.v()['common'] as V)['hours'] as V | undefined;
+    if (!h?.['on']) return null;
+    if (!h['from'] || !h['to']) return 'Khung giờ nhận đơn: chọn giờ bắt đầu và kết thúc';
+    if (h['from'] === h['to']) return 'Khung giờ nhận đơn: giờ bắt đầu và kết thúc không được trùng nhau';
+    return null;
+  }
+
+  private windowOf(c: V, kind: PostKind): OrderWindow | null {
+    const h = c['hours'] as V | undefined;
+    if (!h?.['on'] || kind === 'job') return null;
+    return { from: h['from'] as string, to: h['to'] as string, days: [...((h['days'] as number[]) ?? [])].sort() };
+  }
+
   private promoOf(c: V, kind: PostKind): Promo | null {
     const p = c['promo'] as V | undefined;
     if (!p?.['on'] || kind === 'job') return null;
@@ -641,6 +657,8 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     if (t !== 'job' && !this.images.length) return 'Thêm ít nhất 1 ảnh để khách tin hơn';
     if (t === 'drink' && !this.items(s).length) return 'Menu: nhập ít nhất một đồ uống có tên và giá';
     if (t === 'food' && !this.items(s).length) return 'Menu: nhập ít nhất một món có tên và giá';
+    const hoursErr = this.hoursError();
+    if (hoursErr) return hoursErr;
     const promoErr = this.promoError();
     if (promoErr) return promoErr;
     if (t === 'service' && s['priceType'] !== 'quote' && !this.items(s).length) return 'Bảng giá: nhập ít nhất một dịch vụ có tên và giá (hoặc chọn “Báo giá sau”)';
@@ -679,8 +697,8 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     const post = this.toPost(draft);
     this.seller.upsertPost(post);
     if (post.kind === 'job') this.saveJob(post);
-    // bản rút gọn sang kho bài phía Mua để hiện ở trang chủ (chỉ bài mới, không phải nháp)
-    if (!this.editId() && !draft) this.publishToBuyers(post);
+    // cùng một Post sang phía Mua: đăng mới, sửa, hoặc lưu nháp (nháp = ẩn bài đã đăng, chưa đăng thì không gửi)
+    this.publishToBuyers(post, draft);
     this.saved = true;
     this.toast.show(draft ? 'Đã lưu nháp — bài đang tạm ẩn, chưa hiện cho khách' : this.editId() ? 'Đã lưu thay đổi' : 'Đã đăng — hàng xóm trong khu thấy ngay ở “Gần bạn”');
     this.router.navigate(['/seller/posts']);
@@ -740,13 +758,33 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     });
   }
 
-  private publishToBuyers(p: SellerPost): void {
+  /**
+   * Gửi Post đủ 7 khối sang kho phía Mua (formToPostFields là hàm duy nhất dựng các khối).
+   * Lần đầu: nhớ `_id` bên Mua vào `buyerPostId` để sau này sửa / tạm ngưng / xóa ghi vào CÙNG một Post.
+   */
+  private publishToBuyers(p: SellerPost, draft: boolean): void {
     const c = (p.form as V)['common'] as V;
-    if (!this.auth.currentUser()) return;
-    this.sellerApi
-      .savePost({ kind: p.kind, title: p.title, description: c['desc'], price: p.price, priceUnit: p.unit?.replace('/ ', ''), block: this.auth.currentUser()?.block ?? 'B', images: c['images'], acceptsXu: p.kind !== 'job' && ((((p.form as V)['spec'] as V)['pay'] as string[]) ?? []).includes('xu'), due: p.kind === 'job' ? this.preview().facts[0][2] : undefined,
-        promo: this.promoOf(c, p.kind) })
-      .subscribe({ error: () => undefined });
+    const user = this.auth.currentUser();
+    if (!user) return;
+    // nháp chưa đăng, hoặc bài mẫu cũ chưa có bản bên Mua (sửa thì không tự đăng lên): không gửi
+    if (!p.buyerPostId && (draft || this.editId())) return;
+    const spec = (p.form as V)['spec'] as V;
+    const fields = formToPostFields(this.type(), p.form as V, p.kind, p.kind === 'job' ? this.preview().facts[0][2] : '');
+    const body = {
+      kind: p.kind, title: p.title, description: c['desc'], price: p.price, priceUnit: p.unit?.replace('/ ', ''), block: user.block ?? 'B', images: c['images'],
+      acceptsXu: p.kind !== 'job' && ((spec['pay'] as string[]) ?? []).includes('xu'),
+      due: p.kind === 'job' ? this.preview().facts[0][2] : undefined,
+      status: draft || !p.on ? ('closed' as const) : ('open' as const),
+      promo: this.promoOf(c, p.kind),
+      ...fields,
+      orderWindow: this.windowOf(c, p.kind) ?? fields.orderWindow ?? null,
+    };
+    this.sellerApi.savePost(body, p.buyerPostId).subscribe({
+      next: (saved) => {
+        if (!p.buyerPostId) this.seller.setPost(p.id, { buyerPostId: saved._id });
+      },
+      error: () => undefined,
+    });
   }
 
   // ---------------- sửa bài cũ ----------------

@@ -36,10 +36,25 @@
         <header class="top">
           <app-avatar [src]="c.withAvatar" [name]="c.withName" [size]="42" />
           <span class="tx"><b>{{ c.withName }}</b>@if (c.context) { <small>{{ ctxOrder() ? ctxOrder()!.code + ' · ' + ctxOrder()!.postTitle : c.context.label }}</small> }</span>
-          @if (c.context) { <a class="ctxlink" [routerLink]="ctxLink(c)">{{ ctxText(c) }}</a> }
         </header>
+        <ng-template #oc let-o>
+          <li class="stamp">{{ fmt(o.createdAt) }}</li>
+          <li class="ctxrow">
+            <div class="ordcard">
+              <div class="ordmain" role="link" tabindex="0" [routerLink]="orderLink(o)">
+                @if (o.image || o.type === 'placed') { <app-order-thumb [image]="o.image" [category]="o.category" [avatar]="o.counterpartAvatar" [name]="o.counterpartName" /> }
+                <span class="cc"><b>{{ o.code }} · {{ o.postTitle }}</b><small>{{ o.type === 'placed' ? 'Đơn đã đặt' : 'Việc đã nhận' }} · <span class="od" [ngClass]="'s-' + dotOf(o)"><i></i>{{ statusOf(o) }}</span>@if (o.type === 'placed' && dotOf(o) === 'end') { · <a class="redo" [routerLink]="['/posts', o.postId]" (click)="$event.stopPropagation()">Đặt lại</a> }</small></span>
+                <svg class="i"><use href="#right" /></svg>
+              </div>
+            </div>
+          </li>
+        </ng-template>
         <ul class="messages">
+          @if (!related().length && c.context && (c.context.type === 'post' || c.context.type === 'job')) {
+            <li class="ctxrow"><a class="ordcard" [routerLink]="ctxLink(c)"><span class="cc"><b>{{ c.context.label }}</b><small>Chưa có đơn · bấm để xem bài</small></span><svg class="i"><use href="#right" /></svg></a></li>
+          }
           @for (m of c.messages; track m._id; let i = $index) {
+            @for (o of cardsBefore(c.messages, i); track o._id) { <ng-container *ngTemplateOutlet="oc; context: { $implicit: o }" /> }
             @if (i === 0 || gap(c.messages[i - 1], m)) { <li class="stamp">{{ fmt(m.createdAt) }}</li> }
             <li class="msg" [class.mine]="m.mine" [ngClass]="pos(c.messages, i)">
               @if (!m.mine) {
@@ -54,6 +69,7 @@
             </li>
             @if (m.mine && i === c.messages.length - 1) { <li class="seen">Đã gửi {{ short(m.createdAt).toLowerCase() === 'vừa xong' ? 'vừa xong' : short(m.createdAt) + ' trước' }}</li> }
           }
+          @for (o of cardsAfter(c.messages); track o._id) { <ng-container *ngTemplateOutlet="oc; context: { $implicit: o }" /> }
         </ul>
         @if (recording()) {
           <div class="rec">

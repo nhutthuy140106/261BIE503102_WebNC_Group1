@@ -23,7 +23,16 @@ a { color: inherit; text-decoration: none; }
 .ring { position: absolute; left: 50%; top: 46%; border: 1px solid rgba(255,255,255,.28); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
 .ring.r1 { width: 640px; height: 640px; }
 .ring.r2 { width: 1040px; height: 1040px; border-color: rgba(255,255,255,.16); }
-.cloud { position: absolute; pointer-events: none; will-change: transform; }
+.cloud { position: absolute; pointer-events: none; will-change: transform; animation: cdrift var(--t, 38s) ease-in-out infinite alternate; animation-delay: var(--d, 0s); }
+/* mây trôi nhẹ qua lại + nhấp nhô; dùng `transform` riêng, không đè `translate` của hiệu ứng theo chuột */
+@keyframes cdrift { from { transform: translate(-3%, 0); } 50% { transform: translate(1.5%, -4%); } to { transform: translate(4%, 1%); } }
+.hero .cloud.c3 { --t: 46s; --d: -12s; }
+.hero .cloud.c4 { --t: 52s; --d: -30s; }
+.hero .cloud.c1 { --t: 40s; --d: -6s; }
+.hero .cloud.c2 { --t: 44s; --d: -20s; }
+.cbox .cloud.c1 { --t: 36s; --d: -9s; }
+.cbox .cloud.c2 { --t: 42s; --d: -24s; }
+@media (prefers-reduced-motion: reduce) { .cloud { animation: none; } }
 .cloud img { display: block; width: 100%; transition: transform 1.4s cubic-bezier(.2,.7,.2,1); }
 .landing.pre .hero .cloud img { transform: translateY(120px); }
 .c1 { width: 62vw; left: -12vw; bottom: -10vh; opacity: .95; }

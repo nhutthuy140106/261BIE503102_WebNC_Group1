@@ -35,6 +35,9 @@
     } @else {
       <div class="pr">@if (post.priceFrom) { từ }{{ post.price | vnd }}@if (post.unit) { <span> {{ post.unit }}</span> }</div>
     }
+    @if (manage && saleNote; as sn) {
+      <a class="salenote" [routerLink]="editLink" title="Sửa lịch bán">{{ sn }}</a>
+    }
   </div>
   <div class="ctl">
     <span class="step">

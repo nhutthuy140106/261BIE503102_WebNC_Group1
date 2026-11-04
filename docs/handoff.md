@@ -279,3 +279,9 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
   - Đồ uống: **tùy chọn cộng giá chuyển từ từng loại nước ra cả đơn** (`spec.options`, có `choices[].qty`), bỏ mẫu Size/Topping điền sẵn, cũng bỏ nút "Tùy chọn cộng giá cho món này". Bài cũ gom bằng `toOrderOptions`; nhóm trùng tên giữa các loại nước chỉ giữ nhóm đầu.
   - **Việc phía Mua:** khung đặt đồ uống đọc tùy chọn từ `spec.options` như đồ ăn.
   - Ô Đơn vị trong bảng rộng hơn để chọn "Khác" vẫn đủ chỗ gõ; bỏ dòng giải thích ở ô chọn ngày (mọi form); căn lại dòng tùy chọn nhanh và khoảng cách nút thêm.
+- **04/11 — gộp `dev` (`d35d1d5`) vào `feature/seller-repair-flow`:**
+  - Form đăng bài giữ quyết định khu Bán: Menu, tùy chọn cộng giá cho cả đơn (đồ ăn, đồ uống), không có Combo. Giữ phần mới của `dev`: gửi bài bằng `formToPostFields`, `buyerPostId`, Khung giờ nhận đơn, ảnh minh họa cho việc làm.
+  - **Khác `docs/post-contract.md` (cần Khải xem):** form không còn tạo `items[].optionGroups` (tầng riêng từng món) và không gửi `combo`. Bài cũ đã có combo trên server không bị xóa khi sửa bài.
+  - `post-mapper`: câu hỏi form chung đổi về 4 loại phía Mua (đoạn dài, số, ngày, khoảng, địa chỉ thành ô chữ); lựa chọn có giá ghi `Tên|+5.000đ`.
+  - **Chưa nối:** `choices[].qty` chưa có trong `OptionGroup` và server; server `questions` mới lưu `label`, `required`.
+  - **`ng build` bản production đang lỗi:** `post-detail.css` (phía Mua, 32,32 kB) vượt ngân sách 32 kB ở `angular.json`, bản `dev` cũng có file và cấu hình này. `ng serve` và build development vẫn chạy.

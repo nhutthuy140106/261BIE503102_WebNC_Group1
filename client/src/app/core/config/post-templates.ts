@@ -84,6 +84,7 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
         ]
       ]
     },
+    dishList: true,
     opts: [
       {
         name: 'Món mặn hôm nay',

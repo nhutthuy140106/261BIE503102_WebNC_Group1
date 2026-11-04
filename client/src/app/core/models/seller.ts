@@ -39,6 +39,8 @@ export interface SellerPost {
   category: string;
   /** bài việc làm: id việc tương ứng trong `jobs` */
   jobId?: string;
+  /** `_id` của Post tương ứng ở phía Mua (cùng một bài — sửa/tạm ngưng/xóa ở đây thì phía Mua đổi theo) */
+  buyerPostId?: string;
   /** dữ liệu form đăng bài (để mở lại đúng khi sửa) + loại form: food / drink / goods / service / job */
   form?: Record<string, unknown>;
   formType?: 'food' | 'drink' | 'goods' | 'service' | 'job';

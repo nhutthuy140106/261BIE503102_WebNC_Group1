@@ -9,6 +9,8 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+/* các khối tràn hết bề ngang (width: 100vw) không làm hiện thanh cuộn ngang */
+html { overflow-x: clip; }
 body {
   font-family: 'Mona Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased;
@@ -108,3 +110,4 @@ input, select, textarea {
 
 /* trang Messenger chiếm trọn khung, không hiện chân trang */
 body.no-footer app-footer { display: none; }
+body.no-chat app-chat-widget { display: none; }
