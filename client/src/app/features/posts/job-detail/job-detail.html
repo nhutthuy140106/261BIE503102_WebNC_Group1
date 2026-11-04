@@ -28,9 +28,9 @@
 
   <div class="kfacts">
     <div><svg class="i"><use href="#clock" /></svg><span><b>Thời gian làm</b>{{ j.job | jobWhen }}</span></div>
-    <div><svg class="i"><use href="#pin" /></svg><span><b>Địa điểm</b>{{ j.block }}</span></div>
-    <div><svg class="i"><use href="#users" /></svg><span><b>Số người cần</b>1 người</span></div>
-    <div><svg class="i"><use href="#receipt" /></svg><span><b>Thanh toán</b>Tiền mặt</span></div>
+    <div><svg class="i"><use href="#pin" /></svg><span><b>Địa điểm</b>{{ j.block }}@if (j.job?.building) { · {{ j.job?.building }} }</span></div>
+    <div><svg class="i"><use href="#users" /></svg><span><b>Số người cần</b>{{ j.job?.head ?? 1 }} người</span></div>
+    <div><svg class="i"><use href="#receipt" /></svg><span><b>Thanh toán</b>{{ j.job?.payBy === 'transfer' ? 'Chuyển khoản' : 'Tiền mặt' }}</span></div>
   </div>
 
   <div class="cols">
@@ -104,7 +104,7 @@
     <!-- ===== Khung đề nghị nhận việc ===== -->
     <aside class="order offerbox">
       <div class="price">{{ j.price | vnd }} <span>/ {{ j | unit }}</span></div>
-      <div class="who">{{ j.job?.offers }} người đã đề nghị · cần 1 người</div>
+      <div class="who">{{ j.job?.offers }} người đã đề nghị · cần {{ j.job?.head ?? 1 }} người</div>
 
       @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
 

@@ -151,6 +151,12 @@ export interface Post {
   quickOptions?: string[];
   /** Đồ ăn, đồ uống: false = người bán tắt ô ghi chú */
   noteEnabled?: boolean;
+  /** Miễn phí giao cho đơn từ số tiền này */
+  freeShipFrom?: number;
+  /** Các khu người bán phục vụ (bài đăng từ form khu Bán); `block` ghi sẵn tên các khu để hiển thị */
+  areas?: string[];
+  /** Thông tin người bán đã điền, hiện dưới Mô tả (nội quy, điều kiện hủy, phạm vi phục vụ…) */
+  info?: { label: string; value: string }[];
   /** Khối 3: ngày bán / ngày làm (yyyy-mm-dd) */
   dates?: string[];
   /** Khối 3: dịch vụ — kiểu chọn thời gian và thời lượng (giờ) */
@@ -181,6 +187,10 @@ export interface Post {
     allDay?: boolean;
     /** Số người cần */
     head?: number;
+    /** Cách trả công: tiền mặt / chuyển khoản */
+    payBy?: 'cash' | 'transfer';
+    /** Tòa nhà hiện trên bài; số nhà, tầng chỉ gửi cho người được chọn */
+    building?: string;
     /** Đơn vị tiền công: việc · giờ · lượt… */
     payUnit?: string;
     offers: number;

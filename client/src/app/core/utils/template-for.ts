@@ -179,6 +179,7 @@ export function viewOf(post: Post): PostView {
     ? (post.items?.length ? post.items : [{ name: post.title, price: post.price, optionGroups: [] as OptionGroup[] }]).map((it) => ({
         name: it.name,
         price: it.price,
+        left: (it as { dailyQty?: number }).dailyQty,
         groups: [...(it.optionGroups ?? []), ...(post.optionGroups ?? [])].map(toBlock),
       }))
     : undefined;
@@ -223,6 +224,11 @@ export function viewOf(post: Post): PostView {
     xuOk: post.acceptsXu ?? base.xuOk,
     pays: pays?.length ? pays : undefined,
     bank: post.bank,
+    freeShipFrom: post.freeShipFrom,
+    info: post.info?.length ? post.info : undefined,
+    ...(dish && items?.some((i) => i.dailyQty !== undefined)
+      ? { dishLeft: Object.fromEntries(items.flatMap((it, i) => (it.dailyQty !== undefined ? [[dish.choices[i], it.dailyQty]] : []))) }
+      : {}),
     quick: post.quickOptions,
     noteOff: post.noteEnabled === false,
     time,

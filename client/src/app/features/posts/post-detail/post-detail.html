@@ -84,6 +84,7 @@
         @if (v.tpl.list.length) {
           <ul>@for (t of v.tpl.list; track t) { <li>{{ t }}</li> }</ul>
         }
+        @if (v.tpl.info; as rows) { <app-post-info [rows]="rows" /> }
       </section>
 
       <section class="block">
@@ -160,12 +161,12 @@
                 <div class="row dish" role="checkbox" tabindex="0" [attr.aria-checked]="d.dishQty(c) > 0" [class.on]="d.dishQty(c) > 0" (click)="d.toggleDish(c)" (keydown.enter)="d.toggleDish(c)" (keydown.space)="d.toggleDish(c); $event.preventDefault()">
                   <i class="check"></i>
                   <span class="nm">{{ parse(c).name }}</span>
-                  @if (v.tpl.dishPriced || parse(c).add) { <small class="pr">{{ v.tpl.dishPriced ? fmt((v.tpl.price.amount ?? 0) + parse(c).add) : '+' + fmt(parse(c).add) }}</small> }
+                  @if (v.tpl.dishPriced || parse(c).add) { <small class="pr">{{ v.tpl.dishPriced ? fmt((v.tpl.price.amount ?? 0) + parse(c).add) : '+' + fmt(parse(c).add) }}@if (v.tpl.dishLeft?.[c] !== undefined) { · {{ v.tpl.dishLeft![c] < 1 ? 'Hết' : 'Còn ' + v.tpl.dishLeft![c] }} }</small> }
                   @if (d.dishQty(c) > 0) {
                     <span class="qty sm" (click)="$event.stopPropagation()">
                       <button type="button" [disabled]="d.dishQty(c) <= 1" (click)="d.setDish(c, d.dishQty(c) - 1)" aria-label="Giảm">−</button>
                       <b>{{ d.dishQty(c) }}</b>
-                      <button type="button" [disabled]="d.totalDishes() >= d.maxQty()" (click)="d.setDish(c, d.dishQty(c) + 1)" aria-label="Tăng">+</button>
+                      <button type="button" [disabled]="d.totalDishes() >= d.maxQty() || d.dishQty(c) >= (v.tpl.dishLeft?.[c] ?? 999)" (click)="d.setDish(c, d.dishQty(c) + 1)" aria-label="Tăng">+</button>
                     </span>
                   }
                 </div>
@@ -376,7 +377,7 @@
                 <label class="crow sw">
                   <svg class="i ic"><use href="#l-home" /></svg>
                   <span class="ct"><b>{{ v.tpl.place.choices![0][0] }}</b>
-                    <small>{{ d.place() === 0 ? (v.tpl.place.choices![0][1] ? '+' + fmt(v.tpl.place.choices![0][1]) : 'Miễn phí') : 'Đang tắt, ' + v.tpl.place.choices![1][0].toLowerCase() }}</small>
+                    <small>{{ d.place() === 0 ? (d.placeFee() ? '+' + fmt(d.placeFee()) : 'Miễn phí') + (v.tpl.freeShipFrom ? (d.freeShip() ? ' · đơn đạt mức miễn phí giao' : ' · miễn phí từ ' + fmt(v.tpl.freeShipFrom)) : '') : 'Đang tắt, ' + v.tpl.place.choices![1][0].toLowerCase() }}</small>
                   </span>
                   <input type="checkbox" class="tg" [checked]="d.place() === 0" (change)="d.place.set($any($event.target).checked ? 0 : 1)" />
                 </label>

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostListener, Input, Output, computed, signal } from '@angular/core';
 import type { CupDrink, CupLine } from '../../../core/models/post-template';
-import { CupPicks, buildLine, cupPrice, defaultPicks, putLine, togglePick } from '../../../core/utils/cup-order';
+import { CupPicks, buildLine, cupPrice, defaultPicks, missingGroup, putLine, togglePick } from '../../../core/utils/cup-order';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
 
 /**
@@ -30,7 +30,22 @@ export class CupOrder {
     return d ? cupPrice(d, this.picks()) : 0;
   });
   /** Số ly còn được thêm: giới hạn số lượng của bài, trừ các dòng khác */
-  protected readonly maxQty = computed(() => this.draft.maxQty() - this.draft.totalCups() + (this.editing()?.qty ?? 0));
+  protected readonly maxQty = computed(() => {
+    const room = this.draft.maxQty() - this.draft.totalCups() + (this.editing()?.qty ?? 0);
+    const d = this.drink();
+    return d ? Math.min(room, this.leftOf(d) + (this.editing()?.drink === d.name ? this.editing()!.qty : 0)) : room;
+  });
+  /** Nhóm bắt buộc chưa chọn: khóa nút thêm vào đơn */
+  protected readonly missing = computed(() => {
+    const d = this.drink();
+    return d ? missingGroup(d, this.picks()) : null;
+  });
+
+  /** Số ly còn đặt được của một loại: số còn của bài trừ các dòng đã có trong đơn */
+  protected leftOf(d: CupDrink): number {
+    if (d.left === undefined) return Infinity;
+    return d.left - this.draft.cups().filter((x) => x.drink === d.name).reduce((n, x) => n + x.qty, 0);
+  }
 
   protected open(d: CupDrink): void {
     this.editing.set(null);
@@ -65,7 +80,7 @@ export class CupOrder {
 
   protected save(): void {
     const d = this.drink();
-    if (!d || this.maxQty() < 1) return;
+    if (!d || this.maxQty() < 1 || this.missing()) return;
     this.draft.cups.set(putLine(this.draft.cups(), buildLine(d, this.picks(), this.qty()), this.editing() ?? undefined));
     this.close();
   }

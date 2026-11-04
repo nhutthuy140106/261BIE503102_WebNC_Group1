@@ -1,8 +1,8 @@
 <div class="sec">
   <h4>Menu</h4>
   @for (c of draft.tpl.cups; track c.name) {
-    <button type="button" class="drk" [disabled]="draft.totalCups() >= draft.maxQty()" (click)="open(c)">
-      <span class="dn"><b>{{ c.name }}</b><small>{{ c.price | vnd }}</small></span>
+    <button type="button" class="drk" [disabled]="draft.totalCups() >= draft.maxQty() || leftOf(c) < 1" (click)="open(c)">
+      <span class="dn"><b>{{ c.name }}</b><small>{{ c.price | vnd }}@if (c.left !== undefined) { · {{ leftOf(c) < 1 ? 'Hết' : 'Còn ' + leftOf(c) }} }</small></span>
       <span class="plus" aria-hidden="true">+</span>
     </button>
   }
@@ -52,7 +52,7 @@
           <b>{{ qty() }}</b>
           <button type="button" aria-label="Tăng" [disabled]="qty() >= maxQty()" (click)="setQty(qty() + 1)">+</button>
         </span>
-        <button type="button" class="go" (click)="save()">{{ editing() ? 'Lưu thay đổi' : 'Thêm vào đơn' }} · {{ price() * qty() | vnd }}</button>
+        <button type="button" class="go" [disabled]="missing()" [attr.title]="missing() ? 'Hãy chọn ' + missing() : null" (click)="save()">{{ editing() ? 'Lưu thay đổi' : 'Thêm vào đơn' }} · {{ price() * qty() | vnd }}</button>
       </footer>
     </div>
   </div>

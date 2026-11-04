@@ -13,7 +13,7 @@ type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 export type PostFields = Pick<
   PostBody,
   | 'category' | 'priceType' | 'estimate' | 'inspectFee' | 'items' | 'optionGroups' | 'questions' | 'fulfillmentModes' | 'deliveryFee'
-  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'template' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
+  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
 >;
 
 /** "A, B|+5.000đ" không dùng nữa: form lưu lựa chọn là chuỗi cách nhau dấu phẩy */
@@ -68,7 +68,8 @@ const questionsOf = (arr: unknown): PostQuestion[] =>
       };
     });
 
-const payOf = (s: V): PayMethod[] => ((s['pay'] as PayMethod[]) ?? []).filter((m) => m === 'cash' || m === 'transfer' || m === 'xu');
+/** Việc làm: `pay` là số tiền công, không phải danh sách cách trả tiền */
+const payOf = (s: V): PayMethod[] => (Array.isArray(s['pay']) ? (s['pay'] as PayMethod[]) : []).filter((m) => m === 'cash' || m === 'transfer' || m === 'xu');
 
 /** Tài khoản nhận tiền, chỉ gửi khi bài nhận chuyển khoản. Form lưu mã ngân hàng, phía Mua hiện tên ngắn */
 const bankOf = (s: V): PostFields['bank'] => {
@@ -78,10 +79,10 @@ const bankOf = (s: V): PostFields['bank'] => {
   return { bankName: BANK_LIST.find((x) => x.code === code)?.short ?? code, no: String(b?.['no']).trim(), holder: String(b?.['holder'] ?? '').trim(), qr: (b?.['qr'] as string) || undefined };
 };
 
-const fulfilOf = (s: V): Pick<PostFields, 'fulfillmentModes' | 'deliveryFee'> => {
+const fulfilOf = (s: V): Pick<PostFields, 'fulfillmentModes' | 'deliveryFee' | 'freeShipFrom'> => {
   const f = (s['fulfil'] as V) ?? {};
   const modes = [...(f['delivery'] ? ['delivery' as const] : []), ...(f['pickup'] ? ['pickup' as const] : [])];
-  return { fulfillmentModes: modes, deliveryFee: f['delivery'] ? +f['fee'] || 0 : 0 };
+  return { fulfillmentModes: modes, deliveryFee: f['delivery'] ? +f['fee'] || 0 : 0, freeShipFrom: f['delivery'] && +f['freeFrom'] > 0 ? +f['freeFrom'] : undefined };
 };
 
 /** Size (bắt buộc chọn, có giá cộng thêm), độ ngọt, đá của đồ uống thành các nhóm chọn một, không tính tiền, không bắt buộc (bỏ hết = không cho chọn) */
@@ -91,6 +92,40 @@ const drinkMixOf = (s: V): OptionGroup[] => {
   const group = (name: string, list: unknown): OptionGroup[] => ((list as string[]) ?? []).length ? [{ name, multi: false, required: false, choices: (list as string[]).map((label) => ({ label, price: 0 })) }] : [];
   return [...size, ...group('Độ ngọt', s['sweet']), ...group('Đá', s['ice'])];
 };
+
+const row = (label: string, value: unknown): { label: string; value: string }[] => {
+  const v = String(value ?? '').trim();
+  return v ? [{ label, value: v }] : [];
+};
+
+/** Thông tin dịch vụ người bán đã điền mà khung đặt không có ô riêng: hiện dưới Mô tả */
+function serviceInfoRows(s: V): { label: string; value: string }[] {
+  const preset = String(s['preset'] ?? '');
+  const on = ((s['rules'] as V[]) ?? []).filter((r) => r['on'] && String(r['label'] ?? '').trim()).map((r) => String(r['label']).trim());
+  const f = (s['fulfil'] as V) ?? {};
+  const giveBack = [f['delivery'] ? 'Giao tận tòa' + (+f['fee'] ? ` (${(+f['fee']).toLocaleString('vi-VN')}đ)` : '') : '', f['pickup'] ? 'Khách tự đến lấy' : ''].filter(Boolean).join(', ');
+  return [
+    ...row('Phạm vi phục vụ', s['serviceArea']),
+    ...(preset === 'Giặt sấy' ? [...row('Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : ''), ...row('Cách trả đồ', giveBack)] : []),
+    ...(preset === 'Sửa chữa' && s['priceType'] !== 'quote' ? row('Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ, trừ vào tiền sửa nếu đồng ý` : '') : []),
+    ...(preset === 'Lưu trú'
+      ? [
+          ...row('Tòa nhà', s['building']),
+          ...row('Nhận phòng từ', s['checkIn']),
+          ...row('Trả phòng trước', s['checkOut']),
+          ...row('Ở tối thiểu', +s['minNights'] ? `${+s['minNights']} đêm` : ''),
+          ...row('Tiện nghi', ((s['amenities'] as string[]) ?? []).join(', ')),
+          ...row('Nội quy', on.join('; ')),
+          ...row('Hủy miễn phí', s['freeCancelDays'] !== null && s['freeCancelDays'] !== '' ? `Trước ${+s['freeCancelDays']} ngày` : ''),
+          ...row('Đặt cọc', +s['deposit'] ? `${+s['deposit']}%` : ''),
+          ...row('Giấy tờ', s['idRequired'] ? 'Xuất trình CCCD khi nhận phòng' : ''),
+        ]
+      : []),
+    ...row('Điều kiện hủy', s['cancelPolicy']),
+    ...row('Lưu ý cho khách', s['customerNote']),
+    ...(s['safety'] && (s['place'] === 'buyer' || s['place'] === 'choice') ? row('Lưu ý an toàn', 'Nên có người lớn ở nhà khi người làm đến, cất tài sản giá trị trước khi bắt đầu.') : []),
+  ];
+}
 
 /** Giá đại diện: dòng rẻ nhất; nhiều mức giá khác nhau → 'from' */
 const priceTypeOf = (its: PostItem[], fixed: PriceType = 'fixed'): PriceType =>
@@ -137,6 +172,8 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         dates: (s['dates'] as string[]) ?? [],
         stock: n > 1 ? { mode: 'limit', left: n } : { mode: 'once' },
         needSchedule: !!((s['fulfil'] as V)?.['pickup']),
+        handover: s['pickFrom'] && s['pickTo'] ? { from: s['pickFrom'], to: s['pickTo'] } : undefined,
+        info: row('Tình trạng chi tiết', s['flaw']),
       };
     }
     case 'service': {
@@ -160,6 +197,7 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         handover: s['from'] && s['to'] ? { from: s['from'], to: s['to'] } : undefined,
         serviceInfo: { turnaround: String(s['turnaround'] ?? '').trim() || undefined, warranty: String(s['warranty'] ?? '').trim() || undefined, area: String(s['serviceArea'] ?? '').trim() || undefined },
         deliveryFee: s['place'] === 'buyer' || s['place'] === 'choice' ? +s['homeFee'] || 0 : 0,
+        info: serviceInfoRows(s),
         stock: { mode: 'open' },
         needSchedule: true,
       };
@@ -178,6 +216,8 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
           allDay: !!s['allDay'],
           head: +s['head'] || 1,
           payUnit: s['payUnit'] || 'việc',
+          payBy: s['payBy'] === 'transfer' ? 'transfer' : 'cash',
+          building: String(s['building'] ?? '').trim() || undefined,
           due: jobDue,
         },
       };

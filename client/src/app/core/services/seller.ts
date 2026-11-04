@@ -46,6 +46,9 @@ export interface PostBody {
   quickOptions?: string[];
   noteEnabled?: boolean;
   template?: string;
+  freeShipFrom?: number;
+  areas?: string[];
+  info?: Post['info'];
   dates?: string[];
   timeMode?: Post['timeMode'];
   duration?: Post['duration'];
@@ -57,7 +60,7 @@ export interface PostBody {
   condition?: Post['condition'];
   serviceInfo?: Post['serviceInfo'];
   /** Chỉ việc làm */
-  job?: { start?: string; end?: string; allDay?: boolean; head?: number; payUnit?: string; due?: string };
+  job?: { start?: string; end?: string; allDay?: boolean; head?: number; payUnit?: string; due?: string; payBy?: 'cash' | 'transfer'; building?: string };
 }
 
 /**
@@ -109,7 +112,7 @@ export class SellerService {
           category: body.combo ? 'Combo' : body.category, status: body.status ?? 'open', closed: (body.status ?? 'open') !== 'open',
           priceType: body.priceType, estimate: body.estimate, inspectFee: body.inspectFee, items: body.items?.length ? body.items : undefined,
           optionGroups: body.optionGroups, questions: body.questions, fulfillmentModes: body.fulfillmentModes, deliveryFee: body.deliveryFee,
-          needSchedule: body.needSchedule, payMethods: body.payMethods, bank: body.bank, quickOptions: body.quickOptions, noteEnabled: body.noteEnabled, template: body.template, dates: body.dates, timeMode: body.timeMode, duration: body.duration,
+          needSchedule: body.needSchedule, payMethods: body.payMethods, bank: body.bank, quickOptions: body.quickOptions, noteEnabled: body.noteEnabled, template: body.template, freeShipFrom: body.freeShipFrom, areas: body.areas, info: body.info, dates: body.dates, timeMode: body.timeMode, duration: body.duration,
           repeat: body.repeat, place: body.place, stock: body.stock, prepMinutes: body.prepMinutes, handover: body.handover, condition: body.condition, serviceInfo: body.serviceInfo,
           job: body.kind === 'job' ? { ...body.job, due: body.job?.due ?? body.due ?? '', offers: 0, status: 'open' } : undefined,
         };
@@ -148,6 +151,23 @@ export class SellerService {
         const cur = rows.find((r) => r._id === id);
         if (!cur) throw new AppError('Không tìm thấy bài.', 404, 'NOT_FOUND');
         const next: Post = cur.stock?.mode === 'limit' ? { ...cur, stock: { ...cur.stock, left } } : cur;
+        this.db.save('posts', rows.map((r) => (r._id === id ? next : r)));
+        return next;
+      }),
+    );
+  }
+
+  /** Trừ / trả số lượng của từng món trong bài (món để trống số lượng thì không đổi) */
+  moveItemsLeft(id: string, deltas: { name: string; delta: number }[]): Observable<Post> {
+    return this.db.list<Post>('posts').pipe(
+      map((rows) => {
+        const cur = rows.find((r) => r._id === id);
+        if (!cur) throw new AppError('Không tìm thấy bài.', 404, 'NOT_FOUND');
+        const items = cur.items?.map((it) => {
+          const d = deltas.find((x) => x.name === it.name)?.delta ?? 0;
+          return d && it.dailyQty !== undefined ? { ...it, dailyQty: Math.max(0, it.dailyQty + d) } : it;
+        });
+        const next: Post = { ...cur, items };
         this.db.save('posts', rows.map((r) => (r._id === id ? next : r)));
         return next;
       }),

@@ -1,5 +1,5 @@
 import type { CupDrink } from '../models/post-template';
-import { buildLine, cupPrice, defaultPicks, putLine, togglePick } from './cup-order';
+import { buildLine, cupPrice, defaultPicks, missingGroup, putLine, togglePick } from './cup-order';
 
 const dao: CupDrink = {
   name: 'Trà đào',
@@ -24,6 +24,12 @@ describe('một ly đồ uống', () => {
     expect(p['Độ ngọt']).toEqual(['70%']);
     p = togglePick(dao, p, 'Độ ngọt', '70%');
     expect(p['Độ ngọt']).toEqual([]);
+  });
+
+  it('nhóm bắt buộc chưa chọn thì báo tên nhóm', () => {
+    const d: CupDrink = { ...dao, groups: [{ name: 'Topping', multi: true, req: true, choices: ['Thạch'] }] };
+    expect(missingGroup(d, defaultPicks(d))).toBe('Topping');
+    expect(missingGroup(d, { Topping: ['Thạch'] })).toBeNull();
   });
 
   it('giá ly = giá loại nước + size + topping', () => {

@@ -13,6 +13,8 @@ export type IconName = 'clock' | 'pin' | 'bolt' | 'check' | 'receipt' | 'shield'
 export interface CupDrink {
   name: string;
   price: number;
+  /** Số ly còn của loại này; không có = không giới hạn */
+  left?: number;
   groups: OptionBlock[];
 }
 
@@ -128,6 +130,12 @@ export interface PostTemplate {
   pays?: ('cash' | 'transfer')[];
   /** Tài khoản nhận chuyển khoản của người bán */
   bank?: PostBank;
+  /** Miễn phí giao cho đơn từ số tiền này */
+  freeShipFrom?: number;
+  /** Số phần còn của từng món trong danh sách món (khóa = lựa chọn thô); không có = không giới hạn */
+  dishLeft?: Record<string, number>;
+  /** Thông tin người bán đã điền, hiện dưới Mô tả */
+  info?: { label: string; value: string }[];
   /** Có = đặt đồ uống theo từng dòng (bài đồ uống đăng từ form khu Bán) */
   cups?: CupDrink[];
   /** Tùy chọn nhanh người bán đặt; có thì thay dòng dụng cụ / ống hút mặc định */

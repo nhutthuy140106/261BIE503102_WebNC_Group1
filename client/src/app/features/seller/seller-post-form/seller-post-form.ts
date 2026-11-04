@@ -722,8 +722,11 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     if (!p.buyerPostId && (draft || (this.editId() && !p.id.startsWith('n')))) return;
     const spec = (p.form as V)['spec'] as V;
     const fields = formToPostFields(this.type(), p.form as V, p.kind, p.kind === 'job' ? this.preview().facts[0][2] : '');
+    const areas = p.kind !== 'job' && (c['areas'] as string[])?.length ? (c['areas'] as string[]) : [c['area'] as string];
     const body = {
-      kind: p.kind, title: p.title, description: c['desc'], price: p.price, priceUnit: p.unit?.replace('/ ', ''), block: user.block ?? 'B', images: c['images'],
+      kind: p.kind, title: p.title, description: c['desc'], price: p.price, priceUnit: p.unit?.replace('/ ', ''), images: c['images'],
+      // khu người bán chọn: lọc và hiện trên thẻ bài theo đúng khu này
+      block: this.areaText(), areas,
       acceptsXu: p.kind !== 'job' && ((spec['pay'] as string[]) ?? []).includes('xu'),
       due: p.kind === 'job' ? this.preview().facts[0][2] : undefined,
       status: draft || !p.on ? ('closed' as const) : ('open' as const),

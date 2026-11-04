@@ -37,6 +37,32 @@ describe('formToPostFields', () => {
     expect(f.items?.[0].optionGroups).toBeUndefined();
   });
 
+  it('miễn phí giao chỉ khi có giao tận tòa', () => {
+    const f = (delivery: boolean) => formToPostFields('food', { common: {}, spec: { items: [], options: [], quick: [], fulfil: { delivery, fee: 5000, freeFrom: 100000, pickup: true } } }, 'food');
+    expect(f(true).freeShipFrom).toBe(100000);
+    expect(f(false).freeShipFrom).toBeUndefined();
+  });
+
+  it('đồ dùng: gửi giờ hẹn và tình trạng chi tiết', () => {
+    const f = formToPostFields('goods', { common: {}, spec: { stock: 1, condition: '90', flaw: 'Xước nhẹ', pickFrom: '17:00', pickTo: '21:00', fulfil: { pickup: true } } }, 'goods');
+    expect(f.handover).toEqual({ from: '17:00', to: '21:00' });
+    expect(f.info).toEqual([{ label: 'Tình trạng chi tiết', value: 'Xước nhẹ' }]);
+  });
+
+  it('dịch vụ: thông tin theo mẫu, ô trống không hiện', () => {
+    const spec = { items: [], questions: [], options: [], place: 'seller', serviceArea: 'Trong khu', cancelPolicy: '', customerNote: 'Để sẵn chỗ' };
+    const rows = (s: object) => formToPostFields('service', { common: {}, spec: { ...spec, ...s } }, 'service').info;
+    expect(rows({})).toEqual([{ label: 'Phạm vi phục vụ', value: 'Trong khu' }, { label: 'Lưu ý cho khách', value: 'Để sẵn chỗ' }]);
+    expect(rows({ preset: 'Giặt sấy', returnHours: 24, fulfil: { delivery: true, fee: 0 } })).toContainEqual({ label: 'Trả đồ', value: 'Trong khoảng 24 giờ' });
+    expect(rows({ preset: 'Lưu trú', rules: [{ on: true, label: 'Không hút thuốc' }, { on: false, label: 'Tắt' }], minNights: 2 })).toContainEqual({ label: 'Nội quy', value: 'Không hút thuốc' });
+  });
+
+  it('việc làm: gửi cách trả công và tòa nhà, không gửi địa chỉ chính xác', () => {
+    const f = formToPostFields('job', { common: {}, spec: { dates: [], pay: 200000, head: 3, payBy: 'transfer', building: 'S2', exact: '0512' } }, 'job');
+    expect(f.job).toMatchObject({ head: 3, payBy: 'transfer', building: 'S2' });
+    expect(JSON.stringify(f)).not.toContain('0512');
+  });
+
   it('form chung: lựa chọn có giá được giữ lại', () => {
     const [q] = service([{ type: 'choice', label: 'Gói', required: true, opts: '', hint: '', choices: [{ label: 'Nhanh', price: 20000 }, { label: 'Thường', price: 0 }] }]);
     expect(q.opts).toEqual(['Nhanh|+20.000đ', 'Thường']);

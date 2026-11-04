@@ -45,3 +45,4 @@ h4 small { padding: 3px 10px; border-radius: 999px; background: #F0F2F5; color: 
 .qty button:disabled { opacity: .3; cursor: not-allowed; }
 .qty b { min-width: 26px; text-align: center; font-size: 15px; }
 .go { flex: 1; min-width: 0; height: 44px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 600; font-size: 14.5px; cursor: pointer; }
+.go:disabled { background: #D9D3CF; cursor: not-allowed; }

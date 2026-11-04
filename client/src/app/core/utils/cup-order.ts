@@ -21,6 +21,11 @@ export function togglePick(d: CupDrink, picks: CupPicks, group: string, raw: str
   return { ...picks, [group]: [raw] };
 }
 
+/** Nhóm chọn nhiều bắt buộc mà chưa chọn gì: trả về tên nhóm */
+export function missingGroup(d: CupDrink, picks: CupPicks): string | null {
+  return d.groups.find((g) => g.req !== false && !(picks[g.name] ?? []).length)?.name ?? null;
+}
+
 /** Giá một ly theo lựa chọn hiện tại */
 export function cupPrice(d: CupDrink, picks: CupPicks): number {
   return d.price + d.groups.reduce((n, g) => n + (picks[g.name] ?? []).reduce((m, raw) => m + parseChoice(raw).add, 0), 0);

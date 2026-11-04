@@ -99,8 +99,8 @@ export class SearchResults implements OnInit {
       return 0;
     });
   });
-  protected readonly local = computed(() => this.matched().filter((p) => p.area === this.area.current()));
-  protected readonly nearby = computed(() => this.matched().filter((p) => p.area !== this.area.current()));
+  protected readonly local = computed(() => this.matched().filter((p) => p.area === this.area.current() || p.areas?.includes(this.area.current())));
+  protected readonly nearby = computed(() => this.matched().filter((p) => p.area !== this.area.current() && !p.areas?.includes(this.area.current())));
   /** Ô nhập khoảng giá tự gõ: ẩn sau liên kết "Tự nhập" cho đỡ rối */
   protected readonly manual = signal(false);
   protected readonly hasFilter = computed(() => this.min() != null || this.max() != null || this.rate() > 0 || this.xuOnly() || this.kind() !== 'all');

@@ -50,7 +50,9 @@ export class OrderDraft {
     for (const g of tpl.opts) if (!g.multi) o[g.name] = g.req === false ? '' : g.choices[0];
     for (const [dish, groups] of Object.entries(tpl.dishOpts ?? {})) for (const g of groups) if (!g.multi) o[this.k(dish, g.name)] = g.req === false ? '' : g.choices[0];
     this.opt.set(o);
-    if (this.dishGroup) this.dishes.set({ [this.dishGroup.choices[0]]: tpl.qty?.min ?? 1 });
+    // chọn sẵn món đầu tiên còn hàng
+    const firstDish = this.dishGroup?.choices.find((c) => (tpl.dishLeft?.[c] ?? 1) > 0);
+    if (firstDish) this.dishes.set({ [firstDish]: tpl.qty?.min ?? 1 });
     this.hours.set(tpl.time.dur?.[0] ?? 2);
     this.time.set(tpl.time.win[0]);
   }
@@ -82,7 +84,7 @@ export class OrderDraft {
   /** Tăng / giảm số lượng một món; tổng không vượt giới hạn của bài */
   setDish(raw: string, n: number): void {
     const others = this.totalDishes() - this.dishQty(raw);
-    const q = Math.max(0, Math.min(n, this.maxQty() - others));
+    const q = Math.max(0, Math.min(n, this.maxQty() - others, this.tpl.dishLeft?.[raw] ?? Infinity));
     this.dishes.update((d) => ({ ...d, [raw]: q }));
     this.qty.set(Math.max(this.totalDishes(), 0));
   }
@@ -140,11 +142,16 @@ export class OrderDraft {
   });
   /** Thành tiền trước khi trừ Giờ vàng và voucher */
   readonly gross = computed(() => (this.tpl.price.type === 'quote' ? this.tpl.price.inspect ?? 0 : this.unit() + this.extra()));
+  /** Đơn đạt mức miễn phí giao người bán đã đặt */
+  readonly freeShip = computed(() => !!this.tpl.freeShipFrom && this.subtotal() >= this.tpl.freeShipFrom);
   /** Sau Giờ vàng; voucher Xu tính trên số này (voucher tính SAU) */
   readonly subtotal = computed(() => Math.max(0, this.gross() - this.promoOff()));
   readonly placeFee = computed(() => {
     const pl = this.tpl.place;
-    if (pl.mode === 'choice') return pl.choices?.[this.place()]?.[1] ?? 0;
+    if (pl.mode === 'choice') {
+      const fee = pl.choices?.[this.place()]?.[1] ?? 0;
+      return this.freeShip() ? 0 : fee;
+    }
     return pl.mode === 'buyer' || pl.mode === 'ab' ? pl.fee ?? 0 : 0;
   });
   /** Cách nhận có phụ phí (giao tận cửa / thợ đến nhà) thì cần địa chỉ người nhận */
@@ -282,6 +289,10 @@ export class OrderDraft {
     }
     if (this.dishGroup && this.totalDishes() < 1) return 'Hãy chọn ít nhất 1 món.';
     if (this.tpl.cups && !this.cups().length) return 'Hãy thêm ít nhất 1 ly vào đơn.';
+    for (const g of this.tpl.opts) {
+      // nhóm chọn nhiều người bán đánh dấu bắt buộc
+      if (g.multi && g.req === true && !this.chosen('', g).length) return 'Hãy chọn “' + g.name + '”.';
+    }
     if (this.paying() && !this.payBack()) return 'Hãy nhập số tiền cần trả giùm.';
     if (!checkout) return '';
     if (this.tpl.time.mode === 'datedur' && !this.date()) return 'Hãy chọn ngày giờ.';

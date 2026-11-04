@@ -481,7 +481,13 @@ export class SellerSpaceService {
   /** Trừ (d < 0) hoặc trả lại (d > 0) số lượng trên bài của đơn khách đặt. Số lượng để trống (99) là không giới hạn nên không đổi */
   private moveLinkedStock(s: SellerSpace, t: SellerOrder, d: number): void {
     const p = s.posts.find((x) => x.id === t.sellerPostId);
-    if (!p || p.max >= 99) return;
+    if (!p) return;
+    // số lượng từng món (dòng phụ như "Tùy chọn cộng giá" không có trong bài nên tự bỏ qua)
+    if (p.buyerPostId) {
+      const sign = Math.sign(d);
+      this.buyerApi.moveItemsLeft(p.buyerPostId, t.items.map((i) => ({ name: i.name, delta: sign * i.qty }))).subscribe({ error: () => undefined });
+    }
+    if (p.max >= 99) return;
     p.stock = Math.max(0, Math.min(p.max, p.stock + d));
     if (!p.stock) p.on = false;
     if (!p.buyerPostId) return;
