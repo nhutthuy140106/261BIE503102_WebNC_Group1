@@ -15,7 +15,7 @@
   <div>
     <!-- ===== 1. Thông tin chung (mọi loại) ===== -->
     <section class="sec" formGroupName="common">
-      <header><span class="no">1</span><span><b>{{ type() === 'job' ? 'Việc cần làm' : type() === 'service' ? 'Giới thiệu dịch vụ' : type() === 'goods' ? 'Thông tin đồ dùng' : 'Thông tin món' }}</b></span>
+      <header><span class="no">1</span><span><b>Thông tin bài đăng</b></span>
         @if (foodish()) {
           <div class="seg hseg" role="group" aria-label="Bạn bán">
             <button type="button" [class.on]="type() === 'food'" (click)="setType('food', false)">Đồ ăn</button>
