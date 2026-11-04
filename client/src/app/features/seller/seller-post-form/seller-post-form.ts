@@ -5,7 +5,6 @@ import { EMPTY, catchError, debounceTime, distinctUntilChanged, of, switchMap } 
 import { PricingService } from '../../../core/services/pricing';
 import { PriceSuggestion } from '../../../core/utils/price-suggest';
 import { Promo, discounted, promoLabel } from '../../../core/utils/promo';
-import { OrderWindow } from '../../../core/utils/order-window';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CanComponentDeactivate } from '../../../core/guards/pending-changes-guard';
@@ -231,20 +230,6 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     return { price: now, off: price - now, from };
   }
   /** Promo gửi lên server (null = tắt) */
-  protected hoursError(): string | null {
-    const h = (this.v()['common'] as V)['hours'] as V | undefined;
-    if (!h?.['on']) return null;
-    if (!h['from'] || !h['to']) return 'Khung giờ nhận đơn: chọn giờ bắt đầu và kết thúc';
-    if (h['from'] === h['to']) return 'Khung giờ nhận đơn: giờ bắt đầu và kết thúc không được trùng nhau';
-    return null;
-  }
-
-  private windowOf(c: V, kind: PostKind): OrderWindow | null {
-    const h = c['hours'] as V | undefined;
-    if (!h?.['on'] || kind === 'job') return null;
-    return { from: h['from'] as string, to: h['to'] as string, days: [...((h['days'] as number[]) ?? [])].sort() };
-  }
-
   private promoOf(c: V, kind: PostKind): Promo | null {
     const p = c['promo'] as V | undefined;
     if (!p?.['on'] || kind === 'job') return null;
@@ -657,8 +642,6 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     if (t !== 'job' && !this.images.length) return 'Thêm ít nhất 1 ảnh để khách tin hơn';
     if (t === 'drink' && !this.items(s).length) return 'Menu: nhập ít nhất một đồ uống có tên và giá';
     if (t === 'food' && !this.items(s).length) return 'Menu: nhập ít nhất một món có tên và giá';
-    const hoursErr = this.hoursError();
-    if (hoursErr) return hoursErr;
     const promoErr = this.promoError();
     if (promoErr) return promoErr;
     if (t === 'service' && s['priceType'] !== 'quote' && !this.items(s).length) return 'Bảng giá: nhập ít nhất một dịch vụ có tên và giá (hoặc chọn “Báo giá sau”)';
@@ -777,7 +760,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       status: draft || !p.on ? ('closed' as const) : ('open' as const),
       promo: this.promoOf(c, p.kind),
       ...fields,
-      orderWindow: this.windowOf(c, p.kind) ?? fields.orderWindow ?? null,
+      orderWindow: fields.orderWindow ?? null,
     };
     this.sellerApi.savePost(body, p.buyerPostId).subscribe({
       next: (saved) => {

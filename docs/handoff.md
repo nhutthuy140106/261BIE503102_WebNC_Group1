@@ -280,7 +280,7 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
   - **Việc phía Mua:** khung đặt đồ uống đọc tùy chọn từ `spec.options` như đồ ăn.
   - Ô Đơn vị trong bảng rộng hơn để chọn "Khác" vẫn đủ chỗ gõ; bỏ dòng giải thích ở ô chọn ngày (mọi form); căn lại dòng tùy chọn nhanh và khoảng cách nút thêm.
 - **04/11 — gộp `dev` (`d35d1d5`) vào `feature/seller-repair-flow`:**
-  - Form đăng bài giữ quyết định khu Bán: Menu, tùy chọn cộng giá cho cả đơn (đồ ăn, đồ uống), không có Combo. Giữ phần mới của `dev`: gửi bài bằng `formToPostFields`, `buyerPostId`, Khung giờ nhận đơn, ảnh minh họa cho việc làm.
+  - Form đăng bài giữ quyết định khu Bán: Menu, tùy chọn cộng giá cho cả đơn (đồ ăn, đồ uống), không có Combo. Giữ phần mới của `dev`: gửi bài bằng `formToPostFields`, `buyerPostId`, ảnh minh họa cho việc làm. Bỏ ô Khung giờ nhận đơn (`common.hours`, theo quyết định khu Bán): giờ nhận đơn lấy từ Lịch bán, `orderWindow` vẫn gửi từ `formToPostFields`.
   - **Khác `docs/post-contract.md` (cần Khải xem):** form không còn tạo `items[].optionGroups` (tầng riêng từng món) và không gửi `combo`. Bài cũ đã có combo trên server không bị xóa khi sửa bài.
   - `post-mapper`: câu hỏi form chung đổi về 4 loại phía Mua (đoạn dài, số, ngày, khoảng, địa chỉ thành ô chữ); lựa chọn có giá ghi `Tên|+5.000đ`.
   - **Chưa nối:** `choices[].qty` chưa có trong `OptionGroup` và server; server `questions` mới lưu `label`, `required`.

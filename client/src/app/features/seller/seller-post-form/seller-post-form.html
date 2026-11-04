@@ -634,28 +634,7 @@
       </ng-template>
 
       <!-- ===== Giờ vàng: giảm giá trong khung giờ, tự về giá gốc khi hết giờ (core/utils/promo.ts) ===== -->
-      <!-- ===== Khung giờ nhận đơn: ngoài khung bài tự khóa với người mua, sửa khung giờ để mở lại ===== -->
-      <ng-template #hoursBox>
-        <div class="promo">
-          <label class="ck"><input type="checkbox" [formControl]="$any(c('common.hours.on'))" /><span>Khung giờ nhận đơn<small>Ngoài khung này bài tự khóa, khách không đặt được. Bạn sửa lại khung giờ bất cứ lúc nào để mở lại</small></span></label>
-          @if (c('common.hours.on').value) {
-            <div class="pbody">
-              <div class="row3">
-                <div class="fld"><label for="hrf">Từ</label><app-time-input inputId="hrf" [formControl]="$any(c('common.hours.from'))" /></div>
-                <div class="fld"><label for="hrt">Đến</label><app-time-input inputId="hrt" [formControl]="$any(c('common.hours.to'))" /></div>
-              </div>
-              <div class="fld"><span class="lbl">Ngày nhận đơn <span class="hint">({{ c('common.hours.days').value?.length ? 'các ngày đã chọn' : 'để trống = mọi ngày' }})</span></span>
-                <div class="days">@for (w of promoWeek; track w.d) { <button type="button" [class.on]="has('common.hours.days', w.d)" (click)="toggleIn('common.hours.days', w.d)">{{ w.l }}</button> }</div>
-              </div>
-              @if (hoursError(); as he) { <span class="hint warn">{{ he }}</span> }
-              @else { <span class="hint">Khách thấy các mốc giờ gợi ý trong khung này và có thể tự gõ giờ cụ thể. Giờ Việt Nam.</span> }
-            </div>
-          }
-        </div>
-      </ng-template>
-
       <ng-template #promoBox>
-        <ng-container *ngTemplateOutlet="hoursBox" />
         <div class="promo">
           <label class="ck"><input type="checkbox" [formControl]="$any(c('common.promo.on'))" /><span>Giờ vàng<small>Giảm giá trong khung giờ, tự về giá gốc khi hết giờ</small></span></label>
           @if (c('common.promo.on').value) {
