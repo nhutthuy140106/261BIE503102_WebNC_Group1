@@ -15,8 +15,8 @@ import { SellerService } from '../../../core/services/seller';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import {
-  AMENITIES, BLOCKS, CATS, DRINK_UNITS, FOOD_UNITS, GOODS_UNITS, SVC_UNITS, ymd, CONDITIONS, DAYS, FOOD_TAGS, FormType, ICE, JOB_UNITS, PRICE_TYPES, Q_TYPES, SVC_PLACES, SVC_PRESETS, SVC_TIMES, SWEET,
-  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup,
+  AMENITIES, ASK_QUICK, ASK_TYPES, BLOCKS, GENERIC_PLACES, REPAIR_PLACES, CATS, DRINK_UNITS, FOOD_UNITS, GOODS_UNITS, SVC_UNITS, ymd, CONDITIONS, DAYS, FOOD_TAGS, FormType, ICE, JOB_UNITS, PRICE_TYPES, Q_TYPES, SVC_PLACES, SVC_PRESETS, SVC_TIMES, SWEET,
+  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, datesBetween, toGenericSpec, toOrderOptions,
 } from './post-form-config';
 
 /** Ngày bán: 1 ngày → dd/mm/yyyy, nhiều ngày → ngày đầu - ngày cuối */
@@ -68,6 +68,10 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   protected readonly qTypeOpts: SelectOption[] = Q_TYPES.map(([value, label]) => ({ value, label }));
   protected readonly jobUnits = JOB_UNITS;
   protected readonly svcPlaces = SVC_PLACES;
+  protected readonly repairPlaces = REPAIR_PLACES;
+  protected readonly genericPlaces = GENERIC_PLACES;
+  protected readonly askTypeOpts: SelectOption[] = ASK_TYPES.map(([value, label]) => ({ value, label }));
+  protected readonly askQuick = ASK_QUICK;
   protected readonly svcTimes = SVC_TIMES;
 
   // ---- ô chọn ngày trên lịch (Ngày bán, Ngày hẹn lấy, Ngày nhận lịch, Ngày làm): chọn nhiều ngày, từ hôm nay trở đi ----
@@ -107,11 +111,18 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     this.calMonth.set(new Date(m.getFullYear(), m.getMonth() + d, 1));
   }
 
+  /** Bấm ngày ngoài khoảng đang chọn: chọn luôn các ngày ở giữa. Bấm ngày trong khoảng: bật / tắt riêng ngày đó */
   protected toggleDate(path: string, key: string): void {
     const ctrl = this.form.get(path)!;
-    const cur = (ctrl.value as string[]) ?? [];
-    ctrl.setValue(cur.includes(key) ? cur.filter((x) => x !== key) : [...cur, key].sort());
+    const cur = [...((ctrl.value as string[]) ?? [])].sort();
+    const [first, last] = [cur[0], cur[cur.length - 1]];
+    const add = !cur.length ? [key] : key > last ? datesBetween(last, key) : key < first ? datesBetween(key, first) : [key];
+    ctrl.setValue(cur.includes(key) ? cur.filter((x) => x !== key) : [...new Set([...cur, ...add])].sort());
     ctrl.markAsDirty();
+  }
+
+  protected clearDates(path: string): void {
+    this.set(path, []);
   }
 
   /** Mã QR nhận chuyển khoản: ảnh PNG/JPG/WebP ≤ 2MB */
@@ -338,7 +349,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     this.arr(path).push(choice(this.fb));
   }
 
-  /** thêm nhóm tùy chọn cộng giá: dịch vụ `spec.options`, đồ ăn theo từng món `spec.items.{i}.options` */
+  /** thêm nhóm tùy chọn cộng giá (`spec.options`) */
   protected addOptGroup(path = 'spec.options'): void {
     this.arr(path).push(optGroup(this.fb, '', false, true));
   }
@@ -346,7 +357,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   protected addItem(): void {
     const t = this.type();
     const stay = t === 'service' && this.svcPreset().stay;
-    this.arr('spec.items').push(t === 'food' ? itemGroup(this.fb, '', null, 'phần', 20) : t === 'drink' ? itemGroup(this.fb, '', null, 'ly') : stay ? itemGroup(this.fb, '', null, 'đêm', 1, [], 2) : itemGroup(this.fb));
+    this.arr('spec.items').push(t === 'food' ? itemGroup(this.fb, '', null, 'phần') : t === 'drink' ? itemGroup(this.fb, '', null, 'ly') : stay ? itemGroup(this.fb, '', null, 'đêm', 1, [], 2) : itemGroup(this.fb));
   }
 
   /** thêm dòng tick: tùy chọn nhanh (`spec.quick`) hoặc nội quy lưu trú (`spec.rules`) */
@@ -360,9 +371,10 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   }
 
   /** số thứ tự mục của form dịch vụ, bỏ qua mục bị ẩn */
-  protected svcNo(key: 'quick' | 'price' | 'stay' | 'ask' | 'time' | 'recv' | 'place' | 'pay'): number {
+  protected svcNo(key: 'quick' | 'price' | 'stay' | 'ask' | 'time' | 'recv' | 'place' | 'pay' | 'policy'): number {
     const p = this.svcPreset();
-    const keys = (['quick', 'price', 'stay', 'ask', 'time', 'recv', 'place', 'pay'] as const).filter(
+    if (p.generic) return ['price', 'time', 'place', 'ask', 'pay', 'policy'].indexOf(key) + 2;
+    const keys: string[] = (['quick', 'price', 'stay', 'ask', 'time', 'recv', 'place', 'pay'] as const).filter(
       (k) => !(k === 'quick' && p.noQuick) && !(k === 'place' && p.noPlace) && !(k === 'stay' && !p.stay) && !(k === 'recv' && !p.laundry),
     );
     return keys.indexOf(key) + 2;
@@ -385,6 +397,46 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
 
   protected addQuestion(): void {
     this.arr('spec.questions').push(questionGroup(this.fb));
+  }
+
+  // ---------------- form chung (mẫu Khác): câu hỏi người bán tự tạo ----------------
+
+  protected addAsk(q: (typeof ASK_QUICK)[number] | null = null): void {
+    this.arr('spec.questions').push(questionGroup(this.fb, q ? { ...q, opts: '' } : undefined));
+    this.form.markAsDirty();
+  }
+
+  /** nút thêm nhanh ẩn đi khi câu hỏi đã có */
+  protected askUsed(label: string): boolean {
+    return ((this.v()['spec'] as V)['questions'] as V[]).some((q) => q['label'] === label);
+  }
+
+  /** đổi kiểu trả lời: chọn một / chọn nhiều mới có danh sách lựa chọn */
+  protected setAskType(q: AbstractControl, t: string): void {
+    const g = q as FormGroup;
+    const list = g.get('choices') as FormArray;
+    const pick = t === 'choice' || t === 'multi';
+    if (pick && !list.length) { list.push(choice(this.fb)); list.push(choice(this.fb)); }
+    if (!pick) list.clear();
+    g.get('type')!.setValue(t);
+    g.markAsDirty();
+  }
+
+  /** những gì khách luôn phải điền, người bán không cần tạo */
+  protected readonly askFixed = computed(() => {
+    const s = this.v()['spec'] as V;
+    return [
+      ...(s['priceType'] === 'quote' ? [] : ['Dịch vụ và số lượng']),
+      'Ngày giờ hẹn',
+      ...(s['place'] === 'choice' ? ['Nơi làm', 'Địa chỉ, nếu làm tại nhà'] : s['place'] === 'buyer' ? ['Địa chỉ'] : []),
+      'Cách thanh toán',
+      'Ghi chú',
+    ];
+  });
+
+  /** chữ mờ trong khung xem trước theo kiểu trả lời */
+  protected askPh(t: string): string {
+    return ({ text: 'Khách nhập chữ', long: 'Khách nhập đoạn dài', number: 'Khách nhập số', date: 'Khách chọn ngày', range: 'Khách chọn từ ngày đến ngày', photo: 'Khách thêm ảnh', address: 'Khách nhập địa chỉ' } as Record<string, string>)[t] ?? '';
   }
 
   protected removeAt(path: string, i: number): void {
@@ -435,7 +487,6 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   protected readonly kindIcon = SELLER_KIND_ICON;
   protected readonly myName = computed(() => this.seller.shop()?.name ?? 'Gian hàng của bạn');
   protected readonly myAvatar = computed(() => this.seller.shop()?.avatar);
-  protected readonly previewIcon = computed(() => { const t = this.type(); return SELLER_KIND_ICON[t === 'drink' ? 'food' : t]; });
 
   protected readonly preview = computed(() => {
     const t = this.type();
@@ -493,6 +544,21 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         const { low, from } = this.lowest(its);
         const pr = pt === 'quote' ? 'Báo giá sau' : low ? `${from ? 'từ ' : ''}${money(low['price'])}` : '—';
         const quick = !this.svcPreset().noQuick;
+        if (this.svcPreset().generic) {
+          const fee = +s['homeFee'] ? ` (+${money(s['homeFee'])})` : '';
+          const mine = String(s['where'] ?? '').trim();
+          return {
+            price: pr, unit: pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ', action: 'Đặt lịch', xu: (s['pay'] ?? []).includes('xu'),
+            facts: [
+              ['pin', 'Nơi làm', s['place'] === 'seller' ? mine || 'Tại chỗ người bán' : s['place'] === 'choice' ? `Tại nhà khách${fee} hoặc ${mine || 'tại chỗ người bán'}` : `Tại nhà khách${fee}`],
+              pt === 'quote'
+                ? ['receipt', 'Phí kiểm tra', `${+s['inspect'] ? money(s['inspect']) : 'Miễn phí'} · báo giá trước khi làm`]
+                : ['receipt', 'Bảng giá', its.length ? `${its.map((x) => x['name']).slice(0, 3).join(', ')}${its.length > 3 ? ` +${its.length - 3}` : ''}` : 'Chưa có dịch vụ'],
+              String(s['turnaround'] ?? '').trim() ? ['clock', 'Thời gian làm', s['turnaround']] : ['clock', 'Giờ nhận lịch', `${s['from']} – ${s['to']}, ${dateList(s['dates'])}`],
+            ] as [string, string, string][],
+            sched: this.promoText(), steps: orderStepNames('service'),
+          };
+        }
         if (this.svcPreset().laundry) {
           return {
             price: pr, unit: pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ', action: 'Đặt lấy đồ', xu: (s['pay'] ?? []).includes('xu'),
@@ -500,6 +566,18 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
               ['clock', 'Giờ nhận đơn', `${s['from']} – ${s['to']}, ${dateList(s['dates'])}`],
               ['bolt', 'Trả đồ', `Trong khoảng ${s['returnHours'] || 24} giờ${s['estimate'] ? ' · giá theo cân thực tế' : ''}`],
               ['pin', 'Hình thức nhận', how(s['fulfil'])],
+            ] as [string, string, string][],
+            sched: this.promoText(), steps: orderStepNames('service'),
+          };
+        }
+        if (this.svcPreset().repair) {
+          const place = REPAIR_PLACES.find((m) => m[0] === s['place'])?.[1] ?? '';
+          return {
+            price: pr, unit: pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ', action: 'Đặt lịch sửa', xu: (s['pay'] ?? []).includes('xu'),
+            facts: [
+              ['pin', 'Nơi sửa', s['place'] === 'choice' ? `Thợ đến nhà${+s['homeFee'] ? ` (+${money(s['homeFee'])})` : ''} hoặc khách mang tới` : place],
+              ['receipt', 'Phí kiểm tra', `${+s['inspect'] ? money(s['inspect']) : 'Miễn phí'} · báo giá trước khi sửa`],
+              ['clock', 'Thời gian hoàn thành', s['turnaround'] || 'Báo sau khi kiểm tra'],
             ] as [string, string, string][],
             sched: this.promoText(), steps: orderStepNames('service'),
           };
@@ -561,13 +639,17 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     const t = this.type();
     const s = this.form.get('spec')!.getRawValue() as V;
     if (t !== 'job' && !this.images.length) return 'Thêm ít nhất 1 ảnh để khách tin hơn';
-    if (t === 'drink' && !this.items(s).length) return 'Thực đơn: nhập ít nhất một đồ uống có tên và giá';
-    if (t === 'food' && !this.items(s).length) return 'Thực đơn: nhập ít nhất một món có tên và giá';
+    if (t === 'drink' && !this.items(s).length) return 'Menu: nhập ít nhất một đồ uống có tên và giá';
+    if (t === 'food' && !this.items(s).length) return 'Menu: nhập ít nhất một món có tên và giá';
     const promoErr = this.promoError();
     if (promoErr) return promoErr;
     if (t === 'service' && s['priceType'] !== 'quote' && !this.items(s).length) return 'Bảng giá: nhập ít nhất một dịch vụ có tên và giá (hoặc chọn “Báo giá sau”)';
     if (t === 'service' && this.svcPreset().stay && !String(s['building']).trim()) return 'Lưu trú: nhập tòa nhà';
-    if (t === 'service' && !this.svcPreset().noPlace && (s['place'] === 'seller' || s['place'] === 'choice') && !String(s['where']).trim()) return 'Nhập nơi khách mang tới';
+    if (t === 'service' && !this.svcPreset().noPlace && (s['place'] === 'seller' || s['place'] === 'choice') && !String(s['where']).trim()) return this.svcPreset().generic ? 'Nhập địa chỉ của bạn' : 'Nhập nơi khách mang tới';
+    if (t === 'service' && this.svcPreset().generic) {
+      const q = ((s['questions'] as V[]) ?? []).find((x) => (x['type'] === 'choice' || x['type'] === 'multi') && !(x['choices'] as V[])?.length);
+      if (q) return `Câu hỏi “${q['label']}”: thêm ít nhất một lựa chọn`;
+    }
     if (t !== 'food' && t !== 'drink' && !(s['dates'] as string[])?.length) return t === 'job' ? 'Chọn ngày làm trên lịch' : 'Chọn ít nhất một ngày trên lịch';
     if (s['fulfil'] && !(s['fulfil'] as V)['delivery'] && !(s['fulfil'] as V)['pickup']) return t === 'goods' ? 'Chọn ít nhất một cách nhận hàng' : 'Chọn ít nhất một cách nhận món';
     if ((t === 'food' || t === 'drink') && !((s['schedule'] as V)['dates'] as string[])?.length) return 'Chọn ít nhất một ngày bán trên lịch';
@@ -607,17 +689,18 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   private priceOf(s: V): { price: number; unit: string; stock: number; max: number; priceFrom?: boolean } {
     switch (this.type()) {
       case 'food': {
-        const { low, from } = this.lowest(this.items(s));
-        // tồn mỗi ngày của bài = cộng số phần các món
-        const day = this.items(s).reduce((n, x) => n + (+x['qty'] || 0), 0);
-        return { price: low ? +low['price'] : 0, unit: `/ ${low?.['unit'] || 'phần'}`, priceFrom: from, stock: day, max: day || 20 };
+        const its = this.items(s);
+        const { low, from } = this.lowest(its);
+        // món nào để trống số lượng = bán đến khi đóng bài → cả bài 99
+        const total = its.some((x) => !(+x['qty'] > 0)) ? 99 : its.reduce((n, x) => n + +x['qty'], 0);
+        return { price: low ? +low['price'] : 0, unit: `/ ${low?.['unit'] || 'phần'}`, priceFrom: from, stock: total, max: total || 20 };
       }
       case 'drink': {
         const its = this.items(s);
         const { low, from } = this.lowest(its);
-        // món nào để trống số ly = không giới hạn → cả bài 99
-        const day = its.some((x) => !(+x['qty'] > 0)) ? 99 : its.reduce((n, x) => n + +x['qty'], 0);
-        return { price: low ? +low['price'] : 0, unit: `/ ${low?.['unit'] || 'ly'}`, priceFrom: from, stock: day, max: day || 50 };
+        // món nào để trống số lượng = bán đến khi đóng bài → cả bài 99
+        const total = its.some((x) => !(+x['qty'] > 0)) ? 99 : its.reduce((n, x) => n + +x['qty'], 0);
+        return { price: low ? +low['price'] : 0, unit: `/ ${low?.['unit'] || 'ly'}`, priceFrom: from, stock: total, max: total || 50 };
       }
       case 'goods': return { price: +s['price'] || 0, unit: `/ ${s['unit']}`, stock: +s['stock'] || 1, max: Math.max(+s['stock'] || 1, 20) };
       case 'service': {
@@ -684,14 +767,15 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       p = { ...p, form: { ...p.form, spec: { ...spec0, items: [{ name: p.title, price: base, unit: 'ly', qty: spec0['unlimited'] ? null : spec0['dailyLimit'], options }] } } };
     }
     const spec1 = (p.form as V | undefined)?.['spec'] as V | undefined;
-    if (p.form && p.formType === 'food' && spec1?.['options'] && (spec1['items'] as V[])?.length && !(spec1['items'] as V[])[0]['options']) {
-      const [first, ...rest] = spec1['items'] as V[];
-      p = { ...p, form: { ...p.form, spec: { ...spec1, items: [{ ...first, options: spec1['options'] }, ...rest] } } };
-    }
+    if (p.form && (p.formType === 'food' || p.formType === 'drink') && spec1) p = { ...p, form: { ...p.form, spec: toOrderOptions(spec1) } };
     if (p.form) {
-      if (this.type() === 'service') this.applyPreset(((p.form as V)['spec'] as V)['preset'] ?? 'Khác');
-      this.fit(this.form, p.form);
-      this.form.patchValue(p.form);
+      let saved = p.form;
+      if (this.type() === 'service') {
+        this.applyPreset((saved['spec'] as V)['preset'] ?? 'Khác');
+        if (this.svcPreset().generic) saved = { ...saved, spec: toGenericSpec(saved['spec'] as V) };
+      }
+      this.fit(this.form, saved);
+      this.form.patchValue(saved);
     } else {
       this.form.get('common')!.patchValue({ title: p.title, images: p.image ? [p.image] : [], category: CATS[this.type()].includes(p.category) ? p.category : CATS[this.type()][0] });
       const spec = this.form.get('spec')!;

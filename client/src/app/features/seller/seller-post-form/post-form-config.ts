@@ -18,7 +18,7 @@ export const DEFAULT_AREA = 'Bcons';
 export const FOOD_UNITS = ['phần', 'hộp', 'suất', 'kg'];
 export const DRINK_UNITS = ['ly', 'chai', 'cốc'];
 export const GOODS_UNITS = ['cái', 'chiếc', 'bộ', 'đôi', 'hộp', 'kg'];
-export const SVC_UNITS = ['lần', 'giờ', 'buổi', 'lượt', 'kg', 'bộ', 'cái', 'đôi', 'm²', 'đêm'];
+export const SVC_UNITS = ['lần', 'giờ', 'buổi', 'lượt', 'kg', 'bộ', 'cái', 'đôi', 'máy', 'm²', 'đêm'];
 /** Lưu trú: tiện nghi khách hay lọc trên các trang đặt phòng (Traveloka, Booking) — chọn nhiều */
 export const AMENITIES = ['Wi-Fi', 'Máy lạnh', 'Nước nóng', 'Tủ lạnh', 'Bếp nấu', 'Máy giặt', 'Ti vi', 'Ban công', 'Chỗ để xe máy', 'Thang máy', 'Khăn tắm, dầu gội', 'Tự nhận phòng'];
 
@@ -45,6 +45,21 @@ export const PRICE_TYPES: [string, string][] = [['list', 'Bảng giá'], ['quote
 export const Q_TYPES: [string, string][] = [['text', 'Chữ'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['photo', 'Ảnh']];
 /** Khối Địa điểm phía Mua */
 export const SVC_PLACES: [string, string][] = [['buyer', 'Tại nhà khách'], ['seller', 'Khách mang tới'], ['choice', 'Khách chọn'], ['ab', 'Lấy ở A, giao tới B']];
+/** Mẫu Sửa chữa: nơi sửa */
+export const REPAIR_PLACES: [string, string][] = [['buyer', 'Thợ đến nhà'], ['seller', 'Khách mang tới'], ['choice', 'Cả hai']];
+/** Form chung (mẫu Khác): nơi làm */
+export const GENERIC_PLACES: [string, string][] = [['buyer', 'Tại nhà khách'], ['seller', 'Tại chỗ của tôi'], ['choice', 'Khách chọn']];
+/** Form chung: kiểu trả lời của từng câu hỏi; chọn một / chọn nhiều có danh sách lựa chọn, mỗi lựa chọn cộng giá được */
+export const ASK_TYPES: [string, string][] = [['text', 'Chữ ngắn'], ['long', 'Đoạn dài'], ['number', 'Số'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['date', 'Ngày'], ['range', 'Khoảng ngày'], ['photo', 'Ảnh'], ['address', 'Địa chỉ']];
+/** Form chung: nút thêm nhanh các câu hỏi hay gặp */
+export const ASK_QUICK: { type: string; label: string; required: boolean; hint: string }[] = [
+  { type: 'long', label: 'Mô tả vấn đề', required: true, hint: 'Nói rõ bạn cần làm gì' },
+  { type: 'photo', label: 'Ảnh chụp', required: false, hint: '' },
+  { type: 'number', label: 'Số người', required: false, hint: '' },
+  { type: 'number', label: 'Diện tích', required: false, hint: 'Tính theo m²' },
+  { type: 'address', label: 'Nơi lấy đồ', required: true, hint: '' },
+  { type: 'address', label: 'Nơi giao tới', required: true, hint: '' },
+];
 /** Khối Thời gian phía Mua: khung giờ trong ngày, hoặc ngày + số giờ */
 export const SVC_TIMES: [string, string][] = [['slot', 'Khách chọn giờ hẹn'], ['datedur', 'Khách chọn ngày + số giờ']];
 /** Đơn vị tiền công việc làm; ngoài danh sách = tự nhập ("Khác") */
@@ -64,7 +79,7 @@ export interface SvcPreset {
   place: 'buyer' | 'seller' | 'choice' | 'ab';
   homeFee: number;
   options: { name: string; choices: [string, number][]; multi?: boolean }[];
-  questions: { type: string; label: string; required: boolean; opts: string }[];
+  questions: { type: string; label: string; required: boolean; opts: string; hint?: string; choices?: [string, number][] }[];
   turnaround: string;
   warranty: string;
   /** mẫu không cần mục Thông tin nhanh / Nơi làm (ví dụ giặt sấy: luôn lấy & trả tận nơi) */
@@ -74,6 +89,10 @@ export interface SvcPreset {
   noQuestions?: boolean;
   /** mẫu giặt sấy: "Lịch lấy đồ" (tiệm qua lấy) + "Hình thức nhận" khi trả đồ, đơn có bước Duyệt giá sau khi cân */
   laundry?: boolean;
+  /** mẫu sửa chữa: chọn nơi sửa, luôn có phí kiểm tra, đơn có bước Kiểm tra + Duyệt giá */
+  repair?: boolean;
+  /** form chung (mẫu Khác): không theo ngành nào, người bán tự tạo câu hỏi cho khách */
+  generic?: boolean;
   /** mẫu lưu trú: hiện mục "Tiện nghi & nội quy", lịch theo đêm, cột số phòng / khách tối đa */
   stay?: boolean;
 }
@@ -88,12 +107,12 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
     options: [{ name: 'Nước xả', choices: [['Hương nhẹ', 0], ['Không mùi', 0]] }, { name: 'Gấp đồ', choices: [['Gấp gọn', 0], ['Treo móc', 10000]] }],
   }),
   'Sửa chữa': P({
-    priceType: 'quote', items: [['Thay pin laptop', 450000, 'cái'], ['Cài lại máy', 150000, 'lần']], inspect: 50000, place: 'choice', homeFee: 30000, turnaround: '1 – 3 ngày tùy lỗi', warranty: '3 tháng cho linh kiện thay',
+    repair: true, items: [['Vệ sinh máy lạnh', 150000, 'máy'], ['Thông tắc ống nước', 200000, 'lần'], ['Sửa ổ điện, công tắc', 80000, 'lần']],
+    inspect: 50000, place: 'buyer', homeFee: 30000, turnaround: 'Tùy lỗi, báo sau khi kiểm tra', warranty: '3 tháng cho phần đã sửa',
     questions: [
-      { type: 'text', label: 'Hãng / dòng máy', required: true, opts: '' },
-      { type: 'text', label: 'Máy bị sao?', required: true, opts: '' },
-      { type: 'photo', label: 'Ảnh lỗi (nếu có)', required: false, opts: '' },
-      { type: 'choice', label: 'Cần sao lưu dữ liệu trước?', required: false, opts: 'Không, Có' },
+      { type: 'text', label: 'Thiết bị / vị trí bị hư', required: true, opts: '' },
+      { type: 'text', label: 'Mô tả lỗi', required: true, opts: '' },
+      { type: 'photo', label: 'Ảnh chụp', required: false, opts: '' },
     ],
   }),
   'Dọn dẹp': P({
@@ -129,12 +148,13 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
       { type: 'text', label: 'Giờ đến dự kiến', required: false, opts: '' },
     ],
   }),
-  Khác: P({}),
+  Khác: P({ generic: true, noQuick: true }),
 };
 
 // ---------------- dựng form ----------------
 
-const choice = (fb: FormBuilder, label = '', price = 0) => fb.group({ label: [label, Validators.required], price: [price, Validators.min(0)] });
+/** qty: số lượng của lựa chọn (tùy chọn đồ ăn), trống = không giới hạn */
+const choice = (fb: FormBuilder, label = '', price = 0) => fb.group({ label: [label, Validators.required], price: [price, Validators.min(0)], qty: [null as number | null, Validators.min(0)] });
 const optGroup = (fb: FormBuilder, name = '', multi = false, required = true, choices: [string, number][] = [['', 0]]) =>
   fb.group({ name: [name, Validators.required], multi: [multi], required: [required], choices: fb.array(choices.map(([l, p]) => choice(fb, l, p))) });
 const strList = (fb: FormBuilder, items: string[]) => fb.array(items.map((s) => fb.control(s)));
@@ -172,8 +192,10 @@ export function foodGroup(fb: FormBuilder) {
   return fb.group({
     portion: ['1 người'],
     tags: fb.control<string[]>([]),
-    /** thực đơn trong bài: mỗi món một giá + đơn vị; khách đặt nhiều món trong một đơn, mỗi món một số lượng */
-    items: fb.array([itemGroup(fb, '', null, 'phần', 20)]),
+    /** thực đơn trong bài: mỗi món một giá + đơn vị + số lượng (trống = bán đến khi đóng bài); khách đặt nhiều món trong một đơn */
+    items: fb.array([itemGroup(fb, '', null, 'phần')]),
+    /** tùy chọn cộng giá cho cả đơn */
+    options: fb.array<FormGroup>([]),
     minOrder: [1, Validators.min(1)],
     spicy: [false],
     kitchenNote: [true],
@@ -189,13 +211,10 @@ export function foodGroup(fb: FormBuilder) {
 
 export function drinkGroup(fb: FormBuilder) {
   return fb.group({
-    /** thực đơn đồ uống: mỗi loại nước một giá, số ly mỗi ngày (trống = không giới hạn) và tùy chọn riêng (size, topping…) */
-    items: fb.array([
-      itemGroup(fb, '', null, 'ly', null, [
-        optGroup(fb, 'Size', false, true, [['M', 0], ['L', 6000]]),
-        optGroup(fb, 'Topping', true, false, [['Trân châu đen', 5000], ['Thạch phô mai', 8000]]),
-      ]),
-    ]),
+    /** thực đơn đồ uống: mỗi loại nước một giá + đơn vị + số lượng (trống = bán đến khi đóng bài) */
+    items: fb.array([itemGroup(fb, '', null, 'ly')]),
+    /** tùy chọn cộng giá cho cả đơn (size, topping…) */
+    options: fb.array<FormGroup>([]),
     /** khách gõ ghi chú cho quán khi đặt (như "ghi chú cho bếp" của đồ ăn) */
     kitchenNote: [true],
     hotCold: [true],
@@ -272,6 +291,9 @@ export function serviceGroup(fb: FormBuilder, preset: string) {
     safety: [p.place === 'buyer'],
     pay: fb.control<string[]>(['cash']),
     bank: bankGroup(fb),
+    // form chung: chính sách (bảo hành dùng ô warranty)
+    cancelPolicy: [''],
+    customerNote: [''],
   });
 }
 
@@ -286,7 +308,7 @@ export function quickGroup(fb: FormBuilder, label = '', on = true) {
 }
 
 export function questionGroup(fb: FormBuilder, q: SvcPreset['questions'][number] = { type: 'text', label: '', required: false, opts: '' }) {
-  return fb.group({ type: [q.type], label: [q.label, Validators.required], required: [q.required], opts: [q.opts] });
+  return fb.group({ type: [q.type], label: [q.label, Validators.required], required: [q.required], opts: [q.opts], hint: [q.hint ?? ''], choices: fb.array((q.choices ?? []).map(([l, p]) => choice(fb, l, p))) });
 }
 
 /** Việc làm — phía Mua hiện: thời gian làm (các ngày làm + giờ / cả ngày) · khu · số người cần · tiền công · thanh toán */
@@ -305,6 +327,33 @@ export function jobGroup(fb: FormBuilder) {
     pay: [null as number | null, [Validators.required, Validators.min(1000)]],
     payBy: ['cash'],
   });
+}
+
+type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+/** Bài mẫu Khác đăng trước khi có form chung: lựa chọn dạng chuỗi và nhóm tùy chọn cộng giá chuyển thành câu hỏi */
+export function toGenericSpec(s: V): V {
+  const isPick = (t: string) => t === 'choice' || t === 'multi';
+  const old = ((s['questions'] as V[]) ?? []).map((q) =>
+    !isPick(q['type']) || (q['choices'] as V[])?.length ? q : { ...q, choices: String(q['opts'] ?? '').split(',').map((x) => x.trim()).filter(Boolean).map((label) => ({ label, price: 0 })) },
+  );
+  const groups = ((s['options'] as V[]) ?? []).map((g) => ({ type: g['multi'] ? 'multi' : 'choice', label: g['name'], required: !!g['required'], opts: '', hint: '', choices: g['choices'] }));
+  return { ...s, questions: [...old, ...groups], options: [], place: s['place'] === 'ab' ? 'buyer' : s['place'], timeMode: 'slot', repeat: false, estimate: false };
+}
+
+/** Bài đồ ăn cũ có tùy chọn theo từng món: gom ra tùy chọn của cả đơn, nhóm trùng tên chỉ giữ một */
+export function toOrderOptions(s: V): V {
+  const all = [...((s['options'] as V[]) ?? []), ...((s['items'] as V[]) ?? []).flatMap((it) => (it['options'] as V[]) ?? [])];
+  const options = all.filter((g, i) => all.findIndex((x) => x['name'] === g['name']) === i);
+  return { ...s, options, items: ((s['items'] as V[]) ?? []).map((it) => ({ ...it, options: [] })) };
+}
+
+/** Các ngày yyyy-mm-dd từ a đến b, tính cả hai đầu */
+export function datesBetween(a: string, b: string): string[] {
+  const [y, m, d] = a.split('-').map(Number);
+  const out: string[] = [];
+  for (let k = a, i = 1; k <= b; k = ymd(new Date(y, m - 1, d + i++))) out.push(k);
+  return out;
 }
 
 export const asArray = (g: FormGroup, name: string) => g.get(name) as FormArray;
