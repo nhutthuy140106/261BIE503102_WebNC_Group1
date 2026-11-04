@@ -80,6 +80,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     unit: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(30)] }),
     note: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
     label: new FormControl<'home' | 'family' | 'other'>('family', { nonNullable: true }),
+    isDefault: new FormControl(false, { nonNullable: true }),
   });
   protected readonly voucherOpen = signal(false);
   protected readonly lightbox = signal<number | null>(null);
@@ -476,9 +477,9 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const v = this.addrForm.getRawValue();
     this.addressService.create({ ...v, note: v.note.trim() || undefined }).subscribe({
       next: (a) => {
-        this.addresses.update((l) => [...l, a]);
+        this.addresses.update((l) => [...l.map((x) => (a.isDefault ? { ...x, isDefault: false } : x)), a]);
         d.addressId.set(a._id);
-        this.addrForm.reset({ name: '', phone: '', block: '', unit: '', note: '', label: 'family' });
+        this.addrForm.reset({ name: '', phone: '', block: '', unit: '', note: '', label: 'family', isDefault: false });
         this.addrNew.set(false);
         this.addrOpen.set(false);
         this.toast.show('Đã thêm địa chỉ');
@@ -489,7 +490,23 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
 
   protected pickAddress(d: OrderDraft, a: Address): void {
     d.addressId.set(a._id);
+    this.closeAddr();
+  }
+
+  /** Đóng popup và thu form lại, mở lại luôn thấy danh sách + nút thêm địa chỉ */
+  protected closeAddr(): void {
     this.addrOpen.set(false);
+    this.addrNew.set(false);
+  }
+
+  protected makeDefault(a: Address): void {
+    this.addressService.setDefault(a._id).subscribe({
+      next: () => {
+        this.addresses.update((l) => l.map((x) => ({ ...x, isDefault: x._id === a._id })));
+        this.toast.show('Đã đặt làm địa chỉ mặc định');
+      },
+      error: (e: Error) => this.error.set(e.message),
+    });
   }
 
   /** "23/10/2026 · 11:00", thêm thời lượng với dịch vụ tính theo giờ */
@@ -625,7 +642,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     if (e.key === 'Escape') {
       if (this.lightbox() !== null) this.lightbox.set(null);
       else if (this.addrOpen() || this.voucherOpen()) {
-        this.addrOpen.set(false);
+        this.closeAddr();
         this.voucherOpen.set(false);
       } else if (this.reviewsOpen()) this.reviewsOpen.set(false);
       else if (this.checkout()) this.closeCheckout();

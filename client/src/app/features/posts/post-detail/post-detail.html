@@ -486,15 +486,16 @@
   }
 
   @if (addrOpen()) {
-    <div class="scrim top" (click)="addrOpen.set(false)">
+    <div class="scrim top" (click)="closeAddr()">
       <div class="modal small" (click)="$event.stopPropagation()">
-        <header><h2>Địa chỉ của tôi</h2><button type="button" class="x" (click)="addrOpen.set(false)" aria-label="Đóng">✕</button></header>
+        <header><h2>Địa chỉ của tôi</h2><button type="button" class="x" (click)="closeAddr()" aria-label="Đóng">✕</button></header>
         <div class="mbody">
           @for (a of addresses(); track a._id) {
-            <button type="button" class="card addr" [class.sel]="a._id === d.addressId()" (click)="pickAddress(d, a)">
+            <div class="card addr" role="button" tabindex="0" [class.sel]="a._id === d.addressId()" (click)="pickAddress(d, a)" (keydown.enter)="pickAddress(d, a)">
               <b>{{ a.name }} ({{ a.phone }})</b><span>{{ addressText(a) }}</span>
               @if (a.isDefault) { <em>Mặc định</em> }
-            </button>
+              @else { <button type="button" class="setdef" (click)="$event.stopPropagation(); makeDefault(a)" (keydown.enter)="$event.stopPropagation()">Đặt làm mặc định</button> }
+            </div>
           }
           @if (!addrNew()) {
             <button type="button" class="more" (click)="addrNew.set(true)">+ Thêm địa chỉ mới</button>
@@ -510,6 +511,7 @@
                 <label>Số nhà<input class="input" formControlName="unit" placeholder="Ví dụ: B-1204" /></label>
               </div>
               <label>Ghi chú cho người giao<input class="input" formControlName="note" placeholder="Ví dụ: gọi trước khi tới" /></label>
+              <label class="defck"><input type="checkbox" formControlName="isDefault" />Đặt làm địa chỉ mặc định</label>
               <div class="btnrow"><button type="button" class="ghost" (click)="addrNew.set(false)">Hủy</button><button type="submit" class="go" [disabled]="addrForm.invalid">Lưu và dùng địa chỉ này</button></div>
             </form>
           }

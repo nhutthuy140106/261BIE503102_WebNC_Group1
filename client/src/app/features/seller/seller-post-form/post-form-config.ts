@@ -153,8 +153,7 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
 
 // ---------------- dựng form ----------------
 
-/** qty: số lượng của lựa chọn (tùy chọn đồ ăn), trống = không giới hạn */
-const choice = (fb: FormBuilder, label = '', price = 0) => fb.group({ label: [label, Validators.required], price: [price, Validators.min(0)], qty: [null as number | null, Validators.min(0)] });
+const choice = (fb: FormBuilder, label = '', price = 0) => fb.group({ label: [label, Validators.required], price: [price, Validators.min(0)] });
 const optGroup = (fb: FormBuilder, name = '', multi = false, required = true, choices: [string, number][] = [['', 0]]) =>
   fb.group({ name: [name, Validators.required], multi: [multi], required: [required], choices: fb.array(choices.map(([l, p]) => choice(fb, l, p))) });
 const strList = (fb: FormBuilder, items: string[]) => fb.array(items.map((s) => fb.control(s)));

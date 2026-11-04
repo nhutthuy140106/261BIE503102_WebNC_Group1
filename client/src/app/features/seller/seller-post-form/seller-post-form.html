@@ -89,7 +89,7 @@
               <span class="hint">Để trống số lượng nếu bán đến khi bạn đóng bài. Khách chọn một hoặc nhiều món trong cùng một đơn; thẻ bài hiện giá món rẻ nhất, ví dụ “từ 15.000đ”.</span>
               <div class="optblock">
                 <span class="lbl">Tùy chọn cộng giá</span>
-                <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options', qty: true }" />
+                <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options' }" />
               </div>
               <div class="optblock">
                 <span class="lbl">Tùy chọn nhanh</span>
@@ -122,7 +122,7 @@
               <span class="hint">Để trống số lượng nếu bán đến khi bạn đóng bài. Khách chọn một hoặc nhiều loại trong cùng một đơn; thẻ bài hiện giá loại rẻ nhất, ví dụ “từ 30.000đ”.</span>
               <div class="optblock">
                 <span class="lbl">Tùy chọn cộng giá</span>
-                <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options', qty: true }" />
+                <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options' }" />
               </div>
               <ng-container *ngTemplateOutlet="priceHintBox" />
               <ng-container *ngTemplateOutlet="promoBox" />
@@ -491,8 +491,8 @@
       }
 
       <!-- ===== khối dùng chung: nhóm tùy chọn cộng giá (đồ ăn, đồ uống, dịch vụ) ===== -->
-      <!-- gắn thẳng vào từng nhóm ([formGroup]) theo đường dẫn base; qty: có ô số lượng cho từng lựa chọn -->
-      <ng-template #optGroups let-base="base" let-qty="qty">
+      <!-- gắn thẳng vào từng nhóm ([formGroup]) theo đường dẫn base -->
+      <ng-template #optGroups let-base="base">
         <div class="pkgs">
           @for (g of arr(base).controls; track $index; let gi = $index) {
             <div class="grp" [formGroup]="grp(g)">
@@ -504,10 +504,9 @@
               </div>
               <div formArrayName="choices" class="lines sub">
                 @for (ch of arr(base + '.' + gi + '.choices').controls; track $index; let ci = $index) {
-                  <div class="line" [class.q]="qty" [formGroupName]="ci">
+                  <div class="line" [formGroupName]="ci">
                     <input class="input" formControlName="label" placeholder="Lựa chọn" maxlength="40" />
                     <span class="money"><input appMoney class="input" formControlName="price" placeholder="Giá" /></span>
-                    @if (qty) { <input appMoney class="input" formControlName="qty" placeholder="Số lượng" aria-label="Số lượng của lựa chọn" /> }
                     <button type="button" class="rm" aria-label="Bỏ lựa chọn" (click)="removeAt(base + '.' + gi + '.choices', ci)"><svg class="i"><use href="#xmark" /></svg></button>
                   </div>
                 }
