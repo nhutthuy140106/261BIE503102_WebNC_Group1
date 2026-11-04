@@ -1,0 +1,8 @@
+<div class="bank">
+  @if (bank.qr) { <img class="qr" [src]="bank.qr" alt="Mã QR chuyển khoản" /> }
+  <dl>
+    <dt>Ngân hàng</dt><dd>{{ bank.bankName }}</dd>
+    <dt>Số tài khoản</dt><dd>{{ bank.no }}</dd>
+    <dt>Chủ tài khoản</dt><dd>{{ bank.holder }}</dd>
+  </dl>
+</div>

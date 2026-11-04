@@ -174,6 +174,7 @@ export function viewOf(post: Post): PostView {
       : post.orderWindow
         ? { ...base.time, win: [post.orderWindow.from, post.orderWindow.to] }
         : base.time;
+  const pays = post.payMethods?.filter((m): m is 'cash' | 'transfer' => m !== 'xu');
   const tpl: PostTemplate = {
     ...base,
     title: post.title,
@@ -211,6 +212,8 @@ export function viewOf(post: Post): PostView {
     dishPriced: !!dish,
     qs: post.questions?.length ? post.questions.map((q) => ({ type: q.type ?? ('text' as const), label: q.label, opts: q.opts, ph: q.ph, req: q.required, long: q.long, hint: q.hint, pay: q.pay })) : same ? base.qs : [],
     xuOk: post.acceptsXu ?? base.xuOk,
+    pays: pays?.length ? pays : undefined,
+    bank: post.bank,
     time,
   };
   // Dòng "Nhận đặt …" chỉ lấy từ khung giờ THẬT của bài; bài không đặt khung thì không ghi giờ (câu chữ cứng của mẫu từng nói sai giờ thật)

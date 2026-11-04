@@ -42,6 +42,7 @@ export interface PostBody {
   deliveryFee?: number;
   needSchedule?: boolean;
   payMethods?: PayMethod[];
+  bank?: Post['bank'];
   dates?: string[];
   timeMode?: Post['timeMode'];
   duration?: Post['duration'];
@@ -105,7 +106,7 @@ export class SellerService {
           category: body.combo ? 'Combo' : body.category, status: body.status ?? 'open', closed: (body.status ?? 'open') !== 'open',
           priceType: body.priceType, estimate: body.estimate, inspectFee: body.inspectFee, items: body.items?.length ? body.items : undefined,
           optionGroups: body.optionGroups, questions: body.questions, fulfillmentModes: body.fulfillmentModes, deliveryFee: body.deliveryFee,
-          needSchedule: body.needSchedule, payMethods: body.payMethods, dates: body.dates, timeMode: body.timeMode, duration: body.duration,
+          needSchedule: body.needSchedule, payMethods: body.payMethods, bank: body.bank, dates: body.dates, timeMode: body.timeMode, duration: body.duration,
           repeat: body.repeat, place: body.place, stock: body.stock, prepMinutes: body.prepMinutes, handover: body.handover, condition: body.condition, serviceInfo: body.serviceInfo,
           job: body.kind === 'job' ? { ...body.job, due: body.job?.due ?? body.due ?? '', offers: 0, status: 'open' } : undefined,
         };

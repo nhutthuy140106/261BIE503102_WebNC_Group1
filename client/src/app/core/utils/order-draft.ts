@@ -39,6 +39,7 @@ export class OrderDraft {
 
   constructor(readonly tpl: PostTemplate, private readonly stock: number | null = null) {
     this.qty.set(tpl.qty?.min ?? 1);
+    if (tpl.pays?.length) this.pay.set(tpl.pays[0]);
     const o: Record<string, string> = {};
     // chọn 1 bắt buộc → mặc định mục đầu; không bắt buộc → chưa chọn. Nhóm chọn nhiều không có mặc định (số lượng ở `extras`).
     for (const g of tpl.opts) if (!g.multi) o[g.name] = g.req === false ? '' : g.choices[0];

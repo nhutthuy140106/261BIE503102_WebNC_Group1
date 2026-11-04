@@ -1,3 +1,5 @@
+import { PostBank } from './post';
+
 /**
  * Mẫu chi tiết bài theo "mô hình 7 khối" của design/mockups/detail.html:
  * Giá · Số lượng · Thời gian · Địa điểm · Tùy chọn cộng giá · Câu hỏi riêng · Tình trạng bán.
@@ -104,6 +106,10 @@ export interface PostTemplate {
   /** Tùy chọn RIÊNG của từng món trong danh sách món: khóa = lựa chọn thô của món ('Cơm rang|+5.000đ'). Chọn món nào thì bung nhóm của món đó. */
   dishOpts?: Record<string, OptionBlock[]>;
   qs: QuestionBlock[];
+  /** Cách trả tiền người bán nhận; không có = cả tiền mặt và chuyển khoản (bài mẫu, bài cũ) */
+  pays?: ('cash' | 'transfer')[];
+  /** Tài khoản nhận chuyển khoản của người bán */
+  bank?: PostBank;
   stock: StockBlock;
   notePh: string;
   safety?: boolean;

@@ -41,6 +41,13 @@ export interface PostQuestion {
 /** Trạng thái bài (docs/post-contract.md). `closed` của Post là bản suy ra: status ≠ 'open'. */
 export type PostStatus = 'draft' | 'open' | 'soldout' | 'closed' | 'hidden';
 export type PayMethod = 'cash' | 'transfer' | 'xu';
+/** Tài khoản nhận chuyển khoản của bài, người bán nhập ở form đăng bài */
+export interface PostBank {
+  bankName: string;
+  no: string;
+  holder: string;
+  qr?: string;
+}
 /** Khối 1 — cách tính giá. `price`/`priceUnit` của Post là giá đại diện (thấp nhất) để lọc, sắp xếp. */
 export type PriceType = 'fixed' | 'unit' | 'from' | 'quote';
 
@@ -136,8 +143,10 @@ export interface Post {
   inspectFee?: number;
   /** Thực đơn nhiều món / bảng giá dịch vụ. Bài một món: bỏ trống, dùng price + optionGroups cấp bài */
   items?: PostItem[];
-  /** Cách nhận tiền (tài khoản/QR nằm ở hồ sơ người bán, không ở bài) */
+  /** Cách nhận tiền */
   payMethods?: PayMethod[];
+  /** Tài khoản và mã QR khi bài nhận chuyển khoản */
+  bank?: PostBank;
   /** Khối 3: ngày bán / ngày làm (yyyy-mm-dd) */
   dates?: string[];
   /** Khối 3: dịch vụ — kiểu chọn thời gian và thời lượng (giờ) */

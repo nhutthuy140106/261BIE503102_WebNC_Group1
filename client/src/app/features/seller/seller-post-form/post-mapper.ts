@@ -1,5 +1,6 @@
 import { OptionGroup, PayMethod, PostItem, PostKind, PostQuestion, PriceType } from '../../../core/models/post';
 import { PostBody } from '../../../core/services/seller';
+import { BANK_LIST } from './banks';
 import { FormType } from './post-form-config';
 
 /**
@@ -12,7 +13,7 @@ type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 export type PostFields = Pick<
   PostBody,
   | 'category' | 'priceType' | 'estimate' | 'inspectFee' | 'items' | 'optionGroups' | 'questions' | 'fulfillmentModes' | 'deliveryFee'
-  | 'needSchedule' | 'payMethods' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
+  | 'needSchedule' | 'payMethods' | 'bank' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
 >;
 
 /** "A, B|+5.000đ" không dùng nữa: form lưu lựa chọn là chuỗi cách nhau dấu phẩy */
@@ -69,6 +70,14 @@ const questionsOf = (arr: unknown): PostQuestion[] =>
 
 const payOf = (s: V): PayMethod[] => ((s['pay'] as PayMethod[]) ?? []).filter((m) => m === 'cash' || m === 'transfer' || m === 'xu');
 
+/** Tài khoản nhận tiền, chỉ gửi khi bài nhận chuyển khoản. Form lưu mã ngân hàng, phía Mua hiện tên ngắn */
+const bankOf = (s: V): PostFields['bank'] => {
+  const b = s['bank'] as V | undefined;
+  if (!payOf(s).includes('transfer') || !String(b?.['no'] ?? '').trim()) return undefined;
+  const code = String(b?.['name'] ?? '');
+  return { bankName: BANK_LIST.find((x) => x.code === code)?.short ?? code, no: String(b?.['no']).trim(), holder: String(b?.['holder'] ?? '').trim(), qr: (b?.['qr'] as string) || undefined };
+};
+
 const fulfilOf = (s: V): Pick<PostFields, 'fulfillmentModes' | 'deliveryFee'> => {
   const f = (s['fulfil'] as V) ?? {};
   const modes = [...(f['delivery'] ? ['delivery' as const] : []), ...(f['pickup'] ? ['pickup' as const] : [])];
@@ -82,7 +91,7 @@ const priceTypeOf = (its: PostItem[], fixed: PriceType = 'fixed'): PriceType =>
 export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue = ''): PostFields {
   const c = (raw['common'] as V) ?? {};
   const s = (raw['spec'] as V) ?? {};
-  const base = { category: c['category'] as string, payMethods: payOf(s) };
+  const base = { category: c['category'] as string, payMethods: payOf(s), bank: bankOf(s) };
 
   switch (type) {
     case 'food':

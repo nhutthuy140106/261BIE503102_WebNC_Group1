@@ -412,10 +412,11 @@
               <div class="crow col">
                 <svg class="i ic"><use href="#l-wallet" /></svg>
                 <span class="ct"><b>Phương thức thanh toán</b>
-                  <span class="seg">
-                    <button type="button" [class.on]="d.pay() === 'cash'" (click)="d.pay.set('cash')">Tiền mặt</button>
-                    <button type="button" [class.on]="d.pay() === 'transfer'" (click)="d.pay.set('transfer')">Chuyển khoản</button>
+                  <span class="seg" [style.grid-template-columns]="v.tpl.pays?.length === 1 ? '1fr' : null">
+                    @if (!v.tpl.pays || v.tpl.pays.includes('cash')) { <button type="button" [class.on]="d.pay() === 'cash'" (click)="d.pay.set('cash')">Tiền mặt</button> }
+                    @if (!v.tpl.pays || v.tpl.pays.includes('transfer')) { <button type="button" [class.on]="d.pay() === 'transfer'" (click)="d.pay.set('transfer')">Chuyển khoản</button> }
                   </span>
+                  @if (d.pay() === 'transfer' && v.tpl.bank; as b) { <app-bank-pay [bank]="b" /> }
                 </span>
               </div>
             </section>
