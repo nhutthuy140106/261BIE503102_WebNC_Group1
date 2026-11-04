@@ -6,9 +6,9 @@
     <ul class="list">
       @for (a of items(); track a._id) {
         <li class="card">
-          <strong>{{ a.name }}</strong> · {{ a.phone }}
+          <strong>{{ a.name }} ({{ a.phone }})</strong>
           @if (a.isDefault) { <span class="muted">· Mặc định</span> }
-          <div>{{ a.unit }}, Block {{ a.block }}</div>
+          <div>{{ a.unit }}, Tòa {{ a.block }}</div>
           @if (a.note) { <div class="muted">{{ a.note }}</div> }
           <button type="button" class="btn ghost" (click)="startEdit(a)">Sửa</button>
           @if (!a.isDefault) {
@@ -40,26 +40,20 @@
         }
       </div>
       <div class="field">
-        <label for="a-block">Block</label>
+        <label for="a-block">Tòa</label>
         <select id="a-block" formControlName="block">
-          @for (b of blocks; track b) { <option [value]="b">Block {{ b }}</option> }
+          @for (b of blocks; track b) { <option [value]="b">Tòa {{ b }}</option> }
         </select>
       </div>
       <div class="field">
-        <label for="a-unit">Căn / tầng</label>
+        <label for="a-unit">Số nhà</label>
         <input id="a-unit" formControlName="unit" placeholder="B-1204" />
-        @if (form.controls.unit.invalid && form.controls.unit.touched) { <small class="error">Nhập căn/tầng.</small> }
+        @if (form.controls.unit.invalid && form.controls.unit.touched) { <small class="error">Nhập số nhà.</small> }
       </div>
       <div class="field">
         <label for="a-note">Ghi chú</label>
         <input id="a-note" formControlName="note" />
       </div>
-      <fieldset>
-        <legend>Đây là địa chỉ của</legend>
-        <label><input type="radio" value="home" formControlName="label" /> Nhà riêng</label>
-        <label><input type="radio" value="family" formControlName="label" /> Người thân</label>
-        <label><input type="radio" value="other" formControlName="label" /> Khác</label>
-      </fieldset>
       <label><input type="checkbox" formControlName="isDefault" /> Đặt làm mặc định</label>
       <button type="submit" class="btn" [disabled]="form.invalid">Lưu</button>
       <button type="button" class="btn ghost" (click)="editing.set(null)">Hủy</button>

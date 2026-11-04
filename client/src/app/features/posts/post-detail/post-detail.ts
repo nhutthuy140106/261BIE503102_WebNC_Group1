@@ -72,7 +72,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected readonly submitting = signal(false);
   protected readonly addrOpen = signal(false);
   protected readonly addrNew = signal(false);
-  protected readonly blocks = BLOCKS;
+  protected readonly blockOpts = BLOCKS.map((b) => ({ value: b as string, label: 'Tòa ' + b }));
   /** Thêm địa chỉ mới ngay trong hộp chọn địa chỉ (đặt cho người khác = thêm địa chỉ người đó) */
   protected readonly addrForm = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(60)] }),
@@ -469,7 +469,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   protected addressText(a: Address): string {
-    return a.unit + ', ' + (a.block.length === 1 ? 'Block ' + a.block : a.block);
+    return a.unit + ', ' + (a.block.length === 1 ? 'Tòa ' + a.block : a.block);
   }
 
   protected saveAddress(d: OrderDraft): void {
@@ -543,7 +543,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         itemsLabel: d.dishGroup?.name,
         quantityLabel: d.tpl.qty ? d.tpl.qty.label.replace(/\s*\(.*\)/, '') : undefined,
         unit: d.tpl.qty ? d.tpl.price.unit : undefined,
-        address: d.needsAddress() && a ? a.name + ' · ' + a.phone + '\n' + this.addressText(a) : place.mode === 'seller' ? place.where : undefined,
+        address: d.needsAddress() && a ? a.name + ' (' + a.phone + ')\n' + this.addressText(a) : place.mode === 'seller' ? place.where : undefined,
         place: placeText,
         placeLabel: 'Hình thức nhận hàng',
         when: this.whenLabel(d),

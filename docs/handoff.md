@@ -298,3 +298,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
   - **Tùy chọn nhanh, ghi chú:** `Post.quickOptions` thay dòng dụng cụ / ống hút mặc định, khách tick khi đặt (mặc định chưa tick), ghi vào đơn nhóm "Tùy chọn thêm". `Post.noteEnabled = false` ẩn ô ghi chú.
   - **Đồ uống:** `template: 'drink'`; độ ngọt, đá, nóng / lạnh thành các nhóm chọn một không bắt buộc, không tính tiền ở `optionGroups`.
   - **Server chưa có các trường:** `bank`, `quickOptions`, `noteEnabled`, `payMethods`, `items`. Hiện chỉ chạy ở dữ liệu mẫu.
+- **05/11 — địa chỉ nhận hàng (phía MUA):** chữ cùng cỡ dòng "Địa chỉ nhận hàng", dòng đầu ghi "Họ tên (Số điện thoại)"; đổi nhãn Block thành Tòa, Căn / tầng thành Số nhà; bỏ mục "Đây là địa chỉ của" (trường `label` vẫn lưu giá trị mặc định: popup là `family`, Sổ địa chỉ là `home`). Áp dụng ở khung đặt và Sổ địa chỉ.

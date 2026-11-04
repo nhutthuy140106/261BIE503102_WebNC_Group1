@@ -117,7 +117,12 @@
 .card span { color: #3C4660; }
 .card.addr { cursor: pointer; }
 .card.addr:hover, .card.sel { border-color: var(--ink); }
-.card em { font-style: normal; color: var(--accent); font-size: 11px; font-weight: 600; }
+.card em { font-style: normal; color: var(--accent); font-size: 12.5px; font-weight: 600; }
+/* địa chỉ: chữ cùng cỡ dòng "Địa chỉ nhận hàng", nhãn Mặc định giữa ô bên phải */
+.card.addr { grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-items: center; }
+.card.addr b, .card.addr span { grid-column: 1; font-size: 12.5px; }
+.card.addr em { grid-column: 2; grid-row: 1 / span 2; }
+.crow.addr .ct b, .crow.addr .ct > span { font-size: 12.5px; }
 .warnt { color: #9A3B1C !important; font-weight: 600; }
 .switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 600; cursor: pointer; }
 .switch input { appearance: none; -webkit-appearance: none; flex: none; position: relative; width: 44px; height: 26px; margin: 0; border-radius: 999px; background: #D5D8DE; cursor: pointer; transition: background .2s; }
@@ -228,8 +233,13 @@
 
 .more { background: none; text-align: left; }
 .addrform { display: grid; gap: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
-.addrform label { display: grid; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--smoke); }
-.addrform .input { width: 100%; height: 40px; padding: 0 10px; border: 1px solid #DADDE3; border-radius: 10px; background: #fff; font: inherit; font-size: 14px; color: var(--ink); }
+.addrform label { display: grid; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.addrform .input { width: 100%; height: 42px; padding: 0 12px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font: inherit; font-size: 14px; font-weight: 400; color: var(--ink); }
+.addrform .input::placeholder { color: #c2c5cd; opacity: 1; }
+.addrform app-select { font-weight: 400; }
+.addrform app-select ::ng-deep .trigger { height: 42px; font-size: 14px; }
+/* mở lên trên: popup ngắn, mở xuống sẽ bị che mất lựa chọn cuối */
+.addrform app-select ::ng-deep .menu { top: auto; bottom: calc(100% + 6px); }
 .addrform .input:focus { outline: none; border-color: var(--ink); }
 .addrform .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .addrform .err { color: #B4441C; font-size: 12.5px; }

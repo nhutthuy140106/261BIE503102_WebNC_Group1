@@ -290,7 +290,7 @@
                   <button type="button" class="crow addr" (click)="addrOpen.set(true)">
                     <svg class="i ic pin"><use href="#l-pin" /></svg>
                     <span class="ct"><small>Địa chỉ nhận hàng</small>
-                      @if (address(); as a) { <b>{{ a.name }} <i>{{ a.phone }}</i></b><span>{{ addressText(a) }}</span> } @else { <span class="warnt">Chọn địa chỉ nhận hàng</span> }
+                      @if (address(); as a) { <b>{{ a.name }} ({{ a.phone }})</b><span>{{ addressText(a) }}</span> } @else { <span class="warnt">Chọn địa chỉ nhận hàng</span> }
                     </span>
                     <svg class="i cv"><use href="#chev" /></svg>
                   </button>
@@ -492,7 +492,7 @@
         <div class="mbody">
           @for (a of addresses(); track a._id) {
             <button type="button" class="card addr" [class.sel]="a._id === d.addressId()" (click)="pickAddress(d, a)">
-              <b>{{ a.name }} · {{ a.phone }}</b><span>{{ addressText(a) }}</span>
+              <b>{{ a.name }} ({{ a.phone }})</b><span>{{ addressText(a) }}</span>
               @if (a.isDefault) { <em>Mặc định</em> }
             </button>
           }
@@ -500,22 +500,16 @@
             <button type="button" class="more" (click)="addrNew.set(true)">+ Thêm địa chỉ mới</button>
           } @else {
             <form class="addrform" [formGroup]="addrForm" (ngSubmit)="saveAddress(d)">
-              <p class="hint">Đặt cho người khác? Thêm địa chỉ của người đó rồi chọn.</p>
               <div class="two">
                 <label>Họ tên<input class="input" formControlName="name" placeholder="Người nhận" /></label>
                 <label>Số điện thoại<input class="input" formControlName="phone" inputmode="numeric" maxlength="10" placeholder="10 số" /></label>
               </div>
               @if (addrForm.controls.phone.invalid && addrForm.controls.phone.touched) { <small class="err">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small> }
               <div class="two">
-                <label>Block
-                  <select class="input" formControlName="block">@for (b of blocks; track b) { <option [value]="b">Block {{ b }}</option> }</select>
-                </label>
-                <label>Căn / tầng<input class="input" formControlName="unit" placeholder="Ví dụ: B-1204" /></label>
+                <label>Tòa<app-select [options]="blockOpts" formControlName="block" /></label>
+                <label>Số nhà<input class="input" formControlName="unit" placeholder="Ví dụ: B-1204" /></label>
               </div>
               <label>Ghi chú cho người giao<input class="input" formControlName="note" placeholder="Ví dụ: gọi trước khi tới" /></label>
-              <label>Đây là địa chỉ của
-                <select class="input" formControlName="label"><option value="home">Nhà riêng</option><option value="family">Người thân</option><option value="other">Khác</option></select>
-              </label>
               <div class="btnrow"><button type="button" class="ghost" (click)="addrNew.set(false)">Hủy</button><button type="submit" class="go" [disabled]="addrForm.invalid">Lưu và dùng địa chỉ này</button></div>
             </form>
           }
