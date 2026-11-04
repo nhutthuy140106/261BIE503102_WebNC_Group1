@@ -137,6 +137,19 @@ export class SellerService {
     );
   }
 
+  /** Số còn lại của bài có giới hạn số lượng: đơn trừ đi hoặc trả lại thì phía Mua thấy số mới */
+  setStockLeft(id: string, left: number): Observable<Post> {
+    return this.db.list<Post>('posts').pipe(
+      map((rows) => {
+        const cur = rows.find((r) => r._id === id);
+        if (!cur) throw new AppError('Không tìm thấy bài.', 404, 'NOT_FOUND');
+        const next: Post = cur.stock?.mode === 'limit' ? { ...cur, stock: { ...cur.stock, left } } : cur;
+        this.db.save('posts', rows.map((r) => (r._id === id ? next : r)));
+        return next;
+      }),
+    );
+  }
+
   /** Đổi nhanh giá đại diện của bài (sửa giá ngay trên thẻ bài phía Bán). */
   setPrice(id: string, price: number): Observable<Post> {
     if (!useMock('seller')) return this.api.patch<Post>(`/seller/posts/${id}`, { price });

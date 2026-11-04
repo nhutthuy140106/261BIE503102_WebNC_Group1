@@ -160,7 +160,7 @@ Làm với bài ở mục 6 (ví dụ bài 1):
 - [ ] **Lịch**, **Hiệu quả** (số liệu), **Messenger bán**, **Gian hàng của tôi** mở được và số liệu khớp dữ liệu mẫu.
 - [ ] **Quảng bá bằng Xu**: nút "Quảng bá · n Xu" trừ đúng Xu; thiếu Xu → báo "Cần n Xu, bạn còn …"; bài có nhãn QUẢNG BÁ.
 - [ ] **Xác minh người bán** (`/seller/verify`): gửi form, trạng thái đổi.
-- 🔸 Đơn khách đặt ở phía Mua **chưa tự hiện** trong Giao dịch phía Bán (hai kho riêng); phải dùng đơn mẫu có sẵn của phía Bán để thử các bước.
+- Đơn khách đặt từ bài đăng mới tự hiện trong Giao dịch phía Bán và hai bên đổi bước theo nhau (dữ liệu mẫu). 🔸 Đổi lịch, báo vấn đề, đánh giá chưa nối.
 
 ## 9. Trò chơi & vòng quay
 
@@ -184,7 +184,7 @@ Làm với bài ở mục 6 (ví dụ bài 1):
 ## 12. Những chỗ **chưa làm** (đừng báo là lỗi)
 
 1. Xem trước trong form Bán chưa dùng chung code hiển thị với phía Mua.
-2. Đơn khách đặt / đề nghị nhận việc phía Mua chưa sang phía Bán (hai kho riêng).
+2. Đề nghị nhận việc phía Mua chưa sang phía Bán. Đơn đặt đã nối ở dữ liệu mẫu, chưa nối qua server.
 3. Tùy chọn cộng giá riêng từng món áp chung cả đơn; chưa có giỏ nhiều dòng.
 4. Dịch vụ lưu trú (theo đêm), bảng giá tham khảo của dịch vụ báo giá sau chưa hiện.
 5. Việc làm: số người cần, đơn vị công chưa chắc đã vẽ ra.

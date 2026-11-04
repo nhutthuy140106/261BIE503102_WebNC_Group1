@@ -132,9 +132,11 @@
                 @for (l of o.quote.lines; track $index) { <div><span>{{ l.name }}@if (o.flow === 'laundry') { × {{ l.qty }} }</span><b>{{ l.qty * l.price | vnd }}</b></div> }
                 <div class="tot"><span>Giá báo khách</span><b>{{ o.quote.total | vnd }}</b></div>
               </div>
-              <!-- phía Mua chưa có nút duyệt: giả lập khách đồng ý để thử luồng -->
-              <button type="button" class="btn demo" (click)="act('approveQuote')">Bản mẫu: khách đồng ý giá</button>
-              @if (o.flow === 'repair') { <button type="button" class="btn demo" (click)="act('rejectQuote')">Bản mẫu: khách không đồng ý</button> }
+              <!-- đơn mẫu không có khách thật: giả lập khách trả lời; đơn đặt thật thì khách duyệt ở trang Đơn hàng -->
+              @if (!o.buyerOrderId) {
+                <button type="button" class="btn demo" (click)="act('approveQuote')">Bản mẫu: khách đồng ý giá</button>
+                @if (o.flow === 'repair') { <button type="button" class="btn demo" (click)="act('rejectQuote')">Bản mẫu: khách không đồng ý</button> }
+              }
             }
             @for (a of actions(); track a[0]) {
               <button type="button" class="btn" [class.primary]="a[2]" (click)="act(a[0])">{{ a[1] }}</button>

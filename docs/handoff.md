@@ -285,3 +285,10 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
   - `post-mapper`: câu hỏi form chung đổi về 4 loại phía Mua (đoạn dài, số, ngày, khoảng, địa chỉ thành ô chữ); lựa chọn có giá ghi `Tên|+5.000đ`.
   - **Chưa nối:** `choices[].qty` chưa có trong `OptionGroup` và server; server `questions` mới lưu `label`, `required`.
   - **`ng build` bản production đang lỗi:** `post-detail.css` (phía Mua, 32,32 kB) vượt ngân sách 32 kB ở `angular.json`, bản `dev` cũng có file và cấu hình này. `ng serve` và build development vẫn chạy.
+- **04/11 — nối đơn hai chiều giữa Mua và Bán (bản dữ liệu mẫu):**
+  - Khách đặt bài có `buyerPostId` thì `OrderService.create` gọi `SellerSpaceService.receiveOrder`: thêm `SellerOrder` (`buyerOrderId` = `_id` của Order) và đánh dấu `Order.sellerLinked`. Hàm đổi dữ liệu nằm ở `core/utils/order-link.ts`.
+  - Người bán đổi bước (`orderAct` → `syncToBuyer`): đơn phía Mua đổi trạng thái, ghi lịch sử, thêm thông báo, cộng Xu / trả voucher. Người mua đổi đơn (`update`, `requestCancel`, `respondSurcharge` → `syncFromBuyer`): phía Bán đổi theo.
+  - Đơn nối không còn nút "Mô phỏng" phía Mua và "Bản mẫu: khách đồng ý giá" phía Bán. Đơn mẫu có sẵn vẫn giữ các nút này.
+  - Số lượng: đồ ăn trừ khi đặt, đồ dùng trừ khi xác nhận, hủy / từ chối thì trả lại; về 0 thì tạm ngưng bài. `max >= 99` là không giới hạn. Dịch vụ không trừ. Số lượng theo từng món và từng lựa chọn chưa trừ riêng.
+  - Hai tab cùng trình duyệt cập nhật ngay nhờ sự kiện `storage` (`MockDb.changes`).
+  - **Chưa nối:** đổi lịch, báo vấn đề / trả hàng, đánh giá, đề nghị nhận việc; đơn thật qua server (`useMock('order')` tắt thì không nối).

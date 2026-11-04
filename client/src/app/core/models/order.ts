@@ -62,6 +62,8 @@ export interface Order {
   issue?: OrderIssue | null;
   rated?: { s: number; t: string } | null;
   returnRequested?: string;
+  /** Đơn đặt từ bài của khu Bán: người bán xử lý thật ở Giao dịch, không dùng nút mô phỏng */
+  sellerLinked?: boolean;
   /** Việc đã nhận: đã bấm xác nhận nhận tiền công */
   paid?: boolean;
 }

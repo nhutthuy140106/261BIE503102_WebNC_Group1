@@ -1,14 +1,16 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, map, switchMap } from 'rxjs';
+import { Observable, filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { CreateOrderBody, Order } from '../models/order';
 import { orderFromApi } from '../utils/api-mappers';
 import { offerToOrder } from '../utils/offer-state';
+import { flowOf, priceCheckOf } from '../utils/order-link';
 import { ApiService } from './api';
 import { JobOfferService } from './job-offer';
 import { MockDb } from './mock-db';
 import { PostService } from './post';
+import { SellerSpaceService } from './seller-space';
 
 const COLLECTION = 'orders';
 const MOCK_DELIVERY_FEE = 7000;
@@ -23,6 +25,10 @@ export class OrderService {
   private readonly db = inject(MockDb);
   private readonly posts = inject(PostService);
   private readonly offers = inject(JobOfferService);
+  private readonly seller = inject(SellerSpaceService);
+
+  /** Tab khác vừa đổi đơn (người bán xác nhận, giao…): trang đơn đang mở đọc lại */
+  readonly changed = this.db.changes.pipe(filter((name) => name === COLLECTION));
 
   getOrders(): Observable<Order[]> {
     return forkJoin([this.placed(), this.offers.list()]).pipe(
@@ -76,11 +82,32 @@ export class OrderService {
               history: [{ state: 'pending', at: new Date().toISOString() }],
             };
             this.db.save(COLLECTION, [order, ...rows]);
-            return order;
+            return { order, post };
           }),
         ),
       ),
+      switchMap(({ order, post }) => {
+        return this.seller.receiveOrder(order, post, body).pipe(
+          switchMap((linked) => {
+            if (!linked) return of(order);
+            const sp = this.seller.posts().find((p) => p.buyerPostId === post._id);
+            const priceCheck = sp ? priceCheckOf(flowOf(sp)) : undefined;
+            const next: Order = { ...order, sellerLinked: true, ...(priceCheck ? { priceCheck } : {}) };
+            return this.placed().pipe(
+              map((rows) => {
+                this.db.save(COLLECTION, rows.map((r) => (r._id === order._id ? next : r)));
+                return next;
+              }),
+            );
+          }),
+        );
+      }),
     );
+  }
+
+  /** Đơn đặt từ bài của khu Bán: người mua đổi đơn thì phía Bán đổi theo */
+  private syncSeller(o: Order): void {
+    if (o.sellerLinked) this.seller.syncFromBuyer(o);
   }
 
   /** Chỉ là YÊU CẦU hủy — người bán xử lý (docs/decisions.md 1.6). */
@@ -96,8 +123,9 @@ export class OrderService {
         if (!reason.trim()) {
           throw new AppError('Dữ liệu chưa hợp lệ.', 422, 'VALIDATION_ERROR', [{ field: 'reason', message: 'Hãy nhập lý do.' }]);
         }
-        const next: Order = { ...cur, cancelRequested: true };
+        const next: Order = { ...cur, cancelRequested: true, cancelWhy: reason.trim() };
         this.db.save(COLLECTION, rows.map((r) => (r._id === id ? next : r)));
+        this.syncSeller(next);
         return next;
       }),
     );
@@ -117,6 +145,7 @@ export class OrderService {
           surcharge: { ...cur.surcharge, state: approve ? 'approved' : 'declined' },
         };
         this.db.save(COLLECTION, rows.map((r) => (r._id === id ? next : r)));
+        this.syncSeller(next);
         return next;
       }),
     );
@@ -136,6 +165,7 @@ export class OrderService {
         const history = line ? [...(cur.history ?? []), { state: line, at: new Date().toISOString() }] : cur.history;
         const next: Order = { ...cur, ...patch, history };
         this.db.save(COLLECTION, [...(rows.map((r) => (r._id === id ? next : r)))]);
+        this.syncSeller(next);
         return next;
       }),
     );

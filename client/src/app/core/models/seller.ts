@@ -92,6 +92,13 @@ export interface SellerOrder {
   due?: string;
   history: [SellerOrderState, string][];
   reviewId?: string;
+  /** Đơn do khách đặt thật ở phía Mua: `_id` của Order tương ứng (cùng một đơn, hai bên đổi bước theo nhau) */
+  buyerOrderId?: string;
+  /** Bài của đơn này (`SellerPost.id`) và số phần để trừ / trả lại số lượng trên bài */
+  sellerPostId?: string;
+  stockQty?: number;
+  /** Đơn đã trừ số lượng trên bài, hủy thì trả lại */
+  stockTaken?: boolean;
 }
 
 export interface SellerOffer {

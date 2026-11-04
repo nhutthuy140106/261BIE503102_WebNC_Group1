@@ -1,14 +1,18 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, map, of, switchMap, tap } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, tap } from 'rxjs';
 import { DATASET_BASE } from '../config/api.config';
 import { OFFER_STATE_LABEL } from '../models/offer';
-import { PostKind } from '../models/post';
+import { CreateOrderBody, Order } from '../models/order';
+import { Post, PostKind } from '../models/post';
+import { applyBuyerChange, buyerPatchOf, initialAvatar, toSellerOrder } from '../utils/order-link';
 import {
   DayHours, JOB_STEP_NAMES, SELLER_LANE, SellerJob, SellerOffer, SellerOrder, SellerOrderState, SellerPause, SellerPerson, SellerPost,
   SellerSpace, StatsRange, SellerChat, SellerShop, StepItem, orderPos, orderStepNames, stepItems,
 } from '../models/seller';
+import { AuthService } from './auth';
 import { MockDb } from './mock-db';
+import { NotificationService } from './notification';
 import { SellerService } from './seller';
 import { XuService } from './xu';
 
@@ -110,10 +114,7 @@ export const toMin = (t: string): number => {
   return m ? +m[1] * 60 + +m[2] : 0;
 };
 const money = (n: number) => `${Number(n || 0).toLocaleString('vi-VN')}đ`;
-const nowHm = () => {
-  const x = new Date();
-  return `${x.getHours()}:${String(x.getMinutes()).padStart(2, '0')}`;
-};
+const nowHm = (): string => new Date().toTimeString().slice(0, 5);
 export const dateOf = (d: number): Date => {
   const x = new Date();
   x.setHours(0, 0, 0, 0);
@@ -136,6 +137,8 @@ export class SellerSpaceService {
   private readonly http = inject(HttpClient);
   private readonly xuSvc = inject(XuService);
   private readonly buyerApi = inject(SellerService);
+  private readonly auth = inject(AuthService);
+  private readonly notifications = inject(NotificationService);
   private static readonly NAME = 'seller-space';
   /** khớp trường `version` trong datasets/seller-space.json */
   private static readonly VERSION = '2026-11-03-a';
@@ -151,6 +154,14 @@ export class SellerSpaceService {
   readonly hours = computed<DayHours[]>(() => this.state()?.hours ?? []);
   readonly reviews = computed(() => this.state()?.reviews ?? []);
   readonly chats = computed(() => this.state()?.chats ?? []);
+
+  constructor() {
+    // tab phía Mua vừa đặt đơn / đổi đơn: trang Bán đang mở thấy ngay, không cần tải lại
+    this.db.changes.subscribe((name) => {
+      if (name !== SellerSpaceService.NAME || !this.state()) return;
+      this.db.list<SellerSpace>(name).subscribe((rows) => rows[0] && this.state.set(structuredClone(rows[0])));
+    });
+  }
 
   readonly orders = computed<SellerOrderView[]>(() =>
     (this.state()?.orders ?? []).map((o) => {
@@ -465,12 +476,101 @@ export class SellerSpaceService {
     };
   }
 
+  // ---------------- nối với đơn phía Mua (order-link.ts) ----------------
+
+  /** Trừ (d < 0) hoặc trả lại (d > 0) số lượng trên bài của đơn khách đặt. Số lượng để trống (99) là không giới hạn nên không đổi */
+  private moveLinkedStock(s: SellerSpace, t: SellerOrder, d: number): void {
+    const p = s.posts.find((x) => x.id === t.sellerPostId);
+    if (!p || p.max >= 99) return;
+    p.stock = Math.max(0, Math.min(p.max, p.stock + d));
+    if (!p.stock) p.on = false;
+    if (!p.buyerPostId) return;
+    this.buyerApi.setStockLeft(p.buyerPostId, p.stock).subscribe({ error: () => undefined });
+    if (!p.stock) this.buyerApi.setClosed(p.buyerPostId, true).subscribe({ error: () => undefined });
+  }
+
+  private takeStock(s: SellerSpace, t: SellerOrder): void {
+    if (t.stockTaken || t.kind === 'service') return;
+    t.stockTaken = true;
+    this.moveLinkedStock(s, t, -(t.stockQty ?? 0));
+  }
+
+  private releaseStock(s: SellerSpace, t: SellerOrder): void {
+    if (!t.stockTaken) return;
+    t.stockTaken = false;
+    this.moveLinkedStock(s, t, t.stockQty ?? 0);
+  }
+
+  private markSold(s: SellerSpace, t: SellerOrder): void {
+    const p = s.posts.find((x) => x.id === t.sellerPostId);
+    if (p) p.sold += t.stockQty ?? 0;
+  }
+
+  /** Khách đặt bài có liên kết: thêm đơn vào Giao dịch. Trả về true nếu đơn thuộc một bài của khu Bán */
+  receiveOrder(order: Order, post: Post, body: CreateOrderBody): Observable<boolean> {
+    return this.load().pipe(
+      map(() => {
+        const sp = this.posts().find((p) => p.buyerPostId === post._id);
+        if (!sp) return false;
+        const u = this.auth.currentUser();
+        const phone = /\b0\d{9}\b/.exec(body.detail?.address ?? '')?.[0] ?? u?.username ?? '';
+        const name = u?.fullName ?? 'Khách';
+        const t = toSellerOrder(order, post, body, sp, { name, avatar: u?.avatar || initialAvatar(name), phone });
+        this.patch((s) => {
+          s.orders.unshift(t);
+          // đồ ăn trừ khi khách đặt; đồ dùng trừ khi người bán xác nhận
+          if (t.kind === 'food') this.takeStock(s, t);
+        });
+        this.notifications.push(`Đơn mới ${order.code}: ${order.postTitle}`, `/seller/orders/${t.id}`);
+        return true;
+      }),
+      catchError(() => of(false)),
+    );
+  }
+
+  /** Người mua đổi đơn (hủy, xin hủy, duyệt giá, phụ thu, đã nhận…): đơn phía Bán đổi theo */
+  syncFromBuyer(order: Order): void {
+    this.load().subscribe({
+      next: () =>
+        this.patch((s) => {
+          const t = s.orders.find((x) => x.buyerOrderId === order._id);
+          if (!t || !applyBuyerChange(t, order)) return;
+          if (t.state === 'cancelled' || t.state === 'declined') this.releaseStock(s, t);
+          if (t.state === 'done') this.markSold(s, t);
+        }),
+      error: () => undefined,
+    });
+  }
+
+  /** Người bán đổi đơn: đơn của khách đổi theo và khách được báo */
+  private syncToBuyer(id: string, a: SellerOrderAct, data: { reason?: string; amount?: number }): void {
+    const t = this.state()?.orders.find((x) => x.id === id);
+    if (!t?.buyerOrderId) return;
+    this.db.list<Order>('orders').subscribe((rows) => {
+      const cur = rows.find((r) => r._id === t.buyerOrderId);
+      const change = cur && buyerPatchOf(a, t, cur, this.shop()?.name ?? cur.counterpartName, data);
+      if (!cur || !change) return;
+      const at = new Date().toISOString();
+      const next: Order = { ...cur, ...change.patch, history: [...(cur.history ?? []), { state: change.line, at }] };
+      this.db.save('orders', rows.map((r) => (r._id === cur._id ? next : r)));
+      this.notifications.push(`Đơn ${cur.code}: ${change.line}`, `/orders/${cur._id}`);
+      // như khi khách tự bấm ở chi tiết đơn: xong thì cộng Xu, hủy thì trả voucher
+      if (next.status === 'done' && cur.status !== 'done' && next.total >= 30000) this.xuSvc.earn(10, 'Hoàn thành đơn ' + next.code, 'order:' + next._id);
+      if (next.status === 'cancelled' || next.status === 'declined') this.xuSvc.returnVoucher(next.code);
+    });
+  }
+
   /** Người bán đổi bước đơn. Trả về câu báo cho toast. */
   orderAct(id: string, a: SellerOrderAct, data: { reason?: string; amount?: number; lines?: { name: string; qty: number; price: number }[] } = {}): string {
     const o = this.orders().find((x) => x.id === id);
     if (!o) return '';
     this.patch((s) => {
       const t = s.orders.find((x) => x.id === id)!;
+      if (t.buyerOrderId) {
+        if (a === 'confirm' && t.kind === 'goods') this.takeStock(s, t);
+        if (a === 'approveCancel' || a === 'decline') this.releaseStock(s, t);
+        if (a === 'complete' || a === 'returned') this.markSold(s, t);
+      }
       const stockBy = (name: string, d: number, offWhenEmpty = false) => {
         const p = s.posts.find((x) => x.kind === t.kind && (x.title.startsWith(name) || name.startsWith(x.title)));
         if (!p) return;
@@ -494,9 +594,10 @@ export class SellerSpaceService {
       if (a === 'decline') t.declineReason = data.reason || 'Người bán không nhận được đơn';
       t.history.push([to, nowHm()]);
       // số lượng trên bài đi theo đơn: hủy trả lại phần, xác nhận đồ dùng / lịch dịch vụ thì trừ đi
-      if (a === 'approveCancel' && t.kind === 'food') t.items.forEach((i) => stockBy(i.name, i.qty));
-      if (a === 'confirm' && t.kind !== 'food') t.items.forEach((i) => stockBy(i.name, -i.qty, t.kind === 'goods'));
+      if (!t.buyerOrderId && a === 'approveCancel' && t.kind === 'food') t.items.forEach((i) => stockBy(i.name, i.qty));
+      if (!t.buyerOrderId && a === 'confirm' && t.kind !== 'food') t.items.forEach((i) => stockBy(i.name, -i.qty, t.kind === 'goods'));
     });
+    this.syncToBuyer(id, a, data);
     return {
       confirm: `Đã xác nhận ${o.code} — ${o.buyer.name} được báo, đơn vào lịch`, decline: `Đã từ chối ${o.code} — khách được báo và có thể đặt nơi khác`,
       prepare: 'Đã chuyển sang Đang thực hiện', deliver: 'Đã báo khách: đơn đang được giao', ready: 'Đã báo khách đến lấy', complete: `${o.code} đã hoàn thành`,
