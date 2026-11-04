@@ -167,6 +167,11 @@
                     </span>
                   }
                 </div>
+                @if (d.dishQty(c) > 0 && v.tpl.dishOpts?.[c]; as own) {
+                  <div class="dopts">
+                    @for (og of own; track og.name) { <ng-container *ngTemplateOutlet="optGroup; context: { g: og, scope: c }" /> }
+                  </div>
+                }
               </div>
             }
           </div>

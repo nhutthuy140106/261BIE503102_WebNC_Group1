@@ -17,7 +17,7 @@ import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import {
   AMENITIES, ASK_QUICK, ASK_TYPES, BLOCKS, GENERIC_PLACES, REPAIR_PLACES, CATS, DRINK_UNITS, FOOD_UNITS, GOODS_UNITS, SVC_UNITS, ymd, CONDITIONS, DAYS, FOOD_TAGS, FormType, ICE, JOB_UNITS, PRICE_TYPES, Q_TYPES, SVC_PLACES, SVC_PRESETS, SVC_TIMES, SWEET,
-  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, datesBetween, toGenericSpec, toOrderOptions,
+  choice, commonGroup, defaultSizes, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, datesBetween, toGenericSpec, toOrderOptions,
 } from './post-form-config';
 
 /** Ngày bán: 1 ngày → dd/mm/yyyy, nhiều ngày → ngày đầu - ngày cuối */
@@ -358,7 +358,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   protected addItem(): void {
     const t = this.type();
     const stay = t === 'service' && this.svcPreset().stay;
-    this.arr('spec.items').push(t === 'food' ? itemGroup(this.fb, '', null, 'phần') : t === 'drink' ? itemGroup(this.fb, '', null, 'ly') : stay ? itemGroup(this.fb, '', null, 'đêm', 1, [], 2) : itemGroup(this.fb));
+    this.arr('spec.items').push(t === 'food' ? itemGroup(this.fb, '', null, 'phần') : t === 'drink' ? itemGroup(this.fb, '', null, 'ly', null, [], null, defaultSizes(this.fb)) : stay ? itemGroup(this.fb, '', null, 'đêm', 1, [], 2) : itemGroup(this.fb));
   }
 
   /** thêm dòng tick: tùy chọn nhanh (`spec.quick`) hoặc nội quy lưu trú (`spec.rules`) */

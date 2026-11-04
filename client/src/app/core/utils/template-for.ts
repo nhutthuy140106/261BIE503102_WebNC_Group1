@@ -148,7 +148,13 @@ export function viewOf(post: Post): PostView {
     req: g.required,
     choices: g.choices.map((c) => (c.price ? c.label + '|+' + vnd(c.price) : c.label)),
   });
-  const groups = mergeGroups([...(post.optionGroups ?? []), ...(post.items?.flatMap((i) => i.optionGroups ?? []) ?? [])]);
+  const groups = mergeGroups([...(post.optionGroups ?? []), ...(post.items?.flatMap((i) => (i.optionGroups ?? []).filter((g) => !g.perDish)) ?? [])]);
+  // tùy chọn riêng từng món (size): khóa theo lựa chọn thô của món trong danh sách
+  const dishOpts: Record<string, OptionBlock[]> = {};
+  items?.forEach((it, i) => {
+    const own = (it.optionGroups ?? []).filter((g) => g.perDish).map(toBlock);
+    if (dish && own.length) dishOpts[dish.choices[i]] = own;
+  });
   const own: OptionBlock[] | null = groups.length ? groups.map(toBlock) : null;
   // Cách nhận: bài có ghi cách nhận (giao / tự lấy) thì theo bài; không thì theo mẫu
   const modes = post.fulfillmentModes ?? [];
@@ -210,6 +216,7 @@ export function viewOf(post: Post): PostView {
     opts: [...(dish ? [dish] : []), ...(own ?? (!dish && same ? base.opts : []))],
     dishList: dish ? true : same ? base.dishList : false,
     dishPriced: !!dish,
+    ...(Object.keys(dishOpts).length ? { dishOpts } : {}),
     qs: post.questions?.length ? post.questions.map((q) => ({ type: q.type ?? ('text' as const), label: q.label, opts: q.opts, ph: q.ph, req: q.required, long: q.long, hint: q.hint, pay: q.pay })) : same ? base.qs : [],
     xuOk: post.acceptsXu ?? base.xuOk,
     pays: pays?.length ? pays : undefined,

@@ -22,6 +22,17 @@ describe('toSellerOrder', () => {
     expect(t.stockQty).toBe(2);
   });
 
+  it('size riêng: ghi và tính tiền vào đúng dòng món, không có dòng phụ', () => {
+    const size = (l: number) => [{ name: 'Size', multi: false, required: true, perDish: true, choices: [{ label: 'M', price: 0 }, { label: 'L', price: l }] }];
+    const drink = { ...post, items: [{ id: 'i1', name: 'Trà đào', price: 30000, optionGroups: size(6000) }, { id: 'i2', name: 'Trà sữa', price: 35000, optionGroups: size(8000) }] } as Post;
+    const b = body({ detail: { ...detail(5000), items: [{ name: 'Trà đào', qty: 2 }, { name: 'Trà sữa', qty: 1 }] }, selections: [{ group: 'Menu', choices: ['Trà đào', 'Trà sữa'] }, { group: 'Trà đào – Size', choices: ['L'] }, { group: 'Trà sữa – Size', choices: ['M'] }] });
+    const t = toSellerOrder(order({ total: 112000 }), drink, b, sp, who);
+    expect(t.items).toEqual([
+      { name: 'Trà đào', qty: 2, option: 'Size: L', price: 36000 },
+      { name: 'Trà sữa', qty: 1, option: 'Size: M', price: 35000 },
+    ]);
+  });
+
   it('giảm giá làm tổng thấp hơn giá món thì ghi dòng Giảm giá', () => {
     const t = toSellerOrder(order({ total: 25000 }), post, body(), sp, who);
     expect(t.items[1]).toMatchObject({ name: 'Giảm giá', price: -5000 });

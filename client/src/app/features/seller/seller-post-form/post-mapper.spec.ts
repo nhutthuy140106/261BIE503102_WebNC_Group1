@@ -29,6 +29,18 @@ describe('formToPostFields', () => {
     expect(f.template).toBe('drink');
   });
 
+  it('đồ uống nhiều loại: mỗi loại có size riêng ở món, không gom lên cấp bài', () => {
+    const it = (name: string, l: number) => ({ name, price: 30000, unit: 'ly', options: [], sizes: [{ label: 'M', price: 0 }, { label: 'L', price: l }, { label: ' ', price: 1 }] });
+    const f = formToPostFields('drink', { common: {}, spec: { items: [it('Trà đào', 6000), it('Trà sữa', 8000)], options: [], quick: [] } }, 'food');
+    expect(f.items?.[1].optionGroups?.[0]).toMatchObject({ name: 'Size', required: true, perDish: true, choices: [{ label: 'M', price: 0 }, { label: 'L', price: 8000 }] });
+    expect(f.optionGroups).toEqual([]);
+  });
+
+  it('đồ uống một loại: size lên cấp bài, đứng đầu', () => {
+    const f = formToPostFields('drink', { common: {}, spec: { items: [{ name: 'Trà', price: 30000, options: [], sizes: [{ label: 'M', price: 0 }] }], options: [{ name: 'Topping', multi: true, required: false, choices: [{ label: 'Thạch', price: 5000 }] }], quick: [] } }, 'food');
+    expect(f.optionGroups?.map((g) => g.name)).toEqual(['Size', 'Topping']);
+  });
+
   it('form chung: lựa chọn có giá được giữ lại', () => {
     const [q] = service([{ type: 'choice', label: 'Gói', required: true, opts: '', hint: '', choices: [{ label: 'Nhanh', price: 20000 }, { label: 'Thường', price: 0 }] }]);
     expect(q.opts).toEqual(['Nhanh|+20.000đ', 'Thường']);

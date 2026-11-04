@@ -118,13 +118,12 @@
             <header><span class="no">2</span><span><b>Menu</b></span></header>
             <div class="bd">
               <!-- mỗi loại nước một giá và số lượng; tùy chọn cộng giá (size, topping…) áp dụng cho cả đơn -->
-              <ng-container *ngTemplateOutlet="itemTable; context: { list: drinkUnits, nameLabel: 'Tên đồ uống', namePh: 'Ví dụ: Trà sữa trân châu', pricePh: '30.000', addLabel: 'Thêm đồ uống', ph: 'bình', qty: true, qtyPh: '∞' }" />
-              <span class="hint">Để trống số lượng nếu bán đến khi bạn đóng bài. Khách chọn một hoặc nhiều loại trong cùng một đơn; thẻ bài hiện giá loại rẻ nhất, ví dụ “từ 30.000đ”.</span>
+              <ng-container *ngTemplateOutlet="itemTable; context: { list: drinkUnits, nameLabel: 'Tên đồ uống', namePh: 'Ví dụ: Trà sữa trân châu', pricePh: '30.000', addLabel: 'Thêm đồ uống', ph: 'bình', qty: true, qtyPh: '∞', sizes: true }" />
+              <span class="hint">Giá là giá của size nhỏ nhất, các size khác nhập số tiền cộng thêm. Để trống số lượng nếu bán đến khi bạn đóng bài. Khách chọn một hoặc nhiều loại trong cùng một đơn.</span>
               <div class="optblock">
                 <span class="lbl">Tùy chọn cộng giá</span>
                 <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options' }" />
               </div>
-              <ng-container *ngTemplateOutlet="priceHintBox" />
               <ng-container *ngTemplateOutlet="promoBox" />
             </div>
           </section>
@@ -586,7 +585,7 @@
       </ng-template>
 
       <!-- ===== bảng giá nhiều dòng (thực đơn đồ ăn, bảng giá dịch vụ): tên · giá · đơn vị ===== -->
-      <ng-template #itemTable let-list="list" let-nameLabel="nameLabel" let-namePh="namePh" let-pricePh="pricePh" let-addLabel="addLabel" let-ph="ph" let-qty="qty" let-qtyLabel="qtyLabel" let-qtyPh="qtyPh" let-guests="guests">
+      <ng-template #itemTable let-list="list" let-nameLabel="nameLabel" let-namePh="namePh" let-pricePh="pricePh" let-addLabel="addLabel" let-ph="ph" let-qty="qty" let-qtyLabel="qtyLabel" let-qtyPh="qtyPh" let-guests="guests" let-sizes="sizes">
         <div class="items" [class.q]="qty" [class.g]="guests" formArrayName="items">
           <div class="ihead"><span>{{ nameLabel }}</span><span>Giá</span><span>Đơn vị</span>@if (qty) { <span>{{ qtyLabel || 'Số lượng' }}</span> }@if (guests) { <span>Khách tối đa</span> }<span></span></div>
           @for (it of arr('spec.items').controls; track $index; let i = $index) {
@@ -599,6 +598,19 @@
               @if (guests) { <input class="input" type="number" min="1" formControlName="guests" [attr.aria-label]="'Khách tối đa ' + (i + 1)" placeholder="2" /> }
               <button type="button" class="rm" aria-label="Bỏ dòng" [disabled]="arr('spec.items').length === 1" (click)="removeAt('spec.items', i)"><svg class="i"><use href="#xmark" /></svg></button>
             </div>
+            @if (sizes) {
+              <div class="sizes" formArrayName="sizes">
+                <span class="lbl">Size</span>
+                @for (z of arr('spec.items.' + i + '.sizes').controls; track $index; let zi = $index) {
+                  <div class="sz" [formGroupName]="zi">
+                    <input class="input" formControlName="label" maxlength="12" placeholder="Tên size" [attr.aria-label]="'Tên size ' + (zi + 1)" />
+                    <span class="money"><input appMoney class="input" formControlName="price" placeholder="Cộng thêm" [attr.aria-label]="'Giá cộng thêm size ' + (zi + 1)" /></span>
+                    <button type="button" class="rm" aria-label="Bỏ size" (click)="removeAt('spec.items.' + i + '.sizes', zi)"><svg class="i"><use href="#xmark" /></svg></button>
+                  </div>
+                }
+                <button type="button" class="mini" (click)="addChoice('spec.items.' + i + '.sizes')"><svg class="i"><use href="#plus" /></svg>Thêm size</button>
+              </div>
+            }
             </div>
           }
         </div>

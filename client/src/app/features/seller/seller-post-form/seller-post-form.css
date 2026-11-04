@@ -289,3 +289,10 @@ textarea.small { min-height: 64px; }
   .items.q .iline, .items.q.g .iline { grid-template-columns: 1fr 1fr 40px; }
   .items.q .iline > input[formcontrolname="qty"], .items.q .iline > input[formcontrolname="guests"] { grid-column: span 2; }
 }
+
+/* đồ uống: size riêng của từng loại nước, nằm dưới dòng của loại đó */
+.sizes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sizes .lbl { width: 100%; }
+.sz { display: grid; grid-template-columns: 96px 130px 34px; gap: 6px; align-items: center; }
+.sizes .mini { justify-self: auto; }
+@media (max-width: 700px) { .sz { grid-template-columns: 1fr 1fr 34px; width: 100%; } }

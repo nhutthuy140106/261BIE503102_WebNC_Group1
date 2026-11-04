@@ -29,6 +29,12 @@ const optionsOf = (arr: unknown): OptionGroup[] =>
       choices: (g['choices'] as V[]).filter((c) => String(c['label'] ?? '').trim()).map((c) => ({ label: String(c['label']).trim(), price: +c['price'] || 0 })),
     }));
 
+/** Size riêng của một loại nước: khách bắt buộc chọn một, giá cộng thêm vào giá của loại đó */
+const sizesOf = (it: V): OptionGroup[] => {
+  const choices = ((it['sizes'] as V[]) ?? []).filter((z) => String(z['label'] ?? '').trim()).map((z) => ({ label: String(z['label']).trim(), price: +z['price'] || 0 }));
+  return choices.length ? [{ name: 'Size', multi: false, required: true, perDish: true, choices }] : [];
+};
+
 const itemsOf = (s: V): PostItem[] =>
   ((s['items'] as V[]) ?? [])
     .filter((it) => String(it['name'] ?? '').trim() && +it['price'] > 0)
@@ -38,7 +44,7 @@ const itemsOf = (s: V): PostItem[] =>
       price: +it['price'],
       unit: it['unit'] || undefined,
       dailyQty: +it['qty'] > 0 ? +it['qty'] : undefined,
-      optionGroups: optionsOf(it['options']),
+      optionGroups: [...sizesOf(it), ...optionsOf(it['options'])],
     }))
     .map((it) => (it.optionGroups?.length ? it : { ...it, optionGroups: undefined }));
 
@@ -111,7 +117,7 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         priceType: priceTypeOf(items),
         // món thêm dùng chung (spec.options) luôn ở cấp bài. Một món: tùy chọn của món gộp lên cấp bài; nhiều món: ở từng món
         items: items.length > 1 ? items : undefined,
-        optionGroups: [...(type === 'drink' ? drinkMixOf(s) : []), ...optionsOf(s['options']), ...(items.length === 1 ? (items[0]?.optionGroups ?? []) : [])],
+        optionGroups: [...(items.length === 1 ? (items[0]?.optionGroups ?? []) : []), ...(type === 'drink' ? drinkMixOf(s) : []), ...optionsOf(s['options'])],
         quickOptions: ((s['quick'] as V[]) ?? []).filter((q) => q['on'] && String(q['label'] ?? '').trim()).map((q) => String(q['label']).trim()),
         noteEnabled: !!s['kitchenNote'],
         template: type === 'drink' ? 'drink' : undefined,

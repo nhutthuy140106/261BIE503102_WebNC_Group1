@@ -32,15 +32,25 @@ export const orderQty = (body: CreateOrderBody): number =>
 export function toSellerOrder(order: Order, post: Post, body: CreateOrderBody, sp: SellerPost, buyer: SellerPerson, now = new Date()): SellerOrder {
   const dishes = body.detail?.items?.length ? body.detail.items : [{ name: post.title, qty: body.quantity }];
   const dishNames = new Set(dishes.map((d) => d.name));
-  const option = (body.selections ?? [])
-    .filter((s) => s.choices.length && !s.choices.every((c) => dishNames.has(c)))
+  const picked = (body.selections ?? []).filter((s) => s.choices.length && !s.choices.every((c) => dishNames.has(c)));
+  // tùy chọn riêng của món (size) có nhóm dạng "Trà đào – Size": ghi và tính tiền vào đúng dòng món đó
+  const ownOf = (name: string) => picked.filter((s) => s.group.startsWith(name + ' – ')).map((s) => ({ group: s.group.slice(name.length + 3), choices: s.choices }));
+  const option = picked
+    .filter((s) => !dishes.some((d) => s.group.startsWith(d.name + ' – ')))
     .map((s) => `${s.group}: ${s.choices.join(', ')}`)
     .join(' · ');
+  const dishLine = (d: { name: string; qty: number }, i: number) => {
+    const item = post.items?.find((x) => x.name === d.name);
+    const own = ownOf(d.name);
+    const add = own.reduce((n, s) => n + s.choices.reduce((m, c) => m + (item?.optionGroups?.find((g) => g.name === s.group)?.choices.find((x) => x.label === c)?.price ?? 0), 0), 0);
+    const notes = [...own.map((s) => `${s.group}: ${s.choices.join(', ')}`), ...(i === 0 && option ? [option] : [])];
+    return { name: d.name, qty: d.qty, option: notes.join(' · '), price: (item?.price ?? post.price) + add };
+  };
   const ship = body.detail?.fee ?? 0;
   // báo giá sau: lúc đặt khách chỉ trả phí kiểm tra, giá sửa báo sau
   const items = post.priceType === 'quote'
     ? [{ name: 'Phí kiểm tra', qty: 1, option, price: order.total - ship }]
-    : dishes.map((d, i) => ({ name: d.name, qty: d.qty, option: i === 0 ? option : '', price: post.items?.find((x) => x.name === d.name)?.price ?? post.price }));
+    : dishes.map(dishLine);
   const rest = order.total - ship - items.reduce((n, i) => n + i.qty * i.price, 0);
   if (rest) items.push({ name: rest > 0 ? 'Tùy chọn cộng giá' : 'Giảm giá', qty: 1, option: '', price: rest });
   const at = body.scheduledAt ? new Date(body.scheduledAt) : now;
