@@ -484,7 +484,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       case 'drink': {
         const its = this.items(s);
         const { low, from } = this.lowest(its);
-        const mix = [s['hotCold'] ? 'Nóng / lạnh' : '', s['sweet']?.length ? `Ngọt ${s['sweet'].join('·')}` : '', s['ice']?.length ? `${s['ice'].length} mức đá` : ''].filter(Boolean).join(' · ');
+        const mix = [s['sweet']?.length ? `Ngọt ${s['sweet'].join('·')}` : '', s['ice']?.length ? `${s['ice'].length} mức đá` : ''].filter(Boolean).join(' · ');
         return {
           price: low ? `${from ? 'từ ' : ''}${money(low['price'])}` : '—', unit: low?.['unit'] ?? 'ly', kind: 'Đồ uống', action: `Đặt đồ uống · ${money(low?.['price'])}`, xu: (s['pay'] ?? []).includes('xu'),
           facts: [

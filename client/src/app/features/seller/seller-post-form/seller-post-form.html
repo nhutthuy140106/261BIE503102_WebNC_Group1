@@ -134,7 +134,6 @@
               <!-- các ô tick cho khách đặt cùng một chỗ -->
               <div class="checks">
                 <label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú cho quán<small>Ví dụ: ít ngọt hơn, đá để riêng</small></span></label>
-                <label class="ck"><input type="checkbox" formControlName="hotCold" /><span>Cho chọn nóng / lạnh</span></label>
               </div>
               <ng-container *ngTemplateOutlet="quickList; context: { ph: 'Ví dụ: Đóng nắp riêng' }" />
             </div>
@@ -596,7 +595,7 @@
             </div>
             @if (sizes) {
               <div class="grp sizes" formArrayName="sizes">
-                <span class="lbl">Size</span>
+                <span class="lbl">Tùy chọn size</span>
                 <div class="lines sub">
                   @for (z of arr('spec.items.' + i + '.sizes').controls; track $index; let zi = $index) {
                     <div class="line" [formGroupName]="zi">

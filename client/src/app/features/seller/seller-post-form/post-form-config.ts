@@ -216,7 +216,6 @@ export function drinkGroup(fb: FormBuilder) {
     options: fb.array<FormGroup>([]),
     /** khách gõ ghi chú cho quán khi đặt (như "ghi chú cho bếp" của đồ ăn) */
     kitchenNote: [true],
-    hotCold: [true],
     sweet: fb.control<string[]>([...SWEET]),
     ice: fb.control<string[]>([...ICE]),
     quick: fb.array([quickGroup(fb, 'Lấy ống hút')]),

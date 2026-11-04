@@ -23,9 +23,9 @@ describe('formToPostFields', () => {
   });
 
   it('đồ uống: pha chế thành nhóm chọn một đứng trước tùy chọn, bỏ hết thì không có nhóm', () => {
-    const f = formToPostFields('drink', { common: {}, spec: { items: [], options: [{ name: 'Size', multi: false, required: true, choices: [{ label: 'L', price: 6000 }] }], hotCold: true, sweet: ['50%'], ice: [], quick: [] } }, 'food');
-    expect(f.optionGroups?.map((g) => g.name)).toEqual(['Nóng / lạnh', 'Độ ngọt', 'Size']);
-    expect(f.optionGroups?.[1]).toMatchObject({ required: false, choices: [{ label: '50%', price: 0 }] });
+    const f = formToPostFields('drink', { common: {}, spec: { items: [], options: [{ name: 'Size', multi: false, required: true, choices: [{ label: 'L', price: 6000 }] }], sweet: ['50%'], ice: [], quick: [] } }, 'food');
+    expect(f.optionGroups?.map((g) => g.name)).toEqual(['Độ ngọt', 'Size']);
+    expect(f.optionGroups?.[0]).toMatchObject({ required: false, choices: [{ label: '50%', price: 0 }] });
     expect(f.template).toBe('drink');
   });
 

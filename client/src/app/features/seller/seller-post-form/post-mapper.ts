@@ -90,10 +90,10 @@ const fulfilOf = (s: V): Pick<PostFields, 'fulfillmentModes' | 'deliveryFee'> =>
   return { fulfillmentModes: modes, deliveryFee: f['delivery'] ? +f['fee'] || 0 : 0 };
 };
 
-/** Độ ngọt, đá, nóng / lạnh của đồ uống thành các nhóm chọn một, không tính tiền, không bắt buộc (bỏ hết = không cho chọn) */
+/** Độ ngọt, đá của đồ uống thành các nhóm chọn một, không tính tiền, không bắt buộc (bỏ hết = không cho chọn) */
 const drinkMixOf = (s: V): OptionGroup[] => {
   const group = (name: string, list: unknown): OptionGroup[] => ((list as string[]) ?? []).length ? [{ name, multi: false, required: false, choices: (list as string[]).map((label) => ({ label, price: 0 })) }] : [];
-  return [...(s['hotCold'] ? group('Nóng / lạnh', ['Lạnh', 'Nóng']) : []), ...group('Độ ngọt', s['sweet']), ...group('Đá', s['ice'])];
+  return [...group('Độ ngọt', s['sweet']), ...group('Đá', s['ice'])];
 };
 
 /** Giá đại diện: dòng rẻ nhất; nhiều mức giá khác nhau → 'from' */
