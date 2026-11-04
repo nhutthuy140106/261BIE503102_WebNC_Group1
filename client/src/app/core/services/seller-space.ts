@@ -98,11 +98,11 @@ export interface CalItem {
 const END_LABEL: Partial<Record<SellerOrderState, string>> = { declined: 'Đã từ chối', cancelled: 'Đã hủy' };
 const NEXT: Record<string, SellerOrderState> = {
   confirm: 'confirmed', prepare: 'preparing', deliver: 'delivering', ready: 'ready', complete: 'done', decline: 'declined', approveCancel: 'cancelled',
-  // giặt sấy
-  pickUp: 'picked', quote: 'pricing', approveQuote: 'preparing', returned: 'done',
+  // giặt sấy, sửa chữa
+  pickUp: 'picked', quote: 'pricing', approveQuote: 'preparing', rejectQuote: 'cancelled', returned: 'done',
 };
-/** pickUp / quote / approveQuote / returned: luồng giặt sấy (approveQuote = khách đồng ý giá, phía Mua bấm; bản mẫu giả lập) */
-export type SellerOrderAct = 'confirm' | 'decline' | 'prepare' | 'deliver' | 'ready' | 'complete' | 'approveCancel' | 'keepOrder' | 'surcharge' | 'pickUp' | 'quote' | 'approveQuote' | 'returned';
+/** pickUp / quote / approveQuote / rejectQuote / returned: luồng giặt sấy, sửa chữa (approveQuote, rejectQuote = khách trả lời giá, phía Mua bấm; bản mẫu giả lập) */
+export type SellerOrderAct = 'confirm' | 'decline' | 'prepare' | 'deliver' | 'ready' | 'complete' | 'approveCancel' | 'keepOrder' | 'surcharge' | 'pickUp' | 'quote' | 'approveQuote' | 'rejectQuote' | 'returned';
 
 export const toMin = (t: string): number => {
   const m = /^(\d+):(\d+)/.exec(t || '');
@@ -136,7 +136,7 @@ export class SellerSpaceService {
   private readonly xuSvc = inject(XuService);
   private static readonly NAME = 'seller-space';
   /** khớp trường `version` trong datasets/seller-space.json */
-  private static readonly VERSION = '2026-10-30-a';
+  private static readonly VERSION = '2026-11-03-a';
 
   private readonly state = signal<SellerSpace | null>(null);
   readonly ready = computed(() => this.state() !== null);
@@ -241,14 +241,14 @@ export class SellerSpaceService {
    */
   private nextStep(o: SellerOrder): [SellerOrderAct, string] | null {
     // giặt sấy: lấy đồ khi gần giờ hẹn; báo giá và trả đồ thì luôn hiện (không theo giờ hẹn)
-    if (o.flow === 'laundry') {
+    if (o.flow) {
       if (o.state === 'picked') return ['quote', 'Báo giá'];
-      if (o.state === 'preparing') return ['returned', 'Xác nhận trả đồ'];
+      if (o.state === 'preparing') return ['returned', o.flow === 'laundry' ? 'Xác nhận trả đồ' : 'Xác nhận hoàn thành'];
     }
     const left = (dateOf(o.day).getTime() + toMin(o.time) * 60000 - Date.now()) / 60000;
     const soon = o.kind === 'goods' ? o.day <= 0 : left <= (o.kind === 'food' ? 60 : 120);
     if (!soon) return null;
-    if (o.flow === 'laundry') return o.state === 'confirmed' ? ['pickUp', 'Xác nhận lấy đồ'] : null;
+    if (o.flow) return o.state === 'confirmed' ? ['pickUp', o.flow === 'laundry' ? 'Xác nhận lấy đồ' : 'Xác nhận kiểm tra'] : null;
     const give: SellerOrderAct = o.fulfil === 'pickup' ? 'ready' : 'deliver';
     if (o.state === 'confirmed') return o.kind === 'goods' ? [give, 'Xác nhận giao'] : ['prepare', 'Xác nhận thực hiện'];
     if (o.state === 'preparing') return o.kind === 'service' ? ['complete', 'Xác nhận hoàn thành'] : [give, 'Xác nhận giao'];
@@ -367,12 +367,13 @@ export class SellerSpaceService {
   orderActions(o: SellerOrderView): [SellerOrderAct, string, boolean][] {
     if (o.cancelRequest) return [['approveCancel', 'Xác nhận hủy', true], ['keepOrder', 'Không đồng ý', false]];
     const svc = o.fulfil === 'home';
-    if (o.flow === 'laundry') {
+    if (o.flow) {
+      const laundry = o.flow === 'laundry';
       switch (o.state) {
         case 'waiting': return [['confirm', 'Xác nhận', true], ['decline', 'Từ chối', false]];
-        case 'confirmed': return [['pickUp', 'Xác nhận đã lấy đồ', true]];
+        case 'confirmed': return [['pickUp', laundry ? 'Xác nhận đã lấy đồ' : 'Xác nhận đã kiểm tra', true]];
         case 'picked': return [['quote', 'Báo giá', true]];
-        case 'preparing': return [['returned', 'Xác nhận đã trả đồ', true]];
+        case 'preparing': return [['returned', laundry ? 'Xác nhận đã trả đồ' : 'Xác nhận hoàn thành', true]];
         default: return [];
       }
     }
@@ -475,6 +476,7 @@ export class SellerSpaceService {
         t.quote = { lines, total: Math.round(lines.reduce((n, l) => n + l.qty * l.price, 0)), ok: false };
       }
       if (a === 'approveQuote' && t.quote) t.quote.ok = true;
+      if (a === 'rejectQuote') t.quote = null;
       const to = NEXT[a];
       t.state = to;
       t.cancelRequest = null;
@@ -489,10 +491,11 @@ export class SellerSpaceService {
       prepare: 'Đã chuyển sang Đang thực hiện', deliver: 'Đã báo khách: đơn đang được giao', ready: 'Đã báo khách đến lấy', complete: `${o.code} đã hoàn thành`,
       approveCancel: `Đã hủy ${o.code} — ${o.buyer.name} được báo`, keepOrder: 'Đã báo khách: đơn vẫn giữ nguyên',
       surcharge: `Đã gửi phụ thu ${money(data.amount ?? 0)} — chờ khách đồng ý`,
-      pickUp: `Đã lấy đồ của ${o.buyer.name} — cân xong thì báo giá`,
+      pickUp: o.flow === 'repair' ? 'Đã kiểm tra — báo giá để khách duyệt' : `Đã lấy đồ của ${o.buyer.name} — cân xong thì báo giá`,
       quote: `Đã gửi báo giá cho ${o.buyer.name} — chờ khách đồng ý`,
-      approveQuote: `${o.buyer.name} đã đồng ý giá — bắt đầu giặt`,
-      returned: `Đã trả đồ ${o.code} — ${o.buyer.name} được báo`,
+      approveQuote: `${o.buyer.name} đã đồng ý giá — bắt đầu ${o.flow === 'repair' ? 'sửa' : 'giặt'}`,
+      rejectQuote: `${o.buyer.name} không đồng ý giá — đơn hủy, chỉ thu phí kiểm tra`,
+      returned: o.flow === 'repair' ? `${o.code} đã hoàn thành — ${o.buyer.name} được báo` : `Đã trả đồ ${o.code} — ${o.buyer.name} được báo`,
     }[a];
   }
 

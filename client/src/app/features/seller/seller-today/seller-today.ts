@@ -1,10 +1,11 @@
 import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { KIND_LABEL, PostKind } from '../../../core/models/post';
-import { SELLER_LANE, SELLER_NEW_KINDS, SellerPause, SellerPost, StatsRange } from '../../../core/models/seller';
+import { SELLER_LANE, SELLER_NEW_KINDS, SellerPost, StatsRange } from '../../../core/models/seller';
 import { AuthService } from '../../../core/services/auth';
 import { SellerSpaceService, SellerTask } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
+import { SelectOption } from '../../../shared/components/select/select';
 import { TaskAction } from '../components/task-card/task-card';
 
 type KindFilter = PostKind | 'all';
@@ -71,6 +72,7 @@ export class SellerToday implements OnInit {
   // ---- Hiệu quả ----
   protected readonly range = signal<StatsRange>(read(RANGE_KEY, '7') as StatsRange);
   protected readonly stats = computed(() => this.seller.statsFor(this.range()) ?? this.seller.statsFor('7'));
+  protected readonly rangeOpts = computed<SelectOption[]>(() => this.ranges.map((r) => ({ value: r, label: this.seller.statsFor(r)?.label ?? r })));
   protected setRange(r: string): void {
     this.range.set(r as StatsRange);
     write(RANGE_KEY, r);
@@ -178,36 +180,23 @@ export class SellerToday implements OnInit {
 
   // ---------------- Tạm nghỉ ----------------
   protected readonly popOpen = signal(false);
-  protected readonly popMode = signal<'open' | 'all' | 'some'>('open');
-  protected readonly popKinds = signal<PostKind[]>([]);
+  protected readonly popMode = signal<'open' | 'all'>('open');
   protected popUntil = 'sau 1 giờ';
-  protected readonly pauseKinds: PostKind[] = ['food', 'goods', 'service'];
+  protected readonly untilOpts: SelectOption[] = [{ value: 'sau 1 giờ', label: 'sau 1 giờ' }, { value: 'sau 24h', label: 'sau 24h' }, { value: 'khi bạn tự mở lại', label: 'khi tôi tự mở lại' }];
 
-  protected readonly pauseText = computed(() => {
-    const p = this.seller.pause();
-    return !p ? 'Đang nhận đơn' : p.mode === 'all' ? 'Đang tạm nghỉ' : 'Tạm nghỉ một phần';
-  });
-  protected pauseWhat(p: SellerPause): string {
-    return p.mode === 'all' ? 'Gian hàng đang tạm nghỉ' : `Tạm nghỉ: ${p.kinds.map((k) => KIND_LABEL[k]).join(', ')}`;
-  }
+  protected readonly pauseText = computed(() => (this.seller.pause() ? 'Đang tạm nghỉ' : 'Đang nhận đơn'));
 
   protected togglePop(e: Event): void {
     e.stopPropagation();
     const p = this.seller.pause();
-    this.popMode.set(p ? p.mode : 'open');
-    this.popKinds.set(p ? [...p.kinds] : []);
-    this.popUntil = p?.until ?? 'sau 1 giờ';
+    this.popMode.set(p ? 'all' : 'open');
+    this.popUntil = p && this.untilOpts.some((o) => o.value === p.until) ? p.until : 'sau 1 giờ';
     this.popOpen.update((v) => !v);
-  }
-
-  protected toggleKind(k: PostKind, on: boolean): void {
-    this.popKinds.update((l) => (on ? [...l, k] : l.filter((x) => x !== k)));
   }
 
   protected savePause(): void {
     const mode = this.popMode();
-    if (mode === 'some' && !this.popKinds().length) return this.toast.show('Chọn ít nhất một mảng để tạm nghỉ');
-    this.seller.setPause(mode === 'open' ? null : { mode, kinds: this.popKinds(), until: this.popUntil });
+    this.seller.setPause(mode === 'open' ? null : { until: this.popUntil });
     this.popOpen.set(false);
     this.toast.show(mode === 'open' ? 'Đang nhận đơn bình thường' : 'Đã tạm nghỉ — khách thấy “Tạm nghỉ” trên bài');
   }

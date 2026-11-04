@@ -1,6 +1,6 @@
 [
   {
-    "version": "2026-10-30-a",
+    "version": "2026-11-03-a",
     "posts": [
       {
         "id": "f1",
@@ -1089,6 +1089,125 @@
           [
             "preparing",
             "18:42"
+          ]
+        ]
+      },
+      {
+        "kind": "service",
+        "icon": "wrench",
+        "flow": "repair",
+        "ship": 0,
+        "cancelRequest": null,
+        "items": [
+          {
+            "name": "Phí kiểm tra",
+            "qty": 1,
+            "option": "",
+            "price": 50000
+          }
+        ],
+        "note": "",
+        "id": "r3034",
+        "code": "AG-O3034",
+        "title": "Sửa máy lạnh không lạnh",
+        "buyer": {
+          "name": "Chị Hoa",
+          "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 004"
+        },
+        "fulfil": "home",
+        "address": "B-0910, Block B",
+        "day": 0,
+        "time": "16:00",
+        "pay": "cash",
+        "state": "confirmed",
+        "answers": [
+          [
+            "Thiết bị / vị trí bị hư",
+            "Máy lạnh phòng ngủ"
+          ],
+          [
+            "Mô tả lỗi",
+            "Bật lên chạy nhưng không lạnh"
+          ]
+        ],
+        "history": [
+          [
+            "waiting",
+            "8:30"
+          ],
+          [
+            "confirmed",
+            "8:40"
+          ]
+        ]
+      },
+      {
+        "kind": "service",
+        "icon": "wrench",
+        "flow": "repair",
+        "ship": 0,
+        "cancelRequest": null,
+        "items": [
+          {
+            "name": "Phí kiểm tra",
+            "qty": 1,
+            "option": "",
+            "price": 50000
+          }
+        ],
+        "note": "",
+        "id": "r3035",
+        "code": "AG-O3035",
+        "title": "Sửa quạt đứng kêu to",
+        "buyer": {
+          "name": "Phương",
+          "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&q=70&crop=faces",
+          "phone": "0900 000 008"
+        },
+        "fulfil": "pickup",
+        "address": "B-0703, Block B",
+        "day": 0,
+        "time": "10:00",
+        "pay": "transfer",
+        "state": "pricing",
+        "answers": [
+          [
+            "Thiết bị / vị trí bị hư",
+            "Quạt đứng"
+          ],
+          [
+            "Mô tả lỗi",
+            "Chạy kêu to, cánh quay chậm"
+          ]
+        ],
+        "quote": {
+          "lines": [
+            {
+              "name": "Thay bạc đạn quạt",
+              "qty": 1,
+              "price": 120000
+            }
+          ],
+          "total": 120000,
+          "ok": false
+        },
+        "history": [
+          [
+            "waiting",
+            "8:00"
+          ],
+          [
+            "confirmed",
+            "8:05"
+          ],
+          [
+            "picked",
+            "10:10"
+          ],
+          [
+            "pricing",
+            "10:30"
           ]
         ]
       }

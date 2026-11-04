@@ -8,12 +8,11 @@
       <div class="avw"><img [src]="sh.avatar" alt="" /><button type="button" title="Đổi ảnh đại diện" (click)="avFile.click()"><svg class="i"><use href="#camera" /></svg></button></div>
       <div class="nm">
         <h1>{{ sh.name }}</h1>
-        <span class="kd">{{ sh.kind }}</span>
         <p><span><svg class="i"><use href="#pin" /></svg>{{ sh.at }}</span><span><svg class="i"><use href="#home" /></svg>{{ sh.since }}</span><span><svg class="i"><use href="#chat" /></svg>{{ sh.reply }}</span></p>
       </div>
       <!-- 2 nút xếp dọc, cùng bề rộng; nút ảnh bìa nằm góc trái trên để không thành 3 nút một cột -->
       <div class="sh-acts">
-        <button type="button" class="btn dark" (click)="editing.set(true)"><svg class="i"><use href="#pencil" /></svg>Sửa hồ sơ</button>
+        <button type="button" class="btn dark" (click)="startEdit()"><svg class="i"><use href="#pencil" /></svg>Sửa hồ sơ</button>
         <a class="btn" [routerLink]="['/shop', myId()]"><svg class="i"><use href="#eye" /></svg>Xem như khách</a>
       </div>
     </div>
@@ -32,13 +31,15 @@
         <form class="editf" #ef (submit)="save($event, ef)">
           <div class="row">
             <label>Tên gian hàng<input class="input" name="name" [value]="sh.name" maxlength="40" required /></label>
-            <label>Loại gian hàng<input class="input" name="kind" [value]="sh.kind" maxlength="30" placeholder="Ví dụ: Bếp nhà làm" /></label>
+            <label>Địa chỉ (hiện cho khách)<input class="input" name="at" [value]="sh.at" maxlength="40" /></label>
           </div>
           <div class="row">
-            <label>Nơi ở (hiện cho khách)<input class="input" name="at" [value]="sh.at" maxlength="40" /></label>
-            <label>Thời gian trả lời
-              <select class="input" name="reply">@for (o of replies; track o) { <option [selected]="o === sh.reply">{{ o }}</option> }</select>
-            </label>
+            <div class="lbw"><label for="shreply">Thời gian trả lời</label>
+              <app-select inputId="shreply" [options]="replyOpts" [ngModel]="replyPick()" [ngModelOptions]="{ standalone: true }" (ngModelChange)="replyPick.set($event)" />
+            </div>
+            @if (replyPick() === 'other') {
+              <label>Thời gian khác<input class="input" name="replyOther" [value]="replies.includes(sh.reply) ? '' : sh.reply" maxlength="40" placeholder="Ví dụ: Thường trả lời trong 2 giờ" /></label>
+            }
           </div>
           <label>Lời giới thiệu<textarea class="input" name="bio" maxlength="500" required [value]="sh.bio"></textarea></label>
           <div class="foot"><button type="button" class="btn" (click)="editing.set(false)">Hủy</button><button type="submit" class="btn primary">Lưu hồ sơ</button></div>
@@ -56,7 +57,7 @@
           <li [class.ok]="c.ok">
             <svg class="i"><use [attr.href]="c.ok ? '#check' : '#plus'" /></svg>{{ c.t }}
             @if (!c.ok) {
-              <button type="button" (click)="c.how === 'cover' ? cvFile.click() : c.how === 'avatar' ? avFile.click() : editing.set(true)">Thêm</button>
+              <button type="button" (click)="c.how === 'cover' ? cvFile.click() : c.how === 'avatar' ? avFile.click() : startEdit()">Thêm</button>
             }
           </li>
         }

@@ -5,6 +5,7 @@ import { SELLER_KIND_ICON, SellerPost } from '../../../core/models/seller';
 import { AuthService } from '../../../core/services/auth';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
+import { SelectOption } from '../../../shared/components/select/select';
 
 type Tab = 'sell' | 'jobs' | 'revs';
 const REPLY = ['Thường trả lời trong 10 phút', 'Thường trả lời trong 30 phút', 'Thường trả lời trong 1 giờ', 'Thường trả lời trong ngày'];
@@ -26,6 +27,9 @@ export class SellerShop implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly replies = REPLY;
+  protected readonly replyOpts: SelectOption[] = [...REPLY.map((r) => ({ value: r, label: r })), { value: 'other', label: 'Khác' }];
+  /** thời gian trả lời đang chọn; 'other' = tự nhập */
+  protected readonly replyPick = signal('');
   protected readonly kindLabel = KIND_LABEL;
   protected readonly kindIcon = SELLER_KIND_ICON;
   protected readonly myId = computed(() => this.auth.currentUser()?._id ?? '');
@@ -60,11 +64,19 @@ export class SellerShop implements OnInit {
     return this.seller.postState(p);
   }
 
+  protected startEdit(): void {
+    const r = this.seller.shop()?.reply ?? '';
+    this.replyPick.set(REPLY.includes(r) ? r : r ? 'other' : REPLY[0]);
+    this.editing.set(true);
+  }
+
   protected save(e: Event, f: HTMLFormElement): void {
     e.preventDefault();
     const v = (n: string) => (f.elements.namedItem(n) as HTMLInputElement).value.trim();
     if (!v('name') || v('bio').length < 10) return this.toast.show('Nhập tên gian hàng và lời giới thiệu (ít nhất 10 ký tự)');
-    this.seller.setShop({ name: v('name'), kind: v('kind'), at: v('at'), reply: v('reply'), bio: v('bio') });
+    const reply = this.replyPick() === 'other' ? v('replyOther') : this.replyPick();
+    if (!reply) return this.toast.show('Nhập thời gian trả lời');
+    this.seller.setShop({ name: v('name'), at: v('at'), reply, bio: v('bio') });
     this.editing.set(false);
     this.toast.show('Đã lưu hồ sơ gian hàng');
   }

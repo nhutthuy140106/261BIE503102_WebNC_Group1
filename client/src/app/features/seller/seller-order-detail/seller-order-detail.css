@@ -16,3 +16,6 @@
 .qbox { display: grid; gap: 6px; margin-bottom: 12px; padding: 12px; border-radius: 12px; background: var(--soft); font-size: 13px; }
 .qbox > div { display: flex; justify-content: space-between; gap: 8px; }
 .btn.demo { border-style: dashed; color: var(--smoke); font-size: 13px; }
+/* sửa chữa: hạng mục báo giá do thợ tự nhập */
+.qedit { display: grid; grid-template-columns: minmax(0, 1fr) 92px 38px; gap: 6px; align-items: center; }
+.qedit .btn { width: 38px; height: 38px; padding: 0; margin: 0; }

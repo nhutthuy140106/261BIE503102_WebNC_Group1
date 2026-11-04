@@ -20,10 +20,10 @@
         <h2>Thông tin đơn</h2>
         <dl class="info">
           <div><dt><svg class="i"><use href="#user" /></svg>Khách</dt><dd>{{ o.buyer.name }}<small>{{ o.buyer.phone }}</small></dd></div>
-          <div><dt><svg class="i"><use href="#pin" /></svg>{{ o.fulfil === 'home' ? 'Làm tại' : 'Hình thức nhận' }}</dt>
-            <dd>{{ o.fulfil === 'pickup' ? 'Khách tự đến lấy' : o.fulfil === 'home' ? 'Tại nhà khách' : 'Giao tận tòa' }}<small>{{ o.address }}</small></dd></div>
+          <div><dt><svg class="i"><use href="#pin" /></svg>{{ o.flow === 'repair' ? 'Nơi sửa' : o.fulfil === 'home' ? 'Làm tại' : 'Hình thức nhận' }}</dt>
+            <dd>{{ o.fulfil === 'pickup' ? (o.flow === 'repair' ? 'Khách mang tới' : 'Khách tự đến lấy') : o.fulfil === 'home' ? 'Tại nhà khách' : 'Giao tận tòa' }}<small>{{ o.address }}</small></dd></div>
           <div><dt><svg class="i"><use href="#clock" /></svg>Thời gian</dt><dd>{{ o.time }} · {{ dayLabel(o.day) }}@if (o.duration) { <small>Khoảng {{ o.duration / 60 }} giờ</small> }</dd></div>
-          <div><dt><svg class="i"><use href="#bag" /></svg>{{ o.fulfil === 'home' ? 'Dịch vụ' : 'Món' }}</dt>
+          <div><dt><svg class="i"><use href="#bag" /></svg>{{ o.fulfil === 'home' || o.flow === 'repair' ? 'Dịch vụ' : 'Món' }}</dt>
             <dd>@for (i of o.items; track $index) { {{ i.name }} × {{ i.qty }}@if (i.option) { <small>{{ i.option }}</small> } }</dd></div>
           @for (a of o.answers ?? []; track $index) {
             <div><dt><svg class="i"><use href="#question" /></svg>{{ a[0] }}</dt><dd>{{ a[1] }}</dd></div>
@@ -39,7 +39,7 @@
           @if (o.quote) {
             <!-- giặt sấy đã báo giá: theo cân / đếm thực tế -->
             @for (l of o.quote.lines; track $index) {
-              <div><span>{{ l.name }} × {{ l.qty }} · thực tế</span><b>{{ l.qty * l.price | vnd }}</b></div>
+              <div><span>{{ l.name }}@if (o.flow === 'laundry') { × {{ l.qty }} · thực tế }</span><b>{{ l.qty * l.price | vnd }}</b></div>
             }
           } @else {
             @for (i of o.items; track $index) {
@@ -97,7 +97,7 @@
             <form class="form" (submit)="surcharge($event, sa.value, sr.value)">
               <span class="ftitle">Báo phụ thu</span>
               <span class="muted small">Khách đồng ý thì phụ thu mới cộng vào đơn.</span>
-              <input #sa class="input" type="number" min="1000" step="1000" placeholder="Số tiền, ví dụ 50000" required />
+              <input #sa appMoney class="input" placeholder="Số tiền, ví dụ 50.000" required />
               <input #sr class="input" placeholder="Lý do, ví dụ: thêm 2 món" required maxlength="80" />
               <div class="row2"><button type="button" class="btn" (click)="form.set(null)">Thôi</button><button type="submit" class="btn primary">Gửi khách</button></div>
             </form>
@@ -105,24 +105,36 @@
           @case ('quote') {
             <!-- giặt sấy: nhập số cân / đếm thực tế, khách duyệt giá mới -->
             <form class="form" (submit)="sendQuote($event)">
-              <span class="ftitle">Báo giá theo cân / đếm thực tế</span>
+              <span class="ftitle">{{ o.flow === 'repair' ? 'Báo giá sau khi kiểm tra' : 'Báo giá theo cân / đếm thực tế' }}</span>
+              @if (o.flow === 'repair') {
+                @for (l of repairLines(); track $index; let i = $index) {
+                  <div class="qedit">
+                    <input class="input" placeholder="Hạng mục, ví dụ: Nạp gas" maxlength="60" [value]="l.name" (input)="setRepairLine(i, { name: $any($event.target).value })" aria-label="Tên hạng mục" />
+                    <input appMoney class="input" placeholder="Giá" [moneyValue]="l.price || null" (input)="setRepairLine(i, { price: parseMoney($any($event.target).value) ?? 0 })" aria-label="Giá hạng mục" />
+                    <button type="button" class="btn" aria-label="Bỏ hạng mục" [disabled]="repairLines().length === 1" (click)="removeRepairLine(i)"><svg class="i"><use href="#xmark" /></svg></button>
+                  </div>
+                }
+                <button type="button" class="btn" (click)="addRepairLine()"><svg class="i"><use href="#plus" /></svg>Thêm hạng mục</button>
+              } @else {
               @for (it of o.items; track $index; let i = $index) {
                 <label class="qline"><span>{{ it.name }}<small>{{ it.price | vnd }} / {{ it.option.replace('ước tính · ', '') }} · khách ước tính {{ it.qty }}</small></span>
                   <input class="input" type="number" min="0" step="0.1" [value]="quoteQty()[i]" (input)="setQuoteQty(i, $any($event.target).value)" [attr.aria-label]="'Số thực tế ' + it.name" /></label>
               }
+              }
               <div class="qtotal"><span>Tổng mới</span><b>{{ quoteTotal() | vnd }}</b></div>
-              <span class="muted small">Khách luôn phải đồng ý giá này thì bạn mới bắt đầu giặt.</span>
+              <span class="muted small">Khách luôn phải đồng ý giá này thì bạn mới bắt đầu {{ o.flow === 'repair' ? 'sửa' : 'giặt' }}.@if (o.flow === 'repair') { Không đồng ý thì khách chỉ trả phí kiểm tra. }</span>
               <div class="row2"><button type="button" class="btn" (click)="form.set(null)">Thôi</button><button type="submit" class="btn primary">Gửi báo giá</button></div>
             </form>
           }
           @default {
-            @if (o.flow === 'laundry' && o.quote && o.state === 'pricing') {
+            @if (o.flow && o.quote && o.state === 'pricing') {
               <div class="qbox">
-                @for (l of o.quote.lines; track $index) { <div><span>{{ l.name }} × {{ l.qty }}</span><b>{{ l.qty * l.price | vnd }}</b></div> }
+                @for (l of o.quote.lines; track $index) { <div><span>{{ l.name }}@if (o.flow === 'laundry') { × {{ l.qty }} }</span><b>{{ l.qty * l.price | vnd }}</b></div> }
                 <div class="tot"><span>Giá báo khách</span><b>{{ o.quote.total | vnd }}</b></div>
               </div>
               <!-- phía Mua chưa có nút duyệt: giả lập khách đồng ý để thử luồng -->
               <button type="button" class="btn demo" (click)="act('approveQuote')">Bản mẫu: khách đồng ý giá</button>
+              @if (o.flow === 'repair') { <button type="button" class="btn demo" (click)="act('rejectQuote')">Bản mẫu: khách không đồng ý</button> }
             }
             @for (a of actions(); track a[0]) {
               <button type="button" class="btn" [class.primary]="a[2]" (click)="act(a[0])">{{ a[1] }}</button>

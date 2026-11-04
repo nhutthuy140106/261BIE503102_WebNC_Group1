@@ -20,19 +20,11 @@
           <h3>Trạng thái nhận đơn</h3>
           <label class="opt" [class.on]="popMode() === 'open'"><input type="radio" name="pm" [checked]="popMode() === 'open'" (change)="popMode.set('open')" /><span><b>Đang nhận đơn</b><small>Mọi mảng mở bình thường</small></span></label>
           <label class="opt" [class.on]="popMode() === 'all'"><input type="radio" name="pm" [checked]="popMode() === 'all'" (change)="popMode.set('all')" /><span><b>Tạm nghỉ cả gian hàng</b><small>Khách vẫn xem bài, chưa đặt được</small></span></label>
-          <label class="opt" [class.on]="popMode() === 'some'"><input type="radio" name="pm" [checked]="popMode() === 'some'" (change)="popMode.set('some')" /><span><b>Tạm nghỉ một vài mảng</b><small>Vd. hết cơm nhưng vẫn nhận nấu cỗ</small></span></label>
-          <div class="pkinds">
-            @for (k of pauseKinds; track k) {
-              <label><input type="checkbox" [checked]="popKinds().includes(k)" (change)="toggleKind(k, $any($event.target).checked)" />{{ kindLabel[k] }}</label>
-            }
-          </div>
+          @if (popMode() === 'all') {
           <div class="row2">Mở lại
-            <select class="input" [(ngModel)]="popUntil">
-              <option value="sau 1 giờ">sau 1 giờ</option>
-              <option value="sáng mai">sáng mai</option>
-              <option value="khi bạn tự mở lại">khi tôi tự mở lại</option>
-            </select>
+            <app-select [options]="untilOpts" [(ngModel)]="popUntil" />
           </div>
+          }
           <div class="pfoot"><button type="button" class="btn" (click)="popOpen.set(false)">Hủy</button><button type="button" class="btn dark" (click)="savePause()">Lưu</button></div>
         </div>
       }
@@ -55,7 +47,7 @@
   </div>
 
   @if (seller.pause(); as p) {
-    <div class="pausebar"><svg class="i"><use href="#pause" /></svg><span><b>{{ pauseWhat(p) }}</b> · mở lại {{ p.until }}</span><button type="button" class="btn" (click)="resume()">Mở nhận đơn lại</button></div>
+    <div class="pausebar"><svg class="i"><use href="#pause" /></svg><span><b>Gian hàng đang tạm nghỉ</b> · mở lại {{ p.until }}</span><button type="button" class="btn" (click)="resume()">Mở nhận đơn lại</button></div>
   }
 
   <!-- Cần bạn xử lý -->
@@ -96,9 +88,7 @@
     <section class="sec">
       <div class="gh">
         <h2>Hiệu quả</h2>
-        <select class="range" aria-label="Khoảng thời gian" [value]="range()" (change)="setRange($any($event.target).value)">
-          @for (r of ranges; track r) { <option [value]="r" [selected]="r === range()">{{ seller.statsFor(r)?.label }}</option> }
-        </select>
+        <app-select class="range" [options]="rangeOpts()" [ngModel]="range()" (ngModelChange)="setRange($event)" />
       </div>
       @if (stats(); as d) {
         <div class="card kpis">

@@ -9,7 +9,6 @@
 .avw button svg { width: 15px; height: 15px; }
 .nm { flex: 1; min-width: 0; }
 .nm h1 { font-size: 28px; line-height: 1.2; letter-spacing: -.02em; margin: 0; }
-.kd { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 999px; background: #fff; border: 1px solid var(--border); font-size: 12px; font-weight: 700; }
 .nm p { margin: 8px 0 0; color: var(--smoke); font-size: 14px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .nm p span { display: inline-flex; align-items: center; gap: 5px; }
 .nm p svg { width: 15px; height: 15px; }
@@ -30,7 +29,11 @@
 .editf { display: grid; gap: 12px; padding: 20px; border: 1px solid var(--border); border-radius: 18px; background: #fff; }
 .editf .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .editf label { display: grid; gap: 6px; font-size: 13.5px; font-weight: 600; }
+.editf .lbw { display: grid; gap: 6px; }
+.editf app-select ::ng-deep .trigger { height: 42px; border-radius: 10px; font-weight: 400; font-size: 14px; }
 .editf textarea { min-height: 100px; resize: vertical; line-height: 1.5; }
+/* ô nhập nằm trong label: không kế thừa chữ đậm của nhãn */
+.editf .input { font-weight: 400; }
 .editf .foot { display: flex; justify-content: flex-end; gap: 8px; }
 .check { border: 1px solid var(--border); border-radius: 18px; padding: 18px; background: #fff; }
 .check h3 { margin: 0 0 4px; font-size: 15px; }

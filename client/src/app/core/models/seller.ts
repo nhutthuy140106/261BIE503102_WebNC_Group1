@@ -82,8 +82,8 @@ export interface SellerOrder {
   declineReason?: string;
   surcharge?: { amount: number; reason: string; ok: boolean } | null;
   answers?: [string, string][];
-  /** laundry = đơn giặt sấy: tiệm qua lấy đồ, cân lại, báo giá cho khách duyệt rồi mới giặt */
-  flow?: 'laundry';
+  /** laundry = đơn giặt sấy: tiệm qua lấy đồ, cân lại, báo giá cho khách duyệt rồi mới giặt · repair = đơn sửa chữa: kiểm tra, báo giá, khách duyệt rồi mới sửa */
+  flow?: 'laundry' | 'repair';
   /** Báo giá sau khi cân / đếm thực tế (đơn giặt sấy); ok = khách đã đồng ý */
   quote?: { lines: { name: string; qty: number; price: number }[]; total: number; ok: boolean } | null;
   /** Chữ hạn xử lý trên thẻ ("Còn 12 phút") */
@@ -171,8 +171,6 @@ export interface DayHours {
 }
 
 export interface SellerPause {
-  mode: 'all' | 'some';
-  kinds: PostKind[];
   until: string;
 }
 
@@ -234,9 +232,11 @@ export interface SellerSpace {
  * Thanh bước dùng CHUNG tên với phía Mua (placedStepNames / OFFER_STEPS), hai bên nhìn cùng một đơn thấy cùng bước:
  * đồ ăn & uống 5 bước, đồ dùng 4 (không có "Đang thực hiện"), dịch vụ 4 (không có "Đang giao"), việc làm theo đề nghị.
  */
-export const orderStepNames = (kind: SellerOrder['kind'], flow?: SellerOrder['flow']): string[] => (flow === 'laundry' ? LAUNDRY_STEP_NAMES : placedStepNames(kind));
+export const orderStepNames = (kind: SellerOrder['kind'], flow?: SellerOrder['flow']): string[] => (flow === 'laundry' ? LAUNDRY_STEP_NAMES : flow === 'repair' ? REPAIR_STEP_NAMES : placedStepNames(kind));
 /** Giặt sấy: tiệm qua lấy đồ, cân rồi báo giá (khách luôn phải duyệt), giặt xong trả đồ */
 export const LAUNDRY_STEP_NAMES = ['Đã gửi', 'Đã xác nhận', 'Đã lấy đồ', 'Duyệt giá', 'Đang giặt', 'Đã trả đồ'];
+/** Sửa chữa: thợ đến nhà hoặc khách mang tới, kiểm tra rồi báo giá (khách luôn phải duyệt) */
+export const REPAIR_STEP_NAMES = ['Đã gửi', 'Đã xác nhận', 'Kiểm tra', 'Duyệt giá', 'Đang sửa', 'Hoàn thành'];
 export const JOB_STEP_NAMES = OFFER_STEPS.map((s) => OFFER_STATE_LABEL[s]);
 
 /** Trạng thái đơn → vị trí trên thanh bước (khớp posMap ở chi tiết đơn phía Mua) */
@@ -247,7 +247,7 @@ const ORDER_POS: Record<SellerOrder['kind'], Partial<Record<SellerOrderState, nu
 };
 const LAUNDRY_POS: Partial<Record<SellerOrderState, number>> = { waiting: 0, confirmed: 1, picked: 2, pricing: 3, preparing: 4, done: 5 };
 export const orderPos = (kind: SellerOrder['kind'], state: SellerOrderState, flow?: SellerOrder['flow']): number | undefined =>
-  flow === 'laundry' ? LAUNDRY_POS[state] : ORDER_POS[kind][state];
+  flow ? LAUNDRY_POS[state] : ORDER_POS[kind][state];
 
 /** Một bước trên thanh tiến trình: ok ✓ xanh đen · cur viền cam · cut ✕ (hủy / từ chối) */
 export interface StepItem {

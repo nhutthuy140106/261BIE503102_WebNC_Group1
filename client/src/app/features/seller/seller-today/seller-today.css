@@ -27,11 +27,9 @@ section.sec { margin-top: 36px; }
 .opt input { margin-top: 3px; accent-color: var(--ink); }
 .opt b { display: block; font-size: 14px; font-weight: 600; }
 .opt small { color: var(--smoke); font-size: 12px; }
-.pkinds { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px 30px; }
-.pkinds label { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; cursor: pointer; }
-.pkinds input { accent-color: var(--ink); }
 .row2 { display: flex; align-items: center; gap: 10px; margin-top: 4px; font-size: 13px; color: var(--smoke); }
-.row2 select { flex: 1; }
+.row2 app-select { flex: 1; min-width: 0; }
+.row2 app-select ::ng-deep .trigger { height: 40px; border-radius: 10px; font-weight: 400; font-size: 14px; }
 .pfoot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 
 /* 4 nút đăng bài: cùng kiểu ô chọn loại bài ở form đăng bài (nền trắng, viền nhạt, biểu tượng trong ô kem), giữ kích thước cũ */
@@ -70,7 +68,8 @@ section.sec { margin-top: 36px; }
 .cols > section { display: flex; flex-direction: column; }
 .cols .gh { height: 32px; }
 .card { border: 1px solid var(--border); border-radius: 16px; background: #fff; height: 540px; overflow: hidden; }
-.range { margin-left: auto; height: 32px; padding: 0 30px 0 12px; border: 1px solid var(--border); border-radius: 999px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%236A6879' d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E") no-repeat right 10px center / 13px; font-size: 12.5px; font-weight: 600; color: var(--ink); appearance: none; cursor: pointer; }
+.range { margin-left: auto; width: 180px; }
+.range ::ng-deep .trigger { height: 36px; border-radius: 10px; font-weight: 400; font-size: 13.5px; }
 .kpis { display: grid; grid-template-rows: 1.35fr 2fr auto; gap: 12px; padding: 18px; }
 .kduo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-height: 0; }
 .kbig { padding: 14px; border-radius: 14px; background: var(--ink); color: #fff; display: flex; flex-direction: column; gap: 6px; min-width: 0; }

@@ -6,6 +6,7 @@ import { KIND_LABEL } from '../../../core/models/post';
 import { SELLER_KIND_ICON, SellerOrderState } from '../../../core/models/seller';
 import { SellerOrderAct, SellerSpaceService, dayLabel } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
+import { parseMoney } from '../components/money-input/money-input';
 
 /** Câu hướng dẫn ở khung hành động, theo bước hiện tại */
 const GUIDE: Record<SellerOrderState, string> = {
@@ -25,6 +26,15 @@ const LAUNDRY_GUIDE: Partial<Record<SellerOrderState, string>> = {
   confirmed: 'Bạn đã nhận đơn. Qua lấy đồ đúng giờ khách hẹn rồi bấm xác nhận đã lấy đồ.',
   preparing: 'Khách đã đồng ý giá, đồ đang giặt. Giặt xong trả đồ theo hình thức khách chọn rồi bấm xác nhận.',
   done: 'Đã trả đồ. Tiền khách trả trực tiếp cho bạn; AntGo không giữ tiền.',
+};
+/** Sửa chữa: câu hướng dẫn theo bước */
+const REPAIR_GUIDE: Partial<Record<SellerOrderState, string>> = {
+  confirmed: 'Bạn đã nhận lịch. Kiểm tra đúng giờ hẹn rồi bấm xác nhận đã kiểm tra.',
+  picked: 'Đã kiểm tra. Báo giá từng hạng mục để khách duyệt.',
+  pricing: 'Đã gửi báo giá, chờ khách đồng ý. Khách đồng ý xong mới bắt đầu sửa.',
+  preparing: 'Khách đã đồng ý giá, đang sửa. Sửa xong bấm xác nhận hoàn thành.',
+  done: 'Đơn đã hoàn thành. Tiền khách trả trực tiếp cho bạn; AntGo không giữ tiền.',
+  cancelled: 'Đơn đã hủy. Nếu đã kiểm tra, khách chỉ trả phí kiểm tra.',
 };
 const DECLINE_REASONS = ['Hết món / hết hàng', 'Không kịp giờ khách hẹn', 'Ngoài khu vực giao', 'Khác'];
 
@@ -57,11 +67,15 @@ export class SellerOrderDetail implements OnInit {
   });
 
   /** Khung hành động đang mở form nào */
+  protected readonly parseMoney = parseMoney;
   protected readonly form = signal<'decline' | 'surcharge' | 'quote' | null>(null);
   /** Báo giá giặt sấy: số cân / đếm thực tế từng dòng */
   protected readonly quoteQty = signal<number[]>([]);
+  /** Báo giá sửa chữa: các hạng mục do thợ tự nhập sau khi kiểm tra */
+  protected readonly repairLines = signal<{ name: string; price: number }[]>([]);
   protected readonly quoteTotal = computed(() => {
     const o = this.o();
+    if (o?.flow === 'repair') return this.repairLines().reduce((n, l) => n + l.price, 0);
     return o ? Math.round(o.items.reduce((n, it, i) => n + (this.quoteQty()[i] ?? it.qty) * it.price, 0)) : 0;
   });
   protected reason = DECLINE_REASONS[0];
@@ -76,16 +90,34 @@ export class SellerOrderDetail implements OnInit {
 
   protected guideText(): string {
     const o = this.o()!;
-    return (o.flow === 'laundry' ? LAUNDRY_GUIDE[o.state] : undefined) ?? this.guide[o.state];
+    return (o.flow === 'laundry' ? LAUNDRY_GUIDE[o.state] : o.flow === 'repair' ? REPAIR_GUIDE[o.state] : undefined) ?? this.guide[o.state];
   }
 
   protected setQuoteQty(i: number, v: string): void {
     this.quoteQty.update((l) => l.map((x, k) => (k === i ? Math.max(0, +v || 0) : x)));
   }
 
+  protected setRepairLine(i: number, patch: Partial<{ name: string; price: number }>): void {
+    this.repairLines.update((l) => l.map((x, k) => (k === i ? { ...x, ...patch } : x)));
+  }
+
+  protected addRepairLine(): void {
+    this.repairLines.update((l) => [...l, { name: '', price: 0 }]);
+  }
+
+  protected removeRepairLine(i: number): void {
+    this.repairLines.update((l) => l.filter((_, k) => k !== i));
+  }
+
   protected sendQuote(e: Event): void {
     e.preventDefault();
     const o = this.o()!;
+    if (o.flow === 'repair') {
+      const rows = this.repairLines().map((l) => ({ name: l.name.trim(), qty: 1, price: l.price }));
+      if (!rows.length || rows.some((l) => !l.name || !(l.price > 0))) return this.toast.show('Nhập tên và giá cho từng hạng mục');
+      this.form.set(null);
+      return this.toast.show(this.seller.orderAct(o.id, 'quote', { lines: rows }));
+    }
     const lines = o.items.map((it, i) => ({ name: it.name, qty: this.quoteQty()[i] ?? it.qty, price: it.price }));
     if (lines.some((l) => !(l.qty > 0))) return this.toast.show('Nhập số lượng thực tế cho từng dịch vụ');
     this.form.set(null);
@@ -94,7 +126,7 @@ export class SellerOrderDetail implements OnInit {
 
   protected whenText(): string {
     const o = this.o()!;
-    return `${o.flow === 'laundry' ? 'Hẹn lấy đồ' : o.fulfil === 'pickup' ? 'Tự lấy' : o.fulfil === 'home' ? 'Làm tại nhà' : 'Giao'} ${o.time} · ${dayLabel(o.day).toLowerCase()}`;
+    return `${o.flow === 'laundry' ? 'Hẹn lấy đồ' : o.flow === 'repair' ? 'Hẹn kiểm tra' : o.fulfil === 'pickup' ? 'Tự lấy' : o.fulfil === 'home' ? 'Làm tại nhà' : 'Giao'} ${o.time} · ${dayLabel(o.day).toLowerCase()}`;
   }
 
   /** Hộp hỏi lại trước khi xác nhận đơn / xác nhận hủy (giống trang Hôm nay) */
@@ -113,6 +145,7 @@ export class SellerOrderDetail implements OnInit {
   protected act(a: SellerOrderAct): void {
     if (a === 'decline' || a === 'surcharge') return this.form.set(a);
     if (a === 'quote') {
+      this.repairLines.set([{ name: '', price: 0 }]);
       this.quoteQty.set(this.o()!.items.map((i) => i.qty));
       return this.form.set('quote');
     }
@@ -129,9 +162,10 @@ export class SellerOrderDetail implements OnInit {
 
   protected surcharge(e: Event, amount: string, reason: string): void {
     e.preventDefault();
-    if (!+amount || !reason.trim()) return this.toast.show('Nhập số tiền và lý do phụ thu');
+    const n = parseMoney(amount) ?? 0;
+    if (n < 1000 || !reason.trim()) return this.toast.show('Nhập số tiền từ 1.000đ và lý do phụ thu');
     this.form.set(null);
-    this.toast.show(this.seller.orderAct(this.o()!.id, 'surcharge', { amount: +amount, reason: reason.trim() }));
+    this.toast.show(this.seller.orderAct(this.o()!.id, 'surcharge', { amount: n, reason: reason.trim() }));
   }
 
   protected sendReply(e: Event, text: string): void {
