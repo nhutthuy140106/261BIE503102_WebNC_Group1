@@ -3,7 +3,10 @@ const { Schema, model } = require('mongoose');
 const userSchema = new Schema({
   name: { type: String, required: true, trim: true, maxlength: 60 },
   phone: { type: String, required: true, unique: true, match: [/^0\d{9}$/, 'Số điện thoại gồm 10 số, bắt đầu bằng 0'] },
-  password: { type: String, required: true, select: false },
+  // Tài khoản tạo bằng Google không có mật khẩu (vẫn bắt buộc có SĐT)
+  password: { type: String, select: false, required: function () { return !this.googleId; } },
+  googleId: { type: String, unique: true, sparse: true }, // sparse: tài khoản thường không có googleId vẫn không bị trùng nhau
+  email: { type: String, trim: true, lowercase: true },
   avatar: { type: String, default: null },          // URL ảnh chân dung; null = chưa có (FE hiện chữ cái đầu)
   area: { type: String, default: 'B' },
   role: { type: String, enum: ['enduser', 'admin'], default: 'enduser' },

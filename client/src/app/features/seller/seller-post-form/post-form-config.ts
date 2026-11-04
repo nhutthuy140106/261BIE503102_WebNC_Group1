@@ -148,6 +148,8 @@ export function commonGroup(fb: FormBuilder, type: FormType) {
     desc: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
     notes: strList(fb, ['']),
     /** Giờ vàng (khuyến mãi theo khung giờ) — gửi lên server dạng `Promo` (core/utils/promo.ts); days: 0 = CN … 6 = T7, rỗng = mọi ngày */
+    /** Khung giờ nhận đơn của bài: ngoài khung bài tự khóa với người mua. on=false → không giới hạn. days rỗng = mọi ngày */
+    hours: fb.group({ on: [false], from: ['06:00'], to: ['12:00'], days: fb.control<number[]>([]) }),
     promo: fb.group({ on: [false], kind: ['percent'], value: [10], from: ['11:00'], to: ['13:00'], days: fb.control<number[]>([]) }),
   });
 }
@@ -172,6 +174,8 @@ export function foodGroup(fb: FormBuilder) {
     tags: fb.control<string[]>([]),
     /** thực đơn trong bài: mỗi món một giá + đơn vị; khách đặt nhiều món trong một đơn, mỗi món một số lượng */
     items: fb.array([itemGroup(fb, '', null, 'phần', 20)]),
+    /** món thêm DÙNG CHUNG cho cả đơn (rau thêm, gà chiên thêm…): không thuộc món nào, khách chọn số lượng từng thứ */
+    options: fb.array([]),
     minOrder: [1, Validators.min(1)],
     spicy: [false],
     kitchenNote: [true],
@@ -189,6 +193,8 @@ export function foodGroup(fb: FormBuilder) {
 
 export function drinkGroup(fb: FormBuilder) {
   return fb.group({
+    /** món thêm dùng chung cho cả đơn (xem foodGroup) */
+    options: fb.array([]),
     /** thực đơn đồ uống: mỗi loại nước một giá, số ly mỗi ngày (trống = không giới hạn) và tùy chọn riêng (size, topping…) */
     items: fb.array([
       itemGroup(fb, '', null, 'ly', null, [

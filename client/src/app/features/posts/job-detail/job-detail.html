@@ -35,6 +35,16 @@
 
   <div class="cols">
     <div>
+      @if (photos().length) {
+        <section class="block">
+          <h2>Ảnh minh họa <small>({{ photos().length }})</small></h2>
+          <div class="jgal" [attr.data-n]="photos().length">
+            @for (src of photos(); track src; let i = $index) {
+              <button type="button" class="jph" (click)="lightbox.set(i)" [attr.aria-label]="'Xem ảnh ' + (i + 1)"><img [src]="src" alt="" loading="lazy" /></button>
+            }
+          </div>
+        </section>
+      }
       <section class="block"><h2>Việc cần làm</h2><div class="desc"><p>{{ j.description }}</p></div></section>
       <section class="block">
         <h2>Địa điểm</h2>
@@ -100,7 +110,7 @@
 
       @if (myOffer(); as o) {
         <div class="state"><b>Bạn đã gửi đề nghị</b>Đang chờ {{ j.sellerName }} xem và chọn người. Bạn sẽ nhận thông báo khi có kết quả.</div>
-        <div class="stepper mini" [style.--n]="stepLabels.length">@for (n of stepLabels; track $index) { @if ($index > 0) { <i class="ln"></i> } <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span><span class="slbl">{{ n }}</span></div> }</div>
+        <div class="stepper mini" [style.--n]="stepLabels.length">@for (n of stepLabels; track $index) { @if ($index > 0) { <i class="ln"></i> } <div class="s" [class.cur]="$index === 0"><span class="dot" [attr.title]="n" [attr.aria-label]="n">{{ $index + 1 }}</span></div> }</div>
         <button type="button" class="primary" (click)="openOrder()">Xem trong Đơn hàng</button>
         @if (o.state === 'offered') { <button type="button" class="ghostbtn" (click)="withdraw()">Rút đề nghị</button> }
       } @else if (j.job?.status === 'open') {
@@ -151,7 +161,7 @@
           <div class="done">
             <h3>Đã gửi đề nghị!</h3>
             <p>{{ j.sellerName }} sẽ xem và chọn người. Gửi đề nghị <b>chưa phải là đã nhận việc</b>, bạn sẽ nhận thông báo khi có kết quả.</p>
-            <div class="stepper mini" [style.--n]="stepLabels.length">@for (n of stepLabels; track $index) { @if ($index > 0) { <i class="ln"></i> } <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span><span class="slbl">{{ n }}</span></div> }</div>
+            <div class="stepper mini" [style.--n]="stepLabels.length">@for (n of stepLabels; track $index) { @if ($index > 0) { <i class="ln"></i> } <div class="s" [class.cur]="$index === 0"><span class="dot" [attr.title]="n" [attr.aria-label]="n">{{ $index + 1 }}</span></div> }</div>
             <div class="btns"><button type="button" class="ghost" (click)="confirm.set(false)">Quay lại</button><button type="button" class="go" (click)="openOrder()">Xem trong Đơn hàng</button></div>
           </div>
         } @else {
@@ -168,5 +178,17 @@
     <h1>Việc không tồn tại</h1>
     @if (error()) { <p>{{ error() }}</p> }
     <a routerLink="/search" [queryParams]="{ kind: 'job' }" class="btn">Xem việc khác</a>
+  </div>
+}
+
+@if (lightbox() !== null) {
+  <div class="lb">
+    <div class="lbtop"><span>{{ lightbox()! + 1 }} / {{ photos().length }}</span><button type="button" class="x" (click)="lightbox.set(null)" aria-label="Đóng">✕</button></div>
+    <div class="stage">
+      <button type="button" class="nav" (click)="stepPhoto(-1)" aria-label="Ảnh trước">‹</button>
+      <img class="big" [src]="photos()[lightbox()!]" alt="" />
+      <button type="button" class="nav" (click)="stepPhoto(1)" aria-label="Ảnh sau">›</button>
+    </div>
+    <div class="thumbs">@for (src of photos(); track src; let i = $index) { <img [src]="src" alt="" [class.on]="i === lightbox()" (click)="lightbox.set(i)" /> }</div>
   </div>
 }

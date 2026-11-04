@@ -30,19 +30,21 @@
           </div>
         }
 
-        @if (type() !== 'job') {
-        <div class="fld" [class.bad]="tried() && !images.length">
-          <span class="lbl">Ảnh <span class="hint">(tối đa {{ maxImages }})</span></span>
+        <div class="fld" [class.bad]="type() !== 'job' && tried() && !images.length">
+          <span class="lbl">{{ type() === 'job' ? 'Ảnh minh họa' : 'Ảnh' }} <span class="hint">({{ type() === 'job' ? 'tùy chọn, ' : '' }}tối đa {{ maxImages }})</span></span>
           <div class="imgs">
             @for (im of images; track $index; let i = $index) {
-              <div class="im"><img [src]="im" alt="" /><button type="button" class="x" aria-label="Bỏ ảnh" (click)="removeImage(i)">×</button>@if (i === 0) { <span class="cover">Ảnh bìa</span> }</div>
+              <div class="im"><img [src]="im" alt="" /><button type="button" class="x" aria-label="Bỏ ảnh" (click)="removeImage(i)">×</button>@if (i === 0 && type() !== 'job') { <span class="cover">Ảnh bìa</span> }</div>
             }
             @if (images.length < maxImages) { <button type="button" class="addimg" (click)="file.click()"><svg class="i"><use href="#camera" /></svg>Thêm ảnh<small>PNG, JPG, WebP<br />≤ 2MB</small></button> }
           </div>
-          <span class="hint">Ảnh đầu tiên là ảnh bìa trên thẻ bài.</span>
-          <span class="err">Thêm ít nhất 1 ảnh</span>
+          @if (type() === 'job') {
+            <span class="hint">Chụp nơi làm việc hoặc món đồ cần xử lý để người nhận hình dung được (ví dụ căn phòng cần dọn). Ảnh chỉ hiện ở trang chi tiết việc. Tránh chụp giấy tờ, biển số xe, mặt người.</span>
+          } @else {
+            <span class="hint">Ảnh đầu tiên là ảnh bìa trên thẻ bài.</span>
+            <span class="err">Thêm ít nhất 1 ảnh</span>
+          }
         </div>
-        }
 
         <div class="fld" [class.bad]="bad('common.title')">
           <label for="title">{{ type() === 'job' ? 'Tên việc' : type() === 'service' ? 'Tiêu đề bài đăng' : type() === 'goods' ? 'Tên món đồ' : 'Tên bài đăng' }}</label>
@@ -89,6 +91,11 @@
               } @else {
                 <ng-container *ngTemplateOutlet="itemTable; context: { list: foodUnits, nameLabel: 'Tên món', namePh: 'Ví dụ: Xôi bắp', pricePh: '15000', addLabel: 'Thêm món', ph: 'khay', qty: true, opts: true }" />
                 <span class="hint">Mỗi món có giá, số phần bán mỗi ngày và tùy chọn cộng giá riêng. Khách chọn một hoặc nhiều món trong cùng một đơn; thẻ bài hiện giá món rẻ nhất, ví dụ “từ 15.000đ”.</span>
+              <div class="sharedopts">
+                <span class="lbl">Món thêm dùng chung cho cả đơn</span>
+                <span class="hint">Không thuộc món nào, khách tự chọn số lượng: rau thêm, gà chiên thêm, cơm thêm… (chọn “Chọn nhiều” để khách chọn số lượng từng thứ).</span>
+                <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options' }" />
+              </div>
               }
               <ng-container *ngTemplateOutlet="priceHintBox" />
               <ng-container *ngTemplateOutlet="promoBox" />
@@ -121,6 +128,12 @@
               <!-- mỗi loại nước một giá, số ly mỗi ngày và tùy chọn riêng (size, topping…) như thực đơn đồ ăn -->
               <ng-container *ngTemplateOutlet="itemTable; context: { list: drinkUnits, nameLabel: 'Tên đồ uống', namePh: 'Ví dụ: Trà sữa trân châu', pricePh: '30000', addLabel: 'Thêm đồ uống', ph: 'bình', qty: true, qtyPh: '∞', opts: true }" />
               <span class="hint">Mỗi loại nước có giá, số ly mỗi ngày (để trống = không giới hạn) và tùy chọn cộng giá riêng như size, topping. Khách chọn nhiều loại trong cùng một đơn.</span>
+              <div class="sharedopts">
+                <span class="lbl">Món thêm dùng chung cho cả đơn</span>
+                <span class="hint">Không thuộc món nào, khách tự chọn số lượng: thêm đá, thêm ống hút… (chọn “Chọn nhiều” để khách chọn số lượng từng thứ).</span>
+                <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options' }" />
+              </div>
+
               <ng-container *ngTemplateOutlet="priceHintBox" />
               <ng-container *ngTemplateOutlet="promoBox" />
             </div>
@@ -555,7 +568,28 @@
       </ng-template>
 
       <!-- ===== Giờ vàng: giảm giá trong khung giờ, tự về giá gốc khi hết giờ (core/utils/promo.ts) ===== -->
+      <!-- ===== Khung giờ nhận đơn: ngoài khung bài tự khóa với người mua, sửa khung giờ để mở lại ===== -->
+      <ng-template #hoursBox>
+        <div class="promo">
+          <label class="ck"><input type="checkbox" [formControl]="$any(c('common.hours.on'))" /><span>Khung giờ nhận đơn<small>Ngoài khung này bài tự khóa, khách không đặt được. Bạn sửa lại khung giờ bất cứ lúc nào để mở lại</small></span></label>
+          @if (c('common.hours.on').value) {
+            <div class="pbody">
+              <div class="row3">
+                <div class="fld"><label for="hrf">Từ</label><app-time-input inputId="hrf" [formControl]="$any(c('common.hours.from'))" /></div>
+                <div class="fld"><label for="hrt">Đến</label><app-time-input inputId="hrt" [formControl]="$any(c('common.hours.to'))" /></div>
+              </div>
+              <div class="fld"><span class="lbl">Ngày nhận đơn <span class="hint">({{ c('common.hours.days').value?.length ? 'các ngày đã chọn' : 'để trống = mọi ngày' }})</span></span>
+                <div class="days">@for (w of promoWeek; track w.d) { <button type="button" [class.on]="has('common.hours.days', w.d)" (click)="toggleIn('common.hours.days', w.d)">{{ w.l }}</button> }</div>
+              </div>
+              @if (hoursError(); as he) { <span class="hint warn">{{ he }}</span> }
+              @else { <span class="hint">Khách thấy các mốc giờ gợi ý trong khung này và có thể tự gõ giờ cụ thể. Giờ Việt Nam.</span> }
+            </div>
+          }
+        </div>
+      </ng-template>
+
       <ng-template #promoBox>
+        <ng-container *ngTemplateOutlet="hoursBox" />
         <div class="promo">
           <label class="ck"><input type="checkbox" [formControl]="$any(c('common.promo.on'))" /><span>Giờ vàng<small>Giảm giá trong khung giờ, tự về giá gốc khi hết giờ</small></span></label>
           @if (c('common.promo.on').value) {

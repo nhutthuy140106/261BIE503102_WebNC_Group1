@@ -9,6 +9,7 @@ import {
   SellerSpace, StatsRange, SellerChat, SellerShop, StepItem, orderPos, orderStepNames, stepItems,
 } from '../models/seller';
 import { MockDb } from './mock-db';
+import { SellerService } from './seller';
 import { XuService } from './xu';
 
 /** Đơn kèm các giá trị tính sẵn để hiển thị */
@@ -131,6 +132,7 @@ export class SellerSpaceService {
   private readonly db = inject(MockDb);
   private readonly http = inject(HttpClient);
   private readonly xuSvc = inject(XuService);
+  private readonly buyerApi = inject(SellerService);
   private static readonly NAME = 'seller-space';
   /** khớp trường `version` trong datasets/seller-space.json */
   private static readonly VERSION = '2026-10-27-a';
@@ -277,10 +279,14 @@ export class SellerSpaceService {
   }
 
   setPost(id: string, patch: Partial<SellerPost>): void {
+    const bid = this.state()?.posts.find((x) => x.id === id)?.buyerPostId;
     this.patch((s) => {
       const p = s.posts.find((x) => x.id === id);
       if (p) Object.assign(p, patch);
     });
+    // cùng một Post: tạm ngưng / mở lại / đổi giá ở đây thì phía Mua đổi theo
+    if (bid && patch.on !== undefined) this.buyerApi.setClosed(bid, !patch.on).subscribe({ error: () => undefined });
+    if (bid && patch.price !== undefined) this.buyerApi.setPrice(bid, patch.price).subscribe({ error: () => undefined });
   }
 
   /** Nhân bản bài: bản sao tạm ẩn, chưa có lượt xem / quảng bá */
@@ -288,13 +294,15 @@ export class SellerSpaceService {
     this.patch((s) => {
       const p = s.posts.find((x) => x.id === id);
       if (!p) return;
-      const copy: SellerPost = { ...structuredClone(p), id: 'n' + Date.now(), title: `${p.title} (bản sao)`, on: false, views: 0, saves: 0, sold: 0, promo: undefined, jobId: undefined };
+      const copy: SellerPost = { ...structuredClone(p), id: 'n' + Date.now(), title: `${p.title} (bản sao)`, on: false, views: 0, saves: 0, sold: 0, promo: undefined, jobId: undefined, buyerPostId: undefined };
       s.posts.splice(s.posts.indexOf(p) + 1, 0, copy);
     });
   }
 
   removePost(id: string): void {
+    const bid = this.state()?.posts.find((x) => x.id === id)?.buyerPostId;
     this.patch((s) => (s.posts = s.posts.filter((x) => x.id !== id)));
+    if (bid) this.buyerApi.removePost(bid).subscribe({ error: () => undefined });
   }
 
   /** Thêm bài mới (form đăng bài) hoặc ghi đè bài đang sửa */
@@ -445,7 +453,10 @@ export class SellerSpaceService {
         const p = s.posts.find((x) => x.kind === t.kind && (x.title.startsWith(name) || name.startsWith(x.title)));
         if (!p) return;
         p.stock = Math.max(0, Math.min(p.max, p.stock + d));
-        if (offWhenEmpty && !p.stock) p.on = false;
+        if (offWhenEmpty && !p.stock) {
+          p.on = false;
+          if (p.buyerPostId) this.buyerApi.setClosed(p.buyerPostId, true).subscribe({ error: () => undefined });
+        }
       };
       if (a === 'keepOrder') return void (t.cancelRequest = null);
       if (a === 'surcharge') return void (t.surcharge = { amount: data.amount ?? 0, reason: data.reason ?? '', ok: false });

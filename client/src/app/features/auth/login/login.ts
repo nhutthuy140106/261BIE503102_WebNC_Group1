@@ -39,9 +39,51 @@ export class Login implements OnInit {
     rememberMe: new FormControl(false, { nonNullable: true }),
   });
 
+  /** Tên Google đang chờ nhập số điện thoại (lần đầu đăng nhập Google); khác null thì thẻ hiện bước nhập SĐT thay cho form. */
+  protected readonly googleName = this.auth.googlePending;
+  protected readonly phoneOnly = new FormControl('', { nonNullable: true, validators: [Validators.required, phoneValidator] });
+
+  /** Quay về form đăng nhập thường (bỏ thông tin Google đang chờ). */
+  cancelGoogle(): void {
+    this.auth.googlePending.set(null);
+    this.error.set(null);
+  }
+
+  completeGoogle(): void {
+    if (this.phoneOnly.invalid) {
+      this.phoneOnly.markAsTouched();
+      return;
+    }
+    this.submitting.set(true);
+    this.error.set(null);
+    this.auth.completeGoogle(this.phoneOnly.value.trim()).subscribe({
+      next: () => this.goAfterLogin(),
+      error: (e: Error & { code?: string }) => {
+        this.error.set(e.message || 'Chưa hoàn tất được, thử lại nhé.');
+        this.submitting.set(false);
+        // Quá 10 phút chờ: phải chọn lại tài khoản Google → về form đăng nhập (lời báo vẫn hiện)
+        if (e.code === 'INVALID_STATE') this.auth.googlePending.set(null);
+      },
+    });
+  }
+
+  /** Lý do + trang đang làm dở, đưa sang Đăng ký để không mất khi khách chưa có tài khoản. */
+  protected carry(): Record<string, string> {
+    const q = this.route.snapshot.queryParamMap;
+    const out: Record<string, string> = {};
+    for (const k of ['reason', 'returnUrl']) { const v = q.get(k); if (v) out[k] = v; }
+    return out;
+  }
+
+  private goAfterLogin(): void {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    // Chỉ chấp nhận đường dẫn nội bộ để tránh chuyển hướng ra site khác
+    this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/');
+  }
+
   ngOnInit(): void {
     // Điền sẵn số điện thoại đã nhớ (cookie thường, không dùng để xác thực)
-    const remembered = this.auth.getRememberedUsername();
+    const remembered = this.route.snapshot.queryParamMap.get('phone') ?? this.auth.getRememberedUsername();
     if (remembered) this.form.patchValue({ phone: remembered, rememberMe: true });
   }
 
@@ -58,11 +100,7 @@ export class Login implements OnInit {
     this.submitting.set(true);
     this.error.set(null);
     this.auth.login(this.form.getRawValue()).subscribe({
-      next: () => {
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-        // Chỉ chấp nhận đường dẫn nội bộ để tránh chuyển hướng ra site khác
-        this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/');
-      },
+      next: () => this.goAfterLogin(),
       error: (e: Error) => {
         this.error.set(e.message || 'Số điện thoại hoặc mật khẩu không đúng.');
         this.submitting.set(false);

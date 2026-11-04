@@ -275,3 +275,6 @@ textarea.small { min-height: 64px; }
 .hint.warn { color: #c0392b; }
 .promo { display: grid; gap: 10px; }
 .promo .pbody { display: grid; gap: 12px; margin-left: 18px; padding-left: 12px; border-left: 2px solid var(--soft); }
+
+/* món thêm dùng chung cho cả đơn */
+.sharedopts { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--border, #E5E7EB); display: grid; gap: 8px; }

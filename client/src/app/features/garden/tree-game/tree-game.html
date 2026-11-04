@@ -1,35 +1,52 @@
 <section class="tg">
   <a routerLink=".." class="back">← Vườn AntGo</a>
-  <h1>Tưới cây xoài</h1>
-  <p class="sub">Tưới {{ perDay }} lần mỗi ngày. Đủ {{ full }} lần cây ra trái — thu hoạch nhận {{ reward }} Xu.</p>
 
-  <div class="stage" [class.splash]="splash">
-    <svg viewBox="0 0 200 200" role="img" [attr.aria-label]="'Cây xoài giai đoạn ' + stage()">
-      <rect x="0" y="150" width="200" height="50" fill="#e9d9c8" />
-      <ellipse cx="100" cy="152" rx="60" ry="9" fill="#d9c3ac" />
-      @switch (stage()) {
-        @case (0) { <ellipse cx="100" cy="146" rx="9" ry="6" fill="#8a5a33" /> }
-        @case (1) { <path d="M100 150 V128" stroke="#5b8a3c" stroke-width="4" stroke-linecap="round" /><ellipse cx="93" cy="126" rx="9" ry="5" fill="#6aa043" transform="rotate(-25 93 126)" /><ellipse cx="108" cy="124" rx="9" ry="5" fill="#6aa043" transform="rotate(25 108 124)" /> }
-        @case (2) { <rect x="96" y="104" width="8" height="46" rx="3" fill="#8a5a33" /><circle cx="100" cy="96" r="26" fill="#6aa043" /><circle cx="84" cy="106" r="16" fill="#5b8a3c" /><circle cx="117" cy="106" r="16" fill="#5b8a3c" /> }
-        @case (3) { <rect x="94" y="88" width="12" height="62" rx="4" fill="#8a5a33" /><circle cx="100" cy="72" r="38" fill="#6aa043" /><circle cx="74" cy="92" r="24" fill="#5b8a3c" /><circle cx="127" cy="92" r="24" fill="#5b8a3c" /> }
-        @default {
-          <rect x="94" y="88" width="12" height="62" rx="4" fill="#8a5a33" /><circle cx="100" cy="72" r="38" fill="#6aa043" /><circle cx="74" cy="92" r="24" fill="#5b8a3c" /><circle cx="127" cy="92" r="24" fill="#5b8a3c" />
-          <ellipse cx="82" cy="78" rx="7" ry="10" fill="#f2b632" /><ellipse cx="116" cy="66" rx="7" ry="10" fill="#f2b632" /><ellipse cx="124" cy="96" rx="7" ry="10" fill="#e8a020" /><ellipse cx="70" cy="100" rx="7" ry="10" fill="#f2b632" />
+  <div class="sky" [class.wet]="watering()">
+
+    <span class="motes" aria-hidden="true"><i style="--x:24%;--s:7s;--d:0s"></i><i style="--x:30%;--s:9s;--d:-3s"></i><i style="--x:36%;--s:8s;--d:-6s"></i><i style="--x:42%;--s:10s;--d:-2s"></i><i style="--x:48%;--s:7.5s;--d:-5s"></i><i style="--x:54%;--s:9.5s;--d:-8s"></i><i style="--x:60%;--s:8.5s;--d:-1s"></i><i style="--x:66%;--s:10.5s;--d:-4s"></i></span>
+
+    <header class="top">
+      <div class="pill"><h1><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22v-9" stroke="#4f9a34" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M12 13C12 8.5 8.8 5.8 4 6c-.2 4.6 2.8 7.4 8 7z" fill="#6cc04a"/><path d="M12 11.5C12 7.6 14.9 4.6 20 4.4c.3 4.4-2.5 7.5-8 7.1z" fill="#8fd35f"/></svg>Chăm cây<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22v-9" stroke="#4f9a34" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M12 13C12 8.5 8.8 5.8 4 6c-.2 4.6 2.8 7.4 8 7z" fill="#6cc04a"/><path d="M12 11.5C12 7.6 14.9 4.6 20 4.4c.3 4.4-2.5 7.5-8 7.1z" fill="#8fd35f"/></svg></h1>
+      <p>Tưới nước mỗi ngày +{{ dayReward }} Xu, đủ 7 ngày cây ra trái xoài.</p></div>
+    </header>
+
+    <div class="plot">
+      <div class="tree" [class.pulse]="watering()" role="img" [attr.aria-label]="'Cây giai đoạn ' + (stage() + 1) + ': ' + stages[stage()]">
+        @for (n of days; track n) { <img [class.on]="n - 1 === stage()" [src]="'assets/garden/tree-' + n + '.png'" alt="" /> }
+        <span class="drops" aria-hidden="true">@for (d of drops; track $index) { <i [style.left.%]="d.x" [style.--d.s]="d.d"></i> }</span>
+      </div>
+    </div>
+
+    <aside class="card">
+      <p class="kick">Ngày {{ stage() + 1 }} / 7</p>
+      <h2>{{ stages[stage()] }}</h2>
+      <ol class="days" aria-label="Tiến trình 7 ngày">
+        @for (n of days; track n) {
+          <li [class]="state(n)" [attr.aria-label]="'Ngày ' + n + ': ' + stages[n - 1]">
+            @if (state(n) === 'done') { <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" /></svg> } @else { {{ n }} }
+          </li>
         }
+      </ol>
+
+      @if (garden.tree() >= 6) {
+        @if (garden.canHarvest()) {
+          <button type="button" class="act" (click)="harvest()">Thu hoạch +{{ reward }} Xu</button>
+          <small>Cây đã ra trái, hái về nào!</small>
+        } @else {
+          <button type="button" class="act" disabled>Mai thu hoạch</button>
+          <small>Cây đã ra trái rồi. Sang ngày mai bạn hái được +{{ reward }} Xu.</small>
+        }
+      } @else if (garden.waterLeft() > 0) {
+        <button type="button" class="act" (click)="water()">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3c3.5 4.2 6 7.3 6 10.5A6 6 0 0 1 6 13.5C6 10.3 8.5 7.2 12 3z" fill="currentColor" /></svg>
+          Tưới nước hôm nay
+        </button>
+        <small>Tưới mỗi ngày nhận +{{ dayReward }} Xu. Đủ 7 ngày thu hoạch thêm +{{ reward }} Xu.</small>
+      } @else {
+        <button type="button" class="act" disabled>Hôm nay đã tưới</button>
+        <small>Mai quay lại tưới tiếp nhé.</small>
       }
-    </svg>
-    <span class="drops" aria-hidden="true"><i></i><i></i><i></i></span>
+      <button type="button" class="sim" (click)="nextDay()" title="Chỉ để thử nghiệm">Thử nghiệm: giả lập sang ngày mới</button>
+    </aside>
   </div>
-
-  <div class="bar" role="progressbar" [attr.aria-valuenow]="garden.tree()" aria-valuemin="0" [attr.aria-valuemax]="full"><i [style.width.%]="garden.tree() / full * 100"></i></div>
-  <p class="meta">Cây lớn {{ garden.tree() }}/{{ full }} · Còn {{ garden.waterLeft() }}/{{ perDay }} lượt tưới hôm nay</p>
-
-  @if (garden.tree() >= full) {
-    <button type="button" class="act" (click)="harvest()">Thu hoạch +{{ reward }} Xu</button>
-  } @else {
-    <button type="button" class="act" [disabled]="garden.waterLeft() <= 0" (click)="water()">
-      <svg class="i"><use href="#bolt" /></svg> {{ garden.waterLeft() > 0 ? 'Tưới nước' : 'Mai tưới tiếp nhé' }}
-    </button>
-  }
-  <p class="cap">Xu nhận từ game hôm nay: <b>{{ xu.gameToday() }}/30</b></p>
 </section>

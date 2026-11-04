@@ -8,6 +8,7 @@
         </div>
         @if (post.description) { <p>{{ post.description }}</p> }
         <div class="jc-foot">
+          @if (post.images.length) { <span class="jc-ph"><svg class="i"><use href="#camera" /></svg>{{ post.images.length }} ảnh</span> }
           @if (post.job?.due) { <span class="due"><svg class="i"><use href="#clock" /></svg>{{ post.job | jobWhen }}</span> }
         </div>
       </div>

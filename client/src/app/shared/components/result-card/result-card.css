@@ -59,3 +59,5 @@ h3 { font-size: 15px; line-height: 1.35; margin: 5px 0; font-weight: 600; min-he
 .area { flex-wrap: nowrap; }
 .area .loc { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .area .jst { flex: none; white-space: nowrap; }
+.jc-ph { display: inline-flex; align-items: center; gap: 5px; margin-right: auto; padding: 4px 9px; border-radius: 999px; background: rgba(255, 255, 255, .7); font-size: 11.5px; font-weight: 600; color: var(--smoke); white-space: nowrap; }
+.jc-ph svg { width: 13px; height: 13px; }

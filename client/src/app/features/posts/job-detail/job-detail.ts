@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, switchMap, forkJoin } from 'rxjs';
@@ -14,6 +14,7 @@ import { ToastService } from '../../../core/services/toast';
 import { JobOfferService } from '../../../core/services/job-offer';
 import { PostService } from '../../../core/services/post';
 import { QuestionService } from '../../../core/services/question';
+import { unsplash } from '../../../core/config/post-templates';
 import { resolveId } from '../../../core/utils/slug-helper';
 import { formatDateTime } from '../../../core/utils/status-label';
 import { noPhoneValidator } from '../../../core/utils/validators';
@@ -46,6 +47,9 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   protected readonly sent = signal(false);
 
   protected readonly job = signal<Post | null>(null);
+  /** Ảnh minh họa người đăng chụp (ví dụ căn phòng cần dọn); việc không có ảnh thì không hiện mục này. */
+  protected readonly photos = computed(() => (this.job()?.images ?? []).map((i) => unsplash(i, 1200, 900)));
+  protected readonly lightbox = signal<number | null>(null);
   protected readonly myOffer = signal<Offer | null>(null);
   protected readonly qa = signal<Question[]>([]);
   protected readonly loading = signal(true);
@@ -208,6 +212,19 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
       },
       error: (e: Error) => this.applyServerErrors(e, this.askForm),
     });
+  }
+
+  protected stepPhoto(n: number): void {
+    const len = this.photos().length;
+    this.lightbox.update((i) => (i === null || !len ? null : (i + n + len) % len));
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  protected onKey(e: KeyboardEvent): void {
+    if (this.lightbox() === null) return;
+    if (e.key === 'Escape') this.lightbox.set(null);
+    if (e.key === 'ArrowRight') this.stepPhoto(1);
+    if (e.key === 'ArrowLeft') this.stepPhoto(-1);
   }
 
   /** Server trả 422 kèm field → hiện đúng chỗ (server vẫn là nơi validate bắt buộc). */

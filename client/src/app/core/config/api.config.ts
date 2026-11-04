@@ -29,6 +29,8 @@ function mockFlag(): boolean {
 export const USE_MOCK = mockFlag();
 export const API_BASE = '/api';
 export const DATASET_BASE = '/datasets';
+/** Client ID đăng nhập Google (công khai, không phải bí mật). Phải trùng GOOGLE_CLIENT_ID ở server/.env. */
+export const GOOGLE_CLIENT_ID = '34800304891-2siaokp32nj38rrfhhf3a2uh8s994n16.apps.googleusercontent.com';
 
 export type ServiceName =
   | 'auth' | 'post' | 'order' | 'offer' | 'address' | 'saved' | 'question'

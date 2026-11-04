@@ -26,9 +26,9 @@
     </div>
   </div>
 
-  <div class="gallery" [class.one]="v.images.length < 3">
+  <div class="gallery" [class]="'gallery n' + (v.images.length > 5 ? 5 : v.images.length)">
     @for (src of v.images; track src; let i = $index) {
-      <img [src]="src" [alt]="p.title" (click)="openLightbox(i)" />
+      <figure [style.--bg]="bg(src)" (click)="openLightbox(i)"><img [src]="src" [alt]="p.title" /></figure>
     }
     @if (v.images.length > 1) {
       <button type="button" class="all" (click)="openLightbox(0)"><svg class="i"><use href="#grid" /></svg>{{ v.images.length }} ảnh</button>
@@ -45,6 +45,7 @@
         <button type="button" class="btn-msg" (click)="message(p)"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
       </section>
 
+      @if (v.tpl.facts.length) {
       <section class="block">
         <div class="facts">
           @for (f of v.tpl.facts; track f[1]) {
@@ -52,6 +53,7 @@
           }
         </div>
       </section>
+      }
 
       @if (post(); as cp) {
           @if (cp.comboDetail; as cd) {
@@ -114,33 +116,62 @@
         <div class="avail" [class.off]="s.off"><i></i><b>{{ s.text }}</b>@if (s.sub) { <span>{{ s.sub }}</span> }</div>
       }
 
-      @for (g of v.tpl.opts; track g.name) {
-        @if (g === d.dishGroup) {
-          <div class="rows">
-            <h4>{{ g.name }}</h4>
+      <!-- Một nhóm tùy chọn. scope '' = dùng chung cả đơn; scope = món = tùy chọn riêng của món đó -->
+      <ng-template #optGroup let-g="g" let-scope="scope">
+        @if (g.multi) {
+          <!-- món thêm: tick rồi chỉnh số lượng từng thứ, không phụ thuộc số phần -->
+          <div class="rows" [class.sub]="scope">
+            <h4>{{ g.name }} <small>Chọn nhiều</small></h4>
             @for (c of g.choices; track c) {
-              <div class="row dish" role="checkbox" tabindex="0" [attr.aria-checked]="d.dishQty(c) > 0" [class.on]="d.dishQty(c) > 0" (click)="d.toggleDish(c)" (keydown.enter)="d.toggleDish(c)" (keydown.space)="d.toggleDish(c); $event.preventDefault()">
-                <i class="radio"></i>
-                <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }
-                @if (d.dishQty(c) > 0) {
+              <div class="row extra" role="checkbox" tabindex="0" [attr.aria-checked]="d.extraQty(scope, g.name, c) > 0" [class.on]="d.extraQty(scope, g.name, c) > 0" (click)="d.toggleExtra(scope, g.name, c)" (keydown.enter)="d.toggleExtra(scope, g.name, c)" (keydown.space)="d.toggleExtra(scope, g.name, c); $event.preventDefault()">
+                <i class="check"></i>
+                <span class="nm">{{ parse(c).name }}</span>
+                @if (parse(c).add) { <small class="pr">+{{ fmt(parse(c).add) }}</small> }
+                @if (d.extraQty(scope, g.name, c) > 0) {
                   <span class="qty sm" (click)="$event.stopPropagation()">
-                    <button type="button" [disabled]="d.dishQty(c) <= 1" (click)="d.setDish(c, d.dishQty(c) - 1)" aria-label="Giảm">−</button>
-                    <b>{{ d.dishQty(c) }}</b>
-                    <button type="button" [disabled]="d.totalDishes() >= d.maxQty()" (click)="d.setDish(c, d.dishQty(c) + 1)" aria-label="Tăng">+</button>
+                    <button type="button" (click)="d.setExtra(scope, g.name, c, d.extraQty(scope, g.name, c) - 1)" aria-label="Giảm">−</button>
+                    <b>{{ d.extraQty(scope, g.name, c) }}</b>
+                    <button type="button" [disabled]="d.extraQty(scope, g.name, c) >= 10" (click)="d.setExtra(scope, g.name, c, d.extraQty(scope, g.name, c) + 1)" aria-label="Tăng">+</button>
                   </span>
                 }
               </div>
             }
           </div>
         } @else {
-        <div class="rows">
-          <h4>{{ g.name }} <small>Chọn 1</small></h4>
-          @for (c of g.choices; track c) {
-            <button type="button" class="row" [class.on]="d.opt()[g.name] === c" (click)="d.setOpt(g.name, c)">
-              <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
-            </button>
-          }
-        </div>
+          <div class="rows" [class.sub]="scope">
+            <h4>{{ g.name }} <small>{{ g.req === false ? 'Chọn 1, không bắt buộc' : 'Chọn 1' }}</small></h4>
+            @for (c of g.choices; track c) {
+              <button type="button" class="row" [class.on]="d.isOpt(scope, g.name, c)" (click)="d.setOpt(g.name, c, scope)">
+                <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
+              </button>
+            }
+          </div>
+        }
+      </ng-template>
+
+      @for (g of v.tpl.opts; track g.name) {
+        @if (g === d.dishGroup) {
+          <div class="rows">
+            <h4>{{ g.name }} <small>Chọn nhiều</small></h4>
+            @for (c of g.choices; track c) {
+              <div class="dishbox" [class.on]="d.dishQty(c) > 0">
+                <div class="row dish" role="checkbox" tabindex="0" [attr.aria-checked]="d.dishQty(c) > 0" [class.on]="d.dishQty(c) > 0" (click)="d.toggleDish(c)" (keydown.enter)="d.toggleDish(c)" (keydown.space)="d.toggleDish(c); $event.preventDefault()">
+                  <i class="check"></i>
+                  <span class="nm">{{ parse(c).name }}</span>
+                  @if (v.tpl.dishPriced || parse(c).add) { <small class="pr">{{ v.tpl.dishPriced ? fmt((v.tpl.price.amount ?? 0) + parse(c).add) : '+' + fmt(parse(c).add) }}</small> }
+                  @if (d.dishQty(c) > 0) {
+                    <span class="qty sm" (click)="$event.stopPropagation()">
+                      <button type="button" [disabled]="d.dishQty(c) <= 1" (click)="d.setDish(c, d.dishQty(c) - 1)" aria-label="Giảm">−</button>
+                      <b>{{ d.dishQty(c) }}</b>
+                      <button type="button" [disabled]="d.totalDishes() >= d.maxQty()" (click)="d.setDish(c, d.dishQty(c) + 1)" aria-label="Tăng">+</button>
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <ng-container *ngTemplateOutlet="optGroup; context: { g: g, scope: '' }" />
         }
       }
 
@@ -241,7 +272,7 @@
             <div class="stepper mini" [style.--n]="doneSteps(o).length">
               @for (n of doneSteps(o); track $index) {
                 @if ($index > 0) { <i class="ln"></i> }
-                <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span><span class="slbl">{{ n }}</span></div>
+                <div class="s" [class.cur]="$index === 0"><span class="dot" [attr.title]="n" [attr.aria-label]="n">{{ $index + 1 }}</span></div>
               }
             </div>
             <div class="donebtns">
@@ -325,13 +356,16 @@
                       }
                     </span>
                     <span class="timebox">
-                      <input type="text" class="timein" inputmode="numeric" maxlength="5" placeholder="hh:mm" [value]="customTime() || d.time()"
-                             (focus)="openTime()" (click)="openTime()" (input)="onCustomTime(d, $any($event.target).value)" aria-label="Giờ" />
+                      <span class="timein" (focusout)="endTime(d, $event)">
+                        <input #th type="text" class="th" inputmode="numeric" maxlength="2" [value]="d.time().slice(0, 2)" (focus)="openTime(); th.select()" (input)="onHM(d, th, tm, true)" aria-label="Giờ" />
+                        <b>:</b>
+                        <input #tm type="text" class="tm" inputmode="numeric" maxlength="2" [value]="d.time().slice(3)" (focus)="openTime(); tm.select()" (input)="onHM(d, th, tm, false)" aria-label="Phút" />
+                      </span>
                       <svg class="i clk"><use href="#l-timer" /></svg>
                       @if (timeOpen()) {
                         <span class="tlist" role="listbox">
-                          <p>Chọn giờ hoặc tự gõ</p>
-                          <span class="tgrid">@for (t of slots(); track t) { <button type="button" [class.on]="d.time() === t" (click)="pickTime(d, t)">{{ t }}</button> }</span>
+                          <p>Nhận đặt {{ d.tpl.time.win[0] }} – {{ d.tpl.time.win[1] }}. Chọn giờ bên dưới hoặc tự gõ.</p>
+                          <span class="tgrid">@for (t of slotsFor(d); track t) { <button type="button" [class.on]="d.time() === t" (click)="pickTime(d, t)">{{ t }}</button> }</span>
                         </span>
                       }
                     </span>

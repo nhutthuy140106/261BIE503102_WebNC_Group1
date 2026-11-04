@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { COIN_MAX_PLAYS, COIN_MILESTONES, GardenService, TREE_FULL, TREE_REWARD } from '../../../core/services/garden';
 import { GAME_DAILY_CAP, XuService } from '../../../core/services/xu';
 
@@ -9,7 +9,7 @@ import { GAME_DAILY_CAP, XuService } from '../../../core/services/xu';
   templateUrl: './garden-hub.html',
   styleUrl: './garden-hub.css',
 })
-export class GardenHub {
+export class GardenHub implements OnInit, OnDestroy {
   protected readonly garden = inject(GardenService);
   protected readonly xu = inject(XuService);
   protected readonly cap = GAME_DAILY_CAP;
@@ -17,4 +17,12 @@ export class GardenHub {
   protected readonly treeFull = TREE_FULL;
   protected readonly treeReward = TREE_REWARD;
   protected readonly milestones = COIN_MILESTONES;
+
+  ngOnInit(): void {
+    document.body.classList.add('no-footer', 'no-chat');
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('no-footer', 'no-chat');
+  }
 }

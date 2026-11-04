@@ -159,3 +159,27 @@
 .stepper.mini::before { left: calc(50% / var(--n, 5)); right: calc(50% / var(--n, 5)); }
 .stepper.mini .s, .stepper.mini .s:first-of-type, .stepper.mini .s:last-of-type { justify-items: center; text-align: center; }
 .stepper.mini { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); } .stepper.mini .s { min-width: 0; }
+
+/* ảnh minh họa của việc: ảnh đầu to, các ảnh còn lại xếp lưới nhỏ */
+.jgal { display: grid; gap: 8px; margin-top: 12px; grid-template-columns: repeat(4, 1fr); }
+.jph { padding: 0; border: 0; border-radius: 12px; overflow: hidden; background: #EEF0F3; cursor: zoom-in; aspect-ratio: 4 / 3; }
+.jph img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s; }
+.jph:hover img { transform: scale(1.04); }
+.jgal .jph:first-child { grid-column: span 2; grid-row: span 2; aspect-ratio: auto; }
+.jgal[data-n='1'] { grid-template-columns: minmax(0, 520px); }
+.jgal[data-n='1'] .jph:first-child { grid-column: auto; grid-row: auto; aspect-ratio: 4 / 3; }
+.jgal[data-n='2'] { grid-template-columns: repeat(2, 1fr); }
+.jgal[data-n='2'] .jph:first-child { grid-column: auto; grid-row: auto; aspect-ratio: 4 / 3; }
+.jgal[data-n='3'] { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(2, 1fr); }
+.jgal[data-n='3'] .jph:first-child { grid-row: span 2; grid-column: auto; }
+@media (max-width: 640px) { .jgal, .jgal[data-n='3'] { grid-template-columns: repeat(2, 1fr); } .jgal .jph:first-child { grid-column: span 2; } }
+/* xem ảnh lớn */
+.lb { position: fixed; inset: 0; z-index: 95; background: rgba(18, 22, 34, .94); display: flex; flex-direction: column; color: #fff; }
+.lbtop { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; font-weight: 600; }
+.lb .x { width: 36px; height: 36px; border: 0; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, .1); cursor: pointer; }
+.lb .stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 20px; padding: 0 24px; }
+.lb .big { max-width: min(1200px, calc(100vw - 180px)); max-height: 100%; object-fit: contain; border-radius: 10px; }
+.lb .nav { width: 48px; height: 48px; border: 0; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: #fff; font-size: 26px; flex: none; cursor: pointer; }
+.lb .thumbs { display: flex; justify-content: center; gap: 8px; padding: 16px; }
+.lb .thumbs img { width: 72px; height: 54px; object-fit: cover; border-radius: 8px; opacity: .45; cursor: pointer; outline: 2px solid transparent; outline-offset: 2px; }
+.lb .thumbs img.on { opacity: 1; outline-color: #fff; }

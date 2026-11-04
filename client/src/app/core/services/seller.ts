@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import type { Promo } from '../utils/promo';
+import type { OrderWindow } from '../utils/order-window';
 import { Observable, map } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { Offer } from '../models/offer';
 import { Order } from '../models/order';
-import { Post, PostKind } from '../models/post';
+import { PayMethod, Post, PostItem, PostKind, PostQuestion, PostStatus, OptionGroup, PriceType } from '../models/post';
 import { PosterAction, SellerOrderAction, applyPoster, applySellerOrder } from '../utils/seller-state';
 import { ApiService } from './api';
 import { AuthService } from './auth';
@@ -24,8 +25,35 @@ export interface PostBody {
   due?: string;
   /** Giờ vàng (khuyến mãi theo khung giờ); null = tắt */
   promo?: Promo | null;
+  /** Khung giờ nhận đơn của bài (người bán đặt); null = không giới hạn */
+  orderWindow?: OrderWindow | null;
   /** Combo: các món cùng người bán + giá combo (server tự tính giá lẻ và kiểm hợp lệ) */
   combo?: { items: { postId: string; qty: number }[]; comboPrice: number } | null;
+  // ---- hợp đồng Post đủ 7 khối (docs/post-contract.md); form Bán → formToPostBody() điền ----
+  category?: string;
+  status?: PostStatus;
+  priceType?: PriceType;
+  estimate?: boolean;
+  inspectFee?: number;
+  items?: PostItem[];
+  optionGroups?: OptionGroup[];
+  questions?: PostQuestion[];
+  fulfillmentModes?: ('delivery' | 'pickup')[];
+  deliveryFee?: number;
+  needSchedule?: boolean;
+  payMethods?: PayMethod[];
+  dates?: string[];
+  timeMode?: Post['timeMode'];
+  duration?: Post['duration'];
+  repeat?: boolean;
+  place?: Post['place'];
+  stock?: Post['stock'];
+  prepMinutes?: number;
+  handover?: Post['handover'];
+  condition?: Post['condition'];
+  serviceInfo?: Post['serviceInfo'];
+  /** Chỉ việc làm */
+  job?: { start?: string; end?: string; allDay?: boolean; head?: number; payUnit?: string; due?: string };
 }
 
 /**
@@ -67,19 +95,24 @@ export class SellerService {
         if (!user) throw new AppError('Bạn cần đăng nhập.', 401, 'UNAUTHORIZED');
         const fields: Partial<Post> = {
           kind: body.kind, title: body.title.trim(), description: body.description.trim(), price: body.price,
-          priceUnit: body.priceUnit || undefined, block: body.block, images: body.images, acceptsXu: !!body.acceptsXu, promo: body.promo ?? undefined,
+          priceUnit: body.priceUnit || undefined, block: body.block, images: body.images, acceptsXu: !!body.acceptsXu, promo: body.promo ?? undefined, orderWindow: body.orderWindow ?? undefined,
           ...(body.combo
             ? {
                 category: 'Combo', priceUnit: body.priceUnit || 'combo',
                 combo: { items: body.combo.items, comboPrice: body.combo.comboPrice, listPrice: body.combo.items.reduce((t, i) => t + (rows.find((r) => r._id === i.postId)?.price ?? 0) * i.qty, 0) },
               }
             : {}),
-          job: body.kind === 'job' ? { due: body.due ?? '', offers: 0, status: 'open' } : undefined,
+          category: body.combo ? 'Combo' : body.category, status: body.status ?? 'open', closed: (body.status ?? 'open') !== 'open',
+          priceType: body.priceType, estimate: body.estimate, inspectFee: body.inspectFee, items: body.items?.length ? body.items : undefined,
+          optionGroups: body.optionGroups, questions: body.questions, fulfillmentModes: body.fulfillmentModes, deliveryFee: body.deliveryFee,
+          needSchedule: body.needSchedule, payMethods: body.payMethods, dates: body.dates, timeMode: body.timeMode, duration: body.duration,
+          repeat: body.repeat, place: body.place, stock: body.stock, prepMinutes: body.prepMinutes, handover: body.handover, condition: body.condition, serviceInfo: body.serviceInfo,
+          job: body.kind === 'job' ? { ...body.job, due: body.job?.due ?? body.due ?? '', offers: 0, status: 'open' } : undefined,
         };
         if (id) {
           const cur = rows.find((r) => r._id === id && r.sellerId === user._id);
           if (!cur) throw new AppError('Không tìm thấy bài của bạn.', 404, 'NOT_FOUND');
-          const next: Post = { ...cur, ...fields, job: body.kind === 'job' ? { ...(cur.job ?? { offers: 0, status: 'open' as const }), due: body.due ?? '' } : undefined };
+          const next: Post = { ...cur, ...fields, job: body.kind === 'job' ? { ...(cur.job ?? { offers: 0, status: 'open' as const }), ...body.job, due: body.job?.due ?? body.due ?? '' } : undefined };
           this.db.save('posts', rows.map((r) => (r._id === id ? next : r)));
           return next;
         }
@@ -97,7 +130,21 @@ export class SellerService {
       map((rows) => {
         const cur = rows.find((r) => r._id === id && r.sellerId === this.me);
         if (!cur) throw new AppError('Không tìm thấy bài của bạn.', 404, 'NOT_FOUND');
-        const next = { ...cur, closed };
+        const next = { ...cur, closed, status: closed ? ('closed' as const) : ('open' as const) };
+        this.db.save('posts', rows.map((r) => (r._id === id ? next : r)));
+        return next;
+      }),
+    );
+  }
+
+  /** Đổi nhanh giá đại diện của bài (sửa giá ngay trên thẻ bài phía Bán). */
+  setPrice(id: string, price: number): Observable<Post> {
+    if (!useMock('seller')) return this.api.patch<Post>(`/seller/posts/${id}`, { price });
+    return this.db.list<Post>('posts').pipe(
+      map((rows) => {
+        const cur = rows.find((r) => r._id === id && r.sellerId === this.me);
+        if (!cur) throw new AppError('Không tìm thấy bài của bạn.', 404, 'NOT_FOUND');
+        const next = { ...cur, price };
         this.db.save('posts', rows.map((r) => (r._id === id ? next : r)));
         return next;
       }),

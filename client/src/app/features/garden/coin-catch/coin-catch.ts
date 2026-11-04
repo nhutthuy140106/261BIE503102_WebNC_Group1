@@ -25,7 +25,11 @@ interface Pop {
 const ROUND_SECONDS = 30;
 const GRAVITY = 7.5; // đơn vị thế giới / giây², cộng dần vào vận tốc theo delta time
 const MAX_FALL = 9;
-const MASCOT_H = 1.7;
+const MASCOT_H = 2.3;
+/** Rộng/cao của ảnh kiến cầm giỏ (ant-basket.png 411×640) */
+const MASCOT_RATIO = 411 / 640;
+/** Cao/rộng của ảnh bãi cỏ phía dưới (scene-bottom.png 2000×194) */
+const BOTTOM_RATIO = 194 / 2000;
 
 /**
  * Mini game "Hái xu" (Three.js, nạp động khi vào trang). Xu rơi từ tán xoài, kiến hứng bằng chuột/chạm/phím mũi tên.
@@ -60,7 +64,6 @@ export class CoinCatch implements AfterViewInit, OnDestroy {
   private scene?: THREE.Scene;
   private camera?: THREE.PerspectiveCamera;
   private mascot?: THREE.Sprite;
-  private ground?: THREE.Mesh;
   private collect: (THREE.BufferGeometry | THREE.Material)[] | null = null;
   private shared: { geo: THREE.BufferGeometry[]; mat: THREE.Material[]; tex: THREE.Texture[] } = { geo: [], mat: [], tex: [] };
   private items: Item[] = [];
@@ -70,6 +73,8 @@ export class CoinCatch implements AfterViewInit, OnDestroy {
   private ro?: ResizeObserver;
   private halfW = 3;
   private halfH = 4.66;
+  /** Cao độ mặt cỏ: xu rơi xuống tới đây mà không hứng được thì biến mất */
+  private floorY = -4;
   private targetX = 0;
   private keys = { left: false, right: false };
   private spawnIn = 0.6;
@@ -77,6 +82,7 @@ export class CoinCatch implements AfterViewInit, OnDestroy {
   private squash = 0;
 
   async ngAfterViewInit(): Promise<void> {
+    document.body.classList.add('no-footer', 'no-chat'); // vừa đúng một màn hình, không có chân trang để cuộn xuống
     try {
       this.T = await import('three');
       this.build(this.T);
@@ -89,6 +95,7 @@ export class CoinCatch implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    document.body.classList.remove('no-footer', 'no-chat');
     cancelAnimationFrame(this.raf);
     this.ro?.disconnect();
     this.clearItems();
@@ -148,61 +155,20 @@ export class CoinCatch implements AfterViewInit, OnDestroy {
     sun.position.set(3, 6, 8);
     scene.add(sun);
 
-    this.buildTree(T, scene);
-
-    // đất ở đáy cảnh
-    const ground = this.mesh(T, new T.PlaneGeometry(40, 1.4), new T.MeshStandardMaterial({ color: 0x86b36b }));
-    ground.position.set(0, -4.9, -1);
-    scene.add(ground);
-    this.ground = ground;
-
-    // mascot: sprite ảnh kiến, đứng sát đáy
-    const tex = new T.TextureLoader().load('assets/clean/idle.png');
+    // mascot: sprite ảnh kiến cầm giỏ, ngồi sát đáy
+    const tex = new T.TextureLoader().load('assets/clean/ant-basket.png');
     tex.colorSpace = T.SRGBColorSpace;
     this.shared.tex.push(tex);
     const mat = new T.SpriteMaterial({ map: tex, transparent: true });
     this.shared.mat.push(mat);
     const mascot = new T.Sprite(mat);
-    mascot.scale.set(MASCOT_H * (329 / 599), MASCOT_H, 1);
+    mascot.scale.set(MASCOT_H * MASCOT_RATIO, MASCOT_H, 1);
     scene.add(mascot);
     this.mascot = mascot;
 
     this.ro = new ResizeObserver(() => this.resize());
     this.ro.observe(el);
     this.resize();
-  }
-
-  private buildTree(T: typeof THREE, scene: THREE.Scene): void {
-    const leaf = new T.MeshStandardMaterial({ color: 0x4f9d52, roughness: 0.9 });
-    const leaf2 = new T.MeshStandardMaterial({ color: 0x3f8a46, roughness: 0.9 });
-    const bark = new T.MeshStandardMaterial({ color: 0x7a5230 });
-    const mango = new T.MeshStandardMaterial({ color: 0xf2a33a, roughness: 0.6 });
-    this.shared.mat.push(leaf, leaf2, bark, mango);
-    const sphere = new T.SphereGeometry(1, 20, 16);
-    const mangoGeo = new T.SphereGeometry(0.16, 12, 10);
-    const branchGeo = new T.CylinderGeometry(0.12, 0.2, 14, 8);
-    this.shared.geo.push(sphere, mangoGeo, branchGeo);
-
-    const tree = new T.Group();
-    tree.name = 'tree';
-    const branch = new T.Mesh(branchGeo, bark);
-    branch.rotation.z = Math.PI / 2;
-    branch.position.set(0, 0.2, -0.5);
-    tree.add(branch);
-    for (let i = -4; i <= 4; i++) {
-      const s = new T.Mesh(sphere, i % 2 ? leaf : leaf2);
-      const r = 0.9 + ((i * 7) % 3) * 0.12;
-      s.scale.setScalar(r);
-      s.position.set(i * 0.95, 0.7 + Math.sin(i) * 0.15, -0.4 + (i % 2) * 0.2);
-      tree.add(s);
-    }
-    for (const x of [-3.4, -1.6, 0.4, 2.2, 3.6]) {
-      const m = new T.Mesh(mangoGeo, mango);
-      m.scale.set(1, 1.25, 1);
-      m.position.set(x, -0.25 - Math.abs(Math.sin(x)) * 0.2, 0.5);
-      tree.add(m);
-    }
-    scene.add(tree);
   }
 
   private mesh(T: typeof THREE, geo: THREE.BufferGeometry, mat: THREE.Material): THREE.Mesh {
@@ -224,11 +190,12 @@ export class CoinCatch implements AfterViewInit, OnDestroy {
     this.halfH = Math.tan((this.camera.fov * Math.PI) / 360) * 10;
     this.halfW = this.halfH * this.camera.aspect;
     this.camera.updateProjectionMatrix();
-    const tree = this.scene?.getObjectByName('tree');
-    tree?.position.set(0, this.halfH - 0.9, 0);
-    this.ground?.position.set(0, -this.halfH - 0.2, -1);
+    // tán xoài + bãi cỏ là ảnh PNG phủ trên canvas (CSS .deco); mặt cỏ cao botPx tính từ đáy khung
+    const upp = (this.halfH * 2) / h; // đơn vị thế giới trên 1 px
+    const botU = w * BOTTOM_RATIO * upp;
+    this.floorY = -this.halfH + botU * 0.7; // xu rơi tới mặt cỏ thì biến mất
     const x = this.mascot?.position.x ?? 0;
-    this.mascot?.position.set(Math.max(-this.halfW + 0.6, Math.min(this.halfW - 0.6, x)), -this.halfH + MASCOT_H / 2 + 0.35, 0);
+    this.mascot?.position.set(Math.max(-this.halfW + 0.6, Math.min(this.halfW - 0.6, x)), -this.halfH + botU * 0.4 + MASCOT_H / 2, 0);
   }
 
   // ---------- vòng lặp ----------
@@ -252,7 +219,7 @@ export class CoinCatch implements AfterViewInit, OnDestroy {
     this.mascot.position.x += (this.targetX - this.mascot.position.x) * Math.min(1, dt * 14);
     this.squash = Math.max(0, this.squash - dt * 4);
     const k = 1 + Math.sin(this.squash * Math.PI) * 0.12;
-    this.mascot.scale.set(MASCOT_H * (329 / 599) * (2 - k), MASCOT_H * k, 1);
+    this.mascot.scale.set(MASCOT_H * MASCOT_RATIO * (2 - k), MASCOT_H * k, 1);
 
     if (this.phase() === 'playing') {
       this.elapsed += dt;
@@ -266,18 +233,19 @@ export class CoinCatch implements AfterViewInit, OnDestroy {
       if (left <= 0) this.zone.run(() => this.finish());
     }
 
-    const catchY = this.mascot.position.y + MASCOT_H * 0.28;
+    // miệng giỏ nằm sát đỉnh ảnh kiến cầm giỏ trên đầu
+    const catchY = this.mascot.position.y + MASCOT_H * 0.4;
     for (let i = this.items.length - 1; i >= 0; i--) {
       const it = this.items[i];
       it.vy = Math.max(-MAX_FALL, it.vy - GRAVITY * dt); // gia tốc rơi
       it.group.position.y += it.vy * dt;
       it.group.rotation.y += it.spin * dt;
       if (it.sparkle) it.sparkle.rotation.z += dt * 2.5;
-      const caught = this.phase() === 'playing' && Math.abs(it.group.position.x - this.mascot.position.x) < 0.62 && Math.abs(it.group.position.y - catchY) < 0.4;
+      const caught = this.phase() === 'playing' && Math.abs(it.group.position.x - this.mascot.position.x) < 0.8 && Math.abs(it.group.position.y - catchY) < 0.4;
       if (caught) {
         this.onCatch(T, it);
         this.removeItem(i);
-      } else if (it.group.position.y < -this.halfH - 0.6) {
+      } else if (it.group.position.y < this.floorY) {
         this.removeItem(i);
       }
     }

@@ -42,12 +42,18 @@ export interface PlaceBlock {
   choices?: [string, number][];
   /** mode 'seller': địa chỉ người bán */
   where?: string;
+  /** mode 'buyer' / 'ab': phí người làm tới tận nơi (không có thì 0) */
+  fee?: number;
 }
 
 /** Khối 5 — Tùy chọn cộng giá. Nhãn dạng "Tên|+5.000đ" */
 export interface OptionBlock {
   name: string;
   choices: string[];
+  /** Chọn nhiều (topping…). Mặc định chọn 1 */
+  multi?: boolean;
+  /** false = không bắt buộc chọn (chọn 1 nhưng được bỏ trống). Mặc định bắt buộc */
+  req?: boolean;
 }
 
 /** Khối 6 — Câu hỏi riêng (chữ / chọn 1 / chọn nhiều / ảnh) */
@@ -91,6 +97,12 @@ export interface PostTemplate {
   time: TimeBlock;
   place: PlaceBlock;
   opts: OptionBlock[];
+  /** Nhóm đầu của `opts` là DANH SÁCH MÓN (tick món + số lượng từng món), không phải tùy chọn chọn 1 */
+  dishList?: boolean;
+  /** Danh sách món ghi giá đầy đủ của từng món (bài nhiều món của người bán); false = ghi "+phụ phí" so với giá chính */
+  dishPriced?: boolean;
+  /** Tùy chọn RIÊNG của từng món trong danh sách món: khóa = lựa chọn thô của món ('Cơm rang|+5.000đ'). Chọn món nào thì bung nhóm của món đó. */
+  dishOpts?: Record<string, OptionBlock[]>;
   qs: QuestionBlock[];
   stock: StockBlock;
   notePh: string;

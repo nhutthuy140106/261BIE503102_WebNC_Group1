@@ -60,6 +60,66 @@ export class AuthService {
     );
   }
 
+  /** Tên Google đang chờ nhập số điện thoại (lần đầu đăng nhập Google); null = không có bước chờ. */
+  readonly googlePending = signal<string | null>(null);
+
+  /**
+   * Đăng nhập Google bước 1: gửi ID token cho server xác thực. Tài khoản đã có → vào luôn;
+   * lần đầu → `needPhone` (đã ghi `googlePending`) để chuyển sang trang nhập số điện thoại.
+   * Mock (chưa có server): chỉ đọc tên/ảnh trong token để dựng người dùng mẫu, không xác thực.
+   */
+  loginWithGoogle(credential: string): Observable<{ user: User } | { needPhone: true }> {
+    if (useMock('auth')) {
+      const p = this.decodeJwt(credential);
+      const user: User = {
+        _id: '000000000000000000000001',
+        username: '',
+        fullName: p['name'] || 'Hàng xóm',
+        block: 'Block B',
+        avatar: p['picture'] || undefined,
+        xu: 120,
+        role: 'user',
+      };
+      sessionStorage.setItem(MOCK_KEY, JSON.stringify(user));
+      this.currentUser.set(user);
+      return of({ user });
+    }
+    return this.http.post<{ data?: unknown; needPhone?: boolean; name?: string }>(`${API_BASE}/auth/google`, { credential }, { withCredentials: true }).pipe(
+      map((r) => {
+        if (r.needPhone) {
+          this.googlePending.set(r.name ?? '');
+          return { needPhone: true as const };
+        }
+        const user = userFromApi(r.data);
+        this.currentUser.set(user);
+        return { user };
+      }),
+      catchError(toAppError),
+    );
+  }
+
+  /** Đăng nhập Google bước 2: nhập số điện thoại để tạo tài khoản. */
+  completeGoogle(phone: string): Observable<User> {
+    return this.http.post<{ data: unknown }>(`${API_BASE}/auth/google/complete`, { phone }, { withCredentials: true }).pipe(
+      map((r) => userFromApi(r.data)),
+      tap((user) => {
+        this.googlePending.set(null);
+        this.currentUser.set(user);
+      }),
+      catchError(toAppError),
+    );
+  }
+
+  private decodeJwt(token: string): Record<string, string> {
+    try {
+      const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes)) as Record<string, string>;
+    } catch {
+      return {};
+    }
+  }
+
   /** areaId + building + unit (khu, tòa, phòng) dùng làm địa chỉ mặc định — server chưa nhận thì bỏ qua. */
   register(body: { phone: string; name: string; password: string; areaId?: string; building?: string; unit?: string; termsVersion?: string; marketing?: boolean }): Observable<void> {
     if (useMock('auth')) {
