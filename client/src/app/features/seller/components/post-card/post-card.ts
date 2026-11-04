@@ -4,6 +4,7 @@ import { SELLER_KIND_ICON, SELLER_LANE, SellerPost } from '../../../../core/mode
 import { AuthService } from '../../../../core/services/auth';
 import { SellerSpaceService } from '../../../../core/services/seller-space';
 import { ToastService } from '../../../../core/services/toast';
+import { parseMoney } from '../money-input/money-input';
 
 /**
  * Thẻ một bài ở "Tình trạng bán" (trang Hôm nay) và trang Bài đăng:
@@ -77,7 +78,7 @@ export class SellerPostCard {
   protected savePrice(e: Event, v: string): void {
     e.preventDefault();
     this.editing.set(false);
-    this.priced.emit(Math.max(0, Math.round(+v || 0)));
+    this.priced.emit(parseMoney(v) ?? 0);
   }
 
   @HostListener('document:click', ['$event'])

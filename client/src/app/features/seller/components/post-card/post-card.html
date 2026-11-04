@@ -19,7 +19,7 @@
     </div>
     @if (manage && editing()) {
       <form class="pedit" (submit)="savePrice($event, pin.value)">
-        <input #pin class="input" type="number" min="0" step="1000" [value]="post.price" required autofocus />
+        <input #pin appMoney class="input" [moneyValue]="post.price" required autofocus />
         <button type="submit" class="btn dark">Lưu</button>
       </form>
     } @else if (manage) {
