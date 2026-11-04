@@ -292,3 +292,9 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
   - Số lượng: đồ ăn trừ khi đặt, đồ dùng trừ khi xác nhận, hủy / từ chối thì trả lại; về 0 thì tạm ngưng bài. `max >= 99` là không giới hạn. Dịch vụ không trừ. Số lượng theo từng món và từng lựa chọn chưa trừ riêng.
   - Hai tab cùng trình duyệt cập nhật ngay nhờ sự kiện `storage` (`MockDb.changes`).
   - **Chưa nối:** đổi lịch, báo vấn đề / trả hàng, đánh giá, đề nghị nhận việc; đơn thật qua server (`useMock('order')` tắt thì không nối).
+- **05/11 — bài đăng bên Mua hiện đúng cài đặt bên Bán:**
+  - Bài cũ chưa có `buyerPostId` (mã bài `n…`): lưu lại thì tìm bản bên Mua cùng tên để ghi đè và liên kết, không có thì đăng mới. Bài mẫu có sẵn của khu Bán (`f1`, `g1`…) vẫn không tự đăng.
+  - **Thanh toán:** `Post.bank` (`bankName`, `no`, `holder`, `qr`) lưu theo từng bài, theo đúng form đăng bài. Khung đặt chỉ hiện cách trong `payMethods`, chuyển khoản thì hiện `app-bank-pay`; trang chi tiết đơn cũng hiện. Bài không có `payMethods` vẫn hiện cả hai cách.
+  - **Tùy chọn nhanh, ghi chú:** `Post.quickOptions` thay dòng dụng cụ / ống hút mặc định, khách tick khi đặt (mặc định chưa tick), ghi vào đơn nhóm "Tùy chọn thêm". `Post.noteEnabled = false` ẩn ô ghi chú.
+  - **Đồ uống:** `template: 'drink'`; độ ngọt, đá, nóng / lạnh thành các nhóm chọn một không bắt buộc, không tính tiền ở `optionGroups`.
+  - **Server chưa có các trường:** `bank`, `quickOptions`, `noteEnabled`, `payMethods`, `items`. Hiện chỉ chạy ở dữ liệu mẫu.

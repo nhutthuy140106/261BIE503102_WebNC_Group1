@@ -31,6 +31,8 @@ export class OrderDraft {
   readonly repeat = signal(false);
   readonly note = signal('');
   readonly utensils = signal(true);
+  /** Tùy chọn nhanh khách đã tick */
+  readonly quickPicks = signal<string[]>([]);
   readonly pay = signal<PayMethod>('cash');
   readonly addressId = signal('');
   readonly voucher = signal<Voucher | null>(null);
@@ -237,6 +239,7 @@ export class OrderDraft {
       if (!isBase) out.push(g.name + ': ' + v.join(', '));
     }
     for (const sel of this.dishOptSelections()) out.push(sel.group + ': ' + sel.choices.join(', '));
+    if (this.quickPicks().length) out.push('Tùy chọn thêm: ' + this.quickPicks().join(', '));
     for (const q of this.tpl.qs) {
       const a = this.ans()[q.label] ?? '';
       const v = q.type === 'multi' ? this.picks(q.label).map((x) => parseChoice(x).name).join(', ') : q.type === 'choice' ? parseChoice(a).name : a;
@@ -245,6 +248,10 @@ export class OrderDraft {
     if (this.paying() && this.payBack()) out.push('Số tiền cần trả giùm: ' + Number(this.payBack()).toLocaleString('vi-VN') + 'đ');
     return out;
   });
+
+  toggleQuick(label: string, on: boolean): void {
+    this.quickPicks.update((l) => (on ? [...l, label] : l.filter((x) => x !== label)));
+  }
 
   /** Đã chọn "Có" ở câu hỏi trả tiền giùm */
   paying(): boolean {

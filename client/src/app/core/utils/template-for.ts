@@ -214,6 +214,8 @@ export function viewOf(post: Post): PostView {
     xuOk: post.acceptsXu ?? base.xuOk,
     pays: pays?.length ? pays : undefined,
     bank: post.bank,
+    quick: post.quickOptions,
+    noteOff: post.noteEnabled === false,
     time,
   };
   // Dòng "Nhận đặt …" chỉ lấy từ khung giờ THẬT của bài; bài không đặt khung thì không ghi giờ (câu chữ cứng của mẫu từng nói sai giờ thật)

@@ -110,6 +110,10 @@ export interface PostTemplate {
   pays?: ('cash' | 'transfer')[];
   /** Tài khoản nhận chuyển khoản của người bán */
   bank?: PostBank;
+  /** Tùy chọn nhanh người bán đặt; có thì thay dòng dụng cụ / ống hút mặc định */
+  quick?: string[];
+  /** Người bán tắt ô ghi chú */
+  noteOff?: boolean;
   stock: StockBlock;
   notePh: string;
   safety?: boolean;

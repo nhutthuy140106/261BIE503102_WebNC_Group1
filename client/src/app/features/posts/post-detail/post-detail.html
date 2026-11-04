@@ -382,19 +382,27 @@
               @if (v.tpl.time.repeat) {
                 <label class="crow sw"><svg class="i ic"><use href="#l-cal" /></svg><span class="ct"><b>Lặp lại hằng tuần</b><small>Giữ cố định khung giờ này mỗi tuần</small></span><input type="checkbox" class="tg" [checked]="d.repeat()" (change)="d.repeat.set($any($event.target).checked)" /></label>
               }
+              @if (v.tpl.quick; as quick) {
+                @for (q of quick; track q) {
+                  <label class="crow sw"><svg class="i ic"><use href="#l-bag" /></svg><span class="ct"><b>{{ q }}</b></span><input type="checkbox" class="tg" [checked]="d.quickPicks().includes(q)" (change)="d.toggleQuick(q, $any($event.target).checked)" /></label>
+                }
+              } @else {
               @if (v.tpl.key === 'food') {
                 <label class="crow sw"><svg class="i ic"><use href="#l-bag" /></svg><span class="ct"><b>Lấy dụng cụ ăn uống</b><small>Muỗng, đũa, khăn giấy, tắt để bớt rác thải</small></span><input type="checkbox" class="tg" [checked]="d.utensils()" (change)="d.utensils.set($any($event.target).checked)" /></label>
               }
               @if (v.tpl.key === 'drink') {
                 <label class="crow sw"><svg class="i ic"><use href="#l-bag" /></svg><span class="ct"><b>Lấy ống hút</b><small>Tắt để bớt rác thải</small></span><input type="checkbox" class="tg" [checked]="d.utensils()" (change)="d.utensils.set($any($event.target).checked)" /></label>
               }
+              }
 
+              @if (!v.tpl.noteOff) {
               <label class="crow">
                 <svg class="i ic"><use href="#l-receipt" /></svg>
                 <span class="ct"><b>Ghi chú</b>
                   <input class="noteinp" [placeholder]="v.tpl.notePh" maxlength="200" [value]="d.note()" (input)="d.note.set($any($event.target).value)" />
                 </span>
               </label>
+              }
             </section>
 
             <!-- 4. Voucher + thanh toán -->

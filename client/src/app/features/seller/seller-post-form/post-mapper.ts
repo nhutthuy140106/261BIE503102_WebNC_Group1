@@ -13,7 +13,7 @@ type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 export type PostFields = Pick<
   PostBody,
   | 'category' | 'priceType' | 'estimate' | 'inspectFee' | 'items' | 'optionGroups' | 'questions' | 'fulfillmentModes' | 'deliveryFee'
-  | 'needSchedule' | 'payMethods' | 'bank' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
+  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'template' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
 >;
 
 /** "A, B|+5.000đ" không dùng nữa: form lưu lựa chọn là chuỗi cách nhau dấu phẩy */
@@ -84,6 +84,12 @@ const fulfilOf = (s: V): Pick<PostFields, 'fulfillmentModes' | 'deliveryFee'> =>
   return { fulfillmentModes: modes, deliveryFee: f['delivery'] ? +f['fee'] || 0 : 0 };
 };
 
+/** Độ ngọt, đá, nóng / lạnh của đồ uống thành các nhóm chọn một, không tính tiền, không bắt buộc (bỏ hết = không cho chọn) */
+const drinkMixOf = (s: V): OptionGroup[] => {
+  const group = (name: string, list: unknown): OptionGroup[] => ((list as string[]) ?? []).length ? [{ name, multi: false, required: false, choices: (list as string[]).map((label) => ({ label, price: 0 })) }] : [];
+  return [...(s['hotCold'] ? group('Nóng / lạnh', ['Lạnh', 'Nóng']) : []), ...group('Độ ngọt', s['sweet']), ...group('Đá', s['ice'])];
+};
+
 /** Giá đại diện: dòng rẻ nhất; nhiều mức giá khác nhau → 'from' */
 const priceTypeOf = (its: PostItem[], fixed: PriceType = 'fixed'): PriceType =>
   new Set(its.map((i) => i.price)).size > 1 ? 'from' : fixed;
@@ -105,7 +111,10 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         priceType: priceTypeOf(items),
         // món thêm dùng chung (spec.options) luôn ở cấp bài. Một món: tùy chọn của món gộp lên cấp bài; nhiều món: ở từng món
         items: items.length > 1 ? items : undefined,
-        optionGroups: [...optionsOf(s['options']), ...(items.length === 1 ? (items[0]?.optionGroups ?? []) : [])],
+        optionGroups: [...(type === 'drink' ? drinkMixOf(s) : []), ...optionsOf(s['options']), ...(items.length === 1 ? (items[0]?.optionGroups ?? []) : [])],
+        quickOptions: ((s['quick'] as V[]) ?? []).filter((q) => q['on'] && String(q['label'] ?? '').trim()).map((q) => String(q['label']).trim()),
+        noteEnabled: !!s['kitchenNote'],
+        template: type === 'drink' ? 'drink' : undefined,
         dates: (sc['dates'] as string[]) ?? [],
         // "Nhận đặt từ … Đóng đơn lúc …" của Lịch bán = khung giờ nhận đơn của bài (khách ngoài giờ này không đặt được)
         orderWindow: sc['orderFrom'] && sc['orderTo'] && sc['orderFrom'] !== sc['orderTo'] ? { from: sc['orderFrom'], to: sc['orderTo'], days: [] } : undefined,

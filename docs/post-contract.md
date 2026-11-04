@@ -45,7 +45,9 @@ Post chỉ mang các **cờ** quyết định luồng của đơn:
 | `block`, `area` | string | Lấy từ tài khoản/khu vực |
 | `status` | `draft` · `open` · `soldout` · `closed` · `hidden` | `hidden` = Admin gỡ. Thay cho cờ `closed` + `on` rời nhau |
 | `acceptsXu` | boolean | |
-| `payMethods[]` | `cash` · `transfer` · `xu` | **Chỉ tên phương thức.** Tài khoản/QR nằm ở hồ sơ người bán (xem dưới) |
+| `payMethods[]` | `cash` · `transfer` · `xu` | Tên phương thức khách được chọn |
+| `bank` | `{ bankName, no, holder, qr? }` | **Đổi 05/11:** tài khoản và QR lưu theo từng bài, theo form đăng bài, không ở hồ sơ người bán. Chỉ có khi nhận chuyển khoản |
+| `quickOptions[]`, `noteEnabled` | string[], boolean | Đồ ăn, đồ uống: tùy chọn nhanh khách tick (không tính tiền), bật / tắt ô ghi chú |
 | `promo` | Giờ vàng | Giữ nguyên như hiện có |
 | `combo` | Combo | Giữ nguyên như hiện có |
 | `promoted`, `spinPromo` | boolean | **Do hệ thống gán** khi trả Xu; người bán không nhập |

@@ -147,6 +147,10 @@ export interface Post {
   payMethods?: PayMethod[];
   /** Tài khoản và mã QR khi bài nhận chuyển khoản */
   bank?: PostBank;
+  /** Đồ ăn, đồ uống: tùy chọn nhanh người bán đặt, khách tick khi đặt, không tính tiền. Không có = dùng dòng mặc định của mẫu */
+  quickOptions?: string[];
+  /** Đồ ăn, đồ uống: false = người bán tắt ô ghi chú */
+  noteEnabled?: boolean;
   /** Khối 3: ngày bán / ngày làm (yyyy-mm-dd) */
   dates?: string[];
   /** Khối 3: dịch vụ — kiểu chọn thời gian và thời lượng (giờ) */
