@@ -164,7 +164,8 @@ export class SellerService {
         const cur = rows.find((r) => r._id === id);
         if (!cur) throw new AppError('Không tìm thấy bài.', 404, 'NOT_FOUND');
         const items = cur.items?.map((it) => {
-          const d = deltas.find((x) => x.name === it.name)?.delta ?? 0;
+          // một món có thể nằm ở nhiều dòng của đơn (cùng loại, khác tùy chỉnh)
+          const d = deltas.filter((x) => x.name === it.name).reduce((n, x) => n + x.delta, 0);
           return d && it.dailyQty !== undefined ? { ...it, dailyQty: Math.max(0, it.dailyQty + d) } : it;
         });
         const next: Post = { ...cur, items };
