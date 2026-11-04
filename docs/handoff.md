@@ -254,3 +254,28 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
   - Đơn giặt sấy (`SellerOrder.flow = 'laundry'`): thanh bước **Đã gửi → Đã xác nhận → Đã lấy đồ → Duyệt giá → Đang giặt → Đã trả đồ** (`LAUNDRY_STEP_NAMES`, trạng thái mới `picked`, `pricing`). Người bán: Xác nhận → Xác nhận đã lấy đồ → **Báo giá** (nhập số cân / đếm thực tế từng dịch vụ, `SellerOrder.quote`) → chờ khách duyệt (**lần nào cũng phải duyệt**) → Xác nhận đã trả đồ. Thanh toán giữ như cũ (tiền mặt / chuyển khoản do người bán đặt), chưa có mã QR theo đơn hay nhãn đối chiếu (để backend).
   - Dữ liệu mẫu thêm 3 đơn giặt sấy (`l3031` đã xác nhận, `l3032` chờ duyệt giá, `l3033` đang giặt); `VERSION` 2026-10-30-a — đổi phiên bản giờ **giữ lại bài đăng người dùng đã tạo**.
   - **Việc phía Mua:** bước "Duyệt giá" cho đơn giặt sấy (nút Đồng ý / Không đồng ý với `quote`), dùng `LAUNDRY_STEP_NAMES`; khách chọn giờ lấy đồ trong khung "Nhận đặt từ – Đóng đơn lúc". Trong bản mẫu phía Bán có nút "Bản mẫu: khách đồng ý giá" để thử luồng.
+- **03/11 — Sửa chữa (phía BÁN):**
+  - Form, mẫu **Sửa chữa** (cờ `repair`): ví dụ đổi sang dịch vụ tại nhà (vệ sinh máy lạnh, thông tắc ống nước, sửa ổ điện); **Phí kiểm tra** hiện ở cả Bảng giá lẫn Báo giá sau; mục **Nơi sửa**: Thợ đến nhà / Khách mang tới / Cả hai (`REPAIR_PLACES`); Lịch hẹn bỏ kiểu thời gian và đặt lặp lại; câu hỏi chung: thiết bị / vị trí bị hư, mô tả lỗi, ảnh chụp.
+  - Đơn sửa chữa (`SellerOrder.flow = 'repair'`): thanh bước **Đã gửi → Đã xác nhận → Kiểm tra → Duyệt giá → Đang sửa → Hoàn thành** (`REPAIR_STEP_NAMES`). Thợ tự nhập hạng mục báo giá sau khi kiểm tra. Khách đồng ý: phí kiểm tra trừ vào tiền sửa. Không đồng ý (`rejectQuote`): đơn hủy, chỉ thu phí kiểm tra.
+  - Dữ liệu mẫu thêm `r3034` (đã xác nhận, thợ đến nhà), `r3035` (chờ duyệt giá, khách mang tới); `VERSION` 2026-11-03-a.
+  - **Việc phía Mua:** bước "Duyệt giá" cho đơn sửa chữa (Đồng ý / Không đồng ý với `quote`), dùng `REPAIR_STEP_NAMES`; khách chọn nơi sửa khi mẫu cho "Cả hai"; đọc `inspect` để hiện phí kiểm tra trước khi đặt.
+- **04/11 — form dịch vụ chung, đang để ở mẫu **Khác** chờ review (cờ `generic`; các mẫu khác chưa đổi):** không theo ngành, khách nhận biết dịch vụ qua tên bài, không thêm từ khóa hay danh mục.
+  - Thứ tự mục: Giới thiệu · Cài đặt giá (Bảng giá / Báo giá sau + phí kiểm tra) · Lịch hẹn (+ thời gian làm dự kiến) · Nơi làm (Tại nhà khách + phụ phí đi lại / Tại chỗ của tôi / Khách chọn) · **Thông tin cần từ khách** · Thanh toán · Chính sách (`cancelPolicy`, `warranty`, `customerNote`).
+  - **Thông tin cần từ khách:** người bán tự tạo câu hỏi trong `spec.questions` gồm `label`, `type` (`ASK_TYPES`: text, long, number, choice, multi, date, range, photo, address), `required`, `hint`, `choices` (`label`, `price`: lựa chọn cộng giá); có nút thêm nhanh (`ASK_QUICK`) và khung xem trước phần khách điền.
+  - Bài mẫu Khác đăng trước đó được `toGenericSpec` chuyển sang cấu trúc mới khi mở lại để sửa.
+  - **Việc phía Mua (khi chốt form này):** hiện câu hỏi theo các kiểu mới, cộng `choices[].price` vào tổng tiền; đơn dùng flow theo `priceType` (Bảng giá: thường; Báo giá sau: có Kiểm tra + Duyệt giá).
+- **04/11 — form đồ ăn & uống, lịch chọn ngày, khác (phía BÁN):**
+  - Cột **Mỗi ngày** đổi thành **Số lượng**, để trống = bán đến khi đóng bài (đồ ăn và đồ uống).
+  - Đồ ăn: **tùy chọn cộng giá chuyển từ từng món ra cả đơn** (`spec.options`), mỗi lựa chọn có thêm số lượng (`choices[].qty`, trống = không giới hạn). Bài cũ gom tự động bằng `toOrderOptions`. Đồ uống vẫn tùy chọn theo từng loại.
+  - Lịch chọn ngày (mọi form): bấm ngày ngoài khoảng đang chọn thì chọn luôn các ngày ở giữa, bấm ngày trong khoảng thì bật / tắt riêng ngày đó; thêm nút "Bỏ hết".
+  - Bỏ khung "Đầu trang bài" ở cột xem trước; bỏ "Tạm nghỉ một vài mảng", trạng thái chỉ còn nhận đơn / tạm nghỉ cả gian hàng (`SellerPause` chỉ còn `until`).
+  - **Việc phía Mua:** khung đặt món đọc tùy chọn từ `spec.options` của cả đơn thay vì từng món (mục 29/10 không còn đúng), lựa chọn hết số lượng thì không cho chọn.
+- **04/11 — chỉnh form và hồ sơ gian hàng (phía BÁN):**
+  - Ô tiền và ô số lượng hiện dấu chấm hàng nghìn (directive `appMoney`, `components/money-input`), giá trị lưu vẫn là số.
+  - Form đồ ăn: mục **Menu** gộp cả tùy chọn cộng giá và tùy chọn nhanh (bỏ mục "Tùy chọn cho khách"); đồ uống đổi tên mục thành Menu.
+  - Hồ sơ gian hàng: bỏ ô và thẻ "Loại gian hàng" (dữ liệu `shop.kind` vẫn còn); "Nơi ở" đổi thành "Địa chỉ"; thời gian trả lời có "Khác" tự nhập.
+  - Ô thả xuống của khu Bán dùng `app-select`: thời gian trả lời, mở lại (đổi "sáng mai" thành "sau 24h"), khoảng thời gian ở Hôm nay.
+- **04/11 — form đồ uống giống đồ ăn (phía BÁN):**
+  - Đồ uống: **tùy chọn cộng giá chuyển từ từng loại nước ra cả đơn** (`spec.options`, có `choices[].qty`), bỏ mẫu Size/Topping điền sẵn, cũng bỏ nút "Tùy chọn cộng giá cho món này". Bài cũ gom bằng `toOrderOptions`; nhóm trùng tên giữa các loại nước chỉ giữ nhóm đầu.
+  - **Việc phía Mua:** khung đặt đồ uống đọc tùy chọn từ `spec.options` như đồ ăn.
+  - Ô Đơn vị trong bảng rộng hơn để chọn "Khác" vẫn đủ chỗ gõ; bỏ dòng giải thích ở ô chọn ngày (mọi form); căn lại dòng tùy chọn nhanh và khoảng cách nút thêm.
