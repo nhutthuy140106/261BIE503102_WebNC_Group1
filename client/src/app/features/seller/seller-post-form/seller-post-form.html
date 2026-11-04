@@ -98,7 +98,6 @@
                 </div>
                 <ng-container *ngTemplateOutlet="quickList; context: { ph: 'Ví dụ: Để sốt riêng' }" />
               </div>
-              <ng-container *ngTemplateOutlet="priceHintBox" />
               <ng-container *ngTemplateOutlet="promoBox" />
             </div>
           </section>
@@ -168,7 +167,6 @@
                 <div class="fld"><label for="gunit">Đơn vị</label><ng-container *ngTemplateOutlet="unitPick; context: { path: 'spec.unit', list: goodsUnits, id: 'gunit', ph: 'thùng' }" /></div>
                 <div class="fld" [class.bad]="bad('spec.stock')"><label for="gstock">Số lượng</label><input appMoney id="gstock" class="input" formControlName="stock" /><span class="err">Ít nhất 1</span></div>
               </div>
-              <ng-container *ngTemplateOutlet="priceHintBox" />
               <ng-container *ngTemplateOutlet="promoBox" />
             </div>
           </section>
@@ -229,7 +227,6 @@
                 } @else if (!svcPreset().generic) {
                   <label class="ck"><input type="checkbox" formControlName="estimate" /><span>Giá ước tính, cân / đếm thực tế khi nhận đồ</span></label>
                 }
-                <ng-container *ngTemplateOutlet="priceHintBox" />
               }
               <ng-container *ngTemplateOutlet="promoBox" />
             </div>
@@ -483,7 +480,6 @@
                 </div>
               </div>
               <span class="hint">Trả trực tiếp cho người làm, AntGo không giữ tiền.</span>
-              <ng-container *ngTemplateOutlet="priceHintBox" />
             </div>
           </section>
         }
@@ -599,16 +595,18 @@
               <button type="button" class="rm" aria-label="Bỏ dòng" [disabled]="arr('spec.items').length === 1" (click)="removeAt('spec.items', i)"><svg class="i"><use href="#xmark" /></svg></button>
             </div>
             @if (sizes) {
-              <div class="sizes" formArrayName="sizes">
+              <div class="grp sizes" formArrayName="sizes">
                 <span class="lbl">Size</span>
-                @for (z of arr('spec.items.' + i + '.sizes').controls; track $index; let zi = $index) {
-                  <div class="sz" [formGroupName]="zi">
-                    <input class="input" formControlName="label" maxlength="12" placeholder="Tên size" [attr.aria-label]="'Tên size ' + (zi + 1)" />
-                    <span class="money"><input appMoney class="input" formControlName="price" placeholder="Cộng thêm" [attr.aria-label]="'Giá cộng thêm size ' + (zi + 1)" /></span>
-                    <button type="button" class="rm" aria-label="Bỏ size" (click)="removeAt('spec.items.' + i + '.sizes', zi)"><svg class="i"><use href="#xmark" /></svg></button>
-                  </div>
-                }
-                <button type="button" class="mini" (click)="addChoice('spec.items.' + i + '.sizes')"><svg class="i"><use href="#plus" /></svg>Thêm size</button>
+                <div class="lines sub">
+                  @for (z of arr('spec.items.' + i + '.sizes').controls; track $index; let zi = $index) {
+                    <div class="line" [formGroupName]="zi">
+                      <input class="input" formControlName="label" maxlength="12" placeholder="Tên size" [attr.aria-label]="'Tên size ' + (zi + 1)" />
+                      <span class="money"><input appMoney class="input" formControlName="price" placeholder="Giá" [attr.aria-label]="'Giá cộng thêm size ' + (zi + 1)" /></span>
+                      <button type="button" class="rm" aria-label="Bỏ size" (click)="removeAt('spec.items.' + i + '.sizes', zi)"><svg class="i"><use href="#xmark" /></svg></button>
+                    </div>
+                  }
+                </div>
+                <button type="button" class="mini sub" (click)="addChoice('spec.items.' + i + '.sizes')"><svg class="i"><use href="#plus" /></svg>Thêm size</button>
               </div>
             }
             </div>
@@ -631,17 +629,6 @@
           </div>
           <button type="button" class="mini" (click)="addQuick('spec.' + (name || 'quick'))"><svg class="i"><use href="#plus" /></svg>{{ add || 'Thêm tùy chọn nhanh' }}</button>
         </div>
-      </ng-template>
-
-      <!-- ===== Gợi ý giá (PricingService, kNN trên bài tương tự) ===== -->
-      <ng-template #priceHintBox>
-        @if (priceHint(); as h) {
-          <div class="phint" role="status">
-            <div class="pht"><b>Gợi ý: {{ h.suggested | vnd }}</b><span>thường {{ h.low | vnd }} – {{ h.high | vnd }}</span>
-              <button type="button" class="btn" (click)="applyHint(h.suggested)">Dùng giá này</button></div>
-            <small>Dựa trên {{ h.samples }} {{ type() === 'job' ? 'việc' : 'bài' }} tương tự{{ h.confidence === 'low' ? ', ít mẫu giống nên chỉ tham khảo' : '' }}{{ h.basis[0] ? ': ' + h.basis[0].title + '…' : '' }}</small>
-          </div>
-        }
       </ng-template>
 
       <!-- ===== Giờ vàng: giảm giá trong khung giờ, tự về giá gốc khi hết giờ (core/utils/promo.ts) ===== -->

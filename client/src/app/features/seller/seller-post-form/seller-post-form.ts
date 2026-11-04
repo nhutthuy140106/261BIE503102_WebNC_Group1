@@ -1,9 +1,7 @@
 import { SelectOption } from '../../../shared/components/select/select';
 import { Component, DestroyRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { EMPTY, catchError, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
-import { PricingService } from '../../../core/services/pricing';
-import { PriceSuggestion } from '../../../core/utils/price-suggest';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { map, of, switchMap } from 'rxjs';
 import { Promo, discounted, promoLabel } from '../../../core/utils/promo';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -55,7 +53,6 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroy = inject(DestroyRef);
-  private readonly pricing = inject(PricingService);
 
   protected readonly types = TYPES;
   protected readonly days = DAYS;
@@ -173,36 +170,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   /** Giá trị form hiện tại (để vẽ cột xem trước) */
   protected readonly v = signal<V>(this.form.getRawValue());
 
-  // ---------------- Gợi ý giá · Giờ vàng (tính năng của HoangKhai, logic dùng lại từ core) ----------------
-
-  /** Gợi ý giá theo tên + loại (kNN trên bài tương tự); null khi chưa đủ dữ liệu */
-  protected readonly priceHint = signal<PriceSuggestion | null>(null);
-  private readonly hintKey = computed(() => {
-    const t = this.type();
-    return `${t === 'drink' ? 'food' : t}|${String((this.v()['common'] as V)['title'] ?? '').trim()}`;
-  });
-  private readonly hintSub = toObservable(this.hintKey)
-    .pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      switchMap((k) => {
-        const [kind, title] = [k.slice(0, k.indexOf('|')), k.slice(k.indexOf('|') + 1)];
-        return title.length >= 5 ? this.pricing.suggest(kind as PostKind, title).pipe(catchError(() => EMPTY)) : of(null);
-      }),
-      takeUntilDestroyed(),
-    )
-    .subscribe((h) => this.priceHint.set(h));
-
-  /** Dùng giá gợi ý: đồ ăn / đồ uống / dịch vụ điền vào dòng đầu chưa có giá (hoặc dòng đầu), đồ dùng vào Giá bán, việc vào Tiền công */
-  protected applyHint(n: number): void {
-    const t = this.type();
-    if (t === 'goods') return this.set('spec.price', n);
-    if (t === 'job') return this.set('spec.pay', n);
-    const rows = this.arr('spec.items').controls;
-    const row = rows.find((r) => !(+r.get('price')!.value > 0)) ?? rows[0];
-    row?.get('price')!.setValue(n);
-    this.form.markAsDirty();
-  }
+  // ---------------- Giờ vàng (logic dùng lại từ core) ----------------
 
   protected readonly promoWeek = [{ d: 1, l: 'T2' }, { d: 2, l: 'T3' }, { d: 3, l: 'T4' }, { d: 4, l: 'T5' }, { d: 5, l: 'T6' }, { d: 6, l: 'T7' }, { d: 0, l: 'CN' }];
   /** giá dùng để xem trước / kiểm Giờ vàng: bài nhiều giá → giá rẻ nhất */

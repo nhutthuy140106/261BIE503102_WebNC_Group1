@@ -134,7 +134,6 @@ Vào `/seller/posts/new?type=food|goods|service|job`. Với **mỗi bài**: đă
 **Kiểm tra form (mỗi loại)**
 - [ ] Thiếu ảnh (trừ việc làm), thiếu ngày, thiếu cách nhận tiền, chuyển khoản thiếu số tài khoản/QR → báo lỗi, không đăng.
 - [ ] Ô đỏ cuộn tới đúng chỗ; **Lưu nháp** không hiện bài bên Mua; thoát khi đang sửa dở → hỏi lại.
-- [ ] **Gợi ý giá**: gõ tên ≥ 5 ký tự → hiện giá tham khảo; bấm "Dùng giá này" điền đúng ô.
 - [ ] **Giờ vàng**: bật, mức giảm 0 hoặc > 90% (hoặc số tiền ≥ giá bán) → báo lỗi; hợp lệ → bên Mua hiện giá giảm trong khung giờ.
 - [ ] **Khung giờ nhận đơn**: bật hộp riêng → ngoài giờ bên Mua khóa. 🔸 Form có **hai chỗ trùng** (Lịch bán "Nhận đặt từ / Đóng đơn lúc" và hộp này), hộp riêng được ưu tiên.
 - [ ] 🔸 Cột **xem trước** có thể không giống hệt phía Mua.
