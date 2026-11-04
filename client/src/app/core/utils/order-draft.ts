@@ -1,5 +1,5 @@
 import { computed, signal } from '@angular/core';
-import { PostTemplate } from '../models/post-template';
+import { CupLine, PostTemplate } from '../models/post-template';
 import type { Voucher } from '../services/xu';
 import { Promo, discounted } from './promo';
 
@@ -31,6 +31,9 @@ export class OrderDraft {
   readonly repeat = signal(false);
   readonly note = signal('');
   readonly utensils = signal(true);
+  /** Đồ uống đặt theo từng dòng */
+  readonly cups = signal<CupLine[]>([]);
+  readonly totalCups = computed(() => this.cups().reduce((n, c) => n + c.qty, 0));
   /** Tùy chọn nhanh khách đã tick */
   readonly quickPicks = signal<string[]>([]);
   readonly pay = signal<PayMethod>('cash');
@@ -84,7 +87,7 @@ export class OrderDraft {
     this.qty.set(Math.max(this.totalDishes(), 0));
   }
 
-  readonly maxQty = computed(() => Math.min(this.tpl.qty?.max ?? 1, this.stock ?? Infinity));
+  readonly maxQty = computed(() => Math.min(this.tpl.cups ? 99 : this.tpl.qty?.max ?? 1, this.stock ?? Infinity));
 
   /** Giá chính (chưa gồm tùy chọn) */
   /** Nhân giá chính với: tổng số món (danh sách món) · số giờ (đặt theo giờ) · số lượng · 1 */
@@ -96,6 +99,7 @@ export class OrderDraft {
   readonly unit = computed(() => {
     const p = this.tpl.price;
     if (p.type === 'quote') return 0;
+    if (this.tpl.cups) return this.cups().reduce((n, c) => n + c.base * c.qty, 0);
     return (p.amount ?? 0) * this.mult();
   });
 
@@ -123,7 +127,7 @@ export class OrderDraft {
   );
 
   /** Phụ giá của tùy chọn/câu hỏi, nhân theo số lượng phần */
-  readonly extra = computed(() => (this.optAdd() + this.qsAdd()) * (this.tpl.qty ? this.qty() : 1) + this.dishRows().reduce((s, r) => s + r.add * r.qty, 0) + this.sharedExtras() + this.dishOptTotal());
+  readonly extra = computed(() => this.tpl.cups ? this.cups().reduce((n, c) => n + (c.price - c.base) * c.qty, 0) : (this.optAdd() + this.qsAdd()) * (this.tpl.qty ? this.qty() : 1) + this.dishRows().reduce((s, r) => s + r.add * r.qty, 0) + this.sharedExtras() + this.dishOptTotal());
   /** Giờ vàng đang áp (null khi hết giờ / không có) — do trang chi tiết cập nhật theo đồng hồ */
   readonly promo = signal<Promo | null>(null);
   /** Số tiền được giảm nhờ Giờ vàng: chỉ giảm giá chính (không giảm tùy chọn cộng giá), nhân theo số lượng/giờ */
@@ -131,6 +135,7 @@ export class OrderDraft {
     const p = this.promo();
     const price = this.tpl.price;
     if (!p || price.type === 'quote') return 0;
+    if (this.tpl.cups) return this.cups().reduce((n, c) => n + (c.base - discounted(c.base, p)) * c.qty, 0);
     return ((price.amount ?? 0) - discounted(price.amount ?? 0, p)) * this.mult();
   });
   /** Thành tiền trước khi trừ Giờ vàng và voucher */
@@ -276,6 +281,7 @@ export class OrderDraft {
       if (q.req && !(this.ans()[q.label] ?? '').trim()) return 'Hãy điền “' + q.label + '”.';
     }
     if (this.dishGroup && this.totalDishes() < 1) return 'Hãy chọn ít nhất 1 món.';
+    if (this.tpl.cups && !this.cups().length) return 'Hãy thêm ít nhất 1 ly vào đơn.';
     if (this.paying() && !this.payBack()) return 'Hãy nhập số tiền cần trả giùm.';
     if (!checkout) return '';
     if (this.tpl.time.mode === 'datedur' && !this.date()) return 'Hãy chọn ngày giờ.';

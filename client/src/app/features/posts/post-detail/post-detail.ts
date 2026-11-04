@@ -72,6 +72,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected readonly submitting = signal(false);
   protected readonly addrOpen = signal(false);
   protected readonly addrNew = signal(false);
+  protected readonly cupPopup = signal(false);
   /** Thêm địa chỉ mới ngay trong hộp chọn địa chỉ (đặt cho người khác = thêm địa chỉ người đó) */
   protected readonly addrForm = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(60)] }),
@@ -537,7 +538,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const placeText = place.mode === 'choice' ? place.choices?.[d.place()]?.[0] : place.mode === 'seller' ? place.where : undefined;
     const body: CreateOrderBody = {
       postId: p._id,
-      quantity: d.qty(),
+      quantity: d.tpl.cups ? d.totalCups() : d.qty(),
       selections: [
         ...d.tpl.opts.map((g) => ({ group: g.name, choices: g === d.dishGroup ? d.dishRows().map((r) => r.name) : d.chosen('', g) })),
         ...d.dishOptSelections(),
@@ -555,8 +556,11 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
       detail: {
         lines: d.lines(),
         quantity: d.tpl.qty ? d.qty() : undefined,
-        items: d.dishGroup ? d.dishRows().map((r) => ({ name: r.name, qty: r.qty })) : undefined,
-        itemsLabel: d.dishGroup?.name,
+        items: d.tpl.cups
+          ? d.cups().map((c) => ({ name: c.drink + (c.text ? ' · ' + c.text : ''), qty: c.qty }))
+          : d.dishGroup ? d.dishRows().map((r) => ({ name: r.name, qty: r.qty })) : undefined,
+        itemsLabel: d.tpl.cups ? 'Menu' : d.dishGroup?.name,
+        cups: d.tpl.cups ? d.cups().map((c) => ({ name: c.drink, option: c.text, qty: c.qty, price: c.price })) : undefined,
         quantityLabel: d.tpl.qty ? d.tpl.qty.label.replace(/\s*\(.*\)/, '') : undefined,
         unit: d.tpl.qty ? d.tpl.price.unit : undefined,
         address: d.needsAddress() && a ? a.name + ' (' + a.phone + ')\n' + this.addressText(a) : place.mode === 'seller' ? place.where : undefined,

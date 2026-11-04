@@ -48,7 +48,11 @@ export function toSellerOrder(order: Order, post: Post, body: CreateOrderBody, s
   };
   const ship = body.detail?.fee ?? 0;
   // báo giá sau: lúc đặt khách chỉ trả phí kiểm tra, giá sửa báo sau
-  const items = post.priceType === 'quote'
+  const cups = body.detail?.cups;
+  const items = cups?.length
+    // đồ uống: mỗi dòng đã có đủ tùy chỉnh và giá; tùy chọn chung của đơn (lấy ống hút…) ghi vào dòng đầu
+    ? cups.map((c, i) => ({ name: c.name, qty: c.qty, option: [c.option, i === 0 ? option : ''].filter(Boolean).join(' · '), price: c.price }))
+    : post.priceType === 'quote'
     ? [{ name: 'Phí kiểm tra', qty: 1, option, price: order.total - ship }]
     : dishes.map(dishLine);
   const rest = order.total - ship - items.reduce((n, i) => n + i.qty * i.price, 0);

@@ -1,0 +1,59 @@
+<div class="sec">
+  <h4>Menu</h4>
+  @for (c of draft.tpl.cups; track c.name) {
+    <button type="button" class="drk" [disabled]="draft.totalCups() >= draft.maxQty()" (click)="open(c)">
+      <span class="dn"><b>{{ c.name }}</b><small>{{ c.price | vnd }}</small></span>
+      <span class="plus" aria-hidden="true">+</span>
+    </button>
+  }
+</div>
+
+<div class="sec">
+  <h4>Đơn của bạn @if (draft.totalCups()) { <small>{{ draft.totalCups() }} ly</small> }</h4>
+  @for (l of draft.cups(); track l) {
+    <div class="ln">
+      <span class="lt"><b>{{ l.qty }} × {{ l.drink }}</b>@if (l.text) { <small>{{ l.text }}</small> }</span>
+      <span class="lr">
+        <b>{{ l.price * l.qty | vnd }}</b>
+        <span class="acts">
+          <button type="button" (click)="edit(l)">Sửa</button>
+          <button type="button" class="rm" [attr.aria-label]="'Bỏ ' + l.drink" (click)="remove(l)">Bỏ</button>
+        </span>
+      </span>
+    </div>
+  } @empty {
+    <p class="none">Bấm vào món trong Menu để chọn size, đường, đá và thêm vào đơn.</p>
+  }
+</div>
+
+@if (drink(); as d) {
+  <div class="scrim" (click)="close()">
+    <div class="pop" role="dialog" aria-modal="true" [attr.aria-label]="d.name" (click)="$event.stopPropagation()">
+      <header>
+        <div><h3>{{ d.name }}</h3><small>{{ d.price | vnd }}</small></div>
+        <button type="button" class="x" aria-label="Đóng" (click)="close()">✕</button>
+      </header>
+      <div class="body">
+        @for (g of d.groups; track g.name) {
+          <section>
+            <h4>{{ g.name === 'Size' ? 'Tùy chọn size' : g.name }} <small>{{ g.multi ? 'Chọn nhiều' : g.req === false ? 'Chọn 1, không bắt buộc' : 'Chọn 1' }}</small></h4>
+            @for (raw of g.choices; track raw) {
+              <button type="button" class="opt" [class.on]="isOn(g.name, raw)" role="checkbox" [attr.aria-checked]="isOn(g.name, raw)" (click)="toggle(g.name, raw)">
+                <i [class.sq]="g.multi"></i><span>{{ parse(raw).name }}</span>
+                @if (parse(raw).add) { <small>+{{ parse(raw).add | vnd }}</small> }
+              </button>
+            }
+          </section>
+        }
+      </div>
+      <footer>
+        <span class="qty">
+          <button type="button" aria-label="Giảm" [disabled]="qty() <= 1" (click)="setQty(qty() - 1)">−</button>
+          <b>{{ qty() }}</b>
+          <button type="button" aria-label="Tăng" [disabled]="qty() >= maxQty()" (click)="setQty(qty() + 1)">+</button>
+        </span>
+        <button type="button" class="go" (click)="save()">{{ editing() ? 'Lưu thay đổi' : 'Thêm vào đơn' }} · {{ price() * qty() | vnd }}</button>
+      </footer>
+    </div>
+  </div>
+}

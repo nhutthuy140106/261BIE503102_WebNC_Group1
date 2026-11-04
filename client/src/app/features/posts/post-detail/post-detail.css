@@ -119,6 +119,7 @@
 .card.addr:hover, .card.sel { border-color: var(--ink); }
 .card em { font-style: normal; color: var(--accent); font-size: 12.5px; font-weight: 600; }
 /* địa chỉ: chữ cùng cỡ dòng "Địa chỉ nhận hàng", nhãn Mặc định giữa ô bên phải */
+.order.lift { z-index: 95; }
 .card.addr { grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-items: center; }
 .card.addr b, .card.addr span { grid-column: 1; font-size: 12.5px; }
 .card.addr em, .card.addr .setdef { grid-column: 2; grid-row: 1 / span 2; }

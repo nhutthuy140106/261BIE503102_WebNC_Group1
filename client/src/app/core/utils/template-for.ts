@@ -180,6 +180,14 @@ export function viewOf(post: Post): PostView {
       : post.orderWindow
         ? { ...base.time, win: [post.orderWindow.from, post.orderWindow.to] }
         : base.time;
+  // Bài đồ uống đăng từ form khu Bán: size, đường, đá, topping chọn cho từng dòng thay vì chung cả đơn
+  const cups = post.template === 'drink' && post.noteEnabled !== undefined
+    ? (post.items?.length ? post.items : [{ name: post.title, price: post.price, optionGroups: [] as OptionGroup[] }]).map((it) => ({
+        name: it.name,
+        price: it.price,
+        groups: [...(it.optionGroups ?? []), ...(post.optionGroups ?? [])].map(toBlock),
+      }))
+    : undefined;
   const pays = post.payMethods?.filter((m): m is 'cash' | 'transfer' => m !== 'xu');
   const tpl: PostTemplate = {
     ...base,
@@ -196,7 +204,7 @@ export function viewOf(post: Post): PostView {
             // giá ước tính là của người bán chọn, không lấy của mẫu (mẫu giặt sấy luôn "ước tính")
             ...(svc ? { estimate: !!post.estimate } : {}),
           },
-    qty: svc ? (quote || (post.timeMode === 'datedur' && !items) ? null : { label: 'Số lượng', min: 1, max: 20 }) : base.qty,
+    qty: cups ? null : svc ? (quote || (post.timeMode === 'datedur' && !items) ? null : { label: 'Số lượng', min: 1, max: 20 }) : base.qty,
     seller: {
       ...base.seller,
       name: post.sellerName,
@@ -213,10 +221,11 @@ export function viewOf(post: Post): PostView {
     place,
     facts: same ? base.facts : post.kind === 'food' ? foodFacts(post, place) : post.kind === 'goods' ? goodsFacts(post, place) : svc ? serviceFacts(post, place) : base.facts,
     steps: !same && post.kind !== 'job' ? placedStepNames(post.kind, quote || !!post.estimate) : base.steps,
-    opts: [...(dish ? [dish] : []), ...(own ?? (!dish && same ? base.opts : []))],
-    dishList: dish ? true : same ? base.dishList : false,
+    opts: cups ? [] : [...(dish ? [dish] : []), ...(own ?? (!dish && same ? base.opts : []))],
+    dishList: cups ? false : dish ? true : same ? base.dishList : false,
+    cups,
     dishPriced: !!dish,
-    ...(Object.keys(dishOpts).length ? { dishOpts } : {}),
+    ...(!cups && Object.keys(dishOpts).length ? { dishOpts } : {}),
     qs: post.questions?.length ? post.questions.map((q) => ({ type: q.type ?? ('text' as const), label: q.label, opts: q.opts, ph: q.ph, req: q.required, long: q.long, hint: q.hint, pay: q.pay })) : same ? base.qs : [],
     xuOk: post.acceptsXu ?? base.xuOk,
     pays: pays?.length ? pays : undefined,

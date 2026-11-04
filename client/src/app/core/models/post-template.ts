@@ -9,6 +9,24 @@ export type TemplateKey = 'food' | 'drink' | 'goods' | 'svc' | 'fix' | 'clean' |
 
 export type IconName = 'clock' | 'pin' | 'bolt' | 'check' | 'receipt' | 'shield';
 
+/** Đồ uống đặt theo từng dòng: một loại nước và các nhóm khách chọn cho ly đó (size, độ ngọt, đá, topping) */
+export interface CupDrink {
+  name: string;
+  price: number;
+  groups: OptionBlock[];
+}
+
+/** Một dòng trong đơn đồ uống: cùng loại, cùng tùy chỉnh. `price` = giá một ly đã gồm tùy chỉnh */
+export interface CupLine {
+  drink: string;
+  base: number;
+  price: number;
+  qty: number;
+  /** Lựa chọn thô theo nhóm, để mở lại khi sửa dòng */
+  picks: Record<string, string[]>;
+  text: string;
+}
+
 /** Khối 1 — Giá: cố định / theo đơn vị / "từ" / báo giá sau (kèm phí kiểm tra) */
 export interface PriceBlock {
   type: 'fixed' | 'unit' | 'from' | 'quote';
@@ -110,6 +128,8 @@ export interface PostTemplate {
   pays?: ('cash' | 'transfer')[];
   /** Tài khoản nhận chuyển khoản của người bán */
   bank?: PostBank;
+  /** Có = đặt đồ uống theo từng dòng (bài đồ uống đăng từ form khu Bán) */
+  cups?: CupDrink[];
   /** Tùy chọn nhanh người bán đặt; có thì thay dòng dụng cụ / ống hút mặc định */
   quick?: string[];
   /** Người bán tắt ô ghi chú */

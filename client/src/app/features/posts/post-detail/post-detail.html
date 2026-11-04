@@ -106,7 +106,7 @@
     </div>
 
     <!-- ===== Khung đặt — bước 1: chỉ chọn món ===== -->
-    <aside class="order">
+    <aside class="order" [class.lift]="cupPopup()">
       <div class="price">@if (deal(); as dl) { <strong class="dnow">{{ fmt(dl.price) }}</strong> <s class="dwas">{{ fmt(dl.original) }}</s> } @else { {{ priceLabel() }} } @if (v.tpl.price.type !== 'quote' && v.tpl.price.unit) { <span>/ {{ v.tpl.price.unit }}</span> }@if (v.tpl.xuOk) { <img class="xuico" src="assets/clean/antxu.png" alt="Dùng được Xu" title="Đơn này dùng được voucher AntXu" /> }</div>
       @if (priceSub()) { <div class="psub">{{ priceSub() }}</div> }
       @if (deal(); as dl) {
@@ -148,6 +148,8 @@
           </div>
         }
       </ng-template>
+
+      @if (v.tpl.cups) { <app-cup-order [draft]="d" (popup)="cupPopup.set($event)" /> }
 
       @for (g of v.tpl.opts; track g.name) {
         @if (g === d.dishGroup) {
@@ -314,6 +316,7 @@
                 <span class="ct">
                   <b>{{ v.tpl.title }}</b>
                   @for (r of d.dishRows(); track r.raw) { <small>{{ r.name }} x {{ r.qty }}</small> }
+                  @for (c of d.cups(); track c) { <small>{{ c.drink }} x {{ c.qty }}@if (c.text) { · {{ c.text }} }</small> }
                   @if (v.tpl.qty && !d.dishGroup) { <small>Số lượng: {{ d.qty() }}</small> }
                   @if (d.lines().length) { <small>{{ d.lines().join(' · ') }}</small> }
                 </span>
