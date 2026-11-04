@@ -29,12 +29,6 @@ const optionsOf = (arr: unknown): OptionGroup[] =>
       choices: (g['choices'] as V[]).filter((c) => String(c['label'] ?? '').trim()).map((c) => ({ label: String(c['label']).trim(), price: +c['price'] || 0 })),
     }));
 
-/** Size riêng của một loại nước: khách bắt buộc chọn một, giá cộng thêm vào giá của loại đó */
-const sizesOf = (it: V): OptionGroup[] => {
-  const choices = ((it['sizes'] as V[]) ?? []).filter((z) => String(z['label'] ?? '').trim()).map((z) => ({ label: String(z['label']).trim(), price: +z['price'] || 0 }));
-  return choices.length ? [{ name: 'Size', multi: false, required: true, perDish: true, choices }] : [];
-};
-
 const itemsOf = (s: V): PostItem[] =>
   ((s['items'] as V[]) ?? [])
     .filter((it) => String(it['name'] ?? '').trim() && +it['price'] > 0)
@@ -44,7 +38,7 @@ const itemsOf = (s: V): PostItem[] =>
       price: +it['price'],
       unit: it['unit'] || undefined,
       dailyQty: +it['qty'] > 0 ? +it['qty'] : undefined,
-      optionGroups: [...sizesOf(it), ...optionsOf(it['options'])],
+      optionGroups: optionsOf(it['options']),
     }))
     .map((it) => (it.optionGroups?.length ? it : { ...it, optionGroups: undefined }));
 
@@ -90,10 +84,12 @@ const fulfilOf = (s: V): Pick<PostFields, 'fulfillmentModes' | 'deliveryFee'> =>
   return { fulfillmentModes: modes, deliveryFee: f['delivery'] ? +f['fee'] || 0 : 0 };
 };
 
-/** Độ ngọt, đá của đồ uống thành các nhóm chọn một, không tính tiền, không bắt buộc (bỏ hết = không cho chọn) */
+/** Size (bắt buộc chọn, có giá cộng thêm), độ ngọt, đá của đồ uống thành các nhóm chọn một, không tính tiền, không bắt buộc (bỏ hết = không cho chọn) */
 const drinkMixOf = (s: V): OptionGroup[] => {
+  const sizes = ((s['sizes'] as V[]) ?? []).filter((z) => String(z['label'] ?? '').trim()).map((z) => ({ label: String(z['label']).trim(), price: +z['price'] || 0 }));
+  const size: OptionGroup[] = sizes.length ? [{ name: 'Size', multi: false, required: true, choices: sizes }] : [];
   const group = (name: string, list: unknown): OptionGroup[] => ((list as string[]) ?? []).length ? [{ name, multi: false, required: false, choices: (list as string[]).map((label) => ({ label, price: 0 })) }] : [];
-  return [...group('Độ ngọt', s['sweet']), ...group('Đá', s['ice'])];
+  return [...size, ...group('Độ ngọt', s['sweet']), ...group('Đá', s['ice'])];
 };
 
 /** Giá đại diện: dòng rẻ nhất; nhiều mức giá khác nhau → 'from' */
@@ -117,7 +113,7 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         priceType: priceTypeOf(items),
         // món thêm dùng chung (spec.options) luôn ở cấp bài. Một món: tùy chọn của món gộp lên cấp bài; nhiều món: ở từng món
         items: items.length > 1 ? items : undefined,
-        optionGroups: [...(items.length === 1 ? (items[0]?.optionGroups ?? []) : []), ...(type === 'drink' ? drinkMixOf(s) : []), ...optionsOf(s['options'])],
+        optionGroups: [...(type === 'drink' ? drinkMixOf(s) : []), ...(items.length === 1 ? (items[0]?.optionGroups ?? []) : []), ...optionsOf(s['options'])],
         quickOptions: ((s['quick'] as V[]) ?? []).filter((q) => q['on'] && String(q['label'] ?? '').trim()).map((q) => String(q['label']).trim()),
         noteEnabled: !!s['kitchenNote'],
         template: type === 'drink' ? 'drink' : undefined,

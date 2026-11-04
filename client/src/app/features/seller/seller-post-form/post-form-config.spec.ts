@@ -1,5 +1,5 @@
 import { FormBuilder } from '@angular/forms';
-import { datesBetween, drinkGroup, toGenericSpec, toOrderOptions } from './post-form-config';
+import { datesBetween, drinkGroup, toDrinkSizes, toGenericSpec, toOrderOptions } from './post-form-config';
 
 describe('toGenericSpec', () => {
   it('chuyển lựa chọn dạng chuỗi thành danh sách lựa chọn', () => {
@@ -34,11 +34,32 @@ describe('toOrderOptions', () => {
   });
 });
 
+describe('toDrinkSizes', () => {
+  const m = { label: 'M', price: 0 };
+  it('giữ nguyên bộ size chung đã có', () => {
+    expect(toDrinkSizes({ sizes: [m], items: [], options: [] })['sizes']).toEqual([m]);
+  });
+  it('bài có size riêng từng loại: lấy của loại đầu tiên, bỏ khỏi các món', () => {
+    const r = toDrinkSizes({ items: [{ name: 'A', sizes: [] }, { name: 'B', sizes: [m] }, { name: 'C', sizes: [] }], options: [] });
+    expect(r['sizes']).toEqual([m]);
+    expect(r['items'][1]).toEqual({ name: 'B' });
+  });
+  it('nhóm Size trong tùy chọn cộng giá chuyển thành bộ size, nhóm khác giữ lại', () => {
+    const r = toDrinkSizes({ items: [], options: [{ name: 'size', choices: [m] }, { name: 'Topping', choices: [] }] });
+    expect(r['sizes']).toEqual([m]);
+    expect(r['options'].map((g: { name: string }) => g.name)).toEqual(['Topping']);
+  });
+  it('bài cũ không có size thì để trống', () => {
+    expect(toDrinkSizes({ items: [{ name: 'A' }], options: [] })['sizes']).toEqual([]);
+  });
+});
+
 describe('drinkGroup', () => {
   it('tùy chọn cộng giá nằm ở cả đơn, loại nước không có tùy chọn riêng', () => {
     const v = drinkGroup(new FormBuilder()).getRawValue();
     expect(v.options).toEqual([]);
     expect(v.items[0].options).toEqual([]);
+    expect(v.sizes.map((z) => z['label'])).toEqual(['M', 'L']);
   });
 });
 

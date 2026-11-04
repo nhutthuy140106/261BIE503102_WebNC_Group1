@@ -22,17 +22,6 @@ describe('toSellerOrder', () => {
     expect(t.stockQty).toBe(2);
   });
 
-  it('size riêng: ghi và tính tiền vào đúng dòng món, không có dòng phụ', () => {
-    const size = (l: number) => [{ name: 'Size', multi: false, required: true, perDish: true, choices: [{ label: 'M', price: 0 }, { label: 'L', price: l }] }];
-    const drink = { ...post, items: [{ id: 'i1', name: 'Trà đào', price: 30000, optionGroups: size(6000) }, { id: 'i2', name: 'Trà sữa', price: 35000, optionGroups: size(8000) }] } as Post;
-    const b = body({ detail: { ...detail(5000), items: [{ name: 'Trà đào', qty: 2 }, { name: 'Trà sữa', qty: 1 }] }, selections: [{ group: 'Menu', choices: ['Trà đào', 'Trà sữa'] }, { group: 'Trà đào – Size', choices: ['L'] }, { group: 'Trà sữa – Size', choices: ['M'] }] });
-    const t = toSellerOrder(order({ total: 112000 }), drink, b, sp, who);
-    expect(t.items).toEqual([
-      { name: 'Trà đào', qty: 2, option: 'Size: L', price: 36000 },
-      { name: 'Trà sữa', qty: 1, option: 'Size: M', price: 35000 },
-    ]);
-  });
-
   it('đồ uống theo dòng: giữ từng dòng và giá, tùy chọn chung ghi vào dòng đầu', () => {
     const cups = [{ name: 'Trà đào', option: 'L · 70%', qty: 2, price: 36000 }, { name: 'Trà đào', option: 'M', qty: 1, price: 30000 }];
     const b = body({ quantity: 3, detail: { ...detail(0), items: [{ name: 'Trà đào · L · 70%', qty: 2 }, { name: 'Trà đào · M', qty: 1 }], cups }, selections: [{ group: 'Tùy chọn thêm', choices: ['Lấy ống hút'] }] });

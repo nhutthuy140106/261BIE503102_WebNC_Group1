@@ -15,8 +15,6 @@ export interface OptionGroup {
   multi: boolean;
   required: boolean;
   choices: { label: string; price: number }[];
-  /** Chọn riêng cho từng món (size của từng loại nước), hiện ngay dưới món thay vì gom xuống cuối khung đặt */
-  perDish?: boolean;
 }
 
 /**

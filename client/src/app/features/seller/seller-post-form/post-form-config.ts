@@ -210,9 +210,11 @@ export function foodGroup(fb: FormBuilder) {
 
 export function drinkGroup(fb: FormBuilder) {
   return fb.group({
-    /** thực đơn đồ uống: mỗi loại nước một giá + đơn vị + số lượng (trống = bán đến khi đóng bài) + các size riêng */
-    items: fb.array([itemGroup(fb, '', null, 'ly', null, [], null, defaultSizes(fb))]),
-    /** tùy chọn cộng giá cho cả đơn (size, topping…) */
+    /** thực đơn đồ uống: mỗi loại nước một giá + đơn vị + số lượng (trống = bán đến khi đóng bài) */
+    items: fb.array([itemGroup(fb, '', null, 'ly')]),
+    /** size dùng chung cho mọi loại nước: tên + số tiền cộng thêm */
+    sizes: fb.array(defaultSizes(fb)),
+    /** tùy chọn cộng giá (topping…) */
     options: fb.array<FormGroup>([]),
     /** khách gõ ghi chú cho quán khi đặt (như "ghi chú cho bếp" của đồ ăn) */
     kitchenNote: [true],
@@ -296,11 +298,11 @@ export function serviceGroup(fb: FormBuilder, preset: string) {
 }
 
 /** Một dòng thực đơn / bảng giá: tên, giá, đơn vị tính; đồ ăn có thêm số phần mỗi ngày + tùy chọn cộng giá riêng của món */
-/** Size mặc định của một loại nước: quán đổi tên, giá cộng thêm hoặc bỏ bớt */
+/** Size mặc định của quán: đổi tên, giá cộng thêm hoặc bỏ bớt */
 export const defaultSizes = (fb: FormBuilder): FormGroup[] => [choice(fb, 'M', 0), choice(fb, 'L', 0)];
 
-export function itemGroup(fb: FormBuilder, name = '', price: number | null = null, unit = 'lần', qty: number | null = null, options: FormGroup[] = [], guests: number | null = null, sizes: FormGroup[] = []) {
-  return fb.group({ name: [name], price: [price, Validators.min(0)], unit: [unit], qty: [qty, Validators.min(0)], options: fb.array(options), guests: [guests, Validators.min(1)], sizes: fb.array(sizes) });
+export function itemGroup(fb: FormBuilder, name = '', price: number | null = null, unit = 'lần', qty: number | null = null, options: FormGroup[] = [], guests: number | null = null) {
+  return fb.group({ name: [name], price: [price, Validators.min(0)], unit: [unit], qty: [qty, Validators.min(0)], options: fb.array(options), guests: [guests, Validators.min(1)] });
 }
 
 /** Một tùy chọn nhanh: bật thì khách thấy dòng này để tick khi đặt */
@@ -343,6 +345,18 @@ export function toGenericSpec(s: V): V {
 }
 
 /** Bài đồ ăn cũ có tùy chọn theo từng món: gom ra tùy chọn của cả đơn, nhóm trùng tên chỉ giữ một */
+/**
+ * Bài đồ uống đã lưu: chuyển về một bộ size chung. Lấy từ size riêng của loại nước đầu tiên có size,
+ * hoặc nhóm tên "Size" trong tùy chọn cộng giá; không có thì để trống (khách không phải chọn size).
+ */
+export function toDrinkSizes(s: V): V {
+  const items = (s['items'] as V[]) ?? [];
+  const options = (s['options'] as V[]) ?? [];
+  const inOptions = options.find((g) => /^size$/i.test(String(g['name'] ?? '').trim()));
+  const sizes = (s['sizes'] as V[] | undefined) ?? items.find((it) => (it['sizes'] as V[])?.length)?.['sizes'] ?? inOptions?.['choices'] ?? [];
+  return { ...s, sizes, options: options.filter((g) => g !== inOptions), items: items.map(({ sizes: _drop, ...it }) => it) };
+}
+
 export function toOrderOptions(s: V): V {
   const all = [...((s['options'] as V[]) ?? []), ...((s['items'] as V[]) ?? []).flatMap((it) => (it['options'] as V[]) ?? [])];
   const options = all.filter((g, i) => all.findIndex((x) => x['name'] === g['name']) === i);

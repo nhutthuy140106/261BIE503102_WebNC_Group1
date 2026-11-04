@@ -15,7 +15,7 @@ import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import {
   AMENITIES, ASK_QUICK, ASK_TYPES, BLOCKS, GENERIC_PLACES, REPAIR_PLACES, CATS, DRINK_UNITS, FOOD_UNITS, GOODS_UNITS, SVC_UNITS, ymd, CONDITIONS, DAYS, FOOD_TAGS, FormType, ICE, JOB_UNITS, PRICE_TYPES, Q_TYPES, SVC_PLACES, SVC_PRESETS, SVC_TIMES, SWEET,
-  choice, commonGroup, defaultSizes, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, datesBetween, toGenericSpec, toOrderOptions,
+  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, datesBetween, toDrinkSizes, toGenericSpec, toOrderOptions,
 } from './post-form-config';
 
 /** Ngày bán: 1 ngày → dd/mm/yyyy, nhiều ngày → ngày đầu - ngày cuối */
@@ -326,7 +326,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   protected addItem(): void {
     const t = this.type();
     const stay = t === 'service' && this.svcPreset().stay;
-    this.arr('spec.items').push(t === 'food' ? itemGroup(this.fb, '', null, 'phần') : t === 'drink' ? itemGroup(this.fb, '', null, 'ly', null, [], null, defaultSizes(this.fb)) : stay ? itemGroup(this.fb, '', null, 'đêm', 1, [], 2) : itemGroup(this.fb));
+    this.arr('spec.items').push(t === 'food' ? itemGroup(this.fb, '', null, 'phần') : t === 'drink' ? itemGroup(this.fb, '', null, 'ly') : stay ? itemGroup(this.fb, '', null, 'đêm', 1, [], 2) : itemGroup(this.fb));
   }
 
   /** thêm dòng tick: tùy chọn nhanh (`spec.quick`) hoặc nội quy lưu trú (`spec.rules`) */
@@ -745,7 +745,8 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
 
   /** Mở lại bài: có dữ liệu form thì dựng đúng từng ô, bài mẫu cũ thì điền những gì có */
   private restore(p: SellerPost): void {
-    const spec0 = (p.form as V | undefined)?.['spec'] as V | undefined;
+    let spec0 = (p.form as V | undefined)?.['spec'] as V | undefined;
+    // bản rất cũ có `spec.sizes` là giá tuyệt đối: đã đổi thành nhóm Size ở dưới nên không dùng làm bộ size chung
     if (p.form && p.formType === 'food' && spec0 && !spec0['items']) {
       p = { ...p, form: { ...p.form, spec: { ...spec0, items: [{ name: p.title, price: spec0['price'], unit: spec0['unit'] || 'phần', qty: spec0['dailyLimit'] ?? 20 }] } } };
     }
@@ -756,10 +757,13 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         ...(sizes.length > 1 ? [{ name: 'Size', multi: false, required: true, choices: sizes.map((z) => ({ label: z['label'], price: +z['price'] - base })) }] : []),
         ...((spec0['toppings'] as V[])?.length ? [{ name: 'Topping', multi: true, required: false, choices: spec0['toppings'] }] : []),
       ];
-      p = { ...p, form: { ...p.form, spec: { ...spec0, items: [{ name: p.title, price: base, unit: 'ly', qty: spec0['unlimited'] ? null : spec0['dailyLimit'], options }] } } };
+      const { sizes: _absolute, ...rest } = spec0;
+      spec0 = rest;
+      p = { ...p, form: { ...p.form, spec: { ...rest, items: [{ name: p.title, price: base, unit: 'ly', qty: rest['unlimited'] ? null : rest['dailyLimit'], options }] } } };
     }
     const spec1 = (p.form as V | undefined)?.['spec'] as V | undefined;
     if (p.form && (p.formType === 'food' || p.formType === 'drink') && spec1) p = { ...p, form: { ...p.form, spec: toOrderOptions(spec1) } };
+    if (p.form && p.formType === 'drink') p = { ...p, form: { ...p.form, spec: toDrinkSizes((p.form as V)['spec'] as V) } };
     if (p.form) {
       let saved = p.form;
       if (this.type() === 'service') {
