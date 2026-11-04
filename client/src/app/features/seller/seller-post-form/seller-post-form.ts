@@ -1,7 +1,7 @@
 import { SelectOption } from '../../../shared/components/select/select';
 import { Component, DestroyRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { EMPTY, catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
+import { EMPTY, catchError, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { PricingService } from '../../../core/services/pricing';
 import { PriceSuggestion } from '../../../core/utils/price-suggest';
 import { Promo, discounted, promoLabel } from '../../../core/utils/promo';
@@ -678,10 +678,11 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       return;
     }
     const post = this.toPost(draft);
+    const prevTitle = this.seller.posts().find((x) => x.id === post.id)?.title;
     this.seller.upsertPost(post);
     if (post.kind === 'job') this.saveJob(post);
     // cùng một Post sang phía Mua: đăng mới, sửa, hoặc lưu nháp (nháp = ẩn bài đã đăng, chưa đăng thì không gửi)
-    this.publishToBuyers(post, draft);
+    this.publishToBuyers(post, draft, prevTitle);
     this.saved = true;
     this.toast.show(draft ? 'Đã lưu nháp — bài đang tạm ẩn, chưa hiện cho khách' : this.editId() ? 'Đã lưu thay đổi' : 'Đã đăng — hàng xóm trong khu thấy ngay ở “Gần bạn”');
     this.router.navigate(['/seller/posts']);
@@ -745,12 +746,12 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
    * Gửi Post đủ 7 khối sang kho phía Mua (formToPostFields là hàm duy nhất dựng các khối).
    * Lần đầu: nhớ `_id` bên Mua vào `buyerPostId` để sau này sửa / tạm ngưng / xóa ghi vào CÙNG một Post.
    */
-  private publishToBuyers(p: SellerPost, draft: boolean): void {
+  private publishToBuyers(p: SellerPost, draft: boolean, prevTitle?: string): void {
     const c = (p.form as V)['common'] as V;
     const user = this.auth.currentUser();
     if (!user) return;
-    // nháp chưa đăng, hoặc bài mẫu cũ chưa có bản bên Mua (sửa thì không tự đăng lên): không gửi
-    if (!p.buyerPostId && (draft || this.editId())) return;
+    // nháp chưa đăng, hoặc bài mẫu có sẵn của khu Bán (f1, g1…) chưa có bản bên Mua: không gửi
+    if (!p.buyerPostId && (draft || (this.editId() && !p.id.startsWith('n')))) return;
     const spec = (p.form as V)['spec'] as V;
     const fields = formToPostFields(this.type(), p.form as V, p.kind, p.kind === 'job' ? this.preview().facts[0][2] : '');
     const body = {
@@ -762,7 +763,9 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       ...fields,
       orderWindow: fields.orderWindow ?? null,
     };
-    this.sellerApi.savePost(body, p.buyerPostId).subscribe({
+    // bài đăng từ trước khi có liên kết: ghi đè bản cũ bên Mua (cùng tên) thay vì tạo bài trùng
+    const target = p.buyerPostId || !this.editId() ? of(p.buyerPostId) : this.sellerApi.myPosts().pipe(map((l) => l.find((x) => x.title === prevTitle)?._id));
+    target.pipe(switchMap((id) => this.sellerApi.savePost(body, id))).subscribe({
       next: (saved) => {
         if (!p.buyerPostId) this.seller.setPost(p.id, { buyerPostId: saved._id });
       },
