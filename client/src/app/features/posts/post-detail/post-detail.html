@@ -307,10 +307,10 @@
               <div class="citem">
                 <img [src]="v.images[0]" alt="" />
                 <span class="ct">
-                  <b>{{ v.tpl.qty ? d.qty() + '× ' : '' }}{{ v.tpl.title }}</b>
-                  @for (r of d.dishRows(); track r.raw) { <small>{{ r.name }} × {{ r.qty }}</small> }
+                  <b>{{ v.tpl.title }}</b>
+                  @for (r of d.dishRows(); track r.raw) { <small>{{ r.name }} x {{ r.qty }}</small> }
+                  @if (v.tpl.qty && !d.dishGroup) { <small>Số lượng: {{ d.qty() }}</small> }
                   @if (d.lines().length) { <small>{{ d.lines().join(' · ') }}</small> }
-                  <small class="by">{{ p.sellerName }} · {{ p.block }}</small>
                 </span>
                 <strong>{{ fmt(d.subtotal()) }}</strong>
               </div>
@@ -318,16 +318,6 @@
 
             <!-- 3. Cách nhận, thời gian, tùy chọn -->
             <section class="cs">
-              @if (v.tpl.place.mode === 'choice') {
-                <label class="crow sw">
-                  <svg class="i ic"><use href="#l-home" /></svg>
-                  <span class="ct"><b>{{ v.tpl.place.choices![0][0] }}</b>
-                    <small>{{ d.place() === 0 ? (v.tpl.place.choices![0][1] ? '+' + fmt(v.tpl.place.choices![0][1]) : 'Miễn phí') : 'Đang tắt, ' + v.tpl.place.choices![1][0].toLowerCase() }}</small>
-                  </span>
-                  <input type="checkbox" class="tg" [checked]="d.place() === 0" (change)="d.place.set($any($event.target).checked ? 0 : 1)" />
-                </label>
-              }
-
               <div class="crow col">
                 <svg class="i ic"><use href="#l-clock" /></svg>
                 <span class="ct"><b>{{ v.tpl.time.label }}</b>
@@ -378,6 +368,16 @@
                   }
                 </span>
               </div>
+
+              @if (v.tpl.place.mode === 'choice') {
+                <label class="crow sw">
+                  <svg class="i ic"><use href="#l-home" /></svg>
+                  <span class="ct"><b>{{ v.tpl.place.choices![0][0] }}</b>
+                    <small>{{ d.place() === 0 ? (v.tpl.place.choices![0][1] ? '+' + fmt(v.tpl.place.choices![0][1]) : 'Miễn phí') : 'Đang tắt, ' + v.tpl.place.choices![1][0].toLowerCase() }}</small>
+                  </span>
+                  <input type="checkbox" class="tg" [checked]="d.place() === 0" (change)="d.place.set($any($event.target).checked ? 0 : 1)" />
+                </label>
+              }
 
               @if (v.tpl.time.repeat) {
                 <label class="crow sw"><svg class="i ic"><use href="#l-cal" /></svg><span class="ct"><b>Lặp lại hằng tuần</b><small>Giữ cố định khung giờ này mỗi tuần</small></span><input type="checkbox" class="tg" [checked]="d.repeat()" (change)="d.repeat.set($any($event.target).checked)" /></label>
@@ -501,12 +501,12 @@
           } @else {
             <form class="addrform" [formGroup]="addrForm" (ngSubmit)="saveAddress(d)">
               <div class="two">
-                <label>Họ tên<input class="input" formControlName="name" placeholder="Người nhận" /></label>
-                <label>Số điện thoại<input class="input" formControlName="phone" inputmode="numeric" maxlength="10" placeholder="10 số" /></label>
+                <label>Họ tên<input class="input" formControlName="name" placeholder="Tên người nhận" /></label>
+                <label>Số điện thoại<input class="input" formControlName="phone" inputmode="numeric" maxlength="10" placeholder="Số điện thoại người nhận" /></label>
               </div>
               @if (addrForm.controls.phone.invalid && addrForm.controls.phone.touched) { <small class="err">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small> }
               <div class="two">
-                <label>Tòa<app-select [options]="blockOpts" formControlName="block" /></label>
+                <label>Tòa<input class="input" formControlName="block" maxlength="40" placeholder="Ví dụ: S2.01" /></label>
                 <label>Số nhà<input class="input" formControlName="unit" placeholder="Ví dụ: B-1204" /></label>
               </div>
               <label>Ghi chú cho người giao<input class="input" formControlName="note" placeholder="Ví dụ: gọi trước khi tới" /></label>

@@ -14,7 +14,7 @@ const { auth } = require('../../../middlewares/auth');
  *       properties:
  *         name: { type: string, example: Ngọc Thủy }
  *         phone: { type: string, example: "0901234567" }
- *         block: { type: string, enum: [A, B, C, D] }
+ *         block: { type: string, description: 'Tòa người dùng tự nhập, tối đa 40 ký tự' }
  *         unit: { type: string, example: B-1204 }
  *         note: { type: string }
  *         label: { type: string, enum: [home, family, other] }
@@ -36,7 +36,7 @@ const { auth } = require('../../../middlewares/auth');
  *       content: { application/json: { schema: { $ref: "#/components/schemas/AddressInput" } } }
  *     responses:
  *       201: { description: Đã tạo }
- *       422: { description: SĐT không đủ 10 số hoặc block ngoài A–D }
+ *       422: { description: SĐT không đủ 10 số hoặc thiếu tòa }
  * /me/addresses/{id}:
  *   parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
  *   put:

@@ -206,6 +206,13 @@ export class OrderDraft {
     return v ? [parseChoice(v).name] : [];
   }
 
+  /** Lựa chọn để hiện cho khách, luôn ghi số lượng khi có tính tiền: "Thêm chả x 1". Chọn một có phụ giá thì nhân theo số phần */
+  private chosenText(scope: string, g: { name: string; multi?: boolean; choices: string[] }, portions: number): string[] {
+    if (g.multi) return g.choices.filter((raw) => this.extraQty(scope, g.name, raw) > 0).map((raw) => parseChoice(raw).name + ' x ' + this.extraQty(scope, g.name, raw));
+    const c = parseChoice(this.opt()[this.k(scope, g.name)] ?? '');
+    return c.name ? [c.add > 0 ? c.name + ' x ' + portions : c.name] : [];
+  }
+
   /** Tùy chọn riêng của từng món đã chọn, để ghi vào đơn: "Cơm rang – Đồ ăn thêm" → ["Bò ×2"] */
   dishOptSelections(): { group: string; choices: string[] }[] {
     return this.dishRows().flatMap((r) => (this.tpl.dishOpts?.[r.raw] ?? []).map((g) => ({ group: r.name + ' – ' + g.name, choices: this.chosen(r.raw, g) })).filter((x) => x.choices.length));
@@ -232,13 +239,18 @@ export class OrderDraft {
     const out: string[] = this.comboItems().length ? ['Gồm: ' + this.comboItems().join(', ')] : [];
     for (const g of this.tpl.opts) {
       if (g === this.dishGroup) continue;
-      const v = this.chosen('', g);
+      const v = this.chosenText('', g, this.dishGroup ? this.totalDishes() : this.qty());
       if (!v.length) continue;
       // Lựa chọn mặc định (không tính thêm tiền, trong khi nhóm có lựa chọn nâng cấp trả thêm) không cần ghi vào đơn
       const isBase = !g.multi && parseChoice(this.opt()[g.name] ?? '').add === 0 && g.choices.some((x) => parseChoice(x).add > 0);
       if (!isBase) out.push(g.name + ': ' + v.join(', '));
     }
-    for (const sel of this.dishOptSelections()) out.push(sel.group + ': ' + sel.choices.join(', '));
+    for (const r of this.dishRows()) {
+      for (const g of this.tpl.dishOpts?.[r.raw] ?? []) {
+        const v = this.chosenText(r.raw, g, r.qty);
+        if (v.length) out.push(r.name + ' – ' + g.name + ': ' + v.join(', '));
+      }
+    }
     if (this.quickPicks().length) out.push('Tùy chọn thêm: ' + this.quickPicks().join(', '));
     for (const q of this.tpl.qs) {
       const a = this.ans()[q.label] ?? '';

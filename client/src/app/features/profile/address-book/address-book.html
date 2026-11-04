@@ -8,7 +8,7 @@
         <li class="card">
           <strong>{{ a.name }} ({{ a.phone }})</strong>
           @if (a.isDefault) { <span class="muted">· Mặc định</span> }
-          <div>{{ a.unit }}, Tòa {{ a.block }}</div>
+          <div>{{ a.unit }}, {{ blockText(a.block) }}</div>
           @if (a.note) { <div class="muted">{{ a.note }}</div> }
           <button type="button" class="btn ghost" (click)="startEdit(a)">Sửa</button>
           @if (!a.isDefault) {
@@ -41,9 +41,8 @@
       </div>
       <div class="field">
         <label for="a-block">Tòa</label>
-        <select id="a-block" formControlName="block">
-          @for (b of blocks; track b) { <option [value]="b">Tòa {{ b }}</option> }
-        </select>
+        <input id="a-block" formControlName="block" maxlength="40" placeholder="S2.01" />
+        @if (form.controls.block.invalid && form.controls.block.touched) { <small class="error">Nhập tòa.</small> }
       </div>
       <div class="field">
         <label for="a-unit">Số nhà</label>

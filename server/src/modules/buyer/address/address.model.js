@@ -4,7 +4,7 @@ const addressSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   name: { type: String, required: true, trim: true },
   phone: { type: String, required: true, match: [/^\d{10}$/, 'Số điện thoại gồm 10 số'] },
-  block: { type: String, required: true, enum: ['A', 'B', 'C', 'D'] },
+  block: { type: String, required: true, trim: true, maxlength: 40 },
   unit: { type: String, default: '' },
   note: { type: String, default: '' },
   label: { type: String, enum: ['home', 'family', 'other'], default: 'home' },

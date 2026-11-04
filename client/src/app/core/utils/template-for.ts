@@ -132,7 +132,7 @@ export function viewOf(post: Post): PostView {
   const lowest = items ? Math.min(...items.map((i) => i.price)) : 0;
   const dish: OptionBlock | null = items
     ? {
-        name: svc ? 'Dịch vụ' : 'Món',
+        name: svc ? 'Dịch vụ' : 'Menu',
         // dịch vụ: mỗi dòng bảng giá có đơn vị riêng (kg, bộ, đôi…) nên ghi kèm tên
         choices: items.map((i) => {
           const name = svc && i.unit ? `${i.name} (${i.unit})` : i.name;

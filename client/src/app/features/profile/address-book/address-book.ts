@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AppError } from '../../../core/models/api';
-import { Address, BLOCKS } from '../../../core/models/user';
+import { Address, blockText } from '../../../core/models/user';
 import { AddressService } from '../../../core/services/address';
 import { phoneValidator } from '../../../core/utils/validators';
 
@@ -15,7 +15,7 @@ import { phoneValidator } from '../../../core/utils/validators';
 export class AddressBook implements OnInit {
   private readonly service = inject(AddressService);
 
-  protected readonly blocks = BLOCKS;
+  protected readonly blockText = blockText;
   protected readonly items = signal<Address[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
@@ -24,7 +24,7 @@ export class AddressBook implements OnInit {
   protected readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(60)] }),
     phone: new FormControl('', { nonNullable: true, validators: [Validators.required, phoneValidator] }),
-    block: new FormControl<'A' | 'B' | 'C' | 'D'>('B', { nonNullable: true }),
+    block: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(40)] }),
     unit: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(30)] }),
     note: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(200)] }),
     label: new FormControl<'home' | 'family' | 'other'>('home', { nonNullable: true }),
@@ -49,7 +49,7 @@ export class AddressBook implements OnInit {
   }
 
   startNew(): void {
-    this.form.reset({ block: 'B', label: 'home', isDefault: false });
+    this.form.reset({ block: '', label: 'home', isDefault: false });
     this.editing.set('new');
   }
 

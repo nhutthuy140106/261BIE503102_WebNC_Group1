@@ -6,7 +6,7 @@ import { CanComponentDeactivate } from '../../../core/guards/pending-changes-gua
 import { AppError } from '../../../core/models/api';
 import { CreateOrderBody, Order } from '../../../core/models/order';
 import { KIND_LABEL, Post } from '../../../core/models/post';
-import { Address, BLOCKS } from '../../../core/models/user';
+import { Address, blockText } from '../../../core/models/user';
 import { unsplash } from '../../../core/config/post-templates';
 import { AddressService } from '../../../core/services/address';
 import { AuthPromptService } from '../../../core/services/auth-prompt';
@@ -72,12 +72,11 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected readonly submitting = signal(false);
   protected readonly addrOpen = signal(false);
   protected readonly addrNew = signal(false);
-  protected readonly blockOpts = BLOCKS.map((b) => ({ value: b as string, label: 'Tòa ' + b }));
   /** Thêm địa chỉ mới ngay trong hộp chọn địa chỉ (đặt cho người khác = thêm địa chỉ người đó) */
   protected readonly addrForm = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(60)] }),
     phone: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^0\d{9}$/)] }),
-    block: new FormControl<(typeof BLOCKS)[number]>('B', { nonNullable: true }),
+    block: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(40)] }),
     unit: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(30)] }),
     note: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
     label: new FormControl<'home' | 'family' | 'other'>('family', { nonNullable: true }),
@@ -469,7 +468,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   protected addressText(a: Address): string {
-    return a.unit + ', ' + (a.block.length === 1 ? 'Tòa ' + a.block : a.block);
+    return a.unit + ', ' + blockText(a.block);
   }
 
   protected saveAddress(d: OrderDraft): void {
@@ -479,7 +478,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
       next: (a) => {
         this.addresses.update((l) => [...l, a]);
         d.addressId.set(a._id);
-        this.addrForm.reset({ name: '', phone: '', block: 'B', unit: '', note: '', label: 'family' });
+        this.addrForm.reset({ name: '', phone: '', block: '', unit: '', note: '', label: 'family' });
         this.addrNew.set(false);
         this.addrOpen.set(false);
         this.toast.show('Đã thêm địa chỉ');
