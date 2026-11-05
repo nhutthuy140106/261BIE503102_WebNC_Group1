@@ -136,12 +136,6 @@
                 <span class="lbl">Tùy chọn cộng giá</span>
                 <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options' }" />
               </div>
-              <ng-container *ngTemplateOutlet="promoBox" />
-            </div>
-          </section>
-          <section class="sec">
-            <header><span class="no">3</span><span><b>Pha chế</b></span></header>
-            <div class="bd">
               <div class="fld"><span class="lbl">Độ ngọt <span class="hint">(bỏ hết = không cho chọn)</span></span><div class="pills">@for (l of sweetLevels; track l) { <button type="button" [class.on]="has('spec.sweet', l)" (click)="toggleIn('spec.sweet', l)">{{ l }}</button> }</div></div>
               <div class="fld"><span class="lbl">Đá</span><div class="pills">@for (l of iceLevels; track l) { <button type="button" [class.on]="has('spec.ice', l)" (click)="toggleIn('spec.ice', l)">{{ l }}</button> }</div></div>
               <!-- các ô tick cho khách đặt cùng một chỗ -->
@@ -149,12 +143,13 @@
                 <label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú cho quán</span></label>
               </div>
               <ng-container *ngTemplateOutlet="quickList; context: { ph: 'Ví dụ: Đóng nắp riêng' }" />
+              <ng-container *ngTemplateOutlet="promoBox" />
             </div>
           </section>
-          <ng-container *ngTemplateOutlet="sellSchedule; context: { n: 4 }" />
-          <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 5 }" />
+          <ng-container *ngTemplateOutlet="sellSchedule; context: { n: 3 }" />
+          <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 4 }" />
           <section class="sec">
-            <header><span class="no">6</span><span><b>Thanh toán</b></span></header>
+            <header><span class="no">5</span><span><b>Thanh toán</b></span></header>
             <div class="bd"><ng-container *ngTemplateOutlet="payPills" /></div>
           </section>
         }
