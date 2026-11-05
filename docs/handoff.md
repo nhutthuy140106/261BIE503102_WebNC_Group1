@@ -330,3 +330,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Hộp đặt dịch vụ:** bài từ form dùng chung một bộ chữ: nút "Đặt lịch" (báo giá sau là "Gửi yêu cầu"), gợi ý ghi chú chung; không lấy chữ của mẫu giặt sấy.
 - **Nhãn 5 loại trên mọi thẻ:** bài quảng bá hiện cả nhãn loại và QUẢNG BÁ, thẻ việc có nhãn "Việc làm".
 - **Giặt sấy:** tiệm luôn qua nhà khách lấy đồ (`Post.pickupAtBuyer`), hộp đặt luôn hỏi địa chỉ; công tắc Giao tận nơi chỉ áp dụng lúc trả đồ. Đơn phía Bán ghi "Lấy đồ tại" và "Trả đồ". Bài đã đăng cần Sửa + Lưu.
+- **Cần bạn xử lý:** đơn chờ xác nhận và xin hủy luôn đứng đầu dù hẹn ngày nào, rồi đến bước cần làm của đơn (trước đây đơn hẹn ngày khác xếp sau và bị ẩn sau nút Xem thêm).

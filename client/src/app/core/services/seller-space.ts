@@ -189,7 +189,10 @@ export class SellerSpaceService {
   /** Bài đăng — bài việc làm lấy số đề nghị / người đã chọn từ việc tương ứng */
   readonly posts = computed<SellerPost[]>(() => this.state()?.posts ?? []);
 
-  /** Khối "Cần bạn xử lý": suy ra từ dữ liệu, xếp theo độ gấp */
+  /**
+   * Khối "Cần bạn xử lý": suy ra từ dữ liệu. Đơn chờ xác nhận, xin hủy đứng đầu dù hẹn ngày nào (đơn mới nhất trước),
+   * rồi đến bước cần làm của đơn; sau đó mới tới việc đăng, hỏi đáp, đánh giá.
+   */
   readonly tasks = computed<SellerTask[]>(() => {
     const out: (SellerTask & { rank: number })[] = [];
     const place = (o: SellerOrder) =>
@@ -204,12 +207,12 @@ export class SellerSpaceService {
         person: o.buyer.name, personAvatar: o.buyer.avatar, kindTag: 'Đơn khách đặt', when: at(o.day, o.time),
       };
       if (o.cancelRequest) {
-        out.push({ ...base, key: 'c-' + o.id, type: 'cancel', status: 'Xác nhận hủy', note: `Lý do: ${o.cancelRequest}`, noteIcon: 'question', rank: 2 });
+        out.push({ ...base, key: 'c-' + o.id, type: 'cancel', status: 'Xác nhận hủy', note: `Lý do: ${o.cancelRequest}`, noteIcon: 'question', rank: 0 });
       } else if (o.state === 'waiting') {
-        out.push({ ...base, key: 'o-' + o.id, type: 'order', status: 'Xác nhận đơn', due: o.kind === 'service' ? undefined : o.due, note: o.note, rank: o.day === 0 ? 0 : 3 });
+        out.push({ ...base, key: 'o-' + o.id, type: 'order', status: 'Xác nhận đơn', due: o.kind === 'service' ? undefined : o.due, note: o.note, rank: 0 });
       } else {
         const next = this.nextStep(o);
-        if (next) out.push({ ...base, key: 's-' + o.id, type: 'step', status: next[1], act: next[0], due: `${o.flow === 'laundry' ? 'Hẹn lấy' : o.kind === 'service' ? 'Hẹn' : 'Giao'} lúc ${o.time}`, rank: 2.5 });
+        if (next) out.push({ ...base, key: 's-' + o.id, type: 'step', status: next[1], act: next[0], due: `${o.flow === 'laundry' ? 'Hẹn lấy' : o.kind === 'service' ? 'Hẹn' : 'Giao'} lúc ${o.time}`, rank: 0.5 });
       }
     }
     for (const j of this.jobs()) {
