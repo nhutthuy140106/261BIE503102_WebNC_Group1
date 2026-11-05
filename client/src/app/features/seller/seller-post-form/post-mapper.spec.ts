@@ -70,6 +70,17 @@ describe('formToPostFields', () => {
       expect(f.info?.map((x) => x.label)).not.toContain('Phạm vi phục vụ');
     });
 
+    it('sửa chữa: bỏ thông tin nhanh, 3 ô là nơi làm, phí kiểm tra, giờ nhận lịch', () => {
+      const f = svc({ preset: 'Sửa chữa', inspect: 50000, from: '08:00', to: '18:00', turnaround: 'còn sót', warranty: 'còn sót' });
+      expect(f.highlights?.map((x) => [x.label, x.value])).toEqual([['Nơi làm', 'Tại nhà bạn'], ['Phí kiểm tra', '50.000đ'], ['Giờ nhận lịch', '08:00 – 18:00']]);
+      expect(f.serviceInfo).toMatchObject({ turnaround: undefined, warranty: undefined, area: undefined });
+      expect(f.info?.map((x) => x.label)).not.toContain('Phạm vi phục vụ');
+    });
+
+    it('mẫu Khác vẫn giữ thời gian làm và bảo hành đã điền', () => {
+      expect(svc({ preset: 'Khác', turnaround: '2 giờ', warranty: '1 tháng' }).serviceInfo).toMatchObject({ turnaround: '2 giờ', warranty: '1 tháng' });
+    });
+
     it('mẫu có đủ mục thì vẫn gửi như người bán điền', () => {
       const f = svc({ preset: 'Dọn dẹp' });
       expect(f.highlights).toBeUndefined();

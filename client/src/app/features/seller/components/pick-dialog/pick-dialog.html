@@ -16,6 +16,7 @@
             <div class="m">
               <span><svg class="i st"><use href="#star" /></svg>{{ o.worker.rating }} ({{ o.worker.jobs }})</span>
               <span><svg class="i"><use href="#pin" /></svg>{{ o.worker.distance }}</span>
+              <span><svg class="i"><use href="#clock" /></svg>{{ o.slot }}</span>
             </div>
           </div>
           <a class="chat" routerLink="/seller/messenger" [queryParams]="{ to: o.worker.name, job: j.id }" [attr.aria-label]="'Nhắn ' + o.worker.name" title="Nhắn tin" (click)="$event.stopPropagation()">

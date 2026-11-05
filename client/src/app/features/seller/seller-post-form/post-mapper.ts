@@ -106,7 +106,7 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
   const on = ((s['rules'] as V[]) ?? []).filter((r) => r['on'] && String(r['label'] ?? '').trim()).map((r) => String(r['label']).trim());
   return [
     ...(shown?.noQuick ? [] : row('Phạm vi phục vụ', s['serviceArea'])),
-    ...(preset === 'Sửa chữa' && s['priceType'] !== 'quote' ? row('Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ, trừ vào tiền sửa nếu đồng ý` : '') : []),
+    ...(preset === 'Sửa chữa' && s['priceType'] !== 'quote' ? row('Phí kiểm tra', +s['inspect'] ? 'Trừ vào tiền sửa nếu bạn đồng ý giá' : '') : []),
     ...(preset === 'Lưu trú'
       ? [
           ...row('Tòa nhà', s['building']),
@@ -127,12 +127,20 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
 function serviceHighlights(s: V): Post['highlights'] {
   const preset = String(s['preset'] ?? '');
   const f = (s['fulfil'] as V) ?? {};
-  const cell = (icon: 'clock' | 'bolt' | 'pin' | 'check', label: string, value: unknown) => (String(value ?? '').trim() ? [{ icon, label, value: String(value).trim() }] : []);
+  const cell = (icon: NonNullable<Post['highlights']>[number]['icon'], label: string, value: unknown) => (String(value ?? '').trim() ? [{ icon, label, value: String(value).trim() }] : []);
   if (preset === 'Giặt sấy') {
     return [
       ...cell('clock', 'Giờ nhận đơn', s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
       ...cell('bolt', 'Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : ''),
       ...cell('pin', 'Cách nhận', [f['delivery'] ? 'Giao tận nơi' : '', f['pickup'] ? 'Tự đến lấy' : ''].filter(Boolean).join(', ')),
+    ];
+  }
+  if (preset === 'Sửa chữa') {
+    const where = { buyer: 'Tại nhà bạn', seller: 'Bạn mang tới', choice: 'Đến nhà bạn, Bạn mang tới' }[String(s['place'])];
+    return [
+      ...cell('pin', 'Nơi làm', where),
+      ...cell('receipt', 'Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ` : 'Miễn phí'),
+      ...cell('clock', 'Giờ nhận lịch', s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
     ];
   }
   if (preset === 'Lưu trú') {
@@ -207,6 +215,8 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
       const its = itemsOf(s);
       const quote = s['priceType'] === 'quote';
       const where = String(s['where'] ?? '').trim();
+      const shown = SVC_PRESETS[String(s['preset'] ?? '')];
+      const hideQuick = !!shown?.noQuick && !shown.generic;
       return {
         ...base,
         priceType: quote ? 'quote' : priceTypeOf(its, its.length === 1 && s['estimate'] ? 'unit' : 'fixed'),
@@ -222,7 +232,8 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         place: { mode: s['place'], ...(where ? { where } : {}) },
         // khung giờ khách chọn hẹn (giờ nhận lịch của người làm)
         handover: s['from'] && s['to'] ? { from: s['from'], to: s['to'] } : undefined,
-        serviceInfo: { turnaround: String(s['turnaround'] ?? '').trim() || undefined, warranty: String(s['warranty'] ?? '').trim() || undefined, area: SVC_PRESETS[String(s['preset'] ?? '')]?.noQuick ? undefined : String(s['serviceArea'] ?? '').trim() || undefined },
+        // mẫu không có mục Thông tin nhanh thì không gửi giá trị đã lưu của mục đó (mẫu Khác có ô riêng cho thời gian, bảo hành)
+        serviceInfo: { turnaround: hideQuick ? undefined : String(s['turnaround'] ?? '').trim() || undefined, warranty: hideQuick ? undefined : String(s['warranty'] ?? '').trim() || undefined, area: SVC_PRESETS[String(s['preset'] ?? '')]?.noQuick ? undefined : String(s['serviceArea'] ?? '').trim() || undefined },
         highlights: serviceHighlights(s),
         // giặt sấy chọn cách nhận như đồ ăn, đồ dùng; dịch vụ khác tính phụ phí đến nhà
         ...(s['preset'] === 'Giặt sấy' ? { ...fulfilOf(s), pickupAtBuyer: true } : { deliveryFee: s['place'] === 'buyer' || s['place'] === 'choice' ? +s['homeFee'] || 0 : 0 }),

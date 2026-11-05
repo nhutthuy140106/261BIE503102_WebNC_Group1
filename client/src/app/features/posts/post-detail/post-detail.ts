@@ -18,6 +18,7 @@ import { SavedService } from '../../../core/services/saved';
 import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
+import { imageToDataUrl } from '../../../core/utils/image-file';
 import { canPickDate, firstOpenDate, lastOpenDate } from '../../../core/utils/open-dates';
 import { formatDateTime } from '../../../core/utils/status-label';
 import { ClockService } from '../../../core/services/clock';
@@ -385,8 +386,14 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   protected onPhoto(d: OrderDraft, label: string, e: Event): void {
-    const f = (e.target as HTMLInputElement).files?.[0];
-    d.setAns(label, f ? f.name : '');
+    const input = e.target as HTMLInputElement;
+    const f = input.files?.[0];
+    input.value = '';
+    if (!f) return;
+    void imageToDataUrl(f).then((url) => {
+      if (url) d.setAns(label, url);
+      else this.toast.show('Không đọc được ảnh, bạn chọn ảnh khác nhé');
+    });
   }
 
   protected next(d: OrderDraft): void {
@@ -560,7 +567,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         ...d.dishOptSelections(),
         ...(d.quickPicks().length ? [{ group: 'Tùy chọn thêm', choices: d.quickPicks() }] : []),
       ],
-      answers: d.tpl.qs.map((q) => ({ question: q.label, value: d.lines().find((l) => l.startsWith(q.label + ': '))?.slice(q.label.length + 2) ?? '' })).filter((x) => x.value),
+      answers: d.tpl.qs.map((q) => ({ question: q.label, value: q.type === 'photo' ? d.ans()[q.label] ?? '' : d.lines().find((l) => l.startsWith(q.label + ': '))?.slice(q.label.length + 2) ?? '' })).filter((x) => x.value),
       fulfillment: d.toBuyer() ? 'delivery' : 'pickup',
       addressId: d.needsAddress() ? d.addressId() : undefined,
       scheduledAt: d.date() ? new Date(d.date() + 'T' + d.time()).toISOString() : undefined,

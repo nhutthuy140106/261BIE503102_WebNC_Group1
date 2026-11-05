@@ -231,7 +231,6 @@
                   <div class="row3">
                     <div class="fld"><label for="insr">Phí kiểm tra</label><span class="money"><input appMoney id="insr" class="input" formControlName="inspect" placeholder="50.000" /></span></div>
                   </div>
-                  <span class="hint">Thợ kiểm tra rồi báo giá, khách đồng ý mới sửa. Đồng ý thì phí kiểm tra trừ vào tiền sửa; không đồng ý thì khách chỉ trả phí này.</span>
                 } @else if (!svcPreset().generic) {
                   <label class="ck"><input type="checkbox" formControlName="estimate" /><span>Giá ước tính, cân / đếm thực tế khi nhận đồ</span></label>
                 }
@@ -506,7 +505,7 @@
           @for (g of arr(base).controls; track $index; let gi = $index) {
             <div class="grp" [formGroup]="grp(g)">
               <div class="top">
-                <input class="input" formControlName="name" placeholder="Tên nhóm, ví dụ: Phần cơm" maxlength="40" />
+                <input class="input" formControlName="name" placeholder="Tên nhóm" maxlength="40" />
                 <span class="seg"><button type="button" [class.on]="!grp(g).get('multi')!.value" (click)="grp(g).get('multi')!.setValue(false)">Chọn một</button><button type="button" [class.on]="grp(g).get('multi')!.value" (click)="grp(g).get('multi')!.setValue(true)">Chọn nhiều</button></span>
                 <label class="reqck"><input type="checkbox" formControlName="required" />Bắt buộc</label>
                 <button type="button" class="rm" aria-label="Bỏ nhóm" (click)="removeAt(base, gi)"><svg class="i"><use href="#xmark" /></svg></button>

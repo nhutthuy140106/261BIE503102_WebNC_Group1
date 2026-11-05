@@ -42,7 +42,7 @@ export const SWEET = ['0%', '30%', '50%', '70%', '100%'];
 export const ICE = ['Không đá', 'Ít đá', 'Bình thường', 'Đá để riêng'];
 /** Cách báo giá dịch vụ: bảng giá nhiều dịch vụ con (khách chọn nhiều trong một đơn) hoặc báo giá sau khi kiểm tra */
 export const PRICE_TYPES: [string, string][] = [['list', 'Bảng giá'], ['quote', 'Báo giá sau']];
-export const Q_TYPES: [string, string][] = [['text', 'Chữ'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['photo', 'Ảnh']];
+export const Q_TYPES: [string, string][] = [['text', 'Chữ'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['photo', 'Hình ảnh']];
 /** Khối Địa điểm phía Mua */
 export const SVC_PLACES: [string, string][] = [['buyer', 'Tại nhà khách'], ['seller', 'Khách mang tới'], ['choice', 'Khách chọn'], ['ab', 'Lấy ở A, giao tới B']];
 /** Mẫu Sửa chữa: nơi sửa */
@@ -108,7 +108,7 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
   }),
   'Sửa chữa': P({
     repair: true, items: [['Vệ sinh máy lạnh', 150000, 'máy'], ['Thông tắc ống nước', 200000, 'lần'], ['Sửa ổ điện, công tắc', 80000, 'lần']],
-    inspect: 50000, place: 'buyer', homeFee: 30000, turnaround: 'Tùy lỗi, báo sau khi kiểm tra', warranty: '3 tháng cho phần đã sửa',
+    inspect: 50000, place: 'buyer', homeFee: 30000, noQuick: true,
     questions: [
       { type: 'text', label: 'Thiết bị / vị trí bị hư', required: true, opts: '' },
       { type: 'text', label: 'Mô tả lỗi', required: true, opts: '' },

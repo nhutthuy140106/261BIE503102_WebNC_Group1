@@ -86,6 +86,7 @@ Làm với **mỗi loại** (đồ ăn, đồ uống, đồ dùng, dịch vụ).
 - [ ] **Combo**: mở bài combo → khối "Trong combo này" liệt kê từng món + số lượng + giá lẻ + "Tiết kiệm"; món trong combo đã ngừng bán → ghi rõ và không đặt được; giá combo = giá hiện ở đầu trang. Đặt combo → đơn ghi "Gồm: …".
 - [ ] **Dịch vụ**: lịch chọn ngày chỉ bấm được các ngày người bán chọn; giá theo giờ × số giờ; báo giá sau có "Phí kiểm tra" và bước **Duyệt giá** trong đơn; giặt sấy hiện "giá ước tính".
 - [ ] **Ngày hẹn:** lịch khi đặt chỉ mở các ngày người bán đã đặt (mọi loại bài), ngày ngoài khoảng bị khóa; đã qua hết ngày thì bài ghi "Đã hết lịch hẹn".
+- [ ] **Câu hỏi riêng:** Chữ hiện ô chữ, Chọn một và Chọn nhiều hiện các lựa chọn, Hình ảnh hiện nút thêm ảnh; phía Bán thấy đúng câu trả lời và ảnh trong chi tiết đơn.
 - [ ] **Ghi chú:** form đồ ăn, đồ uống, đồ dùng, dịch vụ đều có ô cho khách ghi chú, mặc định bật; tắt thì khung đặt không còn ô Ghi chú.
 - 🔸 Dịch vụ **lưu trú** (theo đêm) vẫn theo mẫu cũ. 🔸 Tùy chọn riêng từng món hiện áp **chung cả đơn**. 🔸 `payMethods`, `dailyQty` từng món chưa dùng.
 

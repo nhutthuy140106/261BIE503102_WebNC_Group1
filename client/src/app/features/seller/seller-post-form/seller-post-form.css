@@ -69,6 +69,8 @@ textarea.small { min-height: 64px; }
 .pkgs { display: grid; gap: 10px; }
 .grp { border: 1px solid var(--border); border-radius: 14px; padding: 14px; display: grid; gap: 10px; background: #fffcfa; }
 .grp .top { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; }
+/* kiểu câu hỏi: đủ rộng để Chọn một, Chọn nhiều, Hình ảnh nằm trên một dòng */
+.grp .top app-select { width: 150px; }
 .lines { display: grid; gap: 8px; }
 .line { display: grid; grid-template-columns: 1fr 150px 34px; gap: 8px; align-items: center; }
 .line.sizeline { grid-template-columns: 1fr 150px auto 34px; }

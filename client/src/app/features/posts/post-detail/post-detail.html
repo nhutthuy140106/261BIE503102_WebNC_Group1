@@ -211,7 +211,11 @@
           @case ('photo') {
             <div class="qfield">
               <label>{{ q.label }}@if (q.req) { <em class="rq">*</em> }</label>
-              <label class="upload"><input type="file" accept="image/*" hidden (change)="onPhoto(d, q.label, $event)" />{{ d.ans()[q.label] ? 'Đã chọn: ' + d.ans()[q.label] : 'Thêm ảnh' }}</label>
+              @if (d.ans()[q.label]; as photo) {
+                <div class="qphoto"><img [src]="photo" alt="Ảnh bạn đã chọn" /><button type="button" (click)="d.setAns(q.label, '')">Bỏ ảnh</button></div>
+              } @else {
+                <label class="upload"><input type="file" accept="image/*" hidden (change)="onPhoto(d, q.label, $event)" />Thêm ảnh</label>
+              }
             </div>
           }
           @default {

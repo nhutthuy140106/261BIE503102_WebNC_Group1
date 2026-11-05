@@ -268,7 +268,7 @@ export class OrderDraft {
     if (this.quickPicks().length) out.push('Tùy chọn thêm: ' + this.quickPicks().join(', '));
     for (const q of this.tpl.qs) {
       const a = this.ans()[q.label] ?? '';
-      const v = q.type === 'multi' ? this.picks(q.label).map((x) => parseChoice(x).name).join(', ') : q.type === 'choice' ? parseChoice(a).name : a;
+      const v = q.type === 'multi' ? this.picks(q.label).map((x) => parseChoice(x).name).join(', ') : q.type === 'choice' ? parseChoice(a).name : q.type === 'photo' && a ? 'Đã gửi ảnh' : a;
       if (v) out.push(q.label + ': ' + v);
     }
     if (this.paying() && this.payBack()) out.push('Số tiền cần trả giùm: ' + Number(this.payBack()).toLocaleString('vi-VN') + 'đ');

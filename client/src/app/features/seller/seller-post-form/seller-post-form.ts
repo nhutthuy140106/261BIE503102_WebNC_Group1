@@ -633,6 +633,9 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       if (!b['name'] || !String(b['no']).trim() || !String(b['holder']).trim()) return 'Chuyển khoản: nhập ngân hàng, số tài khoản và tên chủ tài khoản';
       if (!b['qr']) return 'Chuyển khoản: thêm ảnh mã QR';
     }
+    // câu hỏi chọn một, chọn nhiều phải có lựa chọn, không thì khách không có gì để chọn
+    const noChoice = ((s['questions'] as V[]) ?? []).find((q) => String(q['label'] ?? '').trim() && (q['type'] === 'choice' || q['type'] === 'multi') && !String(q['opts'] ?? '').trim() && !((q['choices'] as V[]) ?? []).some((c) => String(c['label'] ?? '').trim()));
+    if (noChoice) return `Câu hỏi "${String(noChoice['label']).trim()}": nhập các lựa chọn`;
     if (t === 'job') {
       if (!s['allDay'] && !s['from']) return 'Chọn giờ bắt đầu làm';
       if (!s['allDay'] && s['to'] && s['to'] <= s['from']) return 'Giờ kết thúc phải sau giờ bắt đầu';

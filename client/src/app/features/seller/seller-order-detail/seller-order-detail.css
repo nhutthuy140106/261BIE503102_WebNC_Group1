@@ -19,3 +19,4 @@
 /* sửa chữa: hạng mục báo giá do thợ tự nhập */
 .qedit { display: grid; grid-template-columns: minmax(0, 1fr) 92px 38px; gap: 6px; align-items: center; }
 .qedit .btn { width: 38px; height: 38px; padding: 0; margin: 0; }
+.ansphoto img { display: block; width: 96px; height: 96px; border-radius: 10px; object-fit: cover; }

@@ -158,7 +158,7 @@ export interface Post {
   /** Giặt sấy: người làm luôn qua nhà khách lấy đồ nên luôn cần địa chỉ; cách nhận chỉ áp dụng lúc trả đồ */
   pickupAtBuyer?: boolean;
   /** Dịch vụ không có mục Thông tin nhanh (giặt sấy, lưu trú): 3 ô đầu bài lấy từ các ô người bán đã điền */
-  highlights?: { icon: 'clock' | 'bolt' | 'pin' | 'check'; label: string; value: string }[];
+  highlights?: { icon: 'clock' | 'bolt' | 'pin' | 'check' | 'receipt'; label: string; value: string }[];
   /** Thông tin người bán đã điền, hiện dưới Mô tả (nội quy, điều kiện hủy, phạm vi phục vụ…) */
   info?: { label: string; value: string }[];
   /** Khối 3: ngày bán / ngày làm (yyyy-mm-dd) */
