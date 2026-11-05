@@ -320,3 +320,5 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Ghi chú:** thêm ô cho khách ghi chú (`spec.kitchenNote`, mặc định bật) vào form đồ dùng và dịch vụ. Bài cũ chưa có `noteEnabled` vẫn hiện ô ghi chú.
 - **Khám phá quanh khu:** bỏ tải dần và nút "Xem thêm", hiện hết bài của khu trong một lần.
 - **Form đăng việc:** không cố định giờ thì thẻ xem trước và dữ liệu `job.due` chỉ ghi ngày, không còn chữ "cả ngày"; bỏ dòng "Trả trực tiếp cho người làm...".
+- **Trang chi tiết việc:** bỏ hai tag đầu trang và mục Địa điểm có khung bản đồ (giữ ô Địa điểm ở hàng thông tin nhanh vì đó là chỗ duy nhất hiện tòa nhà); rút gọn câu lưu ý ở Hỏi đáp.
+- **Vạch giờ ở Lịch:** vùng lịch dùng `isolation: isolate` để vạch giờ và thẻ đơn không đè lên header khi cuộn (Hôm nay và trang Lịch).
