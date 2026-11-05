@@ -17,9 +17,8 @@ h4 small { padding: 3px 10px; border-radius: 999px; background: #F0F2F5; color: 
 .lt small { font-size: 12.5px; color: var(--smoke); overflow-wrap: anywhere; }
 .lr { flex: none; display: grid; gap: 4px; justify-items: end; align-content: start; }
 .acts { display: flex; gap: 10px; }
-.acts button { background: none; padding: 0; font-size: 12.5px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.acts button { background: none; padding: 0; font-size: 12.5px; font-weight: 600; color: var(--smoke); cursor: pointer; }
 .acts button:hover { text-decoration: underline; }
-.acts .rm { color: var(--smoke); }
 .none { margin: 0; font-size: 13px; line-height: 1.5; color: var(--smoke); }
 
 .scrim { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 24px; background: rgba(31, 42, 68, .45); }
@@ -37,7 +36,6 @@ h4 small { padding: 3px 10px; border-radius: 999px; background: #F0F2F5; color: 
 .opt span { flex: 1; min-width: 0; }
 .opt small { font-size: 13.5px; font-weight: 600; color: var(--smoke); white-space: nowrap; }
 .opt i { flex: none; width: 20px; height: 20px; border: 1.5px solid #CFD3DA; border-radius: 50%; background: #fff; }
-.opt i.sq { border-radius: 5px; }
 .opt.on i { border-color: var(--accent); background: var(--accent); box-shadow: inset 0 0 0 4px #fff; }
 .pop footer { display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-top: 1px solid var(--border); }
 .qty { flex: none; display: flex; align-items: center; height: 44px; border: 1px solid var(--border); border-radius: 12px; }

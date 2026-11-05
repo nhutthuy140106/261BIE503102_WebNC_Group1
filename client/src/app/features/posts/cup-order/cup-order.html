@@ -17,7 +17,7 @@
         <b>{{ l.price * l.qty | vnd }}</b>
         <span class="acts">
           <button type="button" (click)="edit(l)">Sửa</button>
-          <button type="button" class="rm" [attr.aria-label]="'Bỏ ' + l.drink" (click)="remove(l)">Bỏ</button>
+          <button type="button" [attr.aria-label]="'Bỏ ' + l.drink" (click)="remove(l)">Bỏ</button>
         </span>
       </span>
     </div>
@@ -39,7 +39,7 @@
             <h4>{{ g.name === 'Size' ? 'Tùy chọn size' : g.name }} <small>{{ g.multi ? 'Chọn nhiều' : g.req === false ? 'Chọn 1, không bắt buộc' : 'Chọn 1' }}</small></h4>
             @for (raw of g.choices; track raw) {
               <button type="button" class="opt" [class.on]="isOn(g.name, raw)" role="checkbox" [attr.aria-checked]="isOn(g.name, raw)" (click)="toggle(g.name, raw)">
-                <i [class.sq]="g.multi"></i><span>{{ parse(raw).name }}</span>
+                <i></i><span>{{ parse(raw).name }}</span>
                 @if (parse(raw).add) { <small>+{{ parse(raw).add | vnd }}</small> }
               </button>
             }
