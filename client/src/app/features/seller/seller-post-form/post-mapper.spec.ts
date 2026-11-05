@@ -23,6 +23,13 @@ describe('formToPostFields', () => {
     expect(f.template).toBeUndefined();
   });
 
+  it('việc một ngày có giờ kết thúc thì gửi cả giờ kết thúc, không cố định giờ thì không', () => {
+    const job = (spec: Record<string, unknown>) => formToPostFields('job', { common: {}, spec: { dates: ['2026-11-14'], ...spec } }, 'job').job;
+    expect(job({ from: '08:30', to: '11:00' })).toMatchObject({ start: '2026-11-14T08:30:00', end: '2026-11-14T11:00:00' });
+    expect(job({ from: '08:30', to: '' })?.end).toBeUndefined();
+    expect(job({ allDay: true, from: '08:30', to: '11:00' })?.end).toBeUndefined();
+  });
+
   it('việc có giờ: giờ chính đứng đầu, thêm khung khác đủ Từ và Đến, không trùng', () => {
     const w = jobWindows({ from: '08:30', to: '11:00', altWindows: [{ from: '14:00', to: '16:00' }, { from: '08:30', to: '11:00' }, { from: '17:00', to: '' }, { from: '', to: '' }] });
     expect(w).toEqual(['08:30 – 11:00', '14:00 – 16:00']);

@@ -222,7 +222,7 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         dates,
         job: {
           start: dates[0] ? at(dates[0], s['allDay'] ? '' : s['from']) : undefined,
-          end: dates.length > 1 ? at(dates[dates.length - 1], s['allDay'] ? '' : s['to'] || s['from']) : undefined,
+          end: dates.length > 1 || (dates[0] && !s['allDay'] && s['to']) ? at(dates[dates.length - 1], s['allDay'] ? '' : s['to'] || s['from']) : undefined,
           allDay: !!s['allDay'],
           head: +s['head'] || 1,
           payUnit: s['payUnit'] || 'việc',

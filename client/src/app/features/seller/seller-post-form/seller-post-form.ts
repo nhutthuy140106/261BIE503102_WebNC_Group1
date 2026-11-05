@@ -581,7 +581,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         };
       }
       default: {
-        const day = dateRange(s['dates']) || 'chưa chọn ngày';
+        const day = dateRange(s['dates']).replace(' - ', ' – ') || 'chưa chọn ngày';
         // không cố định giờ: chỉ hiện ngày
         const when = s['allDay'] ? day : `${day} · ${s['from'] || '--:--'}${s['to'] ? ' – ' + s['to'] : ''}`;
         return {
