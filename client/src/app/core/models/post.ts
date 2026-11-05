@@ -155,6 +155,8 @@ export interface Post {
   freeShipFrom?: number;
   /** Các khu người bán phục vụ (bài đăng từ form khu Bán); `block` ghi sẵn tên các khu để hiển thị */
   areas?: string[];
+  /** Dịch vụ không có mục Thông tin nhanh (giặt sấy, lưu trú): 3 ô đầu bài lấy từ các ô người bán đã điền */
+  highlights?: { icon: 'clock' | 'bolt' | 'pin' | 'check'; label: string; value: string }[];
   /** Thông tin người bán đã điền, hiện dưới Mô tả (nội quy, điều kiện hủy, phạm vi phục vụ…) */
   info?: { label: string; value: string }[];
   /** Khối 3: ngày bán / ngày làm (yyyy-mm-dd) */

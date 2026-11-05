@@ -1,7 +1,7 @@
-import { OptionGroup, PayMethod, PostItem, PostKind, PostQuestion, PriceType } from '../../../core/models/post';
+import { OptionGroup, PayMethod, Post, PostItem, PostKind, PostQuestion, PriceType } from '../../../core/models/post';
 import { PostBody } from '../../../core/services/seller';
 import { BANK_LIST } from './banks';
-import { FormType } from './post-form-config';
+import { FormType, SVC_PRESETS } from './post-form-config';
 
 /**
  * HÀM DUY NHẤT biến dữ liệu form đăng bài (khu Bán) thành `Post` đủ 7 khối (docs/post-contract.md).
@@ -13,7 +13,7 @@ type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 export type PostFields = Pick<
   PostBody,
   | 'category' | 'priceType' | 'estimate' | 'inspectFee' | 'items' | 'optionGroups' | 'questions' | 'fulfillmentModes' | 'deliveryFee'
-  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
+  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'highlights' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
 >;
 
 /** "A, B|+5.000đ" không dùng nữa: form lưu lựa chọn là chuỗi cách nhau dấu phẩy */
@@ -101,19 +101,17 @@ const row = (label: string, value: unknown): { label: string; value: string }[] 
 /** Thông tin dịch vụ người bán đã điền mà khung đặt không có ô riêng: hiện dưới Mô tả */
 function serviceInfoRows(s: V): { label: string; value: string }[] {
   const preset = String(s['preset'] ?? '');
+  // mục bị ẩn trong form của mẫu này thì không đưa giá trị mặc định của nó sang bên Mua
+  const shown = SVC_PRESETS[preset];
   const on = ((s['rules'] as V[]) ?? []).filter((r) => r['on'] && String(r['label'] ?? '').trim()).map((r) => String(r['label']).trim());
   const f = (s['fulfil'] as V) ?? {};
-  const giveBack = [f['delivery'] ? 'Giao tận tòa' + (+f['fee'] ? ` (${(+f['fee']).toLocaleString('vi-VN')}đ)` : '') : '', f['pickup'] ? 'Khách tự đến lấy' : ''].filter(Boolean).join(', ');
   return [
-    ...row('Phạm vi phục vụ', s['serviceArea']),
-    ...(preset === 'Giặt sấy' ? [...row('Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : ''), ...row('Cách trả đồ', giveBack)] : []),
+    ...(shown?.noQuick ? [] : row('Phạm vi phục vụ', s['serviceArea'])),
+    ...(preset === 'Giặt sấy' ? row('Phí giao khi trả đồ', f['delivery'] && +f['fee'] ? `${(+f['fee']).toLocaleString('vi-VN')}đ` : '') : []),
     ...(preset === 'Sửa chữa' && s['priceType'] !== 'quote' ? row('Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ, trừ vào tiền sửa nếu đồng ý` : '') : []),
     ...(preset === 'Lưu trú'
       ? [
           ...row('Tòa nhà', s['building']),
-          ...row('Nhận phòng từ', s['checkIn']),
-          ...row('Trả phòng trước', s['checkOut']),
-          ...row('Ở tối thiểu', +s['minNights'] ? `${+s['minNights']} đêm` : ''),
           ...row('Tiện nghi', ((s['amenities'] as string[]) ?? []).join(', ')),
           ...row('Nội quy', on.join('; ')),
           ...row('Hủy miễn phí', s['freeCancelDays'] !== null && s['freeCancelDays'] !== '' ? `Trước ${+s['freeCancelDays']} ngày` : ''),
@@ -123,8 +121,30 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
       : []),
     ...row('Điều kiện hủy', s['cancelPolicy']),
     ...row('Lưu ý cho khách', s['customerNote']),
-    ...(s['safety'] && (s['place'] === 'buyer' || s['place'] === 'choice') ? row('Lưu ý an toàn', 'Nên có người lớn ở nhà khi người làm đến, cất tài sản giá trị trước khi bắt đầu.') : []),
+    ...(!shown?.noPlace && s['safety'] && (s['place'] === 'buyer' || s['place'] === 'choice') ? row('Lưu ý an toàn', 'Nên có người lớn ở nhà khi người làm đến, cất tài sản giá trị trước khi bắt đầu.') : []),
   ];
+}
+
+/** 3 ô đầu bài của giặt sấy, lưu trú (các mẫu không có mục Thông tin nhanh và Nơi làm trong form); mẫu khác thì không có */
+function serviceHighlights(s: V): Post['highlights'] {
+  const preset = String(s['preset'] ?? '');
+  const f = (s['fulfil'] as V) ?? {};
+  const cell = (icon: 'clock' | 'bolt' | 'pin' | 'check', label: string, value: unknown) => (String(value ?? '').trim() ? [{ icon, label, value: String(value).trim() }] : []);
+  if (preset === 'Giặt sấy') {
+    return [
+      ...cell('clock', 'Giờ nhận đơn', s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
+      ...cell('bolt', 'Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : ''),
+      ...cell('pin', 'Cách trả đồ', [f['delivery'] ? 'Giao tận tòa' : '', f['pickup'] ? 'Khách tự đến lấy' : ''].filter(Boolean).join(', ')),
+    ];
+  }
+  if (preset === 'Lưu trú') {
+    return [
+      ...cell('clock', 'Nhận phòng', s['checkIn'] ? `Từ ${s['checkIn']}` : ''),
+      ...cell('clock', 'Trả phòng', s['checkOut'] ? `Trước ${s['checkOut']}` : ''),
+      ...cell('check', 'Ở tối thiểu', +s['minNights'] ? `${+s['minNights']} đêm` : ''),
+    ];
+  }
+  return undefined;
 }
 
 /** Giá đại diện: dòng rẻ nhất; nhiều mức giá khác nhau → 'from' */
@@ -204,7 +224,8 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         place: { mode: s['place'], ...(where ? { where } : {}) },
         // khung giờ khách chọn hẹn (giờ nhận lịch của người làm)
         handover: s['from'] && s['to'] ? { from: s['from'], to: s['to'] } : undefined,
-        serviceInfo: { turnaround: String(s['turnaround'] ?? '').trim() || undefined, warranty: String(s['warranty'] ?? '').trim() || undefined, area: String(s['serviceArea'] ?? '').trim() || undefined },
+        serviceInfo: { turnaround: String(s['turnaround'] ?? '').trim() || undefined, warranty: String(s['warranty'] ?? '').trim() || undefined, area: SVC_PRESETS[String(s['preset'] ?? '')]?.noQuick ? undefined : String(s['serviceArea'] ?? '').trim() || undefined },
+        highlights: serviceHighlights(s),
         deliveryFee: s['place'] === 'buyer' || s['place'] === 'choice' ? +s['homeFee'] || 0 : 0,
         noteEnabled: !!s['kitchenNote'],
         info: serviceInfoRows(s),

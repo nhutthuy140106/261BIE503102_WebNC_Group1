@@ -59,8 +59,9 @@ function placeText(place: PlaceBlock): string {
   }
 }
 
-/** Dịch vụ: Thời gian hoàn thành · Nơi làm · Bảo hành (báo giá sau mà chưa ghi bảo hành thì ô 3 là Phí kiểm tra) */
+/** Dịch vụ: Thời gian hoàn thành · Nơi làm · Bảo hành (báo giá sau mà chưa ghi bảo hành thì ô 3 là Phí kiểm tra); còn thiếu ô thì thêm Giờ nhận lịch */
 function serviceFacts(post: Post, place: PlaceBlock): PostTemplate['facts'] {
+  if (post.highlights?.length) return post.highlights.map((h) => [h.icon, h.label, h.value]);
   const out: PostTemplate['facts'] = [];
   const info = post.serviceInfo;
   if (info?.turnaround) out.push(['clock', 'Thời gian hoàn thành', info.turnaround]);
@@ -68,6 +69,7 @@ function serviceFacts(post: Post, place: PlaceBlock): PostTemplate['facts'] {
   if (where) out.push(['pin', 'Nơi làm', where]);
   if (info?.warranty) out.push(['shield', 'Bảo hành', info.warranty]);
   else if (post.priceType === 'quote') out.push(['receipt', 'Phí kiểm tra', vnd(post.inspectFee ?? 0)]);
+  if (out.length < 3 && post.handover) out.push(['clock', 'Giờ nhận lịch', `${post.handover.from} – ${post.handover.to}`]);
   return out;
 }
 
