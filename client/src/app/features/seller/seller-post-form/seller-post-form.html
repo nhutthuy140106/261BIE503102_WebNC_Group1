@@ -554,7 +554,7 @@
           <div class="bd">
             <label class="ck"><input type="checkbox" formControlName="delivery" /><span>Giao tận tòa</span>
               @if (c('spec.fulfil.delivery').value) { <span class="money extra" (click)="$event.stopPropagation()"><input appMoney class="input" formControlName="fee" placeholder="Phí giao" /></span> }</label>
-            @if (c('spec.fulfil.delivery').value && foodish()) {
+            @if (c('spec.fulfil.delivery').value) {
               <div class="fld half"><label for="ff">Miễn phí giao cho đơn từ</label><span class="money"><input appMoney id="ff" class="input" formControlName="freeFrom" /></span></div>
             }
             <label class="ck"><input type="checkbox" formControlName="pickup" /><span>Khách tự đến lấy</span></label>

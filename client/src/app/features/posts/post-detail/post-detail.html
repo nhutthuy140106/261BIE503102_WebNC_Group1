@@ -378,7 +378,7 @@
                   <span class="ct"><b>{{ v.tpl.place.choices![0][0] }}</b>
                     <small>{{ d.place() === 0 ? (d.placeFee() ? '+' + fmt(d.placeFee()) : 'Miễn phí') + (v.tpl.freeShipFrom ? (d.freeShip() ? ' · đơn đạt mức miễn phí giao' : ' · miễn phí từ ' + fmt(v.tpl.freeShipFrom)) : '') : 'Đang tắt, ' + v.tpl.place.choices![1][0].toLowerCase() }}</small>
                   </span>
-                  <input type="checkbox" class="tg" [checked]="d.place() === 0" (change)="d.place.set($any($event.target).checked ? 0 : 1)" />
+                  @if (v.tpl.place.choices!.length > 1) { <input type="checkbox" class="tg" [checked]="d.place() === 0" (change)="d.place.set($any($event.target).checked ? 0 : 1)" /> }
                 </label>
               }
 

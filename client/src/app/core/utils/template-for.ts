@@ -155,7 +155,7 @@ export function viewOf(post: Post): PostView {
   // Cách nhận: bài có ghi cách nhận (giao / tự lấy) thì theo bài; không thì theo mẫu
   const modes = post.fulfillmentModes ?? [];
   const place: PlaceBlock =
-    (post.kind === 'food' || post.kind === 'goods') && modes.length
+    modes.length && post.kind !== 'job'
       ? {
           ...base.place,
           mode: 'choice',
@@ -233,6 +233,8 @@ export function viewOf(post: Post): PostView {
       : {}),
     quick: post.quickOptions,
     noteOff: post.noteEnabled === false,
+    // dịch vụ đăng từ form: một bộ chữ chung, không lấy chữ riêng của mẫu ("Đặt lấy đồ", "áo len" của giặt sấy)
+    ...(svc ? { action: quote ? 'Gửi yêu cầu' : 'Đặt lịch', notePh: 'Thêm thông tin cho người làm (không bắt buộc)…' } : {}),
     time,
   };
   // Dòng "Nhận đặt …" chỉ lấy từ khung giờ THẬT của bài; bài không đặt khung thì không ghi giờ (câu chữ cứng của mẫu từng nói sai giờ thật)

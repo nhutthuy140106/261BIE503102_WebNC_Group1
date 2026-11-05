@@ -82,7 +82,7 @@ const bankOf = (s: V): PostFields['bank'] => {
 const fulfilOf = (s: V): Pick<PostFields, 'fulfillmentModes' | 'deliveryFee' | 'freeShipFrom'> => {
   const f = (s['fulfil'] as V) ?? {};
   const modes = [...(f['delivery'] ? ['delivery' as const] : []), ...(f['pickup'] ? ['pickup' as const] : [])];
-  return { fulfillmentModes: modes, deliveryFee: f['delivery'] ? +f['fee'] || 0 : 0, freeShipFrom: f['delivery'] && +f['freeFrom'] > 0 ? +f['freeFrom'] : undefined };
+  return { fulfillmentModes: modes, deliveryFee: f['delivery'] ? +f['fee'] || 0 : 0, freeShipFrom: f['delivery'] && +f['fee'] > 0 && +f['freeFrom'] > 0 ? +f['freeFrom'] : undefined };
 };
 
 /** Size (bắt buộc chọn, có giá cộng thêm), độ ngọt, đá của đồ uống thành các nhóm chọn một, không tính tiền, không bắt buộc (bỏ hết = không cho chọn) */
@@ -104,10 +104,8 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
   // mục bị ẩn trong form của mẫu này thì không đưa giá trị mặc định của nó sang bên Mua
   const shown = SVC_PRESETS[preset];
   const on = ((s['rules'] as V[]) ?? []).filter((r) => r['on'] && String(r['label'] ?? '').trim()).map((r) => String(r['label']).trim());
-  const f = (s['fulfil'] as V) ?? {};
   return [
     ...(shown?.noQuick ? [] : row('Phạm vi phục vụ', s['serviceArea'])),
-    ...(preset === 'Giặt sấy' ? row('Phí giao khi trả đồ', f['delivery'] && +f['fee'] ? `${(+f['fee']).toLocaleString('vi-VN')}đ` : '') : []),
     ...(preset === 'Sửa chữa' && s['priceType'] !== 'quote' ? row('Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ, trừ vào tiền sửa nếu đồng ý` : '') : []),
     ...(preset === 'Lưu trú'
       ? [
@@ -134,7 +132,7 @@ function serviceHighlights(s: V): Post['highlights'] {
     return [
       ...cell('clock', 'Giờ nhận đơn', s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
       ...cell('bolt', 'Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : ''),
-      ...cell('pin', 'Cách trả đồ', [f['delivery'] ? 'Giao tận tòa' : '', f['pickup'] ? 'Khách tự đến lấy' : ''].filter(Boolean).join(', ')),
+      ...cell('pin', 'Cách nhận', [f['delivery'] ? 'Giao tận nơi' : '', f['pickup'] ? 'Tự đến lấy' : ''].filter(Boolean).join(', ')),
     ];
   }
   if (preset === 'Lưu trú') {
@@ -226,7 +224,8 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         handover: s['from'] && s['to'] ? { from: s['from'], to: s['to'] } : undefined,
         serviceInfo: { turnaround: String(s['turnaround'] ?? '').trim() || undefined, warranty: String(s['warranty'] ?? '').trim() || undefined, area: SVC_PRESETS[String(s['preset'] ?? '')]?.noQuick ? undefined : String(s['serviceArea'] ?? '').trim() || undefined },
         highlights: serviceHighlights(s),
-        deliveryFee: s['place'] === 'buyer' || s['place'] === 'choice' ? +s['homeFee'] || 0 : 0,
+        // giặt sấy chọn cách nhận như đồ ăn, đồ dùng; dịch vụ khác tính phụ phí đến nhà
+        ...(s['preset'] === 'Giặt sấy' ? fulfilOf(s) : { deliveryFee: s['place'] === 'buyer' || s['place'] === 'choice' ? +s['homeFee'] || 0 : 0 }),
         noteEnabled: !!s['kitchenNote'],
         info: serviceInfoRows(s),
         stock: { mode: 'open' },

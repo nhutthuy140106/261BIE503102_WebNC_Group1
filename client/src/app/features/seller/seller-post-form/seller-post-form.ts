@@ -534,7 +534,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         }
         if (this.svcPreset().laundry) {
           return {
-            price: pr, unit: pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ', action: 'Đặt lấy đồ', xu: (s['pay'] ?? []).includes('xu'),
+            price: pr, unit: pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ', action: 'Đặt lịch', xu: (s['pay'] ?? []).includes('xu'),
             facts: [
               ['clock', 'Giờ nhận đơn', `${s['from']} – ${s['to']}, ${dateList(s['dates'])}`],
               ['bolt', 'Trả đồ', `Trong khoảng ${s['returnHours'] || 24} giờ${s['estimate'] ? ' · giá theo cân thực tế' : ''}`],
