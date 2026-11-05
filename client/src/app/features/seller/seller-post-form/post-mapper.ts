@@ -119,7 +119,6 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
       : []),
     ...row('Điều kiện hủy', s['cancelPolicy']),
     ...row('Lưu ý cho khách', s['customerNote']),
-    ...(!shown?.noPlace && s['safety'] && (s['place'] === 'buyer' || s['place'] === 'choice') ? row('Lưu ý an toàn', 'Nên có người lớn ở nhà khi người làm đến, cất tài sản giá trị trước khi bắt đầu.') : []),
   ];
 }
 

@@ -50,7 +50,7 @@ describe('formToPostFields', () => {
   describe('mẫu ẩn mục trong form', () => {
     const svc = (spec: Record<string, unknown>) => formToPostFields('service', { common: {}, spec: { items: [], options: [], questions: [], serviceArea: 'Trong khu', place: 'buyer', safety: true, ...spec } }, 'service');
 
-    it('giặt sấy: không gửi phạm vi phục vụ, nơi làm, lưu ý an toàn mặc định', () => {
+    it('giặt sấy: không gửi phạm vi phục vụ, nơi làm mặc định', () => {
       const f = svc({ preset: 'Giặt sấy', from: '08:00', to: '18:00', returnHours: 12, fulfil: { delivery: true, pickup: true, fee: 0 } });
       expect(f.info).toEqual([]);
       expect(f.serviceInfo?.area).toBeUndefined();
@@ -81,10 +81,14 @@ describe('formToPostFields', () => {
       expect(svc({ preset: 'Khác', turnaround: '2 giờ', warranty: '1 tháng' }).serviceInfo).toMatchObject({ turnaround: '2 giờ', warranty: '1 tháng' });
     });
 
+    it('không còn dòng lưu ý an toàn, kể cả bài cũ đã lưu ô này', () => {
+      for (const place of ['buyer', 'choice', 'seller']) expect(svc({ preset: 'Dọn dẹp', place }).info?.map((x) => x.label)).not.toContain('Lưu ý an toàn');
+    });
+
     it('mẫu có đủ mục thì vẫn gửi như người bán điền', () => {
       const f = svc({ preset: 'Dọn dẹp' });
       expect(f.highlights).toBeUndefined();
-      expect(f.info?.map((x) => x.label)).toEqual(['Phạm vi phục vụ', 'Lưu ý an toàn']);
+      expect(f.info?.map((x) => x.label)).toEqual(['Phạm vi phục vụ']);
     });
   });
 

@@ -290,7 +290,6 @@ export function serviceGroup(fb: FormBuilder, preset: string) {
     place: [p.place],
     where: [''],
     homeFee: [p.homeFee, Validators.min(0)],
-    safety: [p.place === 'buyer'],
     /** khách gõ ghi chú khi đặt; mặc định bật như đồ ăn, đồ uống */
     kitchenNote: [true],
     pay: fb.control<string[]>(['cash']),

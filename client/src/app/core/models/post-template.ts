@@ -146,7 +146,6 @@ export interface PostTemplate {
   noteOff?: boolean;
   stock: StockBlock;
   notePh: string;
-  safety?: boolean;
   /** Các bước theo dõi đơn của loại này */
   steps: string[];
 }

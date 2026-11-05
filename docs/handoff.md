@@ -336,3 +336,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Trạng thái đóng của việc:** việc đã đăng sang phía Mua lấy trạng thái từ `SellerPost.on`, nút Đóng nhận đề nghị đóng luôn bài bên Mua. Đóng chỉ ngừng nhận đề nghị mới, đề nghị đã gửi vẫn chọn được. Việc do người thật gửi từ phía Mua đứng đầu Cần bạn xử lý. Đăng bài từ bản nháp thì bài mở bán.
 - **Form sửa chữa:** bỏ mục Thông tin nhanh, bỏ dòng giải thích; 3 ô đầu bài là Nơi làm, Phí kiểm tra, Giờ nhận lịch. Hộp chọn người hiện khung giờ.
 - **Câu hỏi riêng:** kiểu Hình ảnh lưu ảnh thật (thu nhỏ, `core/utils/image-file.ts`) thay vì tên file, phía Bán thấy ảnh trong chi tiết đơn. Câu hỏi chọn một, chọn nhiều phải có lựa chọn mới đăng được.
+- **Bỏ lưu ý an toàn:** form dịch vụ không còn ô "Hiện lưu ý an toàn khi làm tại nhà khách", phía Mua không còn dòng Lưu ý an toàn ở mọi trường hợp (kể cả bài cũ đã lưu ô này).

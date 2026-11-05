@@ -228,7 +228,8 @@ export function viewOf(post: Post): PostView {
     pays: pays?.length ? pays : undefined,
     bank: post.bank,
     freeShipFrom: post.freeShipFrom,
-    info: post.info?.length ? post.info : undefined,
+    // bài đăng trước khi bỏ ô lưu ý an toàn vẫn còn dòng này trong dữ liệu: không hiện nữa
+    info: post.info?.some((r) => r.label !== 'Lưu ý an toàn') ? post.info.filter((r) => r.label !== 'Lưu ý an toàn') : undefined,
     ...(dish && items?.some((i) => i.dailyQty !== undefined)
       ? { dishLeft: Object.fromEntries(items.flatMap((it, i) => (it.dailyQty !== undefined ? [[dish.choices[i], it.dailyQty]] : []))) }
       : {}),
