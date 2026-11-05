@@ -8,7 +8,7 @@
     @if (post.promoted) {
       <span class="kind ad">QUẢNG BÁ</span>
     } @else {
-      <span class="kind">{{ post.category ?? kindLabel[post.kind] }}</span>
+      <span class="kind">{{ tag }}</span>
     }
     <app-deal-tag class="deal" [post]="post" />
     @if (post.acceptsXu) { <span class="xuico" title="Dùng được Xu"><img src="assets/clean/antxu.png" alt="Dùng được Xu" /></span> }

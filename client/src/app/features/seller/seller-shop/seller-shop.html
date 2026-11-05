@@ -99,7 +99,7 @@
               <span class="edit"><svg class="i"><use href="#pencil" /></svg>Sửa</span>
             </div>
           </a>
-          <span class="k"><span>{{ kindLabel[p.kind] }}</span>@if (postState(p).cls === 'wait') { <span class="stat wait">{{ postState(p).text }}</span> }</span>
+          <span class="k"><span>{{ postTag(p) }}</span>@if (postState(p).cls === 'wait') { <span class="stat wait">{{ postState(p).text }}</span> }</span>
           <h3>{{ p.title }}</h3>
           <div class="pr">@if (p.priceFrom) { từ }{{ p.price | vnd }}@if (p.unit) { <small> {{ p.unit }}</small> }</div>
         </div>

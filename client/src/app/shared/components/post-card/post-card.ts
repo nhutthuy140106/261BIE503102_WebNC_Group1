@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { AuthService } from '../../../core/services/auth';
 import { flyHeart } from '../../../core/utils/fly-heart';
-import { KIND_LABEL, Post } from '../../../core/models/post';
+import { Post } from '../../../core/models/post';
+import { postTag } from '../../../core/utils/post-tag';
 import { createSlug } from '../../../core/utils/slug-helper';
 
 /** Thẻ món đồ / dịch vụ có ảnh. Cha -> con: @Input; con -> cha: @Output. */
@@ -16,7 +17,9 @@ export class PostCard {
   @Input() saved = false;
   @Output() toggleSave = new EventEmitter<Post>();
 
-  protected readonly kindLabel = KIND_LABEL;
+  protected get tag(): string {
+    return postTag(this.post);
+  }
 
   /** 4.9 -> "4,9" (dấu phẩy như bản mẫu) */
   protected get rating(): string {

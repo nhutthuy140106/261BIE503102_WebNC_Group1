@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { KIND_LABEL, PostKind } from '../../../core/models/post';
+import { postTag } from '../../../core/utils/post-tag';
 import { SELLER_KIND_ICON, SellerStats, StatsRange } from '../../../core/models/seller';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 
@@ -27,6 +28,7 @@ export class SellerInsights implements OnInit, AfterViewInit {
 
   protected readonly ranges: StatsRange[] = ['today', '7', '30', '90', 'year'];
   protected readonly kindLabel = KIND_LABEL;
+  protected readonly postTag = postTag;
   protected readonly kindIcon = SELLER_KIND_ICON;
   protected readonly short = short;
   protected readonly range = signal<StatsRange>(this.readRange());

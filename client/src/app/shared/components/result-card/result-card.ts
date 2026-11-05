@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
-import { KIND_LABEL, Post } from '../../../core/models/post';
+import { Post } from '../../../core/models/post';
+import { postTag } from '../../../core/utils/post-tag';
 import { AuthService } from '../../../core/services/auth';
 import { createSlug } from '../../../core/utils/slug-helper';
 import { flyHeart } from '../../../core/utils/fly-heart';
@@ -26,10 +27,8 @@ export class ResultCard {
     return this.isJob ? ['/posts/job', createSlug(this.post.title, this.post._id)] : ['/posts', createSlug(this.post.title, this.post._id)];
   }
 
-  /** "Đồ uống" riêng khỏi "Đồ ăn" như bản mẫu; còn lại theo nhóm */
   protected get kindText(): string {
-    if (this.post.kind === 'food') return this.post.category === 'Đồ uống' ? 'Đồ uống' : 'Đồ ăn';
-    return KIND_LABEL[this.post.kind];
+    return postTag(this.post);
   }
 
   protected onSave(e: Event): void {

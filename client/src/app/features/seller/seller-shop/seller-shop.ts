@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { KIND_LABEL } from '../../../core/models/post';
+import { postTag } from '../../../core/utils/post-tag';
 import { SELLER_KIND_ICON, SellerPost } from '../../../core/models/seller';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
@@ -28,7 +28,7 @@ export class SellerShop implements OnInit {
   protected readonly replyOpts: SelectOption[] = [...REPLY.map((r) => ({ value: r, label: r })), { value: 'other', label: 'Khác' }];
   /** thời gian trả lời đang chọn; 'other' = tự nhập */
   protected readonly replyPick = signal('');
-  protected readonly kindLabel = KIND_LABEL;
+  protected readonly postTag = postTag;
   protected readonly kindIcon = SELLER_KIND_ICON;
 
   protected readonly tab = signal<Tab>((this.route.snapshot.queryParamMap.get('tab') as Tab) || 'sell');

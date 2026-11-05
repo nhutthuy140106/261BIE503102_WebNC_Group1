@@ -1,5 +1,5 @@
 import { Component, EventEmitter, HostListener, Input, Output, inject, signal } from '@angular/core';
-import { KIND_LABEL } from '../../../../core/models/post';
+import { postTag } from '../../../../core/utils/post-tag';
 import { SELLER_KIND_ICON, SELLER_LANE, SellerPost } from '../../../../core/models/seller';
 import { SellerSpaceService } from '../../../../core/services/seller-space';
 import { ToastService } from '../../../../core/services/toast';
@@ -30,7 +30,7 @@ export class SellerPostCard {
   @Output() readonly removed = new EventEmitter<void>();
 
   protected readonly lane = SELLER_LANE;
-  protected readonly kindLabel = KIND_LABEL;
+  protected readonly postTag = postTag;
   protected readonly kindIcon = SELLER_KIND_ICON;
 
   protected readonly editing = signal(false);

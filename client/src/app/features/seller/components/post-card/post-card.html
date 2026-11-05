@@ -3,7 +3,7 @@
     @if (post.image) {
       <img [src]="post.image" alt="" />
     } @else {
-      <span class="cream"><svg class="i"><use [attr.href]="'#' + (post.icon || kindIcon[post.kind])" /></svg><small>{{ kindLabel[post.kind] }}</small></span>
+      <span class="cream"><svg class="i"><use [attr.href]="'#' + (post.icon || kindIcon[post.kind])" /></svg><small>{{ postTag(post) }}</small></span>
     }
     <span class="stp"><span class="stat" [class]="'stat ' + st.cls">{{ st.text }}</span></span>
     @if (post.promo) {
