@@ -577,8 +577,9 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         };
       }
       default: {
-        const time = s['allDay'] ? 'cả ngày' : `${s['from'] || '--:--'}${s['to'] ? ' – ' + s['to'] : ''}`;
-        const when = `${dateRange(s['dates']) || 'chưa chọn ngày'} · ${time}`;
+        const day = dateRange(s['dates']) || 'chưa chọn ngày';
+        // không cố định giờ: chỉ hiện ngày
+        const when = s['allDay'] ? day : `${day} · ${s['from'] || '--:--'}${s['to'] ? ' – ' + s['to'] : ''}`;
         return {
           price: money(s['pay']), unit: s['payUnit'] || 'việc', kind: 'Việc làm', action: 'Đề nghị nhận việc', xu: false,
           facts: [

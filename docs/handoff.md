@@ -319,3 +319,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Ngày hẹn phía Mua:** lịch chọn ngày chỉ mở `Post.dates` cho mọi loại bài (trước đây chỉ dịch vụ), kiểm tra lại khi gửi đơn (`core/utils/open-dates.ts`). Bài không có `dates` vẫn mở mọi ngày.
 - **Ghi chú:** thêm ô cho khách ghi chú (`spec.kitchenNote`, mặc định bật) vào form đồ dùng và dịch vụ. Bài cũ chưa có `noteEnabled` vẫn hiện ô ghi chú.
 - **Khám phá quanh khu:** bỏ tải dần và nút "Xem thêm", hiện hết bài của khu trong một lần.
+- **Form đăng việc:** không cố định giờ thì thẻ xem trước và dữ liệu `job.due` chỉ ghi ngày, không còn chữ "cả ngày"; bỏ dòng "Trả trực tiếp cho người làm...".
