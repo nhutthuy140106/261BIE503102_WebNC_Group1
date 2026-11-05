@@ -60,6 +60,7 @@ export interface PostBody {
   condition?: Post['condition'];
   serviceInfo?: Post['serviceInfo'];
   highlights?: Post['highlights'];
+  pickupAtBuyer?: boolean;
   /** Chỉ việc làm */
   job?: { start?: string; end?: string; allDay?: boolean; head?: number; payUnit?: string; due?: string; payBy?: 'cash' | 'transfer'; building?: string; windows?: string[] };
 }
@@ -114,7 +115,7 @@ export class SellerService {
           priceType: body.priceType, estimate: body.estimate, inspectFee: body.inspectFee, items: body.items?.length ? body.items : undefined,
           optionGroups: body.optionGroups, questions: body.questions, fulfillmentModes: body.fulfillmentModes, deliveryFee: body.deliveryFee,
           needSchedule: body.needSchedule, payMethods: body.payMethods, bank: body.bank, quickOptions: body.quickOptions, noteEnabled: body.noteEnabled, template: body.template, freeShipFrom: body.freeShipFrom, areas: body.areas, info: body.info, dates: body.dates, timeMode: body.timeMode, duration: body.duration,
-          repeat: body.repeat, place: body.place, highlights: body.highlights, stock: body.stock, prepMinutes: body.prepMinutes, handover: body.handover, condition: body.condition, serviceInfo: body.serviceInfo,
+          repeat: body.repeat, place: body.place, highlights: body.highlights, pickupAtBuyer: body.pickupAtBuyer, stock: body.stock, prepMinutes: body.prepMinutes, handover: body.handover, condition: body.condition, serviceInfo: body.serviceInfo,
           job: body.kind === 'job' ? { ...body.job, due: body.job?.due ?? body.due ?? '', offers: 0, status: 'open' } : undefined,
         };
         if (id) {

@@ -154,13 +154,15 @@ export class OrderDraft {
     }
     return pl.mode === 'buyer' || pl.mode === 'ab' ? pl.fee ?? 0 : 0;
   });
-  /** Cách nhận có phụ phí (giao tận cửa / thợ đến nhà) thì cần địa chỉ người nhận */
-  readonly needsAddress = computed(() => {
+  /** Cách nhận có phụ phí (giao tận cửa / thợ đến nhà): làm hoặc giao tới tận nơi khách */
+  readonly toBuyer = computed(() => {
     const m = this.tpl.place.mode;
     // cách nhận tên "Giao…" luôn cần địa chỉ, kể cả khi người bán miễn phí giao
     const delivers = /^(giao|đến nhà)/i.test(this.tpl.place.choices?.[this.place()]?.[0] ?? '');
     return m === 'buyer' || m === 'ab' || (m === 'choice' && (this.placeFee() > 0 || delivers));
   });
+  /** Cần địa chỉ khách: giao tới nơi, hoặc người làm qua nhà lấy đồ (giặt sấy) dù khách tự đến nhận lại */
+  readonly needsAddress = computed(() => this.toBuyer() || !!this.tpl.place.alwaysAddress);
   readonly discount = computed(() => {
     const v = this.voucher();
     if (!v) return 0;

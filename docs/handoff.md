@@ -328,3 +328,5 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Nhãn phân loại trên thẻ bài:** chỉ còn 5 nhãn Đồ ăn, Đồ uống, Đồ dùng, Dịch vụ, Việc làm (`core/utils/post-tag.ts`). Danh mục con và chữ Combo không còn làm nhãn; QUẢNG BÁ giữ nguyên. Bộ lọc và đường dẫn vẫn ghi nhóm Đồ ăn & uống.
 - **Cách nhận của giặt sấy:** dùng chung `fulfillmentModes`, `deliveryFee`, `freeShipFrom` với đồ ăn, đồ dùng; hộp đặt có công tắc Giao tận nơi và tính phí vào tổng. Ô "Miễn phí giao cho đơn từ" hiện ở cả đồ dùng, giặt sấy (trước đây ẩn mà vẫn gửi 100.000đ). Bài chỉ có một cách nhận thì không có công tắc.
 - **Hộp đặt dịch vụ:** bài từ form dùng chung một bộ chữ: nút "Đặt lịch" (báo giá sau là "Gửi yêu cầu"), gợi ý ghi chú chung; không lấy chữ của mẫu giặt sấy.
+- **Nhãn 5 loại trên mọi thẻ:** bài quảng bá hiện cả nhãn loại và QUẢNG BÁ, thẻ việc có nhãn "Việc làm".
+- **Giặt sấy:** tiệm luôn qua nhà khách lấy đồ (`Post.pickupAtBuyer`), hộp đặt luôn hỏi địa chỉ; công tắc Giao tận nơi chỉ áp dụng lúc trả đồ. Đơn phía Bán ghi "Lấy đồ tại" và "Trả đồ". Bài đã đăng cần Sửa + Lưu.

@@ -1,4 +1,5 @@
 import type { Post } from '../models/post';
+import { OrderDraft } from './order-draft';
 import { viewOf } from './template-for';
 
 const post = (x: Partial<Post>) => ({ _id: 'a', kind: 'service', title: 'Giặt sấy thử', description: 'x', price: 18000, images: [], block: 'Bcons', sellerName: 'A', createdAt: '2026-11-05T08:00:00Z', timeMode: 'slot', ...x }) as unknown as Post;
@@ -9,6 +10,19 @@ describe('cách nhận của dịch vụ', () => {
     expect(tpl.place.mode).toBe('choice');
     expect(tpl.place.choices).toEqual([['Giao tận nơi', 10000], ['Tự đến lấy', 0]]);
     expect(tpl.freeShipFrom).toBe(100000);
+  });
+
+  it('giặt sấy: tiệm qua nhà lấy đồ nên luôn cần địa chỉ, tắt giao chỉ đổi cách trả đồ', () => {
+    const d = new OrderDraft(viewOf(post({ pickupAtBuyer: true, fulfillmentModes: ['delivery', 'pickup'], deliveryFee: 10000 })).tpl);
+    expect([d.needsAddress(), d.toBuyer(), d.placeFee()]).toEqual([true, true, 10000]);
+    d.place.set(1);
+    expect([d.needsAddress(), d.toBuyer(), d.placeFee()]).toEqual([true, false, 0]);
+  });
+
+  it('bài khác tắt giao thì không cần địa chỉ', () => {
+    const d = new OrderDraft(viewOf(post({ kind: 'goods', fulfillmentModes: ['delivery', 'pickup'], deliveryFee: 10000 })).tpl);
+    d.place.set(1);
+    expect(d.needsAddress()).toBe(false);
   });
 
   it('dịch vụ đăng từ form dùng chung một bộ chữ', () => {

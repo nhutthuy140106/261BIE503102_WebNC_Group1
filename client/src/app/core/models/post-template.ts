@@ -62,6 +62,8 @@ export interface PlaceBlock {
   label: string;
   /** mode 'choice': [tên cách nhận, phụ phí] */
   choices?: [string, number][];
+  /** mode 'choice': người làm qua nhà khách lấy đồ, luôn cần địa chỉ dù khách tự đến nhận lại */
+  alwaysAddress?: boolean;
   /** mode 'seller': địa chỉ người bán */
   where?: string;
   /** mode 'buyer' / 'ab': phí người làm tới tận nơi (không có thì 0) */

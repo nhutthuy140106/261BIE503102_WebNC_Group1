@@ -193,7 +193,7 @@ export class SellerSpaceService {
   readonly tasks = computed<SellerTask[]>(() => {
     const out: (SellerTask & { rank: number })[] = [];
     const place = (o: SellerOrder) =>
-      (o.fulfil === 'pickup' ? 'Tự đến lấy' : o.fulfil === 'home' ? `Tại nhà ${o.address.split(',')[0]}` : `Giao tới ${o.address.split(',')[0]}`) +
+      (o.flow === 'laundry' ? `Lấy đồ tại ${o.address.split(',')[0]}` : o.fulfil === 'pickup' ? 'Tự đến lấy' : o.fulfil === 'home' ? `Tại nhà ${o.address.split(',')[0]}` : `Giao tới ${o.address.split(',')[0]}`) +
       ` · ${o.day ? dayText(o.day, { weekday: 'short', day: '2-digit', month: '2-digit' }) + ' ' : ''}${o.time}`;
     // ngày giờ kiểu dòng Đơn hàng phía Mua: 16/10/2026 · 18:00
     const at = (day: number, time: string) => `${dayText(day, { day: '2-digit', month: '2-digit', year: 'numeric' })} · ${time}`;
@@ -731,7 +731,7 @@ export class SellerSpaceService {
       if (o.day !== d || ['waiting', 'declined', 'cancelled'].includes(o.state)) continue;
       out.push({
         key: o.id, kind: o.kind, time: o.time, duration: o.duration ?? 30, image: o.image, avatar: o.image ? undefined : o.buyer.avatar, who: o.buyer.name,
-        address: o.fulfil === 'pickup' ? o.address : `${o.fulfil === 'home' ? 'Tại nhà khách ' : 'Giao tới '}${o.address.split(',')[0]}`,
+        address: o.flow === 'laundry' ? `Lấy đồ tại ${o.address.split(',')[0]}` : o.fulfil === 'pickup' ? o.address : `${o.fulfil === 'home' ? 'Tại nhà khách ' : 'Giao tới '}${o.address.split(',')[0]}`,
         phone: o.buyer.phone, item: `${o.code} · ${o.title}`, link: `/seller/orders/${o.id}`, done: o.state === 'done',
       });
     }

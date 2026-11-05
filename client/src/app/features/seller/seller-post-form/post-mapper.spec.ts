@@ -60,7 +60,7 @@ describe('formToPostFields', () => {
       const f = svc({ preset: 'Giặt sấy', from: '08:00', to: '18:00', returnHours: 12, fulfil: { delivery: true, pickup: true, fee: 10000 } });
       expect(f.highlights?.map((x) => [x.label, x.value])).toEqual([['Giờ nhận đơn', '08:00 – 18:00'], ['Trả đồ', 'Trong khoảng 12 giờ'], ['Cách nhận', 'Giao tận nơi, Tự đến lấy']]);
       expect(f.info).toEqual([]);
-      expect(f).toMatchObject({ fulfillmentModes: ['delivery', 'pickup'], deliveryFee: 10000 });
+      expect(f).toMatchObject({ fulfillmentModes: ['delivery', 'pickup'], deliveryFee: 10000, pickupAtBuyer: true });
     });
 
     it('lưu trú: 3 ô đầu bài là nhận phòng, trả phòng, ở tối thiểu', () => {

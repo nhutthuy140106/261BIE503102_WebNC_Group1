@@ -340,7 +340,7 @@
             </div>
           </section>
           @if (svcPreset().laundry) {
-            <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: svcNo('recv'), title: 'Cách trả đồ sau khi giặt xong' }" />
+            <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: svcNo('recv'), title: 'Cách trả đồ sau khi giặt xong, tiệm luôn qua nhà khách lấy đồ' }" />
           }
           @if (!svcPreset().noPlace) {
           <section class="sec">
@@ -704,6 +704,7 @@
         <div class="jcard">
           <div class="jt">@if (myAvatar()) { <img [src]="myAvatar()" alt="" /> }<span><b>{{ myName() }}</b>vừa đăng</span></div>
           <p class="jd">{{ v()['common']['desc'] || 'Mô tả việc sẽ hiện ở đây.' }}</p>
+          <span class="jtag">Việc làm</span>
           <div class="jf"><span class="jpay">{{ p.price }}<small>/ {{ p.unit }}</small></span><span class="due"><svg class="i"><use href="#clock" /></svg>{{ p.facts[0][2] }}</span></div>
         </div>
         <div class="cbody"><h4>{{ v()['common']['title'] || 'Tên việc' }}</h4><div class="meta"><span><svg class="i"><use href="#pin" /></svg>{{ v()['common']['area'] }}{{ v()['spec']['building'] ? ' · ' + v()['spec']['building'] : '' }}</span><span class="jst">Đang mở · chưa có đề nghị</span></div></div>

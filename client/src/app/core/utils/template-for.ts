@@ -159,6 +159,7 @@ export function viewOf(post: Post): PostView {
       ? {
           ...base.place,
           mode: 'choice',
+          alwaysAddress: post.pickupAtBuyer,
           choices: [...(modes.includes('delivery') ? [['Giao tận nơi', post.deliveryFee ?? 0] as [string, number]] : []), ...(modes.includes('pickup') ? [['Tự đến lấy', 0] as [string, number]] : [])],
         }
       : svc && post.place
