@@ -173,6 +173,7 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         stock: n > 1 ? { mode: 'limit', left: n } : { mode: 'once' },
         needSchedule: !!((s['fulfil'] as V)?.['pickup']),
         handover: s['pickFrom'] && s['pickTo'] ? { from: s['pickFrom'], to: s['pickTo'] } : undefined,
+        noteEnabled: !!s['kitchenNote'],
         info: row('Tình trạng chi tiết', s['flaw']),
       };
     }
@@ -197,6 +198,7 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         handover: s['from'] && s['to'] ? { from: s['from'], to: s['to'] } : undefined,
         serviceInfo: { turnaround: String(s['turnaround'] ?? '').trim() || undefined, warranty: String(s['warranty'] ?? '').trim() || undefined, area: String(s['serviceArea'] ?? '').trim() || undefined },
         deliveryFee: s['place'] === 'buyer' || s['place'] === 'choice' ? +s['homeFee'] || 0 : 0,
+        noteEnabled: !!s['kitchenNote'],
         info: serviceInfoRows(s),
         stock: { mode: 'open' },
         needSchedule: true,

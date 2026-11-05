@@ -185,6 +185,7 @@
                 <div class="fld"><label for="gpf">Từ</label><app-time-input inputId="gpf" formControlName="pickFrom" /></div>
                 <div class="fld"><label for="gpt">Đến</label><app-time-input inputId="gpt" formControlName="pickTo" /></div>
               </div>
+              <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú cho người bán</span></label></div>
             </div>
           </section>
           <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 5 }" />
@@ -288,6 +289,7 @@
               </div>
               <button type="button" class="mini" (click)="addQuestion()"><svg class="i"><use href="#plus" /></svg>Thêm câu hỏi</button>
               }
+              <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú khi đặt lịch</span></label></div>
             </div>
           </section>
           }
@@ -418,6 +420,7 @@
                   }
                 </div>
               </div>
+              <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú khi đặt lịch</span></label></div>
             </div>
           </section>
           }

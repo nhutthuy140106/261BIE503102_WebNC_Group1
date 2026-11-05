@@ -22,6 +22,12 @@ describe('formToPostFields', () => {
     expect(f.template).toBeUndefined();
   });
 
+  it('đồ dùng, dịch vụ: tắt ghi chú thì khách không ghi được, mặc định theo form', () => {
+    expect(formToPostFields('goods', { common: {}, spec: { kitchenNote: false } }, '').noteEnabled).toBe(false);
+    expect(formToPostFields('goods', { common: {}, spec: { kitchenNote: true } }, '').noteEnabled).toBe(true);
+    expect(formToPostFields('service', { common: {}, spec: { kitchenNote: false, items: [], options: [], questions: [] } }, '').noteEnabled).toBe(false);
+  });
+
   it('đồ uống: pha chế thành nhóm chọn một đứng trước tùy chọn, bỏ hết thì không có nhóm', () => {
     const f = formToPostFields('drink', { common: {}, spec: { items: [], options: [{ name: 'Size', multi: false, required: true, choices: [{ label: 'L', price: 6000 }] }], sweet: ['50%'], ice: [], quick: [] } }, 'food');
     expect(f.optionGroups?.map((g) => g.name)).toEqual(['Độ ngọt', 'Size']);

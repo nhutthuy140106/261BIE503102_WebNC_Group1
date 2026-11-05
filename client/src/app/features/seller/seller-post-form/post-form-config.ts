@@ -239,6 +239,8 @@ export function goodsGroup(fb: FormBuilder) {
     dates: fb.control<string[]>(nextDays(7)),
     pickFrom: ['17:00'],
     pickTo: ['21:00'],
+    /** khách gõ ghi chú khi đặt; mặc định bật như đồ ăn, đồ uống */
+    kitchenNote: [true],
     fulfil: fulfil(fb, false, 10000),
     pay: fb.control<string[]>(['cash']),
     bank: bankGroup(fb),
@@ -289,6 +291,8 @@ export function serviceGroup(fb: FormBuilder, preset: string) {
     where: [''],
     homeFee: [p.homeFee, Validators.min(0)],
     safety: [p.place === 'buyer'],
+    /** khách gõ ghi chú khi đặt; mặc định bật như đồ ăn, đồ uống */
+    kitchenNote: [true],
     pay: fb.control<string[]>(['cash']),
     bank: bankGroup(fb),
     // form chung: chính sách (bảo hành dùng ô warranty)
