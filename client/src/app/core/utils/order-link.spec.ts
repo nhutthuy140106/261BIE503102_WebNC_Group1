@@ -33,6 +33,13 @@ describe('toSellerOrder', () => {
     expect(t.stockQty).toBe(3);
   });
 
+  it('dịch vụ nhiều dòng: tên kèm đơn vị vẫn ra đúng giá từng dòng', () => {
+    const svc = { ...post, kind: 'service', price: 80000, items: [{ id: 'i1', name: 'Sửa ổ điện', price: 80000, unit: 'lần' }, { id: 'i2', name: 'Vệ sinh máy lạnh', price: 150000, unit: 'máy' }] } as unknown as Post;
+    const b = body({ detail: { ...detail(30000), items: [{ name: 'Vệ sinh máy lạnh (máy)', qty: 1 }] } });
+    const t = toSellerOrder(order({ total: 180000 }), svc, b, sp, who);
+    expect(t.items).toEqual([{ name: 'Vệ sinh máy lạnh (máy)', qty: 1, option: '', price: 150000 }]);
+  });
+
   it('giảm giá làm tổng thấp hơn giá món thì ghi dòng Giảm giá', () => {
     const t = toSellerOrder(order({ total: 25000 }), post, body(), sp, who);
     expect(t.items[1]).toMatchObject({ name: 'Giảm giá', price: -5000 });

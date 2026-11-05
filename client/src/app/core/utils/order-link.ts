@@ -44,7 +44,8 @@ export function toSellerOrder(order: Order, post: Post, body: CreateOrderBody, s
     ? cups.map((c, i) => ({ name: c.name, qty: c.qty, option: [c.option, i === 0 ? option : ''].filter(Boolean).join(' · '), price: c.price }))
     : post.priceType === 'quote'
     ? [{ name: 'Phí kiểm tra', qty: 1, option, price: order.total - ship }]
-    : dishes.map((d, i) => ({ name: d.name, qty: d.qty, option: i === 0 ? option : '', price: post.items?.find((x) => x.name === d.name)?.price ?? post.price }));
+    : dishes.map((d, i) => ({ name: d.name, qty: d.qty, option: i === 0 ? option : '', price: post.items?.find((x) => x.name === d.name || (x.unit && `${x.name} (${x.unit})` === d.name))?.price ?? post.price }));
+  // dịch vụ: phía Mua ghi tên kèm đơn vị, ví dụ "Vệ sinh máy lạnh (máy)", nên so cả hai cách ghi
   const rest = order.total - ship - items.reduce((n, i) => n + i.qty * i.price, 0);
   if (rest) items.push({ name: rest > 0 ? 'Tùy chọn cộng giá' : 'Giảm giá', qty: 1, option: '', price: rest });
   const at = body.scheduledAt ? new Date(body.scheduledAt) : now;
