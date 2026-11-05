@@ -57,6 +57,47 @@ describe('mock services', () => {
     expect(done.history.length).toBe(2);
   });
 
+  describe('đề nghị dùng chung giữa hai bên', () => {
+    const jobPost = (head = 1) => ({ _id: 'j1', kind: 'job', job: { head, payUnit: 'việc', offers: 0, status: 'open', due: '' } });
+    const from = (id: string, worker: string): Offer => ({ ...offer('offered'), _id: id, workerId: worker, workerName: worker });
+    const post = () => new Promise<{ job: { offers: number; status: string } }[]>((resolve) => TestBed.inject(MockDb).list<{ job: { offers: number; status: string } }>('posts').subscribe(resolve)).then((l) => l[0]);
+    const seed = (head = 1) => {
+      TestBed.inject(MockDb).save('posts', [jobPost(head)]);
+      TestBed.inject(MockDb).save('offers', [from('a', 'u1'), from('b', 'u2')]);
+    };
+    const act = (id: string, a: 'choose' | 'reject', head = 1) => new Promise<Offer>((resolve) => TestBed.inject(JobOfferService).posterAct(id, a, { exact: 'S2, 0512', head }).subscribe(resolve));
+    const all = () => new Promise<Offer[]>((resolve) => TestBed.inject(JobOfferService).all().subscribe(resolve));
+
+    it('đề nghị của người khác không nằm trong đơn của tôi, nhưng người đăng thấy đủ', async () => {
+      seed();
+      const mine = await new Promise<Offer[]>((resolve) => TestBed.inject(JobOfferService).list().subscribe(resolve));
+      expect(mine).toEqual([]);
+      expect((await all()).length).toBe(2);
+    });
+
+    it('chọn đủ người: người được chọn thấy địa chỉ, người còn lại không được chọn, bài thành đã có người', async () => {
+      seed();
+      const picked = await act('a', 'choose');
+      expect(picked).toMatchObject({ state: 'chosen', exactAddress: 'S2, 0512' });
+      expect((await all()).find((o) => o._id === 'b')?.state).toBe('rejected');
+      expect((await post()).job).toMatchObject({ status: 'taken', offers: 1 });
+    });
+
+    it('việc cần 2 người: chọn một người thì người kia vẫn chờ, bài vẫn mở', async () => {
+      seed(2);
+      await act('a', 'choose', 2);
+      expect((await all()).find((o) => o._id === 'b')?.state).toBe('offered');
+      expect((await post()).job).toMatchObject({ status: 'open', offers: 2 });
+    });
+
+    it('từ chối một người thì giảm số đề nghị trên bài, bài vẫn mở', async () => {
+      seed();
+      await act('b', 'reject');
+      expect((await all()).find((o) => o._id === 'a')?.state).toBe('offered');
+      expect((await post()).job).toMatchObject({ status: 'open', offers: 1 });
+    });
+  });
+
   it('đề nghị: báo hoàn thành thiếu ghi chú trả 422 kèm field', async () => {
     TestBed.inject(MockDb).save('offers', ([offer('working')]));
     const svc = TestBed.inject(JobOfferService);

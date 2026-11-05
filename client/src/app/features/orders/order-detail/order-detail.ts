@@ -121,6 +121,7 @@ export class OrderDetail implements OnInit {
     this.orderService.changed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       const id = this.order()?._id;
       if (id) this.orderService.getOrder(id).subscribe({ next: (o) => this.order.set(o), error: () => undefined });
+      if (id && this.offer()) this.offerService.get(id).subscribe({ next: (o) => this.offer.set(o), error: () => undefined });
     });
   }
 
@@ -626,6 +627,8 @@ export class OrderDetail implements OnInit {
   }
 
   protected receivedSims(o: Order, of: Offer): { id: string; label: string }[] {
+    // đề nghị thật: người đăng tự xử lý ở phía Bán, chỉ đề nghị mẫu mới có nút mô phỏng
+    if (of.workerId) return [];
     const n = o.counterpartName;
     if (of.state === 'reported') return [{ id: 'sim-confirm', label: 'Mô phỏng: ' + n + ' xác nhận hoàn thành' }];
     if (of.state === 'offered') return [{ id: 'sim-pick', label: 'Mô phỏng: ' + n + ' chọn bạn' }, { id: 'sim-reject', label: 'Mô phỏng: ' + n + ' chọn người khác' }];

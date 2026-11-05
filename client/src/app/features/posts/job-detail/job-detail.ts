@@ -1,4 +1,5 @@
-import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, switchMap, forkJoin } from 'rxjs';
@@ -12,6 +13,8 @@ import { SavedService } from '../../../core/services/saved';
 import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { JobOfferService } from '../../../core/services/job-offer';
+import { MockDb } from '../../../core/services/mock-db';
+import { SellerSpaceService } from '../../../core/services/seller-space';
 import { PostService } from '../../../core/services/post';
 import { QuestionService } from '../../../core/services/question';
 import { unsplash } from '../../../core/config/post-templates';
@@ -33,6 +36,9 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   private readonly postService = inject(PostService);
   private readonly offers = inject(JobOfferService);
   private readonly questions = inject(QuestionService);
+  private readonly db = inject(MockDb);
+  private readonly seller = inject(SellerSpaceService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly prompt = inject(AuthPromptService);
   private readonly toast = inject(ToastService);
@@ -69,6 +75,14 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   });
 
   ngOnInit(): void {
+    // người đăng trả lời, chọn người ở tab khác: cập nhật ngay, không làm mất nội dung đang gõ
+    this.db.changes.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((name) => {
+      const id = this.job()?._id;
+      if (!id || !['questions', 'offers', 'posts'].includes(name)) return;
+      if (name === 'questions') this.questions.list(id).subscribe((l) => this.qa.set(l));
+      if (name === 'offers') this.offers.findActiveForJob(id).subscribe((o) => this.myOffer.set(o));
+      if (name === 'posts') this.postService.getPostById(id).subscribe((p) => p && this.job.set(p));
+    });
     this.route.paramMap
       .pipe(
         switchMap((params) => {
@@ -187,6 +201,8 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
         this.myOffer.set(o);
         this.offerForm.markAsPristine();
         this.sent.set(true);
+        this.seller.receiveFromBuyer(j._id, `Đề nghị mới ở việc "${j.title}" từ ${o.workerName ?? 'một người nhận việc'}`);
+        this.postService.getPostById(j._id).subscribe((p) => p && this.job.set(p));
         this.submitting.set(false);
         this.toast.show('Đã gửi đề nghị nhận việc');
         this.notifications.push('Bạn đã gửi đề nghị nhận việc "' + o.jobTitle + '". Chờ ' + o.posterName + ' chọn người.', '/orders/' + o._id);
@@ -217,6 +233,7 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
       next: (q) => {
         this.qa.update((l) => [...l, q]);
         this.askForm.reset();
+        this.seller.receiveFromBuyer(j._id, `Câu hỏi mới ở việc "${j.title}": ${q.text}`);
       },
       error: (e: Error) => this.applyServerErrors(e, this.askForm),
     });

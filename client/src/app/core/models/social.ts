@@ -3,6 +3,7 @@ export interface Question {
   jobId: string;
   text: string;
   authorName: string;
+  authorAvatar?: string;
   answer: string | null;
   createdAt: string;
 }

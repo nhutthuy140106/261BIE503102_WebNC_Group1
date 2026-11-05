@@ -28,7 +28,7 @@ export class OrderService {
   private readonly seller = inject(SellerSpaceService);
 
   /** Tab khác vừa đổi đơn (người bán xác nhận, giao…): trang đơn đang mở đọc lại */
-  readonly changed = this.db.changes.pipe(filter((name) => name === COLLECTION));
+  readonly changed = this.db.changes.pipe(filter((name) => name === COLLECTION || name === 'offers'));
 
   getOrders(): Observable<Order[]> {
     return forkJoin([this.placed(), this.offers.list()]).pipe(

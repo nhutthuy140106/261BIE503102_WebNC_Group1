@@ -2,17 +2,21 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, switchMap, tap } from 'rxjs';
 import { DATASET_BASE } from '../config/api.config';
-import { OFFER_STATE_LABEL } from '../models/offer';
+import { OFFER_STATE_LABEL, Offer } from '../models/offer';
 import { CreateOrderBody, Order } from '../models/order';
 import { Post, PostKind } from '../models/post';
+import { Question } from '../models/social';
+import { toSellerOffer, toSellerQuestion } from '../utils/job-link';
 import { applyBuyerChange, buyerPatchOf, initialAvatar, toSellerOrder } from '../utils/order-link';
 import {
   DayHours, JOB_STEP_NAMES, SELLER_LANE, SellerJob, SellerOffer, SellerOrder, SellerOrderState, SellerPause, SellerPerson, SellerPost,
   SellerSpace, StatsRange, SellerChat, SellerShop, StepItem, orderPos, orderStepNames, stepItems,
 } from '../models/seller';
 import { AuthService } from './auth';
+import { JobOfferService } from './job-offer';
 import { MockDb } from './mock-db';
 import { NotificationService } from './notification';
+import { QuestionService } from './question';
 import { SellerService } from './seller';
 import { XuService } from './xu';
 
@@ -139,6 +143,11 @@ export class SellerSpaceService {
   private readonly buyerApi = inject(SellerService);
   private readonly auth = inject(AuthService);
   private readonly notifications = inject(NotificationService);
+  private readonly offerStore = inject(JobOfferService);
+  private readonly questionStore = inject(QuestionService);
+  /** Đề nghị, hỏi đáp lưu ở kho chung với phía Mua. Dữ liệu mẫu của khu Bán (việc chưa đăng sang phía Mua) vẫn nằm trong từng việc */
+  private readonly sharedOffers = signal<Offer[]>([]);
+  private readonly sharedQuestions = signal<Question[]>([]);
   private static readonly NAME = 'seller-space';
   /** khớp trường `version` trong datasets/seller-space.json */
   private static readonly VERSION = '2026-11-03-a';
@@ -158,6 +167,7 @@ export class SellerSpaceService {
   constructor() {
     // tab phía Mua vừa đặt đơn / đổi đơn: trang Bán đang mở thấy ngay, không cần tải lại
     this.db.changes.subscribe((name) => {
+      if (name === 'offers' || name === 'questions') return this.refreshShared();
       if (name !== SellerSpaceService.NAME || !this.state()) return;
       this.db.list<SellerSpace>(name).subscribe((rows) => rows[0] && this.state.set(structuredClone(rows[0])));
     });
@@ -177,12 +187,14 @@ export class SellerSpaceService {
 
   readonly jobs = computed<SellerJobView[]>(() =>
     (this.state()?.jobs ?? []).map((j) => {
-      const offers = j.offers.map((o) => ({ ...o, label: o.state === 'withdrawn' ? 'Đã rút' : OFFER_STATE_LABEL[o.state] }));
+      const bid = this.state()?.posts.find((p) => p.jobId === j.id)?.buyerPostId;
+      const questions = [...this.sharedQuestions().filter((q) => bid && q.jobId === bid).map(toSellerQuestion), ...j.questions];
+      const offers = [...this.sharedOffers().filter((o) => bid && o.jobId === bid).map(toSellerOffer), ...j.offers].map((o) => ({ ...o, label: o.state === 'withdrawn' ? 'Đã rút' : OFFER_STATE_LABEL[o.state] }));
       const active = offers.filter((o) => ['chosen', 'working', 'reported', 'done'].includes(o.state));
       const waiting = offers.filter((o) => o.state === 'offered');
       const label = j.closed ? (active.length ? 'Đã xong' : 'Đã đóng') : active.length >= j.head ? 'Đã có người nhận' : `Đang mở · ${waiting.length} đề nghị`;
-      const need = (waiting.length > 0 && active.length < j.head && !j.closed) || offers.some((o) => o.state === 'reported') || j.questions.some((q) => !q.answer);
-      return { ...j, offers, active, waiting, label, need, cls: need ? 'act' : j.closed ? 'done' : 'go' };
+      const need = (waiting.length > 0 && active.length < j.head && !j.closed) || offers.some((o) => o.state === 'reported') || questions.some((q) => !q.answer);
+      return { ...j, questions, offers, active, waiting, label, need, cls: need ? 'act' : j.closed ? 'done' : 'go' };
     }),
   );
 
@@ -272,7 +284,22 @@ export class SellerSpaceService {
   }
 
   /** Nạp dữ liệu (lần đầu đọc JSON, sau đó lấy bản đã lưu trong trình duyệt) */
+  /** Đọc lại đề nghị, hỏi đáp từ kho chung */
+  private refreshShared(): void {
+    this.offerStore.all().subscribe((rows) => this.sharedOffers.set(rows));
+    this.db.list<Question>('questions').subscribe((rows) => this.sharedQuestions.set(rows));
+  }
+
+  /** Người nhận việc vừa gửi đề nghị hoặc câu hỏi ở phía Mua: báo người đăng, đưa vào Cần bạn xử lý */
+  receiveFromBuyer(jobId: string, text: string): void {
+    this.load().subscribe(() => {
+      const sp = this.posts().find((p) => p.buyerPostId === jobId);
+      if (sp) this.notifications.push(text, sp.jobId ? `/seller/jobs/${sp.jobId}` : '/seller');
+    });
+  }
+
   load(): Observable<SellerSpace> {
+    this.refreshShared();
     const cur = this.state();
     if (cur) return of(cur);
     return this.db.list<SellerSpace>(SellerSpaceService.NAME).pipe(
@@ -625,7 +652,14 @@ export class SellerSpaceService {
     const j = this.jobs().find((x) => x.id === jobId);
     const o = j?.offers.find((x) => x.id === offerId);
     if (!j || !o) return '';
-    this.patch((s) => {
+    const shared = this.sharedOffers().find((x) => x._id === offerId);
+    if (shared) {
+      this.offerStore.posterAct(offerId, a, { exact: j.exact, head: j.head, stars: data.stars, text: data.text }).subscribe((next) => {
+        this.refreshShared();
+        const line = { choose: `${j.title}: bạn được chọn, xem địa chỉ làm việc`, reject: `${j.title}: bạn không được chọn`, confirmDone: `${j.title}: người đăng đã xác nhận hoàn thành`, rate: `${j.title}: người đăng đã đánh giá bạn` }[a];
+        this.notifications.push(line, `/orders/${next._id}`);
+      });
+    } else this.patch((s) => {
       const job = s.jobs.find((x) => x.id === jobId)!;
       const t = job.offers.find((x) => x.id === offerId)!;
       if (a === 'choose') {
@@ -662,6 +696,13 @@ export class SellerSpaceService {
   }
 
   answer(jobId: string, questionId: string, text: string): void {
+    if (this.sharedQuestions().some((q) => q._id === questionId)) {
+      this.questionStore.answer(questionId, text).subscribe((q) => {
+        this.refreshShared();
+        this.notifications.push(`Người đăng đã trả lời câu hỏi của bạn: "${q.text}"`, `/posts/job/${q.jobId}`);
+      });
+      return;
+    }
     this.patch((s) => {
       const q = s.jobs.find((x) => x.id === jobId)?.questions.find((x) => x.id === questionId);
       if (q) q.answer = text;

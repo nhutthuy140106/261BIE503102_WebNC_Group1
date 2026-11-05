@@ -23,6 +23,19 @@ export class QuestionService {
     return this.db.list<Question>(COLLECTION).pipe(map((rows) => rows.filter((q) => q.jobId === jobId)));
   }
 
+  /** Người đăng việc trả lời: ghi vào cùng câu hỏi nên người hỏi thấy ngay */
+  answer(id: string, text: string): Observable<Question> {
+    return this.db.list<Question>(COLLECTION).pipe(
+      map((rows) => {
+        const cur = rows.find((q) => q._id === id);
+        if (!cur) throw new AppError('Không tìm thấy câu hỏi.', 404, 'NOT_FOUND');
+        const next = { ...cur, answer: text };
+        this.db.save(COLLECTION, rows.map((q) => (q._id === id ? next : q)));
+        return next;
+      }),
+    );
+  }
+
   /** Server mới là nơi chặn SĐT bắt buộc; mock mô phỏng lại để thấy lỗi 422. */
   ask(jobId: string, text: string): Observable<Question> {
     if (!useMock('question')) return this.api.post<unknown>(`/jobs/${jobId}/questions`, { text }).pipe(map(questionFromApi));
@@ -39,6 +52,7 @@ export class QuestionService {
           jobId,
           text: t,
           authorName: this.auth.currentUser()?.fullName ?? 'Bạn',
+          authorAvatar: this.auth.currentUser()?.avatar,
           answer: null,
           createdAt: new Date().toISOString(),
         };
