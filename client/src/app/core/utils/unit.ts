@@ -5,7 +5,10 @@ import { Post } from '../models/post';
  * đồ ăn = phần, đồ uống = ly, đồ dùng = không ghi (mua cả món), bài bán trọn gói = combo, dịch vụ = lần / giờ / kg / buổi, việc làm = lần / buổi / ngày.
  * Người bán gõ tự do (ổ, hộp, combo, ca, máy…) nên ở đây chuẩn hóa lại; khi form đăng bài cho chọn từ danh sách cố định thì bỏ bước này.
  */
-export function displayUnit(p: Pick<Post, 'kind' | 'category' | 'priceUnit'>): string {
+export function displayUnit(p: Pick<Post, 'kind' | 'category' | 'priceUnit'> & { job?: Pick<NonNullable<Post['job']>, 'payUnit'> }): string {
+  // việc đăng từ form: đơn vị người đăng đã chọn
+  const pay = p.kind === 'job' ? p.job?.payUnit?.trim() : '';
+  if (pay) return pay;
   const u = (p.priceUnit ?? '').trim().toLowerCase();
   if (u === 'combo') return 'combo';
   switch (p.kind) {
