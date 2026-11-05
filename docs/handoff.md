@@ -314,3 +314,5 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Bỏ "Xem như khách"** ở Hôm nay, Gian hàng và thẻ bài đăng. Trang `/shop/:id` vẫn còn cho người mua.
 - **Form đồ uống:** gộp Pha chế vào mục 2 Menu, còn 5 mục.
 - **Đặt món:** topping dùng dấu tròn, Sửa và Bỏ cùng màu, bỏ dòng "Chưa bị trừ tiền", mũi tên địa chỉ căn giữa.
+- **Khám phá quanh khu:** hiện mọi bài của khu đang chọn, không còn bỏ bài đã có ở các khối trên. Bài chưa có khoảng cách xếp đầu khi sắp theo Gần nhất.
+- **Bài đồ ăn, đồ uống:** bỏ "Còn n" cạnh giá món (vẫn chặn theo số lượng, hết thì ghi "Hết"); bỏ dòng "Mở lại ..." khi hết giờ nhận đơn.

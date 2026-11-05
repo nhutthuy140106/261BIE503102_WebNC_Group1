@@ -50,8 +50,8 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected readonly popular = ['cơm trưa', 'trà sữa', 'giặt sấy', 'dọn nhà', 'sửa điện nước', 'mua hộ', 'trông thú cưng'];
 
   /**
-   * Các khối chọn bài theo thứ tự Nổi bật → Gợi ý → Gần bạn → Việc mới → Khám phá,
-   * mỗi khối bỏ những bài khối trước đã hiện, nên một bài chỉ xuất hiện một lần.
+   * Các khối chọn bài theo thứ tự Nổi bật → Gợi ý → Gần bạn → Việc mới, mỗi khối bỏ những bài khối trước đã hiện.
+   * Riêng Khám phá hiện mọi bài của khu, kể cả bài đã có ở các khối trên.
    */
   protected readonly clock = inject(ClockService);
   /** Bài đang trong Giờ vàng (kết thúc sớm nhất xếp trước), tối đa 4 */
@@ -120,16 +120,14 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected readonly sortLabel = computed(() => this.sortLabels[this.feedSort()]);
 
   private readonly feedAll = computed(() => {
-    const shown = new Set([...this.dealsNow().map((x) => x.p), ...this.featured(), ...this.forYouShown(), ...this.nearby(), ...this.jobs()].map((p) => p._id));
     const f = this.feedFilter();
-    // hết bài chưa hiện thì để trống (có thông báo), không lấy lại bài đã hiện ở trên
-    const pool = this.posts().filter((p) => (f === 'all' || p.kind === f) && !shown.has(p._id));
+    const pool = this.posts().filter((p) => f === 'all' || p.kind === f);
     const by = this.feedSort();
-    const far = Number.MAX_SAFE_INTEGER;
     return [...pool].sort((a, b) => {
       switch (by) {
         case 'near':
-          return (a.distance ?? far) - (b.distance ?? far);
+          // bài mới đăng chưa có khoảng cách: xếp đầu để không bị chìm xuống cuối danh sách
+          return (a.distance ?? 0) - (b.distance ?? 0);
         case 'cheap':
           return a.price - b.price;
         case 'dear':
@@ -271,15 +269,23 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
 
   protected loadMore(): void {
     if (this.loadingMore()) return;
-    if (!this.feedAll().length || this.shownCount() >= this.feedAll().length) return; // hết bài thì dừng, không lặp lại bài đã hiện
+    if (!this.feedAll().length || this.shownCount() >= this.feedAll().length) return; // hết bài thì dừng
     this.loadingMore.set(true);
     this.timers.push(
       setTimeout(() => {
         this.shownCount.update((n) => n + BATCH);
         this.loads.update((n) => n + 1);
         this.loadingMore.set(false);
+        // chờ vẽ xong các thẻ mới rồi kiểm tra lại
+        this.timers.push(setTimeout(() => this.fillFeed(), 60));
       }, 450),
     );
+  }
+
+  /** Cuối danh sách vẫn nằm trong vùng nhìn thì tải tiếp: lúc đó trình duyệt không báo thêm sự kiện cuộn tới nữa */
+  private fillFeed(): void {
+    const near = this.sentinel().nativeElement.getBoundingClientRect().top < window.innerHeight + 300;
+    if (near && this.loads() > 0 && this.loads() < MAX_AUTO_LOADS) this.loadMore();
   }
 
   protected loadMoreClick(): void {
