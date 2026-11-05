@@ -323,3 +323,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Trang chi tiết việc:** bỏ hai tag đầu trang và mục Địa điểm có khung bản đồ (giữ ô Địa điểm ở hàng thông tin nhanh vì đó là chỗ duy nhất hiện tòa nhà); rút gọn câu lưu ý ở Hỏi đáp.
 - **Vạch giờ ở Lịch:** vùng lịch dùng `isolation: isolate` để vạch giờ và thẻ đơn không đè lên header khi cuộn (Hôm nay và trang Lịch).
 - **Khung giờ việc làm:** form gửi `job.windows` (giờ chính + khung giờ khác, dạng "08:30 – 11:00"); ô "Khung giờ khác" đổi thành hai ô chọn giờ, bài cũ tự chuyển khi mở sửa. Trang chi tiết việc chỉ cho chọn các khung đó; không cố định giờ thì 3 nút Sáng, Chiều, Tối, bỏ chữ "có thể làm". Bài đăng trước đó cần Sửa + Lưu mới có khung giờ.
+- **Việc làm khớp với thẻ xem trước:** `jobWhen` ghi cả giờ kết thúc (form gửi `job.end` cả khi làm một ngày), đơn vị lấy `job.payUnit`, thẻ việc ghi thêm tòa nhà. Bài đăng trước đó cần Sửa + Lưu mới có giờ kết thúc.
