@@ -2,7 +2,6 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { KIND_LABEL } from '../../../core/models/post';
 import { SELLER_KIND_ICON, SellerPost } from '../../../core/models/seller';
-import { AuthService } from '../../../core/services/auth';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import { SelectOption } from '../../../shared/components/select/select';
@@ -11,7 +10,7 @@ type Tab = 'sell' | 'jobs' | 'revs';
 const REPLY = ['Thường trả lời trong 10 phút', 'Thường trả lời trong 30 phút', 'Thường trả lời trong 1 giờ', 'Thường trả lời trong ngày'];
 
 /**
- * Gian hàng của tôi (design/mockups/seller-shop.html) — xem gian hàng ở chế độ NGƯỜI BÁN, khác "Xem như khách" (/shop/:id):
+ * Gian hàng của tôi (design/mockups/seller-shop.html) — xem gian hàng ở chế độ NGƯỜI BÁN:
  * đổi ảnh bìa / đại diện, sửa hồ sơ, số liệu, hồ sơ hoàn thiện, tab bài / việc đang hoạt động / đánh giá (phản hồi được).
  */
 @Component({
@@ -22,7 +21,6 @@ const REPLY = ['Thường trả lời trong 10 phút', 'Thường trả lời tr
 })
 export class SellerShop implements OnInit {
   protected readonly seller = inject(SellerSpaceService);
-  private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
 
@@ -32,7 +30,6 @@ export class SellerShop implements OnInit {
   protected readonly replyPick = signal('');
   protected readonly kindLabel = KIND_LABEL;
   protected readonly kindIcon = SELLER_KIND_ICON;
-  protected readonly myId = computed(() => this.auth.currentUser()?._id ?? '');
 
   protected readonly tab = signal<Tab>((this.route.snapshot.queryParamMap.get('tab') as Tab) || 'sell');
   protected readonly editing = signal(false);

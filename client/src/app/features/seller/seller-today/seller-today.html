@@ -11,7 +11,6 @@
       </div>
     </div>
     <div class="acts">
-      <a class="hbtn2" [routerLink]="['/shop', myId()]"><svg class="i"><use href="#eye" /></svg>Xem như khách</a>
       <button type="button" class="hbtn2" [class.off]="seller.pause()" aria-haspopup="dialog" (click)="togglePop($event)">
         <i></i>{{ pauseText() }}<svg class="i chev"><use href="#chev" /></svg>
       </button>

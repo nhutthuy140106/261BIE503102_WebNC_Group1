@@ -65,7 +65,6 @@
   @if (menuOpen()) {
     <div class="menu">
       <button type="button" (click)="menuOpen.set(false); duplicated.emit()"><svg class="i"><use href="#copy" /></svg>Nhân bản bài</button>
-      <a [routerLink]="['/shop', myId()]"><svg class="i"><use href="#out" /></svg>Xem như khách</a>
       <button type="button" class="danger" (click)="menuOpen.set(false); removed.emit()"><svg class="i"><use href="#xmark" /></svg>Xóa bài</button>
     </div>
   }

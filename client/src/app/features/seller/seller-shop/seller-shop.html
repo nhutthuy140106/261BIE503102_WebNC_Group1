@@ -10,10 +10,8 @@
         <h1>{{ sh.name }}</h1>
         <p><span><svg class="i"><use href="#pin" /></svg>{{ sh.at }}</span><span><svg class="i"><use href="#home" /></svg>{{ sh.since }}</span><span><svg class="i"><use href="#chat" /></svg>{{ sh.reply }}</span></p>
       </div>
-      <!-- 2 nút xếp dọc, cùng bề rộng; nút ảnh bìa nằm góc trái trên để không thành 3 nút một cột -->
       <div class="sh-acts">
         <button type="button" class="btn dark" (click)="startEdit()"><svg class="i"><use href="#pencil" /></svg>Sửa hồ sơ</button>
-        <a class="btn" [routerLink]="['/shop', myId()]"><svg class="i"><use href="#eye" /></svg>Xem như khách</a>
       </div>
     </div>
     <div class="sh-stats">

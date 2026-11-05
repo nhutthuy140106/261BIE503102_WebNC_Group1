@@ -1,7 +1,6 @@
-import { Component, EventEmitter, HostListener, Input, Output, computed, inject, signal } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, Output, inject, signal } from '@angular/core';
 import { KIND_LABEL } from '../../../../core/models/post';
 import { SELLER_KIND_ICON, SELLER_LANE, SellerPost } from '../../../../core/models/seller';
-import { AuthService } from '../../../../core/services/auth';
 import { SellerSpaceService } from '../../../../core/services/seller-space';
 import { ToastService } from '../../../../core/services/toast';
 import { parseMoney } from '../money-input/money-input';
@@ -10,7 +9,7 @@ import { parseMoney } from '../money-input/money-input';
  * Thẻ một bài ở "Tình trạng bán" (trang Hôm nay) và trang Bài đăng:
  * nhãn trạng thái · lượt xem / QUẢNG BÁ · tên · giá · nút ± số lượng · công tắc bật/tắt · nút dùng Xu.
  * `manage` (trang Bài đăng): ♡ lượt lưu cạnh tên, sửa giá tại chỗ + "Đã bán / Đã đặt n" cùng hàng giá, nút sửa và menu
- * (nhân bản, xem như khách, xóa — trang cha hỏi lại trước khi làm).
+ * (nhân bản, xóa — trang cha hỏi lại trước khi làm).
  */
 @Component({
   selector: 'app-seller-post-card',
@@ -20,7 +19,6 @@ import { parseMoney } from '../money-input/money-input';
 })
 export class SellerPostCard {
   private readonly seller = inject(SellerSpaceService);
-  private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
 
   @Input({ required: true }) post!: SellerPost;
@@ -34,7 +32,6 @@ export class SellerPostCard {
   protected readonly lane = SELLER_LANE;
   protected readonly kindLabel = KIND_LABEL;
   protected readonly kindIcon = SELLER_KIND_ICON;
-  protected readonly myId = computed(() => this.auth.currentUser()?._id ?? '');
 
   protected readonly editing = signal(false);
   protected readonly menuOpen = signal(false);

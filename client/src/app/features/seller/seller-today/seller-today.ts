@@ -2,7 +2,6 @@ import { Component, HostListener, OnInit, computed, inject, signal } from '@angu
 import { Router } from '@angular/router';
 import { KIND_LABEL, PostKind } from '../../../core/models/post';
 import { SELLER_LANE, SELLER_NEW_KINDS, SellerPost, StatsRange } from '../../../core/models/seller';
-import { AuthService } from '../../../core/services/auth';
 import { SellerSpaceService, SellerTask } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import { SelectOption } from '../../../shared/components/select/select';
@@ -40,7 +39,6 @@ const write = (k: string, v: string) => {
 })
 export class SellerToday implements OnInit {
   protected readonly seller = inject(SellerSpaceService);
-  private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
 
@@ -49,7 +47,6 @@ export class SellerToday implements OnInit {
   protected readonly kindLabel = KIND_LABEL;
   protected readonly kinds: PostKind[] = ['food', 'goods', 'service', 'job'];
   protected readonly ranges: StatsRange[] = ['today', '7', '30', '90', 'year'];
-  protected readonly myId = computed(() => this.auth.currentUser()?._id ?? '');
 
   // ---- lọc theo mảng ----
   protected readonly kind = signal<KindFilter>(read(KIND_KEY, 'all') as KindFilter);
