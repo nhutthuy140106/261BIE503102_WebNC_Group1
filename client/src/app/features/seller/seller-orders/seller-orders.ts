@@ -72,8 +72,11 @@ export class SellerOrders implements OnInit {
     const t = this.tab();
     const list = this.rows().filter((r) => (t === 'hist' ? r.dot === 'end' : r.dot !== 'end' && (!t || (t === 'jobs') === r.job)));
     if (t === 'hist') return [{ key: 'hist', title: '', items: list }].filter((g) => g.items.length);
+    // cùng thứ tự với Cần bạn xử lý ở trang Hôm nay: việc khách vừa gửi đứng đầu
+    const order = this.seller.tasks();
+    const todo = list.filter((r) => r.task).sort((x, y) => order.indexOf(x.task!) - order.indexOf(y.task!));
     return [
-      { key: 'todo', title: 'Cần bạn xử lý', items: list.filter((r) => r.task) },
+      { key: 'todo', title: 'Cần bạn xử lý', items: todo },
       { key: 'go', title: 'Đang diễn ra', items: list.filter((r) => !r.task && r.dot === 'go') },
       { key: 'wait', title: 'Chờ xác nhận', items: list.filter((r) => !r.task && r.dot === 'wait') },
     ].filter((g) => g.items.length);

@@ -43,7 +43,7 @@
             </div>
             <div class="oacts">
               <span class="stat" [class]="'stat ' + cls(o)">{{ o.label }}</span>
-              @if (o.state === 'offered' && !j.closed) {
+              @if (o.state === 'offered') {
                 <button type="button" class="btn dark" (click)="offer(o, 'choose')">Chọn người này</button>
                 <button type="button" class="btn" (click)="offer(o, 'reject')">Từ chối</button>
               }

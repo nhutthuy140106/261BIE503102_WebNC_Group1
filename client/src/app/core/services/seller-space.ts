@@ -38,6 +38,8 @@ export interface SellerJobView extends Omit<SellerJob, 'offers'> {
   offers: SellerOfferView[];
   waiting: SellerOfferView[];
   active: SellerOfferView[];
+  /** Việc đã đăng sang phía Mua: đề nghị và hỏi đáp đến từ người thật */
+  linked: boolean;
   label: string;
   need: boolean;
   cls: 'act' | 'go' | 'done';
@@ -187,14 +189,18 @@ export class SellerSpaceService {
 
   readonly jobs = computed<SellerJobView[]>(() =>
     (this.state()?.jobs ?? []).map((j) => {
-      const bid = this.state()?.posts.find((p) => p.jobId === j.id)?.buyerPostId;
+      const post = this.state()?.posts.find((p) => p.jobId === j.id);
+      const bid = post?.buyerPostId;
+      // việc đã đăng sang phía Mua: đóng hay mở theo đúng một nguồn là bài đăng, hai bên không lệch nhau
+      const closed = bid ? !post!.on : !!j.closed;
       const questions = [...this.sharedQuestions().filter((q) => bid && q.jobId === bid).map(toSellerQuestion), ...j.questions];
       const offers = [...this.sharedOffers().filter((o) => bid && o.jobId === bid).map(toSellerOffer), ...j.offers].map((o) => ({ ...o, label: o.state === 'withdrawn' ? 'Đã rút' : OFFER_STATE_LABEL[o.state] }));
       const active = offers.filter((o) => ['chosen', 'working', 'reported', 'done'].includes(o.state));
       const waiting = offers.filter((o) => o.state === 'offered');
-      const label = j.closed ? (active.length ? 'Đã xong' : 'Đã đóng') : active.length >= j.head ? 'Đã có người nhận' : `Đang mở · ${waiting.length} đề nghị`;
-      const need = (waiting.length > 0 && active.length < j.head && !j.closed) || offers.some((o) => o.state === 'reported') || questions.some((q) => !q.answer);
-      return { ...j, questions, offers, active, waiting, label, need, cls: need ? 'act' : j.closed ? 'done' : 'go' };
+      const label = closed ? (active.length ? 'Đã xong' : waiting.length ? `Đã đóng · ${waiting.length} đề nghị` : 'Đã đóng') : active.length >= j.head ? 'Đã có người nhận' : `Đang mở · ${waiting.length} đề nghị`;
+      // đóng chỉ ngừng nhận đề nghị mới, các đề nghị đã gửi vẫn chọn được
+      const need = (waiting.length > 0 && active.length < j.head) || offers.some((o) => o.state === 'reported') || questions.some((q) => !q.answer);
+      return { ...j, closed, linked: !!bid, questions, offers, active, waiting, label, need, cls: need ? 'act' : closed ? 'done' : 'go' };
     }),
   );
 
@@ -202,8 +208,8 @@ export class SellerSpaceService {
   readonly posts = computed<SellerPost[]>(() => this.state()?.posts ?? []);
 
   /**
-   * Khối "Cần bạn xử lý": suy ra từ dữ liệu. Đơn chờ xác nhận, xin hủy đứng đầu dù hẹn ngày nào (đơn mới nhất trước),
-   * rồi đến bước cần làm của đơn; sau đó mới tới việc đăng, hỏi đáp, đánh giá.
+   * Khối "Cần bạn xử lý": suy ra từ dữ liệu. Việc do khách gửi từ phía Mua (đơn chờ xác nhận, xin hủy, đề nghị nhận việc, báo xong) đứng đầu,
+   * rồi đến dữ liệu mẫu cùng loại, bước cần làm của đơn; sau đó mới tới việc đăng, hỏi đáp, đánh giá.
    */
   readonly tasks = computed<SellerTask[]>(() => {
     const out: (SellerTask & { rank: number })[] = [];
@@ -219,9 +225,9 @@ export class SellerSpaceService {
         person: o.buyer.name, personAvatar: o.buyer.avatar, kindTag: 'Đơn khách đặt', when: at(o.day, o.time),
       };
       if (o.cancelRequest) {
-        out.push({ ...base, key: 'c-' + o.id, type: 'cancel', status: 'Xác nhận hủy', note: `Lý do: ${o.cancelRequest}`, noteIcon: 'question', rank: 0 });
+        out.push({ ...base, key: 'c-' + o.id, type: 'cancel', status: 'Xác nhận hủy', note: `Lý do: ${o.cancelRequest}`, noteIcon: 'question', rank: o.buyerOrderId ? -1 : 0 });
       } else if (o.state === 'waiting') {
-        out.push({ ...base, key: 'o-' + o.id, type: 'order', status: 'Xác nhận đơn', due: o.kind === 'service' ? undefined : o.due, note: o.note, rank: 0 });
+        out.push({ ...base, key: 'o-' + o.id, type: 'order', status: 'Xác nhận đơn', due: o.kind === 'service' ? undefined : o.due, note: o.note, rank: o.buyerOrderId ? -1 : 0 });
       } else {
         const next = this.nextStep(o);
         if (next) out.push({ ...base, key: 's-' + o.id, type: 'step', status: next[1], act: next[0], due: `${o.flow === 'laundry' ? 'Hẹn lấy' : o.kind === 'service' ? 'Hẹn' : 'Giao'} lúc ${o.time}`, rank: 0.5 });
@@ -229,11 +235,11 @@ export class SellerSpaceService {
     }
     for (const j of this.jobs()) {
       const jobBase = { kind: 'job' as PostKind, top: j.code, title: j.title, amount: j.pay, amountLabel: 'Tiền công', unit: j.unit, jobId: j.id, icon: 'hand', kindTag: 'Việc bạn đăng', when: at(j.day, j.time) };
-      if (!j.closed && j.waiting.length && j.active.length < j.head) {
+      if (j.waiting.length && j.active.length < j.head) {
         out.push({
           ...jobBase, key: 'p-' + j.id, type: 'pick', status: 'Chọn người', due: j.due,
           person: `${j.waiting.length} đề nghị`, faces: j.waiting.map((o) => o.worker.avatar), who: `${j.waiting.length} người đề nghị · ${j.waiting.map((o) => o.worker.name).join(', ')}`,
-          where: `${j.exact.split(' (')[0]} · ${j.time}–${hmAdd(j.time, j.duration)} ${j.day === 0 ? 'hôm nay' : dayText(j.day, { weekday: 'short' })}`, rank: 1,
+          where: `${j.exact.split(' (')[0]} · ${j.time}–${hmAdd(j.time, j.duration)} ${j.day === 0 ? 'hôm nay' : dayText(j.day, { weekday: 'short' })}`, rank: j.linked ? -1 : 1,
         });
       }
       for (const o of j.offers.filter((x) => x.state === 'reported')) {
@@ -241,14 +247,14 @@ export class SellerSpaceService {
           ...jobBase, key: 'd-' + o.id, type: 'done', status: 'Xác nhận hoàn thành', due: j.due, offerId: o.id, when: at(o.day ?? j.day, j.time),
           person: o.worker.name, personAvatar: o.worker.avatar, avatar: o.worker.avatar, who: `${o.worker.name} (${o.worker.phone})`,
           where: `${j.category === 'Mua hộ' ? 'Chợ đầu mối' : j.exact.split(' (')[0]} · báo xong ${o.report?.at ?? ''}`,
-          note: o.report ? `${o.report.note.split(',')[0]}${o.report.photos ? `, kèm ${o.report.photos} ảnh` : ''}` : undefined, buyer: o.worker.name, rank: 4,
+          note: o.report ? `${o.report.note.split(',')[0]}${o.report.photos ? `, kèm ${o.report.photos} ảnh` : ''}` : undefined, buyer: o.worker.name, rank: j.linked ? -1 : 4,
         });
       }
       for (const q of j.questions.filter((x) => !x.answer)) {
         out.push({
           key: 'q-' + q.id, type: 'question', kind: 'job', tag: 'Hỏi đáp', status: 'Hỏi đáp', top: j.code, title: j.title, icon: 'hand',
           person: q.by.name, personAvatar: q.by.avatar, kindTag: 'Hỏi đáp', when: q.at,
-          avatar: q.by.avatar, note: `“${q.text}”`, noteIcon: 'chat', jobId: j.id, questionId: q.id, rank: 5,
+          avatar: q.by.avatar, note: `“${q.text}”`, noteIcon: 'chat', jobId: j.id, questionId: q.id, rank: j.linked ? 0.5 : 5,
         });
       }
     }
@@ -682,6 +688,9 @@ export class SellerSpaceService {
 
   /** Đóng nhận đề nghị / mở lại việc */
   setJobClosed(id: string, closed: boolean): void {
+    // việc đã đăng sang phía Mua: đóng luôn bài bên đó để không nhận thêm đề nghị
+    const post = this.state()?.posts.find((p) => p.jobId === id && p.buyerPostId);
+    if (post) this.setPost(post.id, { on: !closed });
     this.patch((s) => {
       const j = s.jobs.find((x) => x.id === id);
       if (j) j.closed = closed;

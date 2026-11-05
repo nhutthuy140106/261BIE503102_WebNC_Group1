@@ -698,7 +698,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     return {
       ...(cur ?? { views: 0, saves: 0, sold: 0 }),
       id, kind, title: String(c['title']).trim() || 'Bài nháp chưa đặt tên', image: c['images'][0], icon: c['images'][0] ? undefined : SELLER_KIND_ICON[kind],
-      ...this.priceOf(raw['spec'] as V), on: draft ? false : (cur?.on ?? true), category: c['category'],
+      ...this.priceOf(raw['spec'] as V), on: draft ? false : cur?.id.startsWith('n') && !cur.buyerPostId ? true : (cur?.on ?? true), category: c['category'],
       jobId: kind === 'job' ? cur?.jobId ?? 'j-' + id : undefined, form: raw, formType: t,
     };
   }
