@@ -5,10 +5,6 @@
 
   <div class="jobhero">
     <div>
-      <div class="kindline">
-        <span class="cat">Việc làm@if (j.category) { · {{ j.category }} }</span>
-        @if (j.job?.status === 'open') { <span class="jst">Đang mở · {{ j.job?.offers }} đề nghị</span> } @else { <span class="jst closed">Đã có người nhận</span> }
-      </div>
       <h1>{{ j.title }}</h1>
       <div class="meta">
         <span>{{ j.block }}@if (j.distance != null) { · {{ j.distance | distance }} }</span>
@@ -46,15 +42,10 @@
         </section>
       }
       <section class="block"><h2>Việc cần làm</h2><div class="desc"><p>{{ j.description }}</p></div></section>
-      <section class="block">
-        <h2>Địa điểm</h2>
-        <div class="mapbox"><div class="pinbig"><svg class="i"><use href="#pin" /></svg><b>{{ j.block }}</b></div></div>
-        <p class="hintp">Địa chỉ chính xác gửi sau khi chủ việc chọn bạn.</p>
-      </section>
 
       <section class="block" id="qa">
         <h2>Hỏi đáp <small>({{ qa().length }})</small></h2>
-        <p class="qa-note"><svg class="i"><use href="#shield" /></svg><span>Câu hỏi và trả lời hiện công khai để mọi người cùng xem, nên đừng ghi số điện thoại hay địa chỉ ở đây. Muốn hỏi riêng thì bấm <b>Nhắn tin</b> ở phần Người đăng việc.</span></p>
+        <p class="qa-note"><svg class="i"><use href="#shield" /></svg><span>Câu hỏi và trả lời hiện công khai nên lưu ý bảo mật thông tin cá nhân của bạn.</span></p>
         @for (q of qa(); track q._id) {
           <div class="qa">
             <app-avatar [name]="q.authorName" [size]="34" />

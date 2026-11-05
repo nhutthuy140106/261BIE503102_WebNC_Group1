@@ -5,10 +5,6 @@
 .back:hover { background: var(--soft); }
 .jobhero { margin-top: 14px; display: flex; align-items: flex-end; gap: 28px; }
 .jobhero h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
-.kindline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-bottom: 8px; font-size: 13.5px; color: var(--smoke); }
-.cat { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--soft); border: 1px solid var(--border); color: var(--ink); font-size: 12px; font-weight: 700; }
-.jst { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; background: #E8F4EC; color: #2E7D4F; font-size: 12px; font-weight: 700; }
-.jst.closed { background: var(--soft); color: var(--smoke); }
 .meta { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--smoke); font-size: 14px; }
 .pay { margin-left: auto; text-align: right; flex: none; }
 .pay small { display: block; color: var(--smoke); font-size: 12.5px; }
@@ -29,10 +25,6 @@
 .block h2 { font-size: 19px; font-weight: 700; margin-bottom: 14px; }
 .block h2 small { color: var(--smoke); font-weight: 500; }
 .desc p { line-height: 1.65; color: #3C4660; }
-.mapbox { height: 150px; border-radius: 14px; background: var(--soft); display: grid; place-items: center; border: 1px solid var(--border); }
-.pinbig { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: #fff; border-radius: 999px; box-shadow: 0 8px 20px -12px rgba(34,48,74,.5); }
-.pinbig svg { color: var(--accent); }
-.hintp { margin-top: 10px; font-size: 13px; color: var(--smoke); }
 
 /* hỏi đáp công khai */
 .qa-note { display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--soft); font-size: 13px; color: var(--smoke); line-height: 1.5; margin-bottom: 14px; }
