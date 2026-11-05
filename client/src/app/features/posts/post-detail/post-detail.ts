@@ -306,7 +306,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const sd = this.saleDay();
     if (sd && !sd.open) return { text: 'Hôm nay quán nghỉ', sub: sd.next ? 'Mở bán lại ngày ' + sd.next + '.' : 'Người bán đã ngừng bán.', off: true };
     const os = this.orderState();
-    if (os && !os.open) return { text: 'Đã hết giờ nhận đơn', sub: os.reopen ? 'Mở lại ' + os.reopen + '.' : 'Người bán chưa mở lại.', off: true };
+    if (os && !os.open) return { text: 'Đã hết giờ nhận đơn', sub: os.reopen ? '' : 'Người bán chưa mở lại.', off: true };
     if (os?.closesAt) return { text: 'Đang nhận đơn', sub: 'Nhận đến ' + os.closesAt + ' hôm nay.', off: false };
     if (s.mode === 'once') return { text: 'Còn hàng', sub: 'Bán một lần, ai đặt trước được trước.', off: false };
     if (s.mode === 'limit') return { text: 'Còn ' + s.left + ' phần hôm nay', sub: s.sched ?? '', off: false };
