@@ -2,7 +2,7 @@
   <h4>Menu</h4>
   @for (c of draft.tpl.cups; track c.name) {
     <button type="button" class="drk" [disabled]="draft.totalCups() >= draft.maxQty() || leftOf(c) < 1" (click)="open(c)">
-      <span class="dn"><b>{{ c.name }}</b><small>{{ c.price | vnd }}@if (c.left !== undefined) { · {{ leftOf(c) < 1 ? 'Hết' : 'Còn ' + leftOf(c) }} }</small></span>
+      <span class="dn"><b>{{ c.name }}</b><small>{{ c.price | vnd }}@if (c.left !== undefined && leftOf(c) < 1) { · Hết }</small></span>
       <span class="plus" aria-hidden="true">+</span>
     </button>
   }
