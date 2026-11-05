@@ -242,7 +242,6 @@
       <button type="button" class="primary" [disabled]="stockLine().off" (click)="next(d)">
         @if (v.tpl.price.type === 'quote') { {{ actionLabel() }} · {{ fmt(d.subtotal()) }} } @else { {{ actionLabel() === 'Mua' ? 'Tiếp tục' : 'Tiếp tục' }} · {{ fmt(d.subtotal()) }} }
       </button>
-      <p class="note">Chưa bị trừ tiền. Bạn xem lại và xác nhận ở bước sau.</p>
     </aside>
   </div>
 

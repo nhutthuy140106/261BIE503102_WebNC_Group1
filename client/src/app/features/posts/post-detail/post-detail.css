@@ -96,7 +96,6 @@
 .warn { margin-top: 10px; font-size: 13px; color: #9A3B1C; font-weight: 600; }
 .primary { margin-top: 16px; width: 100%; height: 52px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 700; font-size: 16px; box-shadow: 0 12px 24px -12px rgba(216,90,28,.8); }
 .primary:disabled { background: #D9D3CF; box-shadow: none; cursor: not-allowed; }
-.note { margin-top: 10px; text-align: center; font-size: 12.5px; color: var(--smoke); }
 
 .sec { margin-top: 56px; }
 .sech { font-size: 22px; letter-spacing: -.015em; margin-bottom: 18px; }
@@ -420,6 +419,7 @@
 .crow .ct b { line-height: 22px; }
 .crow input.tg { margin-top: -2px; }
 .crow .cv { margin-top: 4px; }
+.crow.addr .cv { align-self: center; margin-top: 0; }
 
 .stepper.mini { margin: 18px 0 8px; }
 .stepper.mini .s { flex: 1 1 0; min-width: 0; padding: 0 8px; gap: 8px; line-height: 1.3; font-size: 12px; }
