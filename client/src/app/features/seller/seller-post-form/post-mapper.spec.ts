@@ -1,4 +1,5 @@
-import { formToPostFields } from './post-mapper';
+import { formToPostFields, jobWindows } from './post-mapper';
+import { toJobWindows } from './post-form-config';
 
 const service = (questions: unknown[]) =>
   formToPostFields('service', { common: { category: 'Khác' }, spec: { items: [], questions, options: [], place: 'buyer' } }, 'service').questions ?? [];
@@ -20,6 +21,23 @@ describe('formToPostFields', () => {
     expect(f.quickOptions).toEqual(['Để riêng sốt']);
     expect(f.noteEnabled).toBe(false);
     expect(f.template).toBeUndefined();
+  });
+
+  it('việc có giờ: giờ chính đứng đầu, thêm khung khác đủ Từ và Đến, không trùng', () => {
+    const w = jobWindows({ from: '08:30', to: '11:00', altWindows: [{ from: '14:00', to: '16:00' }, { from: '08:30', to: '11:00' }, { from: '17:00', to: '' }, { from: '', to: '' }] });
+    expect(w).toEqual(['08:30 – 11:00', '14:00 – 16:00']);
+    expect(jobWindows({ from: '08:30', to: '' })).toEqual(['08:30']);
+  });
+
+  it('việc không cố định giờ: không có khung, kể cả khi còn sót giờ trong form', () => {
+    expect(jobWindows({ allDay: true, from: '08:30', to: '11:00', altWindows: [{ from: '14:00', to: '16:00' }] })).toEqual([]);
+  });
+
+  it('khung giờ gõ tay của bài cũ chuyển thành Từ, Đến', () => {
+    const s = toJobWindows({ head: 1, altWindows: ['14:00 – 16:00', '8:30-11:00', 'chiều mát', { from: '17:00', to: '18:00' }] });
+    expect(s['altWindows']).toEqual([{ from: '14:00', to: '16:00' }, { from: '08:30', to: '11:00' }, { from: '17:00', to: '18:00' }]);
+    expect(s['head']).toBe(1);
+    expect(toJobWindows({})['altWindows']).toEqual([]);
   });
 
   it('đồ dùng, dịch vụ: tắt ghi chú thì khách không ghi được, mặc định theo form', () => {
@@ -66,6 +84,7 @@ describe('formToPostFields', () => {
   it('việc làm: gửi cách trả công và tòa nhà, không gửi địa chỉ chính xác', () => {
     const f = formToPostFields('job', { common: {}, spec: { dates: [], pay: 200000, head: 3, payBy: 'transfer', building: 'S2', exact: '0512' } }, 'job');
     expect(f.job).toMatchObject({ head: 3, payBy: 'transfer', building: 'S2' });
+    expect(f.job?.windows).toEqual([]);
     expect(JSON.stringify(f)).not.toContain('0512');
   });
 

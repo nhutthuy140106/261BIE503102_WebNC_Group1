@@ -56,7 +56,9 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
   protected readonly stateLabel = OFFER_STATE_LABEL;
-  protected readonly slotOptions = signal<{ value: string; label: string }[]>(SLOTS.map((s) => ({ value: s, label: s })));
+  protected readonly slotOptions = signal<{ value: string; label: string; sub?: string }[]>(SLOTS.map((s) => ({ value: s, label: s })));
+  /** Việc không cố định giờ: 3 nút Sáng, Chiều, Tối trên một hàng */
+  protected readonly freeSlots = signal(true);
 
   protected readonly offerForm = new FormGroup({
     slots: new FormArray<FormControl<boolean>>(SLOTS.map(() => new FormControl(false, { nonNullable: true }))),
@@ -112,11 +114,17 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
       });
   }
 
-  /** Việc có khung giờ cụ thể (ISO) thì chỉ cho chọn trong đó; không thì 3 buổi chung. */
+  /** Việc có khung giờ thì chỉ cho chọn trong đó (form khu Bán gửi "08:30 – 11:00", server gửi ISO); không thì 3 buổi chung. */
   private setSlotOptions(windows: string[]): void {
-    const opts = windows.length
-      ? windows.map((w) => ({ value: w, label: formatDateTime(w) }))
+    const isIso = (w: string) => /^\d{4}-\d{2}-\d{2}T/.test(w);
+    const opts: { value: string; label: string; sub?: string }[] = windows.length
+      ? windows.map((w, i) => ({
+          value: w,
+          label: isIso(w) ? formatDateTime(w) : w,
+          sub: windows.length > 1 && !isIso(w) ? (i === 0 ? 'Giờ chính' : 'Khung giờ khác') : undefined,
+        }))
       : SLOTS.map((s) => ({ value: s, label: s }));
+    this.freeSlots.set(!windows.length);
     this.slotOptions.set(opts);
     const arr = this.offerForm.controls.slots;
     arr.clear();

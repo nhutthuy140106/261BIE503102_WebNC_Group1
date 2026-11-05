@@ -318,6 +318,11 @@ export function questionGroup(fb: FormBuilder, q: SvcPreset['questions'][number]
   return fb.group({ type: [q.type], label: [q.label, Validators.required], required: [q.required], opts: [q.opts], hint: [q.hint ?? ''], choices: fb.array((q.choices ?? []).map(([l, p]) => choice(fb, l, p))) });
 }
 
+/** Một khung giờ khác của việc */
+export function windowGroup(fb: FormBuilder, from = '', to = '') {
+  return fb.group({ from: [from], to: [to] });
+}
+
 /** Việc làm — phía Mua hiện: thời gian làm (các ngày làm + giờ / cả ngày) · khu · số người cần · tiền công · thanh toán */
 export function jobGroup(fb: FormBuilder) {
   return fb.group({
@@ -325,7 +330,8 @@ export function jobGroup(fb: FormBuilder) {
     allDay: [false],
     from: [''],
     to: [''],
-    altWindows: strList(fb, []),
+    /** khung giờ khác người đăng chấp nhận (Từ, Đến); không cố định giờ thì bỏ qua */
+    altWindows: fb.array<FormGroup>([]),
     /** tòa nhà: hiện trên bài; số nhà, tầng (exact) chỉ gửi cho người được chọn */
     building: [''],
     exact: [''],
@@ -353,6 +359,16 @@ export function toGenericSpec(s: V): V {
  * Bài đồ uống đã lưu: chuyển về một bộ size chung. Lấy từ size riêng của loại nước đầu tiên có size,
  * hoặc nhóm tên "Size" trong tùy chọn cộng giá; không có thì để trống (khách không phải chọn size).
  */
+/** Bài việc đăng trước khi có ô chọn giờ: khung giờ gõ tay "14:00 – 16:00" chuyển thành Từ, Đến; dòng không đọc được thì bỏ */
+export function toJobWindows(s: V): V {
+  const rows = ((s['altWindows'] as unknown[]) ?? []).flatMap((w) => {
+    if (typeof w !== 'string') return [w as V];
+    const m = w.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
+    return m ? [{ from: m[1].padStart(2, '0') + ':' + m[2], to: m[3].padStart(2, '0') + ':' + m[4] }] : [];
+  });
+  return { ...s, altWindows: rows };
+}
+
 export function toDrinkSizes(s: V): V {
   const items = (s['items'] as V[]) ?? [];
   const options = (s['options'] as V[]) ?? [];

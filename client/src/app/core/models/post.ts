@@ -195,7 +195,7 @@ export interface Post {
     payUnit?: string;
     offers: number;
     status: 'open' | 'taken';
-    /** Khung giờ người nhận được chọn (ISO). Rỗng = tự do */
+    /** Khung giờ người nhận được chọn: chữ "08:30 – 11:00" (form khu Bán) hoặc ISO (server). Rỗng = Sáng, Chiều, Tối */
     windows?: string[];
   };
 }

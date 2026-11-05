@@ -60,7 +60,7 @@ export interface PostBody {
   condition?: Post['condition'];
   serviceInfo?: Post['serviceInfo'];
   /** Chỉ việc làm */
-  job?: { start?: string; end?: string; allDay?: boolean; head?: number; payUnit?: string; due?: string; payBy?: 'cash' | 'transfer'; building?: string };
+  job?: { start?: string; end?: string; allDay?: boolean; head?: number; payUnit?: string; due?: string; payBy?: 'cash' | 'transfer'; building?: string; windows?: string[] };
 }
 
 /**

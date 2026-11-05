@@ -15,7 +15,7 @@ import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import {
   AMENITIES, ASK_QUICK, ASK_TYPES, BLOCKS, GENERIC_PLACES, REPAIR_PLACES, CATS, DRINK_UNITS, FOOD_UNITS, GOODS_UNITS, SVC_UNITS, ymd, CONDITIONS, DAYS, FOOD_TAGS, FormType, ICE, JOB_UNITS, PRICE_TYPES, Q_TYPES, SVC_PLACES, SVC_PRESETS, SVC_TIMES, SWEET,
-  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, datesBetween, toDrinkSizes, toGenericSpec, toOrderOptions,
+  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, windowGroup, datesBetween, toDrinkSizes, toGenericSpec, toJobWindows, toOrderOptions,
 } from './post-form-config';
 
 /** Ngày bán: 1 ngày → dd/mm/yyyy, nhiều ngày → ngày đầu - ngày cuối */
@@ -308,6 +308,10 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     const ctrl = this.form.get(path)!;
     ctrl.setValue(v);
     ctrl.markAsDirty();
+  }
+
+  protected addWindow(): void {
+    this.arr('spec.altWindows').push(windowGroup(this.fb));
   }
 
   protected addStr(path: string): void {
@@ -631,6 +635,8 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     }
     if (t === 'job') {
       if (!s['allDay'] && !s['from']) return 'Chọn giờ bắt đầu làm';
+      if (!s['allDay'] && s['to'] && s['to'] <= s['from']) return 'Giờ kết thúc phải sau giờ bắt đầu';
+      if (!s['allDay'] && ((s['altWindows'] as V[]) ?? []).some((w) => (w['from'] || w['to']) && !(w['from'] && w['to'] && w['to'] > w['from']))) return 'Khung giờ khác: chọn đủ Từ, Đến và giờ kết thúc phải sau giờ bắt đầu';
       if (!String(s['building']).trim()) return 'Nhập tòa nhà';
       if (!String(s['exact']).trim()) return 'Nhập số nhà, tầng (chỉ gửi cho người được chọn)';
     }
@@ -768,6 +774,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     const spec1 = (p.form as V | undefined)?.['spec'] as V | undefined;
     if (p.form && (p.formType === 'food' || p.formType === 'drink') && spec1) p = { ...p, form: { ...p.form, spec: toOrderOptions(spec1) } };
     if (p.form && p.formType === 'drink') p = { ...p, form: { ...p.form, spec: toDrinkSizes((p.form as V)['spec'] as V) } };
+    if (p.form && p.formType === 'job') p = { ...p, form: { ...p.form, spec: toJobWindows((p.form as V)['spec'] as V) } };
     if (p.form) {
       let saved = p.form;
       if (this.type() === 'service') {
@@ -819,6 +826,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       case 'items': return itemGroup(this.fb);
       case 'rules': return quickGroup(this.fb);
       case 'quick': return quickGroup(this.fb);
+      case 'altWindows': return windowGroup(this.fb);
       default: return this.fb.control(typeof item === 'string' ? '' : item, key === 'notes' ? [] : [Validators.nullValidator]);
     }
   }

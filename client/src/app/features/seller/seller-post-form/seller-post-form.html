@@ -461,12 +461,17 @@
                   @if (!c('spec.allDay').value) {
                     <span class="lbl">Khung giờ khác bạn chấp nhận</span>
                     <div formArrayName="altWindows" class="lines">
-                      @for (n of arr('spec.altWindows').controls; track $index; let i = $index) {
-                        <div class="line2"><input class="input" [formControlName]="i" placeholder="Ví dụ: 14:00 – 16:00" />
-                          <button type="button" class="rm" aria-label="Bỏ khung giờ" (click)="removeAt('spec.altWindows', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
+                      @for (n of arr('spec.altWindows').controls; track n; let i = $index) {
+                        <div class="line2 win" [formGroupName]="i">
+                          <div class="row">
+                            <div class="fld"><label [for]="'awf' + i">Từ</label><app-time-input [inputId]="'awf' + i" formControlName="from" /></div>
+                            <div class="fld"><label [for]="'awt' + i">Đến</label><app-time-input [inputId]="'awt' + i" formControlName="to" /></div>
+                          </div>
+                          <button type="button" class="rm" aria-label="Bỏ khung giờ" (click)="removeAt('spec.altWindows', i)"><svg class="i"><use href="#xmark" /></svg></button>
+                        </div>
                       }
                     </div>
-                    <button type="button" class="mini" (click)="addStr('spec.altWindows')"><svg class="i"><use href="#plus" /></svg>Thêm khung giờ</button>
+                    <button type="button" class="mini" (click)="addWindow()"><svg class="i"><use href="#plus" /></svg>Thêm khung giờ</button>
                   }
                 </div>
               </div>

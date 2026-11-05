@@ -97,6 +97,7 @@ Làm với **mỗi loại** (đồ ăn, đồ uống, đồ dùng, dịch vụ).
 - [ ] **Hỏi đáp công khai**: gửi câu hỏi; **có số điện thoại (≥ 9 chữ số) bị chặn**; câu mới ghi "Chờ … trả lời".
 - [ ] Thẻ người đăng: Nhắn tin, 3 chỉ số, Xem gian hàng.
 - [ ] **Đề nghị nhận việc**: chọn khung giờ + giới thiệu ngắn (bắt buộc) → hộp xác nhận → "Đã gửi đề nghị". Ghi rõ gửi đề nghị ≠ đã nhận việc.
+- [ ] **Bạn làm được lúc nào:** việc có giờ thì chỉ chọn được giờ chính và các khung giờ khác người đăng thêm; việc không cố định giờ thì có 3 nút Sáng, Chiều, Tối.
 - 🔸 Đề nghị mới gửi **chưa hiện sang** danh sách chọn người ở phía Bán (kho chưa gộp). 🔸 Chưa có đề nghị kèm giá.
 
 ## 5. Phía Mua — đơn hàng, tin nhắn, hồ sơ

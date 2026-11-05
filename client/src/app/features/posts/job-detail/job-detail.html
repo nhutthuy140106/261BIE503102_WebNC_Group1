@@ -108,10 +108,10 @@
         <form [formGroup]="offerForm" (ngSubmit)="askConfirm()">
           <div class="field">
             <label>Bạn làm được lúc nào</label>
-            <div class="slot2" formArrayName="slots">
+            <div class="slot2" [class.free]="freeSlots()" formArrayName="slots">
               @for (s of slotOptions(); track s.value; let i = $index) {
                 <label class="slot" [class.on]="offerForm.controls.slots.at(i).value">
-                  <input type="checkbox" [formControlName]="i" />{{ s.label }}<small>{{ i === 0 && slotOptions().length > 3 ? 'đúng giờ chủ việc cần' : 'có thể làm' }}</small>
+                  <input type="checkbox" [formControlName]="i" />{{ s.label }}@if (s.sub) { <small>{{ s.sub }}</small> }
                 </label>
               }
             </div>

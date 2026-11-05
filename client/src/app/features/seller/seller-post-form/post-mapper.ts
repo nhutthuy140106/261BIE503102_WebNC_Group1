@@ -131,6 +131,14 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
 const priceTypeOf = (its: PostItem[], fixed: PriceType = 'fixed'): PriceType =>
   new Set(its.map((i) => i.price)).size > 1 ? 'from' : fixed;
 
+/** Khung giờ người nhận việc được chọn: giờ chính rồi các khung khác. Không cố định giờ thì rỗng (bên Mua hiện Sáng, Chiều, Tối) */
+export function jobWindows(s: V): string[] {
+  if (s['allDay'] || !s['from']) return [];
+  const main = s['to'] ? `${s['from']} – ${s['to']}` : String(s['from']);
+  const others = ((s['altWindows'] as V[]) ?? []).filter((w) => w?.['from'] && w?.['to']).map((w) => `${w['from']} – ${w['to']}`);
+  return [...new Set([main, ...others])];
+}
+
 export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue = ''): PostFields {
   const c = (raw['common'] as V) ?? {};
   const s = (raw['spec'] as V) ?? {};
@@ -220,6 +228,7 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
           payUnit: s['payUnit'] || 'việc',
           payBy: s['payBy'] === 'transfer' ? 'transfer' : 'cash',
           building: String(s['building'] ?? '').trim() || undefined,
+          windows: jobWindows(s),
           due: jobDue,
         },
       };
