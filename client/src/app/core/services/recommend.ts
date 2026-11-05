@@ -3,8 +3,10 @@ import { Observable, forkJoin, map } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { Post } from '../models/post';
 import { postFromApi } from '../utils/api-mappers';
+import { inArea } from '../utils/post-area';
 import { rankSimilar } from '../utils/recommend';
 import { ApiService } from './api';
+import { AreaService } from './area';
 import { OrderService } from './order';
 import { PostService } from './post';
 import { SavedService } from './saved';
@@ -16,6 +18,7 @@ export class RecommendService {
   private readonly posts = inject(PostService);
   private readonly orders = inject(OrderService);
   private readonly saved = inject(SavedService);
+  private readonly area = inject(AreaService);
 
   similar(postId: string, limit = 4): Observable<Post[]> {
     if (!useMock('recommend')) return this.api.get<unknown[]>(`/posts/${postId}/similar`, { limit }).pipe(map((l) => l.map(postFromApi)));
@@ -23,7 +26,7 @@ export class RecommendService {
       map((all) => {
         const seed = all.find((p) => p._id === postId);
         // Việc làm và đồ ăn/dịch vụ không gợi ý lẫn nhau
-        return seed ? rankSimilar([seed], all.filter((p) => (p.kind === 'job') === (seed.kind === 'job')), limit) : [];
+        return seed ? rankSimilar([seed], all.filter((p) => (p.kind === 'job') === (seed.kind === 'job') && inArea(p, this.area.current())), limit) : [];
       }),
     );
   }

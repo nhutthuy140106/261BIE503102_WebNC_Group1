@@ -1,10 +1,12 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { ClockService } from '../../../core/services/clock';
 import { countdown, dealAt, upcomingAt } from '../../../core/utils/promo';
 import { Router } from '@angular/router';
 import { Post, PostKind } from '../../../core/models/post';
 import { AuthPromptService } from '../../../core/services/auth-prompt';
+import { AreaService } from '../../../core/services/area';
 import { AuthService } from '../../../core/services/auth';
+import { inArea } from '../../../core/utils/post-area';
 import { PostService } from '../../../core/services/post';
 import { RecommendService } from '../../../core/services/recommend';
 import { SavedService } from '../../../core/services/saved';
@@ -28,6 +30,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly prompt = inject(AuthPromptService);
   protected readonly auth = inject(AuthService);
+  private readonly area = inject(AreaService);
   protected readonly saved = inject(SavedService);
   protected readonly search = inject(SearchUiService);
   private readonly recommend = inject(RecommendService);
@@ -37,7 +40,9 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   private observers: IntersectionObserver[] = [];
 
   protected readonly forYou = signal<Post[]>([]);
-  protected readonly posts = signal<Post[]>([]);
+  private readonly allPosts = signal<Post[]>([]);
+  /** Mọi khối trên trang chỉ lấy bài bán ở khu đang chọn */
+  protected readonly posts = computed(() => this.allPosts().filter((p) => inArea(p, this.area.current())));
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly dragging = signal(false);
@@ -75,7 +80,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected readonly featured = computed(() => this.posts().filter((p) => p.promoted).slice(0, 4));
   protected readonly forYouShown = computed(() => {
     const taken = new Set(this.featured().map((p) => p._id));
-    return this.forYou().filter((p) => !taken.has(p._id)).slice(0, 4);
+    return this.forYou().filter((p) => !taken.has(p._id) && inArea(p, this.area.current())).slice(0, 4);
   });
   protected readonly nearby = computed(() => {
     const taken = new Set([...this.featured(), ...this.forYouShown()].map((p) => p._id));
@@ -149,6 +154,14 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   private chatIndex = 0;
   private timers: ReturnType<typeof setTimeout>[] = [];
 
+  constructor() {
+    // đổi khu thì danh sách Khám phá tải lại từ đầu
+    effect(() => {
+      this.area.current();
+      untracked(() => this.resetFeed());
+    });
+  }
+
   /** Nói một câu rồi tự ẩn sau vài giây. */
   protected say(html: string, ms = 2600): void {
     this.greeting.set(html);
@@ -170,12 +183,12 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.postService.getPosts().subscribe({
       // Lỗi -> về "Safe State": danh sách rỗng + thông báo, không để spinner quay mãi
       next: (list) => {
-        this.posts.set(list);
+        this.allPosts.set(list);
         this.loading.set(false);
         this.resetFeed();
       },
       error: (e: Error) => {
-        this.posts.set([]);
+        this.allPosts.set([]);
         this.error.set(e.message);
         this.loading.set(false);
       },

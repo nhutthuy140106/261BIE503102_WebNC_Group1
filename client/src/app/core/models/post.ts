@@ -92,7 +92,7 @@ export interface Post {
   sellerAvatar?: string;
   /** Block/khu vực của người đăng, ví dụ "Block B" */
   block: string;
-  /** Khu (KTX, chung cư…) của người đăng — để ưu tiên bài cùng khu khi tìm kiếm */
+  /** Khu (KTX, chung cư…) của người đăng — để lọc bài theo khu đang xem */
   area?: string;
   /** Khoảng cách tới người xem, tính bằng mét (server tính; mock là số mẫu) */
   distance?: number;

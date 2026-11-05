@@ -31,6 +31,7 @@
 - [ ] Các khối: Nổi bật (nhãn QUẢNG BÁ) · Gần bạn · Việc mới quanh bạn · Kiếm thêm gần nhà · Khám phá.
 - [ ] **Khám phá**: lọc Tất cả / Đồ ăn / Đồ dùng / Dịch vụ / Việc làm; sắp xếp (Gần nhất, Mới nhất, Giá ↑↓); cuộn tự tải thêm, rồi nút "Xem thêm"; **không lặp bài** giữa các khối.
 - [ ] Bài vừa đăng ở phía Bán xuất hiện ở trang chủ (sau F5).
+- [ ] **Đổi khu vực** trên header → trang chủ, tìm kiếm và "Xem tất cả" chỉ còn bài bán ở khu đó; bài người bán chọn nhiều khu hiện ở từng khu đã chọn; khu chưa có bài thì trống.
 - [ ] Bài **tạm ngưng / đã xóa** phía Bán không còn ở danh sách.
 
 **Tìm kiếm `/search`**

@@ -75,23 +75,9 @@
     } @else if (error()) {
       <div class="notice">Không tải được dữ liệu: {{ error() }}</div>
     } @else {
-      @if (local().length) {
+      @if (matched().length) {
         <div class="card-grid">
-          @for (p of local(); track p._id) {
-            <app-result-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
-          }
-        </div>
-      }
-
-      @if (nearby().length) {
-        <h2 class="near-title" [class.first]="!local().length">
-          @if (!local().length) {
-            <span class="none"><svg class="i"><use href="#pin" /></svg>Chưa có bài phù hợp trong {{ area.current() }}</span>
-          }
-          Ở khu gần đó
-        </h2>
-        <div class="card-grid">
-          @for (p of nearby(); track p._id) {
+          @for (p of matched(); track p._id) {
             <app-result-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
           }
         </div>
@@ -100,7 +86,7 @@
       @if (!matched().length) {
         <div class="empty">
           <img src="assets/clean/idle.png" alt="" />
-          <h2>Chưa thấy bài phù hợp</h2>
+          <h2>Chưa thấy bài phù hợp trong {{ area.current() }}</h2>
           <p>Thử từ khóa khác, xóa bớt bộ lọc hoặc đổi khu vực.</p>
           <button type="button" class="btn" (click)="clear()">Xóa bộ lọc</button>
         </div>

@@ -4,7 +4,7 @@ import { AREAS } from '../config/areas';
 const KEY = 'antgo_area';
 
 /**
- * Khu đang xem (nút "Khu vực" trên header): bài trong khu này được ưu tiên khi tìm kiếm.
+ * Khu đang xem (nút "Khu vực" trên header): trang chủ và tìm kiếm chỉ hiện bài bán ở khu này.
  * Mặc định là khu người dùng đã chọn lúc đăng ký (chưa có thì khu đầu tiên trong danh sách).
  */
 @Injectable({ providedIn: 'root' })

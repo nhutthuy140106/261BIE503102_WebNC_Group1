@@ -47,10 +47,6 @@
 .sortbar > button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 
 .card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; }
-.near-title { font-size: 16px; margin: 34px 0 14px; padding-top: 22px; border-top: 1px solid #E6E8EC; }
-.near-title.first { margin-top: 0; padding-top: 0; border-top: 0; }
-.near-title .none { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 14px; font-weight: 400; color: var(--smoke); }
-.near-title .none svg { width: 15px; height: 15px; }
 .empty { background: transparent; padding: 56px 0 40px; }
 .empty img { width: 120px; }
 .empty h2 { margin-bottom: 6px; }

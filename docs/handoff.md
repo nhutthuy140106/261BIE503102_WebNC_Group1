@@ -307,3 +307,10 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **05/11 — size đồ uống dùng chung:** bỏ size riêng từng loại; form có một khung Tùy chọn size (`spec.sizes`) áp cho mọi loại nước, thành nhóm `Size` bắt buộc ở `optionGroups`. Bài đã lưu chuyển bằng `toDrinkSizes` khi mở sửa. Mục 05/11 về size riêng ở trên không còn đúng.
 - **05/11 — nối cài đặt form Bán với hiển thị Mua:** thêm `Post.freeShipFrom` (đơn đạt mức thì phí giao 0đ), `dailyQty` từng món được chặn khi đặt và trừ / trả theo đơn (`moveItemsLeft`), `areas` (lọc theo khu ở tìm kiếm, `block` ghi tên các khu đã chọn), `Post.info` hiện dưới Mô tả qua `app-post-info` (phạm vi phục vụ, trả đồ, phí kiểm tra sửa chữa, thông tin lưu trú, điều kiện hủy, lưu ý, an toàn, tình trạng chi tiết đồ dùng), giờ hẹn đồ dùng (`handover`), việc làm hiện đúng số người, cách trả công, tòa nhà. Nhóm chọn nhiều đánh dấu bắt buộc thì khách phải chọn.
   - **Chưa nối:** lưu trú chưa tính tiền theo đêm, số phòng và khách tối đa chưa chặn; câu hỏi kiểu số, ngày, địa chỉ hiện thành ô chữ. Sửa bài sẽ đặt lại số còn của từng món theo form.
+
+## 05/11/2026 — Lọc bài theo khu vực và các chỉnh nhỏ
+
+- **Khu vực phía Mua:** trang chủ, tìm kiếm, "Xem tất cả" và bài tương tự chỉ lấy bài bán ở khu đang chọn (`core/utils/post-area.ts`). Đã bỏ khối "Ở khu gần đó" ở trang tìm kiếm. Bài không có thông tin khu (API thật chưa trả về) thì không lọc. Trợ lý và vòng quay chưa lọc theo khu.
+- **Bỏ "Xem như khách"** ở Hôm nay, Gian hàng và thẻ bài đăng. Trang `/shop/:id` vẫn còn cho người mua.
+- **Form đồ uống:** gộp Pha chế vào mục 2 Menu, còn 5 mục.
+- **Đặt món:** topping dùng dấu tròn, Sửa và Bỏ cùng màu, bỏ dòng "Chưa bị trừ tiền", mũi tên địa chỉ căn giữa.
