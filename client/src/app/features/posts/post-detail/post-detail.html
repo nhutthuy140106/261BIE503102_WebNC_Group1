@@ -334,7 +334,7 @@
                           <span class="calhead">
                             <button type="button" (click)="moveMonth(-1)" [disabled]="!canPrev()" aria-label="Tháng trước">‹</button>
                             <b>Tháng {{ calMonth().getMonth() + 1 }}, {{ calMonth().getFullYear() }}</b>
-                            <button type="button" (click)="moveMonth(1)" aria-label="Tháng sau">›</button>
+                            <button type="button" (click)="moveMonth(1)" [disabled]="!canNext()" aria-label="Tháng sau">›</button>
                           </span>
                           <span class="calgrid dow"><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></span>
                           <span class="calgrid">
@@ -344,7 +344,7 @@
                               } @else { <i></i> }
                             }
                           </span>
-                          <span class="calfoot"><button type="button" (click)="pickDate(d, todayIso())">Hôm nay</button></span>
+                          @if (todayOpen()) { <span class="calfoot"><button type="button" (click)="pickDate(d, todayIso())">Hôm nay</button></span> }
                         </span>
                       }
                     </span>

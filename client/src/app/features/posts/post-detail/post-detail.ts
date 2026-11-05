@@ -18,6 +18,7 @@ import { SavedService } from '../../../core/services/saved';
 import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
+import { canPickDate, firstOpenDate, lastOpenDate } from '../../../core/utils/open-dates';
 import { formatDateTime } from '../../../core/utils/status-label';
 import { ClockService } from '../../../core/services/clock';
 import { comboSaving } from '../../../core/utils/combo';
@@ -157,13 +158,12 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const lead = (first.getDay() + 6) % 7; // tuần bắt đầu từ Thứ Hai
     const total = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
     const today = this.todayIso();
-    const p = this.post();
-    const limit = p?.kind === 'service' && p.dates?.length ? new Set(p.dates) : null;
+    const dates = this.post()?.dates;
     const out: ({ day: number; iso: string; past: boolean; today: boolean } | null)[] = Array(lead).fill(null);
     for (let day = 1; day <= total; day++) {
       const iso = this.iso(new Date(m.getFullYear(), m.getMonth(), day));
-      // dịch vụ: người bán chỉ nhận lịch vào các ngày đã chọn → ngày khác khóa luôn (cùng kiểu với ngày đã qua)
-      out.push({ day, iso, past: iso < today || (limit !== null && !limit.has(iso)), today: iso === today });
+      // chỉ mở các ngày người bán đã đặt, ngày khác khóa như ngày đã qua
+      out.push({ day, iso, past: !canPickDate(dates, iso, today), today: iso === today });
     }
     return out;
   });
@@ -171,6 +171,19 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected canPrev(): boolean {
     const n = new Date();
     return this.calMonth() > new Date(n.getFullYear(), n.getMonth(), 1);
+  }
+
+  /** Khóa nút sang tháng sau khi đã tới tháng có ngày cuối người bán mở */
+  protected canNext(): boolean {
+    const last = lastOpenDate(this.post()?.dates);
+    if (!last) return true;
+    const [y, mo] = last.split('-').map(Number);
+    return this.calMonth() < new Date(y, mo - 1, 1);
+  }
+
+  /** Nút "Hôm nay" chỉ có khi hôm nay nằm trong các ngày người bán mở */
+  protected todayOpen(): boolean {
+    return canPickDate(this.post()?.dates, this.todayIso(), this.todayIso());
   }
 
   protected moveMonth(n: number): void {
@@ -287,8 +300,8 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   });
 
   /**
-   * Ngày bán (đồ ăn & uống): người bán chọn trước trên lịch để khỏi bật/tắt bài mỗi ngày. Người mua KHÔNG thấy lịch này,
-   * chỉ thấy bài tự khóa khi hôm nay không nằm trong các ngày đã chọn. Không chọn ngày nào = bán mọi ngày.
+   * Ngày bán (đồ ăn & uống): người bán chọn trước trên lịch để khỏi bật/tắt bài mỗi ngày. Hôm nay ngoài các ngày này thì
+   * bài tự khóa; lịch khi đặt cũng chỉ mở các ngày này. Không chọn ngày nào = bán mọi ngày.
    */
   protected readonly saleDay = computed(() => {
     const p = this.post();
@@ -307,6 +320,8 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     if (sd && !sd.open) return { text: 'Hôm nay quán nghỉ', sub: sd.next ? 'Mở bán lại ngày ' + sd.next + '.' : 'Người bán đã ngừng bán.', off: true };
     const os = this.orderState();
     if (os && !os.open) return { text: 'Đã hết giờ nhận đơn', sub: os.reopen ? '' : 'Người bán chưa mở lại.', off: true };
+    // người bán đặt ngày nhưng đã qua hết: không còn ngày nào để hẹn (đồ ăn & uống đã có saleDay ở trên)
+    if (this.post()?.kind !== 'food' && !firstOpenDate(this.post()?.dates, this.todayIso())) return { text: 'Đã hết lịch hẹn', sub: 'Người bán chưa mở thêm ngày.', off: true };
     if (os?.closesAt) return { text: 'Đang nhận đơn', sub: 'Nhận đến ' + os.closesAt + ' hôm nay.', off: false };
     if (s.mode === 'once') return { text: 'Còn hàng', sub: 'Bán một lần, ai đặt trước được trước.', off: false };
     if (s.mode === 'limit') return { text: 'Còn ' + s.left + ' phần hôm nay', sub: s.sched ?? '', off: false };
@@ -423,7 +438,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
 
   protected openCheckout(): void {
     const d = this.draft();
-    if (d && !d.date()) d.date.set(this.todayIso());
+    if (d && !d.date()) d.date.set(firstOpenDate(this.post()?.dates, this.todayIso()));
     this.checkout.set(true);
     this.tried.set(false);
     this.error.set(null);
@@ -533,6 +548,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     // hộp xác nhận mở lúc còn giờ nhưng người dùng chậm: hết giờ nhận đơn thì không cho gửi
     const os = this.orderState();
     if (os && !os.open) return void this.error.set('Quán vừa hết giờ nhận đơn' + (os.reopen ? ', mở lại ' + os.reopen : '') + '.');
+    if (d.date() && !canPickDate(p.dates, d.date(), this.todayIso())) return void this.error.set('Người bán không nhận hẹn ngày này, bạn chọn ngày khác nhé.');
     const a = this.address();
     const place = d.tpl.place;
     const placeText = place.mode === 'choice' ? place.choices?.[d.place()]?.[0] : place.mode === 'seller' ? place.where : undefined;
