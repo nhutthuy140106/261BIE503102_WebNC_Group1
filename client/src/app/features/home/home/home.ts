@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { ClockService } from '../../../core/services/clock';
 import { countdown, dealAt, upcomingAt } from '../../../core/utils/promo';
 import { Router } from '@angular/router';
@@ -15,8 +15,6 @@ import { SearchUiService } from '../../../core/services/search-ui';
 type FeedFilter = 'all' | PostKind;
 type FeedSort = 'near' | 'new' | 'cheap' | 'dear' | 'pay';
 
-const BATCH = 8;
-const MAX_AUTO_LOADS = 3;
 
 /** Trang chủ không gian Mua — bê từ design/mockups/home-v5.html (khối đầu trang giữ bản đã duyệt: kiến người nhện). */
 @Component({
@@ -36,7 +34,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   private readonly recommend = inject(RecommendService);
 
   private readonly bigSearch = viewChild.required<ElementRef<HTMLElement>>('bigSearch');
-  private readonly sentinel = viewChild.required<ElementRef<HTMLElement>>('sentinel');
   private observers: IntersectionObserver[] = [];
 
   protected readonly forYou = signal<Post[]>([]);
@@ -91,7 +88,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     return this.posts().filter((p) => p.kind === 'job' && !taken.has(p._id)).slice(0, 4);
   });
 
-  // ----- Khám phá quanh khu: lọc + sắp xếp, tự tải thêm khi cuộn (8 bài × 3 lần rồi nút "Xem thêm") -----
+  // ----- Khám phá quanh khu: lọc + sắp xếp, hiện hết mọi bài của khu trong một lần -----
   protected readonly feedFilters: { key: FeedFilter; label: string }[] = [
     { key: 'all', label: 'Tất cả' },
     { key: 'food', label: 'Đồ ăn & uống' },
@@ -119,7 +116,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected readonly sortMenu = computed(() => this.sortOptions[this.feedFilter()].map((k) => ({ key: k, label: this.sortLabels[k] })));
   protected readonly sortLabel = computed(() => this.sortLabels[this.feedSort()]);
 
-  private readonly feedAll = computed(() => {
+  protected readonly feed = computed(() => {
     const f = this.feedFilter();
     const pool = this.posts().filter((p) => f === 'all' || p.kind === f);
     const by = this.feedSort();
@@ -138,11 +135,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   });
-  protected readonly shownCount = signal(0);
-  protected readonly loads = signal(0);
-  protected readonly loadingMore = signal(false);
-  protected readonly feed = computed(() => this.feedAll().slice(0, this.shownCount()));
-  protected readonly showMoreButton = computed(() => this.loads() >= MAX_AUTO_LOADS && this.shownCount() < this.feedAll().length);
 
   /** Kiến người nhện chào hàng xóm: các câu đổi dần, bấm vào kiến để nghe câu khác (giống kiến ở trang giới thiệu). */
   protected readonly greeting = signal('');
@@ -151,14 +143,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   private readonly chat = ['Chào <i>hàng xóm</i>!', 'Cần gì <i>cứ gọi</i>!', 'Có <i>mình</i> đây!', 'Ghé chơi <i>nha</i>!'];
   private chatIndex = 0;
   private timers: ReturnType<typeof setTimeout>[] = [];
-
-  constructor() {
-    // đổi khu thì danh sách Khám phá tải lại từ đầu
-    effect(() => {
-      this.area.current();
-      untracked(() => this.resetFeed());
-    });
-  }
 
   /** Nói một câu rồi tự ẩn sau vài giây. */
   protected say(html: string, ms = 2600): void {
@@ -183,7 +167,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       next: (list) => {
         this.allPosts.set(list);
         this.loading.set(false);
-        this.resetFeed();
       },
       error: (e: Error) => {
         this.allPosts.set([]);
@@ -206,12 +189,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     window.addEventListener('scroll', sync, { passive: true });
     window.addEventListener('resize', sync);
     this.observers.push({ disconnect: () => { window.removeEventListener('scroll', sync); window.removeEventListener('resize', sync); } } as unknown as IntersectionObserver);
-    // cuộn gần tới cuối khối Khám phá → tự tải thêm (tối đa 3 lần, sau đó hiện nút "Xem thêm")
-    const feed = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && this.loads() > 0 && this.loads() < MAX_AUTO_LOADS) this.loadMore();
-    }, { rootMargin: '300px' });
-    feed.observe(this.sentinel().nativeElement);
-    this.observers.push(big, feed);
+    this.observers.push(big);
   }
 
   ngOnDestroy(): void {
@@ -252,45 +230,11 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected setFilter(f: FeedFilter): void {
     this.feedFilter.set(f);
     if (!this.sortOptions[f].includes(this.feedSort())) this.feedSort.set(this.sortOptions[f][0]);
-    this.resetFeed();
   }
 
   protected setSort(s: FeedSort): void {
     this.feedSort.set(s);
     this.sortMenuOpen.set(false);
-    this.resetFeed();
-  }
-
-  private resetFeed(): void {
-    this.shownCount.set(0);
-    this.loads.set(0);
-    this.loadMore();
-  }
-
-  protected loadMore(): void {
-    if (this.loadingMore()) return;
-    if (!this.feedAll().length || this.shownCount() >= this.feedAll().length) return; // hết bài thì dừng
-    this.loadingMore.set(true);
-    this.timers.push(
-      setTimeout(() => {
-        this.shownCount.update((n) => n + BATCH);
-        this.loads.update((n) => n + 1);
-        this.loadingMore.set(false);
-        // chờ vẽ xong các thẻ mới rồi kiểm tra lại
-        this.timers.push(setTimeout(() => this.fillFeed(), 60));
-      }, 450),
-    );
-  }
-
-  /** Cuối danh sách vẫn nằm trong vùng nhìn thì tải tiếp: lúc đó trình duyệt không báo thêm sự kiện cuộn tới nữa */
-  private fillFeed(): void {
-    const near = this.sentinel().nativeElement.getBoundingClientRect().top < window.innerHeight + 300;
-    if (near && this.loads() > 0 && this.loads() < MAX_AUTO_LOADS) this.loadMore();
-  }
-
-  protected loadMoreClick(): void {
-    this.loads.set(0);
-    this.loadMore();
   }
 
   @HostListener('document:click')

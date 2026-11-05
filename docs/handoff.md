@@ -318,3 +318,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Bài đồ ăn, đồ uống:** bỏ "Còn n" cạnh giá món (vẫn chặn theo số lượng, hết thì ghi "Hết"); bỏ dòng "Mở lại ..." khi hết giờ nhận đơn.
 - **Ngày hẹn phía Mua:** lịch chọn ngày chỉ mở `Post.dates` cho mọi loại bài (trước đây chỉ dịch vụ), kiểm tra lại khi gửi đơn (`core/utils/open-dates.ts`). Bài không có `dates` vẫn mở mọi ngày.
 - **Ghi chú:** thêm ô cho khách ghi chú (`spec.kitchenNote`, mặc định bật) vào form đồ dùng và dịch vụ. Bài cũ chưa có `noteEnabled` vẫn hiện ô ghi chú.
+- **Khám phá quanh khu:** bỏ tải dần và nút "Xem thêm", hiện hết bài của khu trong một lần.
