@@ -23,9 +23,9 @@ describe('formToPostFields', () => {
   });
 
   it('đồ dùng, dịch vụ: tắt ghi chú thì khách không ghi được, mặc định theo form', () => {
-    expect(formToPostFields('goods', { common: {}, spec: { kitchenNote: false } }, '').noteEnabled).toBe(false);
-    expect(formToPostFields('goods', { common: {}, spec: { kitchenNote: true } }, '').noteEnabled).toBe(true);
-    expect(formToPostFields('service', { common: {}, spec: { kitchenNote: false, items: [], options: [], questions: [] } }, '').noteEnabled).toBe(false);
+    expect(formToPostFields('goods', { common: {}, spec: { kitchenNote: false } }, 'goods').noteEnabled).toBe(false);
+    expect(formToPostFields('goods', { common: {}, spec: { kitchenNote: true } }, 'goods').noteEnabled).toBe(true);
+    expect(formToPostFields('service', { common: {}, spec: { kitchenNote: false, items: [], options: [], questions: [] } }, 'service').noteEnabled).toBe(false);
   });
 
   it('đồ uống: pha chế thành nhóm chọn một đứng trước tùy chọn, bỏ hết thì không có nhóm', () => {
