@@ -122,7 +122,8 @@ textarea.small { min-height: 64px; }
 .jt b { display: block; font-size: 13px; color: var(--ink); }
 .jcat { margin-left: auto; padding: 3px 8px; border-radius: 6px; background: #fff; font-size: 11px; font-weight: 600; color: var(--ink) !important; }
 .jd { margin: 0; font-size: 14px; line-height: 1.45; color: #3c4660; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.jf { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.jtag { align-self: flex-start; margin-top: auto; padding: 3px 8px; border-radius: 6px; background: #fff; font-size: 11px; font-weight: 600; }
+.jf { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .jpay { font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
 .jpay small { font-size: 12px; font-weight: 500; color: var(--smoke); margin-left: 3px; }
 .due { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px; background: #fff; font-size: 11.5px; font-weight: 600; max-width: 100%; }
