@@ -42,7 +42,7 @@ export const SWEET = ['0%', '30%', '50%', '70%', '100%'];
 export const ICE = ['Không đá', 'Ít đá', 'Bình thường', 'Đá để riêng'];
 /** Cách báo giá dịch vụ: bảng giá nhiều dịch vụ con (khách chọn nhiều trong một đơn) hoặc báo giá sau khi kiểm tra */
 export const PRICE_TYPES: [string, string][] = [['list', 'Bảng giá'], ['quote', 'Báo giá sau']];
-export const Q_TYPES: [string, string][] = [['text', 'Chữ'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['photo', 'Hình ảnh']];
+export const Q_TYPES: [string, string][] = [['text', 'Văn bản'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['photo', 'Hình ảnh']];
 /** Khối Địa điểm phía Mua */
 export const SVC_PLACES: [string, string][] = [['buyer', 'Tại nhà khách'], ['seller', 'Khách mang tới'], ['choice', 'Khách chọn'], ['ab', 'Lấy ở A, giao tới B']];
 /** Mẫu Sửa chữa: nơi sửa */
@@ -50,7 +50,7 @@ export const REPAIR_PLACES: [string, string][] = [['buyer', 'Thợ đến nhà']
 /** Form chung (mẫu Khác): nơi làm */
 export const GENERIC_PLACES: [string, string][] = [['buyer', 'Tại nhà khách'], ['seller', 'Tại chỗ của tôi'], ['choice', 'Khách chọn']];
 /** Form chung: kiểu trả lời của từng câu hỏi; chọn một / chọn nhiều có danh sách lựa chọn, mỗi lựa chọn cộng giá được */
-export const ASK_TYPES: [string, string][] = [['text', 'Chữ ngắn'], ['long', 'Đoạn dài'], ['number', 'Số'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['date', 'Ngày'], ['range', 'Khoảng ngày'], ['photo', 'Ảnh'], ['address', 'Địa chỉ']];
+export const ASK_TYPES: [string, string][] = [['text', 'Văn bản ngắn'], ['long', 'Văn bản dài'], ['number', 'Số'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['date', 'Ngày'], ['range', 'Khoảng ngày'], ['photo', 'Ảnh'], ['address', 'Địa chỉ']];
 /** Form chung: nút thêm nhanh các câu hỏi hay gặp */
 export const ASK_QUICK: { type: string; label: string; required: boolean; hint: string }[] = [
   { type: 'long', label: 'Mô tả vấn đề', required: true, hint: 'Nói rõ bạn cần làm gì' },
