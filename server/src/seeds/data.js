@@ -1,6 +1,7 @@
 // Dữ liệu mẫu cho `npm run seed`, lấy từ design/mockups (shared/catalog.js, home-v5.html).
 // Ảnh: Unsplash (ID đã kiểm tra ở bản mẫu), chỉ để minh họa.
-const img = (id) => `https://images.unsplash.com/photo-${id}?w=800&q=70`;
+// id Unsplash → URL đầy đủ; đường dẫn riêng (/uploads/…) hoặc http(s) thì giữ nguyên
+const img = (id) => (/^(\/|https?:)/.test(id) ? id : `https://images.unsplash.com/photo-${id}?w=800&q=70`);
 // Ảnh chân dung người dùng mẫu (Unsplash, đã kiểm tra HTTP 200 và xem từng ảnh); cắt vuông quanh khuôn mặt
 const face = (id) => `https://images.unsplash.com/photo-${id}?w=200&h=200&fit=crop&crop=faces&q=70`;
 const AVATAR = {
@@ -108,6 +109,13 @@ const POSTS = [
   { key: 'cat', type: 'service', category: 'Dịch vụ', title: 'Cắt tóc nam tại nhà', description: 'Cắt tóc nam tại nhà, gọn gàng nhanh chóng, tự mang dụng cụ.', price: 70000, unit: 'lần', seller: 'minh', area: 'B', distance: 210, images: [IMG.don], fulfillmentModes: ['delivery'], needSchedule: true, daysAgo: 7 },
   { key: 'nail', type: 'service', category: 'Dịch vụ', title: 'Làm móng tay, sơn gel tại nhà', description: 'Làm móng tay sơn gel tại nhà, mẫu đơn giản, dụng cụ vô trùng.', price: 120000, unit: 'bộ', seller: 'phuong', area: 'D', distance: 380, images: [IMG.don], fulfillmentModes: ['delivery'], needSchedule: true, daysAgo: 9 },
 
+  // ---- Bài do bạn nhóm đăng thử ở khu Bán (gán cho Bếp Cô Lan); ảnh ở client/public/uploads/posts ----
+  { key: 'dienLanh', type: 'service', category: 'Sửa chữa', title: 'Điện lạnh Gia Hân - nhận vệ sinh và sửa chữa các thiết bị điện', description: 'Vệ sinh, bảo trì, sửa chữa, tháo lắp máy lạnh, máy giặt, tủ lạnh. Tư vấn báo giá trước khi làm.', price: 100000, unit: 'lần', seller: 'lan', area: 'B', distance: 150, images: ['/uploads/posts/89cab1-1.jpg', '/uploads/posts/89cab1-2.jpg'], fulfillmentModes: ['delivery'], needSchedule: true, daysAgo: 1 },
+  { key: 'giatJaly', type: 'service', category: 'Dịch vụ', title: 'GIẶT SẤY JALY: GIAO NHẬN TẬN TOÀ - TRẢ LUÔN TRONG NGÀY', description: 'Giặt sạch, sấy khô, khử mùi, nhận lại trong ngày. Quần áo từ 9k/kg, chăn mền 20k/kg, vệ sinh giày 40k/đôi.', price: 18000, unit: 'kg', seller: 'lan', area: 'B', distance: 150, images: ['/uploads/posts/86a71f-1.jpg', '/uploads/posts/86a71f-2.jpg'], fulfillmentModes: ['delivery'], needSchedule: true, daysAgo: 5 },
+  { key: 'nem', type: 'goods', category: 'Đồ dùng', title: 'Pass nệm Rạng Đông còn mới', description: 'Nệm Rạng Đông size 2m x 2m, dày 10cm, màu trắng, mới dùng 1 tháng. Pass gấp vì chuyển công tác.', price: 8500000, unit: 'cái', seller: 'lan', area: 'B', distance: 150, images: ['/uploads/posts/fbf4c3-1.jpg', '/uploads/posts/fbf4c3-2.jpg'], fulfillmentModes: ['delivery', 'pickup'], oneTime: true, daysAgo: 5 },
+  { key: 'traBong', type: 'food', category: 'Đồ uống', title: 'Khai trương giảm giá - Tiệm Trà Bông Đường số 8', description: 'Cà phê, trà sữa khai trương giảm giá. Cà phê sữa tươi, trà sữa gạo rang, trà sữa truyền thống.', price: 18000, unit: 'ly', seller: 'lan', area: 'B', distance: 150, acceptsXu: true, images: ['/uploads/posts/c434e2-1.jpg', '/uploads/posts/c434e2-2.jpg', '/uploads/posts/c434e2-3.jpg', '/uploads/posts/c434e2-4.jpg'], ...DELIVER, deliveryFee: 5000, optionGroups: DRINK, daysAgo: 13 },
+  { key: 'xoiYuumi', type: 'food', category: 'Đồ ăn', title: 'Tiệm xôi Yuumi - Nhận đơn đồ ăn sáng', description: 'Xôi bắp, xôi mặn, bắp hầm, súp cua cho bữa sáng. Thêm chả, trứng tùy chọn.', price: 12000, unit: 'phần', seller: 'lan', area: 'B', distance: 150, acceptsXu: true, images: ['/uploads/posts/fc4728-1.jpg', '/uploads/posts/fc4728-2.jpg', '/uploads/posts/fc4728-3.jpg', '/uploads/posts/fc4728-4.jpg'], ...DELIVER, deliveryFee: 5000, optionGroups: [{ name: 'Topping', multi: true, choices: [{ label: 'Thêm chả', price: 5000 }, { label: 'Thêm trứng', price: 5000 }] }], daysAgo: 12 },
+
   // ---- Bài bị gỡ (dữ liệu mẫu cho trang Quản trị) ----
   { key: 'vipham', type: 'goods', category: 'Đồ dùng', title: 'Điện thoại giá rẻ bất ngờ, chuyển khoản trước', description: 'Bài mẫu bị gỡ vì yêu cầu chuyển khoản trước, nghi ngờ lừa đảo.', price: 500000, unit: 'cái', seller: 'vp', area: 'C', distance: 700, images: [IMG.taiNghe], fulfillmentModes: ['pickup'], status: 'hidden', hiddenReason: 'Yêu cầu chuyển khoản trước, nghi ngờ lừa đảo', statusBeforeHidden: 'open', daysAgo: 12 },
 ];
@@ -128,6 +136,7 @@ const JOBS = [
   { key: 'nauAn', title: 'Nấu giúp bữa tối cho 4 người', category: 'Việc nhà', desc: 'Nấu 3 món gia đình, nguyên liệu mua sẵn, nấu tại bếp nhà mình.', pay: 150000, unit: 'buổi', workTime: 'Thứ sáu · 17:00', area: 'B', distance: 260, poster: 'ha', exactAddress: 'Căn B-0203, Block B', daysAgo: 2 },
   { key: 'lapTu', title: 'Lắp giúp tủ quần áo IKEA', category: 'Việc vặt', desc: 'Tủ 2 cánh còn nguyên hộp, cần người có tua vít điện, khoảng 2 giờ.', pay: 180000, unit: 'lần', workTime: 'Thứ bảy · 14:00', area: 'C', distance: 400, poster: 'tung', exactAddress: 'Căn C-0102, Block C', daysAgo: 1 },
   { key: 'xong', title: 'Nhận hộ gói hàng khi vắng nhà', category: 'Mua hộ', desc: 'Nhận hộ một gói hàng lúc 15:00 và để ở sảnh, mình về lấy sau.', pay: 25000, unit: 'lần', workTime: 'Hôm qua · 15:00', area: 'C', distance: 330, poster: 'tung', exactAddress: 'Căn C-0102, Block C', status: 'done', daysAgo: 6 },
+  { key: 'muaThuoc', title: 'Mua thuốc cho người bệnh', category: 'Giao nhận', desc: 'Cần người đi tìm mua thuốc kê đơn ở các nhà thuốc lớn hoặc gần bệnh viện theo danh sách đánh dấu đỏ.', pay: 100000, unit: 'việc', workTime: 'Cả ngày', area: 'B', distance: 150, poster: 'lan', exactAddress: 'Tòa BA3, KTX Khu B', daysAgo: 4 },
 ];
 
 // Combo (cùng người bán, rẻ hơn mua lẻ). items: [key bài thành phần, số lượng]; seed.js tạo SAU các bài thường để có id.

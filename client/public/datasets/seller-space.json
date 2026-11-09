@@ -1,7 +1,820 @@
 [
   {
-    "version": "2026-11-03-a",
+    "version": "2026-11-10-b",
     "posts": [
+      {
+        "views": 0,
+        "saves": 0,
+        "sold": 0,
+        "id": "n1794240653908",
+        "kind": "service",
+        "title": "Điện lạnh Gia Hân - nhận vệ sinh và sửa chữa các thiết bị điện",
+        "image": "/uploads/posts/89cab1-1.jpg",
+        "price": 100000,
+        "unit": "/ lần",
+        "priceFrom": true,
+        "stock": 1,
+        "max": 5,
+        "on": true,
+        "category": "Sửa chữa",
+        "form": {
+          "common": {
+            "images": [
+              "/uploads/posts/89cab1-1.jpg",
+              "/uploads/posts/89cab1-2.jpg"
+            ],
+            "title": "Điện lạnh Gia Hân - nhận vệ sinh và sửa chữa các thiết bị điện",
+            "category": "Sửa chữa",
+            "area": "Bcons",
+            "areas": [
+              "Bcons",
+              "KTX Khu B",
+              "KTX Khu A",
+              "Vinhomes Grand Park"
+            ],
+            "desc": "Em nhận vệ sinh, bảo trì, sửa chữa, tháo lắp, di dời, mua bán, trao đổi các loại\nMáy lạnh, máy lạnh âm trần, máy giặt, tủ lạnh...\n👉Vệ sinh máy lạnh 200k\n👉 Kiểm tra xử lý Máy lạnh không lạnh, kêu to\n👉 Xử lý máy lạnh chảy nước ( gọi e báo giá)\n👉Vệ sinh máy giặt chỉ từ 300k ( Tuỳ máy)\n👉Tháo lắp máy lạnh 600k ( tùy thế khó dễ )\n👉 Kiểm tra sữa chữa, bơm gas ( kiểm tra báo giá )\n☎️ Gọi em nhé zalo 0909864033\n☎️hoặc 0345234979✈️\n☘️Bên em tư vấn báo giá trước khi làm🔧\ncô chú anh chị em cứ yên tâm 🤝\n🧑‍🔧UY TÍN và TRÁCH NHIỆM 🩷",
+            "notes": [
+              ""
+            ],
+            "promo": {
+              "on": false,
+              "kind": "percent",
+              "value": 10,
+              "from": "11:00",
+              "to": "13:00",
+              "days": []
+            }
+          },
+          "spec": {
+            "preset": "Sửa chữa",
+            "turnaround": "",
+            "serviceArea": "Trong khu",
+            "warranty": "",
+            "priceType": "list",
+            "menu": [],
+            "items": [
+              {
+                "name": "Vệ sinh máy lạnh",
+                "price": 150000,
+                "unit": "máy",
+                "qty": null,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Vệ sinh lồng giặt ",
+                "price": 200000,
+                "unit": "máy",
+                "qty": null,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Đi dây điện phòng làm việc",
+                "price": 100000,
+                "unit": "lần",
+                "qty": null,
+                "options": [],
+                "guests": null
+              }
+            ],
+            "estimate": false,
+            "inspect": 50000,
+            "options": [
+              {
+                "name": "Sử dụng bộ đồ dùng dành riêng",
+                "multi": false,
+                "required": true,
+                "choices": [
+                  {
+                    "label": "Cao cấp",
+                    "price": 80000
+                  },
+                  {
+                    "label": "Tiêu chuẩn",
+                    "price": 0
+                  }
+                ]
+              }
+            ],
+            "questions": [
+              {
+                "type": "text",
+                "label": "Bộ phận / vị trí bị hư",
+                "required": true,
+                "opts": "",
+                "hint": "",
+                "choices": []
+              },
+              {
+                "type": "text",
+                "label": "Mô tả lỗi",
+                "required": true,
+                "opts": "",
+                "hint": "",
+                "choices": []
+              },
+              {
+                "type": "photo",
+                "label": "Ảnh chụp",
+                "required": false,
+                "opts": "",
+                "hint": "",
+                "choices": []
+              }
+            ],
+            "timeMode": "slot",
+            "dates": [
+              "2026-11-09",
+              "2026-11-10",
+              "2026-11-11",
+              "2026-11-12",
+              "2026-11-13",
+              "2026-11-14",
+              "2026-11-15"
+            ],
+            "from": "08:00",
+            "to": "18:00",
+            "durMin": 2,
+            "durMax": 4,
+            "repeat": false,
+            "checkIn": "14:00",
+            "checkOut": "12:00",
+            "minNights": 1,
+            "amenities": [],
+            "rules": [],
+            "freeCancelDays": 2,
+            "deposit": 30,
+            "idRequired": true,
+            "building": "",
+            "room": "",
+            "returnHours": 24,
+            "fulfil": {
+              "delivery": true,
+              "fee": 0,
+              "freeFrom": 100000,
+              "pickup": true
+            },
+            "place": "buyer",
+            "where": "",
+            "homeFee": 0,
+            "kitchenNote": true,
+            "pay": [
+              "cash"
+            ],
+            "bank": {
+              "name": "",
+              "no": "0123456789",
+              "holder": "BEP CO LAN (MAU)",
+              "qr": "",
+              "bankName": "MBBank"
+            },
+            "cancelPolicy": "",
+            "customerNote": ""
+          }
+        },
+        "formType": "service",
+        "buyerPostId": "656e4889ab31b8ac5489cab1"
+      },
+      {
+        "views": 0,
+        "saves": 0,
+        "sold": 0,
+        "id": "n1793887388871",
+        "kind": "service",
+        "title": "GIẶT SẤY JALY: GIAO NHẬN TẬN TOÀ - TRẢ LUÔN TRONG NGÀY",
+        "image": "/uploads/posts/86a71f-1.jpg",
+        "price": 18000,
+        "unit": "/ kg",
+        "priceFrom": true,
+        "stock": 1,
+        "max": 5,
+        "on": true,
+        "category": "Giặt sấy",
+        "form": {
+          "common": {
+            "images": [
+              "/uploads/posts/86a71f-1.jpg",
+              "/uploads/posts/86a71f-2.jpg"
+            ],
+            "title": "GIẶT SẤY JALY: GIAO NHẬN TẬN TOÀ - TRẢ LUÔN TRONG NGÀY",
+            "category": "Giặt sấy",
+            "area": "Bcons",
+            "areas": [
+              "Bcons",
+              "KTX Khu A",
+              "KTX Khu B"
+            ],
+            "desc": "• Lần giặt tối thiểu: 30k/lần (áp dụng tất cả các dịch vụ)\n• Quần áo Từ 3,5kg: 9k/kg\n• Chăn mền, rèm cửa: 20k/kg\n• Mền chần bông, chăn lông dày: 25k/kg\n• Topper: 30k/kg\n• Ruột gối: 30k/kg\nGẤU BÔNG\n• Size nhỏ dưới 0,4kg: 10k/con\n• Size lớn trên 0,4kg: 30k/kg\nVỆ SINH GIÀY: 40k/đôi\nGiặt sạch – sấy khô – khử mùi, nhận lại trong ngày.\nGIẶT RIÊNG ĐỒ TRẮNG: phụ thu 10k/lần, không giới hạn số lượng.\n✒️ Đồ trắng hoặc đồ dễ ra màu vui lòng báo trước để tiệm giặt riêng.\n✒️ Quần áo có phụ kiện đính bằng keo dán, vui lòng note trước khi gửi. Nếu không báo trước, tiệm xin phép không chịu trách nhiệm.\n💬 Khi nhận đồ, các bạn vui lòng kiểm tra kỹ. Nếu có vấn đề, báo tiệm trong 24–48h kể từ khi nhận, nhưng không quá 7 ngày kể từ ngày gửi đồ.\n📍 Địa chỉ: Số 1, Đ. Lương Định Của, Đông Hòa,TP.HCM (Đối diện tòa E4)",
+            "notes": [
+              ""
+            ],
+            "promo": {
+              "on": false,
+              "kind": "percent",
+              "value": 10,
+              "from": "11:00",
+              "to": "13:00",
+              "days": []
+            }
+          },
+          "spec": {
+            "preset": "Giặt sấy",
+            "turnaround": "",
+            "serviceArea": "Trong khu",
+            "warranty": "",
+            "priceType": "list",
+            "items": [
+              {
+                "name": "Giặt sấy quần áo",
+                "price": 18000,
+                "unit": "kg",
+                "qty": null,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Giặt chăn, ga",
+                "price": 40000,
+                "unit": "bộ",
+                "qty": null,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Giặt gối",
+                "price": 25000,
+                "unit": "cái",
+                "qty": null,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Giặt thú bông",
+                "price": 30000,
+                "unit": "cái",
+                "qty": null,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Vệ sinh giày",
+                "price": 60000,
+                "unit": "đôi",
+                "qty": null,
+                "options": [],
+                "guests": null
+              }
+            ],
+            "estimate": true,
+            "inspect": null,
+            "options": [
+              {
+                "name": "Nước xả",
+                "multi": false,
+                "required": true,
+                "choices": [
+                  {
+                    "label": "Hương nhẹ",
+                    "price": 0
+                  },
+                  {
+                    "label": "Không mùi",
+                    "price": 0
+                  }
+                ]
+              },
+              {
+                "name": "Gấp đồ",
+                "multi": false,
+                "required": true,
+                "choices": [
+                  {
+                    "label": "Gấp gọn",
+                    "price": 0
+                  },
+                  {
+                    "label": "Treo móc",
+                    "price": 10000
+                  }
+                ]
+              }
+            ],
+            "questions": [],
+            "timeMode": "slot",
+            "dates": [
+              "2026-11-05",
+              "2026-11-06",
+              "2026-11-07",
+              "2026-11-08",
+              "2026-11-09",
+              "2026-11-10",
+              "2026-11-11"
+            ],
+            "from": "08:00",
+            "to": "22:00",
+            "durMin": 2,
+            "durMax": 4,
+            "repeat": false,
+            "checkIn": "14:00",
+            "checkOut": "12:00",
+            "minNights": 1,
+            "amenities": [],
+            "rules": [],
+            "freeCancelDays": 2,
+            "deposit": 30,
+            "idRequired": true,
+            "building": "",
+            "room": "",
+            "returnHours": 12,
+            "fulfil": {
+              "delivery": true,
+              "fee": 0,
+              "freeFrom": 100000,
+              "pickup": true
+            },
+            "place": "buyer",
+            "where": "",
+            "homeFee": 0,
+            "safety": true,
+            "kitchenNote": true,
+            "pay": [
+              "cash",
+              "transfer"
+            ],
+            "bank": {
+              "name": "MB",
+              "no": "0123456789",
+              "holder": "BEP CO LAN (MAU)",
+              "qr": "",
+              "bankName": "MBBank"
+            },
+            "cancelPolicy": "",
+            "customerNote": ""
+          }
+        },
+        "formType": "service",
+        "buyerPostId": "4839d738c13263aa5b86a71f"
+      },
+      {
+        "views": 0,
+        "saves": 0,
+        "sold": 0,
+        "id": "n1793871163927",
+        "kind": "job",
+        "title": "Mua thuốc cho người bệnh",
+        "icon": "hand",
+        "price": 100000,
+        "unit": "/ việc",
+        "stock": 1,
+        "max": 10,
+        "on": true,
+        "category": "Giao nhận",
+        "jobId": "j-n1793871163927",
+        "form": {
+          "common": {
+            "images": [],
+            "title": "Mua thuốc cho người bệnh",
+            "category": "Giao nhận",
+            "area": "KTX Khu B",
+            "areas": [
+              "Bcons"
+            ],
+            "desc": "Mình đang cần mua thuốc kê đơn theo chỉ định của bác sĩ nhưng các nhà thuốc mình khảo sát trên website đã hết, mình cần bạn đi tìm mua các loại được đánh dấu đỏ trong hình ảnh trên ở những nhà thuốc lớn gần đây, hoặc các nhà thuốc gần bệnh viện.",
+            "notes": [
+              ""
+            ],
+            "promo": {
+              "on": false,
+              "kind": "percent",
+              "value": 10,
+              "from": "11:00",
+              "to": "13:00",
+              "days": []
+            }
+          },
+          "spec": {
+            "dates": [
+              "2026-11-06"
+            ],
+            "allDay": true,
+            "from": "07:00",
+            "to": "23:00",
+            "altWindows": [],
+            "building": "BA3",
+            "exact": "907",
+            "head": 1,
+            "payUnit": "việc",
+            "pay": 100000,
+            "payBy": "cash"
+          }
+        },
+        "formType": "job",
+        "buyerPostId": "83551653a80289f958d96afb"
+      },
+      {
+        "views": 0,
+        "saves": 0,
+        "sold": 0,
+        "id": "n1793868926460",
+        "kind": "goods",
+        "title": "Pass nệm Rạng Đông còn mới",
+        "image": "/uploads/posts/fbf4c3-1.jpg",
+        "price": 8500000,
+        "unit": "/ cái",
+        "stock": 1,
+        "max": 20,
+        "on": true,
+        "category": "Đồ bếp",
+        "form": {
+          "common": {
+            "images": [
+              "/uploads/posts/fbf4c3-1.jpg",
+              "/uploads/posts/fbf4c3-2.jpg"
+            ],
+            "title": "Pass nệm Rạng Đông còn mới",
+            "category": "Đồ bếp",
+            "area": "Bcons",
+            "areas": [
+              "Bcons",
+              "KTX Khu A",
+              "KTX Khu B",
+              "Vinhomes Grand Park"
+            ],
+            "desc": "Mình mới mua chiếc nệm này 1 tháng trước cho nhà mới nhưng hiện tại mình chuyển công tác ra Hà Nội nên cần pass gấp. Nệm size 2mx2m dày 10cm màu trắng.",
+            "notes": [
+              ""
+            ],
+            "promo": {
+              "on": false,
+              "kind": "percent",
+              "value": 10,
+              "from": "11:00",
+              "to": "13:00",
+              "days": []
+            }
+          },
+          "spec": {
+            "condition": "80",
+            "flaw": "Minh mua vào ngày 5/10/2026 ở store của cửa hàng, mình mới nằm được 1 tháng còn rất mới. Chưa dính bẩn hay qua giặt sấy.",
+            "price": 8500000,
+            "unit": "cái",
+            "stock": 1,
+            "dates": [
+              "2026-11-05",
+              "2026-11-06",
+              "2026-11-07",
+              "2026-11-08",
+              "2026-11-09",
+              "2026-11-10",
+              "2026-11-11",
+              "2026-11-12"
+            ],
+            "pickFrom": "17:00",
+            "pickTo": "23:00",
+            "kitchenNote": true,
+            "fulfil": {
+              "delivery": true,
+              "fee": 0,
+              "freeFrom": 100000,
+              "pickup": true
+            },
+            "pay": [
+              "cash"
+            ],
+            "bank": {
+              "name": "",
+              "no": "0123456789",
+              "holder": "BEP CO LAN (MAU)",
+              "qr": "",
+              "bankName": "MBBank"
+            }
+          }
+        },
+        "formType": "goods",
+        "buyerPostId": "eab809cdcfb475bbacfbf4c3"
+      },
+      {
+        "views": 0,
+        "saves": 0,
+        "sold": 2,
+        "id": "n1793213763703",
+        "kind": "food",
+        "title": "Khai trương giảm giá - Tiệm Trà Bông Đường số 8",
+        "image": "/uploads/posts/c434e2-1.jpg",
+        "price": 18000,
+        "unit": "/ ly",
+        "priceFrom": true,
+        "stock": 99,
+        "max": 99,
+        "on": true,
+        "category": "Cà phê",
+        "form": {
+          "common": {
+            "images": [
+              "/uploads/posts/c434e2-1.jpg",
+              "/uploads/posts/c434e2-2.jpg",
+              "/uploads/posts/c434e2-3.jpg",
+              "/uploads/posts/c434e2-4.jpg"
+            ],
+            "title": "Khai trương giảm giá - Tiệm Trà Bông Đường số 8",
+            "category": "Cà phê",
+            "area": "KTX Khu A",
+            "areas": [
+              "KTX Khu A",
+              "KTX Khu B"
+            ],
+            "desc": "Cn1: 190A đường 8, Linh Xuân, Thủ Đức ( đối diện nhà thuốc Hoàng Dũng 2)\nCn2: Toà B3 KTX khu B - làng đại học ( trong toà Quán Cô Mai )\n----\n❤️‍🔥 Chân thành cám ơn khách hàng đã lựa chọn tin dùng Tiệm Trà Bông",
+            "notes": [
+              ""
+            ],
+            "promo": {
+              "on": false,
+              "kind": "percent",
+              "value": 10,
+              "from": "11:00",
+              "to": "13:00",
+              "days": []
+            }
+          },
+          "spec": {
+            "items": [
+              {
+                "name": "Cà phê sữa tươi",
+                "price": 18000,
+                "unit": "ly",
+                "qty": null,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Trà sữa gạo rang ",
+                "price": 22000,
+                "unit": "ly",
+                "qty": null,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Trà sữa truyền thống ",
+                "price": 20000,
+                "unit": "ly",
+                "qty": null,
+                "options": [],
+                "guests": null
+              }
+            ],
+            "sizes": [
+              {
+                "label": "M",
+                "price": 0
+              },
+              {
+                "label": "L",
+                "price": 6000
+              }
+            ],
+            "options": [
+              {
+                "name": "Topping",
+                "multi": true,
+                "required": false,
+                "choices": [
+                  {
+                    "label": "Sương sáo",
+                    "price": 5000
+                  },
+                  {
+                    "label": "Trân châu phô mai",
+                    "price": 10000
+                  },
+                  {
+                    "label": "Trân châu đường đen",
+                    "price": 0
+                  }
+                ]
+              }
+            ],
+            "kitchenNote": true,
+            "sweet": [
+              "0%",
+              "30%",
+              "50%",
+              "70%",
+              "100%"
+            ],
+            "ice": [
+              "Không đá",
+              "Ít đá",
+              "Bình thường",
+              "Đá để riêng"
+            ],
+            "quick": [
+              {
+                "on": true,
+                "label": "Lấy thêm ống hút"
+              }
+            ],
+            "schedule": {
+              "mode": "daily",
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "dates": [
+                "2026-11-05",
+                "2026-11-06",
+                "2026-11-07"
+              ],
+              "orderFrom": "09:00",
+              "orderTo": "22:00",
+              "prep": 30,
+              "pickFrom": "09:00",
+              "pickTo": "23:00",
+              "batchDate": ""
+            },
+            "fulfil": {
+              "delivery": true,
+              "fee": 0,
+              "freeFrom": 100000,
+              "pickup": true
+            },
+            "pay": [
+              "cash",
+              "xu"
+            ],
+            "bank": {
+              "name": "",
+              "no": "0123456789",
+              "holder": "BEP CO LAN (MAU)",
+              "qr": "",
+              "bankName": "MBBank"
+            }
+          }
+        },
+        "formType": "drink",
+        "buyerPostId": "a6394de138033af275c434e2"
+      },
+      {
+        "views": 0,
+        "saves": 0,
+        "sold": 0,
+        "id": "n1793817687738",
+        "kind": "food",
+        "title": "Tiệm xôi Yuumi - Nhận đơn đồ ăn sáng 29/10",
+        "image": "/uploads/posts/fc4728-1.jpg",
+        "price": 12000,
+        "unit": "/ phần",
+        "priceFrom": true,
+        "stock": 90,
+        "max": 90,
+        "on": true,
+        "category": "Cơm nhà làm",
+        "form": {
+          "common": {
+            "images": [
+              "/uploads/posts/fc4728-1.jpg",
+              "/uploads/posts/fc4728-2.jpg",
+              "/uploads/posts/fc4728-3.jpg",
+              "/uploads/posts/fc4728-4.jpg"
+            ],
+            "title": "Tiệm xôi Yuumi - Nhận đơn đồ ăn sáng 29/10",
+            "category": "Cơm nhà làm",
+            "area": "Bcons",
+            "areas": [
+              "Bcons",
+              "KTX Khu A",
+              "KTX Khu B"
+            ],
+            "desc": "ahhgdiQDUIQGWUILHAJKCB",
+            "notes": [
+              ""
+            ],
+            "promo": {
+              "on": false,
+              "kind": "percent",
+              "value": 10,
+              "from": "11:00",
+              "to": "13:00",
+              "days": []
+            }
+          },
+          "spec": {
+            "portion": "1 người",
+            "tags": [],
+            "items": [
+              {
+                "name": "Xôi bắp",
+                "price": 15000,
+                "unit": "phần",
+                "qty": 20,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Xôi mặn",
+                "price": 20000,
+                "unit": "phần",
+                "qty": 30,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Bắp hầm",
+                "price": 12000,
+                "unit": "phần",
+                "qty": 20,
+                "options": [],
+                "guests": null
+              },
+              {
+                "name": "Súp cua",
+                "price": 20000,
+                "unit": "phần",
+                "qty": 20,
+                "options": [],
+                "guests": null
+              }
+            ],
+            "options": [
+              {
+                "name": "Topping",
+                "multi": true,
+                "required": false,
+                "choices": [
+                  {
+                    "label": "Thêm chả",
+                    "price": 5000,
+                    "qty": null
+                  },
+                  {
+                    "label": "Thêm trứng",
+                    "price": 5000,
+                    "qty": null
+                  }
+                ]
+              }
+            ],
+            "minOrder": 1,
+            "spicy": false,
+            "kitchenNote": true,
+            "quick": [
+              {
+                "on": true,
+                "label": "Gói lá"
+              }
+            ],
+            "schedule": {
+              "mode": "daily",
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "dates": [
+                "2026-11-05",
+                "2026-11-06",
+                "2026-11-07",
+                "2026-11-08"
+              ],
+              "orderFrom": "20:00",
+              "orderTo": "08:00",
+              "prep": 15,
+              "pickFrom": "06:00",
+              "pickTo": "11:00",
+              "batchDate": ""
+            },
+            "fulfil": {
+              "delivery": true,
+              "fee": 5000,
+              "freeFrom": 50000,
+              "pickup": true
+            },
+            "pay": [
+              "cash",
+              "transfer",
+              "xu"
+            ],
+            "bank": {
+              "name": "MB",
+              "no": "0123456789",
+              "holder": "BEP CO LAN (MAU)",
+              "qr": "",
+              "bankName": "MBBank"
+            },
+            "fresh": true
+          }
+        },
+        "formType": "food",
+        "buyerPostId": "750472b5cef66bcc56fc4728"
+      },
       {
         "id": "f1",
         "kind": "food",
@@ -16,7 +829,8 @@
         "saves": 21,
         "sold": 48,
         "promo": "còn 2 ngày",
-        "category": "Cơm nhà làm"
+        "category": "Cơm nhà làm",
+        "buyerPostId": "a4c123b1612dd272d1371c17"
       },
       {
         "id": "f2",
@@ -31,7 +845,8 @@
         "views": 94,
         "saves": 9,
         "sold": 22,
-        "category": "Cơm nhà làm"
+        "category": "Cơm nhà làm",
+        "buyerPostId": "149d439536b3216fdaeeb975"
       },
       {
         "id": "f3",
@@ -46,7 +861,8 @@
         "views": 41,
         "saves": 3,
         "sold": 9,
-        "category": "Món nước"
+        "category": "Món nước",
+        "buyerPostId": "729fae923d5a4fd12aabfe22"
       },
       {
         "id": "g1",
@@ -60,7 +876,8 @@
         "views": 58,
         "saves": 6,
         "sold": 0,
-        "category": "Đồ bếp"
+        "category": "Đồ bếp",
+        "buyerPostId": "8f219e9cb0eb53f16947ccf2"
       },
       {
         "id": "g2",
@@ -75,7 +892,8 @@
         "views": 14,
         "saves": 1,
         "sold": 4,
-        "category": "Đồ bếp"
+        "category": "Đồ bếp",
+        "buyerPostId": "5ec84d8dbc74254770f58904"
       },
       {
         "id": "s1",
@@ -90,7 +908,8 @@
         "views": 18,
         "saves": 0,
         "sold": 3,
-        "category": "Nấu ăn"
+        "category": "Nấu ăn",
+        "buyerPostId": "dba41ecccc3fc1626e53a130"
       },
       {
         "id": "s2",
@@ -105,7 +924,8 @@
         "views": 9,
         "saves": 1,
         "sold": 2,
-        "category": "Nấu ăn"
+        "category": "Nấu ăn",
+        "buyerPostId": "43b026c48bbf33feff9243a8"
       },
       {
         "id": "j1",
@@ -121,7 +941,8 @@
         "saves": 4,
         "sold": 0,
         "category": "Giao nhận",
-        "jobId": "j-giao"
+        "jobId": "j-giao",
+        "buyerPostId": "f506b40928b5b7a767c76fb0"
       },
       {
         "id": "j2",
@@ -137,7 +958,8 @@
         "saves": 2,
         "sold": 0,
         "category": "Mua hộ",
-        "jobId": "j-cho"
+        "jobId": "j-cho",
+        "buyerPostId": "08f86bebb2737f6a6f0fb23c"
       },
       {
         "id": "j3",
@@ -153,7 +975,8 @@
         "saves": 0,
         "sold": 0,
         "category": "Dọn dẹp",
-        "jobId": "j-don"
+        "jobId": "j-don",
+        "buyerPostId": "6f5da2cec255404e4fb44003"
       },
       {
         "id": "j4",
@@ -169,7 +992,8 @@
         "saves": 2,
         "sold": 0,
         "category": "Phụ việc",
-        "jobId": "j-pho"
+        "jobId": "j-pho",
+        "buyerPostId": "4d6608697a8d41bed440e504"
       }
     ],
     "orders": [
@@ -1474,6 +2298,27 @@
             "rated": null
           }
         ]
+      },
+      {
+        "id": "j-n1793871163927",
+        "code": "AG-J2377",
+        "postId": "n1793871163927",
+        "title": "Mua thuốc cho người bệnh",
+        "category": "Giao nhận",
+        "pay": 100000,
+        "unit": "/ việc",
+        "when": "06/11/2026",
+        "day": 0,
+        "time": "07:00",
+        "duration": 960,
+        "head": 1,
+        "area": "KTX Khu B",
+        "exact": "BA3, 907",
+        "desc": "Mình đang cần mua thuốc kê đơn theo chỉ định của bác sĩ nhưng các nhà thuốc mình khảo sát trên website đã hết, mình cần bạn đi tìm mua các loại được đánh dấu đỏ trong hình ảnh trên ở những nhà thuốc lớn gần đây, hoặc các nhà thuốc gần bệnh viện.",
+        "reqs": [],
+        "closed": true,
+        "offers": [],
+        "questions": []
       }
     ],
     "reviews": [

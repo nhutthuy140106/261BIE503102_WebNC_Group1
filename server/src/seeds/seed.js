@@ -59,11 +59,12 @@ async function cleanup(userIds) {
 
 async function seed() {
   const password = getPassword();
-  const hash = await bcrypt.hash(password, 10);
 
   /* ---------- Người dùng ---------- */
   const u = {};
   for (const { key, ...d } of USERS) {
+    // băm riêng cho từng tài khoản: bcrypt tự sinh muối ngẫu nhiên nên cùng mật khẩu vẫn ra bản băm khác nhau
+    const hash = await bcrypt.hash(password, 10);
     u[key] = await User.findOneAndUpdate(
       { phone: d.phone },
       { role: 'enduser', status: 'active', lockedReason: '', ...d, password: hash },
