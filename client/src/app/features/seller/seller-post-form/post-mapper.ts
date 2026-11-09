@@ -106,7 +106,6 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
   const on = ((s['rules'] as V[]) ?? []).filter((r) => r['on'] && String(r['label'] ?? '').trim()).map((r) => String(r['label']).trim());
   return [
     ...(shown?.noQuick ? [] : row('Phạm vi phục vụ', s['serviceArea'])),
-    ...(preset === 'Sửa chữa' && s['priceType'] !== 'quote' ? row('Phí kiểm tra', +s['inspect'] ? 'Trừ vào tiền sửa nếu bạn đồng ý giá' : '') : []),
     ...(preset === 'Lưu trú'
       ? [
           ...row('Tòa nhà', s['building']),
@@ -135,10 +134,11 @@ function serviceHighlights(s: V): Post['highlights'] {
     ];
   }
   if (preset === 'Sửa chữa') {
-    const where = { buyer: 'Tại nhà bạn', seller: 'Bạn mang tới', choice: 'Đến nhà bạn, Bạn mang tới' }[String(s['place'])];
+    // form sửa chữa không còn mục Nơi sửa: thợ luôn đến nhà khách
     return [
-      ...cell('pin', 'Nơi làm', where),
-      ...cell('receipt', 'Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ` : 'Miễn phí'),
+      ...cell('pin', 'Nơi làm', 'Tại nhà bạn'),
+      // phí kiểm tra chỉ có khi báo giá sau; bảng giá thì khách trả đúng giá đã ghi
+      ...(s['priceType'] === 'quote' ? cell('receipt', 'Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ` : 'Miễn phí') : []),
       ...cell('clock', 'Giờ nhận lịch', s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
     ];
   }
@@ -228,14 +228,15 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         timeMode: s['timeMode'],
         duration: { min: +s['durMin'] || 1, max: +s['durMax'] || 1 },
         repeat: !!s['repeat'],
-        place: { mode: s['place'], ...(where ? { where } : {}) },
+        // mẫu không có mục Nơi làm (sửa chữa, giặt sấy, lưu trú): nơi làm theo mẫu, không lấy giá trị cũ còn lưu trong form
+        place: { mode: shown?.noPlace ? shown.place : s['place'], ...(where && !shown?.noPlace ? { where } : {}) },
         // khung giờ khách chọn hẹn (giờ nhận lịch của người làm)
         handover: s['from'] && s['to'] ? { from: s['from'], to: s['to'] } : undefined,
         // mẫu không có mục Thông tin nhanh thì không gửi giá trị đã lưu của mục đó (mẫu Khác có ô riêng cho thời gian, bảo hành)
         serviceInfo: { turnaround: hideQuick ? undefined : String(s['turnaround'] ?? '').trim() || undefined, warranty: hideQuick ? undefined : String(s['warranty'] ?? '').trim() || undefined, area: SVC_PRESETS[String(s['preset'] ?? '')]?.noQuick ? undefined : String(s['serviceArea'] ?? '').trim() || undefined },
         highlights: serviceHighlights(s),
         // giặt sấy chọn cách nhận như đồ ăn, đồ dùng; dịch vụ khác tính phụ phí đến nhà
-        ...(s['preset'] === 'Giặt sấy' ? { ...fulfilOf(s), pickupAtBuyer: true } : { deliveryFee: s['place'] === 'buyer' || s['place'] === 'choice' ? +s['homeFee'] || 0 : 0 }),
+        ...(s['preset'] === 'Giặt sấy' ? { ...fulfilOf(s), pickupAtBuyer: true } : { deliveryFee: !shown?.noPlace && (s['place'] === 'buyer' || s['place'] === 'choice') ? +s['homeFee'] || 0 : 0 }),
         noteEnabled: !!s['kitchenNote'],
         info: serviceInfoRows(s),
         stock: { mode: 'open' },

@@ -337,3 +337,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Form sửa chữa:** bỏ mục Thông tin nhanh, bỏ dòng giải thích; 3 ô đầu bài là Nơi làm, Phí kiểm tra, Giờ nhận lịch. Hộp chọn người hiện khung giờ.
 - **Câu hỏi riêng:** kiểu Hình ảnh lưu ảnh thật (thu nhỏ, `core/utils/image-file.ts`) thay vì tên file, phía Bán thấy ảnh trong chi tiết đơn. Câu hỏi chọn một, chọn nhiều phải có lựa chọn mới đăng được.
 - **Bỏ lưu ý an toàn:** form dịch vụ không còn ô "Hiện lưu ý an toàn khi làm tại nhà khách", phía Mua không còn dòng Lưu ý an toàn ở mọi trường hợp (kể cả bài cũ đã lưu ô này).
+- **Form sửa chữa:** bỏ ô Phí kiểm tra ở chế độ Bảng giá (chỉ còn ở Báo giá sau) và bỏ mục Nơi sửa; thợ luôn đến nhà khách, không còn phụ phí đến nhà. Bài cũ đã lưu nơi sửa hoặc phụ phí thì không lấy nữa.

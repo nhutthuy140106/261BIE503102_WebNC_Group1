@@ -108,7 +108,7 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
   }),
   'Sửa chữa': P({
     repair: true, items: [['Vệ sinh máy lạnh', 150000, 'máy'], ['Thông tắc ống nước', 200000, 'lần'], ['Sửa ổ điện, công tắc', 80000, 'lần']],
-    inspect: 50000, place: 'buyer', homeFee: 30000, noQuick: true,
+    inspect: 50000, place: 'buyer', noQuick: true, noPlace: true,
     questions: [
       { type: 'text', label: 'Thiết bị / vị trí bị hư', required: true, opts: '' },
       { type: 'text', label: 'Mô tả lỗi', required: true, opts: '' },
