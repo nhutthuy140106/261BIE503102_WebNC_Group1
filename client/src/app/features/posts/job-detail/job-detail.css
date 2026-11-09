@@ -24,7 +24,7 @@
 .cols > div > .block:first-child { border-top: 0; padding-top: 0; }
 .block h2 { font-size: 19px; font-weight: 700; margin-bottom: 14px; }
 .block h2 small { color: var(--smoke); font-weight: 500; }
-.desc p { line-height: 1.65; color: #3C4660; }
+.desc p { line-height: 1.65; color: #3C4660; white-space: pre-line; overflow-wrap: anywhere; } /* giữ đúng cách xuống dòng, cách đoạn người đăng gõ trong form */
 
 /* hỏi đáp công khai */
 .qa-note { display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--soft); font-size: 13px; color: var(--smoke); line-height: 1.5; margin-bottom: 14px; }

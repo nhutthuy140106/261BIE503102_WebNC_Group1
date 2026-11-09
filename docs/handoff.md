@@ -339,3 +339,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Bỏ lưu ý an toàn:** form dịch vụ không còn ô "Hiện lưu ý an toàn khi làm tại nhà khách", phía Mua không còn dòng Lưu ý an toàn ở mọi trường hợp (kể cả bài cũ đã lưu ô này).
 - **Form sửa chữa:** bỏ ô Phí kiểm tra ở chế độ Bảng giá (chỉ còn ở Báo giá sau) và bỏ mục Nơi sửa; thợ luôn đến nhà khách, không còn phụ phí đến nhà. Bài cũ đã lưu nơi sửa hoặc phụ phí thì không lấy nữa.
 - **Mẫu dịch vụ:** bỏ mẫu Nấu ăn, bỏ mục Thông tin nhanh ở mọi mẫu. 3 ô đầu bài của mọi dịch vụ đăng từ form tạm thống nhất: Giờ nhận lịch, Nơi làm, Thanh toán (`Post.highlights`); trả đồ, cách trả đồ, trả phòng, ở tối thiểu, phí kiểm tra (báo giá sau), thời gian và bảo hành (mẫu Khác) chuyển xuống thông tin dưới Mô tả. Bài đã đăng cần Sửa + Lưu.
+- **Mô tả giữ xuống dòng:** mô tả bài, việc cần làm, lời giới thiệu gian hàng hiện đúng cách xuống dòng, cách đoạn người đăng gõ (`white-space: pre-line`).

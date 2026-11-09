@@ -63,7 +63,7 @@
           <div><dt><svg class="i"><use href="#clock" /></svg>Thời gian</dt><dd>{{ j.when }}</dd></div>
           <div><dt><svg class="i"><use href="#pin" /></svg>Địa điểm</dt><dd>{{ j.area }}<small>{{ j.exact }} — chỉ người được chọn mới thấy</small></dd></div>
           <div><dt><svg class="i"><use href="#users" /></svg>Số người cần</dt><dd>{{ j.head }} người</dd></div>
-          <div><dt><svg class="i"><use href="#pencil" /></svg>Việc cần làm</dt><dd>{{ j.desc }}</dd></div>
+          <div><dt><svg class="i"><use href="#pencil" /></svg>Việc cần làm</dt><dd class="keepline">{{ j.desc }}</dd></div>
           @if (j.reqs.length) { <div><dt><svg class="i"><use href="#check" /></svg>Yêu cầu</dt><dd>@for (r of j.reqs; track r) { <span class="req">{{ r }}</span> }</dd></div> }
         </dl>
       </div>

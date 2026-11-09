@@ -353,3 +353,5 @@ a.pbtn.link { text-decoration: none; }
 .thanks .btns .go { width: auto; padding: 0 36px; }
 .thanks img { width: 150px; }
 .trk-slot { display: block; margin-bottom: 16px; }
+/* giữ đúng cách xuống dòng, cách đoạn người đăng gõ trong form */
+.iv.plain { white-space: pre-line; }
