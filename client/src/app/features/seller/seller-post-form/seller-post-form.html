@@ -227,7 +227,7 @@
                 }
                 @if (svcPreset().stay) {
                   <span class="hint">Giá mỗi đêm cho từng loại phòng. Khách chọn loại phòng, số phòng và ngày nhận – trả phòng; tổng tiền = giá × số đêm × số phòng.</span>
-                } @else if (!svcPreset().generic) {
+                } @else if (!svcPreset().generic && !svcPreset().repair) {
                   <label class="ck"><input type="checkbox" formControlName="estimate" /><span>Giá ước tính, cân / đếm thực tế khi nhận đồ</span></label>
                 }
               }
