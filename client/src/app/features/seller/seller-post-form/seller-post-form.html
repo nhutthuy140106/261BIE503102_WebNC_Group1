@@ -202,14 +202,21 @@
           <section class="sec">
             <header><span class="no">{{ svcNo('price') }}</span><span><b>Tùy chọn dịch vụ</b></span></header>
             <div class="bd">
-              <div class="lines">
-                @for (n of arr('spec.menu').controls; track $index; let i = $index) {
-                  <div class="line2" [formGroup]="grp(n)"><input class="input" formControlName="name" maxlength="60" placeholder="Tên dịch vụ" [attr.aria-label]="'Tên dịch vụ ' + (i + 1)" />
+              <span class="hint">Khách chọn một dịch vụ cho mỗi đơn, chọn xong mới thấy tùy chọn và câu hỏi của dịch vụ đó. Đặt giá theo phòng, theo m² hay khoảng giá tùy bạn; giá khách trả là tổng các lựa chọn khách chọn.</span>
+              @for (mn of arr('spec.menu').controls; track $index; let i = $index) {
+                <div class="svcblock">
+                  <div class="line2" [formGroup]="grp(mn)"><input class="input svcname" formControlName="name" maxlength="60" placeholder="Tên dịch vụ" [attr.aria-label]="'Tên dịch vụ ' + (i + 1)" />
                     <button type="button" class="rm" aria-label="Bỏ dịch vụ" (click)="removeAt('spec.menu', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
-                }
-              </div>
+                  <div class="optblock">
+                    <span class="lbl">Tùy chọn cộng giá</span>
+                    <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.menu.' + i + '.options' }" />
+                  </div>
+                  <span class="lbl">Câu hỏi riêng</span>
+                  <ng-container *ngTemplateOutlet="qList; context: { base: 'spec.menu.' + i + '.questions' }" />
+                </div>
+              }
               <button type="button" class="mini" (click)="addMenu()"><svg class="i"><use href="#plus" /></svg>Thêm dịch vụ</button>
-              <span class="hint">Khách chọn một dịch vụ cho mỗi đơn. Tùy chọn và câu hỏi của từng dịch vụ đặt ở mục bên dưới.</span>
+              <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú khi đặt lịch</span></label></div>
             </div>
           </section>
           } @else {
@@ -262,25 +269,10 @@
             </div>
           </section>
           }
-          @if (!svcPreset().generic) {
+          @if (!svcPreset().generic && !svcPreset().cleaning) {
           <section class="sec">
-            <header><span class="no">{{ svcNo('ask') }}</span><span><b>{{ svcPreset().cleaning ? 'Cài đặt tùy chọn' : 'Khách chọn khi đặt' }}</b></span></header>
+            <header><span class="no">{{ svcNo('ask') }}</span><span><b>Khách chọn khi đặt</b></span></header>
             <div class="bd">
-              @if (svcPreset().cleaning) {
-                <!-- dọn dẹp: mỗi dịch vụ có tùy chọn cộng giá và câu hỏi riêng; khách chọn dịch vụ xong mới thấy -->
-                <span class="hint">Đặt giá theo phòng, theo m² hay khoảng giá tùy bạn. Giá khách trả là tổng các lựa chọn khách chọn.</span>
-                @for (mn of arr('spec.menu').controls; track $index; let i = $index) {
-                  <div class="svcblock">
-                    <b class="svcname">{{ mn.get('name')?.value || 'Dịch vụ ' + (i + 1) }}</b>
-                    <div class="optblock">
-                      <span class="lbl">Tùy chọn cộng giá</span>
-                      <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.menu.' + i + '.options' }" />
-                    </div>
-                    <span class="lbl">Câu hỏi riêng</span>
-                    <ng-container *ngTemplateOutlet="qList; context: { base: 'spec.menu.' + i + '.questions' }" />
-                  </div>
-                }
-              } @else {
               <div class="optblock">
                 <span class="lbl">Tùy chọn cộng giá</span>
                 <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options' }" />
@@ -288,7 +280,6 @@
               @if (!svcPreset().noQuestions) {
               <span class="lbl">Câu hỏi riêng</span>
               <ng-container *ngTemplateOutlet="qList; context: { base: 'spec.questions' }" />
-              }
               }
               <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú khi đặt lịch</span></label></div>
             </div>

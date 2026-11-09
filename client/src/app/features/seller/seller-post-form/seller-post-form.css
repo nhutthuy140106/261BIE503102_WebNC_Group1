@@ -252,7 +252,7 @@ textarea.small { min-height: 64px; }
 .optblock, .qlist { display: grid; gap: 8px; }
 /* dọn dẹp: khung tùy chọn, câu hỏi của từng dịch vụ */
 .svcblock { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; }
-.svcblock .svcname { font-size: 15px; }
+.svcblock .svcname { font-weight: 600; }
 .optblock > .pkgs:empty { display: none; }
 .optblock > .mini, .qlist > .mini { margin-top: 4px; }
 .ck.qk { display: grid; grid-template-columns: 16px minmax(0, 1fr) 32px; align-items: center; gap: 10px; padding: 4px 6px 4px 12px; }
