@@ -202,7 +202,7 @@ export function viewOf(post: Post): PostView {
             // giá ước tính là của người bán chọn, không lấy của mẫu (mẫu giặt sấy luôn "ước tính")
             ...(svc ? { estimate: !!post.estimate } : {}),
           },
-    qty: cups ? null : svc ? (quote || (post.timeMode === 'datedur' && !items) ? null : { label: 'Số lượng', min: 1, max: 20 }) : base.qty,
+    qty: cups ? null : svc ? (quote || post.bookOnce || (post.timeMode === 'datedur' && !items) ? null : { label: 'Số lượng', min: 1, max: 20 }) : base.qty,
     seller: {
       ...base.seller,
       name: post.sellerName,
@@ -236,6 +236,7 @@ export function viewOf(post: Post): PostView {
     quick: post.quickOptions,
     noteOff: post.noteEnabled === false,
     optsOnce: post.kind === 'service' || undefined,
+    priceInOpts: post.bookOnce || undefined,
     // dịch vụ đăng từ form: một bộ chữ chung, không lấy chữ riêng của mẫu ("Đặt lấy đồ", "áo len" của giặt sấy)
     ...(svc ? { action: quote ? 'Gửi yêu cầu' : 'Đặt lịch', notePh: 'Thêm thông tin cho người làm (không bắt buộc)…' } : {}),
     time,

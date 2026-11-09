@@ -13,7 +13,7 @@ type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 export type PostFields = Pick<
   PostBody,
   | 'category' | 'priceType' | 'estimate' | 'inspectFee' | 'items' | 'optionGroups' | 'questions' | 'fulfillmentModes' | 'deliveryFee'
-  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'highlights' | 'pickupAtBuyer' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
+  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'highlights' | 'pickupAtBuyer' | 'bookOnce' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
 >;
 
 /** "A, B|+5.000đ" không dùng nữa: form lưu lựa chọn là chuỗi cách nhau dấu phẩy */
@@ -28,6 +28,17 @@ const optionsOf = (arr: unknown): OptionGroup[] =>
       required: !!g['required'],
       choices: (g['choices'] as V[]).filter((c) => String(c['label'] ?? '').trim()).map((c) => ({ label: String(c['label']).trim(), price: +c['price'] || 0 })),
     }));
+
+/**
+ * Dọn dẹp: giá thấp nhất khách có thể trả = tổng giá rẻ nhất của các nhóm bắt buộc chọn một (giá theo phòng, m², khoảng giá…).
+ * `from`: các lựa chọn có giá khác nhau nên ghi "từ".
+ */
+export function cleaningPrice(s: V): { price: number; from: boolean } {
+  const groups = optionsOf(s['options']).filter((g) => g.required && !g.multi);
+  const price = groups.reduce((n, g) => n + Math.min(...g.choices.map((c) => c.price)), 0);
+  const from = optionsOf(s['options']).some((g) => new Set(g.choices.map((c) => c.price)).size > 1 || (g.multi && g.choices.some((c) => c.price > 0)));
+  return { price, from };
+}
 
 const itemsOf = (s: V): PostItem[] =>
   ((s['items'] as V[]) ?? [])
@@ -138,6 +149,7 @@ function serviceHighlights(s: V): Post['highlights'] {
     preset === 'Giặt sấy' ? 'Lấy đồ tại nhà bạn'
     : preset === 'Lưu trú' ? String(s['building'] ?? '').trim() || 'Tại chỗ người cho thuê'
     : preset === 'Sửa chữa' ? 'Tại nhà bạn'
+    : SVC_PRESETS[preset]?.noPlace ? ({ buyer: 'Tại nhà bạn', seller: 'Bạn mang tới' } as V)[SVC_PRESETS[preset].place]
     : ({ buyer: 'Tại nhà bạn', seller: where || 'Bạn mang tới', choice: 'Tại nhà bạn hoặc bạn mang tới', ab: 'Lấy ở A, giao tới B' } as V)[String(s['place'])];
   const pays = payOf(s).map((m) => ({ cash: 'Tiền mặt', transfer: 'Chuyển khoản', xu: 'AntXu' })[m]).join(', ');
   return [
@@ -206,24 +218,31 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
       };
     }
     case 'service': {
-      const its = itemsOf(s);
-      const quote = s['priceType'] === 'quote';
+      // dọn dẹp: danh sách dịch vụ thành nhóm chọn một bắt buộc đứng đầu, giá nằm ở các tùy chọn; mỗi đơn một dịch vụ
+      const cleaning = !!SVC_PRESETS[String(s['preset'] ?? '')]?.cleaning;
+      const menu = ((s['menu'] as string[]) ?? []).map((x) => String(x ?? '').trim()).filter(Boolean);
+      const its = cleaning ? [] : itemsOf(s);
+      const quote = !cleaning && s['priceType'] === 'quote';
       const where = String(s['where'] ?? '').trim();
       // mẫu đã bỏ (Nấu ăn) hoặc không ghi mẫu: coi như mẫu Khác
       const shown = SVC_PRESETS[String(s['preset'] ?? '')] ?? SVC_PRESETS['Khác'];
       const hideQuick = !!shown?.noQuick && !shown.generic;
       return {
         ...base,
-        priceType: quote ? 'quote' : priceTypeOf(its, its.length === 1 && s['estimate'] ? 'unit' : 'fixed'),
-        estimate: !!s['estimate'] || undefined,
+        priceType: cleaning ? (cleaningPrice(s).from ? 'from' : 'fixed') : quote ? 'quote' : priceTypeOf(its, its.length === 1 && s['estimate'] ? 'unit' : 'fixed'),
+        estimate: (!cleaning && !!s['estimate']) || undefined,
+        bookOnce: cleaning || undefined,
         inspectFee: quote ? +s['inspect'] || 0 : undefined,
         items: its.length > 1 || quote ? its : undefined,
-        optionGroups: optionsOf(s['options']),
+        optionGroups: [
+          ...(cleaning && menu.length ? [{ name: 'Dịch vụ', multi: false, required: true, choices: menu.map((label) => ({ label, price: 0 })) }] : []),
+          ...optionsOf(s['options']),
+        ],
         questions: questionsOf(s['questions']),
         dates: (s['dates'] as string[]) ?? [],
         timeMode: s['timeMode'],
         duration: { min: +s['durMin'] || 1, max: +s['durMax'] || 1 },
-        repeat: !!s['repeat'],
+        repeat: !cleaning && !!s['repeat'],
         // mẫu không có mục Nơi làm (sửa chữa, giặt sấy, lưu trú): nơi làm theo mẫu, không lấy giá trị cũ còn lưu trong form
         place: { mode: shown?.noPlace ? shown.place : s['place'], ...(where && !shown?.noPlace ? { where } : {}) },
         // khung giờ khách chọn hẹn (giờ nhận lịch của người làm)

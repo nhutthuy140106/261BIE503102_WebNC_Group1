@@ -143,7 +143,7 @@
             <h4>{{ g.name }} <small>{{ g.req === false ? 'Chọn 1, không bắt buộc' : 'Chọn 1' }}</small></h4>
             @for (c of g.choices; track c) {
               <button type="button" class="row" [class.on]="d.isOpt(scope, g.name, c)" (click)="d.setOpt(g.name, c, scope)">
-                <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
+                <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>{{ d.tpl.priceInOpts ? '' : '+' }}{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
               </button>
             }
           </div>
@@ -185,7 +185,7 @@
               <h4>{{ q.label }}@if (q.req) { <em class="rq">*</em> } <small>Chọn 1</small></h4>
               @for (c of q.opts ?? []; track c) {
                 <button type="button" class="row" [class.on]="d.ans()[q.label] === c" (click)="d.setAns(q.label, c)">
-                  <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
+                  <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>{{ d.tpl.priceInOpts ? '' : '+' }}{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
                 </button>
               }
               @if (q.hint) { <p class="hint">{{ q.hint }}</p> }
@@ -203,7 +203,7 @@
               <h4>{{ q.label }}@if (q.req) { <em class="rq">*</em> } <small>Chọn nhiều</small></h4>
               @for (c of q.opts ?? []; track c) {
                 <button type="button" class="row" [class.on]="d.picks(q.label).includes(c)" (click)="d.togglePick(q.label, c)">
-                  <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="check"></i>
+                  <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>{{ d.tpl.priceInOpts ? '' : '+' }}{{ fmt(parse(c).add) }}</small> }<i class="check"></i>
                 </button>
               }
             </div>

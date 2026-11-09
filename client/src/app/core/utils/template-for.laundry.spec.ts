@@ -44,6 +44,16 @@ describe('cách nhận của dịch vụ', () => {
     expect(d.lines()).toContain('Bộ đồ dùng: Cao cấp');
   });
 
+  it('dọn dẹp: giá chỉ là tổng các tùy chọn khách chọn, không cộng giá thấp nhất trên bài', () => {
+    const groups = [{ name: 'Dịch vụ', multi: false, required: true, choices: [{ label: 'Lau kính', price: 0 }] }, { name: 'Diện tích', multi: false, required: true, choices: [{ label: 'Dưới 50m²', price: 150000 }, { label: 'Trên 80m²', price: 350000 }] }];
+    const v = viewOf(post({ place: { mode: 'buyer' }, price: 150000, priceType: 'from', bookOnce: true, optionGroups: groups }));
+    expect(v.tpl.qty).toBeNull();
+    const d = new OrderDraft(v.tpl);
+    expect(d.subtotal()).toBe(150000);
+    d.setOpt('Diện tích', 'Trên 80m²|+350.000đ');
+    expect(d.subtotal()).toBe(350000);
+  });
+
   it('dịch vụ: mỗi câu trả lời là một dòng riêng', () => {
     const d = new OrderDraft(viewOf(post({ place: { mode: 'buyer' }, questions: [{ type: 'text', label: 'Bộ phận', required: false }, { type: 'text', label: 'Mô tả lỗi', required: false }] })).tpl);
     d.setAns('Bộ phận', 'Máy lạnh');

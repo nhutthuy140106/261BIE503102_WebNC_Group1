@@ -93,6 +93,10 @@ export interface SvcPreset {
   repair?: boolean;
   /** form chung (mẫu Khác): không theo ngành nào, người bán tự tạo câu hỏi cho khách */
   generic?: boolean;
+  /** mẫu dọn dẹp: mục 2 chỉ liệt kê tên dịch vụ, giá đặt ở mục Cài đặt tùy chọn; khách đặt một dịch vụ mỗi đơn */
+  cleaning?: boolean;
+  /** mẫu dọn dẹp: tên các dịch vụ có sẵn */
+  menu?: string[];
   /** mẫu lưu trú: hiện mục "Tiện nghi & nội quy", lịch theo đêm, cột số phòng / khách tối đa */
   stay?: boolean;
 }
@@ -117,12 +121,11 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
     ],
   }),
   'Dọn dẹp': P({
-    items: [['Dọn nhà theo giờ', 120000, 'giờ'], ['Lau kính', 50000, 'lần']], timeMode: 'datedur', dur: [2, 6], repeat: true,
-    questions: [
-      { type: 'choice', label: 'Diện tích nhà', required: false, opts: 'Dưới 50m², 50 – 80m², Trên 80m²' },
-      { type: 'multi', label: 'Việc cần làm', required: false, opts: 'Lau nhà, Vệ sinh bếp, Vệ sinh nhà tắm, Gấp đồ' },
-      { type: 'choice', label: 'Nhà có nuôi thú cưng?', required: false, opts: 'Không, Có' },
-    ],
+    cleaning: true, noPlace: true, items: [],
+    menu: ['Dọn nhà tổng quát', 'Dọn sau tiệc', 'Lau kính'],
+    // giá theo diện tích; người bán tự đổi sang theo phòng, khoảng giá…
+    options: [{ name: 'Diện tích', choices: [['Dưới 50m²', 150000], ['50 – 80m²', 250000], ['Trên 80m²', 350000]] }],
+    questions: [{ type: 'choice', label: 'Nhà có nuôi thú cưng?', required: false, opts: 'Không, Có' }],
   }),
   'Giao nhận hộ': P({
     items: [['Lấy đồ trong khu', 15000, 'lượt'], ['Đồ to, nặng từ 10kg', 25000, 'lượt']], place: 'ab',
@@ -255,6 +258,8 @@ export function serviceGroup(fb: FormBuilder, preset: string) {
     warranty: [p.warranty],
     // giá: bảng giá các dịch vụ con hoặc báo giá sau
     priceType: [p.priceType],
+    /** mẫu dọn dẹp: tên các dịch vụ */
+    menu: strList(fb, p.menu ?? []),
     items: fb.array(p.items.map(([n, pr, u, q, g]) => itemGroup(fb, n, pr, u, q ?? null, [], g ?? null))),
     estimate: [p.estimate],
     inspect: [p.inspect, Validators.min(0)],

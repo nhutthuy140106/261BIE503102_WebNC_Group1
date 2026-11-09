@@ -197,6 +197,22 @@
 
         <!-- ================= DỊCH VỤ (đủ 7 khối của trang chi tiết phía Mua + 3 ô thông tin nhanh) ================= -->
         @case ('service') {
+          @if (svcPreset().cleaning) {
+          <!-- dọn dẹp: chỉ liệt kê tên dịch vụ, khách chọn một; giá đặt ở mục Cài đặt tùy chọn -->
+          <section class="sec">
+            <header><span class="no">{{ svcNo('price') }}</span><span><b>Tùy chọn dịch vụ</b></span></header>
+            <div class="bd">
+              <div formArrayName="menu" class="lines">
+                @for (n of arr('spec.menu').controls; track $index; let i = $index) {
+                  <div class="line2"><input class="input" [formControlName]="i" maxlength="60" placeholder="Tên dịch vụ" [attr.aria-label]="'Tên dịch vụ ' + (i + 1)" />
+                    <button type="button" class="rm" aria-label="Bỏ dịch vụ" (click)="removeAt('spec.menu', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
+                }
+              </div>
+              <button type="button" class="mini" (click)="addStr('spec.menu')"><svg class="i"><use href="#plus" /></svg>Thêm dịch vụ</button>
+              <span class="hint">Khách chọn một dịch vụ cho mỗi đơn.</span>
+            </div>
+          </section>
+          } @else {
           <!-- bảng giá: mỗi dịch vụ con một giá + đơn vị; khách chọn nhiều dòng trong cùng một đơn, mỗi dòng một số lượng -->
           <section class="sec">
             <header><span class="no">{{ svcNo('price') }}</span><span><b>Cài đặt giá</b></span></header>
@@ -222,6 +238,7 @@
               <ng-container *ngTemplateOutlet="promoBox" />
             </div>
           </section>
+          }
           @if (svcPreset().stay) {
           <section class="sec">
             <header><span class="no">{{ svcNo('stay') }}</span><span><b>Tiện nghi & nội quy</b></span></header>
@@ -247,10 +264,11 @@
           }
           @if (!svcPreset().generic) {
           <section class="sec">
-            <header><span class="no">{{ svcNo('ask') }}</span><span><b>Khách chọn khi đặt</b></span></header>
+            <header><span class="no">{{ svcNo('ask') }}</span><span><b>{{ svcPreset().cleaning ? 'Cài đặt tùy chọn' : 'Khách chọn khi đặt' }}</b></span></header>
             <div class="bd">
               <div class="optblock">
                 <span class="lbl">Tùy chọn cộng giá</span>
+                @if (svcPreset().cleaning) { <span class="hint">Đặt giá theo phòng, theo m² hay khoảng giá tùy bạn. Giá khách trả là tổng các lựa chọn khách chọn.</span> }
                 <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options' }" />
               </div>
               @if (!svcPreset().noQuestions) {
@@ -316,7 +334,7 @@
                   <div class="fld"><label for="gta">Thời gian làm dự kiến <span class="hint">(không bắt buộc)</span></label><input id="gta" class="input" formControlName="turnaround" maxlength="40" placeholder="Ví dụ: khoảng 2 giờ" /></div>
                 </div>
               }
-              @if (!svcPreset().repair && !svcPreset().generic) {
+              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning) {
               <label class="ck"><input type="checkbox" formControlName="repeat" /><span>Cho khách đặt lặp lại hằng tuần</span></label>
               }
               }

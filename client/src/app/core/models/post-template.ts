@@ -146,6 +146,8 @@ export interface PostTemplate {
   noteOff?: boolean;
   /** Dịch vụ: tùy chọn cộng giá tính một lần cho cả đơn, không nhân với số lượng (như giặt sấy) */
   optsOnce?: boolean;
+  /** Dọn dẹp: giá nằm hết ở các tùy chọn khách chọn; giá trên bài chỉ là mức thấp nhất để hiện "từ …", không cộng vào đơn */
+  priceInOpts?: boolean;
   stock: StockBlock;
   notePh: string;
   /** Các bước theo dõi đơn của loại này */

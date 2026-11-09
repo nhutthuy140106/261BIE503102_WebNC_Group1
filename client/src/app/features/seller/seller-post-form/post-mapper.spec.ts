@@ -1,4 +1,4 @@
-import { formToPostFields, jobWindows } from './post-mapper';
+import { cleaningPrice, formToPostFields, jobWindows } from './post-mapper';
 import { toJobWindows } from './post-form-config';
 
 const service = (questions: unknown[]) =>
@@ -45,6 +45,24 @@ describe('formToPostFields', () => {
     expect(s['altWindows']).toEqual([{ from: '14:00', to: '16:00' }, { from: '08:30', to: '11:00' }, { from: '17:00', to: '18:00' }]);
     expect(s['head']).toBe(1);
     expect(toJobWindows({})['altWindows']).toEqual([]);
+  });
+
+  describe('dọn dẹp: liệt kê dịch vụ, giá ở tùy chọn, mỗi đơn một dịch vụ', () => {
+    const area = { name: 'Diện tích', multi: false, required: true, choices: [{ label: 'Dưới 50m²', price: 150000 }, { label: 'Trên 80m²', price: 350000 }] };
+    const pet = { name: 'Thêm', multi: true, required: false, choices: [{ label: 'Hút bụi sofa', price: 50000 }] };
+    const f = formToPostFields('service', { common: {}, spec: { preset: 'Dọn dẹp', menu: ['Dọn nhà', ' ', 'Lau kính'], items: [{ name: 'cũ', price: 1, unit: 'giờ' }], options: [area, pet], questions: [], estimate: true, repeat: true, place: 'seller', homeFee: 30000 } }, 'service');
+
+    it('danh sách dịch vụ thành nhóm chọn một bắt buộc đứng đầu, không có bảng giá', () => {
+      expect(f.optionGroups?.[0]).toEqual({ name: 'Dịch vụ', multi: false, required: true, choices: [{ label: 'Dọn nhà', price: 0 }, { label: 'Lau kính', price: 0 }] });
+      expect(f.items).toBeUndefined();
+      expect(f).toMatchObject({ bookOnce: true, estimate: undefined, repeat: false, priceType: 'from', deliveryFee: 0, place: { mode: 'buyer' } });
+    });
+
+    it('giá trên thẻ là tổng giá rẻ nhất của các nhóm bắt buộc', () => {
+      expect(cleaningPrice({ options: [area, pet] })).toEqual({ price: 150000, from: true });
+      expect(cleaningPrice({ options: [{ ...area, choices: [{ label: 'Mọi nhà', price: 200000 }] }] })).toEqual({ price: 200000, from: false });
+      expect(cleaningPrice({ options: [pet] }).price).toBe(0);
+    });
   });
 
   describe('3 ô đầu bài của dịch vụ: giờ nhận lịch, nơi làm, thanh toán', () => {

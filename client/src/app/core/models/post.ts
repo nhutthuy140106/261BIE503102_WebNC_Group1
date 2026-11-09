@@ -155,6 +155,8 @@ export interface Post {
   freeShipFrom?: number;
   /** Các khu người bán phục vụ (bài đăng từ form khu Bán); `block` ghi sẵn tên các khu để hiển thị */
   areas?: string[];
+  /** Dọn dẹp: mỗi đơn một dịch vụ, khách không chọn số lượng; giá là tổng các tùy chọn khách chọn */
+  bookOnce?: boolean;
   /** Giặt sấy: người làm luôn qua nhà khách lấy đồ nên luôn cần địa chỉ; cách nhận chỉ áp dụng lúc trả đồ */
   pickupAtBuyer?: boolean;
   /** Dịch vụ không có mục Thông tin nhanh (giặt sấy, lưu trú): 3 ô đầu bài lấy từ các ô người bán đã điền */

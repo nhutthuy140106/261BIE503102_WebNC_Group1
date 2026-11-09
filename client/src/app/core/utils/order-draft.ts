@@ -100,7 +100,7 @@ export class OrderDraft {
 
   readonly unit = computed(() => {
     const p = this.tpl.price;
-    if (p.type === 'quote') return 0;
+    if (p.type === 'quote' || this.tpl.priceInOpts) return 0;
     if (this.tpl.cups) return this.cups().reduce((n, c) => n + c.base * c.qty, 0);
     return (p.amount ?? 0) * this.mult();
   });
@@ -136,7 +136,7 @@ export class OrderDraft {
   readonly promoOff = computed(() => {
     const p = this.promo();
     const price = this.tpl.price;
-    if (!p || price.type === 'quote') return 0;
+    if (!p || price.type === 'quote' || this.tpl.priceInOpts) return 0;
     if (this.tpl.cups) return this.cups().reduce((n, c) => n + (c.base - discounted(c.base, p)) * c.qty, 0);
     return ((price.amount ?? 0) - discounted(price.amount ?? 0, p)) * this.mult();
   });
