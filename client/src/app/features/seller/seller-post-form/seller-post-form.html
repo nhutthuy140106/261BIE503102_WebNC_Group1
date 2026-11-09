@@ -283,6 +283,9 @@
               <span class="lbl">Câu hỏi riêng</span>
               <ng-container *ngTemplateOutlet="qList; context: { base: 'spec.questions' }" />
               }
+              @if (svcPreset().courier) {
+                <div class="checks"><label class="ck"><input type="checkbox" formControlName="advancePay" /><span>Nhận ứng trước tiền hàng cho khách<small>Khách nhập tổng số tiền hàng, số tiền được cộng vào tổng đơn và khách phải thanh toán chung với phí dịch vụ.</small></span></label></div>
+              }
               <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú khi đặt lịch</span></label></div>
             </div>
           </section>

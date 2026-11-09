@@ -200,9 +200,9 @@
               @if (q.hint) { <p class="hint">{{ q.hint }}</p> }
               @if (q.pay && d.ans()[q.label] === 'Có') {
                 <div class="qfield pay">
-                  <label>Số tiền cần trả giùm</label>
+                  <label>Tổng tiền hàng</label>
                   <input class="input" inputmode="numeric" placeholder="Ví dụ: 120000" [value]="d.payBack()" (input)="d.payBack.set($any($event.target).value.replace(/\D/g, ''))" />
-                  <p class="hint">Bạn trả lại số tiền này khi nhận đồ.</p>
+                  <p class="hint">Số tiền này được cộng vào tổng đơn, bạn thanh toán chung với phí dịch vụ.</p>
                 </div>
               }
             </div>
@@ -454,7 +454,7 @@
                 @if (d.promoOff()) { <div class="disc"><dt>Giảm giờ vàng</dt><dd>−{{ fmt(d.promoOff()) }}</dd></div> }
                 @if (d.placeFee()) { <div><dt>Phí vận chuyển</dt><dd>{{ fmt(d.placeFee()) }}</dd></div> }
                 @if (d.discount()) { <div class="disc"><dt>Voucher</dt><dd>−{{ fmt(d.discount()) }}</dd></div> }
-                @if (d.advance()) { <div><dt>Tiền hàng trả giùm</dt><dd>{{ fmt(d.advance()) }}</dd></div> }
+                @if (d.advance()) { <div><dt>Tiền hàng ứng trước</dt><dd>{{ fmt(d.advance()) }}</dd></div> }
                 @if (v.tpl.price.type === 'quote') { <div><dt>Tiền sửa</dt><dd>báo giá sau khi kiểm tra</dd></div> }
               </dl>
               @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }

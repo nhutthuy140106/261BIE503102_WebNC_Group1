@@ -143,7 +143,6 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
       { type: 'text', label: 'Lấy ở đâu?', required: true, opts: '' },
       { type: 'text', label: 'Lấy món gì?', required: true, opts: '' },
       { type: 'choice', label: 'Kích thước', required: false, opts: 'Nhỏ dưới 10kg, To / nặng từ 10kg' },
-      { type: 'choice', label: 'Cần trả tiền giùm?', required: false, opts: 'Không, Có' },
     ],
   }),
   'Chăm sóc': P({ items: [['Trông trẻ theo giờ', 60000, 'giờ'], ['Trông thú cưng theo giờ', 40000, 'giờ']], timeMode: 'datedur', dur: [2, 6] }),
@@ -303,6 +302,8 @@ export function serviceGroup(fb: FormBuilder, preset: string) {
     place: [p.place],
     where: [''],
     homeFee: [p.homeFee, Validators.min(0)],
+    /** giao nhận: nhận ứng trước tiền hàng cho khách, số tiền cộng vào tổng đơn */
+    advancePay: [!!p.courier],
     /** khách gõ ghi chú khi đặt; mặc định bật như đồ ăn, đồ uống */
     kitchenNote: [true],
     pay: fb.control<string[]>(['cash']),

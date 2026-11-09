@@ -84,6 +84,15 @@ describe('formToPostFields', () => {
       expect(f.highlights?.slice(0, 2).map((x) => [x.label, x.value])).toEqual([['Giờ giao hàng', '08:00 – 20:00'], ['Nơi làm', 'Giao tới nhà bạn']]);
     });
 
+    it('ô tick nhận ứng trước tiền hàng thay cho câu hỏi theo tên', () => {
+      const q = (spec: Record<string, unknown>) => formToPostFields('service', { common: {}, spec: { preset: 'Giao nhận', items: [], options: [], ...spec } }, 'service').questions;
+      const old = [{ type: 'choice', label: 'Cần trả tiền giùm?', required: false, opts: 'Không, Có' }];
+      expect(q({ advancePay: true, questions: old })).toEqual([{ type: 'choice', label: 'Cần ứng trước tiền hàng?', required: false, opts: ['Không', 'Có'], pay: true }]);
+      expect(q({ advancePay: false, questions: old })).toEqual([]);
+      // mẫu khác: câu hỏi có chữ "trả tiền giùm" chỉ là câu hỏi thường
+      expect(formToPostFields('service', { common: {}, spec: { preset: 'Khác', items: [], options: [], questions: old } }, 'service').questions?.[0].pay).toBeUndefined();
+    });
+
     it('giặt sấy cũng không còn báo giá sau', () => {
       expect(formToPostFields('service', { common: {}, spec: { preset: 'Giặt sấy', priceType: 'quote', inspect: 30000, items: [{ name: 'Giặt', price: 18000, unit: 'kg' }], options: [], questions: [] } }, 'service').priceType).not.toBe('quote');
     });

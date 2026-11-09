@@ -49,9 +49,9 @@ export function toSellerOrder(order: Order, post: Post, body: CreateOrderBody, s
     ? [{ name: post.title, qty: 1, option, price: order.total - ship }]
     : dishes.map((d, i) => ({ name: d.name, qty: d.qty, option: i === 0 ? option : '', price: post.items?.find((x) => x.name === d.name || (x.unit && `${x.name} (${x.unit})` === d.name))?.price ?? post.price }));
   // dịch vụ: phía Mua ghi tên kèm đơn vị, ví dụ "Vệ sinh máy lạnh (máy)", nên so cả hai cách ghi
-  // tiền hàng trả giùm: dòng riêng, không lẫn vào tùy chọn cộng giá
+  // tiền hàng ứng trước: dòng riêng, không lẫn vào tùy chọn cộng giá
   const advance = body.detail?.advance ?? 0;
-  if (advance) items.push({ name: 'Tiền hàng trả giùm', qty: 1, option: '', price: advance });
+  if (advance) items.push({ name: 'Tiền hàng ứng trước', qty: 1, option: '', price: advance });
   const rest = order.total - ship - items.reduce((n, i) => n + i.qty * i.price, 0);
   if (rest) items.push({ name: rest > 0 ? 'Tùy chọn cộng giá' : 'Giảm giá', qty: 1, option: '', price: rest });
   const at = body.scheduledAt ? new Date(body.scheduledAt) : now;

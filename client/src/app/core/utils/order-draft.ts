@@ -294,7 +294,7 @@ export class OrderDraft {
       const v = q.type === 'multi' ? this.picks(q.label).map((x) => parseChoice(x).name).join(', ') : q.type === 'choice' ? parseChoice(a).name : q.type === 'photo' && a ? 'Đã gửi ảnh' : a;
       if (v) out.push(q.label + ': ' + v);
     }
-    if (this.paying() && this.payBack()) out.push('Số tiền cần trả giùm: ' + Number(this.payBack()).toLocaleString('vi-VN') + 'đ');
+    if (this.paying() && this.payBack()) out.push('Tổng tiền hàng ứng trước: ' + Number(this.payBack()).toLocaleString('vi-VN') + 'đ');
     return out;
   });
 
@@ -319,7 +319,7 @@ export class OrderDraft {
       // nhóm chọn nhiều người bán đánh dấu bắt buộc
       if (g.multi && g.req === true && !this.chosen('', g).length) return 'Hãy chọn “' + g.name + '”.';
     }
-    if (this.paying() && !this.payBack()) return 'Hãy nhập số tiền cần trả giùm.';
+    if (this.paying() && !this.payBack()) return 'Hãy nhập tổng tiền hàng.';
     if (!checkout) return '';
     if (this.tpl.time.mode === 'datedur' && !this.date()) return 'Hãy chọn ngày giờ.';
     if (this.tpl.price.type !== 'quote' && this.tpl.time.mode === 'slot' && !this.time()) return 'Hãy chọn giờ.';

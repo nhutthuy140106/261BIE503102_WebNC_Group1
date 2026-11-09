@@ -54,10 +54,10 @@ describe('cách nhận của dịch vụ', () => {
     expect(d.subtotal()).toBe(350000);
   });
 
-  it('giao nhận: tiền hàng trả giùm cộng vào tổng, không bị voucher trừ', () => {
-    const d = new OrderDraft(viewOf(post({ place: { mode: 'ab' }, price: 15000, timeLabel: 'Giờ giao hàng', questions: [{ type: 'choice', label: 'Cần trả tiền giùm?', required: false, opts: ['Không', 'Có'], pay: true }] })).tpl);
+  it('giao nhận: tiền hàng ứng trước cộng vào tổng, không bị voucher trừ', () => {
+    const d = new OrderDraft(viewOf(post({ place: { mode: 'ab' }, price: 15000, timeLabel: 'Giờ giao hàng', questions: [{ type: 'choice', label: 'Cần ứng trước tiền hàng?', required: false, opts: ['Không', 'Có'], pay: true }] })).tpl);
     expect(d.tpl.time.label).toBe('Giờ giao hàng');
-    d.setAns('Cần trả tiền giùm?', 'Có');
+    d.setAns('Cần ứng trước tiền hàng?', 'Có');
     d.payBack.set('120000');
     expect(d.advance()).toBe(120000);
     expect(d.grand()).toBe(15000 + 120000);

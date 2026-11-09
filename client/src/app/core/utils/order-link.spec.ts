@@ -47,10 +47,10 @@ describe('toSellerOrder', () => {
     expect(t.items).toEqual([{ name: 'Bếp', qty: 1, option: 'Dịch vụ: Lau kính · Diện tích: Trên 80m²', price: 350000 }]);
   });
 
-  it('tiền hàng trả giùm thành dòng riêng, không lẫn vào tùy chọn', () => {
+  it('tiền hàng ứng trước thành dòng riêng, không lẫn vào tùy chọn', () => {
     const b = body({ detail: { ...detail(0), advance: 120000, items: [{ name: 'Xôi', qty: 1 }] } });
     const t = toSellerOrder(order({ total: 150000 }), post, b, sp, who);
-    expect(t.items).toEqual([{ name: 'Xôi', qty: 1, option: '', price: 30000 }, { name: 'Tiền hàng trả giùm', qty: 1, option: '', price: 120000 }]);
+    expect(t.items).toEqual([{ name: 'Xôi', qty: 1, option: '', price: 30000 }, { name: 'Tiền hàng ứng trước', qty: 1, option: '', price: 120000 }]);
   });
 
   it('giảm giá làm tổng thấp hơn giá món thì ghi dòng Giảm giá', () => {

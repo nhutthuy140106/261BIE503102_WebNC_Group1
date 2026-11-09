@@ -95,8 +95,6 @@ const questionsOf = (arr: unknown): PostQuestion[] =>
         ...(type === 'choice' || type === 'multi' ? { opts: choicesOf(q) } : {}),
         ...(raw === 'long' ? { long: true } : {}),
         ...(hint ? { hint } : {}),
-        // câu "Cần trả tiền giùm?": chọn "Có" thì hỏi thêm số tiền (khung đặt phía Mua)
-        ...(/trả tiền giùm/i.test(label) ? { pay: true } : {}),
       };
     });
 
@@ -261,7 +259,15 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         inspectFee: quote ? +s['inspect'] || 0 : undefined,
         items: its.length > 1 || quote ? its : undefined,
         optionGroups: cleaning ? [] : optionsOf(s['options']),
-        questions: cleaning ? [] : questionsOf(s['questions']),
+        questions: cleaning
+          ? []
+          : [
+              // câu hỏi cũ "Cần trả tiền giùm?" đã thay bằng ô tick ở giao nhận
+              ...questionsOf(courier ? ((s['questions'] as V[]) ?? []).filter((q) => !/trả tiền giùm/i.test(String(q?.['label'] ?? ''))) : s['questions']),
+              ...(courier && s['advancePay']
+                ? [{ type: 'choice' as const, label: 'Cần ứng trước tiền hàng?', required: false, opts: ['Không', 'Có'], pay: true }]
+                : []),
+            ],
         serviceMenu: cleaning ? menuOf(s).map((m) => ({ name: m.name, optionGroups: optionsOf(m.options), questions: questionsOf(m.questions) })) : undefined,
         dates: (s['dates'] as string[]) ?? [],
         // dọn dẹp: luôn hẹn giờ, kể cả bài cũ đã lưu kiểu chọn số giờ

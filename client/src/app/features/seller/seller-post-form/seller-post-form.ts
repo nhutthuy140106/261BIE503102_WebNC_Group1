@@ -801,6 +801,13 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     if (p.form && (p.formType === 'food' || p.formType === 'drink') && spec1) p = { ...p, form: { ...p.form, spec: toOrderOptions(spec1) } };
     if (p.form && p.formType === 'drink') p = { ...p, form: { ...p.form, spec: toDrinkSizes((p.form as V)['spec'] as V) } };
     if (p.form && p.formType === 'job') p = { ...p, form: { ...p.form, spec: toJobWindows((p.form as V)['spec'] as V) } };
+    // bài giao nhận cũ: câu hỏi "Cần trả tiền giùm?" thành ô tick nhận ứng trước tiền hàng
+    const sq = (p.form as V | undefined)?.['spec'] as V | undefined;
+    if (sq && sq['preset'] === 'Giao nhận' && sq['advancePay'] === undefined) {
+      const qs = (sq['questions'] as V[]) ?? [];
+      const had = qs.some((q) => /trả tiền giùm/i.test(String(q?.['label'] ?? '')));
+      p = { ...p, form: { ...p.form, spec: { ...sq, advancePay: had, questions: qs.filter((q) => !/trả tiền giùm/i.test(String(q?.['label'] ?? ''))) } } };
+    }
     // bài dọn dẹp cũ: tên dịch vụ dạng chữ (hoặc tên dòng bảng giá) thành dịch vụ có tùy chọn, câu hỏi riêng (lấy tùy chọn, câu hỏi chung cũ)
     const sp = (p.form as V | undefined)?.['spec'] as V | undefined;
     if (sp && sp['preset'] === 'Dọn dẹp' && !((sp['menu'] as unknown[]) ?? []).some((m) => typeof m === 'object' && m)) {
