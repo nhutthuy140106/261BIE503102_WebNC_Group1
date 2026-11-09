@@ -19,6 +19,7 @@ import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
 import { imageToDataUrl } from '../../../core/utils/image-file';
+import { MAX_PHOTOS } from '../../../core/utils/order-draft';
 import { canPickDate, firstOpenDate, lastOpenDate } from '../../../core/utils/open-dates';
 import { formatDateTime } from '../../../core/utils/status-label';
 import { ClockService } from '../../../core/services/clock';
@@ -385,14 +386,20 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     d.qty.set(Math.min(d.maxQty(), Math.max(d.tpl.qty?.min ?? 1, n)));
   }
 
+  protected readonly maxPhotos = MAX_PHOTOS;
+
+  /** Chọn một hoặc nhiều ảnh; quá số ảnh cho phép thì chỉ lấy đủ và báo cho khách */
   protected onPhoto(d: OrderDraft, label: string, e: Event): void {
     const input = e.target as HTMLInputElement;
-    const f = input.files?.[0];
+    const files = [...(input.files ?? [])];
     input.value = '';
-    if (!f) return;
-    void imageToDataUrl(f).then((url) => {
-      if (url) d.setAns(label, url);
-      else this.toast.show('Không đọc được ảnh, bạn chọn ảnh khác nhé');
+    if (!files.length) return;
+    const room = MAX_PHOTOS - d.photos(label).length;
+    if (files.length > room) this.toast.show(`Mỗi câu tối đa ${MAX_PHOTOS} ảnh, chỉ thêm được ${room} ảnh`);
+    void Promise.all(files.slice(0, room).map((f) => imageToDataUrl(f))).then((urls) => {
+      const ok = urls.filter(Boolean);
+      if (ok.length < urls.length) this.toast.show('Có ảnh không đọc được, bạn chọn ảnh khác nhé');
+      if (ok.length) d.addPhotos(label, ok);
     });
   }
 

@@ -3,6 +3,9 @@ import { CupLine, PostTemplate } from '../models/post-template';
 import type { Voucher } from '../services/xu';
 import { Promo, discounted } from './promo';
 
+/** Số ảnh tối đa cho một câu hỏi hình ảnh */
+export const MAX_PHOTOS = 5;
+
 /** "Nhiều cơm|+5.000đ" → { name, add } */
 export function parseChoice(raw: string): { name: string; add: number } {
   const [name, tail] = raw.split('|');
@@ -254,6 +257,19 @@ export class OrderDraft {
     this.ans.set({});
   }
 
+  /** Câu hỏi hình ảnh: tối đa `MAX_PHOTOS` ảnh, lưu nối bằng '|||' (chuỗi ảnh không chứa ký tự này) */
+  photos(label: string): string[] {
+    return (this.ans()[label] ?? '').split('|||').filter(Boolean);
+  }
+
+  addPhotos(label: string, urls: string[]): void {
+    this.setAns(label, [...this.photos(label), ...urls].slice(0, MAX_PHOTOS).join('|||'));
+  }
+
+  removePhoto(label: string, i: number): void {
+    this.setAns(label, this.photos(label).filter((_, k) => k !== i).join('|||'));
+  }
+
   setAns(label: string, v: string): void {
     this.ans.update((a) => ({ ...a, [label]: v }));
   }
@@ -291,7 +307,7 @@ export class OrderDraft {
     if (this.quickPicks().length) out.push('Tùy chọn thêm: ' + this.quickPicks().join(', '));
     for (const q of this.qs()) {
       const a = this.ans()[q.label] ?? '';
-      const v = q.type === 'multi' ? this.picks(q.label).map((x) => parseChoice(x).name).join(', ') : q.type === 'choice' ? parseChoice(a).name : q.type === 'photo' && a ? 'Đã gửi ảnh' : a;
+      const v = q.type === 'multi' ? this.picks(q.label).map((x) => parseChoice(x).name).join(', ') : q.type === 'choice' ? parseChoice(a).name : q.type === 'photo' && a ? `Đã gửi ${this.photos(q.label).length} ảnh` : a;
       if (v) out.push(q.label + ': ' + v);
     }
     if (this.paying() && this.payBack()) out.push('Tổng tiền hàng ứng trước: ' + Number(this.payBack()).toLocaleString('vi-VN') + 'đ');

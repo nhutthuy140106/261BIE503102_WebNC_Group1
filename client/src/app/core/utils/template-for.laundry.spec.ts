@@ -63,6 +63,18 @@ describe('cách nhận của dịch vụ', () => {
     expect(d.grand()).toBe(15000 + 120000);
   });
 
+  it('câu hỏi hình ảnh: tối đa 5 ảnh, bỏ từng ảnh, ghi số ảnh vào đơn', () => {
+    const d = new OrderDraft(viewOf(post({ place: { mode: 'buyer' }, questions: [{ type: 'photo', label: 'Ảnh chụp', required: true }] })).tpl);
+    expect(d.missing(false)).toContain('Ảnh chụp');
+    d.addPhotos('Ảnh chụp', ['data:image/jpeg;base64,a', 'data:image/jpeg;base64,b']);
+    d.addPhotos('Ảnh chụp', ['data:image/jpeg;base64,c', 'data:image/jpeg;base64,d', 'data:image/jpeg;base64,e', 'data:image/jpeg;base64,f']);
+    expect(d.photos('Ảnh chụp').length).toBe(5);
+    d.removePhoto('Ảnh chụp', 0);
+    expect(d.photos('Ảnh chụp')[0]).toBe('data:image/jpeg;base64,b');
+    expect(d.lines()).toEqual(['Ảnh chụp: Đã gửi 4 ảnh']);
+    expect(d.missing(false)).toBe('');
+  });
+
   it('dịch vụ: mỗi câu trả lời là một dòng riêng', () => {
     const d = new OrderDraft(viewOf(post({ place: { mode: 'buyer' }, questions: [{ type: 'text', label: 'Bộ phận', required: false }, { type: 'text', label: 'Mô tả lỗi', required: false }] })).tpl);
     d.setAns('Bộ phận', 'Máy lạnh');

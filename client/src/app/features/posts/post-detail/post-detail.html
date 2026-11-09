@@ -220,10 +220,16 @@
           @case ('photo') {
             <div class="qfield">
               <label>{{ q.label }}@if (q.req) { <em class="rq">*</em> }</label>
-              @if (d.ans()[q.label]; as photo) {
-                <div class="qphoto"><img [src]="photo" alt="Ảnh bạn đã chọn" /><button type="button" (click)="d.setAns(q.label, '')">Bỏ ảnh</button></div>
-              } @else {
-                <label class="upload"><input type="file" accept="image/*" hidden (change)="onPhoto(d, q.label, $event)" />Thêm ảnh</label>
+              <!-- tối đa 5 ảnh; mỗi ảnh có nút bỏ, còn chỗ thì còn nút thêm -->
+              @if (d.photos(q.label).length) {
+                <div class="qphotos">
+                  @for (ph of d.photos(q.label); track $index; let i = $index) {
+                    <span class="qph"><img [src]="ph" [alt]="'Ảnh ' + (i + 1)" /><button type="button" [attr.aria-label]="'Bỏ ảnh ' + (i + 1)" (click)="d.removePhoto(q.label, i)">✕</button></span>
+                  }
+                </div>
+              }
+              @if (d.photos(q.label).length < maxPhotos) {
+                <label class="upload"><input type="file" accept="image/*" multiple hidden (change)="onPhoto(d, q.label, $event)" />Thêm ảnh <small>({{ d.photos(q.label).length }}/{{ maxPhotos }})</small></label>
               }
             </div>
           }

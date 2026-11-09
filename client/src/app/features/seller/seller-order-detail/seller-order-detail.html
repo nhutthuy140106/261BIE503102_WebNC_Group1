@@ -30,7 +30,7 @@
           <div><dt><svg class="i"><use href="#bag" /></svg>{{ o.fulfil === 'home' || o.flow === 'repair' ? 'Dịch vụ' : 'Món' }}</dt>
             <dd>@for (i of o.items; track $index) { {{ i.name }} × {{ i.qty }}@if (i.option) { <small>{{ i.option }}</small> } }</dd></div>
           @for (a of o.answers ?? []; track $index) {
-            <div><dt><svg class="i"><use href="#question" /></svg>{{ a[0] }}</dt><dd>@if (a[1].startsWith('data:image')) { <a class="ansphoto" [href]="a[1]" target="_blank" rel="noopener"><img [src]="a[1]" [alt]="a[0]" /></a> } @else { {{ a[1] }} }</dd></div>
+            <div><dt><svg class="i"><use href="#question" /></svg>{{ a[0] }}</dt><dd>@if (a[1].startsWith('data:image')) { <span class="ansphotos">@for (ph of a[1].split('|||'); track $index) { <a class="ansphoto" [href]="ph" target="_blank" rel="noopener"><img [src]="ph" [alt]="a[0]" /></a> }</span> } @else { {{ a[1] }} }</dd></div>
           }
           @if (o.note) { <div><dt><svg class="i"><use href="#pencil" /></svg>Ghi chú</dt><dd>{{ o.note }}</dd></div> }
           @if (o.declineReason && o.state === 'declined') { <div><dt><svg class="i"><use href="#xmark" /></svg>Lý do từ chối</dt><dd>{{ o.declineReason }}</dd></div> }
