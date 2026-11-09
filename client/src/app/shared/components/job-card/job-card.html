@@ -2,15 +2,17 @@
   <a [routerLink]="['/posts/job', slug]" class="ph" [attr.aria-label]="job.title">
     <div class="jc-top">
       <app-avatar [src]="job.sellerAvatar" [name]="job.sellerName" [size]="30" />
-      <span><b>{{ job.sellerName }}</b>{{ job.createdAt | ago }}</span>
+      <span class="jc-who"><b>{{ job.sellerName }}</b>{{ job.createdAt | ago }}</span>
     </div>
     @if (job.description) { <p class="jc-desc">{{ job.description }}</p> }
-    <div class="jc-foot">
-      <span class="jc-tag">{{ tag }}</span>
-      @if (job.images.length) { <span class="jc-ph"><svg class="i"><use href="#camera" /></svg>{{ job.images.length }} ảnh</span> }
-      @if (job.job?.due) {
-        <span class="jc-due"><svg class="i"><use href="#clock" /></svg>{{ job.job | jobWhen }}</span>
-      }
+    <div class="jc-bottom">
+      @if (job.images.length) { <span class="jc-ph" [attr.title]="job.images.length + ' ảnh'"><svg class="i"><use href="#camera" /></svg>{{ job.images.length }}</span> }
+      <div class="jc-foot">
+        <span class="jc-tag">{{ tag }}</span>
+        @if (job.job?.due) {
+          <span class="jc-due"><svg class="i"><use href="#clock" /></svg>{{ job.job | jobWhen }}</span>
+        }
+      </div>
     </div>
   </a>
   <button type="button" class="save" [class.on]="savedSvc.has(job._id)" (click)="onSave($event)" [attr.aria-pressed]="savedSvc.has(job._id)"
@@ -21,7 +23,7 @@
     <h3><a [routerLink]="['/posts/job', slug]">{{ job.title }}</a></h3>
     <div class="pr">{{ job.price | vnd }} @if (job | unit; as u) { <span>/ {{ u }}</span> }</div>
     <div class="meta">
-      <span><svg class="i"><use href="#pin" /></svg>{{ job.block }}@if (job.job?.building) { · {{ job.job?.building }} }@if (job.distance != null) { · {{ job.distance | distance }} }</span>
+      <span class="loc"><svg class="i"><use href="#pin" /></svg><span class="loc-t">{{ job.block }}@if (job.job?.building) { · {{ job.job?.building }} }@if (job.distance != null) { · {{ job.distance | distance }} }</span></span>
       @if (job.job?.status === 'taken') {
         <span class="jst closed">Đã có người nhận</span>
       } @else if (job.job) {
