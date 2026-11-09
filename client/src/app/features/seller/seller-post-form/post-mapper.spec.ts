@@ -59,6 +59,7 @@ describe('formToPostFields', () => {
       expect(f.optionGroups).toEqual([]);
       expect(f.questions).toEqual([]);
       expect(f.items).toBeUndefined();
+      expect(formToPostFields('service', { common: {}, spec: { preset: 'Dọn dẹp', menu, timeMode: 'datedur' } }, 'service').timeMode).toBe('slot');
       expect(f).toMatchObject({ bookOnce: true, estimate: undefined, repeat: false, priceType: 'from', deliveryFee: 0, place: { mode: 'buyer' } });
     });
 

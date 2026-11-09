@@ -258,7 +258,8 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         questions: cleaning ? [] : questionsOf(s['questions']),
         serviceMenu: cleaning ? menuOf(s).map((m) => ({ name: m.name, optionGroups: optionsOf(m.options), questions: questionsOf(m.questions) })) : undefined,
         dates: (s['dates'] as string[]) ?? [],
-        timeMode: s['timeMode'],
+        // dọn dẹp: luôn hẹn giờ, kể cả bài cũ đã lưu kiểu chọn số giờ
+        timeMode: cleaning ? 'slot' : s['timeMode'],
         duration: { min: +s['durMin'] || 1, max: +s['durMax'] || 1 },
         repeat: !cleaning && !!s['repeat'],
         // mẫu không có mục Nơi làm (sửa chữa, giặt sấy, lưu trú): nơi làm theo mẫu, không lấy giá trị cũ còn lưu trong form
