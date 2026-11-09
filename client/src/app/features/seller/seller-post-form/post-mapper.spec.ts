@@ -47,58 +47,58 @@ describe('formToPostFields', () => {
     expect(toJobWindows({})['altWindows']).toEqual([]);
   });
 
-  describe('mẫu ẩn mục trong form', () => {
-    const svc = (spec: Record<string, unknown>) => formToPostFields('service', { common: {}, spec: { items: [], options: [], questions: [], serviceArea: 'Trong khu', place: 'buyer', safety: true, ...spec } }, 'service');
+  describe('3 ô đầu bài của dịch vụ: giờ nhận lịch, nơi làm, thanh toán', () => {
+    const svc = (spec: Record<string, unknown>) =>
+      formToPostFields('service', { common: {}, spec: { items: [], options: [], questions: [], serviceArea: 'Trong khu', place: 'buyer', pay: ['cash', 'transfer'], from: '08:00', to: '18:00', ...spec } }, 'service');
+    const cells = (f: ReturnType<typeof svc>) => f.highlights?.map((x) => [x.label, x.value]);
 
-    it('giặt sấy: không gửi phạm vi phục vụ, nơi làm mặc định', () => {
-      const f = svc({ preset: 'Giặt sấy', from: '08:00', to: '18:00', returnHours: 12, fulfil: { delivery: true, pickup: true, fee: 0 } });
-      expect(f.info).toEqual([]);
-      expect(f.serviceInfo?.area).toBeUndefined();
+    it('mẫu thường: theo nơi làm người bán chọn', () => {
+      expect(cells(svc({ preset: 'Dọn dẹp' }))).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Tại nhà bạn'], ['Thanh toán', 'Tiền mặt, Chuyển khoản']]);
+      expect(cells(svc({ preset: 'Gia sư / lớp học', place: 'choice', pay: ['cash', 'xu'] }))?.slice(1)).toEqual([['Nơi làm', 'Tại nhà bạn hoặc bạn mang tới'], ['Thanh toán', 'Tiền mặt, AntXu']]);
+      expect(cells(svc({ preset: 'Khác', place: 'seller', where: 'Tòa S2, tầng 3' }))?.[1]).toEqual(['Nơi làm', 'Tòa S2, tầng 3']);
     });
 
-    it('giặt sấy: 3 ô đầu bài lấy từ form', () => {
-      const f = svc({ preset: 'Giặt sấy', from: '08:00', to: '18:00', returnHours: 12, fulfil: { delivery: true, pickup: true, fee: 10000 } });
-      expect(f.highlights?.map((x) => [x.label, x.value])).toEqual([['Giờ nhận đơn', '08:00 – 18:00'], ['Trả đồ', 'Trong khoảng 12 giờ'], ['Cách nhận', 'Giao tận nơi, Tự đến lấy']]);
-      expect(f.info).toEqual([]);
+    it('giặt sấy: tiệm lấy đồ tại nhà, trả đồ và cách trả đồ xuống phần thông tin', () => {
+      const f = svc({ preset: 'Giặt sấy', returnHours: 12, fulfil: { delivery: true, pickup: true, fee: 10000 } });
+      expect(cells(f)).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Lấy đồ tại nhà bạn'], ['Thanh toán', 'Tiền mặt, Chuyển khoản']]);
+      expect(f.info).toEqual([{ label: 'Trả đồ', value: 'Trong khoảng 12 giờ' }, { label: 'Cách trả đồ', value: 'Giao tận nơi, Tự đến lấy' }]);
       expect(f).toMatchObject({ fulfillmentModes: ['delivery', 'pickup'], deliveryFee: 10000, pickupAtBuyer: true });
     });
 
-    it('lưu trú: 3 ô đầu bài là nhận phòng, trả phòng, ở tối thiểu', () => {
-      const f = svc({ preset: 'Lưu trú', place: 'seller', checkIn: '14:00', checkOut: '12:00', minNights: 2, amenities: ['Wi-Fi'], rules: [] });
-      expect(f.highlights?.map((x) => x.value)).toEqual(['Từ 14:00', 'Trước 12:00', '2 đêm']);
-      expect(f.info?.map((x) => x.label)).not.toContain('Nhận phòng từ');
-      expect(f.info?.map((x) => x.label)).not.toContain('Phạm vi phục vụ');
+    it('lưu trú: giờ nhận phòng, tòa nhà; trả phòng và ở tối thiểu xuống phần thông tin', () => {
+      const f = svc({ preset: 'Lưu trú', place: 'seller', building: 'Tòa S2', checkIn: '14:00', checkOut: '12:00', minNights: 2, amenities: ['Wi-Fi'], rules: [] });
+      expect(cells(f)?.slice(0, 2)).toEqual([['Giờ nhận lịch', 'Nhận phòng từ 14:00'], ['Nơi làm', 'Tòa S2']]);
+      expect(f.info).toEqual(expect.arrayContaining([{ label: 'Trả phòng trước', value: '12:00' }, { label: 'Ở tối thiểu', value: '2 đêm' }]));
     });
 
     it('sửa chữa bảng giá: không có phí kiểm tra, không lấy nơi sửa và phụ phí cũ còn lưu', () => {
-      const f = svc({ preset: 'Sửa chữa', priceType: 'list', inspect: 50000, place: 'seller', homeFee: 30000, from: '08:00', to: '18:00', turnaround: 'còn sót', warranty: 'còn sót' });
-      expect(f.highlights?.map((x) => [x.label, x.value])).toEqual([['Nơi làm', 'Tại nhà bạn'], ['Giờ nhận lịch', '08:00 – 18:00']]);
+      const f = svc({ preset: 'Sửa chữa', priceType: 'list', inspect: 50000, place: 'seller', homeFee: 30000, turnaround: 'còn sót', warranty: 'còn sót' });
+      expect(cells(f)?.[1]).toEqual(['Nơi làm', 'Tại nhà bạn']);
       expect(f.info?.map((x) => x.label)).not.toContain('Phí kiểm tra');
       expect(f).toMatchObject({ place: { mode: 'buyer' }, deliveryFee: 0, inspectFee: undefined });
-    });
-
-    it('sửa chữa báo giá sau: vẫn có phí kiểm tra', () => {
-      const f = svc({ preset: 'Sửa chữa', priceType: 'quote', inspect: 50000, from: '08:00', to: '18:00' });
-      expect(f.highlights?.map((x) => x.label)).toContain('Phí kiểm tra');
-      expect(f.inspectFee).toBe(50000);
       expect(f.serviceInfo).toMatchObject({ turnaround: undefined, warranty: undefined, area: undefined });
-      expect(f.info?.map((x) => x.label)).not.toContain('Phạm vi phục vụ');
     });
 
-    it('mẫu Khác vẫn giữ thời gian làm và bảo hành đã điền', () => {
-      expect(svc({ preset: 'Khác', turnaround: '2 giờ', warranty: '1 tháng' }).serviceInfo).toMatchObject({ turnaround: '2 giờ', warranty: '1 tháng' });
+    it('báo giá sau: phí kiểm tra xuống phần thông tin', () => {
+      const f = svc({ preset: 'Sửa chữa', priceType: 'quote', inspect: 50000 });
+      expect(f.inspectFee).toBe(50000);
+      expect(f.info).toContainEqual({ label: 'Phí kiểm tra', value: '50.000đ, trừ vào tiền làm nếu bạn đồng ý giá' });
     });
 
-    it('không còn dòng lưu ý an toàn, kể cả bài cũ đã lưu ô này', () => {
-      for (const place of ['buyer', 'choice', 'seller']) expect(svc({ preset: 'Dọn dẹp', place }).info?.map((x) => x.label)).not.toContain('Lưu ý an toàn');
+    it('không mẫu nào còn phạm vi phục vụ hay lưu ý an toàn', () => {
+      for (const preset of ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận hộ', 'Chăm sóc', 'Gia sư / lớp học', 'Làm đẹp', 'Lưu trú', 'Khác', 'Nấu ăn']) {
+        const labels = svc({ preset, safety: true }).info?.map((x) => x.label) ?? [];
+        expect(labels).not.toContain('Phạm vi phục vụ');
+        expect(labels).not.toContain('Lưu ý an toàn');
+      }
     });
 
-    it('mẫu có đủ mục thì vẫn gửi như người bán điền', () => {
-      const f = svc({ preset: 'Dọn dẹp' });
-      expect(f.highlights).toBeUndefined();
-      expect(f.info?.map((x) => x.label)).toEqual(['Phạm vi phục vụ']);
+    it('mẫu Khác: thời gian làm dự kiến và bảo hành xuống phần thông tin', () => {
+      const f = svc({ preset: 'Khác', turnaround: '2 giờ', warranty: '1 tháng' });
+      expect(f.info).toEqual(expect.arrayContaining([{ label: 'Thời gian làm dự kiến', value: '2 giờ' }, { label: 'Bảo hành', value: '1 tháng' }]));
     });
   });
+
 
   it('đồ dùng, dịch vụ: tắt ghi chú thì khách không ghi được, mặc định theo form', () => {
     expect(formToPostFields('goods', { common: {}, spec: { kitchenNote: false } }, 'goods').noteEnabled).toBe(false);
@@ -136,8 +136,8 @@ describe('formToPostFields', () => {
   it('dịch vụ: thông tin theo mẫu, ô trống không hiện', () => {
     const spec = { items: [], questions: [], options: [], place: 'seller', serviceArea: 'Trong khu', cancelPolicy: '', customerNote: 'Để sẵn chỗ' };
     const rows = (s: object) => formToPostFields('service', { common: {}, spec: { ...spec, ...s } }, 'service').info;
-    expect(rows({})).toEqual([{ label: 'Phạm vi phục vụ', value: 'Trong khu' }, { label: 'Lưu ý cho khách', value: 'Để sẵn chỗ' }]);
-    expect(rows({ preset: 'Giặt sấy', returnHours: 24, fulfil: { delivery: true, fee: 0 } })).toEqual([{ label: 'Lưu ý cho khách', value: 'Để sẵn chỗ' }]);
+    expect(rows({})).toEqual([{ label: 'Lưu ý cho khách', value: 'Để sẵn chỗ' }]);
+    expect(rows({ preset: 'Giặt sấy', returnHours: 24, fulfil: { delivery: true, fee: 0 } })).toContainEqual({ label: 'Lưu ý cho khách', value: 'Để sẵn chỗ' });
     expect(rows({ preset: 'Lưu trú', rules: [{ on: true, label: 'Không hút thuốc' }, { on: false, label: 'Tắt' }], minNights: 2 })).toContainEqual({ label: 'Nội quy', value: 'Không hút thuốc' });
   });
 

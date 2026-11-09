@@ -102,13 +102,21 @@ const row = (label: string, value: unknown): { label: string; value: string }[] 
 function serviceInfoRows(s: V): { label: string; value: string }[] {
   const preset = String(s['preset'] ?? '');
   // mục bị ẩn trong form của mẫu này thì không đưa giá trị mặc định của nó sang bên Mua
-  const shown = SVC_PRESETS[preset];
+  const shown = SVC_PRESETS[preset] ?? SVC_PRESETS['Khác'];
   const on = ((s['rules'] as V[]) ?? []).filter((r) => r['on'] && String(r['label'] ?? '').trim()).map((r) => String(r['label']).trim());
+  const f = (s['fulfil'] as V) ?? {};
   return [
     ...(shown?.noQuick ? [] : row('Phạm vi phục vụ', s['serviceArea'])),
+    // các thông tin trước đây ở 3 ô đầu bài: chuyển xuống đây để không mất
+    ...(shown?.generic ? [...row('Thời gian làm dự kiến', s['turnaround']), ...row('Bảo hành', s['warranty'])] : []),
+    ...(s['priceType'] === 'quote' ? row('Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ, trừ vào tiền làm nếu bạn đồng ý giá` : 'Miễn phí') : []),
+    ...(preset === 'Giặt sấy'
+      ? [...row('Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : ''), ...row('Cách trả đồ', [f['delivery'] ? 'Giao tận nơi' : '', f['pickup'] ? 'Tự đến lấy' : ''].filter(Boolean).join(', '))]
+      : []),
     ...(preset === 'Lưu trú'
       ? [
-          ...row('Tòa nhà', s['building']),
+          ...row('Trả phòng trước', s['checkOut']),
+          ...row('Ở tối thiểu', +s['minNights'] ? `${+s['minNights']} đêm` : ''),
           ...row('Tiện nghi', ((s['amenities'] as string[]) ?? []).join(', ')),
           ...row('Nội quy', on.join('; ')),
           ...row('Hủy miễn phí', s['freeCancelDays'] !== null && s['freeCancelDays'] !== '' ? `Trước ${+s['freeCancelDays']} ngày` : ''),
@@ -124,32 +132,19 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
 /** 3 ô đầu bài của giặt sấy, lưu trú (các mẫu không có mục Thông tin nhanh và Nơi làm trong form); mẫu khác thì không có */
 function serviceHighlights(s: V): Post['highlights'] {
   const preset = String(s['preset'] ?? '');
-  const f = (s['fulfil'] as V) ?? {};
   const cell = (icon: NonNullable<Post['highlights']>[number]['icon'], label: string, value: unknown) => (String(value ?? '').trim() ? [{ icon, label, value: String(value).trim() }] : []);
-  if (preset === 'Giặt sấy') {
-    return [
-      ...cell('clock', 'Giờ nhận đơn', s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
-      ...cell('bolt', 'Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : ''),
-      ...cell('pin', 'Cách nhận', [f['delivery'] ? 'Giao tận nơi' : '', f['pickup'] ? 'Tự đến lấy' : ''].filter(Boolean).join(', ')),
-    ];
-  }
-  if (preset === 'Sửa chữa') {
-    // form sửa chữa không còn mục Nơi sửa: thợ luôn đến nhà khách
-    return [
-      ...cell('pin', 'Nơi làm', 'Tại nhà bạn'),
-      // phí kiểm tra chỉ có khi báo giá sau; bảng giá thì khách trả đúng giá đã ghi
-      ...(s['priceType'] === 'quote' ? cell('receipt', 'Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ` : 'Miễn phí') : []),
-      ...cell('clock', 'Giờ nhận lịch', s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
-    ];
-  }
-  if (preset === 'Lưu trú') {
-    return [
-      ...cell('clock', 'Nhận phòng', s['checkIn'] ? `Từ ${s['checkIn']}` : ''),
-      ...cell('clock', 'Trả phòng', s['checkOut'] ? `Trước ${s['checkOut']}` : ''),
-      ...cell('check', 'Ở tối thiểu', +s['minNights'] ? `${+s['minNights']} đêm` : ''),
-    ];
-  }
-  return undefined;
+  const where = String(s['where'] ?? '').trim();
+  const place =
+    preset === 'Giặt sấy' ? 'Lấy đồ tại nhà bạn'
+    : preset === 'Lưu trú' ? String(s['building'] ?? '').trim() || 'Tại chỗ người cho thuê'
+    : preset === 'Sửa chữa' ? 'Tại nhà bạn'
+    : ({ buyer: 'Tại nhà bạn', seller: where || 'Bạn mang tới', choice: 'Tại nhà bạn hoặc bạn mang tới', ab: 'Lấy ở A, giao tới B' } as V)[String(s['place'])];
+  const pays = payOf(s).map((m) => ({ cash: 'Tiền mặt', transfer: 'Chuyển khoản', xu: 'AntXu' })[m]).join(', ');
+  return [
+    ...cell('clock', 'Giờ nhận lịch', preset === 'Lưu trú' ? (s['checkIn'] ? `Nhận phòng từ ${s['checkIn']}` : '') : s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
+    ...cell('pin', 'Nơi làm', place),
+    ...cell('receipt', 'Thanh toán', pays),
+  ];
 }
 
 /** Giá đại diện: dòng rẻ nhất; nhiều mức giá khác nhau → 'from' */
@@ -214,7 +209,8 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
       const its = itemsOf(s);
       const quote = s['priceType'] === 'quote';
       const where = String(s['where'] ?? '').trim();
-      const shown = SVC_PRESETS[String(s['preset'] ?? '')];
+      // mẫu đã bỏ (Nấu ăn) hoặc không ghi mẫu: coi như mẫu Khác
+      const shown = SVC_PRESETS[String(s['preset'] ?? '')] ?? SVC_PRESETS['Khác'];
       const hideQuick = !!shown?.noQuick && !shown.generic;
       return {
         ...base,

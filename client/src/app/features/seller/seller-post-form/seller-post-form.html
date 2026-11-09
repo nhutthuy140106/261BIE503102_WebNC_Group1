@@ -197,18 +197,6 @@
 
         <!-- ================= DỊCH VỤ (đủ 7 khối của trang chi tiết phía Mua + 3 ô thông tin nhanh) ================= -->
         @case ('service') {
-          @if (!svcPreset().noQuick) {
-          <section class="sec">
-            <header><span class="no">{{ svcNo('quick') }}</span><span><b>Thông tin nhanh</b></span></header>
-            <div class="bd">
-              <div class="row3">
-                <div class="fld"><label for="ta">Thời gian hoàn thành</label><input id="ta" class="input" formControlName="turnaround" maxlength="40" placeholder="Ví dụ: trong ngày" /></div>
-                <div class="fld"><label for="sa">Phạm vi phục vụ</label><input id="sa" class="input" formControlName="serviceArea" maxlength="40" placeholder="Ví dụ: trong khu" /></div>
-                <div class="fld"><label for="sw">Bảo hành</label><input id="sw" class="input" formControlName="warranty" maxlength="40" placeholder="Không bắt buộc" /></div>
-              </div>
-            </div>
-          </section>
-          }
           <!-- bảng giá: mỗi dịch vụ con một giá + đơn vị; khách chọn nhiều dòng trong cùng một đơn, mỗi dòng một số lượng -->
           <section class="sec">
             <header><span class="no">{{ svcNo('price') }}</span><span><b>Cài đặt giá</b></span></header>

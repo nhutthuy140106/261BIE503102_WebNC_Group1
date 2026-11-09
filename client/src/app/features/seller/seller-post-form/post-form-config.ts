@@ -26,7 +26,7 @@ export const CATS: Record<FormType, string[]> = {
   food: ['Cơm nhà làm', 'Món nước', 'Bánh & tráng miệng', 'Đồ ăn vặt', 'Đồ chay'],
   drink: ['Cà phê', 'Trà sữa', 'Trà trái cây', 'Nước ép', 'Sinh tố', 'Khác'],
   goods: ['Đồ bếp', 'Đồ gia dụng', 'Điện tử', 'Nội thất', 'Quần áo', 'Sách & học tập', 'Đồ trẻ em', 'Thể thao', 'Khác'],
-  service: ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận hộ', 'Nấu ăn', 'Chăm sóc', 'Gia sư / lớp học', 'Làm đẹp', 'Lưu trú', 'Khác'],
+  service: ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận hộ', 'Chăm sóc', 'Gia sư / lớp học', 'Làm đẹp', 'Lưu trú', 'Khác'],
   job: ['Giao nhận', 'Mua hộ', 'Việc nhà', 'Sửa chữa nhỏ', 'Khuân vác', 'Trông trẻ / thú cưng', 'Gia sư', 'Xếp hàng giữ chỗ', 'Hỗ trợ máy tính', 'Khác'],
 };
 
@@ -98,7 +98,8 @@ export interface SvcPreset {
 }
 const P = (o: Partial<SvcPreset>): SvcPreset => ({
   priceType: 'list', items: [['', null, 'lần']], estimate: false, inspect: null,
-  timeMode: 'slot', dur: [2, 4], repeat: false, place: 'buyer', homeFee: 0, options: [], questions: [], turnaround: '', warranty: '', ...o,
+  // không mẫu nào còn mục Thông tin nhanh (thời gian hoàn thành, phạm vi, bảo hành); mẫu Khác có ô riêng cho thời gian và bảo hành
+  timeMode: 'slot', dur: [2, 4], repeat: false, place: 'buyer', homeFee: 0, options: [], questions: [], turnaround: '', warranty: '', noQuick: true, ...o,
 });
 export const SVC_PRESETS: Record<string, SvcPreset> = {
   'Giặt sấy': P({
@@ -116,7 +117,7 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
     ],
   }),
   'Dọn dẹp': P({
-    items: [['Dọn nhà theo giờ', 120000, 'giờ'], ['Lau kính', 50000, 'lần']], timeMode: 'datedur', dur: [2, 6], repeat: true, turnaround: '2 giờ mỗi lần',
+    items: [['Dọn nhà theo giờ', 120000, 'giờ'], ['Lau kính', 50000, 'lần']], timeMode: 'datedur', dur: [2, 6], repeat: true,
     questions: [
       { type: 'choice', label: 'Diện tích nhà', required: false, opts: 'Dưới 50m², 50 – 80m², Trên 80m²' },
       { type: 'multi', label: 'Việc cần làm', required: false, opts: 'Lau nhà, Vệ sinh bếp, Vệ sinh nhà tắm, Gấp đồ' },
@@ -124,20 +125,16 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
     ],
   }),
   'Giao nhận hộ': P({
-    items: [['Lấy đồ trong khu', 15000, 'lượt'], ['Đồ to, nặng từ 10kg', 25000, 'lượt']], place: 'ab', turnaround: 'Thường trong 20 phút',
+    items: [['Lấy đồ trong khu', 15000, 'lượt'], ['Đồ to, nặng từ 10kg', 25000, 'lượt']], place: 'ab',
     questions: [
       { type: 'text', label: 'Lấy món gì?', required: true, opts: '' },
       { type: 'choice', label: 'Kích thước', required: false, opts: 'Nhỏ dưới 10kg, To / nặng từ 10kg' },
       { type: 'choice', label: 'Cần trả tiền giùm?', required: false, opts: 'Không, Có' },
     ],
   }),
-  'Nấu ăn': P({
-    items: [['Nấu cỗ tại nhà', 1200000, 'buổi']], timeMode: 'datedur', dur: [3, 5],
-    questions: [{ type: 'text', label: 'Số người ăn', required: true, opts: '' }, { type: 'choice', label: 'Nguyên liệu', required: true, opts: 'Nhà có sẵn, Nhờ đi chợ giúp' }],
-  }),
   'Chăm sóc': P({ items: [['Trông trẻ theo giờ', 60000, 'giờ'], ['Trông thú cưng theo giờ', 40000, 'giờ']], timeMode: 'datedur', dur: [2, 6] }),
-  'Gia sư / lớp học': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], repeat: true, place: 'choice', turnaround: '90 phút mỗi buổi' }),
-  'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']], turnaround: 'Khoảng 45 phút' }),
+  'Gia sư / lớp học': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], repeat: true, place: 'choice' }),
+  'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']] }),
   // homestay / cho thuê phòng ngắn ngày trong khu (tham khảo Traveloka, Booking, Airbnb): loại phòng · nhận / trả phòng · tiện nghi · nội quy · hủy & cọc
   'Lưu trú': P({
     stay: true, noQuick: true, noPlace: true, timeMode: 'stay', place: 'seller',
