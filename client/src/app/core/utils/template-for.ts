@@ -235,6 +235,7 @@ export function viewOf(post: Post): PostView {
       : {}),
     quick: post.quickOptions,
     noteOff: post.noteEnabled === false,
+    optsOnce: post.kind === 'service' || undefined,
     // dịch vụ đăng từ form: một bộ chữ chung, không lấy chữ riêng của mẫu ("Đặt lấy đồ", "áo len" của giặt sấy)
     ...(svc ? { action: quote ? 'Gửi yêu cầu' : 'Đặt lịch', notePh: 'Thêm thông tin cho người làm (không bắt buộc)…' } : {}),
     time,

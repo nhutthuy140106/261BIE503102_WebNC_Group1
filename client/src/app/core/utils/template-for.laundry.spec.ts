@@ -32,6 +32,25 @@ describe('cách nhận của dịch vụ', () => {
     expect(viewOf(post({ place: { mode: 'buyer' }, priceType: 'quote' })).tpl.action).toBe('Gửi yêu cầu');
   });
 
+  it('dịch vụ: tùy chọn cộng giá tính một lần cho cả đơn, không ghi số lượng', () => {
+    const items = [{ id: 'a', name: 'Vệ sinh máy lạnh', price: 150000, unit: 'máy' }, { id: 'b', name: 'Đi dây điện', price: 90000, unit: 'lần' }];
+    const opt = { name: 'Bộ đồ dùng', multi: false, required: true, choices: [{ label: 'Thường', price: 0 }, { label: 'Cao cấp', price: 100000 }] };
+    const d = new OrderDraft(viewOf(post({ place: { mode: 'buyer' }, price: 90000, items, optionGroups: [opt] })).tpl);
+    const dishes = d.dishGroup!.choices;
+    d.setDish(dishes[0], 2);
+    d.setDish(dishes[1], 1);
+    d.setOpt('Bộ đồ dùng', 'Cao cấp|+100.000đ');
+    expect(d.subtotal()).toBe(150000 * 2 + 90000 + 100000);
+    expect(d.lines()).toContain('Bộ đồ dùng: Cao cấp');
+  });
+
+  it('dịch vụ: mỗi câu trả lời là một dòng riêng', () => {
+    const d = new OrderDraft(viewOf(post({ place: { mode: 'buyer' }, questions: [{ type: 'text', label: 'Bộ phận', required: false }, { type: 'text', label: 'Mô tả lỗi', required: false }] })).tpl);
+    d.setAns('Bộ phận', 'Máy lạnh');
+    d.setAns('Mô tả lỗi', 'Không lạnh');
+    expect(d.lines()).toEqual(['Bộ phận: Máy lạnh', 'Mô tả lỗi: Không lạnh']);
+  });
+
   it('dịch vụ theo nơi làm thì giữ như cũ', () => {
     expect(viewOf(post({ place: { mode: 'buyer' }, deliveryFee: 30000 })).tpl.place).toMatchObject({ mode: 'buyer', fee: 30000 });
   });

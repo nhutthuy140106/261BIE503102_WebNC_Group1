@@ -317,7 +317,8 @@
                   @for (r of d.dishRows(); track r.raw) { <small>{{ r.name }} x {{ r.qty }}</small> }
                   @for (c of d.cups(); track c) { <small>{{ c.drink }} x {{ c.qty }}@if (c.text) { · {{ c.text }} }</small> }
                   @if (v.tpl.qty && !d.dishGroup) { <small>Số lượng: {{ d.qty() }}</small> }
-                  @if (d.lines().length) { <small>{{ d.lines().join(' · ') }}</small> }
+                  <!-- mỗi tùy chọn, mỗi câu trả lời một dòng -->
+                  @for (l of d.lines(); track l) { <small>{{ l }}</small> }
                 </span>
                 <strong>{{ fmt(d.subtotal()) }}</strong>
               </div>

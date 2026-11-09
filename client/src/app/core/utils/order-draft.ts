@@ -128,8 +128,8 @@ export class OrderDraft {
     }, 0),
   );
 
-  /** Phụ giá của tùy chọn/câu hỏi, nhân theo số lượng phần */
-  readonly extra = computed(() => this.tpl.cups ? this.cups().reduce((n, c) => n + (c.price - c.base) * c.qty, 0) : (this.optAdd() + this.qsAdd()) * (this.tpl.qty ? this.qty() : 1) + this.dishRows().reduce((s, r) => s + r.add * r.qty, 0) + this.sharedExtras() + this.dishOptTotal());
+  /** Phụ giá của tùy chọn/câu hỏi: nhân theo số phần; dịch vụ thì tính một lần cho cả đơn */
+  readonly extra = computed(() => this.tpl.cups ? this.cups().reduce((n, c) => n + (c.price - c.base) * c.qty, 0) : (this.optAdd() + this.qsAdd()) * (this.tpl.qty && !this.tpl.optsOnce ? this.qty() : 1) + this.dishRows().reduce((s, r) => s + r.add * r.qty, 0) + this.sharedExtras() + this.dishOptTotal());
   /** Giờ vàng đang áp (null khi hết giờ / không có) — do trang chi tiết cập nhật theo đồng hồ */
   readonly promo = signal<Promo | null>(null);
   /** Số tiền được giảm nhờ Giờ vàng: chỉ giảm giá chính (không giảm tùy chọn cộng giá), nhân theo số lượng/giờ */
@@ -222,9 +222,11 @@ export class OrderDraft {
 
   /** Lựa chọn để hiện cho khách, luôn ghi số lượng khi có tính tiền: "Thêm chả x 1". Chọn một có phụ giá thì nhân theo số phần */
   private chosenText(scope: string, g: { name: string; multi?: boolean; choices: string[] }, portions: number): string[] {
-    if (g.multi) return g.choices.filter((raw) => this.extraQty(scope, g.name, raw) > 0).map((raw) => parseChoice(raw).name + ' x ' + this.extraQty(scope, g.name, raw));
+    // dịch vụ: tùy chọn chung cho cả đơn, khách không chọn số lượng nên không ghi "x n"
+    const once = !!this.tpl.optsOnce;
+    if (g.multi) return g.choices.filter((raw) => this.extraQty(scope, g.name, raw) > 0).map((raw) => parseChoice(raw).name + (once ? '' : ' x ' + this.extraQty(scope, g.name, raw)));
     const c = parseChoice(this.opt()[this.k(scope, g.name)] ?? '');
-    return c.name ? [c.add > 0 ? c.name + ' x ' + portions : c.name] : [];
+    return c.name ? [c.add > 0 && !once ? c.name + ' x ' + portions : c.name] : [];
   }
 
   /** Tùy chọn riêng của từng món đã chọn, để ghi vào đơn: "Cơm rang – Đồ ăn thêm" → ["Bò ×2"] */
