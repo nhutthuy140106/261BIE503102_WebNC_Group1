@@ -5,11 +5,10 @@
         <img [src]="post.images[0]" [alt]="post.title" loading="lazy" />
       }
     </a>
-    @if (post.promoted) {
-      <span class="kind ad">QUẢNG BÁ</span>
-    } @else {
-      <span class="kind">{{ post.category ?? kindLabel[post.kind] }}</span>
-    }
+    <span class="tags">
+      <span class="kind">{{ tag }}</span>
+      @if (post.promoted) { <span class="kind ad">QUẢNG BÁ</span> }
+    </span>
     <app-deal-tag class="deal" [post]="post" />
     @if (post.acceptsXu) { <span class="xuico" title="Dùng được Xu"><img src="assets/clean/antxu.png" alt="Dùng được Xu" /></span> }
     <button type="button" class="save" [class.on]="saved" (click)="onSave($event)" [attr.aria-pressed]="saved"

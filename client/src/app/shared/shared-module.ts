@@ -9,6 +9,7 @@ import { Loader } from './components/loader/loader';
 import { Skeleton } from './components/skeleton/skeleton';
 import { Select } from './components/select/select';
 import { ResultCard } from './components/result-card/result-card';
+import { BankPay } from './components/bank-pay/bank-pay';
 import { PasswordInput } from './components/password-input/password-input';
 import { SortMenu } from './components/sort-menu/sort-menu';
 import { OrderThumb } from './components/order-thumb/order-thumb';
@@ -23,8 +24,8 @@ import { UnitPipe } from './pipes/unit';
 import { CountPipe } from './pipes/count';
 
 @NgModule({
-  declarations: [ComboSaving, Price, DealTag, PostCard, JobCard, ResultCard, Avatar, Select, PasswordInput, SortMenu, OrderThumb, VndPipe, JobWhenPipe, AgoPipe, DistancePipe, UnitPipe, CountPipe, Loader, Skeleton],
+  declarations: [BankPay, ComboSaving, Price, DealTag, PostCard, JobCard, ResultCard, Avatar, Select, PasswordInput, SortMenu, OrderThumb, VndPipe, JobWhenPipe, AgoPipe, DistancePipe, UnitPipe, CountPipe, Loader, Skeleton],
   imports: [CommonModule, RouterModule],
-  exports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, ComboSaving, Price, DealTag, PostCard, JobCard, ResultCard, Avatar, Select, PasswordInput, SortMenu, OrderThumb, VndPipe, JobWhenPipe, AgoPipe, DistancePipe, UnitPipe, CountPipe, Loader, Skeleton],
+  exports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, BankPay, ComboSaving, Price, DealTag, PostCard, JobCard, ResultCard, Avatar, Select, PasswordInput, SortMenu, OrderThumb, VndPipe, JobWhenPipe, AgoPipe, DistancePipe, UnitPipe, CountPipe, Loader, Skeleton],
 })
 export class SharedModule {}

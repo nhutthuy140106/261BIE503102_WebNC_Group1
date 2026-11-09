@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AntGo — Bán &amp; Đăng việc · Hiệu quả</title><link rel="stylesheet" href="shared/base.css"><style>
+  /* Hiệu quả — báo cáo của gian hàng: tiền thu từ bán / tiền trả khi thuê người (đồng cấp), biểu đồ thu theo thời gian,
+     thu theo mảng, hành trình khách (xem → lưu → đặt), bài bán chạy, việc đã thuê, đánh giá + phản hồi.
+     Biểu đồ: một chuỗi, một màu (xanh đen), một trục; cột mảnh bo 4px phía trên, cách 2px; rê chuột xem số; có dạng bảng. */
+  .ohead{margin-top:30px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  .ohead h1{font-size:30px;letter-spacing:-.02em;margin:0}.ohead p{margin:6px 0 0;color:var(--smoke)}
+  .ranges{display:flex;gap:6px;flex-wrap:wrap}
+  .ranges button{height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:600;font-size:13px}
+  .ranges button:hover{border-color:var(--ink)}.ranges button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .kpis{margin-top:22px;display:grid;gap:12px}
+  .kduo{display:grid;grid-template-columns:1fr 1fr;gap:12px}.kq{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .kbig{padding:20px 22px;border-radius:16px;background:var(--accent);color:#fff;display:flex;flex-direction:column;gap:8px}
+  .kbig .lb{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#FFE6D8}.kbig .lb svg{width:15px;height:15px}
+  .kbig b{font-size:34px;letter-spacing:-.02em;line-height:1.1}
+  .kbig small{font-size:12.5px;color:#AEB4C4}
+  .kt{padding:16px;border-radius:16px;background:var(--soft);display:flex;flex-direction:column;gap:4px}
+  .kt span{font-size:12.5px;color:var(--smoke)}.kt b{font-size:22px;letter-spacing:-.02em}.kt small{font-size:12px;color:var(--smoke);margin-top:auto}
+  .kt .st{color:#E39B1A}
+  .up{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:#E3F4E8;color:#2E7D4F;font-size:12px;font-weight:700;align-self:flex-start;margin-top:auto}
+  .kbig .up{background:#fff;color:#2E7D4F}
+  .grid2{margin-top:18px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+  .box{border:1px solid var(--border);border-radius:18px;background:#fff;padding:20px}
+  .box>header{display:flex;align-items:baseline;gap:10px;margin-bottom:14px}
+  .box h2{margin:0;font-size:16px}.box>header small{color:var(--smoke);font-size:13px}
+  .box>header .tv{margin-left:auto;border:0;background:none;font-size:12.5px;font-weight:600;color:var(--smoke);text-decoration:underline}
+  .box+.box{margin-top:18px}
+  /* biểu đồ cột */
+  .chart{position:relative}
+  .chart svg{width:100%;height:240px;display:block;overflow:visible}
+  .chart .gl{stroke:#F0E9E5;stroke-width:1}
+  .chart .ax{fill:var(--smoke);font-size:11px;font-family:inherit}
+  .chart .bar{fill:var(--ink)}
+  .chart .hit{fill:transparent;cursor:pointer}
+  .chart .hit:hover+.bar,.chart .bar.on{fill:#3A4A68}
+  .chart .peak{fill:var(--ink);font-size:11.5px;font-weight:700;font-family:inherit}
+  .tip{position:absolute;pointer-events:none;transform:translate(-50%,-100%);margin-top:-8px;padding:7px 10px;border-radius:9px;background:var(--ink);color:#fff;font-size:12.5px;white-space:nowrap;display:none;z-index:5}
+  .tip b{display:block;font-size:13.5px}
+  table.tv{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.tv th,table.tv td{padding:8px 6px;border-top:1px solid var(--border);text-align:left}
+  table.tv th{font-size:12px;color:var(--smoke);font-weight:600;border-top:0}table.tv td:last-child,table.tv th:last-child{text-align:right}
+  /* thanh ngang (mảng, hành trình) */
+  .hb{display:grid;gap:12px}
+  .hb .r{display:grid;grid-template-columns:120px minmax(0,1fr) 92px;gap:10px;align-items:center;font-size:13.5px}
+  .hb .r span{display:flex;align-items:center;gap:6px;color:var(--smoke)}.hb .r span svg{width:15px;height:15px}
+  .hb .tr{height:12px;border-radius:0 4px 4px 0;background:#F4EEEA;overflow:hidden}
+  .hb .tr i{display:block;height:100%;background:var(--ink);border-radius:0 4px 4px 0}
+  .hb .r b{text-align:right;font-size:13.5px}
+  .hb .r small{display:block;font-size:11.5px;color:var(--smoke);font-weight:400}
+  .funnel .tr i{background:#3A4A68}
+  .fine{margin:12px 0 0;font-size:12px;color:var(--smoke);line-height:1.5}
+  /* bảng bài bán chạy / việc đã thuê */
+  .tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+  .tbl th{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--smoke);text-align:left;padding:0 8px 8px}
+  .tbl td{padding:10px 8px;border-top:1px solid var(--border);vertical-align:middle}
+  .tbl td.n,.tbl th.n{text-align:right;white-space:nowrap}
+  .tbl .pt{display:flex;align-items:center;gap:10px}
+  .tbl .pt img,.tbl .pt .cream{width:42px;height:34px;border-radius:8px;object-fit:cover;flex:none}
+  .tbl .pt .cream{background:var(--soft);display:grid;place-items:center}.tbl .pt .cream svg{width:16px;height:16px}
+  .tbl .pt img.av{width:34px;border-radius:50%}
+  .tbl .pt b{font-weight:600}.tbl .pt small{display:block;font-size:12px;color:var(--smoke)}
+  .tbl a:hover b{text-decoration:underline}
+  .stat{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .stat::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .stat.go{color:#2E7D4F}.stat.act{color:var(--accent)}.stat.done{color:var(--smoke)}
+  /* đánh giá */
+  .rsum{display:flex;align-items:center;gap:22px;margin-bottom:14px}
+  .rsum .big{font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:1}.rsum .big small{display:block;font-size:12.5px;font-weight:400;color:var(--smoke);margin-top:4px}
+  .dist{flex:1;display:grid;gap:4px}
+  .dist div{display:grid;grid-template-columns:28px 1fr 18px;gap:8px;align-items:center;font-size:12px;color:var(--smoke)}
+  .dist i{display:block;height:8px;border-radius:0 4px 4px 0;background:#F4EEEA;overflow:hidden}.dist i u{display:block;height:100%;background:#E39B1A;border-radius:0 4px 4px 0}
+  .rev{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--border)}
+  .rev img{width:38px;height:38px;border-radius:50%;object-fit:cover}
+  .rev .h{font-size:13px;color:var(--smoke)}.rev .h b{color:var(--ink)}
+  .rev .gold{color:#E39B1A;letter-spacing:1px;font-size:13px}
+  .rev p{margin:4px 0 0;font-size:14px}
+  .rev .rep{margin-top:8px;padding:9px 12px;border-radius:10px;background:var(--soft);font-size:13.5px}.rev .rep b{display:block;font-size:12px}
+  .rev form{margin-top:8px;display:flex;gap:8px}.rev form input{flex:1}
+  .rev .need{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-size:11.5px;font-weight:700}
+  @media(max-width:1100px){.kpis{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}
+</style></head><body><div id="siteHeader" data-space="sell" data-active="insights"></div><main class="wrap" id="page"></main>
+<script src="shared/icons.js"></script><script src="shared/common.js"></script><script src="shared/seller-data.js"></script><script>
+(() => {
+  const A = AntSeller, esc = AntGo.esc, icon = AntGo.icon, $ = id => document.getElementById(id), page = $("page");
+  const { U, F, money, KIND } = A;
+  const S = A.load();
+  const V = { table: false };
+
+  // Số liệu mẫu theo mốc (tổng khớp ô Hiệu quả ở trang Hôm nay: 640.000đ / 7 ngày …)
+  const R = {
+    today: { label: "Hôm nay", inc: 210000, incUp: "8%", pay: 40000, payUp: "6%", brUp: "7%", payN: 1, done: 3, doneUp: "20%", rate: "5,0", view: 64, viewUp: "12%", saves: 3,
+      unit: "giờ", x: ["9h", "10h", "11h", "12h", "13h"], y: [0, 45000, 120000, 45000, 0], mix: [210000, 0, 0] },
+    7: { label: "7 ngày qua", inc: 640000, incUp: "12%", pay: 160000, payUp: "10%", brUp: "4%", payN: 2, done: 14, doneUp: "27%", rate: "4,3", view: 412, viewUp: "9%", saves: 21,
+      unit: "ngày", x: ["T5", "T6", "T7", "CN", "T2", "T3", "T4"], y: [95000, 130000, 70000, 0, 120000, 15000, 210000], mix: [520000, 0, 120000] },
+    30: { label: "30 ngày qua", inc: 2480000, incUp: "5%", pay: 520000, payUp: "4%", brUp: "2%", payN: 6, done: 52, doneUp: "13%", rate: "4,3", view: "1.630", viewUp: "4%", saves: 74,
+      unit: "tuần", x: ["Tuần 1", "Tuần 2", "Tuần 3", "Tuần 4", "Tuần này"], y: [520000, 610000, 480000, 230000, 640000], mix: [1720000, 180000, 580000] },
+    90: { label: "3 tháng qua", inc: 3820000, incUp: "18%", pay: 860000, payUp: "15%", brUp: "6%", payN: 9, done: 78, doneUp: "24%", rate: "4,3", view: "4.210", viewUp: "21%", saves: 132,
+      unit: "tháng", x: ["Tháng 8", "Tháng 9", "Tháng 10"], y: [640000, 1020000, 2160000], mix: [2620000, 380000, 820000] },
+    year: { label: "Năm nay", inc: 4120000, incUp: "40%", pay: 940000, payUp: "38%", brUp: "11%", payN: 11, done: 81, doneUp: "53%", rate: "4,3", view: "4.980", viewUp: "35%", saves: 150,
+      unit: "tháng", x: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10"], y: [0, 0, 0, 0, 0, 80000, 220000, 640000, 1020000, 2160000], mix: [2840000, 420000, 860000] },
+  };
+  const ORDER = ["today", "7", "30", "90", "year"];   // giữ đúng thứ tự (khóa dạng số bị JS đẩy lên đầu)
+  const short = n => n >= 1e6 ? (n / 1e6).toLocaleString("vi-VN", { maximumFractionDigits: 1 }) + "tr" : n >= 1000 ? Math.round(n / 1000) + "k" : String(n);
+
+  function render() {
+    const key = R[S.range] ? S.range : "7", d = R[key];
+    const posts = A.posts(S).filter(p => p.k !== "job").sort((a, b) => b.sold * b.price - a.sold * a.price);
+    const jobs = A.jobs(S).flatMap(j => j.offers.filter(o => ["chosen", "working", "reported", "done"].includes(o.st)).map(o => ({ j, o })));
+    const revs = A.reviews(S);
+    const mixTot = d.mix.reduce((a, b) => a + b, 0) || 1;
+    const views = typeof d.view === "string" ? +d.view.replace(/\./g, "") : d.view;
+    page.innerHTML = `<div class="ohead"><div><h1>Hiệu quả</h1><p>Số liệu tổng hợp từ đơn và việc đã hoàn thành. Tiền khách trả trực tiếp cho bạn, AntGo không giữ tiền.</p></div>
+        <div class="ranges">${ORDER.map(k => [k, R[k]]).map(([k, r]) => `<button class="${k === key ? "on" : ""}" data-r="${k}">${r.label}</button>`).join("")}</div></div>
+      <div class="kpis">
+        <div class="kduo"><div class="kbig"><span class="lb">${icon("store")}Tổng tiền đã bán</span><b>${money(d.inc)}</b><span class="up">▲ ${d.incUp}</span></div>
+        <div class="kbig"><span class="lb">${icon("hand")}Tổng tiền đã thuê</span><b>${money(d.pay)}</b><span class="up">▲ ${d.payUp}</span></div></div>
+        <div class="kq"><div class="kt"><span>Đơn hoàn thành</span><b>${d.done}</b><span class="up">▲ ${d.doneUp}</span></div>
+        <div class="kt"><span>Lượt xem bài</span><b>${d.view}</b><span class="up">▲ ${d.viewUp}</span></div>
+        <div class="kt"><span>Tỉ lệ đặt</span><b>${(d.done / views * 100).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}%</b><span class="up">▲ ${d.brUp}</span></div>
+        <div class="kt"><span>Đánh giá</span><b><span class="st">★</span> ${d.rate}</b><small>${revs.length} đánh giá</small></div></div>
+      </div>
+      <div class="grid2"><div>
+          <div class="box"><header><h2>Đã thu theo ${d.unit}</h2><small>${d.label} · ${money(d.inc)}</small><button class="tv" data-tv>${V.table ? "Xem biểu đồ" : "Xem dạng bảng"}</button></header>
+            ${V.table ? `<table class="tv"><tr><th>${d.unit[0].toUpperCase() + d.unit.slice(1)}</th><th>Đã thu</th></tr>${d.x.map((x, i) => `<tr><td>${x}</td><td>${money(d.y[i])}</td></tr>`).join("")}</table>` : `<div class="chart" id="revChart"></div>`}</div>
+          <div class="box"><header><h2>Bài bán chạy</h2><small>từ trước đến nay, theo tiền thu được</small></header>
+            <table class="tbl"><tr><th>Bài</th><th class="n">Lượt xem</th><th class="n">Đã bán</th><th class="n">Đã thu</th></tr>
+            ${posts.slice(0, 5).map(p => `<tr><td><a class="pt" href="seller-post-form.html?id=${p.id}">${p.img ? `<img src="${U(p.img, 100, 80)}" alt="">` : `<span class="cream">${icon(p.ic || KIND[p.k][0])}</span>`}<span><b>${esc(p.t)}</b><small>${KIND[p.k][1]}</small></span></a></td>
+              <td class="n">${p.views || 0}</td><td class="n">${p.sold || 0}</td><td class="n"><b>${money((p.sold || 0) * p.price)}</b></td></tr>`).join("")}</table></div>
+          <div class="box" id="reviews"><header><h2>Đánh giá của khách</h2><small>${revs.length} đánh giá</small></header>
+            <div class="rsum"><div class="big">4,3<small>${revs.length} đánh giá</small></div><div class="dist">${[5, 4, 3, 2, 1].map(n => { const c = revs.filter(r => r.stars === n).length; return `<div><span>${n} ★</span><i><u style="width:${c / revs.length * 100}%"></u></i><span>${c}</span></div>`; }).join("")}</div></div>
+            ${revs.map(r => `<div class="rev"><img src="${F(r.by.av)}" alt=""><div style="flex:1"><div class="h"><b>${esc(r.by.n)}</b> · ${r.at} · ${esc(r.post)}</div>
+              <div class="gold">${"★".repeat(r.stars)}${"☆".repeat(5 - r.stars)}</div><p>${esc(r.text)}</p>
+              ${r.reply ? `<div class="rep"><b>Bạn đã phản hồi</b>${esc(r.reply)}</div>` : ""}</div></div>`).join("")}</div>
+        </div>
+        <div>
+          <div class="box"><header><h2>Thu theo mảng</h2><small>${d.label}</small></header><div class="hb">
+            ${[["food", d.mix[0]], ["goods", d.mix[1]], ["service", d.mix[2]]].map(([k, v]) => `<div class="r"><span>${icon(KIND[k][0])}${KIND[k][1]}</span><div class="tr"><i style="width:${v / mixTot * 100}%"></i></div><b>${short(v)}<small>${Math.round(v / mixTot * 100)}%</small></b></div>`).join("")}</div></div>
+          <div class="box"><header><h2>Hành trình khách</h2><small>${d.label}</small></header><div class="hb funnel">
+            ${[["eye", "Xem bài", views], ["heart", "Lưu bài", d.saves], ["receipt", "Đặt đơn", d.done]].map(([ic, t, v]) => `<div class="r"><span>${icon(ic)}${t}</span><div class="tr"><i style="width:${Math.max(2, v / views * 100)}%"></i></div><b>${v.toLocaleString("vi-VN")}<small>${(v / views * 100).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}%</small></b></div>`).join("")}</div>
+            <p class="fine">Bài có ảnh thật và giá rõ thường được lưu nhiều hơn. Quảng bá bằng AntXu đưa bài lên “Nổi bật trong khu”.</p></div>
+          <div class="box"><header><h2>Việc đã thuê</h2><small>${money(d.pay)} đã trả</small></header>
+            <table class="tbl">${jobs.map(({ j, o }) => `<tr><td><a class="pt" href="seller-orders.html?job=${j.id}"><img class="av" src="${F(o.who.av)}" alt=""><span><b>${esc(o.who.n)}</b><small>${esc(j.title)}</small></span></a></td>
+              <td class="n"><span class="stat ${o.st === "done" ? "done" : o.st === "reported" ? "act" : "go"}">${o.label}</span><br><b>${money(j.pay)}</b></td></tr>`).join("")}</table></div>
+        </div></div>`;
+    if (!V.table) chart(d);
+    if (location.hash === "#reviews") { setTimeout(() => $("reviews").scrollIntoView({ block: "start" }), 0); history.replaceState(null, "", location.pathname + location.search); }
+  }
+
+  // Biểu đồ cột một chuỗi: cột bo 4px phía trên neo vào trục, cách nhau 2px nền; lưới mờ; nhãn cột cao nhất; rê chuột xem số
+  function chart(d) {
+    const box = $("revChart"), W = Math.max(320, box.clientWidth), H = 240, L = 44, B = 26, T = 18;
+    const max = Math.max(...d.y, 1), nice = Math.ceil(max / 4 / 50000) * 50000 * 4 || 200000;
+    const n = d.y.length, slot = (W - L) / n, bw = Math.min(56, Math.max(10, slot * .56));
+    const y = v => T + (H - T - B) * (1 - v / nice);
+    const ticks = [0, .25, .5, .75, 1].map(f => f * nice);
+    const peak = d.y.indexOf(max);
+    const bar = (x, top, w, h) => h <= 0 ? "" : `M${x},${top + h}V${top + Math.min(4, h)}Q${x},${top} ${x + Math.min(4, h)},${top}H${x + w - Math.min(4, h)}Q${x + w},${top} ${x + w},${top + Math.min(4, h)}V${top + h}Z`;
+    box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Đã thu theo ${d.unit}">
+      ${ticks.map(t => `<line class="gl" x1="${L}" x2="${W}" y1="${y(t)}" y2="${y(t)}"/><text class="ax" x="${L - 8}" y="${y(t) + 4}" text-anchor="end">${short(t)}</text>`).join("")}
+      ${d.y.map((v, i) => { const x = L + slot * i + (slot - bw) / 2, top = y(v), h = H - B - top;
+        return `<rect class="hit" x="${L + slot * i}" y="${T}" width="${slot}" height="${H - T - B}" data-i="${i}"/><path class="bar" d="${bar(x, top, bw, h)}"/>
+          <text class="ax" x="${x + bw / 2}" y="${H - 8}" text-anchor="middle">${d.x[i]}</text>${i === peak && v ? `<text class="peak" x="${x + bw / 2}" y="${top - 6}" text-anchor="middle">${short(v)}</text>` : ""}`; }).join("")}
+    </svg><div class="tip" id="tip"></div>`;
+    const tip = $("tip");
+    box.querySelectorAll(".hit").forEach(h => {
+      h.addEventListener("mouseenter", () => { const i = +h.dataset.i, x = L + slot * i + slot / 2;
+        tip.innerHTML = `<b>${money(d.y[i])}</b>${d.x[i]}`; tip.style.display = "block"; tip.style.left = (x / W * 100) + "%"; tip.style.top = (y(d.y[i]) / H * 240) + "px"; });
+      h.addEventListener("mouseleave", () => tip.style.display = "none");
+    });
+  }
+
+  page.addEventListener("click", e => {
+    const r = e.target.closest("[data-r]"); if (r) { S.range = r.dataset.r; A.save(S); return render(); }
+    if (e.target.closest("[data-tv]")) { V.table = !V.table; return render(); }
+  });
+  window.addEventListener("resize", () => { if (!V.table && $("revChart")) chart(R[R[S.range] ? S.range : "7"]); });
+  render();
+})();
+</script>
+</body></html>

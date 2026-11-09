@@ -1,4 +1,5 @@
 import { Component, Input, inject } from '@angular/core';
+import { postTag } from '../../../core/utils/post-tag';
 import { Post } from '../../../core/models/post';
 import { AuthService } from '../../../core/services/auth';
 import { SavedService } from '../../../core/services/saved';
@@ -12,7 +13,11 @@ import { createSlug } from '../../../core/utils/slug-helper';
   templateUrl: './job-card.html',
   styleUrl: './job-card.css',
 })
-export class JobCard {
+export class JobCard {
+  protected get tag(): string {
+    return postTag(this.job);
+  }
+
   @Input({ required: true }) job!: Post;
 
   protected readonly savedSvc = inject(SavedService);

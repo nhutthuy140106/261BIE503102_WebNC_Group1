@@ -1,7 +1,7 @@
 import { Component, HostListener, inject } from '@angular/core';
 import { AreaService } from '../../services/area';
 
-/** Hộp "Chọn khu vực đang xem": bài trong khu được chọn được ưu tiên khi tìm kiếm. */
+/** Hộp "Chọn khu vực đang xem": trang chủ và tìm kiếm chỉ hiện bài bán ở khu được chọn. */
 @Component({
   selector: 'app-area-dialog',
   standalone: false,

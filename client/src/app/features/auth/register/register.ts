@@ -1,6 +1,6 @@
 import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { AREAS, Area } from '../../../core/config/areas';
 import { SelectOption } from '../../../shared/components/select/select';
@@ -28,6 +28,17 @@ const STRENGTH_LABEL = ['', 'Yếu', 'Trung bình', 'Khá', 'Mạnh'];
 export class Register implements OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  /** Giữ lý do + trang đang làm dở (vd đang đặt món) để sang Đăng nhập vẫn quay về đúng chỗ. */
+  protected loginParams(withPhone = false): Record<string, string> {
+    const q = this.route.snapshot.queryParamMap;
+    const out: Record<string, string> = {};
+    const reason = q.get('reason'), returnUrl = q.get('returnUrl');
+    if (reason) out['reason'] = reason;
+    if (returnUrl) out['returnUrl'] = returnUrl;
+    if (withPhone && this.phone.value) out['phone'] = this.phone.value;
+    return out;
+  }
   private timer?: ReturnType<typeof setInterval>;
 
   protected readonly areaOptions: SelectOption[] = AREAS.map((a) => ({ value: a.id, label: a.name }));

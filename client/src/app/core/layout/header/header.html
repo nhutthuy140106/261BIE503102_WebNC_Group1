@@ -1,7 +1,17 @@
 <header class="appbar">
   <div class="wrap bar">
     <div class="left">
-      <a routerLink="/" class="logo" aria-label="AntGo - Trang chủ"><img src="assets/clean/logo-sm.png" alt="AntGo" /></a>
+      <a [routerLink]="sellMode() ? '/seller' : '/'" class="logo" aria-label="AntGo - Trang chủ"><img src="assets/clean/logo-sm.png" alt="AntGo" /></a>
+      @if (sellMode()) {
+      <!-- Khu Bán & Đăng việc: menu riêng, không có ô tìm kiếm phía Mua -->
+      <nav aria-label="Khu Bán và Đăng việc">
+        @for (l of sellLinks; track l.path) {
+          <a [routerLink]="l.path" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: l.exact }" [title]="l.label">
+            <svg class="i"><use [attr.href]="'#' + l.icon" /></svg><span class="t">{{ l.label }}</span>
+          </a>
+        }
+      </nav>
+      } @else {
       <nav aria-label="Điều hướng chính">
         <a routerLink="/" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: true }" title="Trang chủ">
           <svg class="i"><use href="#home" /></svg><span class="t">Trang chủ</span>
@@ -13,6 +23,7 @@
           <svg class="i"><use href="#chat" /></svg><span class="t">Messenger</span>
         </a>
       </nav>
+      }
     </div>
 
     @if (noSearch()) {

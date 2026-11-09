@@ -187,17 +187,10 @@
           <app-post-card class="rise" [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
         }
       }
-      @if (loadingMore()) {
-        @for (n of [1, 2, 3, 4]; track n) { <div class="skel"></div> }
-      }
     </div>
-    @if (!feed().length && !loadingMore()) {
-      <p class="muted">Không còn bài nào khác ở nhóm này.</p>
-    }
-    @if (showMoreButton()) {
-      <div class="feedmore"><button type="button" (click)="loadMoreClick()">Xem thêm</button></div>
+    @if (!feed().length) {
+      <p class="muted">Chưa có bài nào ở nhóm này.</p>
     }
   </section>
 }
 <!-- mốc để biết đã cuộn gần tới cuối khối Khám phá -->
-<div #sentinel></div>

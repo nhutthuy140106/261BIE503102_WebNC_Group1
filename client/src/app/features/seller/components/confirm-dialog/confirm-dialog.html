@@ -1,0 +1,12 @@
+<div class="modal" (click)="backdrop($event)">
+  <div class="dlg" [class.center]="icon" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    @if (icon) { <span class="ring" [class.danger]="danger"><svg class="i"><use [attr.href]="'#' + icon" /></svg></span> }
+    <h2 id="confirmTitle">{{ heading }}</h2>
+    @if (message) { <p [innerHTML]="message"></p> }
+    @if (steps.length) { <app-seller-steps class="sm" [items]="steps" /> }
+    <div class="cbtns">
+      <button type="button" class="btn" (click)="closed.emit()">Để sau</button>
+      <button type="button" class="btn dark" (click)="ok.emit()">{{ okLabel }}</button>
+    </div>
+  </div>
+</div>

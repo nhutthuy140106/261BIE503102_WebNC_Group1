@@ -169,6 +169,62 @@
     "counterpartAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70"
   },
   {
+    "_id": "640b187e71d9faa9039f00d0",
+    "code": "AG-O2975",
+    "type": "placed",
+    "postId": "1fe7afa422737d39bdc56d59",
+    "postTitle": "Giặt sấy gấp, lấy và trả tận cửa",
+    "counterpartName": "Tiệm Sạch Thơm",
+    "status": "done",
+    "total": 72000,
+    "paymentMethod": "transfer",
+    "createdAt": "2026-10-09T06:00:00.000Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "640b187e71d9faa9039f006c",
+    "category": "service",
+    "kind": "service",
+    "detail": {
+      "lines": [
+        "Nước xả: Hương nhẹ",
+        "Có đồ trắng cần giặt riêng?: Không"
+      ],
+      "subtotal": 72000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Đã xác nhận",
+        "Duyệt giá",
+        "Đang làm",
+        "Trả đồ",
+        "Hoàn thành"
+      ],
+      "quantity": 4,
+      "quantityLabel": "Khối lượng ước tính",
+      "unit": "kg",
+      "whenLabel": "Thời gian",
+      "when": "09/10/2026 · 18:00",
+      "placeLabel": "Hình thức nhận hàng",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
+    },
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-10-09T06:00:00Z"
+      },
+      {
+        "state": "Mỹ Linh xác nhận",
+        "at": "2026-10-09T06:20:00Z"
+      },
+      {
+        "state": "Bạn nhận đồ",
+        "at": "2026-10-10T10:00:00Z"
+      }
+    ],
+    "doneAgoH": 150
+  },
+  {
     "_id": "640b187e71d9faa9039f00cc",
     "code": "AG-J1998",
     "type": "received",

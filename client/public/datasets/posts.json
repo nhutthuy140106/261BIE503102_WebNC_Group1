@@ -61,6 +61,7 @@
   },
   {
     "_id": "62bc5cf25fbf9289efa9039d",
+    "orderWindow": { "from": "10:00", "to": "13:00", "days": [] },
     "kind": "food",
     "title": "Cơm nhà làm, thực đơn đổi mỗi ngày",
     "description": "",
@@ -129,6 +130,7 @@
   },
   {
     "_id": "cea72ed545bbceaffbc970ec",
+    "spinPromo": true,
     "kind": "food",
     "title": "Phở bò tái, nước dùng hầm xương",
     "description": "",
@@ -236,6 +238,8 @@
   },
   {
     "_id": "a6c9f01ff90cb1c2b5d15d00",
+    "orderWindow": { "from": "06:00", "to": "12:00", "days": [] },
+    "spinPromo": true,
     "kind": "food",
     "title": "Cà phê sữa đá",
     "description": "",
@@ -368,6 +372,7 @@
   },
   {
     "_id": "4856cac66cb5332fcb85a658",
+    "orderWindow": { "from": "08:00", "to": "22:00", "days": [] },
     "kind": "food",
     "title": "Trà sữa trân châu đường đen",
     "description": "",
@@ -595,6 +600,7 @@
   },
   {
     "_id": "312728497bf7e074011fdbe2",
+    "spinPromo": true,
     "kind": "food",
     "title": "Salad ức gà",
     "description": "",
@@ -837,6 +843,7 @@
   },
   {
     "_id": "2a04c932c49491dce9d1cf2f",
+    "orderWindow": { "from": "08:00", "to": "22:00", "days": [] },
     "kind": "food",
     "title": "Combo 2 trà sữa + 1 cà phê",
     "description": "Hai ly trà sữa trân châu đường đen và một ly cà phê sữa đá, giá rẻ hơn mua lẻ.",
@@ -982,7 +989,7 @@
     "kind": "job",
     "title": "Dọn phòng cuối tuần",
     "description": "Phòng ngủ và phòng khách khoảng 40m², dụng cụ có sẵn.",
-    "images": [],
+    "images": ["1581578731548-c64695cc6952", "1527515637462-cff94eecc1ac", "1584622650111-993a426fbf0a"],
     "sellerId": "88f09a4cab77e5c4d050c18d",
     "sellerName": "Quốc Anh",
     "sellerAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=70",
@@ -1173,7 +1180,7 @@
     "kind": "job",
     "title": "Phơi và gấp đồ cuối tuần",
     "description": "Khoảng 2 giỏ đồ, phơi sáng và gấp lúc chiều.",
-    "images": [],
+    "images": ["1628177142898-93e36e4e3a50", "1556911220-bff31c812dba"],
     "sellerId": "d3cb4d4e1a036f3674759c50",
     "sellerName": "Chị Hoa",
     "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
@@ -1195,6 +1202,7 @@
   },
   {
     "_id": "7a11c0b0c0ffee0000000001",
+    "orderWindow": { "from": "10:00", "to": "14:00", "days": [] },
     "kind": "food",
     "title": "Combo trưa: Bowl rau củ + Mì xào hải sản",
     "description": "Một phần bowl rau củ healthy và một phần mì xào hải sản, giao trưa trong khu.",
@@ -1234,6 +1242,7 @@
   },
   {
     "_id": "7a11c0b0c0ffee0000000002",
+    "orderWindow": { "from": "07:00", "to": "20:00", "days": [] },
     "kind": "food",
     "title": "Combo bánh: 1 ổ bánh kem dâu + 2 pancake",
     "description": "Một ổ bánh kem dâu nhà làm và hai phần pancake mật ong, đặt trước 1 ngày.",

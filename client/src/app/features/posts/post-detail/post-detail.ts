@@ -6,7 +6,7 @@ import { CanComponentDeactivate } from '../../../core/guards/pending-changes-gua
 import { AppError } from '../../../core/models/api';
 import { CreateOrderBody, Order } from '../../../core/models/order';
 import { KIND_LABEL, Post } from '../../../core/models/post';
-import { Address, BLOCKS } from '../../../core/models/user';
+import { Address, blockText } from '../../../core/models/user';
 import { unsplash } from '../../../core/config/post-templates';
 import { AddressService } from '../../../core/services/address';
 import { AuthPromptService } from '../../../core/services/auth-prompt';
@@ -18,10 +18,13 @@ import { SavedService } from '../../../core/services/saved';
 import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
+import { imageToDataUrl } from '../../../core/utils/image-file';
+import { canPickDate, firstOpenDate, lastOpenDate } from '../../../core/utils/open-dates';
 import { formatDateTime } from '../../../core/utils/status-label';
 import { ClockService } from '../../../core/services/clock';
 import { comboSaving } from '../../../core/utils/combo';
 import { countdown, clockVN, dealAt } from '../../../core/utils/promo';
+import { windowSlots, windowStateAt } from '../../../core/utils/order-window';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
 import { placedStepNames } from '../../../core/utils/placed-steps';
 import { resolveId } from '../../../core/utils/slug-helper';
@@ -71,20 +74,26 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected readonly submitting = signal(false);
   protected readonly addrOpen = signal(false);
   protected readonly addrNew = signal(false);
-  protected readonly blocks = BLOCKS;
+  protected readonly cupPopup = signal(false);
   /** Thêm địa chỉ mới ngay trong hộp chọn địa chỉ (đặt cho người khác = thêm địa chỉ người đó) */
   protected readonly addrForm = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(60)] }),
     phone: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^0\d{9}$/)] }),
-    block: new FormControl<(typeof BLOCKS)[number]>('B', { nonNullable: true }),
+    block: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(40)] }),
     unit: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(30)] }),
     note: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
     label: new FormControl<'home' | 'family' | 'other'>('family', { nonNullable: true }),
+    isDefault: new FormControl(false, { nonNullable: true }),
   });
   protected readonly voucherOpen = signal(false);
   protected readonly lightbox = signal<number | null>(null);
   /** Ảnh đang xem ở bộ ảnh (kiểu Shopee: ảnh lớn + dải ảnh nhỏ bên dưới) */
   protected readonly galIdx = signal(0);
+
+  /** Nền mờ của ô ảnh = chính ảnh đó */
+  protected bg(src: string): string {
+    return 'url("' + src + '")';
+  }
 
   protected galStep(n: number): void {
     const len = this.view()?.images.length ?? 1;
@@ -120,14 +129,18 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   });
 
   /** Khung giờ chọn được, bước 30 phút */
-  protected readonly slots = computed(() => {
-    const t = this.view()?.tpl;
-    if (!t) return [];
-    const [a, b] = t.time.win.map((x) => Number(x.slice(0, 2)) * 60 + Number(x.slice(3)));
-    const out: string[] = [];
-    for (let m = a; m <= b; m += 30) out.push(String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'));
-    return out;
-  });
+  /** Mốc giờ gợi ý trong khung nhận đặt. Đặt cho hôm nay thì bỏ các mốc đã qua. */
+  protected slotsFor(d: OrderDraft): string[] {
+    const [a, b] = d.tpl.time.win;
+    const isToday = !d.date() || d.date() === this.todayIso();
+    return windowSlots(a, b, isToday ? this.nowMin() : 0);
+  }
+
+  private nowMin(): number {
+    const t = new Date(this.clock.now() + 7 * 3600e3);
+    return t.getUTCHours() * 60 + t.getUTCMinutes();
+  }
+
   // ----- lịch chọn ngày (tự vẽ, thay lịch gốc của trình duyệt) -----
   protected readonly calOpen = signal(false);
   protected readonly calMonth = signal(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
@@ -146,10 +159,12 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const lead = (first.getDay() + 6) % 7; // tuần bắt đầu từ Thứ Hai
     const total = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
     const today = this.todayIso();
+    const dates = this.post()?.dates;
     const out: ({ day: number; iso: string; past: boolean; today: boolean } | null)[] = Array(lead).fill(null);
     for (let day = 1; day <= total; day++) {
       const iso = this.iso(new Date(m.getFullYear(), m.getMonth(), day));
-      out.push({ day, iso, past: iso < today, today: iso === today });
+      // chỉ mở các ngày người bán đã đặt, ngày khác khóa như ngày đã qua
+      out.push({ day, iso, past: !canPickDate(dates, iso, today), today: iso === today });
     }
     return out;
   });
@@ -157,6 +172,19 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected canPrev(): boolean {
     const n = new Date();
     return this.calMonth() > new Date(n.getFullYear(), n.getMonth(), 1);
+  }
+
+  /** Khóa nút sang tháng sau khi đã tới tháng có ngày cuối người bán mở */
+  protected canNext(): boolean {
+    const last = lastOpenDate(this.post()?.dates);
+    if (!last) return true;
+    const [y, mo] = last.split('-').map(Number);
+    return this.calMonth() < new Date(y, mo - 1, 1);
+  }
+
+  /** Nút "Hôm nay" chỉ có khi hôm nay nằm trong các ngày người bán mở */
+  protected todayOpen(): boolean {
+    return canPickDate(this.post()?.dates, this.todayIso(), this.todayIso());
   }
 
   protected moveMonth(n: number): void {
@@ -237,6 +265,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
             const def = r?.addresses.find((a) => a.isDefault);
             if (def) d.addressId.set(def._id);
             d.comboItems.set(p.comboDetail?.items.map((i) => i.title + (i.qty > 1 ? ' ×' + i.qty : '')) ?? []);
+            if (p.orderWindow) d.time.set(this.slotsFor(d)[0] ?? d.tpl.time.win[0]);
             this.draft.set(d);
             this.recommend.similar(p._id).subscribe({ next: (l) => this.similar.set(l), error: () => this.similar.set([]) });
             this.restore(d);
@@ -265,9 +294,36 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   // ----- bước 1: khung phải -----
+  /** Khung giờ nhận đơn của người bán: đang mở / đã hết giờ (tự khóa, tự mở lại khi tới giờ). null = bài không đặt khung. */
+  protected readonly orderState = computed(() => {
+    const w = this.post()?.orderWindow;
+    return w ? windowStateAt(w, this.clock.now()) : null;
+  });
+
+  /**
+   * Ngày bán (đồ ăn & uống): người bán chọn trước trên lịch để khỏi bật/tắt bài mỗi ngày. Hôm nay ngoài các ngày này thì
+   * bài tự khóa; lịch khi đặt cũng chỉ mở các ngày này. Không chọn ngày nào = bán mọi ngày.
+   */
+  protected readonly saleDay = computed(() => {
+    const p = this.post();
+    const days = p?.kind === 'food' ? [...(p.dates ?? [])].sort() : [];
+    if (!days.length) return null;
+    const today = this.iso(new Date(this.clock.now()));
+    if (days.includes(today)) return { open: true as const };
+    const next = days.find((d) => d > today);
+    return { open: false as const, next: next ? next.slice(8) + '/' + next.slice(5, 7) : '' };
+  });
+
   protected stockLine(): { text: string; sub: string; off: boolean } {
     const s = this.view()!.tpl.stock;
     if (this.post()?.closed) return { text: 'Tạm ngưng nhận', sub: 'Người bán đang tạm dừng bài này.', off: true };
+    const sd = this.saleDay();
+    if (sd && !sd.open) return { text: 'Hôm nay quán nghỉ', sub: sd.next ? 'Mở bán lại ngày ' + sd.next + '.' : 'Người bán đã ngừng bán.', off: true };
+    const os = this.orderState();
+    if (os && !os.open) return { text: 'Đã hết giờ nhận đơn', sub: os.reopen ? '' : 'Người bán chưa mở lại.', off: true };
+    // người bán đặt ngày nhưng đã qua hết: không còn ngày nào để hẹn (đồ ăn & uống đã có saleDay ở trên)
+    if (this.post()?.kind !== 'food' && !firstOpenDate(this.post()?.dates, this.todayIso())) return { text: 'Đã hết lịch hẹn', sub: 'Người bán chưa mở thêm ngày.', off: true };
+    if (os?.closesAt) return { text: 'Đang nhận đơn', sub: 'Nhận đến ' + os.closesAt + ' hôm nay.', off: false };
     if (s.mode === 'once') return { text: 'Còn hàng', sub: 'Bán một lần, ai đặt trước được trước.', off: false };
     if (s.mode === 'limit') return { text: 'Còn ' + s.left + ' phần hôm nay', sub: s.sched ?? '', off: false };
     return { text: 'Đang nhận đặt', sub: s.sched ?? '', off: false };
@@ -276,6 +332,8 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   /** Giờ vàng đang chạy của bài này (tự hết khi qua giờ, không cần tải lại) */
   protected readonly deal = computed(() => {
     const p = this.post();
+    // quán đang khóa (hết giờ nhận đơn) thì không đặt được nên không hiện Giờ vàng, tránh hiểu nhầm là còn đặt được
+    if (this.orderState()?.open === false || this.saleDay()?.open === false) return null;
     return p ? dealAt(p, this.clock.now()) : null;
   });
   protected readonly dealLeft = computed(() => {
@@ -328,8 +386,14 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   protected onPhoto(d: OrderDraft, label: string, e: Event): void {
-    const f = (e.target as HTMLInputElement).files?.[0];
-    d.setAns(label, f ? f.name : '');
+    const input = e.target as HTMLInputElement;
+    const f = input.files?.[0];
+    input.value = '';
+    if (!f) return;
+    void imageToDataUrl(f).then((url) => {
+      if (url) d.setAns(label, url);
+      else this.toast.show('Không đọc được ảnh, bạn chọn ảnh khác nhé');
+    });
   }
 
   protected next(d: OrderDraft): void {
@@ -341,36 +405,47 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     this.openCheckout();
   }
 
-  protected readonly customTime = signal('');
   protected readonly timeErr = signal('');
   protected readonly timeOpen = signal(false);
 
   protected pickTime(d: OrderDraft, t: string): void {
     d.time.set(t);
-    this.customTime.set('');
     this.timeErr.set('');
     this.timeOpen.set(false);
   }
 
-  /** Giờ tự gõ: tự thêm dấu ":" và chỉ nhận giờ nằm trong khung nhận đặt của bài */
-  protected onCustomTime(d: OrderDraft, raw: string): void {
-    const digits = raw.replace(/\D/g, '').slice(0, 4);
-    const txt = digits.length > 2 ? digits.slice(0, 2) + ':' + digits.slice(2) : digits;
-    this.customTime.set(txt);
+  /** Ô giờ 24h gồm 2 ô riêng (giờ, phút). Chỉ nhận giờ nằm trong khung nhận đặt của bài. */
+  protected onHM(d: OrderDraft, th: HTMLInputElement, tm: HTMLInputElement, fromHour: boolean): void {
+    const el = fromHour ? th : tm;
+    el.value = el.value.replace(/\D/g, '').slice(0, 2);
     this.timeErr.set('');
-    const m = txt.match(/^(\d{2}):(\d{2})$/);
-    if (!m) return;
-    const mins = Number(m[1]) * 60 + Number(m[2]);
+    if (fromHour && el.value.length === 2) { tm.focus(); tm.select(); }
+    if (th.value.length === 2 && tm.value.length === 2) this.applyTime(d, th.value + ':' + tm.value);
+  }
+
+  private applyTime(d: OrderDraft, v: string): void {
+    const [h, m] = v.split(':').map(Number);
+    if (h > 23 || m > 59) return void this.timeErr.set('Giờ không hợp lệ.');
     const [a, b] = d.tpl.time.win.map((x) => Number(x.slice(0, 2)) * 60 + Number(x.slice(3)));
-    if (Number(m[1]) > 23 || Number(m[2]) > 59) return void this.timeErr.set('Giờ không hợp lệ.');
-    if (mins < a || mins > b) return void this.timeErr.set('Chỉ nhận trong khung ' + d.tpl.time.win[0] + ' – ' + d.tpl.time.win[1] + '.');
-    d.time.set(txt);
-    this.timeOpen.set(false);
+    if (h * 60 + m < a || h * 60 + m > b) return void this.timeErr.set(v + ' ngoài khung nhận đặt (' + d.tpl.time.win[0] + ' – ' + d.tpl.time.win[1] + '). Chọn giờ trong khung nhé.');
+    if ((!d.date() || d.date() === this.todayIso()) && this.post()?.orderWindow && h * 60 + m < this.nowMin()) return void this.timeErr.set(v + ' đã qua. Chọn giờ từ bây giờ trở đi.');
+    d.time.set(v);
+  }
+
+  /** Rời cả ô giờ (không phải chỉ đổi từ giờ sang phút): gõ "14" = 14:00; còn sai thì trả về giờ đang dùng thật. */
+  protected endTime(d: OrderDraft, e: FocusEvent): void {
+    const box = e.currentTarget as HTMLElement;
+    if (box.contains(e.relatedTarget as Node)) return;
+    const [th, tm] = Array.from(box.querySelectorAll('input'));
+    if (th.value) this.applyTime(d, th.value.padStart(2, '0') + ':' + (tm.value || '0').padStart(2, '0'));
+    if (!th.value) this.timeErr.set('Chưa nhập giờ.');
+    th.value = d.time().slice(0, 2);
+    tm.value = d.time().slice(3);
   }
 
   protected openCheckout(): void {
     const d = this.draft();
-    if (d && !d.date()) d.date.set(this.todayIso());
+    if (d && !d.date()) d.date.set(firstOpenDate(this.post()?.dates, this.todayIso()));
     this.checkout.set(true);
     this.tried.set(false);
     this.error.set(null);
@@ -417,7 +492,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   }
 
   protected addressText(a: Address): string {
-    return a.unit + ', ' + (a.block.length === 1 ? 'Block ' + a.block : a.block);
+    return a.unit + ', ' + blockText(a.block);
   }
 
   protected saveAddress(d: OrderDraft): void {
@@ -425,9 +500,9 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     const v = this.addrForm.getRawValue();
     this.addressService.create({ ...v, note: v.note.trim() || undefined }).subscribe({
       next: (a) => {
-        this.addresses.update((l) => [...l, a]);
+        this.addresses.update((l) => [...l.map((x) => (a.isDefault ? { ...x, isDefault: false } : x)), a]);
         d.addressId.set(a._id);
-        this.addrForm.reset({ name: '', phone: '', block: 'B', unit: '', note: '', label: 'family' });
+        this.addrForm.reset({ name: '', phone: '', block: '', unit: '', note: '', label: 'family', isDefault: false });
         this.addrNew.set(false);
         this.addrOpen.set(false);
         this.toast.show('Đã thêm địa chỉ');
@@ -438,7 +513,23 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
 
   protected pickAddress(d: OrderDraft, a: Address): void {
     d.addressId.set(a._id);
+    this.closeAddr();
+  }
+
+  /** Đóng popup và thu form lại, mở lại luôn thấy danh sách + nút thêm địa chỉ */
+  protected closeAddr(): void {
     this.addrOpen.set(false);
+    this.addrNew.set(false);
+  }
+
+  protected makeDefault(a: Address): void {
+    this.addressService.setDefault(a._id).subscribe({
+      next: () => {
+        this.addresses.update((l) => l.map((x) => ({ ...x, isDefault: x._id === a._id })));
+        this.toast.show('Đã đặt làm địa chỉ mặc định');
+      },
+      error: (e: Error) => this.error.set(e.message),
+    });
   }
 
   /** "23/10/2026 · 11:00", thêm thời lượng với dịch vụ tính theo giờ */
@@ -460,18 +551,27 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     if (!p || !d || this.submitting()) return;
     this.tried.set(true);
     if (d.missing(true)) return;
+    if (this.saleDay()?.open === false) return void this.error.set('Hôm nay quán nghỉ, bạn chưa đặt được.');
+    // hộp xác nhận mở lúc còn giờ nhưng người dùng chậm: hết giờ nhận đơn thì không cho gửi
+    const os = this.orderState();
+    if (os && !os.open) return void this.error.set('Quán vừa hết giờ nhận đơn' + (os.reopen ? ', mở lại ' + os.reopen : '') + '.');
+    if (d.date() && !canPickDate(p.dates, d.date(), this.todayIso())) return void this.error.set('Người bán không nhận hẹn ngày này, bạn chọn ngày khác nhé.');
     const a = this.address();
     const place = d.tpl.place;
     const placeText = place.mode === 'choice' ? place.choices?.[d.place()]?.[0] : place.mode === 'seller' ? place.where : undefined;
     const body: CreateOrderBody = {
       postId: p._id,
-      quantity: d.qty(),
-      selections: d.tpl.opts.map((g) => ({ group: g.name, choices: g === d.dishGroup ? d.dishRows().map((r) => r.name) : [parseChoice(d.opt()[g.name] ?? '').name] })),
-      answers: d.tpl.qs.map((q) => ({ question: q.label, value: d.lines().find((l) => l.startsWith(q.label + ': '))?.slice(q.label.length + 2) ?? '' })).filter((x) => x.value),
-      fulfillment: d.needsAddress() ? 'delivery' : 'pickup',
+      quantity: d.tpl.cups ? d.totalCups() : d.qty(),
+      selections: [
+        ...d.tpl.opts.map((g) => ({ group: g.name, choices: g === d.dishGroup ? d.dishRows().map((r) => r.name) : d.chosen('', g) })),
+        ...d.dishOptSelections(),
+        ...(d.quickPicks().length ? [{ group: 'Tùy chọn thêm', choices: d.quickPicks() }] : []),
+      ],
+      answers: d.tpl.qs.map((q) => ({ question: q.label, value: q.type === 'photo' ? d.ans()[q.label] ?? '' : d.lines().find((l) => l.startsWith(q.label + ': '))?.slice(q.label.length + 2) ?? '' })).filter((x) => x.value),
+      fulfillment: d.toBuyer() ? 'delivery' : 'pickup',
       addressId: d.needsAddress() ? d.addressId() : undefined,
       scheduledAt: d.date() ? new Date(d.date() + 'T' + d.time()).toISOString() : undefined,
-      utensils: d.tpl.key === 'food' && d.utensils(),
+      utensils: d.tpl.key === 'food' && !d.tpl.quick && d.utensils(),
       note: d.note().trim() || undefined,
       voucherCode: d.voucher()?.id,
       payment: d.pay(),
@@ -479,17 +579,20 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
       detail: {
         lines: d.lines(),
         quantity: d.tpl.qty ? d.qty() : undefined,
-        items: d.dishGroup ? d.dishRows().map((r) => ({ name: r.name, qty: r.qty })) : undefined,
-        itemsLabel: d.dishGroup?.name,
+        items: d.tpl.cups
+          ? d.cups().map((c) => ({ name: c.drink + (c.text ? ' · ' + c.text : ''), qty: c.qty }))
+          : d.dishGroup ? d.dishRows().map((r) => ({ name: r.name, qty: r.qty })) : undefined,
+        itemsLabel: d.tpl.cups ? 'Menu' : d.dishGroup?.name,
+        cups: d.tpl.cups ? d.cups().map((c) => ({ name: c.drink, option: c.text, qty: c.qty, price: c.price })) : undefined,
         quantityLabel: d.tpl.qty ? d.tpl.qty.label.replace(/\s*\(.*\)/, '') : undefined,
         unit: d.tpl.qty ? d.tpl.price.unit : undefined,
-        address: d.needsAddress() && a ? a.name + ' · ' + a.phone + '\n' + this.addressText(a) : place.mode === 'seller' ? place.where : undefined,
+        address: d.needsAddress() && a ? a.name + ' (' + a.phone + ')\n' + this.addressText(a) : place.mode === 'seller' ? place.where : undefined,
         place: placeText,
         placeLabel: 'Hình thức nhận hàng',
         when: this.whenLabel(d),
         whenLabel: 'Thời gian',
-        pickup: !d.needsAddress(),
-        utensils: d.tpl.key === 'food' ? d.utensils() : undefined,
+        pickup: !d.toBuyer(),
+        utensils: d.tpl.key === 'food' && !d.tpl.quick ? d.utensils() : undefined,
         voucher: d.voucher()?.title,
         subtotal: d.subtotal(),
         fee: d.placeFee(),
@@ -566,7 +669,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     if (e.key === 'Escape') {
       if (this.lightbox() !== null) this.lightbox.set(null);
       else if (this.addrOpen() || this.voucherOpen()) {
-        this.addrOpen.set(false);
+        this.closeAddr();
         this.voucherOpen.set(false);
       } else if (this.reviewsOpen()) this.reviewsOpen.set(false);
       else if (this.checkout()) this.closeCheckout();

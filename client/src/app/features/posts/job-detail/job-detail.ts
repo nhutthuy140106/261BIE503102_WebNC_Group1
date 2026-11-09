@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, switchMap, forkJoin } from 'rxjs';
@@ -12,8 +13,11 @@ import { SavedService } from '../../../core/services/saved';
 import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { JobOfferService } from '../../../core/services/job-offer';
+import { MockDb } from '../../../core/services/mock-db';
+import { SellerSpaceService } from '../../../core/services/seller-space';
 import { PostService } from '../../../core/services/post';
 import { QuestionService } from '../../../core/services/question';
+import { unsplash } from '../../../core/config/post-templates';
 import { resolveId } from '../../../core/utils/slug-helper';
 import { formatDateTime } from '../../../core/utils/status-label';
 import { noPhoneValidator } from '../../../core/utils/validators';
@@ -32,6 +36,9 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   private readonly postService = inject(PostService);
   private readonly offers = inject(JobOfferService);
   private readonly questions = inject(QuestionService);
+  private readonly db = inject(MockDb);
+  private readonly seller = inject(SellerSpaceService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly prompt = inject(AuthPromptService);
   private readonly toast = inject(ToastService);
@@ -46,13 +53,18 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   protected readonly sent = signal(false);
 
   protected readonly job = signal<Post | null>(null);
+  /** Ảnh minh họa người đăng chụp (ví dụ căn phòng cần dọn); việc không có ảnh thì không hiện mục này. */
+  protected readonly photos = computed(() => (this.job()?.images ?? []).map((i) => unsplash(i, 1200, 900)));
+  protected readonly lightbox = signal<number | null>(null);
   protected readonly myOffer = signal<Offer | null>(null);
   protected readonly qa = signal<Question[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
   protected readonly stateLabel = OFFER_STATE_LABEL;
-  protected readonly slotOptions = signal<{ value: string; label: string }[]>(SLOTS.map((s) => ({ value: s, label: s })));
+  protected readonly slotOptions = signal<{ value: string; label: string; sub?: string }[]>(SLOTS.map((s) => ({ value: s, label: s })));
+  /** Việc không cố định giờ: 3 nút Sáng, Chiều, Tối trên một hàng */
+  protected readonly freeSlots = signal(true);
 
   protected readonly offerForm = new FormGroup({
     slots: new FormArray<FormControl<boolean>>(SLOTS.map(() => new FormControl(false, { nonNullable: true }))),
@@ -63,6 +75,14 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   });
 
   ngOnInit(): void {
+    // người đăng trả lời, chọn người ở tab khác: cập nhật ngay, không làm mất nội dung đang gõ
+    this.db.changes.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((name) => {
+      const id = this.job()?._id;
+      if (!id || !['questions', 'offers', 'posts'].includes(name)) return;
+      if (name === 'questions') this.questions.list(id).subscribe((l) => this.qa.set(l));
+      if (name === 'offers') this.offers.findActiveForJob(id).subscribe((o) => this.myOffer.set(o));
+      if (name === 'posts') this.postService.getPostById(id).subscribe((p) => p && this.job.set(p));
+    });
     this.route.paramMap
       .pipe(
         switchMap((params) => {
@@ -108,11 +128,17 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
       });
   }
 
-  /** Việc có khung giờ cụ thể (ISO) thì chỉ cho chọn trong đó; không thì 3 buổi chung. */
+  /** Việc có khung giờ thì chỉ cho chọn trong đó (form khu Bán gửi "08:30 – 11:00", server gửi ISO); không thì 3 buổi chung. */
   private setSlotOptions(windows: string[]): void {
-    const opts = windows.length
-      ? windows.map((w) => ({ value: w, label: formatDateTime(w) }))
+    const isIso = (w: string) => /^\d{4}-\d{2}-\d{2}T/.test(w);
+    const opts: { value: string; label: string; sub?: string }[] = windows.length
+      ? windows.map((w, i) => ({
+          value: w,
+          label: isIso(w) ? formatDateTime(w) : w,
+          sub: windows.length > 1 && !isIso(w) ? (i === 0 ? 'Giờ chính' : 'Khung giờ khác') : undefined,
+        }))
       : SLOTS.map((s) => ({ value: s, label: s }));
+    this.freeSlots.set(!windows.length);
     this.slotOptions.set(opts);
     const arr = this.offerForm.controls.slots;
     arr.clear();
@@ -175,6 +201,8 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
         this.myOffer.set(o);
         this.offerForm.markAsPristine();
         this.sent.set(true);
+        this.seller.receiveFromBuyer(j._id, `Đề nghị mới ở việc "${j.title}" từ ${o.workerName ?? 'một người nhận việc'}`);
+        this.postService.getPostById(j._id).subscribe((p) => p && this.job.set(p));
         this.submitting.set(false);
         this.toast.show('Đã gửi đề nghị nhận việc');
         this.notifications.push('Bạn đã gửi đề nghị nhận việc "' + o.jobTitle + '". Chờ ' + o.posterName + ' chọn người.', '/orders/' + o._id);
@@ -205,9 +233,23 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
       next: (q) => {
         this.qa.update((l) => [...l, q]);
         this.askForm.reset();
+        this.seller.receiveFromBuyer(j._id, `Câu hỏi mới ở việc "${j.title}": ${q.text}`);
       },
       error: (e: Error) => this.applyServerErrors(e, this.askForm),
     });
+  }
+
+  protected stepPhoto(n: number): void {
+    const len = this.photos().length;
+    this.lightbox.update((i) => (i === null || !len ? null : (i + n + len) % len));
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  protected onKey(e: KeyboardEvent): void {
+    if (this.lightbox() === null) return;
+    if (e.key === 'Escape') this.lightbox.set(null);
+    if (e.key === 'ArrowRight') this.stepPhoto(1);
+    if (e.key === 'ArrowLeft') this.stepPhoto(-1);
   }
 
   /** Server trả 422 kèm field → hiện đúng chỗ (server vẫn là nơi validate bắt buộc). */

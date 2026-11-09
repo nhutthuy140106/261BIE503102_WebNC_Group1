@@ -1,0 +1,12 @@
+.dlg { width: 560px; }
+app-seller-steps { display: block; margin: 22px 0 8px; }
+
+/* kiểu thông báo giữa (nhân bản / xóa bài) */
+.dlg.center { width: 480px; padding: 32px 28px 26px; text-align: center; }
+.ring { width: 84px; height: 84px; margin: 0 auto 18px; border-radius: 50%; display: grid; place-items: center; background: #eef0f5; color: var(--ink); box-shadow: 0 0 0 8px #f6f7fa; }
+.ring svg { width: 38px; height: 38px; }
+.ring.danger { background: #fde7e7; color: #e8202a; box-shadow: 0 0 0 8px #fef3f3; }
+.dlg.center h2 { font-size: 21px; }
+.dlg.center > p { margin: 8px 0 0; font-size: 14px; }
+.dlg.center .cbtns { justify-content: center; margin-top: 24px; }
+.dlg.center .cbtns .btn { min-width: 116px; }

@@ -1,37 +1,59 @@
-<app-auth-shell>
-  <h1>Đăng nhập</h1>
-  <p class="why">{{ why }}</p>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-    <label for="phone">Số điện thoại</label>
-    <input id="phone" class="tx" formControlName="phone" name="username" autocomplete="username" inputmode="numeric" maxlength="10"
-           [class.is-invalid]="form.controls.phone.invalid && form.controls.phone.touched" />
-    @if (form.controls.phone.invalid && form.controls.phone.touched) {
-      <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small>
-    }
+<app-auth-shell [showGoogle]="googleName() === null" [centered]="googleName() !== null">
+  @if (googleName() !== null) {
+    <h1>Chỉ còn một bước</h1>
+    <p class="why">Chào {{ googleName() }}! Nhập số điện thoại để hàng xóm liên lạc với bạn khi đặt đơn hoặc nhận việc.</p>
+    <form (ngSubmit)="completeGoogle()" novalidate>
+      <label for="gphone">Số điện thoại</label>
+      <input id="gphone" class="tx" [formControl]="phoneOnly" name="gphone" autocomplete="tel" inputmode="numeric" maxlength="10"
+             [class.is-invalid]="phoneOnly.invalid && phoneOnly.touched" />
+      @if (phoneOnly.invalid && phoneOnly.touched) {
+        <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small>
+      }
+      @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+      <button type="submit" class="go" [disabled]="phoneOnly.invalid || submitting()">Hoàn tất</button>
+    </form>
+  } @else {
+    <h1>Đăng nhập</h1>
+    <p class="why">{{ why }}</p>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <label for="phone">Số điện thoại</label>
+      <input id="phone" class="tx" formControlName="phone" name="username" autocomplete="username" inputmode="numeric" maxlength="10"
+             [class.is-invalid]="form.controls.phone.invalid && form.controls.phone.touched" />
+      @if (form.controls.phone.invalid && form.controls.phone.touched) {
+        <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small>
+      }
 
-    <label for="password">Mật khẩu</label>
-    <app-password-input inputId="password" autocomplete="current-password" formControlName="password"
-                        [invalid]="form.controls.password.invalid && form.controls.password.touched" />
-    @if (form.controls.password.invalid && form.controls.password.touched) {
-      <small class="error">Mật khẩu tối thiểu 6 ký tự.</small>
-    }
+      <label for="password">Mật khẩu</label>
+      <app-password-input inputId="password" autocomplete="current-password" formControlName="password"
+                          [invalid]="form.controls.password.invalid && form.controls.password.touched" />
+      @if (form.controls.password.invalid && form.controls.password.touched) {
+        <small class="error">Mật khẩu tối thiểu 6 ký tự.</small>
+      }
 
-    <div class="rmrow">
-      <label class="remember"><input type="checkbox" formControlName="rememberMe" /> Ghi nhớ đăng nhập</label>
-      <a routerLink="/auth/forgot" class="forgot">Quên mật khẩu?</a>
-    </div>
-
-    @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
-
-    <button type="submit" class="go" [disabled]="form.invalid || submitting()">Đăng nhập</button>
-  </form>
-  @if (demoAccounts.length) {
-    <div class="demo" aria-label="Tài khoản dùng thử">
-      <small>Tài khoản dùng thử (dữ liệu seed) — bấm để điền sẵn</small>
-      <div class="chips">
-        @for (a of demoAccounts; track a.phone) { <button type="button" (click)="fillDemo(a.phone)"><b>{{ a.name }}</b> · {{ a.role }}</button> }
+      <div class="rmrow">
+        <label class="remember"><input type="checkbox" formControlName="rememberMe" /> Ghi nhớ đăng nhập</label>
+        <a routerLink="/auth/forgot" class="forgot">Quên mật khẩu?</a>
       </div>
-    </div>
+
+      @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+
+      <button type="submit" class="go" [disabled]="form.invalid || submitting()">Đăng nhập</button>
+    </form>
+    @if (demoAccounts.length) {
+      <div class="demo" aria-label="Tài khoản dùng thử">
+        <small>Tài khoản dùng thử (dữ liệu seed) — bấm để điền sẵn</small>
+        <div class="chips">
+          @for (a of demoAccounts; track a.phone) { <button type="button" (click)="fillDemo(a.phone)"><b>{{ a.name }}</b> · {{ a.role }}</button> }
+        </div>
+      </div>
+    }
   }
-  <p class="alt" foot>Chưa có tài khoản? <a routerLink="/auth/register">Đăng ký</a></p>
+  <!-- [foot] phải nằm ngoài @if thì mới được đưa xuống cuối thẻ -->
+  <p class="alt" foot>
+    @if (googleName() !== null) {
+      <a href="javascript:void(0)" (click)="cancelGoogle()">Quay lại đăng nhập</a>
+    } @else {
+      Chưa có tài khoản? <a routerLink="/auth/register" [queryParams]="carry()">Đăng ký</a>
+    }
+  </p>
 </app-auth-shell>

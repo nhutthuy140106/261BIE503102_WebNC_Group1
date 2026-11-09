@@ -84,6 +84,7 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
         ]
       ]
     },
+    dishList: true,
     opts: [
       {
         name: 'Món mặn hôm nay',
@@ -642,7 +643,6 @@ export const POST_TEMPLATES: Record<TemplateKey, PostTemplate> = {
       sched: 'Nhận lịch 7:00 – 17:00, thứ 2 – thứ 7'
     },
     notePh: 'Ví dụ: chìa khóa gửi ở quầy lễ tân…',
-    safety: true,
     steps: [
       'Đã gửi',
       'Chờ xác nhận',

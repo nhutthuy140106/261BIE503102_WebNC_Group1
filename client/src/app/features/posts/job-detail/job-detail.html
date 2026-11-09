@@ -1,14 +1,10 @@
 @if (loading()) {
   <app-loader />
 } @else if (job(); as j) {
-  <div class="crumb"><button type="button" class="back" (click)="back()">Quay lại</button><span>·</span><a routerLink="/">Trang chủ</a><span>›</span><span>Việc làm</span>@if (j.category) { <span>›</span><span>{{ j.category }}</span> }</div>
+  <div class="crumb"><button type="button" class="back" (click)="back()">Quay lại</button><span>·</span><a routerLink="/">Trang chủ</a><span>›</span><span>Việc làm</span></div>
 
   <div class="jobhero">
     <div>
-      <div class="kindline">
-        <span class="cat">Việc làm@if (j.category) { · {{ j.category }} }</span>
-        @if (j.job?.status === 'open') { <span class="jst">Đang mở · {{ j.job?.offers }} đề nghị</span> } @else { <span class="jst closed">Đã có người nhận</span> }
-      </div>
       <h1>{{ j.title }}</h1>
       <div class="meta">
         <span>{{ j.block }}@if (j.distance != null) { · {{ j.distance | distance }} }</span>
@@ -28,23 +24,28 @@
 
   <div class="kfacts">
     <div><svg class="i"><use href="#clock" /></svg><span><b>Thời gian làm</b>{{ j.job | jobWhen }}</span></div>
-    <div><svg class="i"><use href="#pin" /></svg><span><b>Địa điểm</b>{{ j.block }}</span></div>
-    <div><svg class="i"><use href="#users" /></svg><span><b>Số người cần</b>1 người</span></div>
-    <div><svg class="i"><use href="#receipt" /></svg><span><b>Thanh toán</b>Tiền mặt</span></div>
+    <div><svg class="i"><use href="#pin" /></svg><span><b>Địa điểm</b>{{ j.block }}@if (j.job?.building) { · {{ j.job?.building }} }</span></div>
+    <div><svg class="i"><use href="#users" /></svg><span><b>Số người cần</b>{{ j.job?.head ?? 1 }} người</span></div>
+    <div><svg class="i"><use href="#receipt" /></svg><span><b>Thanh toán</b>{{ j.job?.payBy === 'transfer' ? 'Chuyển khoản' : 'Tiền mặt' }}</span></div>
   </div>
 
   <div class="cols">
     <div>
+      @if (photos().length) {
+        <section class="block">
+          <h2>Ảnh minh họa <small>({{ photos().length }})</small></h2>
+          <div class="jgal" [attr.data-n]="photos().length">
+            @for (src of photos(); track src; let i = $index) {
+              <button type="button" class="jph" (click)="lightbox.set(i)" [attr.aria-label]="'Xem ảnh ' + (i + 1)"><img [src]="src" alt="" loading="lazy" /></button>
+            }
+          </div>
+        </section>
+      }
       <section class="block"><h2>Việc cần làm</h2><div class="desc"><p>{{ j.description }}</p></div></section>
-      <section class="block">
-        <h2>Địa điểm</h2>
-        <div class="mapbox"><div class="pinbig"><svg class="i"><use href="#pin" /></svg><b>{{ j.block }}</b></div></div>
-        <p class="hintp">Địa chỉ chính xác gửi sau khi chủ việc chọn bạn.</p>
-      </section>
 
       <section class="block" id="qa">
         <h2>Hỏi đáp <small>({{ qa().length }})</small></h2>
-        <p class="qa-note"><svg class="i"><use href="#shield" /></svg><span>Câu hỏi và trả lời hiện công khai để mọi người cùng xem, nên đừng ghi số điện thoại hay địa chỉ ở đây. Muốn hỏi riêng thì bấm <b>Nhắn tin</b> ở phần Người đăng việc.</span></p>
+        <p class="qa-note"><svg class="i"><use href="#shield" /></svg><span>Câu hỏi và trả lời hiện công khai nên lưu ý bảo mật thông tin cá nhân của bạn.</span></p>
         @for (q of qa(); track q._id) {
           <div class="qa">
             <app-avatar [name]="q.authorName" [size]="34" />
@@ -94,23 +95,23 @@
     <!-- ===== Khung đề nghị nhận việc ===== -->
     <aside class="order offerbox">
       <div class="price">{{ j.price | vnd }} <span>/ {{ j | unit }}</span></div>
-      <div class="who">{{ j.job?.offers }} người đã đề nghị · cần 1 người</div>
+      <div class="who">{{ j.job?.offers }} người đã đề nghị · cần {{ j.job?.head ?? 1 }} người</div>
 
       @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
 
       @if (myOffer(); as o) {
         <div class="state"><b>Bạn đã gửi đề nghị</b>Đang chờ {{ j.sellerName }} xem và chọn người. Bạn sẽ nhận thông báo khi có kết quả.</div>
-        <div class="stepper mini" [style.--n]="stepLabels.length">@for (n of stepLabels; track $index) { @if ($index > 0) { <i class="ln"></i> } <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span><span class="slbl">{{ n }}</span></div> }</div>
+        <div class="stepper mini" [style.--n]="stepLabels.length">@for (n of stepLabels; track $index) { @if ($index > 0) { <i class="ln"></i> } <div class="s" [class.cur]="$index === 0"><span class="dot" [attr.title]="n" [attr.aria-label]="n">{{ $index + 1 }}</span></div> }</div>
         <button type="button" class="primary" (click)="openOrder()">Xem trong Đơn hàng</button>
         @if (o.state === 'offered') { <button type="button" class="ghostbtn" (click)="withdraw()">Rút đề nghị</button> }
       } @else if (j.job?.status === 'open') {
         <form [formGroup]="offerForm" (ngSubmit)="askConfirm()">
           <div class="field">
             <label>Bạn làm được lúc nào</label>
-            <div class="slot2" formArrayName="slots">
+            <div class="slot2" [class.free]="freeSlots()" formArrayName="slots">
               @for (s of slotOptions(); track s.value; let i = $index) {
                 <label class="slot" [class.on]="offerForm.controls.slots.at(i).value">
-                  <input type="checkbox" [formControlName]="i" />{{ s.label }}<small>{{ i === 0 && slotOptions().length > 3 ? 'đúng giờ chủ việc cần' : 'có thể làm' }}</small>
+                  <input type="checkbox" [formControlName]="i" />{{ s.label }}@if (s.sub) { <small>{{ s.sub }}</small> }
                 </label>
               }
             </div>
@@ -151,7 +152,7 @@
           <div class="done">
             <h3>Đã gửi đề nghị!</h3>
             <p>{{ j.sellerName }} sẽ xem và chọn người. Gửi đề nghị <b>chưa phải là đã nhận việc</b>, bạn sẽ nhận thông báo khi có kết quả.</p>
-            <div class="stepper mini" [style.--n]="stepLabels.length">@for (n of stepLabels; track $index) { @if ($index > 0) { <i class="ln"></i> } <div class="s" [class.cur]="$index === 0"><span class="dot">{{ $index + 1 }}</span><span class="slbl">{{ n }}</span></div> }</div>
+            <div class="stepper mini" [style.--n]="stepLabels.length">@for (n of stepLabels; track $index) { @if ($index > 0) { <i class="ln"></i> } <div class="s" [class.cur]="$index === 0"><span class="dot" [attr.title]="n" [attr.aria-label]="n">{{ $index + 1 }}</span></div> }</div>
             <div class="btns"><button type="button" class="ghost" (click)="confirm.set(false)">Quay lại</button><button type="button" class="go" (click)="openOrder()">Xem trong Đơn hàng</button></div>
           </div>
         } @else {
@@ -168,5 +169,17 @@
     <h1>Việc không tồn tại</h1>
     @if (error()) { <p>{{ error() }}</p> }
     <a routerLink="/search" [queryParams]="{ kind: 'job' }" class="btn">Xem việc khác</a>
+  </div>
+}
+
+@if (lightbox() !== null) {
+  <div class="lb">
+    <div class="lbtop"><span>{{ lightbox()! + 1 }} / {{ photos().length }}</span><button type="button" class="x" (click)="lightbox.set(null)" aria-label="Đóng">✕</button></div>
+    <div class="stage">
+      <button type="button" class="nav" (click)="stepPhoto(-1)" aria-label="Ảnh trước">‹</button>
+      <img class="big" [src]="photos()[lightbox()!]" alt="" />
+      <button type="button" class="nav" (click)="stepPhoto(1)" aria-label="Ảnh sau">›</button>
+    </div>
+    <div class="thumbs">@for (src of photos(); track src; let i = $index) { <img [src]="src" alt="" [class.on]="i === lightbox()" (click)="lightbox.set(i)" /> }</div>
   </div>
 }

@@ -62,6 +62,8 @@ export interface Order {
   issue?: OrderIssue | null;
   rated?: { s: number; t: string } | null;
   returnRequested?: string;
+  /** Đơn đặt từ bài của khu Bán: người bán xử lý thật ở Giao dịch, không dùng nút mô phỏng */
+  sellerLinked?: boolean;
   /** Việc đã nhận: đã bấm xác nhận nhận tiền công */
   paid?: boolean;
 }
@@ -100,6 +102,8 @@ export interface OrderDetail {
   quantityLabel?: string;
   /** Đồ ăn: các món đã chọn, mỗi món một số lượng (tên nhóm món ở `itemsLabel`) */
   items?: { name: string; qty: number }[];
+  /** Đồ uống: từng dòng đã chọn, `price` = giá một ly đã gồm tùy chỉnh */
+  cups?: { name: string; option: string; qty: number; price: number }[];
   itemsLabel?: string;
   unit?: string;
   address?: string;

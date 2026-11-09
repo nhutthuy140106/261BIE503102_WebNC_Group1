@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { USE_MOCK } from '../../../core/config/api.config';
 import { Post, PostKind } from '../../../core/models/post';
 import { AreaService } from '../../../core/services/area';
+import { inArea } from '../../../core/utils/post-area';
 import { PostService, matches } from '../../../core/services/post';
 import { SavedService } from '../../../core/services/saved';
 
@@ -55,7 +56,7 @@ export class SearchResults implements OnInit {
   protected readonly draftMin = signal('');
   protected readonly draftMax = signal('');
 
-  private readonly byTerm = computed(() => this.all().filter((p) => matches(p, { q: this.term() || undefined })));
+  private readonly byTerm = computed(() => this.all().filter((p) => inArea(p, this.area.current()) && matches(p, { q: this.term() || undefined })));
   protected readonly counts = computed(() => {
     const list = this.byTerm();
     return Object.fromEntries(TABS.map((t) => [t.key, t.key === 'all' ? list.length : list.filter((p) => p.kind === t.key).length])) as Record<Tab, number>;
@@ -99,8 +100,6 @@ export class SearchResults implements OnInit {
       return 0;
     });
   });
-  protected readonly local = computed(() => this.matched().filter((p) => p.area === this.area.current()));
-  protected readonly nearby = computed(() => this.matched().filter((p) => p.area !== this.area.current()));
   /** Ô nhập khoảng giá tự gõ: ẩn sau liên kết "Tự nhập" cho đỡ rối */
   protected readonly manual = signal(false);
   protected readonly hasFilter = computed(() => this.min() != null || this.max() != null || this.rate() > 0 || this.xuOnly() || this.kind() !== 'all');

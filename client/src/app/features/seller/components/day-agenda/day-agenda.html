@@ -1,0 +1,29 @@
+<div class="cal" #box>
+  <div class="cal-in" [style.height.px]="(H1 - H0) * PX">
+    @for (h of hours; track h; let i = $index) {
+      <div class="hr" [style.top.px]="i * PX"><span>{{ h }}:00</span></div>
+    }
+    @if (open(); as o) {
+      <div class="band" [style.top.px]="o.top" [style.height.px]="o.h"><span>{{ o.text }}</span></div>
+    } @else {
+      <div class="band off" [style.top.px]="0" [style.height.px]="(H1 - H0) * PX"><span>Hôm nay nghỉ bán</span></div>
+    }
+    @if (now() !== null) { <div class="nowline" [style.top.px]="now()" title="Bây giờ"></div> }
+
+    @for (s of stacks(); track s.time + s.col) {
+      <div class="slot" [class.deck]="s.items.length > 1" [style.top.px]="s.top" [style.height.px]="s.h"
+        [style.left]="'calc(' + s.col + ' * 100% / ' + s.n + ')'" [style.width]="'calc(100% / ' + s.n + ')'">
+        @if (s.items.length > 1) { <span class="cnt">{{ s.items.length }} đơn</span> }
+        @for (a of s.items; track a.key; let i = $index) {
+          <a class="mc" [class.job]="a.kind === 'job'" [class.fin]="a.done" [style.--i]="i" [routerLink]="a.link" [title]="a.item">
+            @if (a.image) { <img [src]="a.image" alt="" /> } @else { <img class="av" [src]="a.avatar" alt="" /> }
+            <div class="n"><b>{{ a.who }}</b><time>{{ a.time }}</time></div>
+            <div class="l"><svg class="i"><use href="#pin" /></svg>{{ a.address }}</div>
+            <div class="l"><svg class="i"><use href="#phone" /></svg>{{ a.phone }}</div>
+          </a>
+        }
+      </div>
+    }
+  </div>
+  @if (!stacks().length) { <p class="calempty">Không có lịch ở mảng này hôm nay.</p> }
+</div>

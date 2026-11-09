@@ -1,45 +1,59 @@
-<section class="hub">
-  <header class="hd">
-    <img src="assets/clean/ride_point2.png" alt="" width="96" height="96" />
-    <div>
-    <h1>Vườn AntGo</h1>
-    <p>Chơi vui mỗi ngày để nhận thêm Xu — dùng đổi voucher giảm giá khi đặt đơn.</p>
+<section class="sky">
+  <div class="panel">
+    <img class="mascot" src="assets/garden/pet-7.png" alt="" width="150" height="154" />
+
+    <header class="hd">
+      <h1>Vườn AntGo</h1>
+      <p>Chơi vui mỗi ngày để nhận thêm Xu, dùng đổi voucher giảm giá khi đặt đơn.</p>
+    </header>
+
     <div class="cap" role="status">
+      <img src="assets/clean/antxu.png" alt="" width="30" height="30" />
       <span>Xu nhận từ game hôm nay</span>
       <div class="bar"><i [style.width.%]="xu.gameToday() / cap * 100"></i></div>
       <b>{{ xu.gameToday() }}/{{ cap }}</b>
     </div>
+
+    <div class="grid">
+      <a routerLink="hai-xu" class="game">
+        <img class="art coin" src="assets/clean/antxu.png" alt="" />
+        <div class="txt">
+          <h2>Hái xu</h2>
+          <p>30 giây hứng xu rơi từ cây xoài. Xu vàng +5, tránh bọ xít!</p>
+        </div>
+        <span class="go" aria-hidden="true">›</span>
+        <span class="meta">Còn {{ garden.coinPlaysLeft() }}/{{ maxPlays }} lượt hôm nay · Kỷ lục {{ garden.best() }}</span>
+      </a>
+      <a routerLink="tuoi-cay" class="game">
+        <img class="art" [src]="'assets/garden/tree-' + (garden.tree() + 1) + '.png'" alt="" />
+        <div class="txt">
+          <h2>Chăm cây</h2>
+          <p>Tưới nước mỗi ngày, 7 ngày cây ra trái xoài, thu hoạch nhận {{ treeReward }} Xu.</p>
+        </div>
+        <span class="go" aria-hidden="true">›</span>
+        <span class="meta">Ngày {{ garden.tree() + 1 }}/7 · {{ garden.tree() >= treeFull ? (garden.canHarvest() ? 'Sẵn sàng thu hoạch' : 'Mai thu hoạch') : (garden.waterLeft() > 0 ? 'Hôm nay chưa tưới' : 'Hôm nay đã tưới') }}</span>
+      </a>
+      <a routerLink="thu-cung" class="game">
+        <img class="art" src="assets/garden/pet-1.png" alt="" />
+        <div class="txt">
+          <h2>Nuôi thú cưng</h2>
+          <p>Ấp trứng và chăm bé kiến mỗi ngày, 7 ngày bé lớn thành kiến trưởng thành.</p>
+        </div>
+        <span class="go" aria-hidden="true">›</span>
+        <span class="meta">Ngày {{ garden.pet() + 1 }}/7 · {{ garden.petSad() ? 'Bé đang nhớ bạn' : garden.petClaimed() ? 'Hôm nay đã chăm xong' : garden.petDone().length + '/3 việc hôm nay' }}</span>
+      </a>
     </div>
-  </header>
 
-  <div class="grid">
-    <a routerLink="hai-xu" class="game">
-      <div class="art"><img src="assets/clean/antxu.png" alt="" width="64" height="64" /></div>
-      <h2>Hái xu</h2>
-      <p>30 giây hứng xu rơi từ cây xoài. Xu vàng +5, tránh bọ xít!</p>
-      <span class="meta">Còn {{ garden.coinPlaysLeft() }}/{{ maxPlays }} lượt hôm nay · Kỷ lục {{ garden.best() }}</span>
-    </a>
-    <a routerLink="tuoi-cay" class="game">
-      <div class="art"><svg class="i" width="34" height="34"><use href="#bolt" /></svg></div>
-      <h2>Tưới cây</h2>
-      <p>Chăm cây xoài lớn dần mỗi ngày, thu hoạch nhận {{ treeReward }} Xu.</p>
-      <span class="meta">Cây {{ garden.tree() }}/{{ treeFull }} · Còn {{ garden.waterLeft() }} lượt tưới hôm nay</span>
-    </a>
-    <a routerLink="thu-cung" class="game">
-      <div class="art"><svg class="i" width="34" height="34"><use href="#heart" /></svg></div>
-      <h2>Nuôi thú cưng</h2>
-      <p>Cho ăn, chơi cùng và tắm cho bé mỗi ngày để nhận thưởng.</p>
-      <span class="meta">{{ garden.petClaimed() ? 'Hôm nay đã nhận thưởng' : garden.petDone().length + '/3 việc hôm nay' }}</span>
-    </a>
-  </div>
-
-  @if (garden.codes().length) {
     <section class="codes">
-      <h2>Mã giảm giá bạn đã mở khóa <small>(mô phỏng)</small></h2>
-      <ul>
-        @for (c of garden.codes(); track c.code) { <li><code>{{ c.code }}</code> <span>Mốc {{ c.at }} điểm · giảm 5%</span></li> }
-      </ul>
+      <div class="ct"><i class="tk" aria-hidden="true">%</i><h2>Mã giảm giá bạn đã mở khóa <small>(mô phỏng)</small></h2></div>
+      @if (garden.codes().length) {
+        <ul>
+          @for (c of garden.codes(); track c.code) { <li><code>{{ c.code }}</code><span>Mốc {{ c.at }} điểm · giảm 5%</span></li> }
+        </ul>
+      } @else {
+        <p class="none">Chơi Hái xu đạt 10 điểm một lượt để mở mã đầu tiên.</p>
+      }
     </section>
-  }
-  <p class="foot">Mốc Hái xu: @for (m of milestones; track m.at) { <b>{{ m.at }}</b>{{ $last ? '' : ' · ' }} } điểm một lượt mở khóa huy hiệu và mã giảm 5%.</p>
+    <p class="foot">Mốc Hái xu: @for (m of milestones; track m.at) { <b>{{ m.at }}</b>{{ $last ? '' : ' · ' }} } điểm một lượt mở khóa huy hiệu và mã giảm 5%.</p>
+  </div>
 </section>

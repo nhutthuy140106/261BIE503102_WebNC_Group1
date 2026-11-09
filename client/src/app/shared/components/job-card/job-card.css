@@ -2,7 +2,8 @@
 /* Thẻ việc làm — bê từ design/mockups/home-v5.html (.item.jobc): mảng be thay ảnh, người đăng + tiền công in to */
 .item { height: 100%; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; cursor: pointer; transition: box-shadow .2s, transform .2s; }
 .item:hover { box-shadow: 0 14px 30px -18px rgba(34, 48, 74, .35); transform: translateY(-2px); }
-.ph { position: relative; aspect-ratio: 4 / 3; display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; padding: 14px 16px 16px; background: var(--soft); overflow: hidden; }
+.ph { position: relative; aspect-ratio: 4 / 3; display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; padding: 14px 16px 16px; background: var(--soft); }
+.ph > * { flex: none; }
 .jc-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .jc-top span { min-width: 0; font-size: 11.5px; color: var(--smoke); line-height: 1.25; }
 .jc-top b { display: block; font-size: 13px; color: var(--ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -24,10 +25,23 @@ h3 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.35; display: -
 .jst.closed::before { background: var(--fog); }
 .pr { font-size: 15px; font-weight: 700; color: var(--ink); }
 .pr span { font-size: 12px; font-weight: 400; color: var(--smoke); }
-.jc-foot { justify-content: flex-end; }
+/* Một bố cục duy nhất: nhãn "Việc làm" + giờ làm luôn cùng một hàng; chip ảnh nằm ở hàng người đăng; mô tả luôn chừa 3 dòng → mọi thẻ thẳng hàng */
+.jc-foot { flex-wrap: nowrap; align-items: center; gap: 8px; }
+.jc-due { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.jc-desc { min-height: calc(1.45em * 3); }
+.jc-top { padding-right: 36px; } /* chừa chỗ cho nút tim */
+.jc-top .jc-who { flex: 1; }
+.jc-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 6px; }
+.jc-bottom .jc-foot { margin-top: 0; }
+.jc-bottom .jc-ph { align-self: flex-end; padding: 3px 8px; }
+.item { container-type: inline-size; }
+@container (max-width: 260px) { .jc-due svg { display: none; } .jc-due { padding: 4px 8px; } }
+.jc-tag { padding: 3px 8px; border-radius: 6px; background: rgba(255, 255, 255, .92); font-size: 11px; font-weight: 600; }
 
 .meta { flex-wrap: nowrap; align-items: center; }
-.meta > span:first-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.meta .loc { min-width: 0; }
+.meta .loc svg { flex: none; }
+.meta .loc-t { display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .jst { flex: none; white-space: nowrap; }
 
 .item { position: relative; }
@@ -35,3 +49,5 @@ h3 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.35; display: -
 .save svg { width: 16px; height: 16px; }
 .save:hover { background: #fff; }
 .save.on { color: var(--accent); }
+.jc-ph { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px; background: rgba(255, 255, 255, .7); font-size: 11.5px; font-weight: 600; color: var(--smoke); white-space: nowrap; }
+.jc-ph svg { width: 13px; height: 13px; }

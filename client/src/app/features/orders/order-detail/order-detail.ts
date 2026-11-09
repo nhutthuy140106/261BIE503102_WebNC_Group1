@@ -1,4 +1,5 @@
-import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { useMock } from '../../../core/config/api.config';
 import { AppError } from '../../../core/models/api';
@@ -60,6 +61,7 @@ export class OrderDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly orderService = inject(OrderService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly offerService = inject(JobOfferService);
   private readonly reviewService = inject(ReviewService);
   private readonly postService = inject(PostService);
@@ -115,6 +117,12 @@ export class OrderDetail implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => this.load(params.get('id') ?? ''));
+    // người bán đổi đơn ở tab khác: cập nhật ngay, không hiện vòng tải
+    this.orderService.changed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      const id = this.order()?._id;
+      if (id) this.orderService.getOrder(id).subscribe({ next: (o) => this.order.set(o), error: () => undefined });
+      if (id && this.offer()) this.offerService.get(id).subscribe({ next: (o) => this.offer.set(o), error: () => undefined });
+    });
   }
 
   private load(id: string): void {
@@ -359,6 +367,7 @@ export class OrderDetail implements OnInit {
   /** Các nút "Mô phỏng phía người bán" (chỉ ở bản mẫu) */
   protected placedSims(o: Order): { id: string; label: string }[] {
     const s: { id: string; label: string }[] = [];
+    if (o.sellerLinked) return s;
     const n = o.counterpartName;
     const st = o.status as string;
     const k = this.kind(o);
@@ -618,6 +627,8 @@ export class OrderDetail implements OnInit {
   }
 
   protected receivedSims(o: Order, of: Offer): { id: string; label: string }[] {
+    // đề nghị thật: người đăng tự xử lý ở phía Bán, chỉ đề nghị mẫu mới có nút mô phỏng
+    if (of.workerId) return [];
     const n = o.counterpartName;
     if (of.state === 'reported') return [{ id: 'sim-confirm', label: 'Mô phỏng: ' + n + ' xác nhận hoàn thành' }];
     if (of.state === 'offered') return [{ id: 'sim-pick', label: 'Mô phỏng: ' + n + ' chọn bạn' }, { id: 'sim-reject', label: 'Mô phỏng: ' + n + ' chọn người khác' }];

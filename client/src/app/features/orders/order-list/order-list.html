@@ -31,8 +31,8 @@
           <span class="ost" [ngClass]="'s-' + dot(o)">{{ label(o) }}</span>
         </div>
 
-        <a class="body" [routerLink]="['/orders', o._id]">
-          <app-order-thumb [image]="o.image" [category]="o.category" [avatar]="o.counterpartAvatar" [name]="o.counterpartName" />
+        <a class="body" [class.noimg]="!(o.image || o.type === 'placed')" [routerLink]="['/orders', o._id]">
+          @if (o.image || o.type === 'placed') { <app-order-thumb [image]="o.image" [category]="o.category" [avatar]="o.counterpartAvatar" [name]="o.counterpartName" /> }
           <span class="main">
             <h3>{{ o.postTitle }}</h3>
             <span class="sub">{{ when(o) }}</span>

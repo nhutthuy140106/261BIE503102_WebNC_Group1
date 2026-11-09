@@ -25,11 +25,6 @@
 .top .tx b { font-size: 16px; }
 .ctxlink { margin-left: auto; flex: none; font-size: 13.5px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; color: var(--ink); }
 .messages { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; padding: 16px 20px; margin: 0; list-style: none; }
-.ctxcard { align-self: center; width: min(420px, 100%); margin-bottom: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: #fff; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; }
-.ctxcard small { display: block; color: var(--smoke); font-size: 12px; }
-.ctxcard b { font-size: 14.5px; }
-.ctxcard a { font-size: 13.5px; font-weight: 600; padding: 8px 14px; border-radius: 10px; background: var(--ink); color: #fff; }
-.ctxcard p { grid-column: 1 / -1; margin: 4px 0 0; font-size: 12.5px; color: var(--smoke); }
 .stamp { align-self: center; margin: 10px 0 6px; font-size: 12px; color: var(--smoke); }
 .msg { display: flex; }
 .msg span { max-width: 68%; padding: 8px 14px; border-radius: 18px; background: #F0F2F5; line-height: 1.4; overflow-wrap: anywhere; }
@@ -64,16 +59,7 @@
 .tabs button { height: 34px; padding: 0 16px; border-radius: 999px; background: #F0F2F5; color: var(--ink); font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
 .tabs button.on { background: var(--ink); color: #fff; }
 .tabs i { font-style: normal; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 11.5px; display: inline-grid; place-items: center; }
-.ctxcard { grid-template-columns: auto 1fr auto; gap: 4px 14px; padding: 14px 16px; border: 0; background: #F6F7F9; border-radius: 16px; }
-.ctxcard .ci { width: 42px; height: 42px; border-radius: 12px; background: #fff; display: grid; place-items: center; color: var(--ink); }
-.ctxcard .ci svg { width: 22px; height: 22px; }
-.ctxcard .cx { display: grid; gap: 1px; min-width: 0; }
-.ctxcard a { border-radius: 999px; padding: 9px 16px; }
-.ctxcard p { grid-column: 1 / -1; margin: 6px 0 0; text-align: center; }
 
-.ctxcard app-order-thumb ::ng-deep .th { width: 64px; height: 56px; border-radius: 10px; }
-.ctxcard app-order-thumb ::ng-deep .ph small { display: none; }
-.ctxcard .cx b { font-size: 15px; }
 
 /* học theo Facebook Messenger */
 .tabs { gap: 4px; }
@@ -234,3 +220,27 @@
 .tabs button.on { background: var(--ink); color: #fff; }
 .thread.blank img { left: 0; width: 240px; }
 .thread.blank img { width: 180px; }
+
+/* thanh đơn ghim dưới tên người đang nhắn */
+.od { font-weight: 700; color: #B8851A; }
+.od i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: currentColor; margin-right: 5px; }
+.od.s-go { color: #2E7D4F; }
+.od.s-act { color: var(--accent); }
+.od.s-end { color: var(--smoke); }
+
+/* thẻ đơn đầu luồng chat (cùng kiểu Messenger khu Bán) */
+.ctxrow { align-self: center; width: 100%; max-width: 540px; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.ordcard { flex: 1; min-width: 0; position: relative; display: grid; padding: 8px 12px 8px 8px; border: 1px solid var(--border); border-radius: 14px; background: #fff; font-size: 13px; box-shadow: 0 6px 16px -12px rgba(34, 48, 74, .3); }
+.ordmain { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 4px 6px; border-radius: 10px; color: var(--ink); text-decoration: none; cursor: pointer; }
+.ordmain:hover { background: #F4F5F7; }
+.ordcard app-order-thumb { flex: none; }
+.ordcard app-order-thumb ::ng-deep .th { width: 44px; height: 44px; border-radius: 10px; }
+.ordcard app-order-thumb ::ng-deep .ph small { display: none; }
+.ordcard .cc { flex: 1; min-width: 0; }
+.ordcard .cc b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
+.ordcard .cc small { color: var(--smoke); font-size: 12.5px; }
+.ordcard > svg { width: 18px; height: 18px; color: var(--smoke); flex: none; }
+.redo { color: var(--accent); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.redo:hover { opacity: .75; }
+.omore { margin: 0 auto; height: 30px; padding: 0 14px; border: 1px solid var(--border); border-radius: 999px; background: #fff; font: inherit; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.omore:hover { background: #F4F5F7; }

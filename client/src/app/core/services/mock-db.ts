@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map, of, tap } from 'rxjs';
+import { Observable, Subject, map, of, tap } from 'rxjs';
 import { DATASET_BASE } from '../config/api.config';
 
 const PREFIX = 'antgo_mock_';
@@ -16,8 +16,21 @@ const DATA_VERSION = '2026-10-25-a';
 export class MockDb {
   private readonly http = inject(HttpClient);
   private readonly mem = new Map<string, unknown[]>();
+  /** Tab khác của cùng trình duyệt vừa ghi dữ liệu: phát tên bộ dữ liệu để trang đang mở đọc lại */
+  readonly changes = new Subject<string>();
 
   constructor() {
+    try {
+      window.addEventListener('storage', (e) => {
+        if (e.key === null) return this.mem.clear();
+        if (!e.key.startsWith(PREFIX) || e.key === 'antgo_mock_ver') return;
+        const name = e.key.slice(PREFIX.length);
+        this.mem.delete(name);
+        this.changes.next(name);
+      });
+    } catch {
+      /* không có window (test): bỏ qua */
+    }
     try {
       if (localStorage.getItem('antgo_mock_ver') !== DATA_VERSION) {
         this.reset();

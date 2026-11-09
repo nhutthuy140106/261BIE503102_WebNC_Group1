@@ -1,0 +1,44 @@
+<header class="ohead">
+  <h1>Bài đăng</h1>
+  <div class="newwrap">
+    <button type="button" class="btn primary" (click)="newOpen.set(!newOpen())"><svg class="i"><use href="#plus" /></svg>Đăng bài mới</button>
+    @if (newOpen()) {
+      <div class="newmenu">
+        @for (n of newKinds; track n[0]) {
+          <a routerLink="/seller/posts/new" [queryParams]="{ type: n[0] }"><svg class="i"><use [attr.href]="'#' + n[1]" /></svg><span><b>{{ n[2] }}</b><small>{{ n[3] }}</small></span></a>
+        }
+      </div>
+    }
+  </div>
+</header>
+
+<!-- cùng kiểu thanh tab viên của Giao dịch / Đơn hàng; lọc trạng thái dùng nút thả xuống như "Giá" ở trang tìm kiếm -->
+<div class="tools">
+  <nav class="tabs" aria-label="Lọc theo mảng">
+    <button type="button" [class.on]="kind() === 'all'" (click)="kind.set('all')">Tất cả</button>
+    @for (k of kinds; track k) {
+      <button type="button" [class.on]="kind() === k" (click)="kind.set(k)">{{ kindLabel[k] }}</button>
+    }
+  </nav>
+  <app-sort-menu [bar]="true" [options]="statusOptions" [value]="status() === 'all' ? '' : status()" placeholder="Trạng thái" (valueChange)="status.set($any($event))" />
+</div>
+
+@if (groups().length) {
+  @for (g of groups(); track g.kind) {
+    <section class="grp">
+      <div class="lgh"><b>{{ lane[g.kind].title }}</b></div>
+      <div class="cards">
+        @for (p of g.posts; track p.id) {
+          <app-seller-post-card [post]="p" [manage]="true" (toggled)="toggle(p)" (promoted)="promote(p)"
+            (priced)="price(p, $event)" (duplicated)="duplicate(p)" (removed)="remove(p)" />
+        }
+      </div>
+    </section>
+  }
+} @else {
+  <div class="empty2"><img src="assets/clean/peek.png" alt="" />Không có bài nào khớp bộ lọc.</div>
+}
+@if (askView(); as v) {
+  <app-seller-confirm-dialog [heading]="v.heading" [message]="v.message" [icon]="v.icon" [danger]="v.danger" okLabel="Xác nhận" (ok)="confirmAsk()" (closed)="ask.set(null)" />
+}
+<p class="demo-note">Bản mẫu · bấm vào giá để sửa nhanh · <a href="#" (click)="reset($event)">Đặt lại dữ liệu mẫu</a></p>

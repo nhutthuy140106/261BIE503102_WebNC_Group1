@@ -30,10 +30,16 @@ export function formatDate(iso: string): string {
   return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
 }
 
-/** Thời gian làm của một việc, MỘT kiểu chung: "24/10/2026 · 06:30", "28/10/2026 – 30/10/2026"; việc lặp tuần thì dùng chữ `due`. */
+/**
+ * Thời gian làm của một việc, MỘT kiểu chung: "24/10/2026 · 06:30", "24/10/2026 · 08:30 – 11:00",
+ * nhiều ngày "28/10/2026 – 30/10/2026 · 08:30 – 11:00"; không cố định giờ chỉ ghi ngày; việc lặp tuần thì dùng chữ `due`.
+ */
 export function jobWhen(job: { due: string; start?: string; end?: string; allDay?: boolean } | undefined | null): string {
   if (!job) return '';
   if (!job.start) return job.due;
-  const f = job.allDay ? formatDate : formatDateTime;
-  return job.end ? f(job.start) + ' – ' + f(job.end) : f(job.start);
+  if (job.allDay) return job.end ? formatDate(job.start) + ' – ' + formatDate(job.end) : formatDate(job.start);
+  if (!job.end) return formatDateTime(job.start);
+  const [from, to] = [formatDate(job.start), formatDate(job.end)];
+  const [h1, h2] = [formatDateTime(job.start).split(' · ')[1], formatDateTime(job.end).split(' · ')[1]];
+  return (from === to ? from : from + ' – ' + to) + ' · ' + (h1 === h2 ? h1 : h1 + ' – ' + h2);
 }

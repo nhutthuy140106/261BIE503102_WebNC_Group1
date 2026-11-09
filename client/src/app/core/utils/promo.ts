@@ -43,14 +43,14 @@ export function promoLabel(p: Pick<Promo, 'kind' | 'value'>): string {
 }
 
 /** Phút trong ngày (giờ VN) và thứ (0–6) của một thời điểm. */
-function vnParts(ms: number): { min: number; dow: number; dayStart: number } {
+export function vnParts(ms: number): { min: number; dow: number; dayStart: number } {
   const t = ms + VN_OFFSET;
   const dayStart = Math.floor(t / DAY) * DAY; // 0h VN của ngày đó, tính theo "giờ VN giả UTC"
   return { min: Math.floor((t - dayStart) / 60000), dow: new Date(t).getUTCDay(), dayStart };
 }
 
 /** Khung đang chạy tại `ms`? Trả mốc kết thúc (ms epoch) hoặc null. */
-function runningUntil(p: Promo, ms: number): number | null {
+export function runningUntil(p: Pick<Promo, 'from' | 'to' | 'days' | 'active'>, ms: number): number | null {
   if (p.active === false) return null;
   const { min, dow, dayStart } = vnParts(ms);
   const a = toMin(p.from);

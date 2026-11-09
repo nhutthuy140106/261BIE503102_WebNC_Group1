@@ -1,91 +1,79 @@
 <section class="spin">
-  <header class="head">
-    <h1>Chưa biết ăn gì?</h1>
-    <p class="muted">Chọn nhóm món và ngân sách, bấm <b>Quay ngay</b> để AntGo chọn giúp bạn một món đang bán trong khu.</p>
-  </header>
+  <!-- Một màn hình khít dưới thanh menu (như hero trang chủ): nền pastel, tiêu đề, nhóm món + ngân sách, khung quay, nút Quay ngay -->
+  <div class="hero" [class.busy]="spinning()">
+    <!-- ánh nắng (quầng sáng + các tia) -->
+    <div class="sun" aria-hidden="true"></div>
+    <div class="rays" aria-hidden="true"></div>
+    <img class="cloud c1" src="assets/cloud.png" alt="" aria-hidden="true" />
+    <img class="cloud c2" src="assets/cloud.png" alt="" aria-hidden="true" />
+    <img class="cloud c3" src="assets/cloud.png" alt="" aria-hidden="true" />
+    <img class="cloud c4" src="assets/cloud.png" alt="" aria-hidden="true" />
+    <span class="petals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
 
-  @if (loading()) {
-    <app-loader label="Đang mở kho món…" />
-  } @else if (error()) {
-    <div class="notice" role="alert">Không tải được món: {{ error() }}</div>
-  } @else {
-    <div class="tabs" role="tablist">
-      @for (t of tabs; track t.key) {
-        <button type="button" role="tab" class="chip" [class.on]="tab() === t.key" [attr.aria-selected]="tab() === t.key" [disabled]="spinning()" (click)="setTab(t.key)">{{ t.label }}</button>
-      }
-    </div>
+    <div class="inner">
+      <header class="head">
+        <h1>Chưa biết ăn gì?</h1>
+        <p>Chọn nhóm món và ngân sách, bấm <b>Quay ngay</b> để AntGo chọn giúp bạn một món đang bán trong khu.</p>
+      </header>
 
-    <div class="stage" [class.busy]="spinning()">
-      <img class="cloud c1" src="assets/garden/cloud1.png" alt="" />
-      <img class="cloud c2" src="assets/garden/cloud2.png" alt="" />
-      <span class="petals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
-
-      <div class="board" [style.--t]="trackH() + 'px'">
-        <div class="view" #view>
-          <div class="strip" [class.instant]="instant()" [style.transform]="'translateX(' + offset() + 'px)'">
-            @for (p of reel(); track $index) {
-              <div class="item" [class.win]="!spinning() && result() === p && $index === 33" [style.width.px]="itemW()">
-                <div class="card">
-                  @if (p.images.length) { <img class="food" [src]="p.images[0]" [alt]="p.title" loading="lazy" /> } @else { <span class="food ph"></span> }
-                  <img class="rim" src="assets/garden/rim.png" alt="" />
-                </div>
-              </div>
-            } @empty {
-              <p class="empty-reel">Chưa có món nào ở nhóm này.</p>
+      @if (loading()) {
+        <app-loader label="Đang mở kho món…" />
+      } @else if (error()) {
+        <!-- màn hình chờ: con kiến chạy + lý do + nút thử lại (tự thử lại khi có mạng) -->
+        <div class="wait" role="alert">
+          <app-loader [label]="offline() ? 'Mất kết nối, đang chờ có mạng lại…' : 'Chưa tải được món, thử lại nhé'" />
+          <p>{{ offline() ? 'Kiểm tra lại kết nối mạng, AntGo sẽ tự tải lại khi có mạng.' : 'Có lỗi khi tải danh sách món, bấm Thử lại nhé.' }}</p>
+          <button type="button" class="btn" (click)="retry()">Thử lại</button>
+        </div>
+      } @else {
+        <div class="bar2">
+          <div class="tabs" role="tablist">
+            @for (t of tabs; track t.key) {
+              <button type="button" role="tab" class="chip" [class.on]="tab() === t.key" [attr.aria-selected]="tab() === t.key" [disabled]="spinning()" (click)="setTab(t.key)">{{ t.label }}</button>
             }
           </div>
+          <label class="budget">
+            <span>Ngân sách</span>
+            <select [value]="budget()" (change)="setBudget($any($event.target).value)" [disabled]="spinning()" aria-label="Ngân sách">
+              @for (b of budgets; track b.value) { <option [value]="b.value" [selected]="b.value === budget()">{{ b.label }}</option> }
+            </select>
+          </label>
         </div>
-        <img class="frame" src="assets/garden/frame.png" alt="" />
-        <div class="selbox" [class.on]="spinning()" [class.hit]="!spinning() && result()">
-          <img class="sel" src="assets/garden/sel.png" alt="" />
-          <img class="pin top" src="assets/garden/pin.png" alt="" />
-          <img class="pin bot" src="assets/garden/pin.png" alt="" />
+
+        <div class="board">
+          <div class="view" #view>
+            <div class="strip" [class.instant]="instant()" [style.transform]="'translateX(' + offset() + 'px)'">
+              @for (p of reel(); track $index) {
+                <div class="item" [class.win]="!spinning() && result() === p && $index === 33" [style.width.px]="$index === centerIdx() ? centerW() : itemW()">
+                  <div class="card">
+                    @if (p.images.length) { <img class="food" [src]="p.images[0]" [alt]="p.title" loading="lazy" /> } @else { <span class="food ph"></span> }
+                    @if (p.spinPromo) { <span class="ad">QUẢNG BÁ</span> }
+                  </div>
+                </div>
+              } @empty {
+                <p class="empty-reel">Chưa có món nào ở nhóm này.</p>
+              }
+            </div>
+          </div>
+          <img class="frame" src="assets/spin/frame3.png" alt="" />
+          <div class="selbox" [class.on]="spinning()" [class.hit]="!spinning() && result()"></div>
+          <span class="needle" [class.on]="spinning()" [class.hit]="!spinning() && result()" aria-hidden="true"><img src="assets/spin/gem.png" alt="" /></span>
         </div>
-      </div>
 
-      <div class="base">
-        <img class="plat" src="assets/garden/platform.png" alt="" />
-        <button type="button" class="go" aria-label="Quay ngay" [disabled]="spinning() || pool().length === 0" (click)="spin()">
-          <img src="assets/garden/button.png" alt="" />
-        </button>
-      </div>
 
-      <img class="ant" [class.show]="!spinning() && result()" src="assets/garden/ant-joy.png" alt="" />
-    </div>
-    <div class="foot">
-      @if (spinning()) { <app-loader [compact]="true" label="Đang chọn món cho bạn…" /> } @else { <span class="muted">Bấm <b>Quay ngay</b> để AntGo chọn món cho bạn</span> }
-    </div>
-
-    <div class="controls">
-      <label class="budget">
-        <span class="muted">Ngân sách</span>
-        <select [value]="budget()" (change)="setBudget($any($event.target).value)" [disabled]="spinning()" aria-label="Ngân sách">
-          @for (b of budgets; track b.value) { <option [value]="b.value" [selected]="b.value === budget()">{{ b.label }}</option> }
-        </select>
-      </label>
-    </div>
-    <p class="count muted" aria-live="polite">
-      @if (pool().length) { Đang có <b>{{ pool().length }}</b> món hợp điều kiện. } @else { Không có món nào hợp điều kiện — thử nâng ngân sách hoặc đổi nhóm. }
-    </p>
-
-    @if (result(); as r) {
-      <div class="result" role="status">
-        <span class="kick">Hôm nay ăn</span>
-        <a class="rcard" [routerLink]="link(r)">
-          @if (r.images.length) { <img [src]="r.images[0]" [alt]="r.title" /> }
-          <span class="rmeta">
-            <strong>{{ r.title }}</strong>
-            <span class="muted">{{ r.sellerName }}@if (r.block) { · {{ r.block }} }</span>
-            <em>{{ r.price | vnd }}@if (r.priceUnit) {<i>/{{ r.priceUnit }}</i>}</em>
-          </span>
-        </a>
-        <div class="acts">
-          <a class="btn" [routerLink]="link(r)">Xem & đặt món</a>
-          <button type="button" class="btn ghost" (click)="spin()">Quay lại</button>
+        <div class="base">
+          <button type="button" class="go" aria-label="Quay ngay" [disabled]="spinning() || pool().length === 0" (click)="spin()">Quay ngay</button>
         </div>
-      </div>
-    }
+        <div class="foot" aria-live="polite">
+          @if (spinning()) { <span>Đang chọn món cho bạn…</span> }
+          @else if (pool().length) { <span>Đang có <b>{{ pool().length }}</b> món hợp điều kiện</span> }
+          @else { <span>Không có món nào hợp điều kiện, thử nâng ngân sách hoặc đổi nhóm</span> }
+        </div>
+      }
+    </div>
+  </div>
 
+  @if (!loading() && !error()) {
     @if (pool().length) {
       <section class="shelf">
         <h2>Trong kho có gì?</h2>
@@ -99,6 +87,42 @@
           }
         </div>
       </section>
+    }
+  }
+
+  <!-- món trúng hiện dạng popup nổi giữa màn hình -->
+  @if (showResult()) {
+    @if (result(); as r) {
+      <div class="pop" (click)="closeResult()">
+        <!-- ánh sáng phía sau: quầng vàng mềm ôm quanh thẻ + vài đốm lấp lánh -->
+        <div class="halo" aria-hidden="true"></div>
+        <span class="spark s1" aria-hidden="true"></span>
+        <span class="spark s2" aria-hidden="true"></span>
+        <span class="spark s3" aria-hidden="true"></span>
+        <span class="spark s4" aria-hidden="true"></span>
+        <div class="popcard" role="dialog" aria-modal="true" aria-label="Món được chọn cho bạn" (click)="$event.stopPropagation()">
+          <button type="button" class="x" aria-label="Đóng" (click)="closeResult()">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none" /></svg>
+          </button>
+          <img class="ant" src="assets/garden/ant-joy.png" alt="" aria-hidden="true" />
+          <span class="burst" aria-hidden="true">@for (d of dust; track $index) { <i [style.--vx.px]="d.vx" [style.--vy.px]="d.vy" [style.width.px]="d.size" [style.height.px]="d.size" [style.background]="'rgb(' + d.color + ')'" [style.--dur.s]="d.dur" [style.--delay.s]="d.delay"></i> }</span>
+          <p class="kick">Hôm nay ăn món này</p>
+          <div class="shot">
+            @if (r.images.length) { <img [src]="r.images[0]" [alt]="r.title" /> }
+            @if (r.spinPromo) { <span class="ad" title="Người bán đã dùng AntXu để món này dễ xuất hiện hơn trong vòng quay">QUẢNG BÁ</span> }
+          </div>
+          <h2>{{ r.title }}</h2>
+          <p class="price">{{ r.price | vnd }}@if (r.priceUnit) {<i>/{{ r.priceUnit }}</i>}</p>
+          <p class="who">{{ r.sellerName }}@if (r.block) { · {{ r.block }} }</p>
+          <div class="chips">
+            <span>{{ groupLabel(r) }}</span>
+            @if (budgetChip()) { <span>{{ budgetChip() }}</span> }
+            @if (r.acceptsXu) { <span class="xu">Dùng được Xu</span> }
+          </div>
+          <a class="btn go2" [routerLink]="link(r)">Xem & đặt món</a>
+          <button type="button" class="again" (click)="again()">Quay lại</button>
+        </div>
+      </div>
     }
   }
 </section>

@@ -23,6 +23,8 @@
 
 .body { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 16px; align-items: start; padding: 14px 16px; }
 .body:hover { background: #F7F8FA; }
+/* việc làm không có ảnh: bỏ ô ảnh, chữ sát lề trái */
+.body.noimg { grid-template-columns: minmax(0, 1fr) auto; }
 .main { min-width: 0; display: grid; gap: 4px; align-content: start; }
 .main h3 { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.35; }
 .sub { font-size: 13.5px; color: var(--smoke); }
@@ -44,6 +46,7 @@
 
 @media (max-width: 700px) {
   .body { grid-template-columns: 64px minmax(0, 1fr); }
+  .body.noimg { grid-template-columns: minmax(0, 1fr); }
   .total { grid-column: 1 / -1; text-align: left; display: flex; justify-content: space-between; align-items: baseline; }
   .btns { width: 100%; }
   .btn2 { flex: 1; }

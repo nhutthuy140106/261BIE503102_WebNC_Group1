@@ -1,26 +1,101 @@
 <section class="pg">
   <a routerLink=".." class="back">← Vườn AntGo</a>
-  <h1>Nuôi thú cưng</h1>
-  <p class="sub">Làm đủ {{ tasks.length }} việc mỗi ngày để nhận {{ reward }} Xu.</p>
 
-  <div class="pet" [attr.data-act]="last">
-    <img src="assets/clean/idle.png" alt="Bé kiến, thú cưng của bạn" width="140" height="140" />
-    <b>{{ mood() }}</b>
-  </div>
+  <div class="sky" [attr.data-fx]="fx()">
+    <header class="top">
+      <div class="pill"><h1><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.4 2.7 5 6 5c2.1 0 3.5 1.1 4.5 2.6.3.4.7.4 1 0C12.5 6.1 13.9 5 16 5c3.3 0 5.1 3.4 3.6 6.7C19.5 16.4 12 21 12 21z" fill="#ff6b8a"/></svg>Nuôi thú cưng<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.4 2.7 5 6 5c2.1 0 3.5 1.1 4.5 2.6.3.4.7.4 1 0C12.5 6.1 13.9 5 16 5c3.3 0 5.1 3.4 3.6 6.7C19.5 16.4 12 21 12 21z" fill="#ff6b8a"/></svg></h1>
+      <p>Chăm bé mỗi ngày, 7 ngày bé lớn thành kiến trưởng thành.</p></div>
+    </header>
 
-  <ul class="tasks">
-    @for (t of tasks; track t.key) {
-      <li [class.ok]="done(t.key)">
-        <div><b>{{ t.label }}</b><small>{{ t.hint }}</small></div>
-        <button type="button" (click)="act(t.key)" [disabled]="done(t.key)">{{ done(t.key) ? 'Xong ✓' : t.label }}</button>
-      </li>
+    <div class="plot">
+      <i class="glow" aria-hidden="true"></i>
+      <div class="pet" [class.egg]="stage() < 2" [class.big]="stage() >= last" [class.sad]="sad()" role="img" [attr.aria-label]="'Thú cưng: ' + stages[stage()]">
+        @for (n of days; track n) { <img [class.on]="!sad() && n - 1 === stage()" [src]="petSrc(n)" alt="" /> }
+        <img class="cry" [class.on]="sad()" src="assets/garden/pet-cry.png" alt="" />
+      </div>
+      <span class="hearts" aria-hidden="true">
+        @for (h of hearts; track $index) {
+          <svg viewBox="0 0 24 24" [style.left.%]="h.x" [style.width.px]="h.size" [style.height.px]="h.size" [style.color]="h.color" [style.--d.s]="h.d" [style.--t.s]="h.dur" [style.--sw.px]="h.sway"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.4 2.7 5 6 5c2.1 0 3.5 1.1 4.5 2.6.3.4.7.4 1 0C12.5 6.1 13.9 5 16 5c3.3 0 5.1 3.4 3.6 6.7C19.5 16.4 12 21 12 21z" fill="currentColor" /></svg>
+        }
+      </span>
+      <span class="burst" aria-hidden="true">@for (d of dust; track $index) { <i [style.--vx.px]="d.vx" [style.--vy.px]="d.vy" [style.width.px]="d.size" [style.height.px]="d.size" [style.background]="'rgb(' + d.color + ')'" [style.--dur.s]="d.dur" [style.--delay.s]="d.delay"></i> }</span>
+    </div>
+
+    <aside class="card">
+      <p class="kick">Ngày {{ stage() + 1 }} / 7</p>
+      <h2>{{ sad() ? 'Bé đang buồn' : stages[stage()] }}</h2>
+      <ol class="days" aria-label="Tiến trình 7 ngày">
+        @for (n of days; track n) {
+          <li [class]="state(n)" [attr.aria-label]="'Ngày ' + n + ': ' + stages[n - 1]">
+            @if (state(n) === 'done') { <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" /></svg> } @else { {{ n }} }
+          </li>
+        }
+      </ol>
+
+      @if (sad()) { <p class="sadnote">Bạn vắng bé mấy ngày rồi. Chăm bé một chút để bé vui lại nhé, bé không mất tiến độ đâu.</p> }
+      <ul class="tasks">
+        @for (t of tasks; track t.key) {
+          <li [class.ok]="done(t.key)">
+            <div><b>{{ taskLabel(t) }}</b><small>{{ taskHint(t) }}</small></div>
+            @if (done(t.key)) { <span class="okt">Xong</span> } @else { <a class="doit" [routerLink]="t.link" [queryParams]="t.params">{{ t.cta }}</a> }
+          </li>
+        }
+      </ul>
+
+      @if (garden.petClaimed()) {
+        <button type="button" class="act" disabled>Hôm nay đã xong</button>
+        <small>Mai quay lại chăm bé tiếp nhé.</small>
+      } @else {
+        <button type="button" class="act" [disabled]="!allDone()" (click)="claim()">{{ allDone() ? (stage() < last ? 'Nhận +' + reward + ' Xu · bé lớn thêm' : 'Nhận +' + reward + ' Xu') : (stage() < last ? 'Làm đủ 3 việc để bé lớn thêm' : 'Làm đủ 3 việc để nhận Xu') }}</button>
+        <small>@if (stage() < last) { Bé trưởng thành thưởng thêm +{{ finalReward }} Xu. } @else { Bé đã trưởng thành và ở lại làm bạn của bạn. }</small>
+      }
+      <button type="button" class="closet-btn" (click)="closet.set(true)">Tủ đồ của bé · {{ balance() }} Xu</button>
+    </aside>
+
+    <!-- Bảng thử nghiệm: chỉ để kiểm tra luồng nuôi, bỏ khi nộp -->
+    <div class="lab" [class.open]="lab()">
+      <button type="button" class="labtog" (click)="lab.set(!lab())">{{ lab() ? 'Đóng' : 'Thử nghiệm' }}</button>
+      @if (lab()) {
+        <p>Giả lập việc hôm nay · nhảy giai đoạn</p>
+        <div class="row">
+          @for (n of days; track n) { <button type="button" [class.on]="stage() === n - 1" (click)="jump(n - 1)" [title]="stages[n - 1]">{{ n }}</button> }
+        </div>
+        <small>{{ stages[stage()] }} {{ isEgg() ? '(chưa nở)' : '' }}</small>
+        <div class="row wrap">
+          <button type="button" (click)="doOne('feed')" [disabled]="done('feed')">Đặt món</button>
+          <button type="button" (click)="doOne('play')" [disabled]="done('play')">Chơi Hái xu</button>
+          <button type="button" (click)="doOne('bath')" [disabled]="done('bath')">Tưới cây</button>
+          <button type="button" (click)="doAll()" [disabled]="allDone()">Xong cả 3</button>
+          <button type="button" (click)="nextDay()">Sang ngày mới</button>
+          <button type="button" (click)="sadNow()">Bé buồn</button>
+          <button type="button" (click)="addXu(100)">+100 Xu</button>
+        </div>
+      }
+    </div>
+
+    @if (closet()) {
+      <div class="shade" (click)="closet.set(false)"></div>
+      <section class="closet" role="dialog" aria-label="Tủ đồ của bé">
+        <header>
+          <div><h2>Tủ đồ của bé</h2><small>Bạn có {{ balance() }} Xu · bộ càng nhiều chi tiết càng hiếm</small></div>
+          <button type="button" class="x" (click)="closet.set(false)" aria-label="Đóng">×</button>
+        </header>
+        @if (!grown()) { <p class="note">Bé trưởng thành mới mặc được. Bạn vẫn mua và chọn trước được.</p> }
+        <ul>
+          @for (o of outfits; track o.key) {
+            <li [class.worn]="garden.outfit() === o.key">
+              <span class="tier" [style.background]="o.tier ? tiers[o.tier].color : '#5aa43c'">{{ o.tier ? tiers[o.tier].name : 'Mặc định' }}</span>
+              <img [src]="o.img" [alt]="o.name" loading="lazy" />
+              <b>{{ o.name }}</b>
+              @if (garden.ownsOutfit(o.key)) {
+                <button type="button" [disabled]="garden.outfit() === o.key" (click)="wear(o)">{{ garden.outfit() === o.key ? 'Đang mặc' : 'Mặc' }}</button>
+              } @else {
+                <button type="button" class="buy" (click)="buy(o)">Mua · {{ cost(o) }} Xu</button>
+              }
+            </li>
+          }
+        </ul>
+      </section>
     }
-  </ul>
-
-  @if (garden.petClaimed()) {
-    <p class="claimed" role="status">Hôm nay bạn đã nhận thưởng rồi, mai quay lại nhé.</p>
-  } @else {
-    <button type="button" class="claim" [disabled]="!allDone()" (click)="claim()">{{ allDone() ? 'Nhận ' + reward + ' Xu' : 'Làm đủ ' + tasks.length + ' việc để nhận Xu' }}</button>
-  }
-  <p class="cap">Xu nhận từ game hôm nay: <b>{{ xu.gameToday() }}/30</b></p>
+  </div>
 </section>

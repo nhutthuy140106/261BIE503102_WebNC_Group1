@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ORDER_ACTION } from '../../../core/config/order-actions';
 import { Order } from '../../../core/models/order';
@@ -40,6 +41,7 @@ export function needsAction(o: Order): boolean {
 })
 export class OrderList implements OnInit {
   private readonly orderService = inject(OrderService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -170,6 +172,9 @@ export class OrderList implements OnInit {
       const f = p.get('f');
       this.tab.set(f === 'todo' || f === 'placed' || f === 'received' || f === 'history' ? f : 'all');
     });
+    this.orderService.changed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() =>
+      this.orderService.getOrders().subscribe({ next: (list) => this.orders.set(list), error: () => undefined }),
+    );
     this.orderService.getOrders().subscribe({
       next: (list) => {
         this.orders.set(list);

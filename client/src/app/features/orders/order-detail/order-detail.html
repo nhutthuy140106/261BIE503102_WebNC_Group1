@@ -96,7 +96,9 @@
                 @if (d.place || d.address) { <dt>{{ d.place ? 'Hình thức nhận hàng' : 'Địa chỉ' }}</dt><dd>@if (d.place) { {{ d.place }}@if (d.address) { <span class="sub">{{ d.address }}</span> } } @else { {{ d.address }} }</dd> }
                 @if (d.utensils) { <dt>Dụng cụ</dt><dd>Có lấy</dd> }
               }
-              <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
+              <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}
+                @if (o.paymentMethod === 'transfer' && o.status !== 'cancelled' && o.status !== 'declined' && job()?.bank; as b) { <app-bank-pay [bank]="b" /> }
+              </dd>
               @if (o.note) { <dt>Ghi chú</dt><dd class="noteval">{{ o.note }}</dd> }
             </dl>
           </div>
@@ -279,7 +281,7 @@
           @case ('rate') {
             <h3 class="rvh">Đánh giá</h3>
             <div class="rvprod">
-              <app-order-thumb [image]="o.image" [category]="o.kind ?? 'job'" [avatar]="o.counterpartAvatar" [name]="o.counterpartName" />
+              @if (o.image || o.type === 'placed') { <app-order-thumb [image]="o.image" [category]="o.kind ?? 'job'" [avatar]="o.counterpartAvatar" [name]="o.counterpartName" /> }
               <span><b>{{ o.postTitle }}</b><small>{{ o.counterpartName }}</small></span>
             </div>
             <div class="rvstars" [class.bad]="bad()">

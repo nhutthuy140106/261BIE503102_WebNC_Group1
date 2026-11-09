@@ -4,7 +4,9 @@ import { countdown, dealAt, upcomingAt } from '../../../core/utils/promo';
 import { Router } from '@angular/router';
 import { Post, PostKind } from '../../../core/models/post';
 import { AuthPromptService } from '../../../core/services/auth-prompt';
+import { AreaService } from '../../../core/services/area';
 import { AuthService } from '../../../core/services/auth';
+import { inArea } from '../../../core/utils/post-area';
 import { PostService } from '../../../core/services/post';
 import { RecommendService } from '../../../core/services/recommend';
 import { SavedService } from '../../../core/services/saved';
@@ -13,8 +15,6 @@ import { SearchUiService } from '../../../core/services/search-ui';
 type FeedFilter = 'all' | PostKind;
 type FeedSort = 'near' | 'new' | 'cheap' | 'dear' | 'pay';
 
-const BATCH = 8;
-const MAX_AUTO_LOADS = 3;
 
 /** Trang chủ không gian Mua — bê từ design/mockups/home-v5.html (khối đầu trang giữ bản đã duyệt: kiến người nhện). */
 @Component({
@@ -28,16 +28,18 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly prompt = inject(AuthPromptService);
   protected readonly auth = inject(AuthService);
+  private readonly area = inject(AreaService);
   protected readonly saved = inject(SavedService);
   protected readonly search = inject(SearchUiService);
   private readonly recommend = inject(RecommendService);
 
   private readonly bigSearch = viewChild.required<ElementRef<HTMLElement>>('bigSearch');
-  private readonly sentinel = viewChild.required<ElementRef<HTMLElement>>('sentinel');
   private observers: IntersectionObserver[] = [];
 
   protected readonly forYou = signal<Post[]>([]);
-  protected readonly posts = signal<Post[]>([]);
+  private readonly allPosts = signal<Post[]>([]);
+  /** Mọi khối trên trang chỉ lấy bài bán ở khu đang chọn */
+  protected readonly posts = computed(() => this.allPosts().filter((p) => inArea(p, this.area.current())));
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly dragging = signal(false);
@@ -45,8 +47,8 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected readonly popular = ['cơm trưa', 'trà sữa', 'giặt sấy', 'dọn nhà', 'sửa điện nước', 'mua hộ', 'trông thú cưng'];
 
   /**
-   * Các khối chọn bài theo thứ tự Nổi bật → Gợi ý → Gần bạn → Việc mới → Khám phá,
-   * mỗi khối bỏ những bài khối trước đã hiện, nên một bài chỉ xuất hiện một lần.
+   * Các khối chọn bài theo thứ tự Nổi bật → Gợi ý → Gần bạn → Việc mới, mỗi khối bỏ những bài khối trước đã hiện.
+   * Riêng Khám phá hiện mọi bài của khu, kể cả bài đã có ở các khối trên.
    */
   protected readonly clock = inject(ClockService);
   /** Bài đang trong Giờ vàng (kết thúc sớm nhất xếp trước), tối đa 4 */
@@ -75,7 +77,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected readonly featured = computed(() => this.posts().filter((p) => p.promoted).slice(0, 4));
   protected readonly forYouShown = computed(() => {
     const taken = new Set(this.featured().map((p) => p._id));
-    return this.forYou().filter((p) => !taken.has(p._id)).slice(0, 4);
+    return this.forYou().filter((p) => !taken.has(p._id) && inArea(p, this.area.current())).slice(0, 4);
   });
   protected readonly nearby = computed(() => {
     const taken = new Set([...this.featured(), ...this.forYouShown()].map((p) => p._id));
@@ -86,7 +88,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     return this.posts().filter((p) => p.kind === 'job' && !taken.has(p._id)).slice(0, 4);
   });
 
-  // ----- Khám phá quanh khu: lọc + sắp xếp, tự tải thêm khi cuộn (8 bài × 3 lần rồi nút "Xem thêm") -----
+  // ----- Khám phá quanh khu: lọc + sắp xếp, hiện hết mọi bài của khu trong một lần -----
   protected readonly feedFilters: { key: FeedFilter; label: string }[] = [
     { key: 'all', label: 'Tất cả' },
     { key: 'food', label: 'Đồ ăn & uống' },
@@ -114,17 +116,15 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected readonly sortMenu = computed(() => this.sortOptions[this.feedFilter()].map((k) => ({ key: k, label: this.sortLabels[k] })));
   protected readonly sortLabel = computed(() => this.sortLabels[this.feedSort()]);
 
-  private readonly feedAll = computed(() => {
-    const shown = new Set([...this.dealsNow().map((x) => x.p), ...this.featured(), ...this.forYouShown(), ...this.nearby(), ...this.jobs()].map((p) => p._id));
+  protected readonly feed = computed(() => {
     const f = this.feedFilter();
-    // hết bài chưa hiện thì để trống (có thông báo), không lấy lại bài đã hiện ở trên
-    const pool = this.posts().filter((p) => (f === 'all' || p.kind === f) && !shown.has(p._id));
+    const pool = this.posts().filter((p) => f === 'all' || p.kind === f);
     const by = this.feedSort();
-    const far = Number.MAX_SAFE_INTEGER;
     return [...pool].sort((a, b) => {
       switch (by) {
         case 'near':
-          return (a.distance ?? far) - (b.distance ?? far);
+          // bài mới đăng chưa có khoảng cách: xếp đầu để không bị chìm xuống cuối danh sách
+          return (a.distance ?? 0) - (b.distance ?? 0);
         case 'cheap':
           return a.price - b.price;
         case 'dear':
@@ -135,11 +135,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   });
-  protected readonly shownCount = signal(0);
-  protected readonly loads = signal(0);
-  protected readonly loadingMore = signal(false);
-  protected readonly feed = computed(() => this.feedAll().slice(0, this.shownCount()));
-  protected readonly showMoreButton = computed(() => this.loads() >= MAX_AUTO_LOADS && this.shownCount() < this.feedAll().length);
 
   /** Kiến người nhện chào hàng xóm: các câu đổi dần, bấm vào kiến để nghe câu khác (giống kiến ở trang giới thiệu). */
   protected readonly greeting = signal('');
@@ -170,12 +165,11 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.postService.getPosts().subscribe({
       // Lỗi -> về "Safe State": danh sách rỗng + thông báo, không để spinner quay mãi
       next: (list) => {
-        this.posts.set(list);
+        this.allPosts.set(list);
         this.loading.set(false);
-        this.resetFeed();
       },
       error: (e: Error) => {
-        this.posts.set([]);
+        this.allPosts.set([]);
         this.error.set(e.message);
         this.loading.set(false);
       },
@@ -195,12 +189,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     window.addEventListener('scroll', sync, { passive: true });
     window.addEventListener('resize', sync);
     this.observers.push({ disconnect: () => { window.removeEventListener('scroll', sync); window.removeEventListener('resize', sync); } } as unknown as IntersectionObserver);
-    // cuộn gần tới cuối khối Khám phá → tự tải thêm (tối đa 3 lần, sau đó hiện nút "Xem thêm")
-    const feed = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && this.loads() > 0 && this.loads() < MAX_AUTO_LOADS) this.loadMore();
-    }, { rootMargin: '300px' });
-    feed.observe(this.sentinel().nativeElement);
-    this.observers.push(big, feed);
+    this.observers.push(big);
   }
 
   ngOnDestroy(): void {
@@ -241,37 +230,11 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected setFilter(f: FeedFilter): void {
     this.feedFilter.set(f);
     if (!this.sortOptions[f].includes(this.feedSort())) this.feedSort.set(this.sortOptions[f][0]);
-    this.resetFeed();
   }
 
   protected setSort(s: FeedSort): void {
     this.feedSort.set(s);
     this.sortMenuOpen.set(false);
-    this.resetFeed();
-  }
-
-  private resetFeed(): void {
-    this.shownCount.set(0);
-    this.loads.set(0);
-    this.loadMore();
-  }
-
-  protected loadMore(): void {
-    if (this.loadingMore()) return;
-    if (!this.feedAll().length || this.shownCount() >= this.feedAll().length) return; // hết bài thì dừng, không lặp lại bài đã hiện
-    this.loadingMore.set(true);
-    this.timers.push(
-      setTimeout(() => {
-        this.shownCount.update((n) => n + BATCH);
-        this.loads.update((n) => n + 1);
-        this.loadingMore.set(false);
-      }, 450),
-    );
-  }
-
-  protected loadMoreClick(): void {
-    this.loads.set(0);
-    this.loadMore();
   }
 
   @HostListener('document:click')

@@ -1,0 +1,40 @@
+.offer { display: grid; grid-template-columns: 52px minmax(0, 1fr) 170px; gap: 14px; padding: 16px 0; border-top: 1px solid var(--border); align-items: start; }
+.box h2 + .offer { border-top: 0; padding-top: 4px; }
+.offer > img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; }
+.offer b { font-size: 15px; }
+.m { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; color: var(--smoke); margin-top: 3px; }
+.m span { display: inline-flex; align-items: center; gap: 4px; }
+.m svg { width: 13px; height: 13px; }
+.m .gold { color: #e39b1a; }
+.offer p { margin: 8px 0 0; font-size: 14px; color: #3c4660; }
+.oacts { display: grid; gap: 6px; }
+.oacts .btn { height: 38px; font-size: 13px; }
+.oacts .stat { justify-self: end; }
+.offer.out { opacity: .55; }
+.reportbox { margin-top: 10px; padding: 12px 14px; border-radius: 12px; background: #f1f8f3; font-size: 13.5px; }
+.reportbox b { display: block; color: #2e7d4f; margin-bottom: 4px; }
+.reportbox.rated { background: var(--soft); }
+.reportbox.rated b { color: var(--ink); }
+.photos { display: flex; gap: 6px; margin: 8px 0 4px; }
+.photos span { width: 56px; height: 56px; border-radius: 8px; background: #dcefe2; display: grid; place-items: center; color: #2e7d4f; }
+.photos svg { width: 18px; height: 18px; }
+.rateform { margin-top: 10px; }
+.stars { display: flex; gap: 2px; }
+.stars button { font-size: 24px; color: #e5ded6; padding: 0 2px; line-height: 1; }
+.stars button.on { color: #e39b1a; }
+.req { display: block; }
+.qa { display: grid; gap: 12px; }
+.q { padding: 14px; border: 1px solid var(--border); border-radius: 14px; }
+.q .h { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--smoke); }
+.q .h img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+.q .h b { color: var(--ink); }
+.q > p { margin: 8px 0 0; font-size: 14.5px; }
+.q .a { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--soft); font-size: 14px; }
+.q .a b { display: block; font-size: 12.5px; margin-bottom: 2px; }
+.q form { margin-top: 10px; display: flex; gap: 8px; }
+.q form input { flex: 1; }
+.coin { width: 16px; height: 16px; }
+@media (max-width: 700px) {
+  .offer { grid-template-columns: 44px minmax(0, 1fr); }
+  .oacts { grid-column: 1 / -1; }
+}

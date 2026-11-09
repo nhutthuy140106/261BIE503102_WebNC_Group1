@@ -1,0 +1,62 @@
+/* Giao dịch — cùng kiểu với trang Đơn hàng phía Mua (features/orders/order-list/order-list.css, đã gộp các lớp ghi đè cuối) */
+.ohead h1 { font-size: 28px; letter-spacing: -.02em; }
+
+/* tab viên: nền xám nhạt, tab đang chọn là viên trắng nổi */
+.tabs { display: inline-flex; margin-top: 18px; padding: 4px; gap: 2px; border-radius: 999px; background: #F1F2F5; overflow-x: auto; max-width: 100%; }
+.tabs button { flex: none; padding: 10px 22px; border: 0; border-radius: 999px; font-size: 15px; font-weight: 500; color: var(--smoke); background: none; transition: background .15s, color .15s; }
+.tabs button:hover { color: var(--ink); }
+.tabs button.on { background: #fff; color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(34, 48, 74, .16); }
+
+/* nhóm: "Cần bạn xử lý" là khung cam nhạt */
+.grp { margin-top: 32px; }
+.grp.need { margin-top: 24px; padding: 20px; border-radius: 18px; background: #FFF6F1; border: 1px solid #F6DACB; }
+.gh { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font-size: 21px; font-weight: 700; letter-spacing: -.015em; color: var(--ink); }
+.gh.todo { color: var(--accent); }
+.nhint { margin: -4px 0 12px; font-size: 13px; color: var(--smoke); }
+
+/* thẻ đơn: đầu (người · loại · trạng thái) → giữa (ảnh · tên · ngày giờ · mã · tiền) → đáy (nút) */
+.list { margin: 0; padding: 0; list-style: none; display: grid; gap: 20px; }
+.order { border: 1px solid #DADDE3; border-radius: 14px; background: #fff; box-shadow: 0 2px 0 rgba(34, 48, 74, .04), 0 12px 24px -18px rgba(34, 48, 74, .3); overflow: hidden; }
+.grp.need .order { border-color: #F2D5C5; }
+.oh { display: flex; align-items: center; gap: 10px; padding: 12px 16px 4px; font-size: 14px; }
+.who { display: inline-flex; align-items: center; gap: 10px; }
+.who b { font-weight: 600; }
+.faces { display: inline-flex; }
+.faces img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; }
+.faces img + img { margin-left: -9px; }
+.nobody { width: 26px; height: 26px; border-radius: 50%; background: #F1F2F5; color: var(--smoke); display: grid; place-items: center; }
+.nobody svg { width: 15px; height: 15px; }
+.oh .kind { padding: 1px 7px; border-radius: 5px; border: 1px solid #DADDE3; color: var(--smoke); font-size: 11.5px; font-weight: 500; }
+.ost { margin-left: auto; font-size: 14px; font-weight: 600; color: #B8851A; }
+.s-act { color: var(--accent); }
+.s-red { color: #e8202a; }
+.s-go { color: #2E7D4F; }
+.s-end { color: var(--smoke); }
+
+.body { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 16px; align-items: start; padding: 14px 16px; }
+.body:hover { background: #F7F8FA; }
+.main { min-width: 0; display: grid; gap: 4px; align-content: start; }
+.main h3 { margin: 0; font-size: 16px; font-weight: 500; line-height: 1.35; }
+.sub { font-size: 13.5px; color: var(--smoke); }
+.code { font-size: 12px; color: var(--fog); }
+.total { align-self: end; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: flex-end; gap: 0 12px; text-align: right; font-size: 13px; color: var(--smoke); }
+.total em { font-style: normal; font-size: 15px; font-weight: 600; color: var(--ink); }
+.total b { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -.01em; }
+
+.of { display: flex; justify-content: flex-end; padding: 4px 16px 12px; }
+.btns { display: flex; gap: 8px; flex: none; }
+.btn2 { height: 38px; padding: 0 18px; border-radius: 9px; border: 1px solid #DADDE3; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; font-size: 13.5px; font-weight: 500; background: #fff; color: var(--ink); transition: background .15s, border-color .15s; }
+.btn2:hover { background: #F7F8FA; border-color: #B9BEC8; }
+.btn2.main { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn2.main:hover { filter: brightness(.94); }
+
+.empty { margin-top: 24px; padding: 48px 0; text-align: center; color: var(--smoke); background: #fff; border: 1px solid #DADDE3; border-radius: 12px; }
+.empty img { width: 110px; }
+.demo-note { margin-top: 28px; }
+
+@media (max-width: 700px) {
+  .body { grid-template-columns: 64px minmax(0, 1fr); }
+  .total { grid-column: 1 / -1; justify-content: space-between; }
+  .btns { width: 100%; }
+  .btn2 { flex: 1; }
+}

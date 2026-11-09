@@ -5,6 +5,9 @@
     @if (loading()) { <app-loader class="ld" label="Đang dựng khu vườn…" /> }
     @if (error(); as e) { <div class="err" role="alert">{{ e }}</div> }
 
+    <div class="deco top" aria-hidden="true"></div>
+    <div class="deco bot" aria-hidden="true"></div>
+
     <div class="hud" aria-live="polite">
       <div class="pill"><small>Thời gian</small><b>{{ timeLeft() }}s</b></div>
       <div class="pill score"><small>Điểm</small><b>{{ score() }}</b></div>
@@ -12,23 +15,29 @@
 
     @if (phase() === 'ready' && !loading() && !error()) {
       <div class="veil">
+       <div class="duo">
+        <div class="mascot" aria-hidden="true">
+          <span class="rain"><i class="fall" style="--x:28%;--d:0s"></i><i class="fall ax" style="--x:42%;--d:0.4s"></i><i class="fall" style="--x:55%;--d:0.8s"></i><i class="fall" style="--x:68%;--d:1.2s"></i><i class="fall" style="--x:36%;--d:1.6s"></i><i class="fall" style="--x:60%;--d:2.0s"></i><i class="fall ax" style="--x:47%;--d:0.2s"></i><i class="fall" style="--x:72%;--d:0.6s"></i><i class="fall" style="--x:33%;--d:1.0s"></i><i class="fall" style="--x:64%;--d:1.4s"></i><i class="fall" style="--x:50%;--d:1.8s"></i><i class="fall ax" style="--x:40%;--d:2.2s"></i></span>
+          <img class="basket" src="assets/clean/ant-basket.png" alt="" />
+        </div>
         <div class="box">
           <h1>Hái xu</h1>
-          <p>Di chuột (hoặc vuốt) để kiến hứng xu rơi từ cây xoài.</p>
-          <ul>
-            <li><i class="d c"></i> Xu thường <b>+1</b></li>
-            <li><i class="d g"></i> Xu vàng lấp lánh <b>+5</b></li>
-            <li><i class="d b"></i> Bọ xít, lá khô <b>−1</b></li>
+          <p class="lead">Di chuột (hoặc vuốt) để kiến hứng xu rơi từ cây xoài.</p>
+          <ul class="rules">
+            <li><span class="ic"><i class="d c"></i></span><span class="nm">Xu thường</span><b class="pt">+1</b></li>
+            <li><span class="ic"><img src="assets/clean/antxu.png" alt="" /></span><span class="nm">Xu AntGo lấp lánh</span><b class="pt">+5</b></li>
+            <li><span class="ic"><i class="d b"></i></span><span class="nm">Bọ xít, lá khô</span><b class="pt">−1</b></li>
           </ul>
           @if (canPlay()) {
-            <button type="button" class="go" (click)="start()">Bắt đầu · còn {{ playsLeft() }}/{{ maxPlays }} lượt hôm nay</button>
+            <button type="button" class="go" (click)="start()"><span>Bắt đầu</span><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none" /></svg></button>
           } @else if (playsLeft() === 0) {
             <p class="note">Bạn đã dùng hết {{ maxPlays }} lượt hôm nay. Mai quay lại nhé!</p>
           } @else {
             <p class="note">Hôm nay bạn đã nhận đủ {{ cap }} Xu từ game. Mai quay lại nhé!</p>
           }
-          <small class="sub">Xu từ game: {{ xu.gameToday() }}/{{ cap }} hôm nay · phần thưởng mô phỏng</small>
+          <small class="sub">Còn {{ playsLeft() }}/{{ maxPlays }} lượt hôm nay</small>
         </div>
+       </div>
       </div>
     }
 
@@ -54,6 +63,6 @@
         </div>
       </div>
     }
+    <p class="hint">Mẹo: chơi bằng chuột, chạm vuốt trên điện thoại, hoặc phím ← →.</p>
   </div>
-  <p class="hint">Mẹo: chơi bằng chuột, chạm vuốt trên điện thoại, hoặc phím ← →.</p>
 </div>

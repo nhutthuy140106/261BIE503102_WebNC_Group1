@@ -8,6 +8,7 @@
         </div>
         @if (post.description) { <p>{{ post.description }}</p> }
         <div class="jc-foot">
+          @if (post.images.length) { <span class="jc-ph"><svg class="i"><use href="#camera" /></svg>{{ post.images.length }} ảnh</span> }
           @if (post.job?.due) { <span class="due"><svg class="i"><use href="#clock" /></svg>{{ post.job | jobWhen }}</span> }
         </div>
       </div>
@@ -25,7 +26,7 @@
     }
     @if (post.combo) { <div style="margin: -2px 0 4px"><app-combo-saving [post]="post" /></div> }
     <div class="area">
-      <span class="loc"><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.distance != null) { · {{ post.distance | distance }} }</span>
+      <span class="loc"><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.job?.building) { · {{ post.job?.building }} }@if (post.distance != null) { · {{ post.distance | distance }} }</span>
       @if (isJob && post.job) {
         <span class="jst" [class.closed]="post.job.status === 'taken'">@if (post.job.status === 'taken') { Đã có người nhận } @else { {{ post.job.offers ? post.job.offers + ' đề nghị' : 'Chưa có đề nghị' }} }</span>
       } @else if (post.rating) {

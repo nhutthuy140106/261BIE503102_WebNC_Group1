@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AntGo — Bán &amp; Đăng việc · Đăng bài</title><link rel="stylesheet" href="shared/base.css"><style>
+  /* Đăng bài — mỗi loại một bộ thông số riêng, đúng những gì trang khách phía Mua đọc:
+     detail.html (đồ ăn / đồ uống / đồ dùng / dịch vụ: giá, số lượng, thời gian, cách nhận, tùy chọn, câu hỏi, tình trạng bán, 3 ô nổi bật, nút đặt, lưu ý, các bước đơn)
+     và job.html (việc cần người: tiền công, thanh toán, hạn, số người, khung giờ, địa điểm A→B, yêu cầu). Cột phải xem trước như khách thấy. */
+  .crumb{display:inline-flex;align-items:center;gap:6px;margin-top:22px;font-size:13px;font-weight:600}
+  .crumb svg{width:16px;height:16px;transform:rotate(180deg)}
+  .fhead h1{margin:10px 0 0;font-size:30px;letter-spacing:-.02em}.fhead p{margin:6px 0 0;color:var(--smoke)}
+  .tpl{margin-top:20px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .tpl button{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:#fff;text-align:left}
+  .tpl button:hover:not(:disabled){border-color:#E2CFC6}.tpl button:disabled{opacity:.45;cursor:not-allowed}
+  .tpl button.on{border-color:var(--accent);background:#FFF6F1;box-shadow:0 0 0 1px var(--accent) inset;opacity:1}
+  .tpl .pi{width:40px;height:40px;border-radius:11px;background:var(--soft);display:grid;place-items:center;flex:none}
+  .tpl button.on .pi{background:var(--accent);color:#fff}
+  .tpl svg{width:20px;height:20px}.tpl b{display:block;font-size:14.5px}.tpl small{display:block;font-size:12px;color:var(--smoke)}
+  .fgrid{margin-top:22px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:26px;align-items:start}
+  .sec{border:1px solid var(--border);border-radius:18px;background:#fff;margin-bottom:14px}
+  .sec>header{display:flex;align-items:center;gap:12px;padding:16px 20px}
+  .sec>header .no{width:28px;height:28px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-size:12.5px;font-weight:700;flex:none}
+  .sec>header b{font-size:15.5px}.sec>header small{display:block;font-size:12.5px;color:var(--smoke);font-weight:400}
+  .sec>header .tog{margin-left:auto}
+  .sec .bd{padding:0 20px 18px;display:grid;gap:14px}
+  .sec.off .bd{display:none}.sec.off>header b{color:var(--smoke)}
+  .fld{display:grid;gap:6px;min-width:0}
+  .fld>label,.lbl{font-size:13.5px;font-weight:600}
+  .fld .hint,.hint{font-size:12px;color:var(--smoke)}
+  .fld .err{font-size:12.5px;color:#C0392B;display:none}
+  .fld.bad .err{display:block}.fld.bad .input{border-color:#C0392B}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .input{width:100%}
+  textarea.input{min-height:90px;resize:vertical;line-height:1.5}
+  .money{position:relative}.money .input{padding-right:30px}.money::after{content:"đ";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--smoke);font-size:13px}
+  .pills{display:flex;flex-wrap:wrap;gap:6px}
+  .pills button{height:36px;padding:0 14px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:13px;font-weight:600}
+  .pills button.on{border-color:var(--ink);background:var(--ink);color:#fff}
+  .checks{display:grid;gap:8px}
+  .ck{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;cursor:pointer}
+  .ck:has(>input:checked){border-color:var(--ink);background:var(--soft)}
+  .ck>input[type=checkbox]{accent-color:var(--ink);width:16px;height:16px;flex:none}
+  .ck .extra{margin-left:auto;width:210px;flex:none}
+  .ck small{display:block;font-size:12px;color:var(--smoke)}
+  .days{display:flex;gap:6px;flex-wrap:wrap}
+  .days button{width:40px;height:36px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:12.5px;font-weight:600}
+  .days button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .tog{width:40px;height:24px;border-radius:12px;border:0;background:var(--border);position:relative;flex:none;transition:background .2s}
+  .tog::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:left .2s}
+  .tog.on{background:var(--ink)}.tog.on::after{left:19px}
+  .imgs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+  .im{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--soft)}
+  .im img{width:100%;height:100%;object-fit:cover}
+  .im .x{position:absolute;right:4px;top:4px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:13px;line-height:1}
+  .im .cover{position:absolute;left:4px;bottom:4px;padding:1px 6px;border-radius:5px;background:#fff;font-size:10.5px;font-weight:700}
+  .addimg{aspect-ratio:1;border:1.5px dashed #E2CFC6;border-radius:12px;display:grid;place-content:center;justify-items:center;gap:4px;color:var(--smoke);font-size:12px;cursor:pointer;background:#FFFCFA}
+  .addimg:hover{border-color:var(--accent);color:var(--accent)}.addimg svg{width:22px;height:22px}
+  .grp{border:1px solid var(--border);border-radius:14px;padding:14px;display:grid;gap:10px;background:#FFFCFA}
+  .grp .top{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center}
+  .line{display:grid;grid-template-columns:1fr 150px 34px;gap:8px}
+  .line2{display:grid;grid-template-columns:1fr 34px;gap:8px}
+  .line3{display:grid;grid-template-columns:36px 200px 1fr 34px;gap:8px;align-items:center}
+  .line3 .ic{width:36px;height:38px;border-radius:9px;background:var(--soft);display:grid;place-items:center}.line3 .ic svg{width:16px;height:16px}
+  .mini{height:34px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:#fff;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;justify-self:start}
+  .mini:hover{background:var(--soft)}.mini svg{width:14px;height:14px}
+  .rm{width:34px;height:38px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--smoke);display:grid;place-items:center}
+  .rm:hover{color:#C0392B;border-color:#E9B8B0}.rm svg{width:14px;height:14px}
+  .seg{display:inline-flex;padding:3px;border:1px solid var(--border);border-radius:9px;background:#fff}
+  .seg button{height:28px;padding:0 10px;border:0;border-radius:7px;background:none;font-size:12px;font-weight:600;color:var(--smoke)}
+  .seg button.on{background:var(--soft);color:var(--ink)}
+  .reqck{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--smoke);white-space:nowrap}.reqck input{accent-color:var(--ink)}
+  .note{padding:12px 14px;border-radius:12px;background:var(--soft);font-size:13px;color:#3C4660;display:flex;gap:8px}
+  .note svg{width:16px;height:16px;flex:none;margin-top:1px}
+  .stepsed{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .stepsed .sp{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 4px 0 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:12.5px;font-weight:600}
+  .stepsed .sp button{width:22px;height:22px;border:0;border-radius:50%;background:none;color:var(--smoke)}.stepsed .sp button:hover{background:var(--soft);color:#C0392B}
+  .stepsed .arrow{color:var(--fog);font-size:12px}
+  .stepsed form{display:flex;gap:6px}.stepsed form input{width:150px;height:32px;padding:4px 10px;font-size:12.5px}
+  /* cột xem trước */
+  .side{position:sticky;top:84px;display:grid;gap:14px}
+  .pv{border:1px solid var(--border);border-radius:18px;padding:16px;background:#fff}
+  .pv h3{margin:0 0 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--smoke)}
+  .card .ph{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--soft)}
+  .card .ph img{width:100%;height:100%;object-fit:cover}
+  .card .ph .empty{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:6px;color:var(--smoke);font-size:12.5px}.card .ph .empty svg{width:30px;height:30px}
+  .card .kind{position:absolute;left:8px;top:8px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.92);font-size:11px;font-weight:600}
+  .card .save{position:absolute;right:8px;top:8px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center}.card .save svg{width:15px;height:15px}
+  .card .body{padding:10px 2px 0;display:grid;gap:4px}
+  .card h4{margin:0;font-size:14px;font-weight:600;line-height:1.35;min-height:2.7em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card .pr{font-size:15px;font-weight:700}.card .pr span{font-size:12px;font-weight:400;color:var(--smoke)}
+  .card .meta{display:flex;justify-content:space-between;color:var(--smoke);font-size:12px}.card .meta span{display:inline-flex;align-items:center;gap:4px}.card .meta svg{width:13px;height:13px}
+  .xuok{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:6px;background:#FDF3DC;color:#7A5410;font-size:11.5px;font-weight:600;justify-self:start}.xuok img{width:15px}
+  .jcard .ph{display:flex;flex-direction:column;gap:10px;padding:14px 16px}
+  .jcard .jt{display:flex;align-items:center;gap:8px}.jcard .jt img{width:30px;height:30px;border-radius:50%;object-fit:cover}
+  .jcard .jt span{font-size:11.5px;color:var(--smoke);line-height:1.25}.jcard .jt b{display:block;font-size:13px;color:var(--ink)}
+  .jcard .jcat{margin-left:auto;padding:3px 8px;border-radius:6px;background:#fff;font-size:11px;font-weight:600}
+  .jcard .jd{margin:0;font-size:14px;line-height:1.45;color:#3C4660;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .jcard .jf{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .jcard .jpay{font-size:20px;font-weight:700;letter-spacing:-.02em}.jcard .jpay small{font-size:12px;font-weight:500;color:var(--smoke);margin-left:3px}
+  .jcard .due{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:#fff;font-size:11.5px;font-weight:600}.jcard .due svg{width:13px;height:13px;color:var(--accent)}
+  .jst{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#2E7D4F}.jst::before{content:"";width:7px;height:7px;border-radius:50%;background:#3BAA6A}
+  .dp .kl{font-size:12.5px;color:var(--smoke);margin-bottom:8px;display:flex;align-items:center;gap:6px}.dp .kl svg{width:14px;height:14px}
+  .facts{display:grid;gap:8px}
+  .facts div{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:13px}
+  .facts svg{width:16px;height:16px;flex:none;margin-top:1px}.facts b{display:block;font-size:12px;color:var(--smoke);font-weight:600}
+  .dp .act{margin-top:12px;height:44px;width:100%;border:0;border-radius:12px;background:var(--accent);color:#fff;font-weight:700;font-size:14.5px}
+  .dp .stp{margin-top:12px;display:flex;flex-wrap:wrap;gap:4px;font-size:11.5px;color:var(--smoke)}
+  .dp .stp span{padding:3px 8px;border-radius:999px;background:var(--soft)}
+  .dp .sched{margin-top:8px;font-size:12.5px;color:var(--smoke)}
+  .pub{display:grid;gap:8px}.pub .btn{height:46px}
+  .pub small{font-size:12px;color:var(--smoke);text-align:center}
+  .done{margin-top:60px;text-align:center}
+  .done img{width:130px}.done h1{margin:12px 0 6px;font-size:26px}.done p{color:var(--smoke);margin:0 0 18px}
+  .done .btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  @media(max-width:1000px){.fgrid{grid-template-columns:1fr}.side{position:static}.tpl{grid-template-columns:repeat(2,1fr)}.imgs{grid-template-columns:repeat(4,1fr)}}
+  @media(max-width:640px){.row,.row3{grid-template-columns:1fr}.grp .top{grid-template-columns:1fr 1fr}.line{grid-template-columns:1fr 110px 34px}.line3{grid-template-columns:36px 1fr 34px}.line3 input:nth-of-type(1){display:none}}
+</style></head><body><div id="siteHeader" data-space="sell" data-active="posts"></div><main class="wrap" id="page"></main>
+<input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
+<script src="shared/icons.js"></script><script src="shared/common.js"></script><script src="shared/seller-data.js"></script><script>
+(() => {
+  const A = AntSeller, esc = AntGo.esc, icon = AntGo.icon, $ = id => document.getElementById(id), page = $("page");
+  const { U, F, money, KIND } = A;
+  const S = A.load();
+  const qs = new URLSearchParams(location.search), editId = qs.get("id");
+  const DAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+  const CATS = { food: ["Cơm nhà làm", "Món nước", "Bánh & tráng miệng", "Đồ ăn vặt", "Đồ uống"], goods: ["Đồ bếp", "Đồ gia dụng", "Điện tử", "Nội thất", "Quần áo", "Đồ trẻ em", "Khác"],
+    job: ["Mua hộ", "Giao nhận", "Việc nhà", "Thú cưng", "Trông trẻ", "Gia sư", "Sửa chữa", "Khác"] };
+  const ICONS = ["clock", "pin", "receipt", "bolt", "check", "shield", "users", "package"];
+
+  /* ===== Mẫu điền sẵn — lấy đúng từ các bài mẫu ở detail.html / job.html ===== */
+  const FOOD = {
+    meal: { unit: "phần", opts: [{ name: "Món mặn hôm nay", req: true, items: [{ n: "Sườn ram", p: 0 }, { n: "Cá kho tộ", p: 0 }, { n: "Gà chiên mắm", p: 0 }] }, { name: "Phần cơm", req: true, items: [{ n: "Vừa", p: 0 }, { n: "Nhiều cơm", p: 5000 }] }],
+      extras: [], utensil: "Hỏi khách có lấy dụng cụ ăn uống", notePh: "Ví dụ: ít cơm, không hành…", sched: ["06:00", "10:30"], win: ["11:00", "13:00"], prep: "30" },
+    drink: { unit: "ly", opts: [{ name: "Size", req: true, items: [{ n: "Vừa (M)", p: 0 }, { n: "Lớn (L)", p: 6000 }] }, { name: "Độ ngọt", req: true, items: [{ n: "Ngọt vừa (100%)", p: 0 }, { n: "Ít ngọt (70%)", p: 0 }, { n: "Nửa ngọt (50%)", p: 0 }, { n: "Không đường", p: 0 }] }, { name: "Đá", req: true, items: [{ n: "Đá vừa", p: 0 }, { n: "Ít đá", p: 0 }, { n: "Không đá", p: 0 }] }],
+      extras: [{ n: "Trân châu đen", p: 5000 }, { n: "Thạch trái cây", p: 5000 }, { n: "Kem cheese", p: 8000 }], utensil: "Hỏi khách có lấy ống hút", notePh: "Ví dụ: dùng ly giấy, ít trân châu…", sched: ["08:00", "21:30"], win: ["08:00", "22:00"], prep: "15" },
+  };
+  const SVC = {
+    "Giặt sấy": { action: "Đặt lấy đồ", facts: [["clock", "Thời gian hoàn thành", "Trong ngày nếu gửi trước 10h"], ["pin", "Phạm vi phục vụ", "Lấy & trả tận cửa trong khu"], ["receipt", "Cách tính giá", "Theo kg sau khi cân"]],
+      price: { type: "unit", amount: 18000, unit: "kg", estimate: true, inspect: "" }, qty: { on: true, label: "Khối lượng ước tính (kg)", min: 3, max: 30 }, time: { mode: "slot", label: "Lấy đồ lúc", from: "08:00", to: "18:00", durMin: 2, durMax: 4, repeat: false },
+      place: { mode: "buyer", shop: "", fee: 0 }, opts: [{ name: "Nước xả", req: true, items: [{ n: "Hương nhẹ", p: 0 }, { n: "Không mùi", p: 0 }] }, { name: "Gấp đồ", req: true, items: [{ n: "Gấp gọn", p: 0 }, { n: "Treo móc", p: 10000 }] }],
+      qs: [{ type: "choice", label: "Có đồ trắng cần giặt riêng?", opts: "Không, Có", req: false, hint: "" }], steps: ["Đã gửi", "Đến lấy đồ", "Cân & báo giá", "Đang giặt", "Trả đồ"], safety: false, notePh: "Ví dụ: có 1 áo len giặt nhẹ tay…" },
+    "Sửa chữa": { action: "Gửi yêu cầu kiểm tra", facts: [["receipt", "Phí kiểm tra", "50.000đ · trừ vào tiền sửa"], ["clock", "Thời gian sửa", "1 – 3 ngày tùy lỗi"], ["shield", "Bảo hành", "3 tháng cho linh kiện thay"]],
+      price: { type: "quote", amount: "", unit: "", estimate: false, inspect: 50000 }, qty: { on: false, label: "", min: 1, max: 1 }, time: { mode: "slot", label: "Hẹn kiểm tra lúc", from: "09:00", to: "20:00", durMin: 1, durMax: 2, repeat: false },
+      place: { mode: "choice", shop: "Shop 7", fee: 30000 }, opts: [],
+      qs: [{ type: "text", label: "Hãng / dòng máy", opts: "", req: true, hint: "Ví dụ: Dell Inspiron 15, iPhone 12" }, { type: "text", label: "Máy bị sao?", opts: "", req: true, hint: "Ví dụ: bật không lên, sạc không vào…" }, { type: "photo", label: "Ảnh lỗi (nếu có)", opts: "", req: false, hint: "" }, { type: "choice", label: "Cần sao lưu dữ liệu trước?", opts: "Không, Có", req: false, hint: "" }],
+      steps: ["Đã gửi", "Hẹn kiểm tra", "Báo giá", "Bạn đồng ý", "Đang sửa", "Hoàn thành"], safety: false, notePh: "Thêm thông tin cho thợ (không bắt buộc)…" },
+    "Dọn dẹp": { action: "Đặt lịch", facts: [["clock", "Thời lượng tối thiểu", "2 giờ mỗi lần"], ["pin", "Khu phục vụ", "Block A – D"], ["check", "Dụng cụ", "Mang theo dụng cụ cơ bản"]],
+      price: { type: "unit", amount: 120000, unit: "giờ", estimate: false, inspect: "" }, qty: { on: false, label: "", min: 1, max: 1 }, time: { mode: "datedur", label: "Ngày & giờ", from: "07:00", to: "17:00", durMin: 2, durMax: 6, repeat: true },
+      place: { mode: "buyer", shop: "", fee: 0 }, opts: [],
+      qs: [{ type: "choice", label: "Diện tích nhà", opts: "Dưới 50m², 50 – 80m², Trên 80m²", req: true, hint: "" }, { type: "multi", label: "Việc cần làm", opts: "Lau nhà, Vệ sinh bếp, Vệ sinh nhà tắm, Gấp đồ", req: false, hint: "" }, { type: "choice", label: "Nhà có nuôi thú cưng?", opts: "Không, Có", req: false, hint: "" }],
+      steps: ["Đã gửi", "Chờ xác nhận", "Đến lịch", "Hoàn thành"], safety: true, notePh: "Ví dụ: chìa khóa gửi ở quầy lễ tân…" },
+    "Giao nhận hộ": { action: "Đặt lấy hộ", facts: [["receipt", "Giá mỗi lượt", "15.000đ trong khu"], ["pin", "Phạm vi", "Trong khu & cổng chính"], ["bolt", "Thời gian", "Thường trong 20 phút"]],
+      price: { type: "fixed", amount: 15000, unit: "lượt", estimate: false, inspect: "" }, qty: { on: false, label: "", min: 1, max: 1 }, time: { mode: "slot", label: "Lúc nào", from: "07:00", to: "22:00", durMin: 1, durMax: 1, repeat: false },
+      place: { mode: "ab", shop: "", fee: 0 }, opts: [],
+      qs: [{ type: "text", label: "Lấy món gì?", opts: "", req: true, hint: "Ví dụ: 1 thùng hàng Shopee tên Thu Hà" }, { type: "choice", label: "Kích thước", opts: "Nhỏ, dưới 10kg, To / nặng từ 10kg|+10.000đ", req: true, hint: "Đồ thực tế to hơn thì bạn báo phụ thu để khách đồng ý trước." }, { type: "choice", label: "Cần trả tiền giùm?", opts: "Không, Có", req: false, hint: "" }],
+      steps: ["Đã gửi", "Đã nhận đơn", "Đang đi lấy", "Đã giao"], safety: false, notePh: "Ví dụ: gọi mình khi tới cổng…" },
+    "Nấu ăn": { action: "Đặt lịch nấu", facts: [["users", "Số người", "Tối đa 15 người"], ["clock", "Thời gian", "Khoảng 3 – 5 giờ"], ["check", "Nguyên liệu", "Nhà khách chuẩn bị hoặc mình đi chợ"]],
+      price: { type: "from", amount: 1200000, unit: "buổi", estimate: false, inspect: "" }, qty: { on: false, label: "", min: 1, max: 1 }, time: { mode: "datedur", label: "Ngày & giờ", from: "08:00", to: "20:00", durMin: 3, durMax: 5, repeat: false },
+      place: { mode: "buyer", shop: "", fee: 0 }, opts: [],
+      qs: [{ type: "text", label: "Số người ăn", opts: "", req: true, hint: "Ví dụ: 8 người" }, { type: "choice", label: "Bếp nhà có nồi lớn không?", opts: "Có, Không", req: false, hint: "" }],
+      steps: ["Đã gửi", "Chờ xác nhận", "Đến lịch", "Hoàn thành"], safety: true, notePh: "Ví dụ: nhà kiêng hành, có người ăn chay…" },
+    "Khác": { action: "Đặt dịch vụ", facts: [["clock", "Thời gian", ""], ["pin", "Phạm vi", "Trong khu"], ["receipt", "Cách tính giá", ""]],
+      price: { type: "fixed", amount: "", unit: "lần", estimate: false, inspect: "" }, qty: { on: false, label: "", min: 1, max: 1 }, time: { mode: "slot", label: "Hẹn lúc", from: "08:00", to: "20:00", durMin: 1, durMax: 2, repeat: false },
+      place: { mode: "buyer", shop: "", fee: 0 }, opts: [], qs: [], steps: ["Đã gửi", "Chờ xác nhận", "Đang làm", "Hoàn thành"], safety: false, notePh: "Ghi chú thêm cho người làm…" },
+  };
+  const clone = o => JSON.parse(JSON.stringify(o));
+  function template(type, sub) {
+    const base = { type, t: "", desc: "", area: "B", imgs: [], notes: [""] };
+    if (type === "food") { const f = FOOD[sub || "meal"];
+      return Object.assign(base, { sub: sub || "meal", cat: sub === "drink" ? "Đồ uống" : "Cơm nhà làm", price: "", unit: f.unit, maxPer: 20, perDay: sub === "drink" ? "" : 20, limit: sub !== "drink",
+        days: [0, 1, 2, 3, 4, 5], sched: f.sched.slice(), win: f.win.slice(), prep: f.prep, delivery: true, fee: 5000, pickup: true, opts: clone(f.opts), extras: clone(f.extras), utensil: true, notePh: f.notePh, xu: true }); }
+    if (type === "goods") return Object.assign(base, { cat: "Đồ bếp", cond: "Đã dùng", keep: "95", used: "6 tháng", warranty: "", inbox: "", price: "", unit: "cái", stock: 1, win: ["17:00", "21:00"], tryFirst: true, delivery: false, fee: 10000, xu: false });
+    if (type === "service") { const k = sub || "Giặt sấy";
+      return Object.assign(base, { kind: k, notePh: SVC[k].notePh, days: [0, 1, 2, 3, 4, 5], schedOn: true }, clone(SVC[k]), { xu: true }); }
+    return Object.assign(base, { cat: "Mua hộ", pay: "", unit: "lần", payBy: "cash", advance: false, advAmt: "", advNote: "", head: 1, date: "", from: "", to: "", repeat: false, days: [], more: [], deadline: "", deadTime: "",
+      placeMode: "one", exact: "", from2: "", to2: "", reqs: [""] });
+  }
+  // sửa bài có sẵn: lấy lại form đã lưu, hoặc dựng từ mẫu theo loại + thông tin bài
+  function fromPost(p) {
+    if (p.form) return clone(p.form);
+    if (p.k === "food") { const F0 = template("food", p.cat === "Đồ uống" ? "drink" : "meal"); return Object.assign(F0, { t: p.t, cat: p.cat || F0.cat, imgs: p.img ? [p.img] : [], price: p.price, unit: (p.unit || "/ phần").replace("/ ", ""), perDay: p.max || F0.perDay }); }
+    if (p.k === "goods") { const F0 = template("goods"); return Object.assign(F0, { t: p.t, cat: p.cat || F0.cat, imgs: p.img ? [p.img] : [], price: p.price, unit: (p.unit || "/ cái").replace("/ ", ""), stock: p.val || 1 }); }
+    if (p.k === "service") { const F0 = template("service", p.cat === "Nấu ăn" ? "Nấu ăn" : "Khác"); F0.t = p.t; F0.price.amount = p.price; F0.price.unit = (p.unit || "").replace("/ ", "") || F0.price.unit; return F0; }
+    const j = A.jobs(S).find(x => x.id === p.job), F0 = template("job");
+    return Object.assign(F0, { t: p.t, cat: p.cat || F0.cat, pay: p.price, unit: (p.unit || "/ lần").replace("/ ", ""), head: p.val || 1, desc: j ? j.desc : "", exact: j ? j.exact : "", reqs: j && j.reqs.length ? j.reqs.slice() : [""], from: j ? j.tm.padStart(5, "0") : "", repeat: p.job === "j-cho", days: p.job === "j-cho" ? [0, 3] : [] });
+  }
+  const existing = editId ? A.posts(S).find(p => p.id === editId) : null;
+  let Fm = existing ? fromPost(existing) : template(["food", "goods", "service", "job"].includes(qs.get("type")) ? qs.get("type") : "food");
+  let dirty = false, tried = false, submitted = null;
+  const get = path => path.split(".").reduce((o, k) => o == null ? o : o[k], Fm);
+  const set = (path, v) => { const ks = path.split("."); const last = ks.pop(); ks.reduce((o, k) => o[k], Fm)[last] = v; dirty = true; };
+
+  /* ===== khung trang ===== */
+  function render() {
+    if (submitted) return renderDone();
+    const T = Fm.type;
+    page.innerHTML = `<a class="crumb" href="seller-posts.html">${icon("right")}Bài đăng</a>
+      <div class="fhead"><h1>${existing ? "Sửa bài" : "Đăng bài mới"}</h1><p>${{ food: "Món theo phần hoặc đồ uống pha theo đơn — khách chọn món, giờ nhận, giao hay tự lấy.", goods: "Đồ mới hoặc đã dùng — ghi rõ tình trạng, hẹn giờ khách qua lấy.", service: "Bạn làm, khách đặt lịch. Chọn loại dịch vụ để điền sẵn theo mẫu.", job: "Hàng xóm gửi đề nghị nhận việc, bạn so sánh rồi chọn người." }[T]}</p></div>
+      <div class="tpl">${AntGo.NEW_KINDS.map(([k, ic, t, s]) => `<button class="${T === k ? "on" : ""}" data-type="${k}"${existing ? " disabled" : ""}><span class="pi">${icon(ic)}</span><span><b>${t}</b><small>${s}</small></span></button>`).join("")}</div>
+      <div class="fgrid"><form id="form" novalidate>${{ food: foodForm, goods: goodsForm, service: svcForm, job: jobForm }[T]()}</form>
+        <aside class="side"><div class="pv"><h3>Thẻ bài khách thấy</h3><div id="preview"></div></div>
+          <div class="pv dp"><h3>Đầu trang bài</h3><div id="detail"></div></div>
+          <div class="pub"><button class="btn primary" data-publish>${existing ? "Lưu thay đổi" : T === "job" ? "Đăng việc" : "Đăng bài"}</button>${existing ? "" : `<button class="btn" data-draft>Lưu nháp (chưa hiện cho khách)</button>`}
+            <small>Đăng xong, hàng xóm trong Block ${Fm.area} thấy ngay ở “${T === "job" ? "Việc mới quanh bạn" : "Gần bạn"}”.</small></div></aside></div>`;
+    updatePreview();
+  }
+  // các mảnh form dùng chung
+  const fld = (label, inner, hint = "", err = "", key = "") => `<div class="fld${tried && key && invalid(key) ? " bad" : ""}"${key ? ` data-key="${key}"` : ""}><label>${label}</label>${inner}${hint ? `<span class="hint">${hint}</span>` : ""}${err ? `<span class="err">${err}</span>` : ""}</div>`;
+  const inp = (path, attrs = "") => `<input class="input" name="${path}" value="${esc(get(path) ?? "")}" ${attrs}>`;
+  const num = (path, attrs = "") => inp(path, `type="number" ${attrs}`);
+  const cash = (path, ph = "") => `<div class="money">${num(path, `min="0" step="1000" placeholder="${ph}"`)}</div>`;
+  const time = path => inp(path, 'type="time"');
+  const area = () => `<select class="input" name="area">${["A", "B", "C", "D"].map(b => `<option value="${b}"${Fm.area === b ? " selected" : ""}>Block ${b}</option>`).join("")}</select>`;
+  const sel = (path, opts) => `<select class="input" name="${path}">${opts.map(o => { const [v, t] = Array.isArray(o) ? o : [o, o]; return `<option value="${esc(v)}"${String(get(path)) === String(v) ? " selected" : ""}>${esc(t)}</option>`; }).join("")}</select>`;
+  const pills = (path, opts) => `<div class="pills">${opts.map(([v, t]) => `<button type="button" data-set="${path}" data-val="${v}" class="${String(get(path)) === String(v) ? "on" : ""}">${t}</button>`).join("")}</div>`;
+  const ck = (path, label, extra = "") => `<label class="ck"><input type="checkbox" name="${path}" ${get(path) ? "checked" : ""}><span>${label}</span>${extra}</label>`;
+  const days = path => `<div class="days">${DAYS.map((d, i) => `<button type="button" data-day="${path}" data-i="${i}" class="${(get(path) || []).includes(i) ? "on" : ""}">${d}</button>`).join("")}</div>`;
+  const sec = (n, title, sub, body, togPath) => `<section class="sec${togPath && !get(togPath) ? " off" : ""}"><header><span class="no">${n}</span><div><b>${title}</b><small>${sub}</small></div>${togPath ? `<button type="button" class="tog${get(togPath) ? " on" : ""}" data-flip="${togPath}" aria-label="Bật/tắt ${title}"></button>` : ""}</header><div class="bd">${body}</div></section>`;
+  const photos = (max = 6) => `<div class="imgs">${Fm.imgs.map((s, i) => `<div class="im"><img src="${U(s, 240, 240)}" alt=""><button type="button" class="x" data-rmimg="${i}" aria-label="Bỏ ảnh">×</button>${i === 0 ? `<span class="cover">Ảnh bìa</span>` : ""}</div>`).join("")}${Fm.imgs.length < max ? `<label class="addimg" for="file">${icon("camera")}Thêm ảnh</label>` : ""}</div>`;
+  const list = (path, ph, label) => `<div class="fld"><span class="lbl">${label}</span>${get(path).map((v, i) => `<div class="line2"><input class="input" name="${path}.${i}" value="${esc(v)}" placeholder="${ph}"><button type="button" class="rm" data-rmrow="${path}" data-i="${i}" aria-label="Xóa">${icon("xmark")}</button></div>`).join("")}<button type="button" class="mini" data-addrow="${path}">${icon("plus")}Thêm dòng</button></div>`;
+  const optGroups = (path, multiAllowed) => `${get(path).map((g, gi) => `<div class="grp"><div class="top"><input class="input" name="${path}.${gi}.name" value="${esc(g.name)}" placeholder="Tên nhóm, ví dụ: Size">
+      ${multiAllowed ? `<div class="seg"><button type="button" class="${g.multi ? "" : "on"}" data-gm="${path}.${gi}" data-v="0">Chọn 1</button><button type="button" class="${g.multi ? "on" : ""}" data-gm="${path}.${gi}" data-v="1">Chọn nhiều</button></div>` : `<span class="hint">Chọn 1</span>`}
+      <label class="reqck"><input type="checkbox" name="${path}.${gi}.req" ${g.req ? "checked" : ""}>Bắt buộc</label><button type="button" class="rm" data-rmrow="${path}" data-i="${gi}" aria-label="Xóa nhóm">${icon("xmark")}</button></div>
+      ${g.items.map((it, ii) => `<div class="line"><input class="input" name="${path}.${gi}.items.${ii}.n" value="${esc(it.n)}" placeholder="Lựa chọn"><div class="money"><input class="input" type="number" min="0" step="1000" name="${path}.${gi}.items.${ii}.p" value="${it.p || ""}" placeholder="+ giá"></div><button type="button" class="rm" data-rmrow="${path}.${gi}.items" data-i="${ii}" aria-label="Xóa">${icon("xmark")}</button></div>`).join("")}
+      <button type="button" class="mini" data-additem="${path}.${gi}.items">${icon("plus")}Thêm lựa chọn</button></div>`).join("")}<button type="button" class="mini" data-addgroup="${path}">${icon("plus")}Thêm nhóm</button>`;
+  const priceLines = path => `${get(path).map((it, i) => `<div class="line"><input class="input" name="${path}.${i}.n" value="${esc(it.n)}" placeholder="Tên món thêm"><div class="money"><input class="input" type="number" min="0" step="1000" name="${path}.${i}.p" value="${it.p || ""}" placeholder="giá"></div><button type="button" class="rm" data-rmrow="${path}" data-i="${i}" aria-label="Xóa">${icon("xmark")}</button></div>`).join("")}<button type="button" class="mini" data-additem="${path}">${icon("plus")}Thêm món</button>`;
+
+  /* ===== ĐỒ ĂN & ĐỒ UỐNG ===== */
+  function foodForm() {
+    const D = Fm.sub === "drink";
+    return sec(1, "Món & hình ảnh", "Ảnh thật của món, tên dễ tìm", `
+        ${fld("Bạn bán", pills("sub", [["meal", "Món ăn theo phần"], ["drink", "Đồ uống pha theo ly"]]), "Đổi loại sẽ điền sẵn nhóm chọn phù hợp (món mặn, phần cơm… hoặc size, độ ngọt, đá, topping).")}
+        ${fld("Ảnh (tối đa 6, PNG/JPG/WebP ≤ 2 MB)", photos(), "Ảnh đầu tiên là ảnh bìa trên thẻ bài.", "Cần ít nhất 1 ảnh", "imgs")}
+        ${fld(D ? "Tên đồ uống" : "Tên món", inp("t", `maxlength="100" placeholder="${D ? "Ví dụ: Trà sữa trân châu đường đen" : "Ví dụ: Cơm nhà làm, thực đơn đổi mỗi ngày"}"`), "", "Tên 5–100 ký tự", "t")}
+        <div class="row">${fld("Danh mục", sel("cat", CATS.food))}${fld("Khu vực", area())}</div>
+        ${fld("Mô tả", `<textarea class="input" name="desc" maxlength="1000" placeholder="${D ? "Pha thế nào, nguyên liệu, ly có nắp kín…" : "Mỗi phần gồm gì, nấu thế nào, thực đơn đổi ra sao…"}">${esc(Fm.desc)}</textarea>`, "", "Mô tả 10–1000 ký tự", "desc")}
+        ${list("notes", D ? "Ví dụ: đơn từ 2 ly giao miễn phí" : "Ví dụ: hộp giấy dùng một lần, có thể mang hộp riêng", "Lưu ý cho khách (hiện thành danh sách dưới mô tả)")}`) +
+      sec(2, "Giá & số lượng", "Giá mỗi phần/ly và giới hạn mỗi ngày", `
+        <div class="row3">${fld("Giá", cash("price", D ? "30000" : "35000"), "", "Nhập giá lớn hơn 0", "price")}${fld("Tính theo", sel("unit", D ? ["ly", "chai", "cốc"] : ["phần", "hộp", "suất", "ổ", "cái"]))}${fld("Mỗi đơn tối đa", num("maxPer", 'min="1" max="99"'))}</div>
+        ${ck("limit", `Giới hạn số ${D ? "ly" : "phần"} mỗi ngày<small>Bán hết thì bài tự hiện “Hết món”, hôm sau tự mở lại</small>`, Fm.limit ? `<input class="input extra" type="number" min="1" name="perDay" value="${Fm.perDay}" placeholder="Số ${D ? "ly" : "phần"}">` : "")}`) +
+      sec(3, "Giờ nhận đặt & giờ khách nhận", "Khách thấy “Giờ nhận đặt” và chọn giờ nhận trong khung này", `
+        <div class="fld"><span class="lbl">Ngày bán</span>${days("days")}</div>
+        <div class="row">${fld("Nhận đặt từ", time("sched.0"))}${fld("Đến", time("sched.1"), "Sau giờ này khách không đặt được cho hôm đó")}</div>
+        <div class="row3">${fld("Khách nhận từ", time("win.0"))}${fld("Đến", time("win.1"))}${fld(D ? "Thời gian pha" : "Thời gian chuẩn bị", sel("prep", [["10", "10 phút"], ["15", "15 phút"], ["30", "30 phút"], ["45", "45 phút"], ["60", "60 phút"]]))}</div>`) +
+      sec(4, "Cách nhận", "Khách chọn khi đặt; phí giao cộng vào đơn", `<div class="checks">
+        ${ck("delivery", "Giao tận cửa<small>Bạn hoặc người giao mang tới nhà khách trong khu</small>", `<div class="money extra">${num("fee", 'min="0" step="1000" placeholder="Phí giao"')}</div>`)}
+        ${ck("pickup", "Khách tự đến lấy<small>Địa chỉ lấy món gửi cho khách sau khi bạn xác nhận đơn</small>")}</div>`) +
+      sec(5, D ? "Size, độ ngọt, đá" : "Lựa chọn món", "Khách chọn 1 trong mỗi nhóm; lựa chọn có giá thì cộng vào đơn", optGroups("opts", false)) +
+      sec(6, D ? "Topping thêm" : "Món thêm", "Khách chọn nhiều, mỗi món có giá riêng", priceLines("extras")) +
+      sec(7, "Khi khách xác nhận đơn", "Những gì hiện ở hộp “Xác nhận đơn hàng”", `
+        ${ck("utensil", FOOD[Fm.sub].utensil + `<small>Hiện công tắc “${D ? "Lấy ống hút" : "Lấy dụng cụ ăn uống"}” cho khách</small>`)}
+        ${fld("Gợi ý ô ghi chú", inp("notePh", 'maxlength="80"'), "Chữ mờ trong ô ghi chú, giúp khách biết nên ghi gì")}
+        ${ck("xu", `Cho khách dùng voucher AntXu<small>Thẻ bài có nhãn “Dùng được Xu”</small>`)}`);
+  }
+  /* ===== ĐỒ DÙNG ===== */
+  function goodsForm() {
+    return sec(1, "Món đồ & hình ảnh", "Chụp đủ góc, cả chỗ trầy xước nếu có", `
+        ${fld("Ảnh (tối đa 6, PNG/JPG/WebP ≤ 2 MB)", photos(), "Ảnh đầu tiên là ảnh bìa trên thẻ bài.", "Cần ít nhất 1 ảnh", "imgs")}
+        ${fld("Tên món đồ", inp("t", 'maxlength="100" placeholder="Ví dụ: Nồi chiên không dầu 5L, dùng 6 tháng"'), "", "Tên 5–100 ký tự", "t")}
+        <div class="row">${fld("Danh mục", sel("cat", CATS.goods))}${fld("Khu vực", area())}</div>
+        ${fld("Mô tả", `<textarea class="input" name="desc" maxlength="1000" placeholder="Mua khi nào, dùng ra sao, vì sao bán…">${esc(Fm.desc)}</textarea>`, "", "Mô tả 10–1000 ký tự", "desc")}
+        ${list("notes", "Ví dụ: kèm khay, giấy bảo hành và hộp", "Lưu ý cho khách")}`) +
+      sec(2, "Tình trạng", "Khách thấy ở ô “Tình trạng” ngay dưới tên", `
+        ${pills("cond", [["Mới", "Mới · chưa dùng"], ["Như mới", "Như mới"], ["Đã dùng", "Đã dùng"]])}
+        <div class="row3">${Fm.cond === "Đã dùng" ? fld("Còn khoảng (%)", sel("keep", ["99", "95", "90", "80", "70", "50"])) : ""}${Fm.cond !== "Mới" ? fld("Đã dùng", inp("used", 'maxlength="20" placeholder="Ví dụ: 6 tháng"')) : ""}${fld("Bảo hành còn", inp("warranty", 'maxlength="30" placeholder="Ví dụ: đến 04/2027"'))}</div>
+        ${fld("Đi kèm", inp("inbox", 'maxlength="80" placeholder="Ví dụ: hộp, sạc, sách hướng dẫn"'))}`) +
+      sec(3, "Giá & số lượng", "Còn 1 cái = bán một lần, có người mua thì bài tự ẩn", `
+        <div class="row3">${fld("Giá", cash("price", "650000"), "", "Nhập giá lớn hơn 0", "price")}${fld("Tính theo", sel("unit", ["cái", "bộ", "đôi", "chiếc"]))}${fld("Số lượng đang có", num("stock", 'min="1" max="99"'))}</div>`) +
+      sec(4, "Giao nhận", "Đồ dùng thường là khách qua lấy; giao tận cửa là tùy chọn", `
+        <div class="row">${fld("Hẹn khách qua lấy từ", time("win.0"))}${fld("Đến", time("win.1"))}</div>
+        <div class="checks">${ck("tryFirst", "Cho khách xem / thử trước khi lấy<small>Hiện trong lưu ý: “Có thể qua xem và thử trước”</small>")}
+        ${ck("delivery", "Có giao tận cửa trong khu", `<div class="money extra">${num("fee", 'min="0" step="1000" placeholder="Phí giao"')}</div>`)}</div>
+        <div class="note">${icon("shield")}Địa chỉ lấy hàng chính xác chỉ gửi cho khách sau khi bạn xác nhận đơn.</div>`);
+  }
+  /* ===== DỊCH VỤ ===== */
+  function svcForm() {
+    const P = Fm.price, Tm = Fm.time, Pl = Fm.place;
+    return sec(1, "Dịch vụ & hình ảnh", "Chọn loại để AntGo điền sẵn các mục theo mẫu", `
+        ${fld("Loại dịch vụ", `<div class="pills">${Object.keys(SVC).map(k => `<button type="button" data-svc="${k}" class="${Fm.kind === k ? "on" : ""}">${k}</button>`).join("")}</div>`, "Đổi loại sẽ điền lại giá, lịch, câu hỏi, các bước theo mẫu (giữ tên, mô tả, ảnh).")}
+        ${fld("Ảnh (tối đa 6)", photos(), "Ảnh bạn đang làm việc, dụng cụ, kết quả.", "Cần ít nhất 1 ảnh", "imgs")}
+        ${fld("Tên dịch vụ", inp("t", 'maxlength="100" placeholder="Ví dụ: Giặt sấy gấp, lấy và trả tận cửa"'), "", "Tên 5–100 ký tự", "t")}
+        <div class="row">${fld("Tên nút đặt cho khách", inp("action", 'maxlength="24"'), "Ví dụ: Đặt lịch, Đặt lấy đồ, Gửi yêu cầu kiểm tra")}${fld("Khu vực", area())}</div>
+        ${fld("Mô tả", `<textarea class="input" name="desc" maxlength="1000" placeholder="Làm những gì, không nhận gì, khách cần chuẩn bị gì…">${esc(Fm.desc)}</textarea>`, "", "Mô tả 10–1000 ký tự", "desc")}
+        ${list("notes", "Ví dụ: không nhận đồ da, đồ cần giặt khô", "Lưu ý cho khách")}`) +
+      sec(2, "3 ô nổi bật", "Hiện ngay dưới tên bài — điều khách cần biết nhất", Fm.facts.map((f, i) => `<div class="line3"><span class="ic">${icon(f[0])}</span><input class="input" name="facts.${i}.1" value="${esc(f[1])}" placeholder="Tiêu đề"><input class="input" name="facts.${i}.2" value="${esc(f[2])}" placeholder="Nội dung"><span></span></div>`).join("")) +
+      sec(3, "Giá", "Khách thấy giá trên thẻ bài và trong hộp đặt", `
+        ${pills("price.type", [["fixed", "Giá cố định"], ["unit", "Theo đơn vị"], ["from", "Giá “từ”"], ["quote", "Báo giá sau"]])}
+        ${P.type === "quote" ? `<div class="row">${fld("Phí kiểm tra", cash("price.inspect", "50000"), "Trừ vào tiền làm nếu khách đồng ý báo giá")}</div><div class="note">${icon("question")}Khách gửi yêu cầu, bạn kiểm tra rồi báo giá; khách đồng ý thì mới làm.</div>`
+          : `<div class="row">${fld(P.type === "from" ? "Giá thấp nhất" : "Giá", cash("price.amount", "120000"), "", "Nhập giá lớn hơn 0", "price")}${fld("Đơn vị", inp("price.unit", 'maxlength="12" placeholder="lượt, kg, giờ, buổi…"'))}</div>
+            ${P.type === "unit" ? ck("price.estimate", "Giá ước tính — cân/đo xong mới báo chính xác<small>Khách thấy “Giá theo kg sau khi cân, tiệm nhắn báo giá trước khi làm”</small>") : ""}`}
+        ${ck("qty.on", "Khách nhập khối lượng / số lượng ước tính", Fm.qty.on ? `<input class="input extra" name="qty.label" value="${esc(Fm.qty.label)}" placeholder="Ví dụ: Khối lượng (kg)">` : "")}
+        ${Fm.qty.on ? `<div class="row">${fld("Ít nhất", num("qty.min", 'min="1"'))}${fld("Nhiều nhất", num("qty.max", 'min="1"'))}</div>` : ""}`) +
+      sec(4, "Lịch làm", "Khách chọn giờ trong khung bạn nhận", `
+        ${pills("time.mode", [["slot", "Khách chọn giờ"], ["datedur", "Khách chọn ngày + số giờ"]])}
+        <div class="fld"><span class="lbl">Ngày nhận lịch</span>${days("days")}</div>
+        <div class="row3">${Tm.mode === "slot" ? fld("Nhãn ô chọn giờ", inp("time.label", 'maxlength="24"'), "Ví dụ: Lấy đồ lúc, Hẹn kiểm tra lúc") : fld("Mỗi lần từ (giờ)", num("time.durMin", 'min="1" max="12"'))}${Tm.mode === "slot" ? fld("Nhận từ", time("time.from")) : fld("Đến (giờ)", num("time.durMax", 'min="1" max="12"'))}${Tm.mode === "slot" ? fld("Đến", time("time.to")) : fld("Nhận từ – đến", `<div style="display:flex;gap:6px">${time("time.from")}${time("time.to")}</div>`)}</div>
+        ${Tm.mode === "datedur" ? ck("time.repeat", "Cho khách đặt lặp lại hằng tuần<small>Bạn giữ cố định khung giờ cho nhà khách</small>") : ""}`) +
+      sec(5, "Làm ở đâu", "Khách thấy ở ô chọn địa điểm khi đặt", `
+        ${pills("place.mode", [["buyer", "Tại nhà khách"], ["seller", "Khách mang tới"], ["choice", "Khách chọn"], ["ab", "Từ điểm A đến B"]])}
+        ${Pl.mode === "seller" || Pl.mode === "choice" ? `<div class="row">${fld("Chỗ của bạn", inp("place.shop", 'maxlength="40" placeholder="Ví dụ: Shop 7, tầng trệt Block B"'))}${Pl.mode === "choice" ? fld("Phí đến nhà khách", cash("place.fee", "30000")) : ""}</div>` : ""}
+        ${Pl.mode === "ab" ? `<div class="note">${icon("pin")}Khách nhập điểm lấy và điểm giao khi đặt.</div>` : ""}
+        ${Pl.mode === "buyer" || Pl.mode === "choice" ? ck("safety", "Hiện lưu ý an toàn khi làm tại nhà khách<small>Nhắc khách không để đồ có giá trị, báo trước người ở nhà</small>") : ""}`) +
+      sec(6, "Tùy chọn cộng giá", "Khách chọn 1 trong mỗi nhóm", optGroups("opts", false), null) +
+      sec(7, "Câu hỏi cho khách", "Hỏi trước những gì bạn cần biết để nhận việc", `${Fm.qs.map((q, i) => `<div class="grp"><div class="top"><input class="input" name="qs.${i}.label" value="${esc(q.label)}" placeholder="Câu hỏi">
+          <select class="input" name="qs.${i}.type" style="width:130px">${[["text", "Trả lời chữ"], ["choice", "Chọn 1"], ["multi", "Chọn nhiều"], ["photo", "Gửi ảnh"]].map(([v, t]) => `<option value="${v}"${q.type === v ? " selected" : ""}>${t}</option>`).join("")}</select>
+          <label class="reqck"><input type="checkbox" name="qs.${i}.req" ${q.req ? "checked" : ""}>Bắt buộc</label><button type="button" class="rm" data-rmrow="qs" data-i="${i}" aria-label="Xóa">${icon("xmark")}</button></div>
+          ${q.type === "choice" || q.type === "multi" ? `<input class="input" name="qs.${i}.opts" value="${esc(q.opts)}" placeholder="Các lựa chọn, cách nhau bằng dấu phẩy; phụ thu ghi |+10.000đ">` : ""}
+          <input class="input" name="qs.${i}.hint" value="${esc(q.hint)}" placeholder="${q.type === "text" ? "Chữ gợi ý trong ô, ví dụ: Dell Inspiron 15" : "Ghi chú nhỏ dưới câu hỏi (không bắt buộc)"}"></div>`).join("")}
+        <button type="button" class="mini" data-addq>${icon("plus")}Thêm câu hỏi</button>`) +
+      sec(8, "Các bước đơn khách thấy", "Thanh tiến trình trong Đơn hàng của khách — đặt theo cách bạn làm", `
+        <div class="stepsed">${Fm.steps.map((s, i) => `${i ? `<span class="arrow">→</span>` : ""}<span class="sp">${esc(s)}${i ? `<button type="button" data-rmrow="steps" data-i="${i}" aria-label="Bỏ bước">×</button>` : ""}</span>`).join("")}
+          <form data-addstep><input class="input" placeholder="Thêm bước, ví dụ: Cân & báo giá" maxlength="24"><button class="mini">${icon("plus")}Thêm</button></form></div>
+        ${fld("Gợi ý ô ghi chú", inp("notePh", 'maxlength="80"'))}
+        ${ck("xu", "Cho khách dùng voucher AntXu")}`);
+  }
+  /* ===== VIỆC CẦN NGƯỜI ===== */
+  function jobForm() {
+    return sec(1, "Việc cần làm", "Viết rõ để người nhận việc hiểu ngay", `
+        ${fld("Tên việc", inp("t", 'maxlength="100" placeholder="Ví dụ: Mua đồ chợ sáng giúp nhà mình"'), "", "Tên việc 5–100 ký tự", "t")}
+        <div class="row">${fld("Loại việc", sel("cat", CATS.job))}${fld("Khu vực hiện công khai", area())}</div>
+        ${fld("Mô tả việc", `<textarea class="input" name="desc" maxlength="1000" placeholder="Vì sao cần, làm gì, làm xong thế nào là đạt…">${esc(Fm.desc)}</textarea>`, "", "Mô tả 10–1000 ký tự", "desc")}
+        ${list("reqs", "Ví dụ: Có xe máy, quen đường chợ Tân Mỹ", "Yêu cầu với người nhận")}
+        ${fld("Ảnh minh họa (không bắt buộc, tối đa 3)", photos(3))}`) +
+      sec(2, "Tiền công & thanh toán", "Trả trực tiếp cho người làm khi xong việc, AntGo không giữ tiền", `
+        <div class="row3">${fld("Tiền công", cash("pay", "50000"), "", "Nhập tiền công", "pay")}${fld("Tính theo", sel("unit", ["lần", "buổi", "giờ", "ngày"]))}${fld("Số người cần", num("head", 'min="1" max="10"'))}</div>
+        ${fld("Thanh toán bằng", pills("payBy", [["cash", "Tiền mặt"], ["transfer", "Chuyển khoản"]]))}
+        ${ck("advance", "Có ứng tiền trước cho người làm<small>Ví dụ: tiền chợ, tiền mua đồ — người làm giữ hóa đơn</small>", Fm.advance ? `<div class="money extra">${num("advAmt", 'min="0" step="10000" placeholder="Số tiền ứng"')}</div>` : "")}`) +
+      sec(3, "Thời gian", "Người đề nghị chọn khung giờ họ làm được", `
+        ${ck("repeat", "Việc lặp lại hằng tuần")}
+        ${Fm.repeat ? `<div class="fld"><span class="lbl">Các ngày</span>${days("days")}</div>` : fld("Ngày làm", inp("date", 'type="date"'), "", "Chọn ngày làm", "date")}
+        <div class="row">${fld("Khung giờ chính · từ", time("from"))}${fld("Đến", time("to"))}</div>
+        <div class="fld"><span class="lbl">Khung giờ khác bạn chấp nhận (người đề nghị có thể đề xuất)</span>${Fm.more.map((m, i) => `<div class="line2"><input class="input" name="more.${i}" value="${esc(m)}" placeholder="Ví dụ: Thứ Bảy, 6:00 – 7:30 (đi sớm hơn)"><button type="button" class="rm" data-rmrow="more" data-i="${i}" aria-label="Xóa">${icon("xmark")}</button></div>`).join("")}<button type="button" class="mini" data-addrow="more">${icon("plus")}Thêm khung giờ</button></div>
+        <div class="row">${fld("Hạn nhận đề nghị · ngày", inp("deadline", 'type="date"'))}${fld("Giờ", time("deadTime"), "Sau hạn này việc tự đóng nhận đề nghị")}</div>`) +
+      sec(4, "Địa điểm", "Mọi người chỉ thấy khu; địa chỉ chính xác gửi khi bạn chọn người", `
+        ${pills("placeMode", [["one", "Tại một nơi"], ["ab", "Từ điểm A đến điểm B"]])}
+        ${Fm.placeMode === "ab" ? `<div class="row">${fld("Điểm đi", inp("from2", 'maxlength="60" placeholder="Ví dụ: Chợ Tân Mỹ"'))}${fld("Điểm đến (chính xác)", inp("exact", 'maxlength="80" placeholder="Ví dụ: Block A, căn 09.12"'), "", "Nhập điểm đến", "exact")}</div>`
+          : fld("Địa chỉ chính xác", inp("exact", 'maxlength="80" placeholder="Ví dụ: Bếp B-0512 (cửa xanh, tầng 5)"'), "", "Nhập địa chỉ chính xác", "exact")}
+        <div class="note">${icon("shield")}Hỏi đáp công khai trên trang việc chặn số điện thoại; ai cần hỏi riêng thì nhắn tin cho bạn.</div>`);
+  }
+
+  /* ===== kiểm tra ===== */
+  function invalid(key) {
+    const T = Fm.type;
+    if (key === "t") return Fm.t.trim().length < 5;
+    if (key === "desc") return Fm.desc.trim().length < 10;
+    if (key === "imgs") return T !== "job" && !Fm.imgs.length;
+    if (key === "price") return T === "service" ? Fm.price.type !== "quote" && !(+Fm.price.amount > 0) : (T === "food" || T === "goods") && !(+Fm.price > 0);
+    if (key === "pay") return T === "job" && !(+Fm.pay > 0);
+    if (key === "date") return T === "job" && !Fm.repeat && !Fm.date;
+    if (key === "exact") return T === "job" && Fm.exact.trim().length < 3;
+    return false;
+  }
+  const KEYS = ["imgs", "t", "desc", "price", "pay", "date", "exact"];
+  const markErrors = () => document.querySelectorAll("[data-key]").forEach(el => el.classList.toggle("bad", tried && invalid(el.dataset.key)));
+
+  /* ===== xem trước: thẻ bài + đầu trang bài như detail.html / job.html ===== */
+  const hm = t => (t || "").replace(/^0/, "");
+  const dayList = arr => arr.length === 7 ? "mỗi ngày" : arr.length ? arr.map(i => DAYS[i]).join(", ") : "chưa chọn ngày";
+  function view() {
+    const T = Fm.type, area = `Block ${Fm.area}`;
+    if (T === "food") { const D = Fm.sub === "drink", how = [Fm.delivery && "Giao trong khu", Fm.pickup && "tự lấy"].filter(Boolean).join(" hoặc ") || "Chưa chọn";
+      return { kind: "Đồ ăn & uống", pr: Fm.price ? money(Fm.price) : "—", unit: Fm.unit, action: "Đặt món", xu: Fm.xu,
+        facts: [["clock", "Giờ nhận đặt", `${hm(Fm.sched[0])} – ${hm(Fm.sched[1])}, ${dayList(Fm.days)}`], ["pin", "Cách nhận", how], ["bolt", D ? "Thời gian pha" : "Thời gian chuẩn bị", `Khoảng ${Fm.prep} phút · nhận ${hm(Fm.win[0])} – ${hm(Fm.win[1])}`]],
+        steps: ["Đã gửi", "Chờ xác nhận", Fm.delivery ? "Đang giao" : "Chờ lấy", "Hoàn thành"], sched: Fm.limit ? `Mỗi ngày ${Fm.perDay || "?"} ${Fm.unit}` : "" }; }
+    if (T === "goods") return { kind: "Đồ dùng", pr: Fm.price ? money(Fm.price) : "—", unit: Fm.unit, action: "Mua", xu: false,
+      facts: [["check", "Tình trạng", Fm.cond === "Đã dùng" ? `Đã dùng · còn ${Fm.keep}%` : Fm.cond], ["pin", "Cách nhận", `Tự đến lấy ở ${area}${Fm.delivery ? " · có giao" : ""}`], ["clock", "Ngày đăng", "Vừa đăng"]],
+      steps: ["Đã gửi", "Chờ xác nhận", "Hẹn lấy hàng", "Hoàn thành"], sched: Fm.stock > 1 ? `Còn ${Fm.stock} ${Fm.unit}` : "Bán một lần" };
+    if (T === "service") { const P = Fm.price;
+      return { kind: "Dịch vụ", pr: P.type === "quote" ? "Báo giá sau" : `${P.type === "from" ? "từ " : ""}${P.amount ? money(P.amount) : "—"}`, unit: P.type === "quote" ? "" : P.unit, action: Fm.action || "Đặt dịch vụ", xu: Fm.xu,
+        facts: Fm.facts.map(f => [f[0], f[1] || "—", f[2] || "—"]), steps: Fm.steps, sched: `Nhận lịch ${hm(Fm.time.from)} – ${hm(Fm.time.to)}, ${dayList(Fm.days)}` }; }
+    return { kind: "Việc làm", job: true, pr: Fm.pay ? money(Fm.pay) : "—", unit: Fm.unit, action: "Đề nghị nhận việc",
+      facts: [["clock", "Thời gian làm", `${Fm.from ? hm(Fm.from) : "?"} – ${Fm.to ? hm(Fm.to) : "?"}, ${Fm.repeat ? dayList(Fm.days) : Fm.date ? new Date(Fm.date).toLocaleDateString("vi-VN", { weekday: "short", day: "2-digit", month: "2-digit" }) : "chưa chọn ngày"}`],
+        ["pin", "Địa điểm", Fm.placeMode === "ab" ? `${Fm.from2 || "?"} → ${area}` : area], ["users", "Số người cần", `${Fm.head || 1} người`], ["receipt", "Thanh toán", Fm.payBy === "cash" ? "Tiền mặt" : "Chuyển khoản"]] };
+  }
+  function updatePreview() {
+    const P = $("preview"), Dt = $("detail"); if (!P) return;
+    const v = view(), area = `Block ${Fm.area}`;
+    P.innerHTML = v.job
+      ? `<div class="card jcard"><div class="ph"><div class="jt"><img src="${F(A.shop(S).av)}" alt=""><span><b>${esc(A.shop(S).name)}</b>vừa đăng</span><span class="jcat">${esc(Fm.cat)}</span></div>
+          <p class="jd">${esc(Fm.desc || "Mô tả việc sẽ hiện ở đây.")}</p><div class="jf"><span class="jpay">${v.pr}<small>/ ${esc(v.unit)}</small></span><span class="due">${icon("clock")}${esc(v.facts[0][2].split(",").pop().trim())}${Fm.from ? " · " + hm(Fm.from) : ""}</span></div></div>
+          <div class="body"><h4>${esc(Fm.t || "Tên việc")}</h4><div class="meta"><span>${icon("pin")}${area}</span><span class="jst">Đang mở · chưa có đề nghị</span></div></div></div>`
+      : `<div class="card"><div class="ph">${Fm.imgs[0] ? `<img src="${U(Fm.imgs[0], 480, 360)}" alt="">` : `<span class="empty">${icon("camera")}Ảnh bìa</span>`}<span class="kind">${v.kind}</span><span class="save">${icon("heart")}</span></div>
+          <div class="body"><h4>${esc(Fm.t || "Tên bài của bạn")}</h4><div class="pr">${v.pr}${v.unit ? ` <span>/ ${esc(v.unit)}</span>` : ""}</div>
+          ${v.xu ? `<span class="xuok"><img src="assets/clean/antxu.png?v=2" alt="">Dùng được Xu</span>` : ""}<div class="meta"><span>${icon("pin")}${area} · 0m</span><span>Mới</span></div></div></div>`;
+    Dt.innerHTML = `<div class="kl">${icon(v.job ? "hand" : Fm.type === "service" ? "wrench" : Fm.type === "goods" ? "package" : "fork")}${v.kind}${Fm.type === "service" ? " · " + esc(Fm.kind) : ""}</div>
+      <div class="facts">${v.facts.map(([ic, a, b]) => `<div>${icon(ic)}<span><b>${esc(a)}</b>${esc(b)}</span></div>`).join("")}</div>
+      ${v.sched ? `<div class="sched">${esc(v.sched)}</div>` : ""}
+      <button type="button" class="act" tabindex="-1">${esc(v.action)}${v.job ? "" : ` · ${v.pr}`}</button>
+      ${v.steps ? `<div class="stp">${v.steps.map(s => `<span>${esc(s)}</span>`).join("")}</div>` : ""}`;
+  }
+
+  /* ===== sự kiện ===== */
+  const coerce = el => el.type === "checkbox" ? el.checked : el.type === "number" ? (el.value === "" ? "" : +el.value) : el.value;
+  page.addEventListener("input", e => { const n = e.target.name; if (!n || e.target.type === "checkbox") return; set(n, coerce(e.target)); if (tried) markErrors(); updatePreview(); });
+  page.addEventListener("change", e => {
+    const n = e.target.name; if (!n) return;
+    set(n, coerce(e.target));
+    if (e.target.type === "checkbox" || /\.type$/.test(n)) return render();
+    updatePreview();
+  });
+  page.addEventListener("submit", e => {
+    if (!e.target.matches("[data-addstep]")) return; e.preventDefault();
+    const v = e.target.querySelector("input").value.trim(); if (!v) return;
+    Fm.steps.splice(Fm.steps.length - 1, 0, v); dirty = true; render();
+  });
+  page.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.closest("[data-addstep]") && b.type !== "button") return;
+    const d = b.dataset;
+    if (d.type) {
+      if (d.type === Fm.type) return;
+      if (dirty && !confirm("Đổi loại bài sẽ dựng lại form theo loại mới. Giữ tên, mô tả và ảnh. Tiếp tục?")) return;
+      const keep = { t: Fm.t, desc: Fm.desc, imgs: Fm.imgs.slice(0, d.type === "job" ? 3 : 6), area: Fm.area }; Fm = Object.assign(template(d.type), keep); history.replaceState(null, "", "?type=" + d.type); return render();
+    }
+    if (d.set) {
+      if (d.set === "sub") { const keep = { t: Fm.t, desc: Fm.desc, imgs: Fm.imgs, area: Fm.area, price: Fm.price, notes: Fm.notes }; Fm = Object.assign(template("food", d.val), keep); dirty = true; return render(); }
+      const cur = get(d.set); set(d.set, typeof cur === "number" ? +d.val : d.val); return render();
+    }
+    if (d.svc) { const keep = { t: Fm.t, desc: Fm.desc, imgs: Fm.imgs, area: Fm.area, notes: Fm.notes }; Fm = Object.assign(template("service", d.svc), keep); dirty = true; AntGo.toast(`Đã điền sẵn theo mẫu “${d.svc}” — sửa lại cho đúng cách bạn làm`); return render(); }
+    if (d.flip) { set(d.flip, !get(d.flip)); return render(); }
+    if (d.day) { const arr = get(d.day) || [], i = +d.i; set(d.day, arr.includes(i) ? arr.filter(x => x !== i) : arr.concat(i).sort()); return render(); }
+    if (d.rmimg != null) { Fm.imgs.splice(+d.rmimg, 1); dirty = true; return render(); }
+    if (d.addrow) { get(d.addrow).push(""); dirty = true; return render(); }
+    if (d.rmrow) { const arr = get(d.rmrow); arr.splice(+d.i, 1); if (!arr.length && ["notes", "reqs"].includes(d.rmrow)) arr.push(""); dirty = true; return render(); }
+    if (d.addgroup) { get(d.addgroup).push({ name: "", req: false, items: [{ n: "", p: 0 }] }); dirty = true; return render(); }
+    if (d.additem) { get(d.additem).push({ n: "", p: 0 }); dirty = true; return render(); }
+    if (d.gm) { get(d.gm).multi = d.v === "1"; dirty = true; return render(); }
+    if (d.addq != null) { Fm.qs.push({ type: "text", label: "", opts: "", req: false, hint: "" }); dirty = true; return render(); }
+    if (d.publish != null || d.draft != null) return submit(d.draft != null);
+  });
+  // ảnh: thu nhỏ còn 480px để lưu được trong trình duyệt; chỉ nhận png/jpg/webp ≤ 2 MB
+  $("file").addEventListener("change", e => {
+    const max = Fm.type === "job" ? 3 : 6, files = [...e.target.files].slice(0, max - Fm.imgs.length); e.target.value = "";
+    files.forEach(f => {
+      if (!/^image\/(png|jpeg|webp)$/.test(f.type)) return AntGo.toast(`“${f.name}” không phải ảnh PNG/JPG/WebP`);
+      if (f.size > 2 * 1024 * 1024) return AntGo.toast(`“${f.name}” lớn hơn 2 MB`);
+      const r = new FileReader();
+      r.onload = () => { const img = new Image(); img.onload = () => { const k = Math.min(1, 480 / Math.max(img.width, img.height)); const c = document.createElement("canvas"); c.width = img.width * k; c.height = img.height * k; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); Fm.imgs.push(c.toDataURL("image/jpeg", .8)); dirty = true; render(); }; img.src = r.result; };
+      r.readAsDataURL(f);
+    });
+  });
+
+  function submit(draft) {
+    tried = true;
+    const bad = KEYS.filter(invalid);
+    if (bad.length && !draft) { render(); markErrors(); const el = document.querySelector(".fld.bad"); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); return AntGo.toast("Còn mục chưa điền đúng — xem chỗ viền đỏ"); }
+    const T = Fm.type, v = view();
+    const price = T === "service" ? +Fm.price.amount || 0 : T === "job" ? +Fm.pay || 0 : +Fm.price || 0;
+    const unit = v.unit ? "/ " + v.unit : "";
+    const cat = T === "service" ? Fm.kind : Fm.cat;
+    const val = T === "food" ? +Fm.perDay || 20 : T === "goods" ? +Fm.stock || 1 : T === "service" ? 3 : +Fm.head || 1;
+    const form = clone(Fm);
+    if (existing) {
+      A.setPost(S, existing.id, { t: Fm.t.trim(), price, unit, cat, desc: Fm.desc, img: Fm.imgs[0] || existing.img, form });
+      if (T === "job" && existing.job) A.setJob(S, existing.job, { title: Fm.t.trim(), pay: price, desc: Fm.desc, exact: Fm.exact, head: +Fm.head || 1, reqs: Fm.reqs.filter(r => r.trim()) });
+    } else {
+      S.newPosts.push({ id: "n" + Date.now(), k: T, t: Fm.t.trim() || "Bài nháp chưa đặt tên", img: Fm.imgs[0], ic: Fm.imgs[0] ? undefined : KIND[T][0], price, unit, val, max: Math.max(val, 20), on: draft ? 0 : 1, views: 0, saves: 0, sold: 0, cat, desc: Fm.desc, form });
+      A.save(S);
+    }
+    dirty = false; submitted = { draft, T }; render(); window.scrollTo(0, 0);
+  }
+  function renderDone() {
+    const { draft, T } = submitted;
+    page.innerHTML = `<div class="done"><img src="assets/clean/${draft ? "idle" : "wave"}.png" alt=""><h1>${existing ? "Đã lưu thay đổi" : draft ? "Đã lưu nháp" : T === "job" ? "Đã đăng việc!" : "Đã đăng bài!"}</h1>
+      <p>${existing ? "Khách thấy nội dung mới ngay." : draft ? "Bài chưa hiện cho khách. Bật “Mở bán” ở Bài đăng khi sẵn sàng." : T === "job" ? "Hàng xóm trong khu thấy việc ở “Việc mới quanh bạn”. Có đề nghị là bạn nhận thông báo." : "Bài hiện ở “Gần bạn” cho hàng xóm trong khu. Có đơn là bạn nhận thông báo."}</p>
+      <div class="btns"><a class="btn primary" href="seller-posts.html">Xem Bài đăng</a><a class="btn" href="seller-post-form.html?type=${T}">Đăng bài khác</a><a class="btn" href="seller.html">Về Hôm nay</a></div></div>`;
+  }
+  window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+  render();
+})();
+</script>
+</body></html>

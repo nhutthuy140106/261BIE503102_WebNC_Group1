@@ -1,9 +1,11 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Post } from '../../../core/models/post';
+import { AreaService } from '../../../core/services/area';
 import { PostService } from '../../../core/services/post';
 import { RecommendService } from '../../../core/services/recommend';
 import { SavedService } from '../../../core/services/saved';
+import { inArea } from '../../../core/utils/post-area';
 
 type Key = 'featured' | 'foryou' | 'nearby' | 'jobs';
 type Sort = 'near' | 'new' | 'low' | 'high';
@@ -30,6 +32,7 @@ export class SectionList implements OnInit {
   private readonly postService = inject(PostService);
   protected readonly saved = inject(SavedService);
   private readonly recommend = inject(RecommendService);
+  private readonly area = inject(AreaService);
   protected readonly forYou = signal<Post[]>([]);
 
   protected readonly key = signal<Key>('featured');
@@ -52,7 +55,7 @@ export class SectionList implements OnInit {
   protected readonly items = computed(() => {
     const k = this.key();
     const far = Number.MAX_SAFE_INTEGER;
-    const list = k === 'foryou' ? this.forYou() : this.all().filter((p) => (k === 'jobs' ? p.kind === 'job' : k === 'featured' ? !!p.promoted : p.kind !== 'job' && !p.promoted));
+    const list = (k === 'foryou' ? this.forYou() : this.all().filter((p) => (k === 'jobs' ? p.kind === 'job' : k === 'featured' ? !!p.promoted : p.kind !== 'job' && !p.promoted))).filter((p) => inArea(p, this.area.current()));
     const s = this.sort();
     return [...list].sort((a, b) =>
       s === 'low' ? a.price - b.price : s === 'high' ? b.price - a.price : s === 'new' ? b.createdAt.localeCompare(a.createdAt) : (a.distance ?? far) - (b.distance ?? far),

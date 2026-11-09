@@ -1,3 +1,5 @@
+import { PostBank } from './post';
+
 /**
  * Mẫu chi tiết bài theo "mô hình 7 khối" của design/mockups/detail.html:
  * Giá · Số lượng · Thời gian · Địa điểm · Tùy chọn cộng giá · Câu hỏi riêng · Tình trạng bán.
@@ -6,6 +8,26 @@
 export type TemplateKey = 'food' | 'drink' | 'goods' | 'svc' | 'fix' | 'clean' | 'trip';
 
 export type IconName = 'clock' | 'pin' | 'bolt' | 'check' | 'receipt' | 'shield';
+
+/** Đồ uống đặt theo từng dòng: một loại nước và các nhóm khách chọn cho ly đó (size, độ ngọt, đá, topping) */
+export interface CupDrink {
+  name: string;
+  price: number;
+  /** Số ly còn của loại này; không có = không giới hạn */
+  left?: number;
+  groups: OptionBlock[];
+}
+
+/** Một dòng trong đơn đồ uống: cùng loại, cùng tùy chỉnh. `price` = giá một ly đã gồm tùy chỉnh */
+export interface CupLine {
+  drink: string;
+  base: number;
+  price: number;
+  qty: number;
+  /** Lựa chọn thô theo nhóm, để mở lại khi sửa dòng */
+  picks: Record<string, string[]>;
+  text: string;
+}
 
 /** Khối 1 — Giá: cố định / theo đơn vị / "từ" / báo giá sau (kèm phí kiểm tra) */
 export interface PriceBlock {
@@ -40,14 +62,22 @@ export interface PlaceBlock {
   label: string;
   /** mode 'choice': [tên cách nhận, phụ phí] */
   choices?: [string, number][];
+  /** mode 'choice': người làm qua nhà khách lấy đồ, luôn cần địa chỉ dù khách tự đến nhận lại */
+  alwaysAddress?: boolean;
   /** mode 'seller': địa chỉ người bán */
   where?: string;
+  /** mode 'buyer' / 'ab': phí người làm tới tận nơi (không có thì 0) */
+  fee?: number;
 }
 
 /** Khối 5 — Tùy chọn cộng giá. Nhãn dạng "Tên|+5.000đ" */
 export interface OptionBlock {
   name: string;
   choices: string[];
+  /** Chọn nhiều (topping…). Mặc định chọn 1 */
+  multi?: boolean;
+  /** false = không bắt buộc chọn (chọn 1 nhưng được bỏ trống). Mặc định bắt buộc */
+  req?: boolean;
 }
 
 /** Khối 6 — Câu hỏi riêng (chữ / chọn 1 / chọn nhiều / ảnh) */
@@ -91,10 +121,31 @@ export interface PostTemplate {
   time: TimeBlock;
   place: PlaceBlock;
   opts: OptionBlock[];
+  /** Nhóm đầu của `opts` là DANH SÁCH MÓN (tick món + số lượng từng món), không phải tùy chọn chọn 1 */
+  dishList?: boolean;
+  /** Danh sách món ghi giá đầy đủ của từng món (bài nhiều món của người bán); false = ghi "+phụ phí" so với giá chính */
+  dishPriced?: boolean;
+  /** Tùy chọn RIÊNG của từng món trong danh sách món: khóa = lựa chọn thô của món ('Cơm rang|+5.000đ'). Chọn món nào thì bung nhóm của món đó. */
+  dishOpts?: Record<string, OptionBlock[]>;
   qs: QuestionBlock[];
+  /** Cách trả tiền người bán nhận; không có = cả tiền mặt và chuyển khoản (bài mẫu, bài cũ) */
+  pays?: ('cash' | 'transfer')[];
+  /** Tài khoản nhận chuyển khoản của người bán */
+  bank?: PostBank;
+  /** Miễn phí giao cho đơn từ số tiền này */
+  freeShipFrom?: number;
+  /** Số phần còn của từng món trong danh sách món (khóa = lựa chọn thô); không có = không giới hạn */
+  dishLeft?: Record<string, number>;
+  /** Thông tin người bán đã điền, hiện dưới Mô tả */
+  info?: { label: string; value: string }[];
+  /** Có = đặt đồ uống theo từng dòng (bài đồ uống đăng từ form khu Bán) */
+  cups?: CupDrink[];
+  /** Tùy chọn nhanh người bán đặt; có thì thay dòng dụng cụ / ống hút mặc định */
+  quick?: string[];
+  /** Người bán tắt ô ghi chú */
+  noteOff?: boolean;
   stock: StockBlock;
   notePh: string;
-  safety?: boolean;
   /** Các bước theo dõi đơn của loại này */
   steps: string[];
 }

@@ -19,9 +19,12 @@ export interface Offer {
   posterName: string;
   posterAvatar?: string;
   posterId?: string;
-  /** Tên người đề nghị — chỉ dùng ở phía người đăng việc */
+  /** Người đề nghị: phía người đăng việc đọc để hiện và chọn người */
+  workerId?: string;
   workerName?: string;
   workerAvatar?: string;
+  workerPhone?: string;
+  workerBlock?: string;
   pay: number;
   block: string;
   intro: string;
@@ -36,6 +39,8 @@ export interface Offer {
   /** Đã bấm xác nhận nhận tiền công (sau khi người đăng xác nhận hoàn thành) */
   paid?: boolean;
   rated?: { s: number; t: string } | null;
+  /** Người đăng việc đánh giá người làm */
+  posterRated?: { stars: number; text: string } | null;
 }
 
 export interface CreateOfferBody {
