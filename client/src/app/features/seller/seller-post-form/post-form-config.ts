@@ -26,7 +26,7 @@ export const CATS: Record<FormType, string[]> = {
   food: ['Cơm nhà làm', 'Món nước', 'Bánh & tráng miệng', 'Đồ ăn vặt', 'Đồ chay'],
   drink: ['Cà phê', 'Trà sữa', 'Trà trái cây', 'Nước ép', 'Sinh tố', 'Khác'],
   goods: ['Đồ bếp', 'Đồ gia dụng', 'Điện tử', 'Nội thất', 'Quần áo', 'Sách & học tập', 'Đồ trẻ em', 'Thể thao', 'Khác'],
-  service: ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận hộ', 'Chăm sóc', 'Gia sư / lớp học', 'Làm đẹp', 'Lưu trú', 'Khác'],
+  service: ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận', 'Chăm sóc', 'Gia sư / lớp học', 'Làm đẹp', 'Lưu trú', 'Khác'],
   job: ['Giao nhận', 'Mua hộ', 'Việc nhà', 'Sửa chữa nhỏ', 'Khuân vác', 'Trông trẻ / thú cưng', 'Gia sư', 'Xếp hàng giữ chỗ', 'Hỗ trợ máy tính', 'Khác'],
 };
 
@@ -95,8 +95,8 @@ export interface SvcPreset {
   generic?: boolean;
   /** mẫu dọn dẹp: mục 2 chỉ liệt kê tên dịch vụ, giá đặt ở mục Cài đặt tùy chọn; khách đặt một dịch vụ mỗi đơn */
   cleaning?: boolean;
-  /** mẫu dọn dẹp: tên các dịch vụ có sẵn */
-  menu?: string[];
+  /** mẫu dọn dẹp: các dịch vụ có sẵn, mỗi dịch vụ có tùy chọn cộng giá và câu hỏi riêng */
+  menu?: { name: string; options: SvcPreset['options']; questions: SvcPreset['questions'] }[];
   /** mẫu lưu trú: hiện mục "Tiện nghi & nội quy", lịch theo đêm, cột số phòng / khách tối đa */
   stay?: boolean;
 }
@@ -122,12 +122,18 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
   }),
   'Dọn dẹp': P({
     cleaning: true, noPlace: true, items: [],
-    menu: ['Dọn nhà tổng quát', 'Dọn sau tiệc', 'Lau kính'],
-    // giá theo diện tích; người bán tự đổi sang theo phòng, khoảng giá…
-    options: [{ name: 'Diện tích', choices: [['Dưới 50m²', 150000], ['50 – 80m²', 250000], ['Trên 80m²', 350000]] }],
-    questions: [{ type: 'choice', label: 'Nhà có nuôi thú cưng?', required: false, opts: 'Không, Có' }],
+    // mỗi dịch vụ tự đặt giá: theo m², theo phòng, khoảng giá…
+    menu: [
+      {
+        name: 'Dọn nhà tổng quát',
+        options: [{ name: 'Diện tích', choices: [['Dưới 50m²', 150000], ['50 – 80m²', 250000], ['Trên 80m²', 350000]] }],
+        questions: [{ type: 'choice', label: 'Nhà có nuôi thú cưng?', required: false, opts: 'Không, Có' }],
+      },
+      { name: 'Dọn sau tiệc', options: [{ name: 'Số khách', choices: [['Dưới 20 khách', 300000], ['20 – 50 khách', 500000]] }], questions: [] },
+      { name: 'Lau kính', options: [{ name: 'Số ô cửa', choices: [['Dưới 5 ô', 100000], ['5 – 10 ô', 180000], ['Trên 10 ô', 250000]] }], questions: [] },
+    ],
   }),
-  'Giao nhận hộ': P({
+  'Giao nhận': P({
     items: [['Lấy đồ trong khu', 15000, 'lượt'], ['Đồ to, nặng từ 10kg', 25000, 'lượt']], place: 'ab',
     questions: [
       { type: 'text', label: 'Lấy món gì?', required: true, opts: '' },
@@ -258,8 +264,8 @@ export function serviceGroup(fb: FormBuilder, preset: string) {
     warranty: [p.warranty],
     // giá: bảng giá các dịch vụ con hoặc báo giá sau
     priceType: [p.priceType],
-    /** mẫu dọn dẹp: tên các dịch vụ */
-    menu: strList(fb, p.menu ?? []),
+    /** mẫu dọn dẹp: các dịch vụ, mỗi dịch vụ có tùy chọn và câu hỏi riêng */
+    menu: fb.array((p.menu ?? []).map((m) => menuGroup(fb, m))),
     items: fb.array(p.items.map(([n, pr, u, q, g]) => itemGroup(fb, n, pr, u, q ?? null, [], g ?? null))),
     estimate: [p.estimate],
     inspect: [p.inspect, Validators.min(0)],
@@ -317,6 +323,15 @@ export function quickGroup(fb: FormBuilder, label = '', on = true) {
 
 export function questionGroup(fb: FormBuilder, q: SvcPreset['questions'][number] = { type: 'text', label: '', required: false, opts: '' }) {
   return fb.group({ type: [q.type], label: [q.label, Validators.required], required: [q.required], opts: [q.opts], hint: [q.hint ?? ''], choices: fb.array((q.choices ?? []).map(([l, p]) => choice(fb, l, p))) });
+}
+
+/** Một dịch vụ của mẫu dọn dẹp: tên, tùy chọn cộng giá, câu hỏi riêng */
+export function menuGroup(fb: FormBuilder, m: { name: string; options: SvcPreset['options']; questions: SvcPreset['questions'] } = { name: '', options: [], questions: [] }) {
+  return fb.group({
+    name: [m.name],
+    options: fb.array(m.options.map((g) => optGroup(fb, g.name, !!g.multi, !g.multi, g.choices))),
+    questions: fb.array(m.questions.map((q) => questionGroup(fb, q))),
+  });
 }
 
 /** Một khung giờ khác của việc */

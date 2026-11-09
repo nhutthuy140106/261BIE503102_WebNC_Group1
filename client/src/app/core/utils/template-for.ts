@@ -144,6 +144,8 @@ export function viewOf(post: Post): PostView {
     : null;
   // Đồ ăn thêm / tùy chọn: GOM thành các nhóm riêng bên dưới danh sách món (không bung dưới từng món).
   // Gồm tùy chọn cấp bài + tùy chọn của các món; trùng tên nhóm thì gộp lựa chọn (trùng nhãn thì giữ cái đầu).
+  const toQs = (list: NonNullable<Post['questions']>): PostTemplate['qs'] =>
+    list.map((q) => ({ type: q.type ?? ('text' as const), label: q.label, opts: q.opts, ph: q.ph, req: q.required, long: q.long, hint: q.hint, pay: q.pay }));
   const toBlock = (g: OptionGroup): OptionBlock => ({
     name: g.name,
     multi: g.multi || undefined,
@@ -223,7 +225,8 @@ export function viewOf(post: Post): PostView {
     dishList: cups ? false : dish ? true : same ? base.dishList : false,
     cups,
     dishPriced: !!dish,
-    qs: post.questions?.length ? post.questions.map((q) => ({ type: q.type ?? ('text' as const), label: q.label, opts: q.opts, ph: q.ph, req: q.required, long: q.long, hint: q.hint, pay: q.pay })) : same ? base.qs : [],
+    qs: post.questions?.length ? toQs(post.questions) : same ? base.qs : [],
+    menu: post.serviceMenu?.length ? post.serviceMenu.map((m) => ({ name: m.name, opts: m.optionGroups.map(toBlock), qs: toQs(m.questions) })) : undefined,
     xuOk: post.acceptsXu ?? base.xuOk,
     pays: pays?.length ? pays : undefined,
     bank: post.bank,

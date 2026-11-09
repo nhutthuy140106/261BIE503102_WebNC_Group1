@@ -202,14 +202,14 @@
           <section class="sec">
             <header><span class="no">{{ svcNo('price') }}</span><span><b>Tùy chọn dịch vụ</b></span></header>
             <div class="bd">
-              <div formArrayName="menu" class="lines">
+              <div class="lines">
                 @for (n of arr('spec.menu').controls; track $index; let i = $index) {
-                  <div class="line2"><input class="input" [formControlName]="i" maxlength="60" placeholder="Tên dịch vụ" [attr.aria-label]="'Tên dịch vụ ' + (i + 1)" />
+                  <div class="line2" [formGroup]="grp(n)"><input class="input" formControlName="name" maxlength="60" placeholder="Tên dịch vụ" [attr.aria-label]="'Tên dịch vụ ' + (i + 1)" />
                     <button type="button" class="rm" aria-label="Bỏ dịch vụ" (click)="removeAt('spec.menu', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
                 }
               </div>
-              <button type="button" class="mini" (click)="addStr('spec.menu')"><svg class="i"><use href="#plus" /></svg>Thêm dịch vụ</button>
-              <span class="hint">Khách chọn một dịch vụ cho mỗi đơn.</span>
+              <button type="button" class="mini" (click)="addMenu()"><svg class="i"><use href="#plus" /></svg>Thêm dịch vụ</button>
+              <span class="hint">Khách chọn một dịch vụ cho mỗi đơn. Tùy chọn và câu hỏi của từng dịch vụ đặt ở mục bên dưới.</span>
             </div>
           </section>
           } @else {
@@ -266,29 +266,29 @@
           <section class="sec">
             <header><span class="no">{{ svcNo('ask') }}</span><span><b>{{ svcPreset().cleaning ? 'Cài đặt tùy chọn' : 'Khách chọn khi đặt' }}</b></span></header>
             <div class="bd">
+              @if (svcPreset().cleaning) {
+                <!-- dọn dẹp: mỗi dịch vụ có tùy chọn cộng giá và câu hỏi riêng; khách chọn dịch vụ xong mới thấy -->
+                <span class="hint">Đặt giá theo phòng, theo m² hay khoảng giá tùy bạn. Giá khách trả là tổng các lựa chọn khách chọn.</span>
+                @for (mn of arr('spec.menu').controls; track $index; let i = $index) {
+                  <div class="svcblock">
+                    <b class="svcname">{{ mn.get('name')?.value || 'Dịch vụ ' + (i + 1) }}</b>
+                    <div class="optblock">
+                      <span class="lbl">Tùy chọn cộng giá</span>
+                      <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.menu.' + i + '.options' }" />
+                    </div>
+                    <span class="lbl">Câu hỏi riêng</span>
+                    <ng-container *ngTemplateOutlet="qList; context: { base: 'spec.menu.' + i + '.questions' }" />
+                  </div>
+                }
+              } @else {
               <div class="optblock">
                 <span class="lbl">Tùy chọn cộng giá</span>
-                @if (svcPreset().cleaning) { <span class="hint">Đặt giá theo phòng, theo m² hay khoảng giá tùy bạn. Giá khách trả là tổng các lựa chọn khách chọn.</span> }
                 <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.options' }" />
               </div>
               @if (!svcPreset().noQuestions) {
               <span class="lbl">Câu hỏi riêng</span>
-              <div formArrayName="questions" class="pkgs">
-                @for (q of arr('spec.questions').controls; track $index; let i = $index) {
-                  <div class="grp" [formGroupName]="i">
-                    <div class="top">
-                      <input class="input" formControlName="label" placeholder="Câu hỏi, ví dụ: Máy bị sao?" maxlength="80" />
-                      <app-select formControlName="type" [options]="qTypeOpts" />
-                      <label class="reqck"><input type="checkbox" formControlName="required" />Bắt buộc</label>
-                      <button type="button" class="rm" aria-label="Bỏ câu hỏi" (click)="removeAt('spec.questions', i)"><svg class="i"><use href="#xmark" /></svg></button>
-                    </div>
-                    @if (grp(q).get('type')!.value === 'choice' || grp(q).get('type')!.value === 'multi') {
-                      <input class="input sub" formControlName="opts" placeholder="Các lựa chọn, cách nhau bằng dấu phẩy" />
-                    }
-                  </div>
-                }
-              </div>
-              <button type="button" class="mini" (click)="addQuestion()"><svg class="i"><use href="#plus" /></svg>Thêm câu hỏi</button>
+              <ng-container *ngTemplateOutlet="qList; context: { base: 'spec.questions' }" />
+              }
               }
               <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú khi đặt lịch</span></label></div>
             </div>
@@ -523,6 +523,26 @@
           }
         </div>
         <button type="button" class="mini" (click)="addOptGroup(base)"><svg class="i"><use href="#plus" /></svg>Thêm nhóm tùy chọn</button>
+      </ng-template>
+
+      <!-- ===== câu hỏi riêng (dịch vụ): base = đường dẫn tới danh sách câu hỏi ===== -->
+      <ng-template #qList let-base="base">
+        <div class="pkgs">
+          @for (q of arr(base).controls; track $index; let i = $index) {
+            <div class="grp" [formGroup]="grp(q)">
+              <div class="top">
+                <input class="input" formControlName="label" placeholder="Câu hỏi, ví dụ: Máy bị sao?" maxlength="80" />
+                <app-select formControlName="type" [options]="qTypeOpts" />
+                <label class="reqck"><input type="checkbox" formControlName="required" />Bắt buộc</label>
+                <button type="button" class="rm" aria-label="Bỏ câu hỏi" (click)="removeAt(base, i)"><svg class="i"><use href="#xmark" /></svg></button>
+              </div>
+              @if (grp(q).get('type')!.value === 'choice' || grp(q).get('type')!.value === 'multi') {
+                <input class="input sub" formControlName="opts" placeholder="Các lựa chọn, cách nhau bằng dấu phẩy" />
+              }
+            </div>
+          }
+        </div>
+        <button type="button" class="mini" (click)="addQuestionAt(base)"><svg class="i"><use href="#plus" /></svg>Thêm câu hỏi</button>
       </ng-template>
 
       <!-- ===== lịch bán (đồ ăn / đồ uống) ===== -->

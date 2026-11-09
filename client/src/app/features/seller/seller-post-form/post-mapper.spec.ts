@@ -1,4 +1,4 @@
-import { cleaningPrice, formToPostFields, jobWindows } from './post-mapper';
+import { cleaningPrice, formToPostFields, jobWindows, menuOf, unpricedService } from './post-mapper';
 import { toJobWindows } from './post-form-config';
 
 const service = (questions: unknown[]) =>
@@ -47,23 +47,33 @@ describe('formToPostFields', () => {
     expect(toJobWindows({})['altWindows']).toEqual([]);
   });
 
-  describe('dọn dẹp: liệt kê dịch vụ, giá ở tùy chọn, mỗi đơn một dịch vụ', () => {
+  describe('dọn dẹp: mỗi dịch vụ có tùy chọn và câu hỏi riêng, mỗi đơn một dịch vụ', () => {
     const area = { name: 'Diện tích', multi: false, required: true, choices: [{ label: 'Dưới 50m²', price: 150000 }, { label: 'Trên 80m²', price: 350000 }] };
-    const pet = { name: 'Thêm', multi: true, required: false, choices: [{ label: 'Hút bụi sofa', price: 50000 }] };
-    const f = formToPostFields('service', { common: {}, spec: { preset: 'Dọn dẹp', menu: ['Dọn nhà', ' ', 'Lau kính'], items: [{ name: 'cũ', price: 1, unit: 'giờ' }], options: [area, pet], questions: [], estimate: true, repeat: true, place: 'seller', homeFee: 30000 } }, 'service');
+    const glass = { name: 'Số ô cửa', multi: false, required: true, choices: [{ label: 'Dưới 5 ô', price: 100000 }] };
+    const pet = { type: 'choice', label: 'Nhà có nuôi thú cưng?', required: false, opts: 'Không, Có' };
+    const menu = [{ name: 'Dọn nhà', options: [area], questions: [pet] }, { name: ' ', options: [], questions: [] }, { name: 'Lau kính', options: [glass], questions: [] }];
+    const f = formToPostFields('service', { common: {}, spec: { preset: 'Dọn dẹp', menu, items: [{ name: 'cũ', price: 1, unit: 'giờ' }], options: [area], questions: [pet], estimate: true, repeat: true, place: 'seller', homeFee: 30000 } }, 'service');
 
-    it('danh sách dịch vụ thành nhóm chọn một bắt buộc đứng đầu, không có bảng giá', () => {
-      expect(f.optionGroups?.[0]).toEqual({ name: 'Dịch vụ', multi: false, required: true, choices: [{ label: 'Dọn nhà', price: 0 }, { label: 'Lau kính', price: 0 }] });
+    it('gửi danh sách dịch vụ kèm tùy chọn, câu hỏi riêng; không có tùy chọn chung hay bảng giá', () => {
+      expect(f.serviceMenu?.map((m) => [m.name, m.optionGroups.map((g) => g.name), m.questions.map((q) => q.label)])).toEqual([['Dọn nhà', ['Diện tích'], ['Nhà có nuôi thú cưng?']], ['Lau kính', ['Số ô cửa'], []]]);
+      expect(f.optionGroups).toEqual([]);
+      expect(f.questions).toEqual([]);
       expect(f.items).toBeUndefined();
       expect(f).toMatchObject({ bookOnce: true, estimate: undefined, repeat: false, priceType: 'from', deliveryFee: 0, place: { mode: 'buyer' } });
     });
 
-    it('giá trên thẻ là tổng giá rẻ nhất của các nhóm bắt buộc', () => {
-      expect(cleaningPrice({ options: [area, pet] })).toEqual({ price: 150000, from: true });
-      expect(cleaningPrice({ options: [{ ...area, choices: [{ label: 'Mọi nhà', price: 200000 }] }] })).toEqual({ price: 200000, from: false });
-      expect(cleaningPrice({ options: [pet] }).price).toBe(0);
+    it('giá trên bài là giá thấp nhất trong các dịch vụ; dịch vụ chưa có giá thì báo tên', () => {
+      expect(cleaningPrice({ menu })).toEqual({ price: 100000, from: true });
+      expect(cleaningPrice({ menu: [{ name: 'A', options: [{ ...glass }], questions: [] }] })).toEqual({ price: 100000, from: false });
+      expect(unpricedService({ menu: [...menu, { name: 'Hút bụi', options: [], questions: [] }] })).toBe('Hút bụi');
+      expect(unpricedService({ menu })).toBeNull();
+    });
+
+    it('bản cũ lưu tên dịch vụ dạng chữ: dùng tùy chọn, câu hỏi chung cũ cho từng dịch vụ', () => {
+      expect(menuOf({ menu: ['Dọn nhà', ''], options: [area], questions: [pet] })).toEqual([{ name: 'Dọn nhà', options: [area], questions: [pet] }]);
     });
   });
+
 
   describe('3 ô đầu bài của dịch vụ: giờ nhận lịch, nơi làm, thanh toán', () => {
     const svc = (spec: Record<string, unknown>) =>
@@ -104,7 +114,7 @@ describe('formToPostFields', () => {
     });
 
     it('không mẫu nào còn phạm vi phục vụ hay lưu ý an toàn', () => {
-      for (const preset of ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận hộ', 'Chăm sóc', 'Gia sư / lớp học', 'Làm đẹp', 'Lưu trú', 'Khác', 'Nấu ăn']) {
+      for (const preset of ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận', 'Chăm sóc', 'Gia sư / lớp học', 'Làm đẹp', 'Lưu trú', 'Khác', 'Nấu ăn']) {
         const labels = svc({ preset, safety: true }).info?.map((x) => x.label) ?? [];
         expect(labels).not.toContain('Phạm vi phục vụ');
         expect(labels).not.toContain('Lưu ý an toàn');

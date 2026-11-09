@@ -152,7 +152,16 @@
 
       @if (v.tpl.cups) { <app-cup-order [draft]="d" (popup)="cupPopup.set($event)" /> }
 
-      @for (g of v.tpl.opts; track g.name) {
+      <!-- dọn dẹp: chưa chọn dịch vụ thì chỉ hiện tên các dịch vụ; chọn rồi mới hiện tùy chọn, câu hỏi của dịch vụ đó -->
+      @if (v.tpl.menu?.length) {
+        <div class="rows">
+          <h4>Dịch vụ <small>Chọn 1</small></h4>
+          @for (m of v.tpl.menu!; track m.name) {
+            <button type="button" class="row" [class.on]="d.service() === m.name" (click)="d.setService(m.name)"><span>{{ m.name }}</span><i class="radio"></i></button>
+          }
+        </div>
+      }
+      @for (g of d.opts(); track g.name) {
         @if (g === d.dishGroup) {
           <div class="rows">
             <h4>{{ g.name }} <small>Chọn nhiều</small></h4>
@@ -178,7 +187,7 @@
         }
       }
 
-      @for (q of v.tpl.qs; track q.label) {
+      @for (q of d.qs(); track q.label) {
         @switch (q.type) {
           @case ('choice') {
             <div class="rows">

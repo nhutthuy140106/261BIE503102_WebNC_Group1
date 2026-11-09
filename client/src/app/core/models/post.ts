@@ -157,6 +157,8 @@ export interface Post {
   areas?: string[];
   /** Dọn dẹp: mỗi đơn một dịch vụ, khách không chọn số lượng; giá là tổng các tùy chọn khách chọn */
   bookOnce?: boolean;
+  /** Dọn dẹp: danh sách dịch vụ, mỗi dịch vụ có tùy chọn cộng giá và câu hỏi riêng (khách chọn dịch vụ xong mới hiện) */
+  serviceMenu?: { name: string; optionGroups: OptionGroup[]; questions: PostQuestion[] }[];
   /** Giặt sấy: người làm luôn qua nhà khách lấy đồ nên luôn cần địa chỉ; cách nhận chỉ áp dụng lúc trả đồ */
   pickupAtBuyer?: boolean;
   /** Dịch vụ không có mục Thông tin nhanh (giặt sấy, lưu trú): 3 ô đầu bài lấy từ các ô người bán đã điền */

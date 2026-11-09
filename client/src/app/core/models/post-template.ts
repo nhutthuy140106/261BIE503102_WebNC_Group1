@@ -148,6 +148,8 @@ export interface PostTemplate {
   optsOnce?: boolean;
   /** Dọn dẹp: giá nằm hết ở các tùy chọn khách chọn; giá trên bài chỉ là mức thấp nhất để hiện "từ …", không cộng vào đơn */
   priceInOpts?: boolean;
+  /** Dọn dẹp: các dịch vụ, mỗi dịch vụ có tùy chọn và câu hỏi riêng */
+  menu?: { name: string; opts: OptionBlock[]; qs: QuestionBlock[] }[];
   stock: StockBlock;
   notePh: string;
   /** Các bước theo dõi đơn của loại này */

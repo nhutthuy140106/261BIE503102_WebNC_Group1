@@ -13,7 +13,7 @@ type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 export type PostFields = Pick<
   PostBody,
   | 'category' | 'priceType' | 'estimate' | 'inspectFee' | 'items' | 'optionGroups' | 'questions' | 'fulfillmentModes' | 'deliveryFee'
-  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'highlights' | 'pickupAtBuyer' | 'bookOnce' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
+  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'highlights' | 'pickupAtBuyer' | 'bookOnce' | 'serviceMenu' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
 >;
 
 /** "A, B|+5.000đ" không dùng nữa: form lưu lựa chọn là chuỗi cách nhau dấu phẩy */
@@ -33,11 +33,32 @@ const optionsOf = (arr: unknown): OptionGroup[] =>
  * Dọn dẹp: giá thấp nhất khách có thể trả = tổng giá rẻ nhất của các nhóm bắt buộc chọn một (giá theo phòng, m², khoảng giá…).
  * `from`: các lựa chọn có giá khác nhau nên ghi "từ".
  */
+/** Các dịch vụ của mẫu dọn dẹp (bản cũ lưu tên dạng chuỗi, tùy chọn và câu hỏi chung ở cấp bài) */
+export function menuOf(s: V): { name: string; options: V[]; questions: V[] }[] {
+  return ((s['menu'] as unknown[]) ?? [])
+    .map((m) => (typeof m === 'string' ? { name: m, options: (s['options'] as V[]) ?? [], questions: (s['questions'] as V[]) ?? [] } : (m as V)))
+    .map((m) => ({ name: String(m?.['name'] ?? '').trim(), options: (m?.['options'] as V[]) ?? [], questions: (m?.['questions'] as V[]) ?? [] }))
+    .filter((m) => m.name);
+}
+
+/** Giá thấp nhất của một dịch vụ = tổng giá rẻ nhất của các nhóm bắt buộc chọn một */
+const menuPrice = (options: V[]): number =>
+  optionsOf(options).filter((g) => g.required && !g.multi).reduce((n, g) => n + Math.min(...g.choices.map((c) => c.price)), 0);
+
+/**
+ * Dọn dẹp: giá trên bài là giá thấp nhất trong các dịch vụ (mỗi dịch vụ tự đặt giá theo phòng, m², khoảng giá…).
+ * `from`: khách có thể trả nhiều mức khác nhau nên ghi "từ".
+ */
 export function cleaningPrice(s: V): { price: number; from: boolean } {
-  const groups = optionsOf(s['options']).filter((g) => g.required && !g.multi);
-  const price = groups.reduce((n, g) => n + Math.min(...g.choices.map((c) => c.price)), 0);
-  const from = optionsOf(s['options']).some((g) => new Set(g.choices.map((c) => c.price)).size > 1 || (g.multi && g.choices.some((c) => c.price > 0)));
-  return { price, from };
+  const list = menuOf(s);
+  const prices = list.map((m) => menuPrice(m.options)).filter((n) => n > 0);
+  const varies = list.some((m) => optionsOf(m.options).some((g) => new Set(g.choices.map((c) => c.price)).size > 1 || (g.multi && g.choices.some((c) => c.price > 0))));
+  return { price: prices.length ? Math.min(...prices) : 0, from: varies || new Set(prices).size > 1 };
+}
+
+/** Dịch vụ chưa có giá (không có nhóm bắt buộc chọn một có giá): trả về tên dịch vụ đó */
+export function unpricedService(s: V): string | null {
+  return menuOf(s).find((m) => !menuPrice(m.options))?.name ?? null;
 }
 
 const itemsOf = (s: V): PostItem[] =>
@@ -220,7 +241,6 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
     case 'service': {
       // dọn dẹp: danh sách dịch vụ thành nhóm chọn một bắt buộc đứng đầu, giá nằm ở các tùy chọn; mỗi đơn một dịch vụ
       const cleaning = !!SVC_PRESETS[String(s['preset'] ?? '')]?.cleaning;
-      const menu = ((s['menu'] as string[]) ?? []).map((x) => String(x ?? '').trim()).filter(Boolean);
       const its = cleaning ? [] : itemsOf(s);
       const quote = !cleaning && s['priceType'] === 'quote';
       const where = String(s['where'] ?? '').trim();
@@ -234,11 +254,9 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         bookOnce: cleaning || undefined,
         inspectFee: quote ? +s['inspect'] || 0 : undefined,
         items: its.length > 1 || quote ? its : undefined,
-        optionGroups: [
-          ...(cleaning && menu.length ? [{ name: 'Dịch vụ', multi: false, required: true, choices: menu.map((label) => ({ label, price: 0 })) }] : []),
-          ...optionsOf(s['options']),
-        ],
-        questions: questionsOf(s['questions']),
+        optionGroups: cleaning ? [] : optionsOf(s['options']),
+        questions: cleaning ? [] : questionsOf(s['questions']),
+        serviceMenu: cleaning ? menuOf(s).map((m) => ({ name: m.name, optionGroups: optionsOf(m.options), questions: questionsOf(m.questions) })) : undefined,
         dates: (s['dates'] as string[]) ?? [],
         timeMode: s['timeMode'],
         duration: { min: +s['durMin'] || 1, max: +s['durMax'] || 1 },

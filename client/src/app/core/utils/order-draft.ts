@@ -20,6 +20,12 @@ export class OrderDraft {
   readonly qty = signal(1);
   /** Nhóm tùy chọn (chọn 1): tên nhóm → lựa chọn thô ("Tên|+5.000đ"); mặc định chọn mục đầu */
   readonly opt = signal<Record<string, string>>({});
+  /** Dọn dẹp: dịch vụ khách đã chọn; chưa chọn thì chỉ hiện tên các dịch vụ */
+  readonly service = signal('');
+  readonly menuItem = computed(() => this.tpl.menu?.find((m) => m.name === this.service()) ?? null);
+  /** Nhóm tùy chọn, câu hỏi đang dùng: của bài và của dịch vụ đang chọn */
+  readonly opts = computed(() => [...this.tpl.opts, ...(this.menuItem()?.opts ?? [])]);
+  readonly qs = computed(() => [...this.tpl.qs, ...(this.menuItem()?.qs ?? [])]);
   /** Câu hỏi riêng: nhãn → chữ / lựa chọn thô / nhiều lựa chọn thô nối bằng "|||" */
   readonly ans = signal<Record<string, string>>({});
   /** Đồ ăn: nhóm đầu tiên là danh sách MÓN, mỗi món có số lượng riêng (0 = không lấy). Tên món → số lượng. */
@@ -107,11 +113,11 @@ export class OrderDraft {
 
   /** Tùy chọn CHỌN 1 dùng chung của cả đơn: phụ giá mỗi phần */
   readonly optAdd = computed(() =>
-    this.tpl.opts.reduce((s, g) => s + (g === this.dishGroup || g.multi ? 0 : parseChoice(this.opt()[g.name] ?? '').add), 0),
+    this.opts().reduce((s, g) => s + (g === this.dishGroup || g.multi ? 0 : parseChoice(this.opt()[g.name] ?? '').add), 0),
   );
   /** Món thêm (chọn nhiều, có số lượng) dùng chung cho cả đơn: giá × số lượng từng thứ, KHÔNG nhân với số phần */
   readonly sharedExtras = computed(() =>
-    this.tpl.opts.reduce((s, g) => (g === this.dishGroup || !g.multi ? s : s + this.extrasTotal('', g)), 0),
+    this.opts().reduce((s, g) => (g === this.dishGroup || !g.multi ? s : s + this.extrasTotal('', g)), 0),
   );
   /** Tùy chọn riêng của các món đã chọn: chọn 1 nhân số phần của món đó; món thêm tính theo số lượng từng thứ */
   readonly dishOptTotal = computed(() =>
@@ -121,7 +127,7 @@ export class OrderDraft {
     ),
   );
   readonly qsAdd = computed(() =>
-    this.tpl.qs.reduce((s, q) => {
+    this.qs().reduce((s, q) => {
       if (q.type === 'choice') return s + parseChoice(this.ans()[q.label] ?? '').add;
       if (q.type === 'multi') return s + this.picks(q.label).reduce((a, x) => a + parseChoice(x).add, 0);
       return s;
@@ -178,7 +184,7 @@ export class OrderDraft {
 
   /** Chọn 1 (scope = '' cho nhóm dùng chung, hoặc lựa chọn thô của món). Bấm lại mục đang chọn của nhóm không bắt buộc thì bỏ chọn. */
   setOpt(group: string, raw: string, scope = ''): void {
-    const g = (scope ? this.tpl.dishOpts?.[scope] : this.tpl.opts)?.find((x) => x.name === group);
+    const g = (scope ? this.tpl.dishOpts?.[scope] : this.opts())?.find((x) => x.name === group);
     const key = this.k(scope, group);
     const off = g?.req === false && this.opt()[key] === raw;
     this.opt.update((o) => ({ ...o, [key]: off ? '' : raw }));
@@ -234,6 +240,18 @@ export class OrderDraft {
     return this.dishRows().flatMap((r) => (this.tpl.dishOpts?.[r.raw] ?? []).map((g) => ({ group: r.name + ' – ' + g.name, choices: this.chosen(r.raw, g) })).filter((x) => x.choices.length));
   }
 
+  /** Chọn dịch vụ: lựa chọn và câu trả lời của dịch vụ trước bỏ đi, nhóm chọn một bắt buộc chọn sẵn mục đầu */
+  setService(name: string): void {
+    if (this.service() === name) return;
+    this.service.set(name);
+    const o: Record<string, string> = {};
+    for (const g of this.tpl.opts) if (!g.multi) o[g.name] = this.opt()[g.name] ?? '';
+    for (const g of this.menuItem()?.opts ?? []) if (!g.multi) o[g.name] = g.req === false ? '' : g.choices[0];
+    this.opt.set(o);
+    this.extras.set({});
+    this.ans.set({});
+  }
+
   setAns(label: string, v: string): void {
     this.ans.update((a) => ({ ...a, [label]: v }));
   }
@@ -253,7 +271,8 @@ export class OrderDraft {
   readonly comboItems = signal<string[]>([]);
   readonly lines = computed(() => {
     const out: string[] = this.comboItems().length ? ['Gồm: ' + this.comboItems().join(', ')] : [];
-    for (const g of this.tpl.opts) {
+    if (this.service()) out.push('Dịch vụ: ' + this.service());
+    for (const g of this.opts()) {
       if (g === this.dishGroup) continue;
       const v = this.chosenText('', g, this.dishGroup ? this.totalDishes() : this.qty());
       if (!v.length) continue;
@@ -268,7 +287,7 @@ export class OrderDraft {
       }
     }
     if (this.quickPicks().length) out.push('Tùy chọn thêm: ' + this.quickPicks().join(', '));
-    for (const q of this.tpl.qs) {
+    for (const q of this.qs()) {
       const a = this.ans()[q.label] ?? '';
       const v = q.type === 'multi' ? this.picks(q.label).map((x) => parseChoice(x).name).join(', ') : q.type === 'choice' ? parseChoice(a).name : q.type === 'photo' && a ? 'Đã gửi ảnh' : a;
       if (v) out.push(q.label + ': ' + v);
@@ -283,17 +302,18 @@ export class OrderDraft {
 
   /** Đã chọn "Có" ở câu hỏi trả tiền giùm */
   paying(): boolean {
-    return this.tpl.qs.some((q) => q.pay && this.ans()[q.label] === 'Có');
+    return this.qs().some((q) => q.pay && this.ans()[q.label] === 'Có');
   }
 
   /** Thiếu gì để sang bước tiếp / đặt đơn (rỗng = đủ) */
   missing(checkout: boolean): string {
-    for (const q of this.tpl.qs) {
+    if (this.tpl.menu?.length && !this.service()) return 'Hãy chọn một dịch vụ.';
+    for (const q of this.qs()) {
       if (q.req && !(this.ans()[q.label] ?? '').trim()) return 'Hãy điền “' + q.label + '”.';
     }
     if (this.dishGroup && this.totalDishes() < 1) return 'Hãy chọn ít nhất 1 món.';
     if (this.tpl.cups && !this.cups().length) return 'Hãy thêm ít nhất 1 ly vào đơn.';
-    for (const g of this.tpl.opts) {
+    for (const g of this.opts()) {
       // nhóm chọn nhiều người bán đánh dấu bắt buộc
       if (g.multi && g.req === true && !this.chosen('', g).length) return 'Hãy chọn “' + g.name + '”.';
     }

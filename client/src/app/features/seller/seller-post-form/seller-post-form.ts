@@ -10,12 +10,12 @@ import { KIND_LABEL, PostKind } from '../../../core/models/post';
 import { JOB_STEP_NAMES, SELLER_KIND_ICON, SellerPost, orderStepNames } from '../../../core/models/seller';
 import { AuthService } from '../../../core/services/auth';
 import { SellerService } from '../../../core/services/seller';
-import { cleaningPrice, formToPostFields } from './post-mapper';
+import { cleaningPrice, formToPostFields, unpricedService } from './post-mapper';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import {
   AMENITIES, ASK_QUICK, ASK_TYPES, BLOCKS, GENERIC_PLACES, REPAIR_PLACES, CATS, DRINK_UNITS, FOOD_UNITS, GOODS_UNITS, SVC_UNITS, ymd, CONDITIONS, DAYS, FOOD_TAGS, FormType, ICE, JOB_UNITS, PRICE_TYPES, Q_TYPES, SVC_PLACES, SVC_PRESETS, SVC_TIMES, SWEET,
-  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, windowGroup, datesBetween, toDrinkSizes, toGenericSpec, toJobWindows, toOrderOptions,
+  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, windowGroup, menuGroup, datesBetween, toDrinkSizes, toGenericSpec, toJobWindows, toOrderOptions,
 } from './post-form-config';
 
 /** Ngày bán: 1 ngày → dd/mm/yyyy, nhiều ngày → ngày đầu - ngày cuối */
@@ -368,6 +368,14 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     return this.items(this.v()['spec'] as V).length > 0;
   }
 
+  protected addMenu(): void {
+    this.arr('spec.menu').push(menuGroup(this.fb));
+  }
+
+  protected addQuestionAt(path: string): void {
+    this.arr(path).push(questionGroup(this.fb));
+  }
+
   protected addQuestion(): void {
     this.arr('spec.questions').push(questionGroup(this.fb));
   }
@@ -634,8 +642,9 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       if (!b['qr']) return 'Chuyển khoản: thêm ảnh mã QR';
     }
     if (t === 'service' && this.svcPreset().cleaning) {
-      if (!((s['menu'] as string[]) ?? []).some((x) => String(x ?? '').trim())) return 'Thêm ít nhất một dịch vụ';
-      if (!cleaningPrice(s).price) return 'Đặt giá ở mục Cài đặt tùy chọn: thêm một nhóm tùy chọn bắt buộc, chọn một, có giá';
+      if (!((s['menu'] as V[]) ?? []).some((m) => String(m?.['name'] ?? '').trim())) return 'Thêm ít nhất một dịch vụ';
+      const unpriced = unpricedService(s);
+      if (unpriced) return `Dịch vụ "${unpriced}": thêm một nhóm tùy chọn bắt buộc, chọn một, có giá`;
     }
     // câu hỏi chọn một, chọn nhiều phải có lựa chọn, không thì khách không có gì để chọn
     const noChoice = ((s['questions'] as V[]) ?? []).find((q) => String(q['label'] ?? '').trim() && (q['type'] === 'choice' || q['type'] === 'multi') && !String(q['opts'] ?? '').trim() && !((q['choices'] as V[]) ?? []).some((c) => String(c['label'] ?? '').trim()));
@@ -786,9 +795,12 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     if (p.form && (p.formType === 'food' || p.formType === 'drink') && spec1) p = { ...p, form: { ...p.form, spec: toOrderOptions(spec1) } };
     if (p.form && p.formType === 'drink') p = { ...p, form: { ...p.form, spec: toDrinkSizes((p.form as V)['spec'] as V) } };
     if (p.form && p.formType === 'job') p = { ...p, form: { ...p.form, spec: toJobWindows((p.form as V)['spec'] as V) } };
-    // bài dọn dẹp đăng trước khi có danh sách dịch vụ: lấy tên các dòng bảng giá cũ làm danh sách
+    // bài dọn dẹp cũ: tên dịch vụ dạng chữ (hoặc tên dòng bảng giá) thành dịch vụ có tùy chọn, câu hỏi riêng (lấy tùy chọn, câu hỏi chung cũ)
     const sp = (p.form as V | undefined)?.['spec'] as V | undefined;
-    if (sp && sp['preset'] === 'Dọn dẹp' && !sp['menu']) p = { ...p, form: { ...p.form, spec: { ...sp, menu: ((sp['items'] as V[]) ?? []).map((it) => String(it['name'] ?? '').trim()).filter(Boolean) } } };
+    if (sp && sp['preset'] === 'Dọn dẹp' && !((sp['menu'] as unknown[]) ?? []).some((m) => typeof m === 'object' && m)) {
+      const names = ((sp['menu'] as unknown[])?.length ? (sp['menu'] as unknown[]) : ((sp['items'] as V[]) ?? []).map((it) => it['name'])).map((x) => String(x ?? '').trim()).filter(Boolean);
+      p = { ...p, form: { ...p.form, spec: { ...sp, menu: names.map((name) => ({ name, options: sp['options'] ?? [], questions: sp['questions'] ?? [] })), options: [], questions: [] } } };
+    }
     if (p.form) {
       let saved = p.form;
       if (this.type() === 'service') {
@@ -841,6 +853,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       case 'rules': return quickGroup(this.fb);
       case 'quick': return quickGroup(this.fb);
       case 'altWindows': return windowGroup(this.fb);
+      case 'menu': return menuGroup(this.fb);
       default: return this.fb.control(typeof item === 'string' ? '' : item, key === 'notes' ? [] : [Validators.nullValidator]);
     }
   }
