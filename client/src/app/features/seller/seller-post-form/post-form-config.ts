@@ -26,7 +26,7 @@ export const CATS: Record<FormType, string[]> = {
   food: ['Cơm nhà làm', 'Món nước', 'Bánh & tráng miệng', 'Đồ ăn vặt', 'Đồ chay'],
   drink: ['Cà phê', 'Trà sữa', 'Trà trái cây', 'Nước ép', 'Sinh tố', 'Khác'],
   goods: ['Đồ bếp', 'Đồ gia dụng', 'Điện tử', 'Nội thất', 'Quần áo', 'Sách & học tập', 'Đồ trẻ em', 'Thể thao', 'Khác'],
-  service: ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận', 'Chăm sóc', 'Gia sư / lớp học', 'Làm đẹp', 'Lưu trú', 'Khác'],
+  service: ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận', 'Chăm sóc', 'Gia sư', 'Làm đẹp', 'Lưu trú', 'Khác'],
   job: ['Giao nhận', 'Mua hộ', 'Việc nhà', 'Sửa chữa nhỏ', 'Khuân vác', 'Trông trẻ / thú cưng', 'Gia sư', 'Xếp hàng giữ chỗ', 'Hỗ trợ máy tính', 'Khác'],
 };
 
@@ -93,6 +93,10 @@ export interface SvcPreset {
   repair?: boolean;
   /** form chung (mẫu Khác): không theo ngành nào, người bán tự tạo câu hỏi cho khách */
   generic?: boolean;
+  /** mẫu không có kiểu "Báo giá sau" (chỉ bảng giá) */
+  noQuote?: boolean;
+  /** mẫu giao nhận: người làm lấy hàng ngay khi nhận đơn, khách chọn giờ muốn nhận hàng; có thể nhờ trả tiền hàng giùm */
+  courier?: boolean;
   /** mẫu dọn dẹp: mục 2 chỉ liệt kê tên dịch vụ, giá đặt ở mục Cài đặt tùy chọn; khách đặt một dịch vụ mỗi đơn */
   cleaning?: boolean;
   /** mẫu dọn dẹp: các dịch vụ có sẵn, mỗi dịch vụ có tùy chọn cộng giá và câu hỏi riêng */
@@ -108,7 +112,7 @@ const P = (o: Partial<SvcPreset>): SvcPreset => ({
 export const SVC_PRESETS: Record<string, SvcPreset> = {
   'Giặt sấy': P({
     items: [['Giặt sấy quần áo', 18000, 'kg'], ['Giặt chăn, ga', 40000, 'bộ'], ['Giặt gối', 25000, 'cái'], ['Giặt thú bông', 30000, 'cái'], ['Vệ sinh giày', 60000, 'đôi']],
-    estimate: true, noQuick: true, noPlace: true, noQuestions: true, laundry: true,
+    estimate: true, noQuick: true, noPlace: true, noQuestions: true, laundry: true, noQuote: true,
     options: [{ name: 'Nước xả', choices: [['Hương nhẹ', 0], ['Không mùi', 0]] }, { name: 'Gấp đồ', choices: [['Gấp gọn', 0], ['Treo móc', 10000]] }],
   }),
   'Sửa chữa': P({
@@ -121,7 +125,7 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
     ],
   }),
   'Dọn dẹp': P({
-    cleaning: true, noPlace: true, items: [],
+    cleaning: true, noPlace: true, noQuote: true, items: [],
     // mỗi dịch vụ tự đặt giá: theo m², theo phòng, khoảng giá…
     menu: [
       {
@@ -134,15 +138,16 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
     ],
   }),
   'Giao nhận': P({
-    items: [['Lấy đồ trong khu', 15000, 'lượt'], ['Đồ to, nặng từ 10kg', 25000, 'lượt']], place: 'ab',
+    items: [['Lấy đồ trong khu', 15000, 'lượt'], ['Đồ to, nặng từ 10kg', 25000, 'lượt']], place: 'ab', noPlace: true, noQuote: true, courier: true,
     questions: [
+      { type: 'text', label: 'Lấy ở đâu?', required: true, opts: '' },
       { type: 'text', label: 'Lấy món gì?', required: true, opts: '' },
       { type: 'choice', label: 'Kích thước', required: false, opts: 'Nhỏ dưới 10kg, To / nặng từ 10kg' },
       { type: 'choice', label: 'Cần trả tiền giùm?', required: false, opts: 'Không, Có' },
     ],
   }),
   'Chăm sóc': P({ items: [['Trông trẻ theo giờ', 60000, 'giờ'], ['Trông thú cưng theo giờ', 40000, 'giờ']], timeMode: 'datedur', dur: [2, 6] }),
-  'Gia sư / lớp học': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], repeat: true, place: 'choice' }),
+  'Gia sư': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], repeat: true, place: 'choice' }),
   'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']] }),
   // homestay / cho thuê phòng ngắn ngày trong khu (tham khảo Traveloka, Booking, Airbnb): loại phòng · nhận / trả phòng · tiện nghi · nội quy · hủy & cọc
   'Lưu trú': P({

@@ -76,6 +76,19 @@ describe('formToPostFields', () => {
   });
 
 
+  describe('giao nhận: không báo giá sau, khách chọn giờ nhận hàng', () => {
+    const f = formToPostFields('service', { common: {}, spec: { preset: 'Giao nhận', priceType: 'quote', inspect: 30000, estimate: true, repeat: true, timeMode: 'datedur', place: 'seller', homeFee: 20000, from: '08:00', to: '20:00', pay: ['cash'], items: [{ name: 'Lấy đồ', price: 15000, unit: 'lượt' }], options: [], questions: [{ type: 'text', label: 'Lấy ở đâu?', required: true }] } }, 'service');
+
+    it('bỏ báo giá sau, giá ước tính, lặp hằng tuần; giờ là giờ giao hàng', () => {
+      expect(f).toMatchObject({ priceType: 'fixed', inspectFee: undefined, estimate: undefined, repeat: false, timeMode: 'slot', timeLabel: 'Giờ giao hàng', place: { mode: 'ab' }, deliveryFee: 0 });
+      expect(f.highlights?.slice(0, 2).map((x) => [x.label, x.value])).toEqual([['Giờ giao hàng', '08:00 – 20:00'], ['Nơi làm', 'Giao tới nhà bạn']]);
+    });
+
+    it('giặt sấy cũng không còn báo giá sau', () => {
+      expect(formToPostFields('service', { common: {}, spec: { preset: 'Giặt sấy', priceType: 'quote', inspect: 30000, items: [{ name: 'Giặt', price: 18000, unit: 'kg' }], options: [], questions: [] } }, 'service').priceType).not.toBe('quote');
+    });
+  });
+
   describe('3 ô đầu bài của dịch vụ: giờ nhận lịch, nơi làm, thanh toán', () => {
     const svc = (spec: Record<string, unknown>) =>
       formToPostFields('service', { common: {}, spec: { items: [], options: [], questions: [], serviceArea: 'Trong khu', place: 'buyer', pay: ['cash', 'transfer'], from: '08:00', to: '18:00', ...spec } }, 'service');
@@ -83,7 +96,7 @@ describe('formToPostFields', () => {
 
     it('mẫu thường: theo nơi làm người bán chọn', () => {
       expect(cells(svc({ preset: 'Dọn dẹp' }))).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Tại nhà bạn'], ['Thanh toán', 'Tiền mặt, Chuyển khoản']]);
-      expect(cells(svc({ preset: 'Gia sư / lớp học', place: 'choice', pay: ['cash', 'xu'] }))?.slice(1)).toEqual([['Nơi làm', 'Tại nhà bạn hoặc bạn mang tới'], ['Thanh toán', 'Tiền mặt, AntXu']]);
+      expect(cells(svc({ preset: 'Gia sư', place: 'choice', pay: ['cash', 'xu'] }))?.slice(1)).toEqual([['Nơi làm', 'Tại nhà bạn hoặc bạn mang tới'], ['Thanh toán', 'Tiền mặt, AntXu']]);
       expect(cells(svc({ preset: 'Khác', place: 'seller', where: 'Tòa S2, tầng 3' }))?.[1]).toEqual(['Nơi làm', 'Tòa S2, tầng 3']);
     });
 
@@ -115,7 +128,7 @@ describe('formToPostFields', () => {
     });
 
     it('không mẫu nào còn phạm vi phục vụ hay lưu ý an toàn', () => {
-      for (const preset of ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận', 'Chăm sóc', 'Gia sư / lớp học', 'Làm đẹp', 'Lưu trú', 'Khác', 'Nấu ăn']) {
+      for (const preset of ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận', 'Chăm sóc', 'Gia sư', 'Làm đẹp', 'Lưu trú', 'Khác', 'Nấu ăn']) {
         const labels = svc({ preset, safety: true }).info?.map((x) => x.label) ?? [];
         expect(labels).not.toContain('Phạm vi phục vụ');
         expect(labels).not.toContain('Lưu ý an toàn');

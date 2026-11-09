@@ -172,7 +172,7 @@ export function viewOf(post: Post): PostView {
     ? post.timeMode === 'datedur'
       ? { mode: 'datedur', label: 'Ngày & giờ', win: hours, dur: post.duration ? [post.duration.min, post.duration.max] : base.time.dur ?? [2, 4], repeat: post.repeat }
       : post.timeMode === 'slot'
-        ? { mode: 'slot', label: quote ? 'Hẹn kiểm tra lúc' : 'Giờ hẹn', win: hours }
+        ? { mode: 'slot', label: post.timeLabel ?? (quote ? 'Hẹn kiểm tra lúc' : 'Giờ hẹn'), win: hours }
         : base.time
     : post.handover
       ? { ...base.time, win: hours }

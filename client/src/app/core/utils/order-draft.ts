@@ -175,7 +175,9 @@ export class OrderDraft {
     if (v.ship) return this.needsAddress() ? this.placeFee() : 0;
     return v.amount && this.subtotal() >= v.min ? v.amount : 0;
   });
-  readonly grand = computed(() => Math.max(0, this.subtotal() + this.placeFee() - this.discount()));
+  /** Tiền hàng khách nhờ trả giùm (câu "Cần trả tiền giùm?" chọn Có): khách trả chung với phí dịch vụ, không áp voucher */
+  readonly advance = computed(() => (this.paying() ? Number(this.payBack()) || 0 : 0));
+  readonly grand = computed(() => Math.max(0, this.subtotal() + this.placeFee() - this.discount()) + this.advance());
 
   /** Khóa trạng thái của một nhóm: nhóm dùng chung lấy tên nhóm; nhóm riêng của món thêm tên món phía trước */
   k(scope: string, group: string): string {

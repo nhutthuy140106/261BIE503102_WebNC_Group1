@@ -224,8 +224,10 @@
           <section class="sec">
             <header><span class="no">{{ svcNo('price') }}</span><span><b>Cài đặt giá</b></span></header>
             <div class="bd">
+              @if (!svcPreset().noQuote) {
               <div class="pills">@for (m of priceTypes; track m[0]) { <button type="button" [class.on]="c('spec.priceType').value === m[0]" (click)="set('spec.priceType', m[0])">{{ m[1] }}</button> }</div>
-              @if (c('spec.priceType').value === 'quote') {
+              }
+              @if (c('spec.priceType').value === 'quote' && !svcPreset().noQuote) {
                 <div class="row3">
                   <div class="fld"><label for="insp">{{ svcPreset().generic ? 'Phí kiểm tra / khảo sát' : 'Phí kiểm tra' }}</label><span class="money"><input appMoney id="insp" class="input" formControlName="inspect" placeholder="50.000" /></span></div>
                 </div>
@@ -238,7 +240,7 @@
                 }
                 @if (svcPreset().stay) {
                   <span class="hint">Giá mỗi đêm cho từng loại phòng. Khách chọn loại phòng, số phòng và ngày nhận – trả phòng; tổng tiền = giá × số đêm × số phòng.</span>
-                } @else if (!svcPreset().generic && !svcPreset().repair) {
+                } @else if (!svcPreset().generic && !svcPreset().repair && !svcPreset().courier) {
                   <label class="ck"><input type="checkbox" formControlName="estimate" /><span>Giá ước tính, cân / đếm thực tế khi nhận đồ</span></label>
                 }
               }
@@ -286,7 +288,7 @@
           </section>
           }
           <section class="sec">
-            <header><span class="no">{{ svcNo('time') }}</span><span><b>{{ svcPreset().stay ? 'Lịch nhận phòng' : svcPreset().laundry ? 'Lịch lấy đồ' : 'Lịch hẹn' }}</b></span></header>
+            <header><span class="no">{{ svcNo('time') }}</span><span><b>{{ svcPreset().stay ? 'Lịch nhận phòng' : svcPreset().laundry ? 'Lịch lấy đồ' : svcPreset().courier ? 'Lịch giao hàng' : 'Lịch hẹn' }}</b></span></header>
             <div class="bd">
               @if (svcPreset().laundry) {
                 <!-- giặt sấy: khách hẹn giờ để tiệm qua lấy đồ; giặt xong tiệm báo và trả, không hẹn lịch trả -->
@@ -306,13 +308,16 @@
                   <div class="fld"><label for="mn">Ở tối thiểu (đêm)</label><input id="mn" class="input" type="number" min="1" formControlName="minNights" /></div>
                 </div>
               } @else {
-              <!-- dọn dẹp: giá nằm ở tùy chọn nên chỉ cho khách chọn giờ hẹn, không chọn số giờ -->
-              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning) {
+              <!-- dọn dẹp, giao nhận: chỉ cho khách chọn giờ hẹn, không chọn số giờ -->
+              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning && !svcPreset().courier) {
               <div class="pills">@for (m of svcTimes; track m[0]) { <button type="button" [class.on]="c('spec.timeMode').value === m[0]" (click)="set('spec.timeMode', m[0])">{{ m[1] }}</button> }</div>
               }
+              @if (svcPreset().courier) {
+                <span class="hint">Bạn đi lấy hàng ngay khi nhận đơn rồi giữ lại. Khách chọn ngày giờ muốn nhận hàng trong khung dưới đây để bạn giao.</span>
+              }
               <div class="drow">
-                <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: 'Ngày nhận lịch' }" />
-                <div class="fld"><label for="sf">Từ</label><app-time-input inputId="sf" formControlName="from" /></div>
+                <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: svcPreset().courier ? 'Ngày giao hàng' : 'Ngày nhận lịch' }" />
+                <div class="fld"><label for="sf">{{ svcPreset().courier ? 'Giao từ' : 'Từ' }}</label><app-time-input inputId="sf" formControlName="from" /></div>
                 <div class="fld"><label for="st">Đến</label><app-time-input inputId="st" formControlName="to" /></div>
               </div>
               @if (c('spec.timeMode').value === 'datedur' && !svcPreset().cleaning) {
@@ -326,7 +331,7 @@
                   <div class="fld"><label for="gta">Thời gian làm dự kiến <span class="hint">(không bắt buộc)</span></label><input id="gta" class="input" formControlName="turnaround" maxlength="40" placeholder="Ví dụ: khoảng 2 giờ" /></div>
                 </div>
               }
-              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning) {
+              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning && !svcPreset().courier) {
               <label class="ck"><input type="checkbox" formControlName="repeat" /><span>Cho khách đặt lặp lại hằng tuần</span></label>
               }
               }

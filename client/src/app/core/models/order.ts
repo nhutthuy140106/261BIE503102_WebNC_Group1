@@ -121,6 +121,8 @@ export interface OrderDetail {
   subtotal: number;
   fee: number;
   discount: number;
+  /** Tiền hàng người làm trả giùm, khách trả lại chung với phí dịch vụ */
+  advance?: number;
   /** Các bước theo dõi của loại bài này (đồ ăn khác dịch vụ giặt khác sửa máy…) */
   steps: string[];
   template?: string;

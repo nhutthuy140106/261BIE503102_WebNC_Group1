@@ -598,6 +598,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         subtotal: d.subtotal(),
         fee: d.placeFee(),
         discount: d.discount(),
+        advance: d.advance() || undefined,
         steps: d.tpl.steps,
         template: d.tpl.key,
       },

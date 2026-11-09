@@ -13,7 +13,7 @@ type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 export type PostFields = Pick<
   PostBody,
   | 'category' | 'priceType' | 'estimate' | 'inspectFee' | 'items' | 'optionGroups' | 'questions' | 'fulfillmentModes' | 'deliveryFee'
-  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'highlights' | 'pickupAtBuyer' | 'bookOnce' | 'serviceMenu' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
+  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'highlights' | 'pickupAtBuyer' | 'bookOnce' | 'serviceMenu' | 'timeLabel' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
 >;
 
 /** "A, B|+5.000đ" không dùng nữa: form lưu lựa chọn là chuỗi cách nhau dấu phẩy */
@@ -166,15 +166,17 @@ function serviceHighlights(s: V): Post['highlights'] {
   const preset = String(s['preset'] ?? '');
   const cell = (icon: NonNullable<Post['highlights']>[number]['icon'], label: string, value: unknown) => (String(value ?? '').trim() ? [{ icon, label, value: String(value).trim() }] : []);
   const where = String(s['where'] ?? '').trim();
+  const courier = !!SVC_PRESETS[preset]?.courier;
   const place =
-    preset === 'Giặt sấy' ? 'Lấy đồ tại nhà bạn'
+    courier ? 'Giao tới nhà bạn'
+    : preset === 'Giặt sấy' ? 'Lấy đồ tại nhà bạn'
     : preset === 'Lưu trú' ? String(s['building'] ?? '').trim() || 'Tại chỗ người cho thuê'
     : preset === 'Sửa chữa' ? 'Tại nhà bạn'
     : SVC_PRESETS[preset]?.noPlace ? ({ buyer: 'Tại nhà bạn', seller: 'Bạn mang tới' } as V)[SVC_PRESETS[preset].place]
     : ({ buyer: 'Tại nhà bạn', seller: where || 'Bạn mang tới', choice: 'Tại nhà bạn hoặc bạn mang tới', ab: 'Lấy ở A, giao tới B' } as V)[String(s['place'])];
   const pays = payOf(s).map((m) => ({ cash: 'Tiền mặt', transfer: 'Chuyển khoản', xu: 'AntXu' })[m]).join(', ');
   return [
-    ...cell('clock', 'Giờ nhận lịch', preset === 'Lưu trú' ? (s['checkIn'] ? `Nhận phòng từ ${s['checkIn']}` : '') : s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
+    ...cell('clock', courier ? 'Giờ giao hàng' : 'Giờ nhận lịch', preset === 'Lưu trú' ? (s['checkIn'] ? `Nhận phòng từ ${s['checkIn']}` : '') : s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
     ...cell('pin', 'Nơi làm', place),
     ...cell('receipt', 'Thanh toán', pays),
   ];
@@ -242,15 +244,19 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
       // dọn dẹp: danh sách dịch vụ thành nhóm chọn một bắt buộc đứng đầu, giá nằm ở các tùy chọn; mỗi đơn một dịch vụ
       const cleaning = !!SVC_PRESETS[String(s['preset'] ?? '')]?.cleaning;
       const its = cleaning ? [] : itemsOf(s);
-      const quote = !cleaning && s['priceType'] === 'quote';
+      const preset = SVC_PRESETS[String(s['preset'] ?? '')];
+      const courier = !!preset?.courier;
+      const quote = !cleaning && !preset?.noQuote && s['priceType'] === 'quote';
       const where = String(s['where'] ?? '').trim();
       // mẫu đã bỏ (Nấu ăn) hoặc không ghi mẫu: coi như mẫu Khác
       const shown = SVC_PRESETS[String(s['preset'] ?? '')] ?? SVC_PRESETS['Khác'];
       const hideQuick = !!shown?.noQuick && !shown.generic;
       return {
         ...base,
-        priceType: cleaning ? (cleaningPrice(s).from ? 'from' : 'fixed') : quote ? 'quote' : priceTypeOf(its, its.length === 1 && s['estimate'] ? 'unit' : 'fixed'),
-        estimate: (!cleaning && !!s['estimate']) || undefined,
+        priceType: cleaning ? (cleaningPrice(s).from ? 'from' : 'fixed') : quote ? 'quote' : priceTypeOf(its, its.length === 1 && s['estimate'] && !courier ? 'unit' : 'fixed'),
+        estimate: (!cleaning && !courier && !!s['estimate']) || undefined,
+        // giao nhận: khách chọn giờ muốn nhận hàng
+        timeLabel: courier ? 'Giờ giao hàng' : undefined,
         bookOnce: cleaning || undefined,
         inspectFee: quote ? +s['inspect'] || 0 : undefined,
         items: its.length > 1 || quote ? its : undefined,
@@ -259,9 +265,9 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         serviceMenu: cleaning ? menuOf(s).map((m) => ({ name: m.name, optionGroups: optionsOf(m.options), questions: questionsOf(m.questions) })) : undefined,
         dates: (s['dates'] as string[]) ?? [],
         // dọn dẹp: luôn hẹn giờ, kể cả bài cũ đã lưu kiểu chọn số giờ
-        timeMode: cleaning ? 'slot' : s['timeMode'],
+        timeMode: cleaning || courier ? 'slot' : s['timeMode'],
         duration: { min: +s['durMin'] || 1, max: +s['durMax'] || 1 },
-        repeat: !cleaning && !!s['repeat'],
+        repeat: !cleaning && !courier && !!s['repeat'],
         // mẫu không có mục Nơi làm (sửa chữa, giặt sấy, lưu trú): nơi làm theo mẫu, không lấy giá trị cũ còn lưu trong form
         place: { mode: shown?.noPlace ? shown.place : s['place'], ...(where && !shown?.noPlace ? { where } : {}) },
         // khung giờ khách chọn hẹn (giờ nhận lịch của người làm)

@@ -155,6 +155,8 @@ export interface Post {
   freeShipFrom?: number;
   /** Các khu người bán phục vụ (bài đăng từ form khu Bán); `block` ghi sẵn tên các khu để hiển thị */
   areas?: string[];
+  /** Tên dòng giờ trong khung đặt, ví dụ "Giờ giao hàng" (giao nhận); không có thì theo mẫu */
+  timeLabel?: string;
   /** Dọn dẹp: mỗi đơn một dịch vụ, khách không chọn số lượng; giá là tổng các tùy chọn khách chọn */
   bookOnce?: boolean;
   /** Dọn dẹp: danh sách dịch vụ, mỗi dịch vụ có tùy chọn cộng giá và câu hỏi riêng (khách chọn dịch vụ xong mới hiện) */

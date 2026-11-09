@@ -130,6 +130,7 @@
               <span>{{ o.priceCheck === 'quote' ? 'Phí kiểm tra và khoản đã chọn' : 'Tạm tính' + (d.quantity ? ' (' + d.quantity + ' ' + (d.unit ?? '') + ')' : '') }}</span><b>{{ d.subtotal | vnd }}</b>
               @if (d.fee) { <span>Phí vận chuyển</span><b>{{ d.fee | vnd }}</b> }
               @if (d.discount) { <span>Voucher · {{ d.voucher }}</span><b>−{{ d.discount | vnd }}</b> }
+              @if (d.advance) { <span>Tiền hàng trả giùm</span><b>{{ d.advance | vnd }}</b> }
               <span class="total">{{ o.status === 'cancelled' || o.status === 'declined' ? 'Đơn đã hủy · bạn không phải trả' : o.priceCheck === 'quote' ? 'Trước khi báo giá' : 'Thành tiền' }}</span>
               <b class="total">{{ (o.status === 'cancelled' || o.status === 'declined') && !o.priceRejected ? '0đ' : (o.total | vnd) }}</b>
             } @else {

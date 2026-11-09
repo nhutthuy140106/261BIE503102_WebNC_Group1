@@ -368,6 +368,11 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     return this.items(this.v()['spec'] as V).length > 0;
   }
 
+  /** Báo giá sau: chỉ khi mẫu cho phép */
+  private isQuote(s: V): boolean {
+    return s['priceType'] === 'quote' && !this.svcPreset().noQuote;
+  }
+
   protected addMenu(): void {
     this.arr('spec.menu').push(menuGroup(this.fb));
   }
@@ -407,7 +412,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   protected readonly askFixed = computed(() => {
     const s = this.v()['spec'] as V;
     return [
-      ...(s['priceType'] === 'quote' ? [] : ['Dịch vụ và số lượng']),
+      ...(this.isQuote(s) ? [] : ['Dịch vụ và số lượng']),
       'Ngày giờ hẹn',
       ...(s['place'] === 'choice' ? ['Nơi làm', 'Địa chỉ, nếu làm tại nhà'] : s['place'] === 'buyer' ? ['Địa chỉ'] : []),
       'Cách thanh toán',
@@ -520,7 +525,8 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         };
       }
       case 'service': {
-        const pt = s['priceType'] as string;
+        // mẫu không có Báo giá sau (giặt sấy, dọn dẹp, giao nhận): bỏ qua giá trị cũ còn lưu
+        const pt = this.isQuote(s) ? 'quote' : 'list';
         const its = this.items(s);
         const { low, from } = this.lowest(its);
         const pr = pt === 'quote' ? 'Báo giá sau' : low ? `${from ? 'từ ' : ''}${money(low['price'])}` : '—';
@@ -625,7 +631,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     if (t === 'food' && !this.items(s).length) return 'Menu: nhập ít nhất một món có tên và giá';
     const promoErr = this.promoError();
     if (promoErr) return promoErr;
-    if (t === 'service' && !this.svcPreset().cleaning && s['priceType'] !== 'quote' && !this.items(s).length) return 'Bảng giá: nhập ít nhất một dịch vụ có tên và giá (hoặc chọn “Báo giá sau”)';
+    if (t === 'service' && !this.svcPreset().cleaning && !this.isQuote(s) && !this.items(s).length) return 'Bảng giá: nhập ít nhất một dịch vụ có tên và giá (hoặc chọn “Báo giá sau”)';
     if (t === 'service' && this.svcPreset().stay && !String(s['building']).trim()) return 'Lưu trú: nhập tòa nhà';
     if (t === 'service' && !this.svcPreset().noPlace && (s['place'] === 'seller' || s['place'] === 'choice') && !String(s['where']).trim()) return this.svcPreset().generic ? 'Nhập địa chỉ của bạn' : 'Nhập nơi khách mang tới';
     if (t === 'service' && this.svcPreset().generic) {
@@ -701,7 +707,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
           const c = cleaningPrice(s);
           return { price: c.price, unit: '', priceFrom: c.from, stock: 1, max: 5 };
         }
-        const { low, from } = this.lowest(s['priceType'] === 'quote' ? [] : this.items(s));
+        const { low, from } = this.lowest(this.isQuote(s) ? [] : this.items(s));
         return { price: low ? +low['price'] : 0, unit: low?.['unit'] ? `/ ${low['unit']}` : '', priceFrom: from, stock: 1, max: 5 };
       }
       default: return { price: +s['pay'] || 0, unit: `/ ${s['payUnit'] || 'việc'}`, stock: +s['head'] || 1, max: 10 };

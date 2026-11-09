@@ -454,6 +454,7 @@
                 @if (d.promoOff()) { <div class="disc"><dt>Giảm giờ vàng</dt><dd>−{{ fmt(d.promoOff()) }}</dd></div> }
                 @if (d.placeFee()) { <div><dt>Phí vận chuyển</dt><dd>{{ fmt(d.placeFee()) }}</dd></div> }
                 @if (d.discount()) { <div class="disc"><dt>Voucher</dt><dd>−{{ fmt(d.discount()) }}</dd></div> }
+                @if (d.advance()) { <div><dt>Tiền hàng trả giùm</dt><dd>{{ fmt(d.advance()) }}</dd></div> }
                 @if (v.tpl.price.type === 'quote') { <div><dt>Tiền sửa</dt><dd>báo giá sau khi kiểm tra</dd></div> }
               </dl>
               @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }
