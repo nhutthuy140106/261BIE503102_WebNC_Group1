@@ -17,8 +17,10 @@
       <form class="narrow" (ngSubmit)="sendCode()" novalidate>
         <label for="phone">Số điện thoại</label>
         <input id="phone" class="tx" [formControl]="phone" autocomplete="tel" inputmode="numeric" maxlength="10" [class.is-invalid]="invalid(phone)" />
-        @if (invalid(phone)) { <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small> }
-        <button type="submit" class="go" [disabled]="phone.invalid">Gửi mã xác nhận</button>
+        @if (phone.hasError('taken')) {
+          <small class="error">Số điện thoại này đã có tài khoản AntGo. Bạn hãy <a routerLink="/auth/login" [queryParams]="{ phone: phone.value }">đăng nhập bằng số này</a> hoặc dùng số khác để đăng ký.</small>
+        } @else if (invalid(phone)) { <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small> }
+        <button type="submit" class="go" [disabled]="phone.invalid || checking()">Gửi mã xác nhận</button>
       </form>
     }
     @case (2) {

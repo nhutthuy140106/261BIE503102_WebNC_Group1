@@ -12,6 +12,11 @@ async function register({ name, phone, password, area }) {
   return User.create({ name, phone, area, role: 'enduser', password: await bcrypt.hash(password, 10) });
 }
 
+// Cho form đăng ký báo "đã đăng ký" ngay ở bước nhập số (đăng ký vốn đã lộ điều này qua lỗi 409)
+async function phoneTaken(phone) {
+  return !!(await User.exists({ phone }));
+}
+
 async function verifyLogin({ phone, password }) {
   const user = await User.findOne({ phone }).select('+password');
   // cùng một thông báo cho "sai SĐT" và "sai mật khẩu" để không lộ số nào đã đăng ký
@@ -80,4 +85,4 @@ function endSession(req, res) {
   });
 }
 
-module.exports = { register, verifyLogin, googleLogin, googleComplete, startSession, endSession };
+module.exports = { register, phoneTaken, verifyLogin, googleLogin, googleComplete, startSession, endSession };

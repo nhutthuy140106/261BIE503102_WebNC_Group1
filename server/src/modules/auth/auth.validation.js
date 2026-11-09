@@ -10,4 +10,5 @@ exports.register = z.object({
 });
 exports.google = z.object({ credential: z.string({ error: 'Thiếu mã đăng nhập Google' }).min(20).max(4096) });
 exports.googleComplete = z.object({ phone });
+exports.phoneQuery = z.object({ phone });
 exports.login =z.object({ phone, password: z.string({ error: 'Cần nhập mật khẩu' }).min(1, 'Cần nhập mật khẩu') });

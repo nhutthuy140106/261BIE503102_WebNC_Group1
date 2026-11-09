@@ -46,6 +46,7 @@ export class Register implements OnDestroy {
   protected readonly step = signal<Step>(1);
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
+  protected readonly checking = signal(false);
   protected readonly countdown = signal(0);
   protected readonly fullName = computed(() => this.info.controls.name.value.trim());
 
@@ -102,10 +103,29 @@ export class Register implements OnDestroy {
   // ----- bước 1: số điện thoại -----
   protected sendCode(): void {
     if (this.phone.invalid) return this.phone.markAsTouched();
+    if (this.checking()) return;
     this.error.set(null);
-    this.otp.reset('');
-    this.step.set(2);
-    this.startCountdown();
+    this.checking.set(true);
+    // báo "đã đăng ký" ngay ở bước nhập số, không đợi tới lúc bấm Tạo tài khoản
+    this.auth.phoneExists(this.phone.value).subscribe({
+      next: (exists) => {
+        this.checking.set(false);
+        if (exists) {
+          this.phone.setErrors({ taken: true });
+          return this.phone.markAsTouched();
+        }
+        this.otp.reset('');
+        this.step.set(2);
+        this.startCountdown();
+      },
+      // không kiểm tra được (rớt mạng…) thì vẫn cho đi tiếp; bước cuối server vẫn chặn số trùng
+      error: () => {
+        this.checking.set(false);
+        this.otp.reset('');
+        this.step.set(2);
+        this.startCountdown();
+      },
+    });
   }
 
   // ----- bước 2: mã xác nhận -----

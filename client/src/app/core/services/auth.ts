@@ -138,6 +138,20 @@ export class AuthService {
     }
   }
 
+  /** Số điện thoại đã có tài khoản chưa — để form đăng ký báo ngay ở bước nhập số. Mock: số đã đăng ký trong trình duyệt này (antgo_names) */
+  phoneExists(phone: string): Observable<boolean> {
+    if (useMock('auth')) {
+      try {
+        return of(phone in (JSON.parse(localStorage.getItem('antgo_names') ?? '{}') as Record<string, string>));
+      } catch {
+        return of(false);
+      }
+    }
+    return this.http
+      .get<{ data: { exists: boolean } }>(`${API_BASE}/auth/phone-exists`, { params: { phone }, withCredentials: true })
+      .pipe(map((r) => r.data.exists), catchError(toAppError));
+  }
+
   private saveMockName(phone: string, name: string): void {
     try {
       const m = JSON.parse(localStorage.getItem('antgo_names') ?? '{}') as Record<string, string>;

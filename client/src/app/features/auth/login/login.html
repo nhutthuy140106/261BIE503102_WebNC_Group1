@@ -18,7 +18,11 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
       <label for="phone">Số điện thoại</label>
       <input id="phone" class="tx" formControlName="phone" name="username" autocomplete="username" inputmode="numeric" maxlength="10"
+             [attr.list]="rememberedPhone ? 'phoneSuggest' : null"
              [class.is-invalid]="form.controls.phone.invalid && form.controls.phone.touched" />
+      @if (rememberedPhone) {
+        <datalist id="phoneSuggest"><option [value]="rememberedPhone"></option></datalist>
+      }
       @if (form.controls.phone.invalid && form.controls.phone.touched) {
         <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small>
       }
