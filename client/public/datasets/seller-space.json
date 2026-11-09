@@ -1,6 +1,6 @@
 [
   {
-    "version": "2026-11-10-b",
+    "version": "2026-11-10-c",
     "posts": [
       {
         "views": 0,
@@ -830,7 +830,8 @@
         "sold": 48,
         "promo": "còn 2 ngày",
         "category": "Cơm nhà làm",
-        "buyerPostId": "a4c123b1612dd272d1371c17"
+        "buyerPostId": "a4c123b1612dd272d1371c17",
+        "priceFrom": true
       },
       {
         "id": "f2",
@@ -862,7 +863,8 @@
         "saves": 3,
         "sold": 9,
         "category": "Món nước",
-        "buyerPostId": "729fae923d5a4fd12aabfe22"
+        "buyerPostId": "729fae923d5a4fd12aabfe22",
+        "priceFrom": true
       },
       {
         "id": "g1",
@@ -909,7 +911,8 @@
         "saves": 0,
         "sold": 3,
         "category": "Nấu ăn",
-        "buyerPostId": "dba41ecccc3fc1626e53a130"
+        "buyerPostId": "dba41ecccc3fc1626e53a130",
+        "priceFrom": true
       },
       {
         "id": "s2",

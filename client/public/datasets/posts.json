@@ -53,10 +53,12 @@
   {
     "_id": "1fe7afa422737d39bdc56d59",
     "kind": "service",
-    "title": "Giặt sấy gấp, lấy và trả tận cửa",
-    "description": "",
+    "title": "Giặt sấy gấp, lấy và trả tận cửa trong ngày",
+    "description": "Giặt sấy gấp quần áo, lấy và trả tận cửa trong khu.\n• Lần giặt tối thiểu 3kg\n• Giặt sạch, sấy khô, khử mùi, gấp gọn rồi giao lại tận nơi\n• Nhận đồ trước 9h sáng, trả trong ngày\n• Đồ trắng hoặc dễ ra màu vui lòng báo trước để tiệm giặt riêng",
     "images": [
-      "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500&h=375&fit=crop&q=70"
+      "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500&h=375&fit=crop&q=70",
+      "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=500&h=375&fit=crop&q=70",
+      "https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=500&h=375&fit=crop&q=70"
     ],
     "sellerId": "d6f0eb74333b7b8a8d91d593",
     "sellerName": "Tiệm Sạch Thơm",
@@ -72,7 +74,6 @@
     "sold": 41,
     "promoted": true,
     "acceptsXu": true,
-    "template": "svc",
     "agoMin": 3240,
     "createdAt": "2026-10-10T08:00:00.000Z",
     "promo": {
@@ -91,7 +92,7 @@
       "transfer",
       "xu"
     ],
-    "priceType": "fixed",
+    "priceType": "from",
     "fulfillmentModes": [
       "delivery"
     ],
@@ -106,7 +107,146 @@
     ],
     "stock": {
       "mode": "open"
-    }
+    },
+    "estimate": true,
+    "pickupAtBuyer": true,
+    "timeMode": "slot",
+    "place": {
+      "mode": "buyer"
+    },
+    "repeat": false,
+    "items": [
+      {
+        "id": "i1",
+        "name": "Giặt sấy quần áo",
+        "price": 18000,
+        "unit": "kg"
+      },
+      {
+        "id": "i2",
+        "name": "Giặt chăn, ga",
+        "price": 40000,
+        "unit": "bộ"
+      },
+      {
+        "id": "i3",
+        "name": "Giặt gối",
+        "price": 25000,
+        "unit": "cái"
+      },
+      {
+        "id": "i4",
+        "name": "Vệ sinh giày",
+        "price": 50000,
+        "unit": "đôi"
+      }
+    ],
+    "optionGroups": [
+      {
+        "name": "Nước xả",
+        "multi": false,
+        "required": true,
+        "choices": [
+          {
+            "label": "Hương nhẹ",
+            "price": 0
+          },
+          {
+            "label": "Hương hoa",
+            "price": 0
+          },
+          {
+            "label": "Không mùi",
+            "price": 0
+          }
+        ]
+      },
+      {
+        "name": "Giặt riêng đồ trắng",
+        "multi": false,
+        "required": false,
+        "choices": [
+          {
+            "label": "Không",
+            "price": 0
+          },
+          {
+            "label": "Có",
+            "price": 10000
+          }
+        ]
+      },
+      {
+        "name": "Gấp đồ",
+        "multi": false,
+        "required": true,
+        "choices": [
+          {
+            "label": "Gấp gọn",
+            "price": 0
+          },
+          {
+            "label": "Treo móc",
+            "price": 10000
+          }
+        ]
+      }
+    ],
+    "questions": [
+      {
+        "type": "choice",
+        "label": "Đồ có phụ kiện đính bằng keo không?",
+        "required": false,
+        "opts": [
+          "Có",
+          "Không"
+        ],
+        "hint": "Tiệm không chịu trách nhiệm nếu không báo trước"
+      }
+    ],
+    "highlights": [
+      {
+        "icon": "clock",
+        "label": "Giờ nhận đơn",
+        "value": "06:00 – 21:00"
+      },
+      {
+        "icon": "bolt",
+        "label": "Trả đồ",
+        "value": "Trong khoảng 12 giờ"
+      },
+      {
+        "icon": "pin",
+        "label": "Cách nhận",
+        "value": "Giao tận nơi"
+      }
+    ],
+    "info": [
+      {
+        "label": "Phạm vi phục vụ",
+        "value": "Trong Vinhomes Grand Park"
+      },
+      {
+        "label": "Điều kiện hủy",
+        "value": "Hủy miễn phí trước khi tiệm lấy đồ"
+      },
+      {
+        "label": "Lưu ý cho khách",
+        "value": "Kiểm tra đồ khi nhận, báo tiệm trong 24 giờ nếu có vấn đề"
+      }
+    ],
+    "handover": {
+      "from": "06:00",
+      "to": "21:00"
+    },
+    "deliveryFee": 0,
+    "noteEnabled": true,
+    "bank": {
+      "bankName": "Vietcombank",
+      "no": "0123456789",
+      "holder": "TIEM SACH THOM (MAU)"
+    },
+    "needSchedule": true
   },
   {
     "_id": "62bc5cf25fbf9289efa9039d",
@@ -1230,9 +1370,10 @@
     "_id": "f35da3243e06fc2051202856",
     "kind": "service",
     "title": "Giặt hấp đồ vest",
-    "description": "",
+    "description": "Giặt hấp chuyên đồ vest, áo khoác dạ, váy dạ: giữ form, không phai màu, ủi hơi phẳng phiu.\n• Nhận lấy tận nơi và giao lại sau 48 giờ\n• Đồ có đính kết, lông thú hoặc vải đặc biệt vui lòng báo trước\n• Có túi bảo quản kèm theo nếu khách chọn",
     "images": [
-      "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=500&h=375&fit=crop&q=70"
+      "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=500&h=375&fit=crop&q=70",
+      "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=500&h=375&fit=crop&q=70"
     ],
     "sellerId": "dc12b543e1ac00d2d4154a6b",
     "sellerName": "Giặt sấy Mỹ Linh",
@@ -1244,7 +1385,6 @@
     "price": 45000,
     "priceUnit": "bộ",
     "sold": 16,
-    "template": "svc",
     "agoMin": 8520,
     "createdAt": "2026-10-10T08:00:00.000Z",
     "areas": [
@@ -1254,7 +1394,7 @@
       "cash",
       "transfer"
     ],
-    "priceType": "fixed",
+    "priceType": "from",
     "fulfillmentModes": [
       "delivery"
     ],
@@ -1269,7 +1409,105 @@
     ],
     "stock": {
       "mode": "open"
-    }
+    },
+    "estimate": false,
+    "pickupAtBuyer": false,
+    "timeMode": "slot",
+    "place": {
+      "mode": "buyer"
+    },
+    "repeat": false,
+    "items": [
+      {
+        "id": "i1",
+        "name": "Giặt hấp vest",
+        "price": 45000,
+        "unit": "bộ"
+      },
+      {
+        "id": "i2",
+        "name": "Giặt hấp áo khoác dạ",
+        "price": 60000,
+        "unit": "cái"
+      },
+      {
+        "id": "i3",
+        "name": "Giặt hấp váy dạ",
+        "price": 55000,
+        "unit": "cái"
+      },
+      {
+        "id": "i4",
+        "name": "Ủi hơi",
+        "price": 20000,
+        "unit": "bộ"
+      }
+    ],
+    "optionGroups": [
+      {
+        "name": "Túi bảo quản",
+        "multi": false,
+        "required": false,
+        "choices": [
+          {
+            "label": "Không cần",
+            "price": 0
+          },
+          {
+            "label": "Có túi",
+            "price": 5000
+          }
+        ]
+      }
+    ],
+    "questions": [
+      {
+        "type": "text",
+        "label": "Vị trí vết bẩn cần xử lý kỹ",
+        "required": false
+      },
+      {
+        "type": "photo",
+        "label": "Ảnh vết bẩn",
+        "required": false
+      }
+    ],
+    "highlights": [
+      {
+        "icon": "clock",
+        "label": "Giờ nhận đơn",
+        "value": "08:00 – 18:00"
+      },
+      {
+        "icon": "bolt",
+        "label": "Trả đồ",
+        "value": "Trong khoảng 48 giờ"
+      },
+      {
+        "icon": "pin",
+        "label": "Cách nhận",
+        "value": "Giao tận nơi"
+      }
+    ],
+    "info": [
+      {
+        "label": "Lưu ý cho khách",
+        "value": "Đồ cao cấp hoặc có phụ kiện đính kết, tiệm xin phép không chịu trách nhiệm nếu không báo trước"
+      }
+    ],
+    "handover": {
+      "from": "08:00",
+      "to": "18:00"
+    },
+    "deliveryFee": 10000,
+    "noteEnabled": true,
+    "bank": {
+      "bankName": "Vietcombank",
+      "no": "0123456789",
+      "holder": "GIAT SAY MY LINH (MAU)"
+    },
+    "needSchedule": true,
+    "acceptsXu": false
   },
   {
     "_id": "b1c88c532540338a95346b95",
@@ -1756,9 +1994,10 @@
     "_id": "19d7a1ab52a8a75503da3436",
     "kind": "service",
     "title": "Combo giặt sấy 4 lần trong tháng",
-    "description": "",
+    "description": "Gói giặt sấy 4 lần trong tháng cho người đi làm bận rộn: mỗi tuần một lần, tiệm lấy và trả đồ đúng ngày bạn chọn.\n• Dùng trong 30 ngày kể từ ngày mua\n• Mỗi lần tối đa 5kg (chọn 8kg nếu giặt nhiều)\n• Rẻ hơn so với giặt lẻ từng lần",
     "images": [
-      "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500&h=375&fit=crop&q=70"
+      "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500&h=375&fit=crop&q=70",
+      "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=500&h=375&fit=crop&q=70"
     ],
     "sellerId": "d6f0eb74333b7b8a8d91d593",
     "sellerName": "Tiệm Sạch Thơm",
@@ -1773,7 +2012,6 @@
     "reviewCount": 5,
     "sold": 33,
     "acceptsXu": true,
-    "template": "svc",
     "agoMin": 10920,
     "createdAt": "2026-10-10T08:00:00.000Z",
     "areas": [
@@ -1799,7 +2037,101 @@
     ],
     "stock": {
       "mode": "open"
-    }
+    },
+    "estimate": false,
+    "pickupAtBuyer": true,
+    "timeMode": "slot",
+    "place": {
+      "mode": "buyer"
+    },
+    "repeat": true,
+    "optionGroups": [
+      {
+        "name": "Khối lượng mỗi lần",
+        "multi": false,
+        "required": true,
+        "choices": [
+          {
+            "label": "Tối đa 5kg",
+            "price": 0
+          },
+          {
+            "label": "Tối đa 8kg",
+            "price": 80000
+          }
+        ]
+      },
+      {
+        "name": "Nước xả",
+        "multi": false,
+        "required": true,
+        "choices": [
+          {
+            "label": "Hương nhẹ",
+            "price": 0
+          },
+          {
+            "label": "Không mùi",
+            "price": 0
+          }
+        ]
+      }
+    ],
+    "questions": [
+      {
+        "type": "multi",
+        "label": "Bạn muốn giặt vào thứ mấy mỗi tuần?",
+        "required": true,
+        "opts": [
+          "Thứ 2",
+          "Thứ 3",
+          "Thứ 4",
+          "Thứ 5",
+          "Thứ 6",
+          "Thứ 7",
+          "Chủ nhật"
+        ]
+      }
+    ],
+    "highlights": [
+      {
+        "icon": "clock",
+        "label": "Giờ nhận đơn",
+        "value": "06:00 – 21:00"
+      },
+      {
+        "icon": "bolt",
+        "label": "Trả đồ",
+        "value": "Trong khoảng 24 giờ"
+      },
+      {
+        "icon": "pin",
+        "label": "Cách nhận",
+        "value": "Giao tận nơi"
+      }
+    ],
+    "info": [
+      {
+        "label": "Điều kiện hủy",
+        "value": "Không hoàn lại các lần chưa dùng sau 30 ngày"
+      },
+      {
+        "label": "Lưu ý cho khách",
+        "value": "Đổi ngày giặt được nếu báo trước 1 ngày"
+      }
+    ],
+    "handover": {
+      "from": "06:00",
+      "to": "21:00"
+    },
+    "deliveryFee": 0,
+    "noteEnabled": true,
+    "bank": {
+      "bankName": "Vietcombank",
+      "no": "0123456789",
+      "holder": "TIEM SACH THOM (MAU)"
+    },
+    "needSchedule": true
   },
   {
     "_id": "9317677b3fc2e7eb7cc39bcc",
@@ -2997,14 +3329,16 @@
     "title": "Cơm gà kho gừng",
     "description": "Gà ta kho gừng đậm vị, kèm cơm trắng, canh rau và dưa leo. Nấu mới mỗi ngày, ăn no bụng.",
     "images": [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&h=375&fit=crop&q=70"
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&h=375&fit=crop&q=70",
+      "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=375&fit=crop&q=70"
     ],
     "sellerId": "27e64e583095ddf04b21f0e7",
     "sellerName": "Bếp Cô Lan",
     "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
-    "block": "Bcons",
+    "block": "Bcons, KTX Khu B",
     "areas": [
-      "Bcons"
+      "Bcons",
+      "KTX Khu B"
     ],
     "area": "Bcons",
     "distance": 150,
@@ -3016,10 +3350,11 @@
     "sold": 48,
     "promoted": false,
     "acceptsXu": true,
-    "priceType": "fixed",
+    "priceType": "from",
     "payMethods": [
       "cash",
-      "transfer"
+      "transfer",
+      "xu"
     ],
     "status": "open",
     "closed": false,
@@ -3057,31 +3392,68 @@
     "prepMinutes": 30,
     "stock": {
       "mode": "limit",
-      "left": 12
+      "left": 45
     },
     "optionGroups": [
+      {
+        "name": "Cơm",
+        "multi": false,
+        "required": true,
+        "choices": [
+          {
+            "label": "Vừa",
+            "price": 0
+          },
+          {
+            "label": "Nhiều",
+            "price": 5000
+          }
+        ]
+      },
       {
         "name": "Thêm",
         "multi": true,
         "required": false,
         "choices": [
           {
-            "label": "Trứng chiên",
-            "price": 5000
+            "label": "Canh rau",
+            "price": 8000
           },
           {
-            "label": "Canh chua",
-            "price": 8000
+            "label": "Dưa leo muối",
+            "price": 3000
           }
         ]
       }
     ],
     "quickOptions": [
       "Ít cơm",
-      "Không hành",
-      "Thêm nước mắm"
+      "Không hành"
     ],
-    "noteEnabled": true
+    "noteEnabled": true,
+    "items": [
+      {
+        "id": "i1",
+        "name": "Cơm gà kho gừng",
+        "price": 35000,
+        "unit": "phần",
+        "dailyQty": 20
+      },
+      {
+        "id": "i2",
+        "name": "Cơm gà kho trứng",
+        "price": 40000,
+        "unit": "phần",
+        "dailyQty": 15
+      },
+      {
+        "id": "i3",
+        "name": "Cơm gà kho sả ớt",
+        "price": 38000,
+        "unit": "phần",
+        "dailyQty": 10
+      }
+    ]
   },
   {
     "_id": "149d439536b3216fdaeeb975",
@@ -3107,22 +3479,17 @@
     "reviewCount": 8,
     "sold": 22,
     "promoted": false,
-    "acceptsXu": true,
+    "acceptsXu": false,
     "priceType": "fixed",
     "payMethods": [
-      "cash",
-      "transfer"
+      "cash"
     ],
     "status": "open",
     "closed": false,
     "dates": [
       "2026-11-10",
       "2026-11-11",
-      "2026-11-12",
-      "2026-11-13",
-      "2026-11-14",
-      "2026-11-15",
-      "2026-11-16"
+      "2026-11-12"
     ],
     "agoMin": 25920,
     "createdAt": "2026-10-23T08:00:00.000Z",
@@ -3130,23 +3497,18 @@
       "delivery",
       "pickup"
     ],
-    "deliveryFee": 5000,
-    "freeShipFrom": 100000,
-    "bank": {
-      "bankName": "MBBank",
-      "no": "0123456789",
-      "holder": "BEP CO LAN (MAU)"
-    },
+    "deliveryFee": 7000,
+    "freeShipFrom": 150000,
     "orderWindow": {
-      "from": "07:00",
-      "to": "10:30",
+      "from": "08:00",
+      "to": "10:00",
       "days": []
     },
     "handover": {
-      "from": "11:00",
+      "from": "11:30",
       "to": "12:30"
     },
-    "prepMinutes": 30,
+    "prepMinutes": 40,
     "stock": {
       "mode": "limit",
       "left": 3
@@ -3167,7 +3529,25 @@
             "price": 5000
           }
         ]
+      },
+      {
+        "name": "Trứng",
+        "multi": false,
+        "required": false,
+        "choices": [
+          {
+            "label": "Không",
+            "price": 0
+          },
+          {
+            "label": "Ốp la",
+            "price": 5000
+          }
+        ]
       }
+    ],
+    "quickOptions": [
+      "Ít ngọt"
     ]
   },
   {
@@ -3181,9 +3561,10 @@
     "sellerId": "27e64e583095ddf04b21f0e7",
     "sellerName": "Bếp Cô Lan",
     "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
-    "block": "Bcons",
+    "block": "Bcons, KTX Khu A",
     "areas": [
-      "Bcons"
+      "Bcons",
+      "KTX Khu A"
     ],
     "area": "Bcons",
     "distance": 150,
@@ -3194,8 +3575,8 @@
     "reviewCount": 4,
     "sold": 9,
     "promoted": false,
-    "acceptsXu": true,
-    "priceType": "fixed",
+    "acceptsXu": false,
+    "priceType": "from",
     "payMethods": [
       "cash",
       "transfer"
@@ -3204,40 +3585,51 @@
     "closed": true,
     "dates": [
       "2026-11-10",
-      "2026-11-11",
-      "2026-11-12",
-      "2026-11-13",
-      "2026-11-14",
-      "2026-11-15",
-      "2026-11-16"
+      "2026-11-11"
     ],
     "agoMin": 36000,
     "createdAt": "2026-10-16T08:00:00.000Z",
     "fulfillmentModes": [
-      "delivery",
       "pickup"
     ],
-    "deliveryFee": 5000,
-    "freeShipFrom": 100000,
+    "deliveryFee": 0,
     "bank": {
       "bankName": "MBBank",
       "no": "0123456789",
       "holder": "BEP CO LAN (MAU)"
     },
     "orderWindow": {
-      "from": "07:00",
-      "to": "10:30",
+      "from": "09:00",
+      "to": "11:00",
       "days": []
     },
     "handover": {
-      "from": "11:00",
-      "to": "12:30"
+      "from": "11:30",
+      "to": "13:00"
     },
-    "prepMinutes": 30,
+    "prepMinutes": 45,
     "stock": {
       "mode": "limit",
       "left": 0
-    }
+    },
+    "optionGroups": [
+      {
+        "name": "Cỡ tô",
+        "multi": false,
+        "required": true,
+        "choices": [
+          {
+            "label": "Nhỏ",
+            "price": 0
+          },
+          {
+            "label": "Lớn",
+            "price": 13000
+          }
+        ]
+      }
+    ],
+    "noteEnabled": false
   },
   {
     "_id": "8f219e9cb0eb53f16947ccf2",
@@ -3263,11 +3655,10 @@
     "reviewCount": 0,
     "sold": 0,
     "promoted": false,
-    "acceptsXu": true,
+    "acceptsXu": false,
     "priceType": "fixed",
     "payMethods": [
-      "cash",
-      "transfer"
+      "cash"
     ],
     "status": "open",
     "closed": false,
@@ -3276,9 +3667,7 @@
       "2026-11-11",
       "2026-11-12",
       "2026-11-13",
-      "2026-11-14",
-      "2026-11-15",
-      "2026-11-16"
+      "2026-11-14"
     ],
     "agoMin": 17280,
     "createdAt": "2026-10-29T08:00:00.000Z",
@@ -3299,10 +3688,23 @@
     "needSchedule": true,
     "info": [
       {
-        "label": "Bảo hành",
-        "value": "Hết bảo hành, bán kiểm tra tại chỗ"
+        "label": "Phụ kiện kèm theo",
+        "value": "Khay nướng, vỉ nướng, sách hướng dẫn"
+      },
+      {
+        "label": "Lý do pass",
+        "value": "Đổi sang nồi dung tích lớn hơn"
       }
-    ]
+    ],
+    "questions": [
+      {
+        "type": "text",
+        "label": "Bạn muốn xem nồi vào giờ nào?",
+        "required": false
+      }
+    ],
+    "deliveryFee": 0,
+    "noteEnabled": false
   },
   {
     "_id": "5ec84d8dbc74254770f58904",
@@ -3315,9 +3717,11 @@
     "sellerId": "27e64e583095ddf04b21f0e7",
     "sellerName": "Bếp Cô Lan",
     "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
-    "block": "Bcons",
+    "block": "Bcons, KTX Khu B, KTX Khu A",
     "areas": [
-      "Bcons"
+      "Bcons",
+      "KTX Khu B",
+      "KTX Khu A"
     ],
     "area": "Bcons",
     "distance": 150,
@@ -3343,7 +3747,8 @@
       "2026-11-13",
       "2026-11-14",
       "2026-11-15",
-      "2026-11-16"
+      "2026-11-16",
+      "2026-11-17"
     ],
     "agoMin": 11520,
     "createdAt": "2026-11-02T08:00:00.000Z",
@@ -3357,13 +3762,37 @@
       "left": 1
     },
     "condition": {
-      "level": "90"
+      "level": "100"
     },
     "handover": {
-      "from": "17:00",
-      "to": "21:00"
+      "from": "16:00",
+      "to": "22:00"
     },
-    "needSchedule": true
+    "needSchedule": true,
+    "optionGroups": [
+      {
+        "name": "Màu túi giữ nhiệt",
+        "multi": false,
+        "required": true,
+        "choices": [
+          {
+            "label": "Xanh",
+            "price": 0
+          },
+          {
+            "label": "Hồng",
+            "price": 0
+          }
+        ]
+      }
+    ],
+    "bank": {
+      "bankName": "MBBank",
+      "no": "0123456789",
+      "holder": "BEP CO LAN (MAU)"
+    },
+    "freeShipFrom": 200000,
+    "noteEnabled": true
   },
   {
     "_id": "dba41ecccc3fc1626e53a130",
@@ -3376,9 +3805,10 @@
     "sellerId": "27e64e583095ddf04b21f0e7",
     "sellerName": "Bếp Cô Lan",
     "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
-    "block": "Bcons",
+    "block": "Bcons, Vinhomes Grand Park",
     "areas": [
-      "Bcons"
+      "Bcons",
+      "Vinhomes Grand Park"
     ],
     "area": "Bcons",
     "distance": 150,
@@ -3389,7 +3819,7 @@
     "reviewCount": 3,
     "sold": 3,
     "promoted": false,
-    "acceptsXu": true,
+    "acceptsXu": false,
     "priceType": "from",
     "payMethods": [
       "cash",
@@ -3398,8 +3828,6 @@
     "status": "open",
     "closed": false,
     "dates": [
-      "2026-11-10",
-      "2026-11-11",
       "2026-11-12",
       "2026-11-13",
       "2026-11-14",
@@ -3419,7 +3847,7 @@
     "serviceInfo": {
       "turnaround": "3–5 giờ",
       "warranty": "Không",
-      "area": "Trong Bcons"
+      "area": "Trong Bcons và Vinhomes"
     },
     "handover": {
       "from": "08:00",
@@ -3439,9 +3867,73 @@
       },
       {
         "label": "Lưu ý cho khách",
-        "value": "Khách cung cấp bếp, gas và dụng cụ cơ bản"
+        "value": "Khách chuẩn bị bếp, gas và dụng cụ cơ bản"
       }
-    ]
+    ],
+    "items": [
+      {
+        "id": "i1",
+        "name": "Cỗ 6 người",
+        "price": 1200000,
+        "unit": "buổi"
+      },
+      {
+        "id": "i2",
+        "name": "Cỗ 8 người",
+        "price": 1600000,
+        "unit": "buổi"
+      },
+      {
+        "id": "i3",
+        "name": "Cỗ 10 người",
+        "price": 2000000,
+        "unit": "buổi"
+      }
+    ],
+    "optionGroups": [
+      {
+        "name": "Nguyên liệu",
+        "multi": false,
+        "required": true,
+        "choices": [
+          {
+            "label": "Khách tự mua",
+            "price": 0
+          },
+          {
+            "label": "Bếp mua giúp",
+            "price": 600000
+          }
+        ]
+      }
+    ],
+    "questions": [
+      {
+        "type": "text",
+        "label": "Số người ăn",
+        "required": true
+      },
+      {
+        "type": "text",
+        "label": "Món muốn nấu",
+        "required": true,
+        "long": true
+      },
+      {
+        "type": "text",
+        "label": "Có ai ăn chay hoặc dị ứng món gì không?",
+        "required": false
+      }
+    ],
+    "estimate": false,
+    "bank": {
+      "bankName": "MBBank",
+      "no": "0123456789",
+      "holder": "BEP CO LAN (MAU)"
+    },
+    "deliveryFee": 0,
+    "noteEnabled": true,
+    "repeat": false
   },
   {
     "_id": "43b026c48bbf33feff9243a8",
@@ -3471,45 +3963,90 @@
     "priceType": "fixed",
     "payMethods": [
       "cash",
-      "transfer"
+      "transfer",
+      "xu"
     ],
     "status": "soldout",
     "closed": true,
     "dates": [
-      "2026-11-10",
-      "2026-11-11",
-      "2026-11-12",
-      "2026-11-13",
-      "2026-11-14",
-      "2026-11-15",
-      "2026-11-16"
+      "2026-11-16",
+      "2026-11-17",
+      "2026-11-18",
+      "2026-11-19",
+      "2026-11-20",
+      "2026-11-21",
+      "2026-11-22"
     ],
     "agoMin": 57600,
     "createdAt": "2026-10-01T08:00:00.000Z",
     "repeat": true,
     "timeMode": "slot",
     "place": {
-      "mode": "seller"
+      "mode": "seller",
+      "where": "Bếp B-0512, Block B"
     },
     "stock": {
       "mode": "limit",
       "left": 0
     },
     "fulfillmentModes": [
-      "delivery"
+      "delivery",
+      "pickup"
     ],
     "needSchedule": true,
     "handover": {
       "from": "10:30",
       "to": "12:00"
-    }
+    },
+    "optionGroups": [
+      {
+        "name": "Số bữa mỗi ngày",
+        "multi": false,
+        "required": true,
+        "choices": [
+          {
+            "label": "1 bữa trưa",
+            "price": 0
+          },
+          {
+            "label": "Trưa và tối",
+            "price": 400000
+          }
+        ]
+      }
+    ],
+    "questions": [
+      {
+        "type": "text",
+        "label": "Bạn không ăn được món gì?",
+        "required": false
+      }
+    ],
+    "estimate": false,
+    "serviceInfo": {
+      "turnaround": "Giao đúng giờ hẹn mỗi ngày",
+      "warranty": "Không",
+      "area": "Trong Bcons"
+    },
+    "info": [
+      {
+        "label": "Điều kiện hủy",
+        "value": "Báo trước 2 ngày, hoàn tiền các ngày chưa giao"
+      }
+    ],
+    "bank": {
+      "bankName": "MBBank",
+      "no": "0123456789",
+      "holder": "BEP CO LAN (MAU)"
+    },
+    "deliveryFee": 0,
+    "noteEnabled": true
   },
   {
     "_id": "f506b40928b5b7a767c76fb0",
     "kind": "job",
     "title": "Cần người giao cơm trưa 11:00–12:00",
     "description": "Nhận cơm tại bếp, giao cho khách trong Block B và C. Khoảng 10–15 phần mỗi buổi, đi bộ hoặc xe đạp đều được.",
-    "images": [],
     "sellerId": "27e64e583095ddf04b21f0e7",
     "sellerName": "Bếp Cô Lan",
     "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
@@ -3528,17 +4065,10 @@
     "promoted": false,
     "acceptsXu": false,
     "priceType": "fixed",
-    "payMethods": [],
     "status": "open",
     "closed": false,
     "dates": [
-      "2026-11-10",
-      "2026-11-11",
-      "2026-11-12",
-      "2026-11-13",
-      "2026-11-14",
-      "2026-11-15",
-      "2026-11-16"
+      "2026-11-10"
     ],
     "agoMin": 1440,
     "createdAt": "2026-11-09T08:00:00.000Z",
@@ -3552,14 +4082,14 @@
       "payUnit": "buổi",
       "offers": 2,
       "status": "open"
-    }
+    },
+    "images": []
   },
   {
     "_id": "08f86bebb2737f6a6f0fb23c",
     "kind": "job",
     "title": "Đi chợ đầu mối buổi sáng",
     "description": "Mua rau, thịt theo danh sách bếp gửi tối hôm trước, mang về bếp trước 7:30. Bếp ứng tiền chợ trước.",
-    "images": [],
     "sellerId": "27e64e583095ddf04b21f0e7",
     "sellerName": "Bếp Cô Lan",
     "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
@@ -3578,17 +4108,11 @@
     "promoted": false,
     "acceptsXu": false,
     "priceType": "fixed",
-    "payMethods": [],
     "status": "open",
     "closed": false,
     "dates": [
-      "2026-11-10",
-      "2026-11-11",
       "2026-11-12",
-      "2026-11-13",
-      "2026-11-14",
-      "2026-11-15",
-      "2026-11-16"
+      "2026-11-15"
     ],
     "agoMin": 4320,
     "createdAt": "2026-11-07T08:00:00.000Z",
@@ -3602,14 +4126,14 @@
       "payUnit": "lần",
       "offers": 0,
       "status": "closed"
-    }
+    },
+    "images": []
   },
   {
     "_id": "6f5da2cec255404e4fb44003",
     "kind": "job",
     "title": "Dọn bếp cuối tuần",
     "description": "Lau bếp, rửa máy hút mùi, sắp lại tủ đồ khô. Dụng cụ có sẵn ở bếp.",
-    "images": [],
     "sellerId": "27e64e583095ddf04b21f0e7",
     "sellerName": "Bếp Cô Lan",
     "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
@@ -3628,17 +4152,10 @@
     "promoted": false,
     "acceptsXu": false,
     "priceType": "fixed",
-    "payMethods": [],
     "status": "open",
     "closed": false,
     "dates": [
-      "2026-11-10",
-      "2026-11-11",
-      "2026-11-12",
-      "2026-11-13",
-      "2026-11-14",
-      "2026-11-15",
-      "2026-11-16"
+      "2026-11-14"
     ],
     "agoMin": 1440,
     "createdAt": "2026-11-09T08:00:00.000Z",
@@ -3647,19 +4164,19 @@
       "start": "2026-11-14T14:00:00",
       "allDay": false,
       "head": 1,
-      "payBy": "cash",
+      "payBy": "transfer",
       "building": "Block B",
       "payUnit": "buổi",
       "offers": 1,
       "status": "open"
-    }
+    },
+    "images": []
   },
   {
     "_id": "4d6608697a8d41bed440e504",
     "kind": "job",
     "title": "Phụ bếp nấu cỗ 8 người",
     "description": "Sơ chế rau củ, rửa dọn trong lúc nấu cỗ tại nhà khách.",
-    "images": [],
     "sellerId": "27e64e583095ddf04b21f0e7",
     "sellerName": "Bếp Cô Lan",
     "sellerAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
@@ -3678,17 +4195,10 @@
     "promoted": false,
     "acceptsXu": false,
     "priceType": "fixed",
-    "payMethods": [],
     "status": "open",
     "closed": false,
     "dates": [
-      "2026-11-10",
-      "2026-11-11",
-      "2026-11-12",
-      "2026-11-13",
-      "2026-11-14",
-      "2026-11-15",
-      "2026-11-16"
+      "2026-11-13"
     ],
     "agoMin": 1440,
     "createdAt": "2026-11-09T08:00:00.000Z",
@@ -3696,12 +4206,13 @@
       "due": "13/11/2026",
       "start": "2026-11-13T07:00:00",
       "allDay": false,
-      "head": 1,
+      "head": 2,
       "payBy": "cash",
       "building": "Block A",
       "payUnit": "buổi",
       "offers": 0,
       "status": "open"
-    }
+    },
+    "images": []
   }
 ]

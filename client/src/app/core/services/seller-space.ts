@@ -152,7 +152,7 @@ export class SellerSpaceService {
   private readonly sharedQuestions = signal<Question[]>([]);
   private static readonly NAME = 'seller-space';
   /** khớp trường `version` trong datasets/seller-space.json */
-  private static readonly VERSION = '2026-11-10-b';
+  private static readonly VERSION = '2026-11-10-c';
 
   private readonly state = signal<SellerSpace | null>(null);
   readonly ready = computed(() => this.state() !== null);
