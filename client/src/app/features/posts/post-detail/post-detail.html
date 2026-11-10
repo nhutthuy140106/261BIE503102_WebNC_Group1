@@ -126,7 +126,7 @@
             @for (c of g.choices; track c) {
               <div class="row extra" role="checkbox" tabindex="0" [attr.aria-checked]="d.extraQty(scope, g.name, c) > 0" [class.on]="d.extraQty(scope, g.name, c) > 0" (click)="d.toggleExtra(scope, g.name, c)" (keydown.enter)="d.toggleExtra(scope, g.name, c)" (keydown.space)="d.toggleExtra(scope, g.name, c); $event.preventDefault()">
                 <i class="check"></i>
-                <span class="nm">{{ parse(c).name }}</span>
+                <span class="nm">{{ dishName(v.tpl, c) }}</span>
                 @if (parse(c).add) { <small class="pr">+{{ fmt(parse(c).add) }}</small> }
                 @if (d.extraQty(scope, g.name, c) > 0) {
                   <span class="qty sm" (click)="$event.stopPropagation()">
@@ -169,8 +169,8 @@
               <div class="dishbox" [class.on]="d.dishQty(c) > 0">
                 <div class="row dish" role="checkbox" tabindex="0" [attr.aria-checked]="d.dishQty(c) > 0" [class.on]="d.dishQty(c) > 0" (click)="d.toggleDish(c)" (keydown.enter)="d.toggleDish(c)" (keydown.space)="d.toggleDish(c); $event.preventDefault()">
                   <i class="check"></i>
-                  <span class="nm">{{ parse(c).name }}</span>
-                  @if (v.tpl.dishPriced || parse(c).add) { <small class="pr">{{ v.tpl.dishPriced ? fmt((v.tpl.price.amount ?? 0) + parse(c).add) : '+' + fmt(parse(c).add) }}@if (v.tpl.dishLeft?.[c] !== undefined && v.tpl.dishLeft![c] < 1) { · Hết }</small> }
+                  <span class="nm">{{ dishName(v.tpl, c) }}</span>
+                  @if (v.tpl.dishPriced || parse(c).add) { <small class="pr">{{ v.tpl.dishPriced ? fmt((v.tpl.price.amount ?? 0) + parse(c).add) : '+' + fmt(parse(c).add) }}@if (v.tpl.dishUnit?.[c]) { / {{ v.tpl.dishUnit![c] }} }@if (v.tpl.dishLeft?.[c] !== undefined && v.tpl.dishLeft![c] < 1) { · Hết }</small> }
                   @if (d.dishQty(c) > 0) {
                     <span class="qty sm" (click)="$event.stopPropagation()">
                       <button type="button" [disabled]="d.dishQty(c) <= 1" (click)="d.setDish(c, d.dishQty(c) - 1)" aria-label="Giảm">−</button>
@@ -331,7 +331,7 @@
                 <img [src]="v.images[0]" alt="" />
                 <span class="ct">
                   <b>{{ v.tpl.title }}</b>
-                  @for (r of d.dishRows(); track r.raw) { <small>{{ r.name }} x {{ r.qty }}</small> }
+                  @for (r of d.dishRows(); track r.raw) { <small>{{ dishName(v.tpl, r.raw) }} x {{ r.qty }}@if (v.tpl.dishUnit?.[r.raw]) { {{ v.tpl.dishUnit![r.raw] }} }</small> }
                   @for (c of d.cups(); track c) { <small>{{ c.drink }} x {{ c.qty }}@if (c.text) { · {{ c.text }} }</small> }
                   @if (v.tpl.qty && !d.dishGroup) { <small>Số lượng: {{ d.qty() }}</small> }
                   <!-- mỗi tùy chọn, mỗi câu trả lời một dòng -->

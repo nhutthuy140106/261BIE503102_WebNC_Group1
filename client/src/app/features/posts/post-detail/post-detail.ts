@@ -27,6 +27,7 @@ import { comboSaving } from '../../../core/utils/combo';
 import { countdown, clockVN, dealAt } from '../../../core/utils/promo';
 import { windowSlots, windowStateAt } from '../../../core/utils/order-window';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
+import { PostTemplate } from '../../../core/models/post-template';
 import { placedStepNames } from '../../../core/utils/placed-steps';
 import { resolveId } from '../../../core/utils/slug-helper';
 import { PostView, viewOf } from '../../../core/utils/template-for';
@@ -60,6 +61,13 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
 
   protected readonly kindLabel = KIND_LABEL;
   protected readonly parse = parseChoice;
+
+  /** Tên dòng dịch vụ không kèm "(đơn vị)": đơn vị ghi sau giá */
+  protected dishName(tpl: PostTemplate, raw: string): string {
+    const name = parseChoice(raw).name;
+    const u = tpl.dishUnit?.[raw];
+    return u && name.endsWith(` (${u})`) ? name.slice(0, -(u.length + 3)) : name;
+  }
   protected readonly img = unsplash;
   protected readonly post = signal<Post | null>(null);
   protected readonly view = signal<PostView | null>(null);

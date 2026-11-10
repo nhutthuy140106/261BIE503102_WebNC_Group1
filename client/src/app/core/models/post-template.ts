@@ -136,6 +136,8 @@ export interface PostTemplate {
   freeShipFrom?: number;
   /** Số phần còn của từng món trong danh sách món (khóa = lựa chọn thô); không có = không giới hạn */
   dishLeft?: Record<string, number>;
+  /** Đơn vị tính của từng dòng dịch vụ (khóa = lựa chọn thô): bên Mua ghi sau giá "1.500.000đ / khóa" thay vì trong ngoặc ở tên */
+  dishUnit?: Record<string, string>;
   /** Thông tin người bán đã điền, hiện dưới Mô tả */
   info?: { label: string; value: string }[];
   /** Có = đặt đồ uống theo từng dòng (bài đồ uống đăng từ form khu Bán) */

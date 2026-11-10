@@ -238,6 +238,9 @@ export function viewOf(post: Post): PostView {
     ...(dish && items?.some((i) => i.dailyQty !== undefined)
       ? { dishLeft: Object.fromEntries(items.flatMap((it, i) => (it.dailyQty !== undefined ? [[dish.choices[i], it.dailyQty]] : []))) }
       : {}),
+    ...(dish && svc && items?.some((i) => i.unit)
+      ? { dishUnit: Object.fromEntries(items.flatMap((it, i) => (it.unit ? [[dish.choices[i], it.unit]] : []))) }
+      : {}),
     quick: post.quickOptions,
     noteOff: post.noteEnabled === false,
     optsOnce: post.kind === 'service' || undefined,
