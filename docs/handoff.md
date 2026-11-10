@@ -359,3 +359,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Lưu trú:** bỏ Báo giá sau, dòng giải thích giá mỗi đêm, ô "Ở tối thiểu (đêm)" (bài cũ còn lưu cũng không hiện). Tiêu đề cột "Khách tối đa" một dòng. Tiện nghi thành lưới ô tick 4 cột (điện thoại 2 cột, `.amen`).
 - **Lưu trú:** tiện nghi bỏ ô tick, ô được chọn có viền đậm + nền kem; nội quy thành danh sách gạch đầu dòng không ô tick (`quickList` thêm `plain`).
 - **Lưu trú bên Mua:** 3 ô đầu = Nhận phòng (Từ giờ nhận phòng) · Địa điểm (tòa nhà) · Đặt cọc (dòng Đặt cọc bỏ khỏi phần thông tin). Bài lưu trú lưu tòa nhà vào `place.where` nên hộp xác nhận có Địa điểm + ghi chú số phòng gửi sau; khung giờ tên "Nhận phòng lúc". Mọi bài: 3 ô đầu đổi thứ tự thành tiêu đề nhỏ trên, nội dung đậm dưới. Bài lưu trú đăng trước đó cần Sửa + lưu lại để 3 ô mới hiện.
+- **Lưu trú:** ô đầu đổi thành "Nhận – trả phòng" (Nhận 14:00 · Trả 12:00), bỏ dòng Trả phòng trước ở phần thông tin.

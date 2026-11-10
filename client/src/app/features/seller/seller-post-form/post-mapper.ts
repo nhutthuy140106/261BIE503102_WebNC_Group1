@@ -145,7 +145,6 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
       : []),
     ...(preset === 'Lưu trú'
       ? [
-          ...row('Trả phòng trước', s['checkOut']),
           ...row('Tiện nghi', ((s['amenities'] as string[]) ?? []).join(', ')),
           ...row('Nội quy', on.join('; ')),
           ...row('Hủy miễn phí', s['freeCancelDays'] !== null && s['freeCancelDays'] !== '' ? `Trước ${+s['freeCancelDays']} ngày` : ''),
@@ -174,7 +173,7 @@ function serviceHighlights(s: V): Post['highlights'] {
   // lưu trú: giờ nhận phòng · địa điểm (tòa nhà) · đặt cọc
   if (preset === 'Lưu trú')
     return [
-      ...cell('clock', 'Nhận phòng', s['checkIn'] ? `Từ ${s['checkIn']}` : ''),
+      ...cell('clock', 'Nhận – trả phòng', [s['checkIn'] ? `Nhận ${s['checkIn']}` : '', s['checkOut'] ? `Trả ${s['checkOut']}` : ''].filter(Boolean).join(' · ')),
       ...cell('pin', 'Địa điểm', place),
       ...cell('receipt', 'Đặt cọc', +s['deposit'] ? `${+s['deposit']}% khi đặt phòng` : 'Không cần đặt cọc'),
     ];
