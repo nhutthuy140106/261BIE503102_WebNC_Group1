@@ -349,3 +349,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Ứng trước tiền hàng (giao nhận):** ô tick "Nhận ứng trước tiền hàng cho khách" (`spec.advancePay`) thay cho câu hỏi "Cần trả tiền giùm?"; bật thì bên Mua có câu "Cần ứng trước tiền hàng?" (`pay: true`). Không còn nhận theo tên câu hỏi. Bài cũ khi mở Sửa tự chuyển câu hỏi cũ thành ô tick.
 - **Kiểu câu hỏi:** "Chữ" đổi thành "Văn bản" ở mục Câu hỏi riêng; form mẫu Khác đổi "Chữ ngắn", "Đoạn dài" thành "Văn bản ngắn", "Văn bản dài".
 - **Câu hỏi hình ảnh:** khách chọn tối đa 5 ảnh mỗi câu (`MAX_PHOTOS`), lưu nối bằng '|||'; đơn ghi "Đã gửi n ảnh", chi tiết đơn phía Bán hiện đủ các ảnh.
+- **Chăm sóc:** bỏ Báo giá sau, giá ước tính, đặt lặp hằng tuần, mục Nơi làm (người làm đến nhà khách, địa chỉ lấy từ địa chỉ đặt hàng). Cờ mẫu `noEstimate`, `noRepeat` dùng chung với giao nhận. Ô "Tổng tiền hàng" ở khung đặt hiện dạng tiền (120.000đ).

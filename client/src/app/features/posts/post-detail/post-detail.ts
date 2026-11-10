@@ -388,6 +388,18 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
 
   protected readonly maxPhotos = MAX_PHOTOS;
 
+  /** Ô tiền: hiện có dấu chấm ngăn cách nghìn, lưu chỉ chữ số */
+  protected moneyText(v: string): string {
+    return v ? Number(v).toLocaleString('vi-VN') : '';
+  }
+
+  protected onMoney(d: OrderDraft, e: Event): void {
+    const input = e.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 12);
+    d.payBack.set(digits);
+    input.value = this.moneyText(digits);
+  }
+
   /** Chọn một hoặc nhiều ảnh; quá số ảnh cho phép thì chỉ lấy đủ và báo cho khách */
   protected onPhoto(d: OrderDraft, label: string, e: Event): void {
     const input = e.target as HTMLInputElement;

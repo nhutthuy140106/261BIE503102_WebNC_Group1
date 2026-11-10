@@ -251,8 +251,8 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
       const hideQuick = !!shown?.noQuick && !shown.generic;
       return {
         ...base,
-        priceType: cleaning ? (cleaningPrice(s).from ? 'from' : 'fixed') : quote ? 'quote' : priceTypeOf(its, its.length === 1 && s['estimate'] && !courier ? 'unit' : 'fixed'),
-        estimate: (!cleaning && !courier && !!s['estimate']) || undefined,
+        priceType: cleaning ? (cleaningPrice(s).from ? 'from' : 'fixed') : quote ? 'quote' : priceTypeOf(its, its.length === 1 && s['estimate'] && !preset?.noEstimate ? 'unit' : 'fixed'),
+        estimate: (!cleaning && !preset?.noEstimate && !!s['estimate']) || undefined,
         // giao nhận: khách chọn giờ muốn nhận hàng
         timeLabel: courier ? 'Giờ giao hàng' : undefined,
         bookOnce: cleaning || undefined,
@@ -273,7 +273,7 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         // dọn dẹp: luôn hẹn giờ, kể cả bài cũ đã lưu kiểu chọn số giờ
         timeMode: cleaning || courier ? 'slot' : s['timeMode'],
         duration: { min: +s['durMin'] || 1, max: +s['durMax'] || 1 },
-        repeat: !cleaning && !courier && !!s['repeat'],
+        repeat: !cleaning && !preset?.noRepeat && !!s['repeat'],
         // mẫu không có mục Nơi làm (sửa chữa, giặt sấy, lưu trú): nơi làm theo mẫu, không lấy giá trị cũ còn lưu trong form
         place: { mode: shown?.noPlace ? shown.place : s['place'], ...(where && !shown?.noPlace ? { where } : {}) },
         // khung giờ khách chọn hẹn (giờ nhận lịch của người làm)

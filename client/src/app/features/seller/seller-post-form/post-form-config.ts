@@ -95,6 +95,9 @@ export interface SvcPreset {
   generic?: boolean;
   /** mẫu không có kiểu "Báo giá sau" (chỉ bảng giá) */
   noQuote?: boolean;
+  /** mẫu không có ô "Giá ước tính" và "Cho khách đặt lặp lại hằng tuần" */
+  noEstimate?: boolean;
+  noRepeat?: boolean;
   /** mẫu giao nhận: người làm lấy hàng ngay khi nhận đơn, khách chọn giờ muốn nhận hàng; có thể nhờ trả tiền hàng giùm */
   courier?: boolean;
   /** mẫu dọn dẹp: mục 2 chỉ liệt kê tên dịch vụ, giá đặt ở mục Cài đặt tùy chọn; khách đặt một dịch vụ mỗi đơn */
@@ -138,14 +141,18 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
     ],
   }),
   'Giao nhận': P({
-    items: [['Lấy đồ trong khu', 15000, 'lượt'], ['Đồ to, nặng từ 10kg', 25000, 'lượt']], place: 'ab', noPlace: true, noQuote: true, courier: true,
+    items: [['Lấy đồ trong khu', 15000, 'lượt'], ['Đồ to, nặng từ 10kg', 25000, 'lượt']], place: 'ab', noPlace: true, noQuote: true, noEstimate: true, noRepeat: true, courier: true,
     questions: [
       { type: 'text', label: 'Lấy ở đâu?', required: true, opts: '' },
       { type: 'text', label: 'Lấy món gì?', required: true, opts: '' },
       { type: 'choice', label: 'Kích thước', required: false, opts: 'Nhỏ dưới 10kg, To / nặng từ 10kg' },
     ],
   }),
-  'Chăm sóc': P({ items: [['Trông trẻ theo giờ', 60000, 'giờ'], ['Trông thú cưng theo giờ', 40000, 'giờ']], timeMode: 'datedur', dur: [2, 6] }),
+  // chăm sóc: người làm đến nhà khách (địa chỉ lấy từ địa chỉ đặt hàng), tính theo giờ
+  'Chăm sóc': P({
+    items: [['Trông trẻ theo giờ', 60000, 'giờ'], ['Trông thú cưng theo giờ', 40000, 'giờ']], timeMode: 'datedur', dur: [2, 6],
+    noPlace: true, noQuote: true, noEstimate: true, noRepeat: true,
+  }),
   'Gia sư': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], repeat: true, place: 'choice' }),
   'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']] }),
   // homestay / cho thuê phòng ngắn ngày trong khu (tham khảo Traveloka, Booking, Airbnb): loại phòng · nhận / trả phòng · tiện nghi · nội quy · hủy & cọc

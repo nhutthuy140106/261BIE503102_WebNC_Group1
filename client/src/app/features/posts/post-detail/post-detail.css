@@ -234,6 +234,9 @@
 .qfield textarea.input { height: auto; padding: 10px 12px; resize: none; }
 .qfield .input:focus { outline: none; border-color: var(--ink); }
 .qfield.pay { margin-top: 10px; padding-top: 10px; border-top: 0; }
+.qfield .money { position: relative; display: block; }
+.qfield .money .input { padding-right: 30px; }
+.qfield .money::after { content: 'đ'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--smoke); font-size: 14px; pointer-events: none; }
 .upload { display: flex; align-items: center; justify-content: center; height: 42px; border: 1px dashed #B9BEC8; border-radius: 10px; font-size: 14px; color: var(--smoke); cursor: pointer; font-weight: 500 !important; }
 .upload:hover { border-color: var(--ink); color: var(--ink); }
 .qphotos { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }

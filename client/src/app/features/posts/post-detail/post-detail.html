@@ -201,7 +201,7 @@
               @if (q.pay && d.ans()[q.label] === 'Có') {
                 <div class="qfield pay">
                   <label>Tổng tiền hàng</label>
-                  <input class="input" inputmode="numeric" placeholder="Ví dụ: 120000" [value]="d.payBack()" (input)="d.payBack.set($any($event.target).value.replace(/\D/g, ''))" />
+                  <span class="money"><input class="input" inputmode="numeric" placeholder="120.000" [value]="moneyText(d.payBack())" (input)="onMoney(d, $event)" /></span>
                   <p class="hint">Số tiền này được cộng vào tổng đơn, bạn thanh toán chung với phí dịch vụ.</p>
                 </div>
               }

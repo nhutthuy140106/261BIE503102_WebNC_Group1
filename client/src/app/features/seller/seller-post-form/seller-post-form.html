@@ -240,7 +240,7 @@
                 }
                 @if (svcPreset().stay) {
                   <span class="hint">Giá mỗi đêm cho từng loại phòng. Khách chọn loại phòng, số phòng và ngày nhận – trả phòng; tổng tiền = giá × số đêm × số phòng.</span>
-                } @else if (!svcPreset().generic && !svcPreset().repair && !svcPreset().courier) {
+                } @else if (!svcPreset().generic && !svcPreset().repair && !svcPreset().noEstimate) {
                   <label class="ck"><input type="checkbox" formControlName="estimate" /><span>Giá ước tính, cân / đếm thực tế khi nhận đồ</span></label>
                 }
               }
@@ -334,7 +334,7 @@
                   <div class="fld"><label for="gta">Thời gian làm dự kiến <span class="hint">(không bắt buộc)</span></label><input id="gta" class="input" formControlName="turnaround" maxlength="40" placeholder="Ví dụ: khoảng 2 giờ" /></div>
                 </div>
               }
-              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning && !svcPreset().courier) {
+              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning && !svcPreset().noRepeat) {
               <label class="ck"><input type="checkbox" formControlName="repeat" /><span>Cho khách đặt lặp lại hằng tuần</span></label>
               }
               }
