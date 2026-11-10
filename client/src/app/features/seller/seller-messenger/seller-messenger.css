@@ -27,7 +27,7 @@
 .chat-top h2 { font-size: 17px; margin: 0; }
 .chat-top small { color: var(--smoke); }
 .messages { flex: 1; min-height: 0; overflow: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; background: #fffdfc; }
-.context-card { align-self: center; width: 100%; max-width: 540px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font-size: 13px; margin-bottom: 6px; }
+.context-card { align-self: center; width: 100%; max-width: 380px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font-size: 13px; margin-bottom: 6px; }
 .context-card:hover { background: var(--soft); }
 .context-card > img, .context-card .th { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; flex: none; background: var(--soft); display: grid; place-items: center; }
 .context-card .th svg { width: 20px; height: 20px; }
