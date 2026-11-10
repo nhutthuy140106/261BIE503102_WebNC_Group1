@@ -362,3 +362,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Lưu trú:** ô đầu đổi thành "Nhận – trả phòng" (Nhận 14:00 · Trả 12:00), bỏ dòng Trả phòng trước ở phần thông tin.
 - **Header khu Bán:** ẩn nút tim Đã lưu; Messenger bỏ khỏi menu chữ, thành icon tin nhắn ở chỗ nút tim (sáng khi đang ở /seller/messenger). Khu Mua giữ nguyên.
 - **Messenger khu Bán:** bộ lọc Tất cả / Chưa đọc (đếm số; hội thoại đang mở vẫn giữ trong Chưa đọc). Dưới ô nhắn có 3 nút: ghi âm, đính kèm tệp (tối đa 10MB, tệp ≤1MB lưu luôn nội dung), gửi ảnh (Chụp ảnh / Chọn ảnh từ thư viện). `SellerMsg.media`, icon `s-clip`, `s-file`. Ghi âm và chụp ảnh cần trình duyệt cho phép micro / camera.
+- **Messenger khu Bán:** 3 nút ghi âm / tệp / ảnh nằm bên trái ô nhập, cùng dòng. Mốc ngày (dd/mm/yyyy) giữa hai tin khác ngày (`SellerMsg.date`; tin mẫu không có ngày = hôm nay). Thẻ đơn: dòng trên mã đơn + trạng thái, dòng dưới tên bài (không số lượng, tùy chọn).

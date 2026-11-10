@@ -754,7 +754,9 @@ export class SellerSpaceService {
     this.patch((s) => {
       const c = s.chats.find((x) => x.id === id);
       if (!c) return;
-      c.messages.push({ from: 'me', text, time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }), ...(media ? { media } : {}) });
+      const now = new Date();
+      const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      c.messages.push({ from: 'me', text, time: now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }), date, ...(media ? { media } : {}) });
       s.chats = [c, ...s.chats.filter((x) => x.id !== id)];
     });
   }

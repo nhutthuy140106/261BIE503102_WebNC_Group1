@@ -15,7 +15,7 @@
           <span class="text">
             <b>{{ c.name }}</b>
             <small>@if (last(c); as m) { {{ m.from === 'me' ? 'Bạn: ' : '' }}{{ preview(m) }} } @else { Chưa có tin nhắn }</small>
-            @if (ctxOf(c); as x) { <span class="ctx">{{ x.title }}</span> }
+            @if (ctxOf(c); as x) { <span class="ctx">{{ x.code }} · {{ x.title }}</span> }
           </span>
           <span class="when">{{ last(c)?.time }}@if (c.unread) { <i></i> }</span>
         </button>
@@ -35,11 +35,12 @@
         @if (ctxOf(c); as x) {
           <a class="context-card" [routerLink]="x.link">
             @if (x.image) { <img [src]="x.image" alt="" /> } @else { <span class="th"><svg class="i"><use [attr.href]="'#' + x.icon" /></svg></span> }
-            <span class="cc"><b>{{ x.title }}</b><small>{{ x.sub }} · </small><span class="stat" [class]="'stat ' + x.cls">{{ x.st }}</span></span>
+            <span class="cc"><span class="top"><b>{{ x.code }}</b> · <span [class]="'stat ' + x.cls">{{ x.st }}</span></span><small>{{ x.title }}</small></span>
             <svg class="i"><use href="#right" /></svg>
           </a>
         }
-        @for (m of c.messages; track $index) {
+        @for (m of c.messages; track $index; let i = $index) {
+          @if (i === 0 || dayOf(c.messages[i - 1]) !== dayOf(m)) { <div class="daystamp">{{ dayLabel(m) }}</div> }
           <!-- bong bóng giữ white-space: pre-wrap nên nội dung viết liền một dòng -->
           <div class="bubble" [class.them]="m.from === 'them'" [class.media]="m.media && m.media.kind !== 'file' && !m.text">@if (m.media; as md) {@if (md.kind === 'image') {<img class="mimg" [src]="md.url" alt="Hình ảnh" />} @else if (md.kind === 'video') {<video class="mimg" [src]="md.url" controls preload="metadata"></video>} @else if (md.kind === 'audio') {<audio class="maud" [src]="md.url" controls preload="metadata"></audio>} @else {<a class="mfile" [href]="md.url" [attr.download]="md.name"><svg class="i"><use href="#s-file" /></svg><span><b>{{ md.name }}</b><small>{{ sizeText(md.size) }}</small></span></a>}}{{ m.text }}<small>{{ m.time }}</small></div>
         } @empty {
@@ -50,19 +51,16 @@
         <span class="lb">Trả lời nhanh:</span>
         @for (t of quick(); track t) { <button type="button" (click)="useQuick(t)">{{ t }}</button> }
       </div>
-      <form class="compose" (submit)="send($event)">
-        <textarea #draft class="input" [placeholder]="'Nhắn cho ' + c.name" maxlength="2000" (keydown)="key($event)" (input)="grow(draft)"></textarea>
-        <button type="submit" class="btn primary">Gửi</button>
-      </form>
-      <!-- dưới ô nhắn: ghi âm · đính kèm tệp · gửi ảnh (chụp hoặc chọn từ thư viện) -->
+      <!-- bên trái ô nhắn: ghi âm · đính kèm tệp · gửi ảnh (chụp hoặc chọn từ thư viện) -->
       @if (recording()) {
-        <div class="tools rec">
+        <div class="compose rec">
           <button type="button" class="tb" aria-label="Hủy ghi âm" title="Hủy" (click)="stopRec(true)"><svg class="i"><use href="#xmark" /></svg></button>
           <span class="pulse"></span><b>Đang ghi âm {{ clock(recSec()) }}</b>
-          <button type="button" class="btn primary sm" (click)="stopRec()">Gửi ghi âm</button>
+          <button type="button" class="btn primary" (click)="stopRec()">Gửi ghi âm</button>
         </div>
       } @else {
-        <div class="tools">
+        <form class="compose" (submit)="send($event)">
+          <span class="tools">
           <button type="button" class="tb" title="Ghi âm giọng nói" aria-label="Ghi âm giọng nói" (click)="startRec()"><svg class="i"><use href="#mic-s" /></svg></button>
           <label class="tb" title="Đính kèm tệp" aria-label="Đính kèm tệp"><input type="file" multiple hidden (change)="attachFiles($any($event.target))" /><svg class="i"><use href="#s-clip" /></svg></label>
           <span class="picwrap">
@@ -74,9 +72,12 @@
               </span>
             }
           </span>
-          @if (err()) { <span class="terr">{{ err() }}</span> }
-        </div>
+          </span>
+          <textarea #draft class="input" [placeholder]="'Nhắn cho ' + c.name" maxlength="2000" (keydown)="key($event)" (input)="grow(draft)"></textarea>
+          <button type="submit" class="btn primary">Gửi</button>
+        </form>
       }
+      @if (err()) { <p class="terr">{{ err() }}</p> }
     } @else {
       <div class="empty-chat"><img src="assets/clean/peek.png" alt="" />Chưa có cuộc trò chuyện nào.</div>
     }

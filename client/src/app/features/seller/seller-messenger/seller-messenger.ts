@@ -49,11 +49,13 @@ export class SellerMessenger implements OnInit, OnDestroy, AfterViewChecked {
     if (c.ctx.type === 'order') {
       const o = this.seller.orders().find((x) => x.id === c.ctx!.id);
       if (!o) return null;
-      return { link: ['/seller/orders', o.id], image: o.image, icon: o.icon ?? SELLER_KIND_ICON[o.kind], title: `${o.code} · ${o.title}`, sub: 'Đơn khách đặt', cls: o.cls, st: o.cancelRequest ? 'Khách xin hủy' : o.label, kind: KIND_LABEL[o.kind] };
+      // dòng dưới: tên bài đăng (không kèm số lượng, tùy chọn); đơn mẫu cũ ghi "Tên ×2 · thêm…" thì cắt phần sau
+      const postTitle = this.seller.posts().find((p) => p.id === o.sellerPostId)?.title ?? o.title.replace(/\s*×.*$/, '');
+      return { link: ['/seller/orders', o.id], image: o.image, icon: o.icon ?? SELLER_KIND_ICON[o.kind], code: o.code, title: postTitle, cls: o.cls, st: o.cancelRequest ? 'Khách xin hủy' : o.label, kind: KIND_LABEL[o.kind] };
     }
     const j = this.seller.jobs().find((x) => x.id === c.ctx!.id);
     if (!j) return null;
-    return { link: ['/seller/jobs', j.id], image: undefined, icon: 'hand', title: j.title, sub: 'Việc bạn đăng', cls: j.cls, st: j.label, kind: 'Việc làm' };
+    return { link: ['/seller/jobs', j.id], image: undefined, icon: 'hand', code: 'Việc bạn đăng', title: j.title, cls: j.cls, st: j.label, kind: 'Việc làm' };
   }
 
   ngOnInit(): void {
@@ -108,6 +110,19 @@ export class SellerMessenger implements OnInit, OnDestroy, AfterViewChecked {
     el.value = '';
     el.style.height = '44px';
     el.focus();
+  }
+
+  /** Ngày của tin (tin mẫu không ghi ngày = hôm nay) */
+  protected dayOf(m: SellerMsg): string {
+    if (m.date) return m.date;
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  /** Mốc ngày giữa hai tin khác ngày: chỉ ghi ngày, giờ đã có trong từng tin */
+  protected dayLabel(m: SellerMsg): string {
+    const [y, mo, d] = this.dayOf(m).split('-');
+    return `${d}/${mo}/${y}`;
   }
 
   /** Dòng xem trước trong danh sách hội thoại */

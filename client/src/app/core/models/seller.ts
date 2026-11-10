@@ -227,6 +227,8 @@ export interface SellerMsg {
   from: 'me' | 'them';
   text: string;
   time: string;
+  /** Ngày gửi (yyyy-mm-dd, giờ máy); tin mẫu không có = hôm nay */
+  date?: string;
   media?: { kind: 'image' | 'video' | 'audio' | 'file'; url: string; name?: string; size?: number; sec?: number };
 }
 
