@@ -15,7 +15,6 @@
           <span class="text">
             <b>{{ c.name }}</b>
             <small>@if (last(c); as m) { {{ m.from === 'me' ? 'Bạn: ' : '' }}{{ preview(m) }} } @else { Chưa có tin nhắn }</small>
-            @if (ctxOf(c); as x) { <span class="ctx">{{ x.code }} · {{ x.title }}</span> }
           </span>
           <span class="when">{{ last(c)?.time }}@if (c.unread) { <i></i> }</span>
         </button>
@@ -29,7 +28,7 @@
     @if (cur(); as c) {
       <div class="chat-top">
         <img [src]="c.avatar" alt="" />
-        <div><h2>{{ c.name }}</h2><small>{{ c.ctx?.type === 'job' ? 'Người nhận việc' : 'Khách' }} · hàng xóm trong khu</small></div>
+        <h2>{{ c.name }}</h2>
       </div>
       <div class="messages" #msgs>
         @if (ctxOf(c); as x) {
