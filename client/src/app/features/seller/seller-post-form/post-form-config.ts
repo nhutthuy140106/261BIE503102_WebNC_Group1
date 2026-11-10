@@ -159,7 +159,8 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
   }),
   // gia sư: lịch học, nơi học ghi trong mô tả, khách đăng ký rồi thỏa thuận
   'Gia sư': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], place: 'none', noPlace: true, noSchedule: true, noQuote: true, noEstimate: true, noRepeat: true }),
-  'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']] }),
+  // làm đẹp tại nhà khách: chỉ hẹn giờ, không báo giá sau, không lặp hằng tuần, nơi làm cố định (nhà khách)
+  'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']], noPlace: true, noQuote: true, noEstimate: true, noRepeat: true, fixedTime: 'slot' }),
   // homestay / cho thuê phòng ngắn ngày trong khu (tham khảo Traveloka, Booking, Airbnb): loại phòng · nhận / trả phòng · tiện nghi · nội quy · hủy & cọc
   'Lưu trú': P({
     stay: true, noQuick: true, noPlace: true, timeMode: 'stay', place: 'seller',

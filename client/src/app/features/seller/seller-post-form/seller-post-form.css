@@ -4,15 +4,16 @@
 .fhead h1 { margin: 10px 0 0; font-size: 30px; letter-spacing: -.02em; }
 .fhead p { margin: 6px 0 0; color: var(--smoke); }
 
-.tpl { margin-top: 20px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.tpl button { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: #fff; text-align: left; }
+/* cùng kích thước 4 nút đăng bài ở trang Hôm nay (.posts4) */
+.tpl { margin-top: 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.tpl button { display: flex; align-items: center; gap: 14px; height: 90px; padding: 0 20px; border: 1px solid var(--border); border-radius: 16px; background: #fff; text-align: left; white-space: nowrap; }
 .tpl button:hover:not(:disabled) { border-color: #e2cfc6; }
 .tpl button:disabled { opacity: .45; cursor: not-allowed; }
 .tpl button.on { border-color: var(--accent); background: #fff6f1; box-shadow: 0 0 0 1px var(--accent) inset; opacity: 1; }
-.pi { width: 40px; height: 40px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; flex: none; }
+.pi { width: 44px; height: 44px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; flex: none; }
 .tpl button.on .pi { background: var(--accent); color: #fff; }
-.tpl svg { width: 20px; height: 20px; }
-.tpl b { display: block; font-size: 14.5px; }
+.tpl svg { width: 22px; height: 22px; }
+.tpl b { display: block; font-size: 15.5px; font-weight: 700; letter-spacing: -.01em; }
 .tpl small { display: block; font-size: 12px; color: var(--smoke); }
 
 .fgrid { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 26px; align-items: start; }
@@ -49,7 +50,7 @@ textarea.small { min-height: 64px; }
 /* ô chọn mẫu dịch vụ: icon + tên, khác hẳn các nút chọn trong form */
 .tiles { display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; }
 @media (max-width: 900px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
-.tiles button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 84px; padding: 10px 4px; border: 1.5px solid transparent; border-radius: 14px; background: var(--soft); color: var(--ink); font-size: 13px; font-weight: 600; text-align: center; line-height: 1.25; white-space: nowrap; transition: border-color .15s, background .15s; }
+.tiles button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 84px; padding: 10px 4px; border: 1.5px solid transparent; border-radius: 14px; background: var(--soft); color: var(--ink); font-size: 13.5px; font-weight: 600; text-align: center; line-height: 1.25; white-space: nowrap; transition: border-color .15s, background .15s; }
 .tiles button:hover { border-color: var(--border); background: #fff; }
 .tiles .ic { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #fff; color: var(--smoke); }
 .tiles .ic .i { width: 21px; height: 21px; }
@@ -154,6 +155,7 @@ textarea.small { min-height: 64px; }
   .fgrid { grid-template-columns: 1fr; }
   .side { position: static; }
   .tpl { grid-template-columns: repeat(2, 1fr); }
+  .tpl button { height: 72px; }
   .imgs { grid-template-columns: repeat(4, 1fr); }
 }
 @media (max-width: 640px) {
