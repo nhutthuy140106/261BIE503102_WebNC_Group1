@@ -26,7 +26,13 @@
       <div class="bd">
         @if (type() === 'service') {
           <div class="fld"><span class="lbl">Điền nhanh theo mẫu</span>
-            <div class="pills">@for (p of svcPresets; track p) { <button type="button" [class.on]="c('spec.preset').value === p" (click)="applyPreset(p)">{{ p }}</button> }</div>
+            <div class="tiles" role="radiogroup" aria-label="Mẫu dịch vụ">
+              @for (p of svcPresets; track p) {
+                <button type="button" role="radio" [attr.aria-checked]="c('spec.preset').value === p" [class.on]="c('spec.preset').value === p" (click)="applyPreset(p)">
+                  <span class="ic"><svg class="i"><use [attr.href]="'#' + presetIcon(p)" /></svg></span>{{ p }}
+                </button>
+              }
+            </div>
           </div>
         }
 
@@ -273,7 +279,7 @@
           }
           @if (!svcPreset().cleaning) {
           <section class="sec">
-            <header><span class="no">{{ svcNo('ask') }}</span><span><b>{{ svcPreset().generic ? 'Cài đặt tùy chọn' : 'Khách chọn khi đặt' }}</b></span></header>
+            <header><span class="no">{{ svcNo('ask') }}</span><span><b>Cài đặt tùy chọn</b></span></header>
             <div class="bd">
               <div class="optblock">
                 <span class="lbl">Tùy chọn cộng giá</span>

@@ -46,6 +46,16 @@ textarea.small { min-height: 64px; }
 .pills { display: flex; flex-wrap: wrap; gap: 6px; }
 .pills button { height: 36px; padding: 0 14px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 13px; font-weight: 600; }
 .pills button.on { border-color: var(--ink); background: var(--ink); color: #fff; }
+/* ô chọn mẫu dịch vụ: icon + tên, khác hẳn các nút chọn trong form */
+.tiles { display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; }
+@media (max-width: 900px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
+.tiles button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 84px; padding: 10px 4px; border: 1.5px solid transparent; border-radius: 14px; background: var(--soft); color: var(--ink); font-size: 13px; font-weight: 600; text-align: center; line-height: 1.25; white-space: nowrap; transition: border-color .15s, background .15s; }
+.tiles button:hover { border-color: var(--border); background: #fff; }
+.tiles .ic { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #fff; color: var(--smoke); }
+.tiles .ic .i { width: 21px; height: 21px; }
+.tiles button.on { border-color: var(--ink); background: #fff; }
+.tiles button.on .ic { background: var(--ink); color: #fff; }
+.tiles button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .checks { display: grid; gap: 8px; }
 .ck { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; cursor: pointer; }
 .ck:has(> input:checked) { border-color: var(--ink); background: var(--soft); }

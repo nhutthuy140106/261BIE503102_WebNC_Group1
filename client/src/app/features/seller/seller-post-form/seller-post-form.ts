@@ -158,6 +158,10 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   protected readonly priceTypes = PRICE_TYPES;
   protected readonly qTypes = Q_TYPES;
   protected readonly svcPresets = Object.keys(SVC_PRESETS);
+  /** Icon của từng ô mẫu dịch vụ */
+  protected presetIcon(p: string): string {
+    return ({ 'Giặt sấy': 's-washer', 'Sửa chữa': 'wrench', 'Dọn dẹp': 's-broom', 'Giao nhận': 'package', 'Chăm sóc': 'heart', 'Gia sư': 's-book', 'Làm đẹp': 's-sparkle', 'Lưu trú': 's-bed' } as Record<string, string>)[p] ?? 's-more';
+  }
   protected readonly maxImages = 6;
 
   protected readonly type = signal<FormType>('food');
