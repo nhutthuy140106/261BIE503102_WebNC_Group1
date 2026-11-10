@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Conversation, Message } from '../../../core/models/social';
@@ -16,7 +16,88 @@ import { isEnded, needsAction } from '../../orders/order-list/order-list';
   styleUrl: './messenger.css',
   templateUrl: './messenger.html',
 })
-export class Messenger implements OnInit, OnDestroy {
+export class Messenger implements OnInit, OnDestroy, AfterViewChecked {
+  @ViewChild('msgs') private msgs?: ElementRef<HTMLElement>;
+  private lastKey = '';
+  private lastHeight = 0;
+  /** Đang ở cuối khung chat: nội dung nạp thêm (thẻ đơn, tin) thì bám theo xuống cuối */
+  private stick = true;
+
+  /** Cuộn xuống tin mới nhất khi đổi hội thoại, có tin mới, hoặc khung cao thêm lúc đang ở cuối */
+  ngAfterViewChecked(): void {
+    const el = this.msgs?.nativeElement;
+    if (!el) return;
+    // ảnh (thẻ đơn, tin có ảnh) tải xong sau khi đã cuộn: khung cao thêm thì bám xuống cuối
+    if (!el.dataset['watch']) {
+      el.dataset['watch'] = '1';
+      el.addEventListener('load', () => { if (this.stick) el.scrollTop = el.scrollHeight; }, true);
+      if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => { if (this.stick) el.scrollTop = el.scrollHeight; }).observe(el);
+      // tin mới vẽ ra (kể cả khi Angular chỉ vẽ lại phần tin, không gọi ngAfterViewChecked)
+      new MutationObserver(() => { if (this.stick) el.scrollTop = el.scrollHeight; }).observe(el, { childList: true, subtree: true });
+    }
+    const key = `${this.selectedId()}:${this.selected()?.messages.length ?? 0}`;
+    if (this.lastKey !== key) this.stick = true;
+    if (this.lastKey !== key || (this.stick && el.scrollHeight !== this.lastHeight)) {
+      this.lastKey = key;
+      el.scrollTop = el.scrollHeight;
+    }
+    this.lastHeight = el.scrollHeight;
+  }
+
+  protected onScroll(el: HTMLElement): void {
+    this.stick = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+  }
+
+  /** Ngày (giờ máy) của một thời điểm: mốc ngày giữa hai tin khác ngày */
+  protected dayOf(iso: string): string {
+    const d = new Date(iso);
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  }
+
+  protected dayLabel(iso: string): string {
+    const d = new Date(iso);
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+  }
+
+  protected timeOf(iso: string): string {
+    return new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  protected sizeText(b?: number): string {
+    if (!b) return '';
+    return b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' KB' : (b / 1024 / 1024).toFixed(1) + ' MB';
+  }
+
+  /** Tệp bất kỳ (PDF, Word…): tối đa 10MB; tệp nhỏ lưu luôn nội dung để tải lại được */
+  async attachFiles(input: HTMLInputElement): Promise<void> {
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    for (const f of files) {
+      if (f.size > 10 * 1024 * 1024) {
+        this.error.set(`"${f.name}" lớn hơn 10MB, chưa gửi được.`);
+        continue;
+      }
+      const url = f.size <= 1024 * 1024
+        ? await new Promise<string>((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result)); r.onerror = () => ok(URL.createObjectURL(f)); r.readAsDataURL(f); })
+        : URL.createObjectURL(f);
+      this.sendMedia({ kind: 'file', url, name: f.name, size: f.size });
+    }
+  }
+
+  /** Enter gửi, Shift+Enter xuống dòng */
+  protected key(e: KeyboardEvent): void {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      this.send();
+    }
+  }
+
+  /** Ô nhập tự cao theo nội dung */
+  protected grow(el: HTMLTextAreaElement): void {
+    el.style.height = '44px';
+    el.style.height = Math.min(120, el.scrollHeight) + 'px';
+  }
+
   private readonly chat = inject(ChatService);
   private readonly orders = inject(OrderService);
   private readonly route = inject(ActivatedRoute);
@@ -94,7 +175,7 @@ export class Messenger implements OnInit, OnDestroy {
   protected preview(c: Conversation): string {
     const m = c.messages[c.messages.length - 1];
     if (!m) return c.context?.label ?? '';
-    const body = m.text || (m.media?.kind === 'image' ? 'Đã gửi một hình ảnh' : m.media?.kind === 'video' ? 'Đã gửi một video' : m.media ? 'Tin nhắn thoại' : '');
+    const body = m.text || (m.media?.kind === 'image' ? 'Đã gửi một ảnh' : m.media?.kind === 'video' ? 'Đã gửi một video' : m.media?.kind === 'file' ? 'Đã gửi một tệp' : m.media ? 'Đã gửi một tin nhắn thoại' : '');
     return (m.mine ? 'Bạn: ' : '') + body;
   }
 
@@ -118,9 +199,16 @@ export class Messenger implements OnInit, OnDestroy {
     return Math.floor(m / 1440) + ' ngày';
   }
 
+  /** Giờ cạnh tin cuối như khu Bán: hôm nay ghi giờ, hôm qua ghi "Hôm qua", cũ hơn ghi ngày */
   protected lastTime(c: Conversation): string {
     const m = c.messages[c.messages.length - 1];
-    return m ? this.short(m.createdAt) : '';
+    if (!m) return '';
+    const d = new Date(m.createdAt);
+    const today = new Date();
+    const y = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+    if (this.dayOf(m.createdAt) === this.dayOf(today.toISOString())) return this.timeOf(m.createdAt);
+    if (this.dayOf(m.createdAt) === this.dayOf(y.toISOString())) return 'Hôm qua';
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
   }
 
   /** Vị trí của tin trong cụm tin liên tiếp cùng người gửi: bo góc nối liền như Facebook */
@@ -182,6 +270,7 @@ export class Messenger implements OnInit, OnDestroy {
 
   /** Chọn hình / video: ảnh thu nhỏ rồi lưu dạng data URL, video giữ link tạm trong phiên */
   async attach(input: HTMLInputElement): Promise<void> {
+    this.picMenu.set(false);
     const files = Array.from(input.files ?? []);
     input.value = '';
     for (const f of files) {
@@ -315,6 +404,7 @@ export class Messenger implements OnInit, OnDestroy {
   private sendMedia(media: NonNullable<Message['media']>): void {
     const c = this.selected();
     if (!c) return;
+    this.stick = true;
     this.chat.send(c._id, '', media).subscribe({
       next: (m) => this.conversations.update((l) => l.map((x) => (x._id === c._id ? { ...x, messages: [...x.messages, m] } : x))),
       error: (e: Error) => this.error.set(e.message),

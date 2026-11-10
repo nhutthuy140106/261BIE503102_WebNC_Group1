@@ -30,7 +30,7 @@ export interface Message {
   mine: boolean;
   text: string;
   /** Hình / video / ghi âm đính kèm (mock: ảnh lưu dạng data URL, video và ghi âm chỉ sống trong phiên) */
-  media?: { kind: 'image' | 'video' | 'audio'; url: string; sec?: number };
+  media?: { kind: 'image' | 'video' | 'audio' | 'file'; url: string; sec?: number; name?: string; size?: number };
   createdAt: string;
 }
 
