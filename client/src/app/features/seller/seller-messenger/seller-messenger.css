@@ -1,5 +1,5 @@
 /* Messenger người bán — chuyển từ design/mockups/seller-messenger.html. Vừa một màn hình (footer ẩn qua body.no-footer). */
-.chat-layout { display: grid; grid-template-columns: 400px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: calc(100vh - 104px); min-height: 460px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: #fff; }
+.chat-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: calc(100vh - 104px); min-height: 460px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: #fff; }
 .chat-list { border-right: 1px solid var(--border); display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .chat-list-head { padding: 14px 16px; border-bottom: 1px solid var(--border); }
 .chat-list-head h2 { font-size: 17px; margin: 0 0 10px; }
@@ -8,9 +8,9 @@
 .tabs button { height: 30px; padding: 0 10px; white-space: nowrap; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-size: 12.5px; font-weight: 600; }
 .tabs button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 .thread-list { overflow: auto; flex: 1; min-height: 0; }
-.thread { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid var(--border); background: #fff; text-align: left; }
+.thread { width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px 16px; border-bottom: 1px solid var(--border); background: #fff; text-align: left; }
 .thread:hover, .thread.on { background: var(--soft); }
-.thread img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex: none; }
+.thread img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex: none; }
 .text { min-width: 0; flex: 1; }
 .text b, .text small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .text small { color: var(--smoke); margin-top: 2px; }
