@@ -244,9 +244,7 @@
                 } @else {
                   <ng-container *ngTemplateOutlet="itemTable; context: { list: svcUnits, nameLabel: 'Tên dịch vụ', namePh: svcPreset().generic ? 'Ví dụ: Gói cơ bản' : svcPreset().repair ? 'Ví dụ: Vệ sinh máy lạnh' : 'Ví dụ: Giặt chăn, ga', pricePh: '40.000', addLabel: 'Thêm dịch vụ', ph: 'phòng' }" />
                 }
-                @if (svcPreset().stay) {
-                  <span class="hint">Giá mỗi đêm cho từng loại phòng. Khách chọn loại phòng, số phòng và ngày nhận – trả phòng; tổng tiền = giá × số đêm × số phòng.</span>
-                } @else if (!svcPreset().generic && !svcPreset().repair && !svcPreset().noEstimate) {
+                @if (!svcPreset().stay && !svcPreset().generic && !svcPreset().repair && !svcPreset().noEstimate) {
                   <label class="ck"><input type="checkbox" formControlName="estimate" /><span>Giá ước tính, cân / đếm thực tế khi nhận đồ</span></label>
                 }
               }
@@ -259,7 +257,7 @@
             <header><span class="no">{{ svcNo('stay') }}</span><span><b>Tiện nghi & nội quy</b></span></header>
             <div class="bd">
               <div class="fld"><span class="lbl">Tiện nghi <span class="hint">(chọn được nhiều)</span></span>
-                <div class="pills">@for (a of amenities; track a) { <button type="button" [class.on]="has('spec.amenities', a)" (click)="toggleIn('spec.amenities', a)">{{ a }}</button> }</div>
+                <div class="amen">@for (a of amenities; track a) { <button type="button" role="checkbox" [attr.aria-checked]="has('spec.amenities', a)" [class.on]="has('spec.amenities', a)" (click)="toggleIn('spec.amenities', a)"><i class="box"><svg class="i"><use href="#check" /></svg></i>{{ a }}</button> }</div>
               </div>
               <div class="fld"><span class="lbl">Nội quy</span>
                 <ng-container *ngTemplateOutlet="quickList; context: { ph: 'Ví dụ: Không tổ chức tiệc', name: 'rules', add: 'Thêm nội quy' }" />
@@ -313,9 +311,6 @@
                   <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: 'Ngày còn phòng' }" />
                   <div class="fld"><label for="ci">Nhận phòng từ</label><app-time-input inputId="ci" formControlName="checkIn" /></div>
                   <div class="fld"><label for="co">Trả phòng trước</label><app-time-input inputId="co" formControlName="checkOut" /></div>
-                </div>
-                <div class="row3">
-                  <div class="fld"><label for="mn">Ở tối thiểu (đêm)</label><input id="mn" class="input" type="number" min="1" formControlName="minNights" /></div>
                 </div>
               } @else {
               <!-- dọn dẹp, giao nhận: chỉ cho khách chọn giờ hẹn, không chọn số giờ -->

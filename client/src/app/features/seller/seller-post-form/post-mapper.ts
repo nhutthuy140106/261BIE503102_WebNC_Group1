@@ -146,7 +146,6 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
     ...(preset === 'Lưu trú'
       ? [
           ...row('Trả phòng trước', s['checkOut']),
-          ...row('Ở tối thiểu', +s['minNights'] ? `${+s['minNights']} đêm` : ''),
           ...row('Tiện nghi', ((s['amenities'] as string[]) ?? []).join(', ')),
           ...row('Nội quy', on.join('; ')),
           ...row('Hủy miễn phí', s['freeCancelDays'] !== null && s['freeCancelDays'] !== '' ? `Trước ${+s['freeCancelDays']} ngày` : ''),

@@ -146,10 +146,11 @@ describe('formToPostFields', () => {
       expect(f).toMatchObject({ fulfillmentModes: ['delivery', 'pickup'], deliveryFee: 10000, pickupAtBuyer: true });
     });
 
-    it('lưu trú: giờ nhận phòng, tòa nhà; trả phòng và ở tối thiểu xuống phần thông tin', () => {
+    it('lưu trú: giờ nhận phòng, tòa nhà; trả phòng xuống phần thông tin, không còn ở tối thiểu', () => {
       const f = svc({ preset: 'Lưu trú', place: 'seller', building: 'Tòa S2', checkIn: '14:00', checkOut: '12:00', minNights: 2, amenities: ['Wi-Fi'], rules: [] });
       expect(cells(f)?.slice(0, 2)).toEqual([['Giờ nhận lịch', 'Nhận phòng từ 14:00'], ['Nơi làm', 'Tòa S2']]);
-      expect(f.info).toEqual(expect.arrayContaining([{ label: 'Trả phòng trước', value: '12:00' }, { label: 'Ở tối thiểu', value: '2 đêm' }]));
+      expect(f.info).toEqual(expect.arrayContaining([{ label: 'Trả phòng trước', value: '12:00' }]));
+      expect(f.info?.some((r) => r.label === 'Ở tối thiểu')).toBe(false);
     });
 
     it('sửa chữa bảng giá: không có phí kiểm tra, không lấy nơi sửa và phụ phí cũ còn lưu', () => {

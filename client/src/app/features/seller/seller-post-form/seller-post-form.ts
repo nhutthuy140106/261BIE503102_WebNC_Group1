@@ -578,7 +578,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
           return {
             price: pr, unit: low ? low['unit'] : 'đêm', kind: 'Dịch vụ', action: 'Đặt phòng', xu: (s['pay'] ?? []).includes('xu'),
             facts: [
-              ['clock', 'Nhận / trả phòng', `Nhận từ ${s['checkIn']} · trả trước ${s['checkOut']}${+s['minNights'] > 1 ? ` · ở tối thiểu ${s['minNights']} đêm` : ''}`],
+              ['clock', 'Nhận / trả phòng', `Nhận từ ${s['checkIn']} · trả trước ${s['checkOut']}`],
               ['check', 'Tiện nghi', am.length ? `${am.slice(0, 3).join(', ')}${am.length > 3 ? ` +${am.length - 3}` : ''}` : 'Chưa chọn'],
               ['shield', 'Hủy & cọc', `${+s['freeCancelDays'] ? `Hủy miễn phí trước ${s['freeCancelDays']} ngày` : 'Không hoàn tiền khi hủy'}${+s['deposit'] ? ` · cọc ${s['deposit']}%` : ''}`],
             ] as [string, string, string][],

@@ -163,7 +163,7 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
   'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']], noPlace: true, noQuote: true, noEstimate: true, noRepeat: true, fixedTime: 'slot' }),
   // homestay / cho thuê phòng ngắn ngày trong khu (tham khảo Traveloka, Booking, Airbnb): loại phòng · nhận / trả phòng · tiện nghi · nội quy · hủy & cọc
   'Lưu trú': P({
-    stay: true, noQuick: true, noPlace: true, timeMode: 'stay', place: 'seller',
+    stay: true, noQuick: true, noPlace: true, noQuote: true, timeMode: 'stay', place: 'seller',
     items: [['Phòng đơn', 350000, 'đêm', 2, 2], ['Phòng đôi', 500000, 'đêm', 1, 4], ['Nguyên căn 2 phòng ngủ', 1200000, 'đêm', 1, 6]],
     options: [{ name: 'Dịch vụ thêm', multi: true, choices: [['Thêm nệm phụ', 80000], ['Bữa sáng', 50000], ['Giặt đồ', 30000]] }],
     questions: [
