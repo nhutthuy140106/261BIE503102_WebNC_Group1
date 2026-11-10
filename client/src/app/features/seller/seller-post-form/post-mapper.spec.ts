@@ -94,6 +94,7 @@ describe('formToPostFields', () => {
     });
 
     it('chăm sóc: không báo giá sau, giá ước tính, lặp hằng tuần, nơi làm; làm tại nhà khách, tính theo giờ', () => {
+      expect(formToPostFields('service', { common: {}, spec: { preset: 'Chăm sóc', timeMode: 'slot', items: [], options: [], questions: [] } }, 'service').timeMode).toBe('datedur');
       const f = formToPostFields('service', { common: {}, spec: { preset: 'Chăm sóc', priceType: 'quote', estimate: true, repeat: true, timeMode: 'datedur', durMin: 2, durMax: 6, place: 'seller', homeFee: 20000, items: [{ name: 'Trông trẻ', price: 60000, unit: 'giờ' }], options: [], questions: [] } }, 'service');
       expect(f).toMatchObject({ priceType: 'fixed', estimate: undefined, repeat: false, timeMode: 'datedur', place: { mode: 'buyer' }, deliveryFee: 0 });
       expect(f.highlights?.find((x) => x.label === 'Nơi làm')?.value).toBe('Tại nhà bạn');

@@ -98,6 +98,8 @@ export interface SvcPreset {
   /** mẫu không có ô "Giá ước tính" và "Cho khách đặt lặp lại hằng tuần" */
   noEstimate?: boolean;
   noRepeat?: boolean;
+  /** mẫu chỉ có một kiểu lịch (không hiện hai nút chọn kiểu lịch): chăm sóc luôn cho khách chọn ngày + số giờ */
+  fixedTime?: 'slot' | 'datedur';
   /** mẫu giao nhận: người làm lấy hàng ngay khi nhận đơn, khách chọn giờ muốn nhận hàng; có thể nhờ trả tiền hàng giùm */
   courier?: boolean;
   /** mẫu dọn dẹp: mục 2 chỉ liệt kê tên dịch vụ, giá đặt ở mục Cài đặt tùy chọn; khách đặt một dịch vụ mỗi đơn */
@@ -151,7 +153,7 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
   // chăm sóc: người làm đến nhà khách (địa chỉ lấy từ địa chỉ đặt hàng), tính theo giờ
   'Chăm sóc': P({
     items: [['Trông trẻ theo giờ', 60000, 'giờ'], ['Trông thú cưng theo giờ', 40000, 'giờ']], timeMode: 'datedur', dur: [2, 6],
-    noPlace: true, noQuote: true, noEstimate: true, noRepeat: true,
+    noPlace: true, noQuote: true, noEstimate: true, noRepeat: true, fixedTime: 'datedur',
   }),
   'Gia sư': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], repeat: true, place: 'choice' }),
   'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']] }),

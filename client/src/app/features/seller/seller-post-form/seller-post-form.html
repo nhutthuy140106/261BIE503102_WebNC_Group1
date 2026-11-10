@@ -312,7 +312,7 @@
                 </div>
               } @else {
               <!-- dọn dẹp, giao nhận: chỉ cho khách chọn giờ hẹn, không chọn số giờ -->
-              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning && !svcPreset().courier) {
+              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning && !svcPreset().courier && !svcPreset().fixedTime) {
               <div class="pills">@for (m of svcTimes; track m[0]) { <button type="button" [class.on]="c('spec.timeMode').value === m[0]" (click)="set('spec.timeMode', m[0])">{{ m[1] }}</button> }</div>
               }
               @if (svcPreset().courier) {
@@ -323,7 +323,7 @@
                 <div class="fld"><label for="sf">{{ svcPreset().courier ? 'Giao từ' : 'Từ' }}</label><app-time-input inputId="sf" formControlName="from" /></div>
                 <div class="fld"><label for="st">Đến</label><app-time-input inputId="st" formControlName="to" /></div>
               </div>
-              @if (c('spec.timeMode').value === 'datedur' && !svcPreset().cleaning) {
+              @if ((svcPreset().fixedTime ?? c('spec.timeMode').value) === 'datedur' && !svcPreset().cleaning) {
                 <div class="row3">
                   <div class="fld"><label for="dmin">Ít nhất (giờ)</label><input id="dmin" class="input" type="number" min="1" formControlName="durMin" /></div>
                   <div class="fld"><label for="dmax">Nhiều nhất (giờ)</label><input id="dmax" class="input" type="number" min="1" formControlName="durMax" /></div>
