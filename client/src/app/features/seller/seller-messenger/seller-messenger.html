@@ -5,8 +5,7 @@
       <input class="input" placeholder="Tìm người hoặc nội dung" [value]="term()" (input)="term.set($any($event.target).value)" />
       <div class="tabs">
         <button type="button" [class.on]="tab() === 'all'" (click)="tab.set('all')">Tất cả</button>
-        <button type="button" [class.on]="tab() === 'order'" (click)="tab.set('order')">Khách đặt</button>
-        <button type="button" [class.on]="tab() === 'job'" (click)="tab.set('job')">Người nhận việc</button>
+        <button type="button" [class.on]="tab() === 'unread'" (click)="tab.set('unread')">Chưa đọc@if (unreadCount()) { <span class="n">{{ unreadCount() }}</span> }</button>
       </div>
     </div>
     <div class="thread-list">
@@ -15,13 +14,13 @@
           <img [src]="c.avatar" alt="" />
           <span class="text">
             <b>{{ c.name }}</b>
-            <small>@if (last(c); as m) { {{ m.from === 'me' ? 'Bạn: ' : '' }}{{ m.text }} } @else { Chưa có tin nhắn }</small>
+            <small>@if (last(c); as m) { {{ m.from === 'me' ? 'Bạn: ' : '' }}{{ preview(m) }} } @else { Chưa có tin nhắn }</small>
             @if (ctxOf(c); as x) { <span class="ctx">{{ x.title }}</span> }
           </span>
           <span class="when">{{ last(c)?.time }}@if (c.unread) { <i></i> }</span>
         </button>
-      } @empty {
-        <div class="none">Không có cuộc trò chuyện nào.</div>
+        } @empty {
+        <div class="none">{{ tab() === 'unread' ? 'Không có tin nhắn chưa đọc.' : 'Không có cuộc trò chuyện nào.' }}</div>
       }
     </div>
   </aside>
@@ -41,7 +40,8 @@
           </a>
         }
         @for (m of c.messages; track $index) {
-          <div class="bubble" [class.them]="m.from === 'them'">{{ m.text }}<small>{{ m.time }}</small></div>
+          <!-- bong bóng giữ white-space: pre-wrap nên nội dung viết liền một dòng -->
+          <div class="bubble" [class.them]="m.from === 'them'" [class.media]="m.media && m.media.kind !== 'file' && !m.text">@if (m.media; as md) {@if (md.kind === 'image') {<img class="mimg" [src]="md.url" alt="Hình ảnh" />} @else if (md.kind === 'video') {<video class="mimg" [src]="md.url" controls preload="metadata"></video>} @else if (md.kind === 'audio') {<audio class="maud" [src]="md.url" controls preload="metadata"></audio>} @else {<a class="mfile" [href]="md.url" [attr.download]="md.name"><svg class="i"><use href="#s-file" /></svg><span><b>{{ md.name }}</b><small>{{ sizeText(md.size) }}</small></span></a>}}{{ m.text }}<small>{{ m.time }}</small></div>
         } @empty {
           <div class="note">Chưa có tin nhắn — bắt đầu bằng một câu trả lời nhanh bên dưới.</div>
         }
@@ -54,8 +54,39 @@
         <textarea #draft class="input" [placeholder]="'Nhắn cho ' + c.name" maxlength="2000" (keydown)="key($event)" (input)="grow(draft)"></textarea>
         <button type="submit" class="btn primary">Gửi</button>
       </form>
+      <!-- dưới ô nhắn: ghi âm · đính kèm tệp · gửi ảnh (chụp hoặc chọn từ thư viện) -->
+      @if (recording()) {
+        <div class="tools rec">
+          <button type="button" class="tb" aria-label="Hủy ghi âm" title="Hủy" (click)="stopRec(true)"><svg class="i"><use href="#xmark" /></svg></button>
+          <span class="pulse"></span><b>Đang ghi âm {{ clock(recSec()) }}</b>
+          <button type="button" class="btn primary sm" (click)="stopRec()">Gửi ghi âm</button>
+        </div>
+      } @else {
+        <div class="tools">
+          <button type="button" class="tb" title="Ghi âm giọng nói" aria-label="Ghi âm giọng nói" (click)="startRec()"><svg class="i"><use href="#mic-s" /></svg></button>
+          <label class="tb" title="Đính kèm tệp" aria-label="Đính kèm tệp"><input type="file" multiple hidden (change)="attachFiles($any($event.target))" /><svg class="i"><use href="#s-clip" /></svg></label>
+          <span class="picwrap">
+            <button type="button" class="tb" [class.on]="picMenu()" title="Gửi hình ảnh" aria-label="Gửi hình ảnh" (click)="picMenu.set(!picMenu())"><svg class="i"><use href="#photo" /></svg></button>
+            @if (picMenu()) {
+              <span class="picmenu">
+                <button type="button" (click)="startCam()"><svg class="i"><use href="#cam-s" /></svg>Chụp ảnh</button>
+                <label (click)="picMenu.set(false)"><input type="file" accept="image/*,video/*" multiple hidden (change)="attachMedia($any($event.target))" /><svg class="i"><use href="#photo" /></svg>Chọn ảnh từ thư viện</label>
+              </span>
+            }
+          </span>
+          @if (err()) { <span class="terr">{{ err() }}</span> }
+        </div>
+      }
     } @else {
       <div class="empty-chat"><img src="assets/clean/peek.png" alt="" />Chưa có cuộc trò chuyện nào.</div>
     }
   </section>
 </div>
+@if (camOn()) {
+  <div class="camscrim" (click)="closeCam()">
+    <div class="cambox" (click)="$event.stopPropagation()">
+      <video #cam autoplay playsinline muted></video>
+      <div class="camact"><button type="button" class="btn" (click)="closeCam()">Hủy</button><button type="button" class="btn primary" (click)="snap(cam)">Chụp</button></div>
+    </div>
+  </div>
+}

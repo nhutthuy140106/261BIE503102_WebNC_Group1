@@ -11,6 +11,7 @@ import { applyBuyerChange, buyerPatchOf, initialAvatar, toSellerOrder } from '..
 import {
   DayHours, JOB_STEP_NAMES, SELLER_LANE, SellerJob, SellerOffer, SellerOrder, SellerOrderState, SellerPause, SellerPerson, SellerPost,
   SellerSpace, StatsRange, SellerChat, SellerShop, StepItem, orderPos, orderStepNames, stepItems,
+  SellerMsg,
 } from '../models/seller';
 import { AuthService } from './auth';
 import { JobOfferService } from './job-offer';
@@ -749,11 +750,11 @@ export class SellerSpaceService {
   }
 
   /** Gửi tin (bản mẫu: chỉ lưu trong trình duyệt, không tự đổi trạng thái đơn / việc) */
-  sendMessage(id: string, text: string): void {
+  sendMessage(id: string, text: string, media?: SellerMsg['media']): void {
     this.patch((s) => {
       const c = s.chats.find((x) => x.id === id);
       if (!c) return;
-      c.messages.push({ from: 'me', text, time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) });
+      c.messages.push({ from: 'me', text, time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }), ...(media ? { media } : {}) });
       s.chats = [c, ...s.chats.filter((x) => x.id !== id)];
     });
   }

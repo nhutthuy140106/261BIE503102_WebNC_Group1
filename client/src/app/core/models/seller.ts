@@ -219,7 +219,15 @@ export interface SellerChat {
   unread: number;
   /** đơn / việc đang nói tới */
   ctx: { type: 'order' | 'job'; id: string } | null;
-  messages: { from: 'me' | 'them'; text: string; time: string }[];
+  messages: SellerMsg[];
+}
+
+/** Tin nhắn người bán: chữ, hoặc ảnh / video / ghi âm / tệp đính kèm */
+export interface SellerMsg {
+  from: 'me' | 'them';
+  text: string;
+  time: string;
+  media?: { kind: 'image' | 'video' | 'audio' | 'file'; url: string; name?: string; size?: number; sec?: number };
 }
 
 export type StatsRange = 'today' | '7' | '30' | '90' | 'year';

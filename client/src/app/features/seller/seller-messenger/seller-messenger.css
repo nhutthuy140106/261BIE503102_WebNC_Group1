@@ -46,9 +46,40 @@
 .quick button { flex: none; height: 30px; padding: 0 12px; white-space: nowrap; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-size: 12.5px; font-weight: 600; }
 .quick button:hover { background: var(--soft); }
 .quick .lb { flex: none; font-size: 12px; color: var(--smoke); align-self: center; margin-right: 4px; }
-.compose { flex: none; padding: 10px 18px 14px; display: flex; align-items: flex-end; gap: 10px; }
+.compose { flex: none; padding: 10px 18px 4px; display: flex; align-items: flex-end; gap: 10px; }
 .compose textarea { flex: 1; height: 44px; min-height: 44px; max-height: 120px; resize: none; padding-top: 11px; line-height: 1.4; }
 .compose .btn { height: 44px; }
+.tabs .n { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 6px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 11px; }
+/* hàng công cụ dưới ô nhắn: ghi âm · đính kèm · ảnh */
+.tools { flex: none; display: flex; align-items: center; gap: 2px; padding: 0 12px 10px; min-height: 46px; }
+.tb { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: none; color: var(--smoke); cursor: pointer; }
+.tb:hover, .tb.on { background: var(--soft); color: var(--ink); }
+.tb svg { width: 20px; height: 20px; }
+.terr { margin-left: 8px; font-size: 12.5px; color: #c0392b; }
+.tools.rec { gap: 10px; padding: 0 18px 10px; }
+.tools.rec b { flex: 1; font-size: 14px; }
+.tools .btn.sm { height: 36px; padding: 0 14px; }
+.pulse { width: 10px; height: 10px; border-radius: 50%; background: #d93025; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+.picwrap { position: relative; display: inline-flex; }
+.picmenu { position: absolute; left: 0; bottom: 42px; z-index: 5; width: 230px; padding: 6px; border-radius: 14px; background: #fff; box-shadow: 0 8px 28px rgba(34, 48, 74, .22); display: grid; gap: 2px; }
+.picmenu button, .picmenu label { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 12px; border-radius: 10px; background: none; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; text-align: left; }
+.picmenu button:hover, .picmenu label:hover { background: var(--soft); }
+.picmenu svg { width: 19px; height: 19px; color: var(--smoke); flex: none; }
+/* tin có ảnh / ghi âm / tệp */
+.bubble.media { padding: 4px; background: none; border: 0; }
+.bubble.media small { padding: 0 6px 2px; color: var(--fog); }
+.mimg { display: block; max-width: 300px; max-height: 300px; border-radius: 12px; object-fit: cover; background: var(--soft); }
+.maud { display: block; max-width: 260px; height: 40px; }
+.mfile { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 6px 4px; color: inherit; }
+.mfile svg { width: 26px; height: 26px; flex: none; }
+.mfile b { display: block; max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bubble .mfile small { display: block; margin: 0; text-align: left; }
+.camscrim { position: fixed; inset: 0; z-index: 90; background: rgba(34, 48, 74, .5); display: grid; place-items: center; padding: 20px; }
+.cambox { width: min(520px, 100%); padding: 14px; border-radius: 18px; background: #fff; display: grid; gap: 12px; }
+.cambox video { width: 100%; border-radius: 12px; background: #000; max-height: 60vh; }
+.camact { display: flex; gap: 10px; }
+.camact .btn { flex: 1; height: 44px; }
 .empty-chat { margin: auto; text-align: center; color: var(--smoke); }
 .empty-chat img { width: 110px; margin: 0 auto 12px; }
 @media (max-width: 760px) {
