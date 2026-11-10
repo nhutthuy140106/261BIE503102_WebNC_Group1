@@ -133,7 +133,9 @@ describe('formToPostFields', () => {
 
     it('mẫu thường: theo nơi làm người bán chọn', () => {
       expect(cells(svc({ preset: 'Dọn dẹp' }))).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Tại nhà bạn'], ['Thanh toán', 'Tiền mặt, Chuyển khoản']]);
-      expect(cells(svc({ preset: 'Làm đẹp', place: 'choice', pay: ['cash', 'xu'] }))?.slice(1)).toEqual([['Nơi làm', 'Tại nhà bạn hoặc bạn mang tới'], ['Thanh toán', 'Tiền mặt, AntXu']]);
+      expect(cells(svc({ preset: 'Khác', place: 'choice', pay: ['cash', 'xu'] }))?.slice(1)).toEqual([['Nơi làm', 'Tại nhà bạn hoặc bạn mang tới'], ['Thanh toán', 'Tiền mặt, AntXu']]);
+      // làm đẹp không còn mục Nơi làm: luôn làm tại nhà khách
+      expect(cells(svc({ preset: 'Làm đẹp', place: 'choice' }))?.[1]).toEqual(['Nơi làm', 'Tại nhà bạn']);
       expect(cells(svc({ preset: 'Khác', place: 'seller', where: 'Tòa S2, tầng 3' }))?.[1]).toEqual(['Nơi làm', 'Tòa S2, tầng 3']);
     });
 
