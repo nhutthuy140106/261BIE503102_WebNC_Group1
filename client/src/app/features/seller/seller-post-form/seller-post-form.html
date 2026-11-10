@@ -271,9 +271,9 @@
             </div>
           </section>
           }
-          @if (!svcPreset().generic && !svcPreset().cleaning) {
+          @if (!svcPreset().cleaning) {
           <section class="sec">
-            <header><span class="no">{{ svcNo('ask') }}</span><span><b>Khách chọn khi đặt</b></span></header>
+            <header><span class="no">{{ svcNo('ask') }}</span><span><b>{{ svcPreset().generic ? 'Cài đặt tùy chọn' : 'Khách chọn khi đặt' }}</b></span></header>
             <div class="bd">
               <div class="optblock">
                 <span class="lbl">Tùy chọn cộng giá</span>
@@ -363,64 +363,6 @@
                   <div class="fld"><label for="gfee">Phụ phí đi lại <span class="hint">(không bắt buộc)</span></label><span class="money"><input appMoney id="gfee" class="input" formControlName="homeFee" placeholder="0" /></span></div>
                 </div>
               }
-            </div>
-          </section>
-          }
-          <!-- form chung: người bán tự tạo câu hỏi, khách điền đúng những gì người bán cần -->
-          @if (svcPreset().generic) {
-          <section class="sec">
-            <header><span class="no">{{ svcNo('ask') }}</span><span><b>Thông tin cần từ khách</b></span></header>
-            <div class="bd">
-              <span class="hint">Bạn cần biết thêm gì từ khách thì tạo câu hỏi ở đây, khách sẽ trả lời khi đặt.</span>
-              <div formArrayName="questions" class="pkgs ask">
-                @for (q of arr('spec.questions').controls; track $index; let i = $index) {
-                  <div class="grp" [formGroupName]="i">
-                    <div class="top">
-                      <input class="input" formControlName="label" placeholder="Câu hỏi, ví dụ: Bạn cần làm gì?" maxlength="80" [attr.aria-label]="'Câu hỏi ' + (i + 1)" />
-                      <app-select [options]="askTypeOpts" [ngModel]="grp(q).get('type')!.value" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setAskType(q, $event)" />
-                      <label class="reqck"><input type="checkbox" formControlName="required" />Bắt buộc</label>
-                      <button type="button" class="rm" aria-label="Bỏ câu hỏi" (click)="removeAt('spec.questions', i)"><svg class="i"><use href="#xmark" /></svg></button>
-                    </div>
-                    <input class="input" formControlName="hint" placeholder="Gợi ý cho khách (không bắt buộc)" maxlength="80" [attr.aria-label]="'Gợi ý câu hỏi ' + (i + 1)" />
-                    @if (grp(q).get('type')!.value === 'choice' || grp(q).get('type')!.value === 'multi') {
-                      <div formArrayName="choices" class="lines sub">
-                        @for (ch of arr('spec.questions.' + i + '.choices').controls; track $index; let ci = $index) {
-                          <div class="line" [formGroupName]="ci">
-                            <input class="input" formControlName="label" placeholder="Lựa chọn" maxlength="40" />
-                            <span class="money"><input appMoney class="input" formControlName="price" placeholder="Giá" aria-label="Cộng thêm" /></span>
-                            <button type="button" class="rm" aria-label="Bỏ lựa chọn" [disabled]="arr('spec.questions.' + i + '.choices').length === 1" (click)="removeAt('spec.questions.' + i + '.choices', ci)"><svg class="i"><use href="#xmark" /></svg></button>
-                          </div>
-                        }
-                      </div>
-                      <button type="button" class="mini sub" (click)="addChoice('spec.questions.' + i + '.choices')"><svg class="i"><use href="#plus" /></svg>Thêm lựa chọn</button>
-                    }
-                  </div>
-                }
-              </div>
-              <div class="askadd">
-                <button type="button" class="mini" (click)="addAsk()"><svg class="i"><use href="#plus" /></svg>Thêm câu hỏi</button>
-                @for (a of askQuick; track a.label) {
-                  @if (!askUsed(a.label)) { <button type="button" class="mini ghost" (click)="addAsk(a)"><svg class="i"><use href="#plus" /></svg>{{ a.label }}</button> }
-                }
-              </div>
-              <div class="askpv">
-                <span class="lbl">Khách sẽ điền khi đặt</span>
-                <div class="apf">
-                  @for (f of askFixed(); track f) { <div class="apr fixed"><span>{{ f }}</span><small>Luôn có</small></div> }
-                  @for (q of $any(v()['spec']['questions']); track $index) {
-                    <div class="apr">
-                      <span>{{ q.label || 'Câu hỏi chưa đặt tên' }}@if (q.required) { <i>*</i> }</span>
-                      @if (q.type === 'choice' || q.type === 'multi') {
-                        <div class="apc">@for (ch of q.choices; track $index) { <em>{{ ch.label || 'Lựa chọn' }}@if (+ch.price > 0) { +{{ +ch.price | vnd }} }</em> }</div>
-                        @if (q.hint) { <small>{{ q.hint }}</small> }
-                      } @else {
-                        <div class="apb">{{ q.hint || askPh(q.type) }}</div>
-                      }
-                    </div>
-                  }
-                </div>
-              </div>
-              <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú khi đặt lịch</span></label></div>
             </div>
           </section>
           }

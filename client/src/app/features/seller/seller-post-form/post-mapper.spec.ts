@@ -1,8 +1,23 @@
 import { cleaningPrice, formToPostFields, jobWindows, menuOf, unpricedService } from './post-mapper';
-import { toJobWindows } from './post-form-config';
+import { toGenericOptions, toJobWindows } from './post-form-config';
 
 const service = (questions: unknown[]) =>
   formToPostFields('service', { common: { category: 'Khác' }, spec: { items: [], questions, options: [], place: 'buyer' } }, 'service').questions ?? [];
+
+describe('mẫu Khác: câu hỏi cũ thành cài đặt tùy chọn', () => {
+  it('câu chọn có danh sách lựa chọn thành nhóm tùy chọn cộng giá, kiểu riêng thành văn bản', () => {
+    const s = toGenericOptions({
+      options: [],
+      questions: [
+        { type: 'choice', label: 'Gói', required: true, choices: [{ label: 'Cơ bản', price: 0 }, { label: 'Nâng cao', price: 50000 }] },
+        { type: 'long', label: 'Mô tả vấn đề', required: true, choices: [] },
+        { type: 'photo', label: 'Ảnh', required: false, choices: [] },
+      ],
+    });
+    expect(s['options']).toEqual([{ name: 'Gói', multi: false, required: true, choices: [{ label: 'Cơ bản', price: 0 }, { label: 'Nâng cao', price: 50000 }] }]);
+    expect(s['questions'].map((q: { label: string; type: string }) => [q.label, q.type])).toEqual([['Mô tả vấn đề', 'text'], ['Ảnh', 'photo']]);
+  });
+});
 
 describe('formToPostFields', () => {
   it('đồ uống: tùy chọn cho cả đơn nằm ở cấp bài', () => {

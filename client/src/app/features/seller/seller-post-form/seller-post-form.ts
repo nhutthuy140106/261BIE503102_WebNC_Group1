@@ -15,7 +15,7 @@ import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import {
   AMENITIES, ASK_QUICK, ASK_TYPES, BLOCKS, GENERIC_PLACES, REPAIR_PLACES, CATS, DRINK_UNITS, FOOD_UNITS, GOODS_UNITS, SVC_UNITS, ymd, CONDITIONS, DAYS, FOOD_TAGS, FormType, ICE, JOB_UNITS, PRICE_TYPES, Q_TYPES, SVC_PLACES, SVC_PRESETS, SVC_TIMES, SWEET,
-  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, windowGroup, menuGroup, datesBetween, toDrinkSizes, toGenericSpec, toJobWindows, toOrderOptions,
+  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, windowGroup, menuGroup, datesBetween, toDrinkSizes, toGenericSpec, toGenericOptions, toJobWindows, toOrderOptions,
 } from './post-form-config';
 
 /** Ngày bán: 1 ngày → dd/mm/yyyy, nhiều ngày → ngày đầu - ngày cuối */
@@ -346,7 +346,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   /** số thứ tự mục của form dịch vụ, bỏ qua mục bị ẩn */
   protected svcNo(key: 'quick' | 'price' | 'stay' | 'ask' | 'time' | 'recv' | 'place' | 'pay' | 'policy'): number {
     const p = this.svcPreset();
-    if (p.generic) return ['price', 'time', 'place', 'ask', 'pay', 'policy'].indexOf(key) + 2;
+    if (p.generic) return ['price', 'ask', 'time', 'place', 'pay', 'policy'].indexOf(key) + 2;
     const keys: string[] = (['quick', 'price', 'stay', 'ask', 'time', 'recv', 'place', 'pay'] as const).filter(
       (k) => !(k === 'quick' && p.noQuick) && !(k === 'ask' && p.cleaning) && !(k === 'time' && p.noSchedule) && !(k === 'place' && p.noPlace) && !(k === 'stay' && !p.stay) && !(k === 'recv' && !p.laundry),
     );
@@ -818,7 +818,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       let saved = p.form;
       if (this.type() === 'service') {
         this.applyPreset((saved['spec'] as V)['preset'] ?? 'Khác');
-        if (this.svcPreset().generic) saved = { ...saved, spec: toGenericSpec(saved['spec'] as V) };
+        if (this.svcPreset().generic) saved = { ...saved, spec: toGenericOptions(toGenericSpec(saved['spec'] as V)) };
       }
       this.fit(this.form, saved);
       this.form.patchValue(saved);

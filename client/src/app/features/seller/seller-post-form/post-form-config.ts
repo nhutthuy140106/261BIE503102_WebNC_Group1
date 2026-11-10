@@ -379,6 +379,24 @@ export function jobGroup(fb: FormBuilder) {
 type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 /** Bài mẫu Khác đăng trước khi có form chung: lựa chọn dạng chuỗi và nhóm tùy chọn cộng giá chuyển thành câu hỏi */
+/**
+ * Mẫu Khác giờ dùng mục "Cài đặt tùy chọn" như các mẫu khác: câu hỏi chọn một / chọn nhiều có danh sách lựa chọn (có thể có giá)
+ * thành nhóm tùy chọn cộng giá; câu hỏi kiểu riêng của form chung cũ (đoạn dài, số, ngày, địa chỉ…) thành câu hỏi văn bản.
+ */
+export function toGenericOptions(s: V): V {
+  const isPick = (t: string) => t === 'choice' || t === 'multi';
+  const qs = (s['questions'] as V[]) ?? [];
+  const toOption = (q: V) => isPick(q['type']) && ((q['choices'] as V[]) ?? []).some((c) => String(c?.['label'] ?? '').trim());
+  const options = [
+    ...((s['options'] as V[]) ?? []),
+    ...qs.filter(toOption).map((q) => ({ name: q['label'], multi: q['type'] === 'multi', required: !!q['required'], choices: (q['choices'] as V[]).filter((c) => String(c?.['label'] ?? '').trim()) })),
+  ];
+  const questions = qs
+    .filter((q) => !toOption(q))
+    .map((q) => ({ ...q, type: ['text', 'choice', 'multi', 'photo'].includes(q['type']) ? q['type'] : 'text', choices: [] }));
+  return { ...s, options, questions };
+}
+
 export function toGenericSpec(s: V): V {
   const isPick = (t: string) => t === 'choice' || t === 'multi';
   const old = ((s['questions'] as V[]) ?? []).map((q) =>
