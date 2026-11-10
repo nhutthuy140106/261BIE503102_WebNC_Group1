@@ -1,5 +1,5 @@
 /* Messenger người bán — chuyển từ design/mockups/seller-messenger.html. Vừa một màn hình (footer ẩn qua body.no-footer). */
-.chat-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: calc(100vh - 104px); min-height: 460px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: #fff; }
+.chat-layout { display: grid; grid-template-columns: 376px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: calc(100vh - 104px); min-height: 460px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: #fff; }
 .chat-list { border-right: 1px solid var(--border); display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .chat-list-head { padding: 14px 16px; border-bottom: 1px solid var(--border); }
 .chat-list-head h2 { font-size: 17px; margin: 0 0 10px; }
