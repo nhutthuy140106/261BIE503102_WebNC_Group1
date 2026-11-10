@@ -57,10 +57,15 @@
         </a>
       }
       <a routerLink="/search" class="iconbtn msearch" title="Tìm kiếm" aria-label="Tìm kiếm"><svg class="i"><use href="#search" /></svg></a>
-      <button type="button" class="iconbtn" id="savedBtn" title="Đã lưu" (click)="openSaved()">
-        <svg class="i"><use href="#heart" /></svg>
-        @if (saved.ids().length) { <span class="cnt">{{ saved.ids().length }}</span> }
-      </button>
+      @if (sellMode()) {
+        <!-- khu Bán không có bài đã lưu: chỗ nút tim là Messenger của người bán -->
+        <a routerLink="/seller/messenger" routerLinkActive="on" class="iconbtn" title="Messenger" aria-label="Messenger"><svg class="i"><use href="#chat" /></svg></a>
+      } @else {
+        <button type="button" class="iconbtn" id="savedBtn" title="Đã lưu" (click)="openSaved()">
+          <svg class="i"><use href="#heart" /></svg>
+          @if (saved.ids().length) { <span class="cnt">{{ saved.ids().length }}</span> }
+        </button>
+      }
       @if (auth.isLoggedIn()) {
         <span class="nwrap">
           <button type="button" class="iconbtn" [class.on]="notifOpen()" title="Thông báo" (click)="toggleNotif()">
