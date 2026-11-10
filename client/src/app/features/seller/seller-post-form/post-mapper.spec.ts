@@ -148,7 +148,9 @@ describe('formToPostFields', () => {
 
     it('lưu trú: giờ nhận phòng, tòa nhà; trả phòng xuống phần thông tin, không còn ở tối thiểu', () => {
       const f = svc({ preset: 'Lưu trú', place: 'seller', building: 'Tòa S2', checkIn: '14:00', checkOut: '12:00', minNights: 2, amenities: ['Wi-Fi'], rules: [] });
-      expect(cells(f)?.slice(0, 2)).toEqual([['Giờ nhận lịch', 'Nhận phòng từ 14:00'], ['Nơi làm', 'Tòa S2']]);
+      expect(cells(f)).toEqual([['Nhận phòng', 'Từ 14:00'], ['Địa điểm', 'Tòa S2'], ['Đặt cọc', 'Không cần đặt cọc']]);
+      expect(f.place).toEqual({ mode: 'seller', where: 'Tòa S2' });
+      expect(cells(svc({ preset: 'Lưu trú', building: 'Tòa S2', checkIn: '14:00', deposit: 30 }))?.[2]).toEqual(['Đặt cọc', '30% khi đặt phòng']);
       expect(f.info).toEqual(expect.arrayContaining([{ label: 'Trả phòng trước', value: '12:00' }]));
       expect(f.info?.some((r) => r.label === 'Ở tối thiểu')).toBe(false);
     });

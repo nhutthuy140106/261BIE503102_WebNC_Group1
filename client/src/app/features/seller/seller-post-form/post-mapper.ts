@@ -149,7 +149,6 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
           ...row('Tiện nghi', ((s['amenities'] as string[]) ?? []).join(', ')),
           ...row('Nội quy', on.join('; ')),
           ...row('Hủy miễn phí', s['freeCancelDays'] !== null && s['freeCancelDays'] !== '' ? `Trước ${+s['freeCancelDays']} ngày` : ''),
-          ...row('Đặt cọc', +s['deposit'] ? `${+s['deposit']}%` : ''),
           ...row('Giấy tờ', s['idRequired'] ? 'Xuất trình CCCD khi nhận phòng' : ''),
         ]
       : []),
@@ -172,6 +171,13 @@ function serviceHighlights(s: V): Post['highlights'] {
     : SVC_PRESETS[preset]?.noPlace ? ({ buyer: 'Tại nhà bạn', seller: 'Bạn mang tới', none: '' } as V)[SVC_PRESETS[preset].place]
     : ({ buyer: 'Tại nhà bạn', seller: where || 'Bạn mang tới', choice: 'Tại nhà bạn hoặc bạn mang tới', ab: 'Lấy ở A, giao tới B' } as V)[String(s['place'])];
   const pays = payOf(s).map((m) => ({ cash: 'Tiền mặt', transfer: 'Chuyển khoản', xu: 'AntXu' })[m]).join(', ');
+  // lưu trú: giờ nhận phòng · địa điểm (tòa nhà) · đặt cọc
+  if (preset === 'Lưu trú')
+    return [
+      ...cell('clock', 'Nhận phòng', s['checkIn'] ? `Từ ${s['checkIn']}` : ''),
+      ...cell('pin', 'Địa điểm', place),
+      ...cell('receipt', 'Đặt cọc', +s['deposit'] ? `${+s['deposit']}% khi đặt phòng` : 'Không cần đặt cọc'),
+    ];
   return [
     ...cell('clock', courier ? 'Giờ giao hàng' : 'Giờ nhận lịch', SVC_PRESETS[preset]?.noSchedule ? '' : preset === 'Lưu trú' ? (s['checkIn'] ? `Nhận phòng từ ${s['checkIn']}` : '') : s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
     ...cell('pin', 'Nơi làm', place),
@@ -276,7 +282,8 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
         duration: { min: +s['durMin'] || 1, max: +s['durMax'] || 1 },
         repeat: !cleaning && !preset?.noRepeat && !noSchedule && !!s['repeat'],
         // mẫu không có mục Nơi làm (sửa chữa, giặt sấy, lưu trú): nơi làm theo mẫu, không lấy giá trị cũ còn lưu trong form
-        place: { mode: shown?.noPlace ? shown.place : s['place'], ...(where && !shown?.noPlace ? { where } : {}) },
+        // lưu trú: địa điểm là tòa nhà (số phòng chỉ gửi sau khi xác nhận) để hộp xác nhận đơn có địa chỉ
+        place: { mode: shown?.noPlace ? shown.place : s['place'], ...(where && !shown?.noPlace ? { where } : shown?.stay && String(s['building'] ?? '').trim() ? { where: String(s['building']).trim() } : {}) },
         // khung giờ khách chọn hẹn (giờ nhận lịch của người làm)
         handover: !noSchedule && s['from'] && s['to'] ? { from: s['from'], to: s['to'] } : undefined,
         // mẫu không có mục Thông tin nhanh thì không gửi giá trị đã lưu của mục đó (mẫu Khác có ô riêng cho thời gian, bảo hành)

@@ -49,7 +49,7 @@
       <section class="block">
         <div class="facts">
           @for (f of v.tpl.facts; track f[1]) {
-            <div><svg class="i"><use [attr.href]="'#' + f[0]" /></svg><span><b>{{ f[2] }}</b>{{ f[1] }}</span></div>
+            <div><svg class="i"><use [attr.href]="'#' + f[0]" /></svg><span><small>{{ f[1] }}</small><b>{{ f[2] }}</b></span></div>
           }
         </div>
       </section>
@@ -321,7 +321,7 @@
                   <div class="crow"><svg class="i ic pin"><use href="#l-pin" /></svg><span class="ct"><small>Địa chỉ lấy hàng</small><b>{{ p.sellerName }}</b><span>{{ p.block }}@if (p.area) { · {{ p.area }} }</span></span></div>
                 }
               } @else {
-                <div class="crow"><svg class="i ic pin"><use href="#l-pin" /></svg><span class="ct"><small>Nơi nhận hàng</small><b>{{ v.tpl.place.where }}</b></span></div>
+                <div class="crow"><svg class="i ic pin"><use href="#l-pin" /></svg><span class="ct"><small>{{ v.tpl.place.label === 'Địa điểm' ? 'Địa điểm' : 'Nơi nhận hàng' }}</small><b>{{ v.tpl.place.where || p.block }}</b>@if (v.tpl.place.label === 'Địa điểm') { <span>Số phòng gửi cho bạn sau khi chủ nhà xác nhận</span> }</span></div>
               }
             </section>
 

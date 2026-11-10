@@ -110,7 +110,10 @@ function svcPlace(post: Post, base: PlaceBlock): PlaceBlock {
   const pl = post.place!;
   const fee = post.deliveryFee ?? 0;
   switch (pl.mode) {
-    case 'seller': return { mode: 'seller', label: 'Nơi làm', where: pl.where ?? base.where };
+    // lưu trú: "Địa điểm"; bài cũ chưa lưu tòa nhà vào place thì lấy ô Nơi làm ở đầu bài
+    case 'seller': return post.timeMode === 'stay'
+      ? { mode: 'seller', label: 'Địa điểm', where: pl.where ?? post.highlights?.find((h) => h.icon === 'pin')?.value ?? base.where }
+      : { mode: 'seller', label: 'Nơi làm', where: pl.where ?? base.where };
     case 'choice': return { mode: 'choice', label: 'Hình thức', choices: [['Đến nhà bạn', fee], ['Bạn mang tới', 0]], where: pl.where };
     case 'ab': return { mode: 'ab', label: 'Lấy & giao' };
     case 'none': return { mode: 'none', label: 'Nơi làm' };
@@ -171,7 +174,9 @@ export function viewOf(post: Post): PostView {
         : base.place;
   const hours = post.handover ? ([post.handover.from, post.handover.to] as [string, string]) : base.time.win;
   const time: PostTemplate['time'] = svc
-    ? post.timeMode === 'datedur'
+    ? post.timeMode === 'stay'
+      ? { ...base.time, label: 'Nhận phòng lúc' }
+      : post.timeMode === 'datedur'
       ? { mode: 'datedur', label: 'Ngày & giờ', win: hours, dur: post.duration ? [post.duration.min, post.duration.max] : base.time.dur ?? [2, 4], repeat: post.repeat }
       : post.timeMode === 'slot'
         ? { mode: 'slot', label: post.timeLabel ?? (quote ? 'Hẹn kiểm tra lúc' : 'Giờ hẹn'), win: hours }
