@@ -69,6 +69,7 @@ export function toSellerOrder(order: Order, post: Post, body: CreateOrderBody, s
     items,
     buyer,
     fulfil: body.fulfillment === 'pickup' ? 'pickup' : post.kind === 'service' ? 'home' : 'delivery',
+    placeNote: post.place?.mode === 'none' ? 'Theo thỏa thuận, xem mô tả bài' : undefined,
     address: body.detail?.address ?? '',
     day: dayDiff(at, now),
     time: hm(at),

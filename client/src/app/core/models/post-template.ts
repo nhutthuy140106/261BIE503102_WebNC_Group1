@@ -58,7 +58,7 @@ export interface TimeBlock {
 
 /** Khối 4 — Địa điểm: chọn giao/tự lấy · tại nhà khách · tại chỗ người bán · A→B */
 export interface PlaceBlock {
-  mode: 'choice' | 'buyer' | 'seller' | 'ab';
+  mode: 'choice' | 'buyer' | 'seller' | 'ab' | 'none';
   label: string;
   /** mode 'choice': [tên cách nhận, phụ phí] */
   choices?: [string, number][];
@@ -148,6 +148,8 @@ export interface PostTemplate {
   optsOnce?: boolean;
   /** Dọn dẹp: giá nằm hết ở các tùy chọn khách chọn; giá trên bài chỉ là mức thấp nhất để hiện "từ …", không cộng vào đơn */
   priceInOpts?: boolean;
+  /** Không có lịch hẹn: khung đặt không hỏi ngày giờ */
+  noSchedule?: boolean;
   /** Dọn dẹp: các dịch vụ, mỗi dịch vụ có tùy chọn và câu hỏi riêng */
   menu?: { name: string; opts: OptionBlock[]; qs: QuestionBlock[] }[];
   stock: StockBlock;

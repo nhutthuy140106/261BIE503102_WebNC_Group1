@@ -174,7 +174,10 @@ export interface Post {
   duration?: { min: number; max: number };
   repeat?: boolean;
   /** Khối 4: dịch vụ làm ở đâu (tại nhà khách · khách mang tới · khách chọn · A→B) + địa chỉ người bán */
-  place?: { mode: 'buyer' | 'seller' | 'choice' | 'ab'; where?: string };
+  /** none: không có nơi làm cố định (gia sư: ghi trong mô tả, thỏa thuận sau) */
+  place?: { mode: 'buyer' | 'seller' | 'choice' | 'ab' | 'none'; where?: string };
+  /** Không có lịch hẹn: khách không chọn ngày giờ khi đặt (gia sư) */
+  noSchedule?: boolean;
   /** Đồ ăn/uống: thời gian chuẩn bị (phút). `handover` = khung giờ khách chọn hẹn: giờ giao/nhận món (đồ ăn) hoặc giờ làm dịch vụ */
   prepMinutes?: number;
   handover?: { from: string; to: string };

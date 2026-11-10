@@ -76,7 +76,7 @@ export interface SvcPreset {
   timeMode: 'slot' | 'datedur' | 'stay';
   dur: [number, number];
   repeat: boolean;
-  place: 'buyer' | 'seller' | 'choice' | 'ab';
+  place: 'buyer' | 'seller' | 'choice' | 'ab' | 'none';
   homeFee: number;
   options: { name: string; choices: [string, number][]; multi?: boolean }[];
   questions: { type: string; label: string; required: boolean; opts: string; hint?: string; choices?: [string, number][] }[];
@@ -100,6 +100,8 @@ export interface SvcPreset {
   noRepeat?: boolean;
   /** mẫu chỉ có một kiểu lịch (không hiện hai nút chọn kiểu lịch): chăm sóc luôn cho khách chọn ngày + số giờ */
   fixedTime?: 'slot' | 'datedur';
+  /** mẫu không có mục Lịch hẹn: khách không chọn ngày giờ, thời gian học ghi trong mô tả và thỏa thuận sau */
+  noSchedule?: boolean;
   /** mẫu giao nhận: người làm lấy hàng ngay khi nhận đơn, khách chọn giờ muốn nhận hàng; có thể nhờ trả tiền hàng giùm */
   courier?: boolean;
   /** mẫu dọn dẹp: mục 2 chỉ liệt kê tên dịch vụ, giá đặt ở mục Cài đặt tùy chọn; khách đặt một dịch vụ mỗi đơn */
@@ -155,7 +157,8 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
     items: [['Trông trẻ theo giờ', 60000, 'giờ'], ['Trông thú cưng theo giờ', 40000, 'giờ']], timeMode: 'datedur', dur: [2, 6],
     noPlace: true, noQuote: true, noEstimate: true, noRepeat: true, fixedTime: 'datedur',
   }),
-  'Gia sư': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], repeat: true, place: 'choice' }),
+  // gia sư: lịch học, nơi học ghi trong mô tả, khách đăng ký rồi thỏa thuận
+  'Gia sư': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], place: 'none', noPlace: true, noSchedule: true, noQuote: true, noEstimate: true, noRepeat: true }),
   'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']] }),
   // homestay / cho thuê phòng ngắn ngày trong khu (tham khảo Traveloka, Booking, Airbnb): loại phòng · nhận / trả phòng · tiện nghi · nội quy · hủy & cọc
   'Lưu trú': P({
@@ -185,7 +188,7 @@ export function commonGroup(fb: FormBuilder, type: FormType) {
     area: [DEFAULT_AREA],
     /** đồ ăn & uống bán cho nhiều khu; `area` = khu đầu tiên (lưu bài, điểm tự lấy) */
     areas: fb.control<string[]>([DEFAULT_AREA]),
-    desc: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
+    desc: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(2000)]],
     notes: strList(fb, ['']),
     /** Giờ vàng (khuyến mãi theo khung giờ) — gửi lên server dạng `Promo` (core/utils/promo.ts); days: 0 = CN … 6 = T7, rỗng = mọi ngày */
     promo: fb.group({ on: [false], kind: ['percent'], value: [10], from: ['11:00'], to: ['13:00'], days: fb.control<number[]>([]) }),

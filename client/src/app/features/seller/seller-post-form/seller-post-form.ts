@@ -348,7 +348,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     const p = this.svcPreset();
     if (p.generic) return ['price', 'time', 'place', 'ask', 'pay', 'policy'].indexOf(key) + 2;
     const keys: string[] = (['quick', 'price', 'stay', 'ask', 'time', 'recv', 'place', 'pay'] as const).filter(
-      (k) => !(k === 'quick' && p.noQuick) && !(k === 'ask' && p.cleaning) && !(k === 'place' && p.noPlace) && !(k === 'stay' && !p.stay) && !(k === 'recv' && !p.laundry),
+      (k) => !(k === 'quick' && p.noQuick) && !(k === 'ask' && p.cleaning) && !(k === 'time' && p.noSchedule) && !(k === 'place' && p.noPlace) && !(k === 'stay' && !p.stay) && !(k === 'recv' && !p.laundry),
     );
     return keys.indexOf(key) + 2;
   }

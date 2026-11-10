@@ -70,9 +70,9 @@
         }
         <div class="fld" [class.bad]="bad('common.desc')">
           <label for="desc">{{ type() === 'job' ? 'Mô tả việc' : 'Mô tả' }}</label>
-          <textarea id="desc" class="input" formControlName="desc" maxlength="1000"
+          <textarea id="desc" class="input" formControlName="desc" maxlength="2000"
             [placeholder]="type() === 'job' ? 'Vì sao cần, làm gì, ở đâu…' : type() === 'service' ? 'Bạn làm gì, làm thế nào, khách cần chuẩn bị gì…' : type() === 'goods' ? 'Mua khi nào, dùng ra sao, vì sao bán…' : 'Mỗi phần gồm gì, nấu thế nào, thực đơn đổi ra sao…'"></textarea>
-          <span class="err">Mô tả 10–1000 ký tự</span>
+          <span class="err">Mô tả 10–2000 ký tự</span>
         </div>
       </div>
     </section>
@@ -290,6 +290,7 @@
             </div>
           </section>
           }
+          @if (!svcPreset().noSchedule) {
           <section class="sec">
             <header><span class="no">{{ svcNo('time') }}</span><span><b>{{ svcPreset().stay ? 'Lịch nhận phòng' : svcPreset().laundry ? 'Lịch lấy đồ' : svcPreset().courier ? 'Lịch giao hàng' : 'Lịch hẹn' }}</b></span></header>
             <div class="bd">
@@ -340,6 +341,7 @@
               }
             </div>
           </section>
+          }
           @if (svcPreset().laundry) {
             <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: svcNo('recv'), title: 'Cách trả đồ sau khi giặt xong, tiệm luôn qua nhà khách lấy đồ' }" />
           }

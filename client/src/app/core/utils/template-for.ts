@@ -56,6 +56,7 @@ function placeText(place: PlaceBlock): string {
     case 'seller': return 'Bạn mang tới';
     case 'choice': return (place.choices ?? []).map(([n]) => n).join(', ');
     case 'ab': return 'Lấy ở A, giao tới B';
+    case 'none': return '';
   }
 }
 
@@ -112,6 +113,7 @@ function svcPlace(post: Post, base: PlaceBlock): PlaceBlock {
     case 'seller': return { mode: 'seller', label: 'Nơi làm', where: pl.where ?? base.where };
     case 'choice': return { mode: 'choice', label: 'Hình thức', choices: [['Đến nhà bạn', fee], ['Bạn mang tới', 0]], where: pl.where };
     case 'ab': return { mode: 'ab', label: 'Lấy & giao' };
+    case 'none': return { mode: 'none', label: 'Nơi làm' };
     default: return { mode: 'buyer', label: 'Địa chỉ làm', fee };
   }
 }
@@ -240,6 +242,7 @@ export function viewOf(post: Post): PostView {
     noteOff: post.noteEnabled === false,
     optsOnce: post.kind === 'service' || undefined,
     priceInOpts: post.bookOnce || undefined,
+    noSchedule: post.noSchedule || undefined,
     // dịch vụ đăng từ form: một bộ chữ chung, không lấy chữ riêng của mẫu ("Đặt lấy đồ", "áo len" của giặt sấy)
     ...(svc ? { action: quote ? 'Gửi yêu cầu' : 'Đặt lịch', notePh: 'Thêm thông tin cho người làm (không bắt buộc)…' } : {}),
     time,

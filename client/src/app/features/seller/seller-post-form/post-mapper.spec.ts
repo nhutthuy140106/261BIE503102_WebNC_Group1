@@ -100,6 +100,12 @@ describe('formToPostFields', () => {
       expect(f.highlights?.find((x) => x.label === 'Nơi làm')?.value).toBe('Tại nhà bạn');
     });
 
+    it('gia sư: không báo giá sau, giá ước tính, lịch hẹn, nơi làm', () => {
+      const f = formToPostFields('service', { common: {}, spec: { preset: 'Gia sư', priceType: 'quote', estimate: true, repeat: true, place: 'choice', homeFee: 20000, from: '08:00', to: '18:00', dates: ['2026-11-10'], pay: ['cash'], items: [{ name: 'Buổi 90 phút', price: 150000, unit: 'buổi' }], options: [], questions: [] } }, 'service');
+      expect(f).toMatchObject({ priceType: 'fixed', estimate: undefined, repeat: false, noSchedule: true, dates: [], handover: undefined, place: { mode: 'none' }, deliveryFee: 0 });
+      expect(f.highlights?.map((x) => x.label)).toEqual(['Thanh toán']);
+    });
+
     it('giặt sấy cũng không còn báo giá sau', () => {
       expect(formToPostFields('service', { common: {}, spec: { preset: 'Giặt sấy', priceType: 'quote', inspect: 30000, items: [{ name: 'Giặt', price: 18000, unit: 'kg' }], options: [], questions: [] } }, 'service').priceType).not.toBe('quote');
     });
@@ -112,7 +118,7 @@ describe('formToPostFields', () => {
 
     it('mẫu thường: theo nơi làm người bán chọn', () => {
       expect(cells(svc({ preset: 'Dọn dẹp' }))).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Tại nhà bạn'], ['Thanh toán', 'Tiền mặt, Chuyển khoản']]);
-      expect(cells(svc({ preset: 'Gia sư', place: 'choice', pay: ['cash', 'xu'] }))?.slice(1)).toEqual([['Nơi làm', 'Tại nhà bạn hoặc bạn mang tới'], ['Thanh toán', 'Tiền mặt, AntXu']]);
+      expect(cells(svc({ preset: 'Làm đẹp', place: 'choice', pay: ['cash', 'xu'] }))?.slice(1)).toEqual([['Nơi làm', 'Tại nhà bạn hoặc bạn mang tới'], ['Thanh toán', 'Tiền mặt, AntXu']]);
       expect(cells(svc({ preset: 'Khác', place: 'seller', where: 'Tòa S2, tầng 3' }))?.[1]).toEqual(['Nơi làm', 'Tòa S2, tầng 3']);
     });
 

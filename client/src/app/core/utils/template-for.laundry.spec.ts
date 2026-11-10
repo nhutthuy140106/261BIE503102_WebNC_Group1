@@ -75,6 +75,15 @@ describe('cách nhận của dịch vụ', () => {
     expect(d.missing(false)).toBe('');
   });
 
+  it('gia sư: không hỏi ngày giờ, không hỏi địa chỉ', () => {
+    const v = viewOf(post({ place: { mode: 'none' }, noSchedule: true, price: 150000 }));
+    expect(v.tpl.noSchedule).toBe(true);
+    const d = new OrderDraft(v.tpl);
+    expect(d.needsAddress()).toBe(false);
+    expect(d.placeFee()).toBe(0);
+    expect(d.missing(true)).toBe('');
+  });
+
   it('dịch vụ: mỗi câu trả lời là một dòng riêng', () => {
     const d = new OrderDraft(viewOf(post({ place: { mode: 'buyer' }, questions: [{ type: 'text', label: 'Bộ phận', required: false }, { type: 'text', label: 'Mô tả lỗi', required: false }] })).tpl);
     d.setAns('Bộ phận', 'Máy lạnh');

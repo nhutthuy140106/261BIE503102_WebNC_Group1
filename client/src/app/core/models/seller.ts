@@ -70,6 +70,8 @@ export interface SellerOrder {
   items: SellerOrderItem[];
   buyer: SellerPerson;
   fulfil: Fulfil;
+  /** Nơi làm không cố định (gia sư): ghi thay cho hình thức nhận */
+  placeNote?: string;
   address: string;
   day: number;
   time: string;

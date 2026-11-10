@@ -351,3 +351,4 @@ Chuyển dần `design/mockups/seller*.html` vào `client/src/app/features/selle
 - **Câu hỏi hình ảnh:** khách chọn tối đa 5 ảnh mỗi câu (`MAX_PHOTOS`), lưu nối bằng '|||'; đơn ghi "Đã gửi n ảnh", chi tiết đơn phía Bán hiện đủ các ảnh.
 - **Chăm sóc:** bỏ Báo giá sau, giá ước tính, đặt lặp hằng tuần, mục Nơi làm (người làm đến nhà khách, địa chỉ lấy từ địa chỉ đặt hàng). Cờ mẫu `noEstimate`, `noRepeat` dùng chung với giao nhận. Ô "Tổng tiền hàng" ở khung đặt hiện dạng tiền (120.000đ).
 - **Lịch của chăm sóc:** bỏ hai nút chọn kiểu lịch, luôn cho khách chọn ngày + số giờ (`fixedTime: datedur`), bài cũ đã lưu kiểu hẹn giờ cũng gửi là chọn số giờ.
+- **Gia sư:** bỏ Báo giá sau, giá ước tính, mục Lịch hẹn, mục Nơi làm; lịch học và nơi học ghi trong mô tả. Bên Mua không hỏi ngày giờ (`Post.noSchedule`) và không hỏi địa chỉ (`place.mode: 'none'`); đơn phía Bán ghi "Theo thỏa thuận, xem mô tả bài". Mô tả bài cho tối đa 2000 ký tự (trước là 1000).

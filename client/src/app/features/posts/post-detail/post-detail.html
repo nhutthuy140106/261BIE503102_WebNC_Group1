@@ -306,7 +306,9 @@
           <div class="mbody ck">
             <!-- 1. Địa chỉ -->
             <section class="cs">
-              @if (v.tpl.place.mode !== 'seller') {
+              @if (v.tpl.place.mode === 'none') {
+                <!-- không có nơi làm cố định: không hỏi địa chỉ -->
+              } @else if (v.tpl.place.mode !== 'seller') {
                 @if (d.needsAddress()) {
                   <button type="button" class="crow addr" (click)="addrOpen.set(true)">
                     <svg class="i ic pin"><use href="#l-pin" /></svg>
@@ -341,6 +343,7 @@
 
             <!-- 3. Cách nhận, thời gian, tùy chọn -->
             <section class="cs">
+              @if (!v.tpl.noSchedule) {
               <div class="crow col">
                 <svg class="i ic"><use href="#l-clock" /></svg>
                 <span class="ct"><b>{{ v.tpl.time.label }}</b>
@@ -391,6 +394,7 @@
                   }
                 </span>
               </div>
+              }
 
               @if (v.tpl.place.mode === 'choice') {
                 <label class="crow sw">
