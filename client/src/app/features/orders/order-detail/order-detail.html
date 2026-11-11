@@ -96,12 +96,17 @@
                 @if (d.place || d.address) { <dt>{{ d.place ? 'Hình thức nhận hàng' : 'Địa chỉ' }}</dt><dd>@if (d.place) { {{ d.place }}@if (d.address) { <span class="sub">{{ d.address }}</span> } } @else { {{ d.address }} }</dd> }
                 @if (d.utensils) { <dt>Dụng cụ</dt><dd>Có lấy</dd> }
               }
-              <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}
-                @if (o.paymentMethod === 'transfer' && o.status !== 'cancelled' && o.status !== 'declined' && (o.bank ?? job()?.bank); as b) { <app-bank-pay [bank]="b" [amount]="o.total" [content]="o.code" /> }
-              </dd>
+              <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd>
               @if (o.note) { <dt>Ghi chú</dt><dd class="noteval">{{ o.note }}</dd> }
             </dl>
           </div>
+          <!-- Chuyển khoản: khung riêng rộng bằng cả khối, không nhét vào cột giá trị của bảng thông tin -->
+          @if (o.paymentMethod === 'transfer' && o.status !== 'cancelled' && o.status !== 'declined' && (o.bank ?? job()?.bank); as b) {
+            <div class="paybox">
+              <h3>Chuyển khoản cho {{ o.counterpartName }}</h3>
+              <app-bank-pay [bank]="b" [amount]="o.total" [content]="o.code" />
+            </div>
+          }
           @if (o.cancelDenied) { <div class="request-note">{{ o.counterpartName }} không đồng ý hủy: {{ o.cancelDenied }}</div> }
           @if (o.resched?.by === 'buyer') { <div class="request-note">Đã gửi đề nghị đổi sang <b>{{ o.resched!.to }}</b>. Chờ {{ o.counterpartName }} đồng ý, đơn vẫn giữ giờ cũ. <button type="button" class="linkbtn" (click)="actP('resched-undo')">Rút đề nghị</button></div> }
         </section>

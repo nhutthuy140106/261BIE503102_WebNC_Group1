@@ -1,6 +1,6 @@
 /* QR to ở giữa phía trên, thông tin bên dưới. Chỗ hẹp (cột chi tiết đơn): nhãn nằm trên giá trị. Chỗ rộng (popup): nhãn trái · giá trị phải */
-:host { display: block; width: 100%; min-width: 0; }
-.bank { container-type: inline-size; display: grid; justify-items: center; gap: 14px; margin-top: 10px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font-weight: 400; text-align: left; box-sizing: border-box; }
+:host { display: block; width: 100%; min-width: 0; container-type: inline-size; }
+.bank { display: grid; justify-items: center; gap: 14px; margin-top: 10px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font-weight: 400; text-align: left; box-sizing: border-box; }
 .qr { width: min(240px, 100%); height: auto; aspect-ratio: 1 / 1; object-fit: contain; border-radius: 8px; }
 dl { width: 100%; margin: 0; display: grid; gap: 10px; font-size: 14px; }
 .r { display: grid; gap: 2px; min-width: 0; }
@@ -12,4 +12,10 @@ dd { margin: 0; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
   .r { grid-template-columns: auto 1fr; gap: 0 16px; align-items: baseline; }
   dt { font-size: 13px; white-space: nowrap; }
   dd { text-align: right; }
+}
+/* Khung rộng (khối riêng ở chi tiết đơn): QR bên trái, thông tin bên phải */
+@container (min-width: 520px) {
+  .bank { grid-template-columns: auto 1fr; justify-items: stretch; align-items: center; column-gap: 28px; }
+  .qr { width: 220px; }
+  .hint { grid-column: 1 / -1; }
 }

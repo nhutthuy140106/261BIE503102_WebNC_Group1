@@ -355,3 +355,6 @@ a.pbtn.link { text-decoration: none; }
 .trk-slot { display: block; margin-bottom: 16px; }
 /* giữ đúng cách xuống dòng, cách đoạn người đăng gõ trong form */
 .iv.plain { white-space: pre-line; }
+
+.paybox { margin-top: 16px; }
+.paybox h3 { margin: 0; font-size: 15px; }
