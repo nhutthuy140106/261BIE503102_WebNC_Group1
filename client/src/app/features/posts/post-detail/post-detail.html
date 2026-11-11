@@ -290,6 +290,9 @@
               @if (o.detail?.when) { <div><dt>Thời gian</dt><dd>{{ o.detail?.when }}</dd></div> }
               <div><dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd></div>
             </dl>
+            @if (o.paymentMethod === 'transfer' && v.tpl.bank; as b) {
+              <app-bank-pay [bank]="b" [amount]="o.total" [content]="o.code" />
+            }
             <div class="stepper mini" [style.--n]="doneSteps(o).length">
               @for (n of doneSteps(o); track $index) {
                 @if ($index > 0) { <i class="ln"></i> }
@@ -451,7 +454,7 @@
                     @if (!v.tpl.pays || v.tpl.pays.includes('cash')) { <button type="button" [class.on]="d.pay() === 'cash'" (click)="d.pay.set('cash')">Tiền mặt</button> }
                     @if (!v.tpl.pays || v.tpl.pays.includes('transfer')) { <button type="button" [class.on]="d.pay() === 'transfer'" (click)="d.pay.set('transfer')">Chuyển khoản</button> }
                   </span>
-                  @if (d.pay() === 'transfer' && v.tpl.bank; as b) { <app-bank-pay [bank]="b" /> }
+                  @if (d.pay() === 'transfer' && v.tpl.bank; as b) { <app-bank-pay [bank]="b" /> <small class="qrnote">Mã QR có sẵn số tiền và mã đơn sẽ hiện sau khi bạn bấm Đặt đơn.</small> }
                 </span>
               </div>
             </section>
