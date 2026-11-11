@@ -8,6 +8,8 @@ import { unsplash } from '../../../core/config/post-templates';
 import { TemplateKey } from '../../../core/models/post-template';
 import { AuthPromptService } from '../../../core/services/auth-prompt';
 import { SavedService } from '../../../core/services/saved';
+import { AuthService } from '../../../core/services/auth';
+import { SellerSpaceService } from '../../../core/services/seller-space';
 
 const FOLLOW_KEY = 'antgo_follow';
 type Tab = 'selling' | 'jobs' | 'reviews';
@@ -28,6 +30,8 @@ export class Shop implements OnInit {
   protected readonly saved = inject(SavedService);
   private readonly prompt = inject(AuthPromptService);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+  private readonly seller = inject(SellerSpaceService);
   protected readonly img = unsplash;
 
   protected readonly posts = signal<Post[]>([]);
@@ -35,7 +39,14 @@ export class Shop implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly tab = signal<Tab>('selling');
   protected readonly following = signal(false);
-  private sellerId = '';
+  private readonly sellerIdSig = signal('');
+  private get sellerId(): string {
+    return this.sellerIdSig();
+  }
+
+  /** Gian hàng của chính mình: có thêm ảnh bìa, lời giới thiệu, thời gian trả lời… từ hồ sơ bên Bán */
+  protected readonly isMe = computed(() => !!this.sellerIdSig() && this.auth.currentUser()?._id === this.sellerIdSig());
+  protected readonly own = computed(() => (this.isMe() ? this.seller.shop() ?? null : null));
 
   protected readonly name = computed(() => this.posts()[0]?.sellerName ?? '');
   protected readonly block = computed(() => this.posts()[0]?.block ?? '');
@@ -69,7 +80,8 @@ export class Shop implements OnInit {
     this.route.paramMap
       .pipe(
         switchMap((p) => {
-          this.sellerId = p.get('id') ?? '';
+          this.sellerIdSig.set(p.get('id') ?? '');
+          if (this.isMe()) this.seller.load().subscribe({ error: () => undefined });
           this.loading.set(true);
           this.following.set(this.readFollow().includes(this.sellerId));
           return this.postService.getBySeller(this.sellerId);

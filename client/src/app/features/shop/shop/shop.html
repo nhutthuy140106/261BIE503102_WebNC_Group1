@@ -9,65 +9,80 @@
     <a routerLink="/search" class="btn">Xem các bài khác</a>
   </div>
 } @else {
-  <header class="head">
-    <app-avatar [src]="posts()[0].sellerAvatar" [name]="name()" [size]="72" />
-    <div class="who">
-      <h1>{{ name() }}</h1>
-      <p class="addr"><svg class="i"><use href="#pin" /></svg>{{ block() }}@if (area()) { · {{ area() }} }</p>
+  <!-- cùng bố cục với "Gian hàng của tôi" ở khu Bán (seller-shop); gian hàng của chính mình lấy thêm ảnh bìa, giới thiệu… từ hồ sơ bên Bán -->
+  <div class="shophead">
+    <div class="sh-top" [class.cover]="own()?.cover" [style.background-image]="own()?.cover ? 'url(' + own()!.cover + ')' : null">
+      <div class="avw"><app-avatar [src]="own()?.avatar || posts()[0].sellerAvatar" [name]="name()" [size]="96" /></div>
+      <div class="nm">
+        <h1>{{ name() }}</h1>
+        <p>
+          <span><svg class="i"><use href="#pin" /></svg>{{ own()?.at || block() }}@if (!own() && area()) { · {{ area() }} }</span>
+          @if (own(); as sh) {
+            <span><svg class="i"><use href="#home" /></svg>{{ sh.since }}</span>
+            <span><svg class="i"><use href="#chat" /></svg>{{ sh.reply }}</span>
+          }
+        </p>
+      </div>
+      <div class="sh-acts">
+        @if (isMe()) {
+          <a class="btn dark" routerLink="/seller/shop"><svg class="i"><use href="#pencil" /></svg>Sửa hồ sơ</a>
+        } @else {
+          <button type="button" class="btn" [class.primary]="!following()" (click)="toggleFollow()">{{ following() ? 'Đang theo dõi' : 'Theo dõi' }}</button>
+          <button type="button" class="btn dark" (click)="message()"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
+        }
+      </div>
     </div>
-    <div class="cta">
-      <button type="button" class="btn ghost" [class.on]="following()" (click)="toggleFollow()">
-        {{ following() ? 'Đang theo dõi' : 'Theo dõi' }}
-      </button>
-      <button type="button" class="btn-msg" (click)="message()"><svg class="i"><use href="#chat" /></svg>Nhắn tin</button>
+    <div class="sh-stats" [style.grid-template-columns]="'repeat(' + (own() ? 4 : 3) + ', 1fr)'">
+      <div>
+        @if (rating(); as r) { <b><svg class="i"><use href="#star" /></svg>{{ r.avg }}</b><span>{{ r.count }} đánh giá</span> }
+        @else { <b>—</b><span>Chưa có đánh giá</span> }
+      </div>
+      <div><b>{{ posts().length }}</b><span>bài đang đăng</span></div>
+      <div><b>{{ own()?.doneCount ?? done() }}</b><span>đơn / việc hoàn thành</span></div>
+      @if (own(); as sh) { <div><b>{{ sh.followers }}</b><span>người theo dõi</span></div> }
     </div>
-  </header>
-
-  <div class="stats">
-    <div>
-      @if (rating(); as r) {
-        <strong><span class="star">★</span> {{ r.avg }}<em class="of5">/5</em></strong><span>{{ r.count }} đánh giá</span>
-      } @else {
-        <strong>—</strong><span>Chưa có đánh giá</span>
-      }
-    </div>
-    <div><strong>{{ posts().length }}</strong><span>Bài đang đăng</span></div>
-    <div><strong>{{ done() }}</strong><span>Đơn / việc hoàn thành</span></div>
   </div>
 
+  @if (own()?.bio; as bio) { <p class="bio">{{ bio }}</p> }
+
   <div class="tabs">
-    <button type="button" class="btn ghost" [class.active]="tab() === 'selling'" (click)="tab.set('selling')">Đang bán ({{ selling().length }})</button>
-    <button type="button" class="btn ghost" [class.active]="tab() === 'jobs'" (click)="tab.set('jobs')">Việc đang cần người ({{ jobs().length }})</button>
-    <button type="button" class="btn ghost" [class.active]="tab() === 'reviews'" (click)="tab.set('reviews')">Đánh giá ({{ reviews().length }})</button>
+    <button type="button" [class.on]="tab() === 'selling'" (click)="tab.set('selling')">Đang bán<small>{{ selling().length }}</small></button>
+    <button type="button" [class.on]="tab() === 'jobs'" (click)="tab.set('jobs')">Việc đang cần người<small>{{ jobs().length }}</small></button>
+    <button type="button" [class.on]="tab() === 'reviews'" (click)="tab.set('reviews')">Đánh giá<small>{{ reviews().length }}</small></button>
   </div>
 
   @if (tab() === 'reviews') {
     <div class="revs">
       @for (r of reviews(); track $index) {
-        <article class="rev">
-          <div class="rwho"><img [src]="img(r[0], 80, 80)" alt="" /><span><b>{{ r[1] }}</b><small>{{ r[2] }} · {{ r[3] }}</small></span></div>
-          <div class="rstars">@for (s of stars(r[4]); track $index) { <span [class.off]="!s">★</span> }</div>
-          @if (bought($index); as b) { <div class="bought">{{ b }}</div> }
-          <p>{{ r[5] }}</p>
-          @if (r[7]) { <div class="reply"><b>Phản hồi của {{ name() }}</b>{{ r[7] }}</div> }
-        </article>
+        <div class="rv">
+          <img [src]="img(r[0], 80, 80)" alt="" />
+          <div class="rb">
+            <b>{{ r[1] }}</b><small>{{ r[2] }} · {{ r[3] }}</small>
+            <div class="st">@for (s of stars(r[4]); track $index) { <span [class.off]="!s">★</span> }</div>
+            <p>{{ r[5] }}</p>
+            @if (bought($index); as b) { <span class="on">{{ b }}</span> }
+            @if (r[7]) { <div class="rep"><b>Phản hồi của {{ name() }}</b>{{ r[7] }}</div> }
+          </div>
+        </div>
+      } @empty {
+        <p class="muted">Chưa có đánh giá nào.</p>
       }
     </div>
   } @else {
-  <div class="grid">
-    @if (tab() === 'selling') {
-      @for (p of selling(); track p._id) {
-        <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
-      } @empty {
-        <p class="muted" style="grid-column: 1 / -1">Chưa có bài nào đang bán.</p>
+    <div class="grid4">
+      @if (tab() === 'selling') {
+        @for (p of selling(); track p._id) {
+          <app-post-card [post]="p" [saved]="saved.has(p._id)" (toggleSave)="toggleSave($event)" />
+        } @empty {
+          <p class="muted" style="grid-column: 1 / -1">Chưa có bài nào đang bán.</p>
+        }
+      } @else {
+        @for (j of jobs(); track j._id) {
+          <app-job-card [job]="j" />
+        } @empty {
+          <p class="muted" style="grid-column: 1 / -1">Hiện không có việc nào cần người.</p>
+        }
       }
-    } @else {
-      @for (j of jobs(); track j._id) {
-        <app-job-card [job]="j" />
-      } @empty {
-        <p class="muted" style="grid-column: 1 / -1">Hiện không có việc nào cần người.</p>
-      }
-    }
-  </div>
+    </div>
   }
 }
