@@ -46,7 +46,7 @@ Post chỉ mang các **cờ** quyết định luồng của đơn:
 | `status` | `draft` · `open` · `soldout` · `closed` · `hidden` | `hidden` = Admin gỡ. Thay cho cờ `closed` + `on` rời nhau |
 | `acceptsXu` | boolean | |
 | `payMethods[]` | `cash` · `transfer` · `xu` | Tên phương thức khách được chọn |
-| `bank` | `{ bankName, no, holder, qr? }` | **Đổi 05/11:** tài khoản và QR lưu theo từng bài, theo form đăng bài, không ở hồ sơ người bán. Chỉ có khi nhận chuyển khoản |
+| `bank` | `{ bankName, no, holder, qr? }` | **Chốt lại 11/11 (Khải): lưu ở HỒ SƠ NGƯỜI BÁN** (`sellerProfile.payment.bank`, mục dưới), nhập một lần cho cả gian hàng — thay cho quyết định 05/11 "lưu theo từng bài". Post chỉ ghi `payMethods[]`; bài đã lưu `bank` riêng vẫn đọc được trong lúc chuyển đổi. Server không trả `bank` ra API công khai, chỉ trả cho người đã đặt đơn |
 | `quickOptions[]`, `noteEnabled` | string[], boolean | Đồ ăn, đồ uống: tùy chọn nhanh khách tick (không tính tiền), bật / tắt ô ghi chú |
 | `promo` | Giờ vàng | Giữ nguyên như hiện có |
 | `combo` | Combo | Giữ nguyên như hiện có |
