@@ -1,8 +1,17 @@
 :host { position: fixed; right: 20px; bottom: 20px; z-index: 35; font-size: 14px; }
-.fab { position: relative; display: flex; align-items: center; gap: 4px; height: 56px; min-width: 56px; padding: 0 14px 0 10px; border-radius: 28px; background: #fff; border: 1px solid var(--border); box-shadow: 0 12px 30px rgba(34, 48, 74, .28); transition: transform .15s, box-shadow .15s; }
-.fab:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(34, 48, 74, .32); }
-.fab img { display: block; object-fit: contain; margin: -4px 0 0 2px; }
-.fab .tip { font-weight: 600; color: var(--ink); padding-right: 2px; }
+/* Thu gọn: chỉ có hình con kiến trong nút tròn; rê chuột (hoặc Tab tới) thì chữ "Hỏi trợ lý" trượt ra */
+.fab { position: relative; display: flex; align-items: center; justify-content: center; height: 56px; min-width: 56px; padding: 0 3px; border-radius: 28px; background: #fff; border: 1px solid var(--border); box-shadow: 0 12px 30px rgba(34, 48, 74, .28); transition: transform .15s, box-shadow .15s, padding .25s; }
+.fab:hover, .fab:focus-visible { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(34, 48, 74, .32); padding: 0 14px 0 8px; }
+.fab img { display: block; object-fit: contain; margin: -4px 0 0 0; transform-origin: 50% 80%; animation: ring-shake 3.2s ease-in-out infinite; }
+.fab .tip { max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; font-weight: 600; color: var(--ink); transition: max-width .25s ease, opacity .2s, margin .25s; }
+.fab:hover .tip, .fab:focus-visible .tip { max-width: 110px; opacity: 1; margin-left: 6px; }
+.fab:hover img, .fab:focus-visible img { animation: none; }
+
+/* Hiệu ứng "đang gọi" như nút hotline: hai vòng sóng lan ra + con kiến lắc đều đều (dừng khi rê chuột) */
+.fab:not(.on)::before { content: ''; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; z-index: -1; animation: ring-wave 3.2s ease-out infinite; } /* cùng chu kỳ 3.2s với ring-shake: tỏa ra đúng lúc kiến lắc đầu */
+.fab:hover::before, .fab:hover::after, .fab:focus-visible::before, .fab:focus-visible::after { animation: none; }
+@keyframes ring-wave { 0%, 62% { box-shadow: 0 0 0 0 rgba(216, 90, 28, .32); } 92%, 100% { box-shadow: 0 0 0 20px rgba(216, 90, 28, 0); } }
+@keyframes ring-shake { 0%, 62%, 100% { transform: rotate(0); } 66% { transform: rotate(-14deg); } 70% { transform: rotate(12deg); } 74% { transform: rotate(-10deg); } 78% { transform: rotate(8deg); } 82% { transform: rotate(-4deg); } 86% { transform: rotate(0); } }
 .fab.on { background: var(--ink); border-color: var(--ink); width: 56px; justify-content: center; padding: 0; }
 .fab .x { color: #fff; font-size: 28px; line-height: 1; }
 
@@ -52,7 +61,7 @@ form button:disabled { opacity: .45; cursor: not-allowed; }
   .fab { padding: 0 9px; }
   .panel { position: fixed; left: 8px; right: 8px; bottom: 132px; width: auto; height: min(70vh, 520px); }
 }
-@media (prefers-reduced-motion: reduce) { .panel { animation: none; } .fab { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .panel { animation: none; } .fab { transition: none; } .fab img, .fab::before, .fab::after { animation: none !important; } }
 .chips .spinlink { border: 1px dashed var(--accent); color: var(--accent); border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 600; }
 
 .quick { display: flex; gap: 6px; padding: 8px 10px 0; overflow-x: auto; scrollbar-width: none; border-top: 1px solid var(--border); }

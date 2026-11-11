@@ -7,6 +7,10 @@ exports.register = asyncHandler(async (req, res) => {
   res.status(201).json({ data: user });
 });
 
+exports.phoneExists = asyncHandler(async (req, res) => {
+  res.json({ data: { exists: await service.phoneTaken(req.valid.query.phone) } });
+});
+
 exports.login = asyncHandler(async (req, res) => {
   const user = await service.verifyLogin(req.body);
   await service.startSession(req, user);

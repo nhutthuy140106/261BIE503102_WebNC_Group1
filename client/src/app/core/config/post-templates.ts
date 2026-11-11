@@ -2,7 +2,7 @@ import { PostTemplate, TemplateKey } from '../models/post-template';
 
 /** Ảnh: ID Unsplash (đã kiểm tra) — dùng qua `unsplash(id)` */
 export function unsplash(id: string, w = 500, h = 375): string {
-  return id.includes(':') || id.startsWith('http') ? id : `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&q=70`;
+  return id.includes(':') || id.startsWith('http') || id.startsWith('/') ? id : `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&q=70`;
 }
 
 /** 7 mẫu bài của bản mẫu (design/mockups/detail.html). Khóa khớp `Post.template`. */

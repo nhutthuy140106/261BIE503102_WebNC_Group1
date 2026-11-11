@@ -32,6 +32,8 @@ export class Login implements OnInit {
   /** Gợi ý tài khoản dùng thử cho cả nhóm / giảng viên: chỉ khi dev + đang nối máy chủ thật */
   protected readonly demoAccounts = isDevMode() && !USE_MOCK ? DEMO_ACCOUNTS : [];
   protected readonly submitting = signal(false);
+  /** Số điện thoại đã nhớ (cookie): hiện làm gợi ý khi bấm vào ô số điện thoại. Không có mật khẩu. */
+  protected readonly rememberedPhone = this.auth.getRememberedUsername();
 
   protected readonly form = new FormGroup({
     phone: new FormControl('', { nonNullable: true, validators: [Validators.required, phoneValidator] }),

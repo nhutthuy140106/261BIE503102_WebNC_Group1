@@ -4,6 +4,8 @@ h1 { margin: 0; font-size: 26px; letter-spacing: -.025em; line-height: 1.2; }
 label { display: block; margin: 18px 0 7px; font-size: 13px; font-weight: 700; }
 .tx { width: 100%; height: 48px; border: 1px solid var(--border); border-radius: 12px; padding: 0 14px; font: 500 15px 'Mona Sans', sans-serif; color: inherit; outline: none; box-sizing: border-box; background: #fff; }
 .tx:focus { border-color: var(--ink); }
+/* Ô có gợi ý (datalist): bỏ mũi tên xổ xuống, chỉ gợi ý khi gõ những số đầu trùng */
+.tx::-webkit-calendar-picker-indicator { display: none !important; opacity: 0; }
 .tx.is-invalid { border-color: #c2451a; }
 small.error { display: block; margin-top: 6px; }
 .remember { display: flex; gap: 8px; align-items: center; margin: 16px 0 0; font-weight: 500; color: var(--smoke); cursor: pointer; }
