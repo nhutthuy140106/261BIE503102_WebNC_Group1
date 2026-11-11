@@ -1,6 +1,7 @@
 process.env.NODE_ENV = 'test';
 process.env.FORCE_RATE_LIMIT = '1'; // bật giới hạn tốc độ (mặc định tắt khi test)
 process.env.SEED_PASSWORD = 'Test@2026';
+process.env.OTP_REQUIRED = '0'; // test giới hạn tốc độ đăng ký, không đi qua bước nhập mã OTP
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const mongoose = require('mongoose');

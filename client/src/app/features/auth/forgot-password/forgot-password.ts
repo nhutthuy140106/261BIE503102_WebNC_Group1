@@ -12,7 +12,7 @@ const STRENGTH_LABEL = ['', 'Yếu', 'Trung bình', 'Khá', 'Mạnh'];
 
 /**
  * Quên mật khẩu: số điện thoại → mã xác nhận → mật khẩu mới → xong.
- * Mã xác nhận hiện là BẢN MẪU (chưa gửi SMS thật, nhập 6 số bất kỳ), giống bước đăng ký.
+ * Mã xác nhận: mock nhập 6 số bất kỳ; server thật (?mock=0) kiểm mã giả lập, giống bước đăng ký.
  */
 @Component({
   selector: 'app-forgot-password',
@@ -29,6 +29,9 @@ export class ForgotPassword implements OnDestroy {
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
   protected readonly countdown = signal(0);
+  /** Mã thử do server trả khi chạy thử (không có ở production, không có ở mock) */
+  protected readonly devCode = signal<string | null>(null);
+  protected readonly busy = signal(false);
 
   protected readonly phone = new FormControl('', { nonNullable: true, validators: [Validators.required, phoneValidator] });
   protected readonly otp = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^\d{6}$/)] });
@@ -66,24 +69,50 @@ export class ForgotPassword implements OnDestroy {
   protected sendCode(): void {
     if (this.phone.invalid) return this.phone.markAsTouched();
     this.error.set(null);
-    this.otp.reset('');
-    this.step.set(2);
-    this.startCountdown();
+    this.requestCode(true);
+  }
+
+  /** Xin mã từ server. `first` = từ bước 1 sang bước 2. Số chưa đăng ký vẫn như đã gửi (server không để lộ số nào có tài khoản). */
+  private requestCode(first: boolean): void {
+    if (this.busy()) return;
+    this.busy.set(true);
+    this.auth.sendOtp(this.phone.value, 'reset').subscribe({
+      next: (r) => {
+        this.busy.set(false);
+        this.devCode.set(r.devCode ?? null);
+        this.otp.reset('');
+        if (first) this.step.set(2);
+        this.startCountdown(r.resendInSec ?? OTP_SECONDS);
+      },
+      error: (e: Error) => {
+        this.busy.set(false);
+        this.error.set(e.message);
+      },
+    });
   }
 
   protected resend(): void {
     if (this.countdown() > 0) return;
     this.error.set(null);
-    this.otp.reset('');
-    this.startCountdown();
+    this.requestCode(false);
   }
 
   protected verify(): void {
     if (this.otp.invalid) return this.otp.markAsTouched();
-    if (this.countdown() <= 0) return void this.error.set('Mã đã hết hạn. Bấm "Gửi lại mã" để nhận mã mới.');
+    if (this.busy()) return;
     this.error.set(null);
-    clearInterval(this.timer);
-    this.step.set(3);
+    this.busy.set(true);
+    this.auth.verifyOtp(this.phone.value, 'reset', this.otp.value).subscribe({
+      next: () => {
+        this.busy.set(false);
+        clearInterval(this.timer);
+        this.step.set(3);
+      },
+      error: (e: Error) => {
+        this.busy.set(false);
+        this.error.set(e.message);
+      },
+    });
   }
 
   protected back(): void {
@@ -108,9 +137,9 @@ export class ForgotPassword implements OnDestroy {
     });
   }
 
-  private startCountdown(): void {
+  private startCountdown(seconds = OTP_SECONDS): void {
     clearInterval(this.timer);
-    this.countdown.set(OTP_SECONDS);
+    this.countdown.set(seconds);
     this.timer = setInterval(() => {
       this.countdown.update((n) => n - 1);
       if (this.countdown() <= 0) clearInterval(this.timer);

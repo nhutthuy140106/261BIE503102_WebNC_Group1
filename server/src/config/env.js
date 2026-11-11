@@ -13,6 +13,8 @@ module.exports = {
   sessionMaxAgeMs: Number(process.env.SESSION_MAX_AGE_MS) || 60 * 60 * 1000, // 1 giờ
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   clientOrigin:process.env.CLIENT_ORIGIN || 'http://localhost:4200',
+  // Bắt buộc xác minh SĐT bằng OTP khi đăng ký / đặt lại mật khẩu. OTP_REQUIRED=0 chỉ để bỏ qua khi dev/test.
+  otpRequired: process.env.OTP_REQUIRED !== '0',
   isProd,
   isTest: process.env.NODE_ENV === 'test',
 };

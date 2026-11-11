@@ -20,6 +20,7 @@
         @if (phone.hasError('taken')) {
           <small class="error">Số điện thoại này đã có tài khoản AntGo. Bạn hãy <a routerLink="/auth/login" [queryParams]="{ phone: phone.value }">đăng nhập bằng số này</a> hoặc dùng số khác để đăng ký.</small>
         } @else if (invalid(phone)) { <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small> }
+        @if (error()) { <small class="error" role="alert">{{ error() }}</small> }
         <button type="submit" class="go" [disabled]="phone.invalid || checking()">Gửi mã xác nhận</button>
       </form>
     }
@@ -32,11 +33,12 @@
         @if (invalid(otp)) { <small class="error">Mã gồm 6 chữ số.</small> }
         @if (error()) { <small class="error" role="alert">{{ error() }}</small> }
         <button type="submit" class="go" [disabled]="otp.invalid">Xác nhận</button>
-        <p class="demo">Bản mẫu: chưa gửi SMS thật, bạn nhập 6 số bất kỳ để tiếp tục.</p>
+        @if (devCode(); as dc) { <p class="demo">Chạy thử: chưa gửi SMS thật. Mã của bạn là <b>{{ dc }}</b> (cũng in ở màn hình server).</p> }
+        @else { <p class="demo">Bản mẫu: chưa gửi SMS thật, bạn nhập 6 số bất kỳ để tiếp tục.</p> }
         <div class="resend">
           <button type="button" class="lnk plain" (click)="back()">Quay lại</button>
           @if (countdown() > 0) {
-            <span>Mã hết hạn sau {{ countdown() }} giây</span>
+            <span>Gửi lại mã sau {{ countdown() }} giây</span>
           } @else {
             <button type="button" class="lnk" (click)="resend()">Gửi lại mã</button>
           }

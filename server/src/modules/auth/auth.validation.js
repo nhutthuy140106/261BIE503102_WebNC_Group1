@@ -12,3 +12,6 @@ exports.google = z.object({ credential: z.string({ error: 'Thiếu mã đăng nh
 exports.googleComplete = z.object({ phone });
 exports.phoneQuery = z.object({ phone });
 exports.login =z.object({ phone, password: z.string({ error: 'Cần nhập mật khẩu' }).min(1, 'Cần nhập mật khẩu') });
+exports.otpSend = z.object({ phone, purpose: z.enum(['register', 'reset'], { error: 'purpose phải là register hoặc reset' }) });
+exports.otpVerify = z.object({ phone, purpose: z.enum(['register', 'reset'], { error: 'purpose phải là register hoặc reset' }), code: z.string({ error: 'Cần nhập mã' }).regex(/^\d{6}$/, 'Mã gồm 6 chữ số') });
+exports.passwordReset = z.object({ phone, password });

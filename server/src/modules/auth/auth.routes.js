@@ -36,6 +36,16 @@ const phoneCheckLimiter = rateLimit({
   handler: (req, res) => res.status(429).json({ error: { code: 'TOO_MANY_REQUESTS', message: 'Bạn kiểm tra quá nhiều lần, vui lòng đợi ít phút' } }),
 });
 
+// Xin / nhập mã OTP: tối đa 30 lần / giờ / IP (ngoài giới hạn riêng từng số điện thoại trong otp.service)
+const otpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  skip: () => isTest && !process.env.FORCE_RATE_LIMIT,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => res.status(429).json({ error: { code: 'TOO_MANY_REQUESTS', message: 'Bạn thao tác quá nhiều lần, vui lòng thử lại sau' } }),
+});
+
 /**
  * @openapi
  * /auth/register:
@@ -141,6 +151,43 @@ const phoneCheckLimiter = rateLimit({
  *       401: { description: Chưa đăng nhập hoặc hết phiên }
  *       403: { description: Tài khoản bị khóa }
  */
+/**
+ * @openapi
+ * /auth/otp/send:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Gửi mã OTP tới số điện thoại (giả lập, chưa gửi SMS thật)
+ *     description: |
+ *       `purpose` = `register` (số chưa có tài khoản) hoặc `reset` (quên mật khẩu). Mã 6 số, hạn 5 phút, gửi lại cách nhau 60 giây, tối đa 5 lần/giờ.
+ *       Mã in ra màn hình server; ngoài production còn trả `devCode`. `reset` với số chưa đăng ký vẫn trả như đã gửi.
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object, required: [phone, purpose], properties: { phone: { type: string }, purpose: { type: string, enum: [register, reset] } } } } } }
+ *     responses:
+ *       200: { description: "{ data: { sent, expiresInSec, resendInSec, devCode? } }" }
+ *       409: { description: Số đã đăng ký (purpose register) }
+ *       429: { description: Gửi lại quá sớm hoặc quá số lần }
+ * /auth/otp/verify:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Nhập mã OTP
+ *     description: Đúng mã thì số này được coi là đã xác minh trong 10 phút (mã dùng một lần). Nhập sai tối đa 5 lần.
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object, required: [phone, purpose, code], properties: { phone: { type: string }, purpose: { type: string, enum: [register, reset] }, code: { type: string } } } } } }
+ *     responses:
+ *       200: { description: "{ data: { verified: true } }" }
+ *       409: { description: Mã hết hạn hoặc chưa gửi }
+ *       422: { description: Sai mã }
+ *       429: { description: Sai quá nhiều lần }
+ * /auth/password/reset:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Đặt mật khẩu mới sau khi xác minh OTP (purpose reset)
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object, required: [phone, password], properties: { phone: { type: string }, password: { type: string } } } } } }
+ *     responses:
+ *       204: { description: Đã đổi mật khẩu }
+ *       403: { description: Chưa xác minh số điện thoại }
+ */
+router.post('/otp/send', otpLimiter, body(v.otpSend), c.otpSend);
+router.post('/otp/verify', otpLimiter, body(v.otpVerify), c.otpVerify);
+router.post('/password/reset', otpLimiter, body(v.passwordReset), c.passwordReset);
 router.post('/register', registerLimiter, body(v.register), c.register);
 router.get('/phone-exists', phoneCheckLimiter, query(v.phoneQuery), c.phoneExists);
 router.post('/login', loginLimiter, body(v.login), c.login);

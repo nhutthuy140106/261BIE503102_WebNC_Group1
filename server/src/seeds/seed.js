@@ -67,7 +67,7 @@ async function seed() {
     const hash = await bcrypt.hash(password, 10);
     u[key] = await User.findOneAndUpdate(
       { phone: d.phone },
-      { role: 'enduser', status: 'active', lockedReason: '', ...d, password: hash },
+      { role: 'enduser', status: 'active', lockedReason: '', phoneVerifiedAt: new Date(), ...d, password: hash },
       { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
     );
   }

@@ -17,7 +17,7 @@ const STRENGTH_LABEL = ['', 'Yếu', 'Trung bình', 'Khá', 'Mạnh'];
 
 /**
  * Đăng ký 3 bước: số điện thoại → mã xác nhận (OTP) → thông tin tài khoản.
- * OTP hiện là BẢN MẪU (chưa gửi SMS thật, nhập 6 số bất kỳ) — khi có nhà cung cấp SMS chỉ thay phần gửi/kiểm tra mã.
+ * OTP: mock nhập 6 số bất kỳ; server thật (?mock=0) kiểm mã giả lập (chưa gửi SMS thật, mã in ở màn hình server và hiện ở bước 2 khi chạy thử).
  */
 @Component({
   selector: 'app-register',
@@ -48,6 +48,9 @@ export class Register implements OnDestroy {
   protected readonly submitting = signal(false);
   protected readonly checking = signal(false);
   protected readonly countdown = signal(0);
+  /** Mã thử do server trả khi chạy thử (không có ở production, không có ở mock) */
+  protected readonly devCode = signal<string | null>(null);
+  protected readonly verifying = signal(false);
   protected readonly fullName = computed(() => this.info.controls.name.value.trim());
 
   protected readonly phone = new FormControl('', { nonNullable: true, validators: [Validators.required, phoneValidator] });
@@ -114,16 +117,26 @@ export class Register implements OnDestroy {
           this.phone.setErrors({ taken: true });
           return this.phone.markAsTouched();
         }
-        this.otp.reset('');
-        this.step.set(2);
-        this.startCountdown();
+        this.requestCode(true);
       },
-      // không kiểm tra được (rớt mạng…) thì vẫn cho đi tiếp; bước cuối server vẫn chặn số trùng
-      error: () => {
+      // không kiểm tra được số trùng (rớt mạng…) thì vẫn thử gửi mã; bước cuối server vẫn chặn số trùng
+      error: () => this.requestCode(true),
+    });
+  }
+
+  /** Xin mã từ server. `first` = từ bước 1 sang bước 2; lỗi (gửi quá sớm, quá số lần…) hiện ngay tại chỗ đang đứng. */
+  private requestCode(first: boolean): void {
+    this.auth.sendOtp(this.phone.value, 'register').subscribe({
+      next: (r) => {
         this.checking.set(false);
+        this.devCode.set(r.devCode ?? null);
         this.otp.reset('');
-        this.step.set(2);
-        this.startCountdown();
+        if (first) this.step.set(2);
+        this.startCountdown(r.resendInSec ?? OTP_SECONDS);
+      },
+      error: (e: Error) => {
+        this.checking.set(false);
+        this.error.set(e.message);
       },
     });
   }
@@ -132,19 +145,25 @@ export class Register implements OnDestroy {
   protected resend(): void {
     if (this.countdown() > 0) return;
     this.error.set(null);
-    this.otp.reset('');
-    this.startCountdown();
+    this.requestCode(false);
   }
 
   protected verify(): void {
     if (this.otp.invalid) return this.otp.markAsTouched();
-    if (this.countdown() <= 0) {
-      this.error.set('Mã đã hết hạn. Bấm "Gửi lại mã" để nhận mã mới.');
-      return;
-    }
+    if (this.verifying()) return;
     this.error.set(null);
-    clearInterval(this.timer);
-    this.step.set(3);
+    this.verifying.set(true);
+    this.auth.verifyOtp(this.phone.value, 'register', this.otp.value).subscribe({
+      next: () => {
+        this.verifying.set(false);
+        clearInterval(this.timer);
+        this.step.set(3);
+      },
+      error: (e: Error) => {
+        this.verifying.set(false);
+        this.error.set(e.message);
+      },
+    });
   }
 
   protected back(): void {
@@ -153,9 +172,10 @@ export class Register implements OnDestroy {
     if (this.step() === 2) this.startCountdown();
   }
 
-  private startCountdown(): void {
+  /** Đếm ngược tới lúc được gửi lại mã */
+  private startCountdown(seconds = OTP_SECONDS): void {
     clearInterval(this.timer);
-    this.countdown.set(OTP_SECONDS);
+    this.countdown.set(seconds);
     this.timer = setInterval(() => {
       this.countdown.update((n) => n - 1);
       if (this.countdown() <= 0) clearInterval(this.timer);

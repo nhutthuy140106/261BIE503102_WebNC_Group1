@@ -7,6 +7,7 @@ const userSchema = new Schema({
   password: { type: String, select: false, required: function () { return !this.googleId; } },
   googleId: { type: String, unique: true, sparse: true }, // sparse: tài khoản thường không có googleId vẫn không bị trùng nhau
   email: { type: String, trim: true, lowercase: true },
+  phoneVerifiedAt: Date,                            // xác minh SĐT bằng OTP lúc nào; trống = chưa xác minh (vd. tài khoản Google)
   avatar: { type: String, default: null },          // URL ảnh chân dung; null = chưa có (FE hiện chữ cái đầu)
   area: { type: String, default: 'B' },
   role: { type: String, enum: ['enduser', 'admin'], default: 'enduser' },

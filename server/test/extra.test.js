@@ -1,5 +1,6 @@
 // Phiên đăng nhập, slug/tìm không dấu, giỏ nháp, upload, gợi ý, admin
 process.env.NODE_ENV = 'test';
+process.env.OTP_REQUIRED = '0'; // test này kiểm thứ khác, không đi qua bước nhập mã OTP (otp.test.js kiểm riêng)
 process.env.SEED_PASSWORD = 'Test@2026';
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');

@@ -1,4 +1,5 @@
 const service = require('./auth.service');
+const otp = require('./otp.service');
 const asyncHandler = require('../../utils/asyncHandler');
 
 exports.register = asyncHandler(async (req, res) => {
@@ -38,3 +39,16 @@ exports.logout =asyncHandler(async (req, res) => {
 
 // FE (authGuard) hỏi endpoint này: 200 + user nếu còn phiên, 401 nếu không
 exports.profile = (req, res) => res.json({ data: req.user });
+
+exports.otpSend = asyncHandler(async (req, res) => {
+  res.json({ data: await otp.send(req.body.phone, req.body.purpose) });
+});
+
+exports.otpVerify = asyncHandler(async (req, res) => {
+  res.json({ data: await otp.verify(req.body.phone, req.body.purpose, req.body.code) });
+});
+
+exports.passwordReset = asyncHandler(async (req, res) => {
+  await service.resetPassword(req.body);
+  res.status(204).end();
+});

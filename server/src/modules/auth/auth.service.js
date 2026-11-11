@@ -2,14 +2,26 @@ const bcrypt = require('bcryptjs');
 const User = require('../shared/user.model');
 const ApiError = require('../../utils/ApiError');
 const { OAuth2Client } = require('google-auth-library');
-const { googleClientId } = require('../../config/env');
+const { googleClientId, otpRequired } = require('../../config/env');
+const otp = require('./otp.service');
 
 const googleClient = new OAuth2Client(googleClientId);
 
 // Đăng ký công khai LUÔN là enduser: không nhận role từ client (zod đã bỏ field lạ, ở đây ép cứng thêm một lần)
 async function register({ name, phone, password, area }) {
   if (await User.exists({ phone })) throw ApiError.duplicate('Số điện thoại đã được đăng ký');
-  return User.create({ name, phone, area, role: 'enduser', password: await bcrypt.hash(password, 10) });
+  if (otpRequired) await otp.consume(phone, 'register'); // phải vừa nhập đúng mã gửi tới số này
+  return User.create({ name, phone, area, role: 'enduser', password: await bcrypt.hash(password, 10), phoneVerifiedAt: otpRequired ? new Date() : undefined });
+}
+
+// Quên mật khẩu: chỉ đổi được sau khi nhập đúng mã gửi tới số đó
+async function resetPassword({ phone, password }) {
+  if (otpRequired) await otp.consume(phone, 'reset');
+  const user = await User.findOne({ phone }).select('+password status');
+  if (!user || user.status === 'locked') throw ApiError.invalidState('Không đặt lại được mật khẩu cho số này');
+  user.password = await bcrypt.hash(password, 10);
+  if (!user.phoneVerifiedAt && otpRequired) user.phoneVerifiedAt = new Date();
+  await user.save();
 }
 
 // Cho form đăng ký báo "đã đăng ký" ngay ở bước nhập số (đăng ký vốn đã lộ điều này qua lỗi 409)
@@ -85,4 +97,4 @@ function endSession(req, res) {
   });
 }
 
-module.exports = { register, phoneTaken, verifyLogin, googleLogin, googleComplete, startSession, endSession };
+module.exports = { register, resetPassword, phoneTaken, verifyLogin, googleLogin, googleComplete, startSession, endSession };

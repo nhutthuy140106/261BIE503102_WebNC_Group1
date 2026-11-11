@@ -190,11 +190,25 @@ export class AuthService {
     return of(void 0);
   }
 
-  /** Quên mật khẩu: đặt mật khẩu mới sau khi xác nhận mã. Mock luôn thành công; API thật chờ máy chủ có điểm cuối. */
+  /** Gửi mã OTP tới số điện thoại (đăng ký hoặc quên mật khẩu). Mock: không gửi gì, nhập 6 số bất kỳ. Thật: server giả lập, ngoài production trả thêm `devCode` để thử. */
+  sendOtp(phone: string, purpose: 'register' | 'reset'): Observable<{ devCode?: string; resendInSec?: number }> {
+    if (useMock('auth')) return of({});
+    return this.http
+      .post<{ data: { devCode?: string; resendInSec?: number } }>(`${API_BASE}/auth/otp/send`, { phone, purpose }, { withCredentials: true })
+      .pipe(map((r) => r.data), catchError(toAppError));
+  }
+
+  /** Nhập mã OTP. Mock luôn đúng. Thật: server kiểm mã (hạn 5 phút, sai tối đa 5 lần). */
+  verifyOtp(phone: string, purpose: 'register' | 'reset', code: string): Observable<void> {
+    if (useMock('auth')) return of(void 0);
+    return this.http.post<unknown>(`${API_BASE}/auth/otp/verify`, { phone, purpose, code }, { withCredentials: true }).pipe(map(() => void 0), catchError(toAppError));
+  }
+
+  /** Quên mật khẩu: đặt mật khẩu mới sau khi đã nhập đúng mã (verifyOtp, purpose reset). Mock luôn thành công. */
   resetPassword(phone: string, password: string): Observable<void> {
-    if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
     if (!phone || password.length < 8) return throwError(() => new AppError('Mật khẩu chưa hợp lệ.', 422, 'VALIDATION_ERROR'));
-    return of(void 0);
+    if (useMock('auth')) return of(void 0);
+    return this.http.post<unknown>(`${API_BASE}/auth/password/reset`, { phone, password }, { withCredentials: true }).pipe(map(() => void 0), catchError(toAppError));
   }
 
   /** Hỏi server phiên còn hiệu lực không (GET /api/auth/profile: 200 hay 401). */
