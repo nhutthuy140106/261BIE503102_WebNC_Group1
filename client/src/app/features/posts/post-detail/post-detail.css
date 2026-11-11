@@ -350,10 +350,10 @@
 .rbtn:disabled { background: #D9D3CF; }
 .modal footer .ghostbtn { height: 44px; padding: 0 14px; background: none; color: var(--smoke); text-decoration: underline; text-underline-offset: 3px; font: inherit; }
 
-.done { padding: 28px 28px 26px; display: grid; justify-items: center; gap: 10px; text-align: center; overflow-y: auto; min-height: 0; }
-.done .mascot { width: 150px; margin-bottom: 2px; }
-.done h2 { margin: 0; font-size: 22px; }
-.done .sub2 { margin: 0; color: var(--smoke); line-height: 1.5; max-width: 340px; }
+.done { padding: 18px 24px 22px; display: grid; justify-items: center; gap: 8px; text-align: center; overflow-y: auto; min-height: 0; }
+.done .mascot { width: 84px; margin-bottom: 0; }
+.done h2 { margin: 0; font-size: 20px; }
+.done .sub2 { margin: 0; color: var(--smoke); line-height: 1.45; max-width: 400px; font-size: 14px; }
 .recap { width: 100%; margin: 12px 0 0; border: 1px solid #E6E8EC; border-radius: 12px; text-align: left; }
 .recap div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 14px; border-top: 1px solid #E6E8EC; font-size: 14px; }
 .recap div:first-child { border-top: 0; }
