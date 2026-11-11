@@ -72,7 +72,8 @@ const { optionalAuth } = require('../../../middlewares/auth');
  */
 const wrap = (fn) => asyncHandler(async (req, res) => {
   const out = await fn(req);
-  res.json(out.items ? { data: out.items, meta: out.meta } : { data: out });
+  // Danh sách phân trang = { items, meta }. Không dùng riêng `items` để nhận biết: Post có trường `items` (thực đơn nhiều món)
+  res.json(out && out.meta && Array.isArray(out.items) ? { data: out.items, meta: out.meta } : { data: out });
 });
 
 router.get('/posts', query(v.posts), wrap((req) => service.listPosts(req.valid.query)));

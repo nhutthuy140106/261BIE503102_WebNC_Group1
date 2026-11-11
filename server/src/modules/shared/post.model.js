@@ -12,6 +12,24 @@ const optionGroup = new Schema({
   choices: [{ label: { type: String, required: true }, price: { type: Number, default: 0 }, _id: false }],
 }, { _id: false });
 
+// Câu hỏi riêng. type: text = ô chữ · choice = chọn 1 · multi = chọn nhiều · photo = ảnh
+const question = new Schema({
+  type: { type: String, enum: ['text', 'choice', 'multi', 'photo'], default: 'text' },
+  label: { type: String, required: true },
+  required: { type: Boolean, default: false },
+  opts: [String], ph: String, long: Boolean, hint: String,
+  pay: Boolean,                                     // câu "Cần trả tiền giùm?"
+}, { _id: false });
+
+// Món trong thực đơn / dòng trong bảng giá dịch vụ — bài nhiều món gom vào MỘT Post
+const item = new Schema({
+  id: String, name: { type: String, required: true }, price: { type: Number, default: 0, min: 0 }, unit: String,
+  dailyQty: Number,                                 // số phần/ngày; bỏ trống = không giới hạn
+  optionGroups: [optionGroup],
+}, { _id: false });
+
+const sub = (def) => ({ type: new Schema(def, { _id: false }), default: undefined });
+
 const postSchema = new Schema({
   type: { type: String, enum: ['food', 'goods', 'service'], required: true, index: true },
   category: String,
@@ -26,15 +44,8 @@ const postSchema = new Schema({
   acceptsXu: { type: Boolean, default: false },
   // 7 khối (rút gọn) — Q2
   optionGroups: [optionGroup],
-  // Khối 6 — câu hỏi riêng (docs/post-contract.md). type: text = ô chữ · choice = chọn 1 · multi = chọn nhiều · photo = ảnh
-  questions: [{
-    type: { type: String, enum: ['text', 'choice', 'multi', 'photo'], default: 'text' },
-    label: { type: String, required: true },
-    required: { type: Boolean, default: false },
-    opts: [String], ph: String, long: Boolean, hint: String,
-    pay: Boolean,                                   // câu "Cần trả tiền giùm?"
-    _id: false,
-  }],
+  // Khối 6 — câu hỏi riêng (docs/post-contract.md)
+  questions: [question],
   fulfillmentModes: { type: [String], enum: ['delivery', 'pickup'], default: ['pickup'] },
   deliveryFee: { type: Number, default: 0 },
   needSchedule: { type: Boolean, default: false },
@@ -69,6 +80,29 @@ const postSchema = new Schema({
     }, { _id: false }),
     default: undefined,
   },
+  // ---- Các khối còn lại theo docs/post-contract.md (phía Bán điền, phía Mua đọc) ----
+  priceType: { type: String, enum: ['fixed', 'unit', 'from', 'quote'] },   // khối 1: cách tính giá (`price` là giá đại diện)
+  estimate: Boolean,                                  // giá theo đơn vị chỉ là ước tính
+  inspectFee: { type: Number, min: 0 },               // phí kiểm tra khi báo giá sau
+  items: [item],                                      // thực đơn nhiều món / bảng giá
+  serviceMenu: [{ name: { type: String, required: true }, optionGroups: [optionGroup], questions: [question], _id: false }], // dọn dẹp: mỗi dịch vụ có tùy chọn + câu hỏi riêng
+  bookOnce: Boolean, noSchedule: Boolean, repeat: Boolean, pickupAtBuyer: Boolean, noteEnabled: Boolean,
+  quickOptions: [String],                             // đồ ăn/uống: tùy chọn nhanh khách tick, không tính tiền
+  freeShipFrom: { type: Number, min: 0 },
+  timeLabel: String,                                  // tên dòng giờ trong khung đặt ("Giờ giao hàng")
+  timeMode: { type: String, enum: ['slot', 'datedur', 'stay'] },           // khối 3
+  dates: [String],                                    // yyyy-mm-dd: ngày bán / ngày làm
+  duration: sub({ min: Number, max: Number }),
+  orderWindow: sub({ from: String, to: String, days: [Number] }),          // khung giờ nhận đơn
+  prepMinutes: Number,                                // đồ ăn/uống: thời gian chuẩn bị
+  handover: sub({ from: String, to: String }),        // khung giờ khách chọn hẹn
+  place: sub({ mode: { type: String, enum: ['buyer', 'seller', 'choice', 'ab', 'none'] }, where: String }), // khối 4
+  serviceInfo: sub({ turnaround: String, warranty: String, area: String }),
+  condition: sub({ level: String, note: String }),    // đồ dùng: độ mới + mô tả lỗi
+  highlights: [{ icon: { type: String, enum: ['clock', 'bolt', 'pin', 'check', 'receipt'] }, label: String, value: String, _id: false }], // 3 ô đầu bài
+  info: [{ label: String, value: String, _id: false }],                    // thông tin người bán điền, hiện dưới Mô tả
+  promoted: { type: Boolean, default: false },        // do HỆ THỐNG gán khi trả Xu, người bán không nhập
+  spinPromo: { type: Boolean, default: false },
   status: { type: String, enum: ['draft', 'open', 'soldout', 'closed', 'hidden'], default: 'open', index: true },
   hiddenReason: { type: String, default: '' },        // Admin gỡ bài: lý do
   statusBeforeHidden: String,                         // để mở lại đúng trạng thái cũ

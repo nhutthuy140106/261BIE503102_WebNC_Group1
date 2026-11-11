@@ -31,6 +31,10 @@ export function userFromApi(u: Raw): User {
   };
 }
 
+/** Mongo luôn trả mảng rỗng cho mảng chưa điền; FE hiểu "không có dữ liệu" là undefined. */
+const arr = <T>(a: T[] | undefined | null): T[] | undefined => (Array.isArray(a) && a.length ? a : undefined);
+const obj = <T>(o: T | undefined | null): T | undefined => (o && typeof o === 'object' ? o : undefined);
+
 export function postFromApi(p: Raw): Post {
   return {
     _id: p._id,
@@ -57,6 +61,37 @@ export function postFromApi(p: Raw): Post {
     orderWindow: p.orderWindow?.from && p.orderWindow?.to ? { from: p.orderWindow.from, to: p.orderWindow.to, days: p.orderWindow.days ?? [] } : undefined,
     promo: p.promo && p.promo.active !== false ? { kind: p.promo.kind, value: p.promo.value, from: p.promo.from, to: p.promo.to, days: p.promo.days ?? [], active: true } : undefined,
     combo: p.combo?.items?.length ? { items: p.combo.items.map((i: Raw) => ({ postId: String(i.postId), qty: i.qty })), comboPrice: p.combo.comboPrice, listPrice: p.combo.listPrice } : undefined,
+    // ---- các khối theo docs/post-contract.md ----
+    status: p.status,
+    stock: p.stock?.mode ? { mode: p.stock.mode, left: p.stock.left } : undefined,
+    areas: arr(p.areas),
+    payMethods: arr(p.payMethods),
+    // `bank` không có trong API công khai (server để select:false) — chỉ về cùng đơn của người đã đặt
+    bank: p.bank?.no ? { bankName: p.bank.bankName ?? '', no: p.bank.no, holder: p.bank.holder ?? '', qr: p.bank.qr || undefined } : undefined,
+    priceType: p.priceType || undefined,
+    estimate: p.estimate || undefined,
+    inspectFee: p.inspectFee ?? undefined,
+    items: arr(p.items)?.map((i: Raw) => ({ id: i.id ?? i.name, name: i.name, price: i.price ?? 0, unit: i.unit || undefined, dailyQty: i.dailyQty ?? undefined, optionGroups: arr(i.optionGroups) })),
+    serviceMenu: arr(p.serviceMenu)?.map((m: Raw) => ({ name: m.name, optionGroups: m.optionGroups ?? [], questions: m.questions ?? [] })),
+    bookOnce: p.bookOnce || undefined,
+    noSchedule: p.noSchedule || undefined,
+    repeat: p.repeat || undefined,
+    pickupAtBuyer: p.pickupAtBuyer || undefined,
+    noteEnabled: p.noteEnabled ?? undefined,
+    quickOptions: arr(p.quickOptions),
+    freeShipFrom: p.freeShipFrom ?? undefined,
+    timeLabel: p.timeLabel || undefined,
+    timeMode: p.timeMode || undefined,
+    dates: arr(p.dates),
+    duration: p.duration?.min != null ? { min: p.duration.min, max: p.duration.max ?? p.duration.min } : undefined,
+    prepMinutes: p.prepMinutes ?? undefined,
+    handover: p.handover?.from ? { from: p.handover.from, to: p.handover.to ?? '' } : undefined,
+    place: p.place?.mode ? { mode: p.place.mode, where: p.place.where || undefined } : undefined,
+    serviceInfo: obj(p.serviceInfo),
+    condition: p.condition?.level ? { level: p.condition.level, note: p.condition.note || undefined } : undefined,
+    highlights: arr(p.highlights),
+    info: arr(p.info),
+    promoted: p.promoted || undefined,
     comboDetail: p.comboDetail
       ? {
           items: p.comboDetail.items.map((i: Raw) => ({ postId: String(i.postId), qty: i.qty, title: i.title, unitPrice: i.unitPrice, unit: i.unit || undefined, image: i.image || undefined, available: i.available !== false })),
