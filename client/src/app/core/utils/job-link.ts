@@ -19,6 +19,7 @@ export function toSellerOffer(o: Offer): SellerOffer {
     intro: o.intro,
     state: o.state,
     report: o.reportNote ? { note: o.reportNote, at: reportedAt ? formatDateTime(reportedAt) : '', photos: 0 } : undefined,
+    reportedAt,
     rated: o.posterRated ?? null,
   };
 }

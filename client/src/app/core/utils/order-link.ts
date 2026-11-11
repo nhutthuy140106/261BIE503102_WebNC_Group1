@@ -83,6 +83,7 @@ export function toSellerOrder(order: Order, post: Post, body: CreateOrderBody, s
     flow,
     quote: null,
     history: [['waiting', hm(now)]],
+    placedAt: order.createdAt ?? now.toISOString(),
   };
 }
 
@@ -100,7 +101,9 @@ export function applyBuyerChange(t: SellerOrder, o: Order, now = new Date()): bo
   if (moved) {
     t.state = state;
     t.history.push([state, hm(now)]);
+    t.stepAt = now.toISOString();
   }
+  if (o.cancelRequested && !t.cancelRequest) t.cancelAt = now.toISOString();
   t.cancelRequest = o.cancelRequested ? o.cancelWhy || 'Khách xin hủy đơn' : null;
   if (o.surcharge) t.surcharge = o.surcharge.state === 'declined' ? null : { amount: o.surcharge.amount, reason: o.surcharge.reason, ok: o.surcharge.state === 'approved' };
   if (o.priceDone && t.quote) t.quote.ok = true;

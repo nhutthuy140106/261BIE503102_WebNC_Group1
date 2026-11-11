@@ -6,6 +6,7 @@ import { KIND_LABEL } from '../../../core/models/post';
 import { SELLER_KIND_ICON, SellerOrderState } from '../../../core/models/seller';
 import { SellerOrderAct, SellerSpaceService, dayLabel } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
+import { dueText } from '../../../core/utils/countdown';
 import { parseMoney } from '../components/money-input/money-input';
 
 /** Câu hướng dẫn ở khung hành động, theo bước hiện tại */
@@ -86,6 +87,13 @@ export class SellerOrderDetail implements OnInit {
     this.seller.load().subscribe(() => {
       if (openQuote && this.o()?.state === 'picked') this.act('quote');
     });
+  }
+
+  /** Hạn xử lý của bước hiện tại, đếm ngược mỗi giây */
+  protected dueView(): { text: string; hot: boolean } | null {
+    const o = this.o();
+    const d = o && this.seller.orderDeadline(o);
+    return d ? dueText(d, this.seller.now()) : null;
   }
 
   protected guideText(): string {

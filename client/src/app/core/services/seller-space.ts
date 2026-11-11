@@ -1,3 +1,4 @@
+import { Deadline, LIMITS } from '../utils/countdown';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, switchMap, tap } from 'rxjs';
@@ -56,6 +57,8 @@ export interface SellerTask {
   /** nhãn góc trái (mặc định tên mảng) */
   tag?: string;
   due?: string;
+  /** Hạn xử lý (đếm ngược trên thẻ) — xem core/utils/countdown.ts */
+  deadline?: Deadline;
   status: string;
   /** dòng nhỏ trên tên: mã đơn / mã việc / tên bài */
   top: string;
@@ -121,6 +124,7 @@ export const toMin = (t: string): number => {
   return m ? +m[1] * 60 + +m[2] : 0;
 };
 const money = (n: number) => `${Number(n || 0).toLocaleString('vi-VN')}đ`;
+const MIN = 60_000;
 const nowHm = (): string => new Date().toTimeString().slice(0, 5);
 export const dateOf = (d: number): Date => {
   const x = new Date();
@@ -167,7 +171,17 @@ export class SellerSpaceService {
   readonly reviews = computed(() => this.state()?.reviews ?? []);
   readonly chats = computed(() => this.state()?.chats ?? []);
 
+  /** Đồng hồ chung: thẻ đếm ngược đọc mỗi giây */
+  readonly now = signal(Date.now());
+  /** Việc đã tự xử lý trong phiên này (tránh làm hai lần trước khi dữ liệu kịp đổi) */
+  private readonly expired = new Set<string>();
+
   constructor() {
+    if (typeof window !== 'undefined')
+      setInterval(() => {
+        this.now.set(Date.now());
+        this.expire();
+      }, 1000);
     // tab phía Mua vừa đặt đơn / đổi đơn: trang Bán đang mở thấy ngay, không cần tải lại
     this.db.changes.subscribe((name) => {
       if (name === 'offers' || name === 'questions') return this.refreshShared();
@@ -267,8 +281,106 @@ export class SellerSpaceService {
         stars: r.stars, avatar: r.by.avatar, note: `“${r.text}”`, noteIcon: 'chat', reviewId: r.id, rank: 6,
       });
     }
-    return out.sort((a, b) => a.rank - b.rank).map(({ rank: _r, ...t }) => t);
+    return out.sort((a, b) => a.rank - b.rank).map(({ rank: _r, ...t }) => ({ ...t, deadline: this.taskDeadline(t) ?? undefined }));
   });
+
+  /** Giờ hẹn của đơn / việc (mốc tuyệt đối) */
+  private apptAt(day: number, time: string): number {
+    return dateOf(day).getTime() + toMin(time) * MIN;
+  }
+
+  /**
+   * Hạn xử lý của đơn theo bước hiện tại (bảng chốt 11/11): xác nhận đơn (đồ ăn 10 phút, đồ dùng 12 giờ, dịch vụ 2 giờ
+   * và trước giờ hẹn 1 giờ) · trả lời xin hủy (12 giờ, không quá giờ hẹn) · báo giá (2 giờ sau khi lấy đồ) · bước tiếp theo (giờ hẹn).
+   */
+  orderDeadline(o: SellerOrder): Deadline | null {
+    const appt = this.apptAt(o.day, o.time);
+    const at = (iso?: string) => (iso ? Date.parse(iso) : NaN);
+    if (o.cancelRequest) {
+      const b = at(o.cancelAt);
+      return isNaN(b) ? null : { at: Math.min(b + LIMITS.cancel * MIN, appt), mode: 'auto' };
+    }
+    if (o.state === 'waiting') {
+      const b = at(o.placedAt);
+      if (isNaN(b)) return null;
+      if (o.kind === 'food') return { at: b + LIMITS.confirmFood * MIN, mode: 'cancel' };
+      if (o.kind === 'goods') return { at: b + LIMITS.confirmGoods * MIN, mode: 'cancel' };
+      return { at: Math.min(b + LIMITS.confirmService * MIN, appt - LIMITS.serviceBeforeAppt * MIN), mode: 'cancel' };
+    }
+    const next = this.nextStep(o);
+    if (!next) return null;
+    if (next[0] === 'quote') {
+      const b = at(o.stepAt);
+      return o.quote || isNaN(b) ? null : { at: b + LIMITS.quote * MIN, mode: 'remind' };
+    }
+    // bước phải làm đúng giờ hẹn: lấy đồ, bắt đầu làm, giao, báo khách đến lấy
+    if (['pickUp', 'prepare', 'deliver', 'ready'].includes(next[0]))
+      return { at: appt, mode: 'late', prefix: `${o.flow === 'laundry' ? 'Hẹn lấy' : o.kind === 'service' ? 'Hẹn' : 'Giao'} lúc ${o.time}` };
+    return null;
+  }
+
+  private taskDeadline(t: SellerTask): Deadline | null {
+    if (t.orderId && (t.type === 'order' || t.type === 'cancel' || t.type === 'step')) {
+      const o = this.state()?.orders.find((x) => x.id === t.orderId);
+      return o ? this.orderDeadline(o) : null;
+    }
+    const j = t.jobId ? this.jobs().find((x) => x.id === t.jobId) : undefined;
+    if (!j) return null;
+    // chọn người: trước giờ bắt đầu việc 1 giờ
+    if (t.type === 'pick') return { at: this.apptAt(j.day, j.time) - LIMITS.pickBefore * MIN, mode: 'auto' };
+    if (t.type === 'done') {
+      const b = Date.parse(j.offers.find((x) => x.id === t.offerId)?.reportedAt ?? '');
+      return isNaN(b) ? null : { at: b + LIMITS.confirmDone * MIN, mode: 'auto' };
+    }
+    return null;
+  }
+
+  /**
+   * Hết hạn thì tự làm (chỉ chạy khi app đang mở; mở lại thì làm bù): đơn chưa xác nhận tự hủy · khách xin hủy thì tự đồng ý ·
+   * việc chưa chọn người thì đóng và báo người đề nghị · người làm báo xong thì tự xác nhận hoàn thành.
+   */
+  private expire(): void {
+    if (!this.state()) return;
+    const now = this.now();
+    for (const t of this.tasks()) {
+      const d = t.deadline;
+      if (!d || d.at > now || (d.mode !== 'cancel' && d.mode !== 'auto') || this.expired.has(t.key)) continue;
+      this.expired.add(t.key);
+      if (t.type === 'order' && t.orderId) {
+        this.orderAct(t.orderId, 'decline', { reason: 'Người bán không xác nhận kịp, đơn tự hủy' });
+        this.notifications.push(`Đơn ${t.top} tự hủy vì quá hạn xác nhận`, `/seller/orders/${t.orderId}`);
+      } else if (t.type === 'cancel' && t.orderId) {
+        this.orderAct(t.orderId, 'approveCancel');
+        this.notifications.push(`Đơn ${t.top} đã tự đồng ý hủy vì quá hạn trả lời`, `/seller/orders/${t.orderId}`);
+      } else if (t.type === 'pick' && t.jobId) {
+        const j = this.jobs().find((x) => x.id === t.jobId);
+        j?.waiting.forEach((o) => this.offerAct(j.id, o.id, 'reject'));
+        this.setJobClosed(t.jobId, true);
+        this.notifications.push(`${t.title}: đã tự đóng vì tới hạn chọn người (trước giờ làm 1 giờ)`, `/seller/jobs/${t.jobId}`);
+      } else if (t.type === 'done' && t.jobId && t.offerId) {
+        this.offerAct(t.jobId, t.offerId, 'confirmDone');
+        this.notifications.push(`${t.title}: đã tự xác nhận hoàn thành sau 24 giờ`, `/seller/jobs/${t.jobId}`);
+      }
+    }
+  }
+
+  /** Dữ liệu mẫu / bản đã lưu trước khi có mốc thời gian: bắt đầu tính hạn từ lúc mở */
+  private fillTimes(): void {
+    const s = this.state();
+    const nowIso = new Date().toISOString();
+    const missing =
+      s?.orders.some((o) => (o.state === 'waiting' && !o.placedAt) || (o.cancelRequest && !o.cancelAt) || (o.flow && o.state === 'picked' && !o.stepAt)) ||
+      s?.jobs.some((j) => j.offers.some((o) => o.state === 'reported' && !o.reportedAt));
+    if (!missing) return;
+    this.patch((x) => {
+      for (const o of x.orders) {
+        if (o.state === 'waiting' && !o.placedAt) o.placedAt = nowIso;
+        if (o.cancelRequest && !o.cancelAt) o.cancelAt = nowIso;
+        if (o.flow && o.state === 'picked' && !o.stepAt) o.stepAt = nowIso;
+      }
+      for (const j of x.jobs) for (const o of j.offers) if (o.state === 'reported' && !o.reportedAt) o.reportedAt = nowIso;
+    });
+  }
 
   /**
    * Bước người bán phải làm tiếp với đơn đã nhận, chỉ khi gần tới giờ hẹn (đồ ăn trước 60 phút, dịch vụ trước 2 giờ,
@@ -311,7 +423,10 @@ export class SellerSpaceService {
     if (cur) return of(cur);
     return this.db.list<SellerSpace>(SellerSpaceService.NAME).pipe(
       switchMap((rows) => (rows[0]?.version === SellerSpaceService.VERSION ? of(structuredClone(rows[0])) : this.reset(rows[0]?.posts))),
-      tap((s) => this.state.set(s)),
+      tap((s) => {
+        this.state.set(s);
+        this.fillTimes();
+      }),
     );
   }
 
@@ -636,6 +751,7 @@ export class SellerSpaceService {
       t.cancelRequest = null;
       if (a === 'decline') t.declineReason = data.reason || 'Người bán không nhận được đơn';
       t.history.push([to, nowHm()]);
+      t.stepAt = new Date().toISOString();
       // số lượng trên bài đi theo đơn: hủy trả lại phần, xác nhận đồ dùng / lịch dịch vụ thì trừ đi
       if (!t.buyerOrderId && a === 'approveCancel' && t.kind === 'food') t.items.forEach((i) => stockBy(i.name, i.qty));
       if (!t.buyerOrderId && a === 'confirm' && t.kind !== 'food') t.items.forEach((i) => stockBy(i.name, -i.qty, t.kind === 'goods'));

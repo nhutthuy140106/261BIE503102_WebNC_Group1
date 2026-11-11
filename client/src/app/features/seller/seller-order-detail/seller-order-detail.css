@@ -21,3 +21,9 @@
 .qedit .btn { width: 38px; height: 38px; padding: 0; margin: 0; }
 .ansphotos { display: flex; flex-wrap: wrap; gap: 8px; }
 .ansphoto img { display: block; width: 96px; height: 96px; border-radius: 10px; object-fit: cover; }
+
+/* hạn xử lý của bước hiện tại, đếm ngược mỗi giây */
+.dueline { display: inline-flex; align-items: center; gap: 6px; margin: 8px 0 0; padding: 4px 10px; border-radius: 999px; background: #fff6f1; font-size: 13px; font-weight: 600; color: var(--ink); }
+.dueline svg { width: 14px; height: 14px; color: var(--accent); }
+.dueline.hot { background: #fdecea; color: #b3261e; }
+.dueline.hot svg { color: #b3261e; }

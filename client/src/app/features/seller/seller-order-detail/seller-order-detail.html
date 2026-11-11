@@ -84,10 +84,11 @@
     <aside class="side">
       <div class="panel">
         <div class="now"><span class="stat" [class]="'stat ' + o.cls">{{ o.cancelRequest ? 'Khách xin hủy' : o.label }}</span></div>
+        @if (dueView(); as d) { <p class="dueline" [class.hot]="d.hot"><svg class="i"><use href="#clock" /></svg>{{ d.text }}</p> }
         @if (o.cancelRequest) {
           <div class="warn"><b>Khách xin hủy đơn</b>“{{ o.cancelRequest }}”</div>
         } @else {
-          <p>{{ guideText() }}@if (o.state === 'waiting' && o.due) { <b class="due"> {{ o.due }}.</b> }</p>
+          <p>{{ guideText() }}</p>
         }
         @switch (form()) {
           @case ('decline') {

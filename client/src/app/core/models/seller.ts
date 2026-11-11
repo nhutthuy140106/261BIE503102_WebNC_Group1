@@ -93,6 +93,10 @@ export interface SellerOrder {
   /** Chữ hạn xử lý trên thẻ ("Còn 12 phút") */
   due?: string;
   history: [SellerOrderState, string][];
+  /** Mốc thời gian (ISO) để đếm ngược hạn xử lý: lúc khách đặt · lúc khách xin hủy · lúc đơn đổi bước gần nhất */
+  placedAt?: string;
+  cancelAt?: string;
+  stepAt?: string;
   reviewId?: string;
   /** Đơn do khách đặt thật ở phía Mua: `_id` của Order tương ứng (cùng một đơn, hai bên đổi bước theo nhau) */
   buyerOrderId?: string;
@@ -113,6 +117,8 @@ export interface SellerOffer {
   /** ngày làm của riêng đề nghị này (việc lặp) */
   day?: number;
   report?: { note: string; at: string; photos: number };
+  /** Lúc người làm báo xong (ISO): hạn xác nhận hoàn thành tính từ đây */
+  reportedAt?: string;
   rated?: { stars: number; text: string } | null;
 }
 
