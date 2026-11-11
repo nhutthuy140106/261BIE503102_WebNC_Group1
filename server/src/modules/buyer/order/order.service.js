@@ -9,6 +9,9 @@ const xu = require('../xu/xu.service');
 const { effectivePrice } = require('../../../utils/promo');
 const { compute: computeTracking, canTrack } = require('./tracking');
 
+// Bài giới hạn số lượng (stock.mode = 'limit'): chỉ loại này mới trừ kho theo từng đơn
+const isLimited = (p) => !!p.stock && p.stock.mode === 'limit' && typeof p.stock.left === 'number';
+
 // Voucher AntXu tạm (Q11): sau này lấy từ model Voucher. Chỉ áp cho bài có acceptsXu.
 const VOUCHERS = { XU10: { amount: 10000 }, XU5: { amount: 5000 } };
 
@@ -84,7 +87,7 @@ async function prepare(user, input) {
   const post = await Post.findById(input.postId).populate('seller', 'name avatar');
   if (!post) throw ApiError.notFound('Bài không tồn tại');
   if (post.status !== 'open') throw ApiError.invalidState('Bài đã hết hàng, đã đóng hoặc không còn hiển thị');
-  if (post.stock !== null && post.stock < input.quantity) throw ApiError.invalidState('Không đủ số lượng còn lại');
+  if (isLimited(post) && post.stock.left < input.quantity) throw ApiError.invalidState('Không đủ số lượng còn lại');
   if (String(post.seller._id) === String(user._id)) throw ApiError.forbidden('Bạn không thể đặt bài của chính mình');
 
   const xuVoucher = await xu.findVoucher(user._id, input.voucherCode);
@@ -98,7 +101,7 @@ async function prepare(user, input) {
     components = post.combo.items.map((i) => ({ post: byId.get(String(i.postId)), qty: i.qty }));
     for (const { post: p, qty } of components) {
       if (!p || p.status !== 'open') throw ApiError.invalidState(`Món "${p ? p.title : 'trong combo'}" hiện không còn bán nên chưa đặt được combo này`);
-      if (p.stock !== null && p.stock < qty * input.quantity) throw ApiError.invalidState(`Món "${p.title}" trong combo không đủ số lượng`);
+      if (isLimited(p) && p.stock.left < qty * input.quantity) throw ApiError.invalidState(`Món "${p.title}" trong combo không đủ số lượng`);
     }
   }
 
@@ -117,11 +120,11 @@ async function commit(user, input, { post, priced, address, xuVoucher, component
   // giữ voucher trước khi trừ kho: mất lượt dùng thì dừng sớm, chưa đụng tới tồn kho
   if (xuVoucher && !(await xu.claimVoucher(xuVoucher.doc))) throw ApiError.invalidState('Voucher đã được dùng cho đơn khác');
   // trừ tồn kho nguyên tử: tránh hai người cùng đặt món cuối cùng
-  if (post.stock !== null) {
-    const r = await Post.updateOne({ _id: post._id, stock: { $gte: input.quantity } }, { $inc: { stock: -input.quantity } });
+  if (isLimited(post)) {
+    const r = await Post.updateOne({ _id: post._id, 'stock.left': { $gte: input.quantity } }, { $inc: { 'stock.left': -input.quantity } });
     if (r.modifiedCount === 0) throw ApiError.invalidState('Không đủ số lượng còn lại');
-    if (post.stock - input.quantity === 0) await Post.updateOne({ _id: post._id }, { status: 'soldout' });
-  } else if (post.oneTime) {
+    if (post.stock.left - input.quantity === 0) await Post.updateOne({ _id: post._id }, { status: 'soldout' });
+  } else if (post.stock && post.stock.mode === 'once') {
     const r = await Post.updateOne({ _id: post._id, status: 'open' }, { status: 'soldout' });
     if (r.modifiedCount === 0) throw ApiError.invalidState('Bài đã được bán');
   }
@@ -130,15 +133,15 @@ async function commit(user, input, { post, priced, address, xuVoucher, component
   const taken = [];
   try {
     for (const { post: p, qty } of components) {
-      if (p.stock === null) continue;
+      if (!isLimited(p)) continue;
       const need = qty * input.quantity;
-      const r = await Post.updateOne({ _id: p._id, stock: { $gte: need } }, { $inc: { stock: -need } });
+      const r = await Post.updateOne({ _id: p._id, 'stock.left': { $gte: need } }, { $inc: { 'stock.left': -need } });
       if (r.modifiedCount === 0) throw ApiError.invalidState(`Món "${p.title}" trong combo không đủ số lượng`);
       taken.push([p._id, need]);
-      if (p.stock - need === 0) await Post.updateOne({ _id: p._id }, { status: 'soldout' });
+      if (p.stock.left - need === 0) await Post.updateOne({ _id: p._id }, { status: 'soldout' });
     }
   } catch (e) {
-    for (const [id, n] of taken) await Post.updateOne({ _id: id }, { $inc: { stock: n }, status: 'open' });
+    for (const [id, n] of taken) await Post.updateOne({ _id: id }, { $inc: { 'stock.left': n }, status: 'open' });
     if (xuVoucher) await xu.restoreVoucher(user._id, xuVoucher.doc.code);
     throw e;
   }

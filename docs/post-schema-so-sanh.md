@@ -79,3 +79,9 @@ Khối riêng theo loại bài (chỉ có khi đúng loại):
 - Mảng có khuôn dùng sub-schema `_id: false` như `optionGroup` hiện tại. **Không** dùng `Mixed` / JSON tự do, vì sẽ không kiểm tra và lọc được.
 - Viết `post.mapper` ở server (và giữ `post-mapper.ts` ở FE) để đổi tên trường ở một chỗ.
 - Cập nhật `seeds/data.js` sau khi chốt khuôn, tăng `DATA_VERSION` theo CLAUDE.md.
+
+## 7. Cập nhật 11/11 — đợt 1 đã làm ở server
+
+> Lưu ý: bảng trên viết trước khi đối chiếu với `docs/post-contract.md` (hợp đồng Khải chốt 03/11). Hợp đồng đã chọn đúng hướng ở mục 5 (`stock {mode,left}`, `kind`, `status` có `draft`, `questions` đủ trường); `price` dạng object cũng đã chốt nhưng FE chưa đổi (còn `price` + `priceUnit`). Hợp đồng tự mâu thuẫn ở `bank`: bảng "Trường chung" (05/11) ghi bank theo từng bài, mục "Thông tin nhận tiền" ghi ở hồ sơ người bán — **cần chốt một**.
+
+Đã sửa `server/src/modules/shared/post.model.js`: `stock { mode, left }` (bỏ `oneTime`), `questions` đủ 8 trường, `status` thêm `draft`, thêm `areas[]`, `payMethods[]`, `bank` (`select: false`, không trả ra API công khai). `order.service.js` trừ kho theo `stock.left`. Dữ liệu cũ: `node server/scripts/migrate-stock.js` (chạy thử) / `--apply` (ghi). Seed tự đổi `stock`/`oneTime` cũ. Chưa làm: `bank` chưa được trả cho người đã đặt đơn; chưa có API tạo bài phía Bán (`/seller/posts` mà FE gọi ở chế độ thật chưa tồn tại).

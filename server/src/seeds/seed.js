@@ -74,11 +74,16 @@ async function seed() {
   await cleanup(Object.values(u).map((x) => x._id));
 
   /* ---------- Bài đăng ---------- */
+  // Dữ liệu mẫu cũ ghi `stock: số` / `oneTime: true`; model mới dùng stock { mode, left } (docs/post-contract.md, khối 7)
+  const toStock = ({ stock, oneTime, ...rest }) => ({
+    ...rest,
+    stock: oneTime ? { mode: 'once' } : typeof stock === 'number' ? { mode: 'limit', left: stock } : { mode: 'open' },
+  });
   const p = {};
   const promos = {}; // Giờ vàng gán SAU khi tạo đơn mẫu, để tổng tiền đơn mẫu không đổi theo giờ chạy seed
   for (const [i, { key, seller, daysAgo, images, promo, ...d }] of POSTS.entries()) {
     if (promo) promos[key] = promo;
-    p[key] = await Post.create({ ...d, seller: u[seller]._id, images: (images || []).map(img) });
+    p[key] = await Post.create({ ...toStock(d), seller: u[seller]._id, images: (images || []).map(img) });
     await backdate(Post, p[key]._id, ago(daysAgo * DAY + i * 17 * 60000));
   }
 
