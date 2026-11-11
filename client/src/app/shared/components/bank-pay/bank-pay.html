@@ -1,11 +1,11 @@
 <div class="bank">
   @if (qrSrc; as src) { <img class="qr" [src]="src" alt="Mã QR chuyển khoản" (error)="genFailed.set(true)" /> }
   <dl>
-    <dt>Ngân hàng</dt><dd>{{ bank.bankName }}</dd>
-    <dt>Số tài khoản</dt><dd>{{ bank.no }}</dd>
-    <dt>Chủ tài khoản</dt><dd>{{ bank.holder }}</dd>
-    @if (amount) { <dt>Số tiền</dt><dd>{{ amount | vnd }}</dd> }
-    @if (content) { <dt>Nội dung chuyển khoản</dt><dd>{{ content }}</dd> }
+    <div class="r"><dt>Ngân hàng</dt><dd>{{ bank.bankName }}</dd></div>
+    <div class="r"><dt>Số tài khoản</dt><dd>{{ bank.no }}</dd></div>
+    <div class="r"><dt>Chủ tài khoản</dt><dd>{{ bank.holder }}</dd></div>
+    @if (amount) { <div class="r"><dt>Số tiền</dt><dd>{{ amount | vnd }}</dd></div> }
+    @if (content) { <div class="r"><dt>Nội dung chuyển khoản</dt><dd>{{ content }}</dd></div> }
   </dl>
   @if (isGenerated) { <p class="hint">Quét bằng app ngân hàng hoặc MoMo — số tiền và nội dung đã điền sẵn.</p> }
 </div>
