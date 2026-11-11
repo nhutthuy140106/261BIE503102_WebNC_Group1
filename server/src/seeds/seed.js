@@ -77,11 +77,18 @@ async function seed() {
   // Dữ liệu mẫu cũ ghi `stock: số` / `oneTime: true`; model mới dùng stock { mode, left } (docs/post-contract.md, khối 7)
   const toStock = ({ stock, oneTime, ...rest }) => ({
     ...rest,
-    stock: oneTime ? { mode: 'once' } : typeof stock === 'number' ? { mode: 'limit', left: stock } : { mode: 'open' },
+    stock: oneTime ? { mode: 'once' }
+      : stock && typeof stock === 'object' ? stock                       // đã là kiểu mới (bài lấy từ client-posts.json)
+      : typeof stock === 'number' ? { mode: 'limit', left: stock } : { mode: 'open' },
   });
+  // Bài của bạn nhóm (khu Bán), sinh bằng `node scripts/build-client-posts.js` từ client/public/datasets/posts.json:
+  // extras = khối bổ sung cho bài đã có (theo tiêu đề); extra = bài chỉ có ở phía FE
+  const CLIENT = require('./client-posts.json');
   const p = {};
   const promos = {}; // Giờ vàng gán SAU khi tạo đơn mẫu, để tổng tiền đơn mẫu không đổi theo giờ chạy seed
-  for (const [i, { key, seller, daysAgo, images, promo, ...d }] of POSTS.entries()) {
+  const ALL_POSTS = [...POSTS.map((d) => ({ ...d, ...(CLIENT.extras[d.title] || {}) })),
+    ...CLIENT.extra.map((d, i) => ({ key: `fe${i}`, ...d }))];
+  for (const [i, { key, seller, daysAgo, images, promo, ...d }] of ALL_POSTS.entries()) {
     if (promo) promos[key] = promo;
     p[key] = await Post.create({ ...toStock(d), seller: u[seller]._id, images: (images || []).map(img) });
     await backdate(Post, p[key]._id, ago(daysAgo * DAY + i * 17 * 60000));

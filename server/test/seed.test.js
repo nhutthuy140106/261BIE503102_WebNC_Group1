@@ -96,7 +96,9 @@ test('seed dùng được qua API: Thủy thấy đơn, việc, đánh giá; bà
   const com = (await api('GET', '/posts?q=com nha')).body.data.find((x) => /^Cơm nhà làm/.test(x.title));
   const rv = (await api('GET', `/reviews?postId=${com._id}`)).body.data;
   assert.ok(rv.count >= 3 && rv.average >= 4 && rv.items.some((i) => i.reply));
-  assert.equal((await api('GET', '/posts?limit=100')).body.data.length, 36); // 38 bài (34 + 4 combo) trừ 2 bài bị ẩn/đóng
+  // danh sách công khai chỉ gồm bài đang mở (bài ẩn/đóng/hết hàng không có); không ghi số cứng vì seed còn tăng
+  const openCount = await mongoose.model('Post').countDocuments({ status: 'open' });
+  assert.equal((await api('GET', '/posts?limit=100')).body.data.length, Math.min(openCount, 100));
   const cheap = (await api('POST', '/assistant/chat', jar, { messages: [{ role: 'user', content: 'ăn gì dưới 50k' }] })).body;
   assert.ok((cheap.data.items || cheap.data.posts || []).length >= 3 || (await api('GET', '/posts?type=food&maxPrice=50000', jar)).body.data.length >= 3);
   // Giờ vàng: >= 6 bài có khung giờ, và mọi giờ trong ngày (giờ VN) đều có ít nhất 1 bài đang giảm để demo

@@ -1,0 +1,1900 @@
+{
+  "extras": {
+    "Cơm nhà làm, thực đơn đổi mỗi ngày": {
+      "handover": {
+        "from": "11:00",
+        "to": "12:30"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "freeShipFrom": 100000,
+      "prepMinutes": 30,
+      "orderWindow": {
+        "from": "10:00",
+        "to": "13:00",
+        "days": []
+      }
+    },
+    "Phở bò tái, nước dùng hầm xương": {
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Vinhomes Grand Park"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Dọn nhà theo giờ": {
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Rau củ sạch theo combo": {
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Cà phê sữa đá": {
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "orderWindow": {
+        "from": "06:00",
+        "to": "12:00",
+        "days": []
+      }
+    },
+    "Dắt chó đi dạo buổi chiều": {
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Mì xào hải sản": {
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Vệ sinh máy lạnh": {
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Vinhomes Grand Park"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Đậu sốt cà chua": {
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Trà sữa trân châu đường đen": {
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "orderWindow": {
+        "from": "08:00",
+        "to": "22:00",
+        "days": []
+      }
+    },
+    "Tai nghe chụp tai, còn bảo hành 8 tháng": {
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Sofa vải 3 chỗ, chuyển nhà cần nhượng": {
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Xe đạp thể thao, đi được 1 năm": {
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Vinhomes Grand Park"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Ghế ăn nhựa chân gỗ, bộ 2 cái": {
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Salad ức gà": {
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Nồi chiên không dầu 5L, dùng 6 tháng": {
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    "Điện lạnh Gia Hân - nhận vệ sinh và sửa chữa các thiết bị điện": {
+      "items": [
+        {
+          "id": "i1",
+          "name": "Vệ sinh máy lạnh",
+          "price": 150000,
+          "unit": "máy"
+        },
+        {
+          "id": "i2",
+          "name": "Vệ sinh lồng giặt",
+          "price": 200000,
+          "unit": "máy"
+        },
+        {
+          "id": "i3",
+          "name": "Đi dây điện phòng làm việc",
+          "price": 100000,
+          "unit": "lần"
+        }
+      ],
+      "highlights": [
+        {
+          "icon": "clock",
+          "label": "Giờ nhận lịch",
+          "value": "08:00 – 18:00"
+        },
+        {
+          "icon": "pin",
+          "label": "Nơi làm",
+          "value": "Tại nhà bạn"
+        },
+        {
+          "icon": "receipt",
+          "label": "Thanh toán",
+          "value": "Tiền mặt"
+        }
+      ],
+      "place": {
+        "mode": "buyer"
+      },
+      "handover": {
+        "from": "08:00",
+        "to": "18:00"
+      },
+      "payMethods": [
+        "cash"
+      ],
+      "priceType": "from",
+      "serviceInfo": {},
+      "areas": [
+        "Bcons",
+        "KTX Khu B",
+        "KTX Khu A",
+        "Vinhomes Grand Park"
+      ],
+      "dates": [
+        "2026-11-09",
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15"
+      ],
+      "timeMode": "slot",
+      "duration": {
+        "min": 2,
+        "max": 4
+      },
+      "repeat": false,
+      "noteEnabled": true
+    },
+    "GIẶT SẤY JALY: GIAO NHẬN TẬN TOÀ - TRẢ LUÔN TRONG NGÀY": {
+      "items": [
+        {
+          "id": "i1",
+          "name": "Giặt sấy quần áo",
+          "price": 18000,
+          "unit": "kg"
+        },
+        {
+          "id": "i2",
+          "name": "Giặt chăn, ga",
+          "price": 40000,
+          "unit": "bộ"
+        },
+        {
+          "id": "i3",
+          "name": "Giặt gối",
+          "price": 25000,
+          "unit": "cái"
+        },
+        {
+          "id": "i4",
+          "name": "Giặt thú bông",
+          "price": 30000,
+          "unit": "cái"
+        },
+        {
+          "id": "i5",
+          "name": "Vệ sinh giày",
+          "price": 60000,
+          "unit": "đôi"
+        }
+      ],
+      "highlights": [
+        {
+          "icon": "clock",
+          "label": "Giờ nhận đơn",
+          "value": "08:00 – 22:00"
+        },
+        {
+          "icon": "bolt",
+          "label": "Trả đồ",
+          "value": "Trong khoảng 12 giờ"
+        },
+        {
+          "icon": "pin",
+          "label": "Cách nhận",
+          "value": "Giao tận nơi, Tự đến lấy"
+        }
+      ],
+      "place": {
+        "mode": "buyer"
+      },
+      "handover": {
+        "from": "08:00",
+        "to": "22:00"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "from",
+      "estimate": true,
+      "serviceInfo": {},
+      "areas": [
+        "Bcons",
+        "KTX Khu A",
+        "KTX Khu B"
+      ],
+      "dates": [
+        "2026-11-05",
+        "2026-11-06",
+        "2026-11-07",
+        "2026-11-08",
+        "2026-11-09",
+        "2026-11-10",
+        "2026-11-11"
+      ],
+      "timeMode": "slot",
+      "duration": {
+        "min": 2,
+        "max": 4
+      },
+      "repeat": false,
+      "pickupAtBuyer": true,
+      "noteEnabled": true
+    },
+    "Pass nệm Rạng Đông còn mới": {
+      "info": [
+        {
+          "label": "Tình trạng chi tiết",
+          "value": "Minh mua vào ngày 5/10/2026 ở store của cửa hàng, mình mới nằm được 1 tháng còn rất mới. Chưa dính bẩn hay qua giặt sấy."
+        }
+      ],
+      "handover": {
+        "from": "17:00",
+        "to": "23:00"
+      },
+      "payMethods": [
+        "cash"
+      ],
+      "priceType": "fixed",
+      "condition": {
+        "level": "80",
+        "note": "Minh mua vào ngày 5/10/2026 ở store của cửa hàng, mình mới nằm được 1 tháng còn rất mới. Chưa dính bẩn hay qua giặt sấy."
+      },
+      "areas": [
+        "Bcons",
+        "KTX Khu A",
+        "KTX Khu B",
+        "Vinhomes Grand Park"
+      ],
+      "dates": [
+        "2026-11-05",
+        "2026-11-06",
+        "2026-11-07",
+        "2026-11-08",
+        "2026-11-09",
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12"
+      ],
+      "noteEnabled": true,
+      "freeShipFrom": 100000
+    },
+    "Khai trương giảm giá - Tiệm Trà Bông Đường số 8": {
+      "items": [
+        {
+          "id": "i1",
+          "name": "Cà phê sữa tươi",
+          "price": 18000,
+          "unit": "ly"
+        },
+        {
+          "id": "i2",
+          "name": "Trà sữa gạo rang",
+          "price": 22000,
+          "unit": "ly"
+        },
+        {
+          "id": "i3",
+          "name": "Trà sữa truyền thống",
+          "price": 20000,
+          "unit": "ly"
+        }
+      ],
+      "handover": {
+        "from": "09:00",
+        "to": "23:00"
+      },
+      "payMethods": [
+        "cash",
+        "xu"
+      ],
+      "priceType": "from",
+      "quickOptions": [
+        "Lấy thêm ống hút"
+      ],
+      "areas": [
+        "KTX Khu A",
+        "KTX Khu B"
+      ],
+      "dates": [
+        "2026-11-05",
+        "2026-11-06",
+        "2026-11-07"
+      ],
+      "noteEnabled": true,
+      "freeShipFrom": 100000,
+      "prepMinutes": 30,
+      "orderWindow": {
+        "from": "09:00",
+        "to": "22:00",
+        "days": []
+      }
+    },
+    "Cơm gà kho gừng": {
+      "items": [
+        {
+          "id": "i1",
+          "name": "Cơm gà kho gừng",
+          "price": 35000,
+          "unit": "phần",
+          "dailyQty": 20
+        },
+        {
+          "id": "i2",
+          "name": "Cơm gà kho trứng",
+          "price": 40000,
+          "unit": "phần",
+          "dailyQty": 15
+        },
+        {
+          "id": "i3",
+          "name": "Cơm gà kho sả ớt",
+          "price": 38000,
+          "unit": "phần",
+          "dailyQty": 10
+        }
+      ],
+      "handover": {
+        "from": "11:00",
+        "to": "12:30"
+      },
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "from",
+      "quickOptions": [
+        "Ít cơm",
+        "Không hành"
+      ],
+      "areas": [
+        "Bcons",
+        "KTX Khu B"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "noteEnabled": true,
+      "freeShipFrom": 100000,
+      "prepMinutes": 30,
+      "orderWindow": {
+        "from": "07:00",
+        "to": "10:30",
+        "days": []
+      }
+    },
+    "Cơm sườn rim": {
+      "handover": {
+        "from": "11:30",
+        "to": "12:30"
+      },
+      "payMethods": [
+        "cash"
+      ],
+      "priceType": "fixed",
+      "quickOptions": [
+        "Ít ngọt"
+      ],
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12"
+      ],
+      "noteEnabled": true,
+      "freeShipFrom": 150000,
+      "prepMinutes": 40,
+      "orderWindow": {
+        "from": "08:00",
+        "to": "10:00",
+        "days": []
+      }
+    },
+    "Canh chua cá": {
+      "handover": {
+        "from": "11:30",
+        "to": "13:00"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "from",
+      "areas": [
+        "Bcons",
+        "KTX Khu A"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11"
+      ],
+      "noteEnabled": false,
+      "prepMinutes": 45,
+      "orderWindow": {
+        "from": "09:00",
+        "to": "11:00",
+        "days": []
+      }
+    },
+    "Nồi chiên không dầu 5L (đã dùng)": {
+      "info": [
+        {
+          "label": "Phụ kiện kèm theo",
+          "value": "Khay nướng, vỉ nướng, sách hướng dẫn"
+        },
+        {
+          "label": "Lý do pass",
+          "value": "Đổi sang nồi dung tích lớn hơn"
+        }
+      ],
+      "handover": {
+        "from": "17:00",
+        "to": "21:00"
+      },
+      "payMethods": [
+        "cash"
+      ],
+      "priceType": "fixed",
+      "condition": {
+        "level": "90",
+        "note": "Có vài vết xước nhẹ ở nắp"
+      },
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14"
+      ],
+      "noteEnabled": false
+    },
+    "Bộ hộp cơm inox ×6": {
+      "handover": {
+        "from": "16:00",
+        "to": "22:00"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "fixed",
+      "condition": {
+        "level": "100"
+      },
+      "areas": [
+        "Bcons",
+        "KTX Khu B",
+        "KTX Khu A"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16",
+        "2026-11-17"
+      ],
+      "noteEnabled": true,
+      "freeShipFrom": 200000
+    },
+    "Nấu cỗ tại nhà": {
+      "items": [
+        {
+          "id": "i1",
+          "name": "Cỗ 6 người",
+          "price": 1200000,
+          "unit": "buổi"
+        },
+        {
+          "id": "i2",
+          "name": "Cỗ 8 người",
+          "price": 1600000,
+          "unit": "buổi"
+        },
+        {
+          "id": "i3",
+          "name": "Cỗ 10 người",
+          "price": 2000000,
+          "unit": "buổi"
+        }
+      ],
+      "info": [
+        {
+          "label": "Điều kiện hủy",
+          "value": "Báo trước 1 ngày để cô kịp đi chợ"
+        },
+        {
+          "label": "Lưu ý cho khách",
+          "value": "Khách chuẩn bị bếp, gas và dụng cụ cơ bản"
+        }
+      ],
+      "place": {
+        "mode": "buyer"
+      },
+      "handover": {
+        "from": "08:00",
+        "to": "18:00"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "from",
+      "estimate": false,
+      "serviceInfo": {
+        "turnaround": "3–5 giờ",
+        "warranty": "Không",
+        "area": "Trong Bcons và Vinhomes"
+      },
+      "areas": [
+        "Bcons",
+        "Vinhomes Grand Park"
+      ],
+      "dates": [
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "timeMode": "datedur",
+      "duration": {
+        "min": 3,
+        "max": 5
+      },
+      "repeat": false,
+      "noteEnabled": true
+    },
+    "Nấu cơm theo tuần": {
+      "info": [
+        {
+          "label": "Điều kiện hủy",
+          "value": "Báo trước 2 ngày, hoàn tiền các ngày chưa giao"
+        }
+      ],
+      "place": {
+        "mode": "seller",
+        "where": "Bếp B-0512, Block B"
+      },
+      "handover": {
+        "from": "10:30",
+        "to": "12:00"
+      },
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "fixed",
+      "estimate": false,
+      "serviceInfo": {
+        "turnaround": "Giao đúng giờ hẹn mỗi ngày",
+        "warranty": "Không",
+        "area": "Trong Bcons"
+      },
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-16",
+        "2026-11-17",
+        "2026-11-18",
+        "2026-11-19",
+        "2026-11-20",
+        "2026-11-21",
+        "2026-11-22"
+      ],
+      "timeMode": "slot",
+      "repeat": true,
+      "noteEnabled": true
+    }
+  },
+  "extra": [
+    {
+      "seller": "sach",
+      "type": "service",
+      "unit": "kg",
+      "area": "D.302",
+      "daysAgo": 2,
+      "title": "Giặt sấy gấp, lấy và trả tận cửa trong ngày",
+      "description": "Giặt sấy gấp quần áo, lấy và trả tận cửa trong khu.\n• Lần giặt tối thiểu 3kg\n• Giặt sạch, sấy khô, khử mùi, gấp gọn rồi giao lại tận nơi\n• Nhận đồ trước 9h sáng, trả trong ngày\n• Đồ trắng hoặc dễ ra màu vui lòng báo trước để tiệm giặt riêng",
+      "images": [
+        "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500&h=375&fit=crop&q=70",
+        "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=500&h=375&fit=crop&q=70",
+        "https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Dịch vụ",
+      "price": 18000,
+      "acceptsXu": true,
+      "optionGroups": [
+        {
+          "name": "Nước xả",
+          "multi": false,
+          "required": true,
+          "choices": [
+            {
+              "label": "Hương nhẹ",
+              "price": 0
+            },
+            {
+              "label": "Hương hoa",
+              "price": 0
+            },
+            {
+              "label": "Không mùi",
+              "price": 0
+            }
+          ]
+        },
+        {
+          "name": "Giặt riêng đồ trắng",
+          "multi": false,
+          "required": false,
+          "choices": [
+            {
+              "label": "Không",
+              "price": 0
+            },
+            {
+              "label": "Có",
+              "price": 10000
+            }
+          ]
+        },
+        {
+          "name": "Gấp đồ",
+          "multi": false,
+          "required": true,
+          "choices": [
+            {
+              "label": "Gấp gọn",
+              "price": 0
+            },
+            {
+              "label": "Treo móc",
+              "price": 10000
+            }
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "type": "choice",
+          "label": "Đồ có phụ kiện đính bằng keo không?",
+          "required": false,
+          "opts": [
+            "Có",
+            "Không"
+          ],
+          "hint": "Tiệm không chịu trách nhiệm nếu không báo trước"
+        }
+      ],
+      "fulfillmentModes": [
+        "delivery"
+      ],
+      "deliveryFee": 0,
+      "needSchedule": true,
+      "stock": {
+        "mode": "open"
+      },
+      "items": [
+        {
+          "id": "i1",
+          "name": "Giặt sấy quần áo",
+          "price": 18000,
+          "unit": "kg"
+        },
+        {
+          "id": "i2",
+          "name": "Giặt chăn, ga",
+          "price": 40000,
+          "unit": "bộ"
+        },
+        {
+          "id": "i3",
+          "name": "Giặt gối",
+          "price": 25000,
+          "unit": "cái"
+        },
+        {
+          "id": "i4",
+          "name": "Vệ sinh giày",
+          "price": 50000,
+          "unit": "đôi"
+        }
+      ],
+      "highlights": [
+        {
+          "icon": "clock",
+          "label": "Giờ nhận đơn",
+          "value": "06:00 – 21:00"
+        },
+        {
+          "icon": "bolt",
+          "label": "Trả đồ",
+          "value": "Trong khoảng 12 giờ"
+        },
+        {
+          "icon": "pin",
+          "label": "Cách nhận",
+          "value": "Giao tận nơi"
+        }
+      ],
+      "info": [
+        {
+          "label": "Phạm vi phục vụ",
+          "value": "Trong Vinhomes Grand Park"
+        },
+        {
+          "label": "Điều kiện hủy",
+          "value": "Hủy miễn phí trước khi tiệm lấy đồ"
+        },
+        {
+          "label": "Lưu ý cho khách",
+          "value": "Kiểm tra đồ khi nhận, báo tiệm trong 24 giờ nếu có vấn đề"
+        }
+      ],
+      "place": {
+        "mode": "buyer"
+      },
+      "handover": {
+        "from": "06:00",
+        "to": "21:00"
+      },
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "bank": {
+        "bankName": "Vietcombank",
+        "no": "0123456789",
+        "holder": "TIEM SACH THOM (MAU)"
+      },
+      "priceType": "from",
+      "estimate": true,
+      "areas": [
+        "Vinhomes Grand Park"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "timeMode": "slot",
+      "repeat": false,
+      "pickupAtBuyer": true,
+      "noteEnabled": true
+    },
+    {
+      "seller": "hoa",
+      "type": "food",
+      "unit": "phần",
+      "area": "C",
+      "daysAgo": 3,
+      "title": "Bowl rau củ healthy, giao trưa",
+      "description": "",
+      "images": [
+        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Đồ ăn",
+      "price": 55000,
+      "acceptsXu": true,
+      "fulfillmentModes": [
+        "delivery",
+        "pickup"
+      ],
+      "stock": {
+        "mode": "open"
+      },
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    {
+      "seller": "phuong",
+      "type": "service",
+      "unit": "lần",
+      "area": "C",
+      "daysAgo": 3,
+      "title": "Tắm và cắt tỉa lông thú cưng tại nhà",
+      "description": "",
+      "images": [
+        "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Dịch vụ",
+      "price": 150000,
+      "fulfillmentModes": [
+        "delivery"
+      ],
+      "stock": {
+        "mode": "open"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    {
+      "seller": "may",
+      "type": "food",
+      "unit": "250g",
+      "area": "A.304",
+      "daysAgo": 4,
+      "title": "Cà phê hạt rang mộc",
+      "description": "",
+      "images": [
+        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Đồ uống",
+      "price": 120000,
+      "acceptsXu": true,
+      "fulfillmentModes": [
+        "delivery",
+        "pickup"
+      ],
+      "stock": {
+        "mode": "open"
+      },
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    {
+      "seller": "lan",
+      "type": "service",
+      "unit": "buổi",
+      "area": "C",
+      "daysAgo": 5,
+      "title": "Nấu cơm gia đình",
+      "description": "",
+      "images": [
+        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Dịch vụ",
+      "price": 250000,
+      "fulfillmentModes": [
+        "delivery"
+      ],
+      "needSchedule": true,
+      "stock": {
+        "mode": "open"
+      },
+      "place": {
+        "mode": "buyer"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    {
+      "seller": "linh",
+      "type": "service",
+      "unit": "bộ",
+      "area": "D.302",
+      "daysAgo": 6,
+      "title": "Giặt hấp đồ vest",
+      "description": "Giặt hấp chuyên đồ vest, áo khoác dạ, váy dạ: giữ form, không phai màu, ủi hơi phẳng phiu.\n• Nhận lấy tận nơi và giao lại sau 48 giờ\n• Đồ có đính kết, lông thú hoặc vải đặc biệt vui lòng báo trước\n• Có túi bảo quản kèm theo nếu khách chọn",
+      "images": [
+        "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=500&h=375&fit=crop&q=70",
+        "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Dịch vụ",
+      "price": 45000,
+      "acceptsXu": false,
+      "optionGroups": [
+        {
+          "name": "Túi bảo quản",
+          "multi": false,
+          "required": false,
+          "choices": [
+            {
+              "label": "Không cần",
+              "price": 0
+            },
+            {
+              "label": "Có túi",
+              "price": 5000
+            }
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "type": "text",
+          "label": "Vị trí vết bẩn cần xử lý kỹ",
+          "required": false
+        },
+        {
+          "type": "photo",
+          "label": "Ảnh vết bẩn",
+          "required": false
+        }
+      ],
+      "fulfillmentModes": [
+        "delivery"
+      ],
+      "deliveryFee": 10000,
+      "needSchedule": true,
+      "stock": {
+        "mode": "open"
+      },
+      "items": [
+        {
+          "id": "i1",
+          "name": "Giặt hấp vest",
+          "price": 45000,
+          "unit": "bộ"
+        },
+        {
+          "id": "i2",
+          "name": "Giặt hấp áo khoác dạ",
+          "price": 60000,
+          "unit": "cái"
+        },
+        {
+          "id": "i3",
+          "name": "Giặt hấp váy dạ",
+          "price": 55000,
+          "unit": "cái"
+        },
+        {
+          "id": "i4",
+          "name": "Ủi hơi",
+          "price": 20000,
+          "unit": "bộ"
+        }
+      ],
+      "highlights": [
+        {
+          "icon": "clock",
+          "label": "Giờ nhận đơn",
+          "value": "08:00 – 18:00"
+        },
+        {
+          "icon": "bolt",
+          "label": "Trả đồ",
+          "value": "Trong khoảng 48 giờ"
+        },
+        {
+          "icon": "pin",
+          "label": "Cách nhận",
+          "value": "Giao tận nơi"
+        }
+      ],
+      "info": [
+        {
+          "label": "Lưu ý cho khách",
+          "value": "Đồ cao cấp hoặc có phụ kiện đính kết, tiệm xin phép không chịu trách nhiệm nếu không báo trước"
+        }
+      ],
+      "place": {
+        "mode": "buyer"
+      },
+      "handover": {
+        "from": "08:00",
+        "to": "18:00"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "bank": {
+        "bankName": "Vietcombank",
+        "no": "0123456789",
+        "holder": "GIAT SAY MY LINH (MAU)"
+      },
+      "priceType": "from",
+      "estimate": false,
+      "areas": [
+        "Vinhomes Grand Park"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "timeMode": "slot",
+      "repeat": false,
+      "pickupAtBuyer": false,
+      "noteEnabled": true
+    },
+    {
+      "seller": "minh",
+      "type": "service",
+      "unit": "lần",
+      "area": "A",
+      "daysAgo": 6,
+      "title": "Đi siêu thị hộ, giao tận cửa",
+      "description": "",
+      "images": [
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Dịch vụ",
+      "price": 30000,
+      "acceptsXu": true,
+      "fulfillmentModes": [
+        "delivery"
+      ],
+      "stock": {
+        "mode": "open"
+      },
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    {
+      "seller": "tung",
+      "type": "service",
+      "unit": "kiểm tra",
+      "area": "C.207",
+      "daysAgo": 7,
+      "title": "Sửa laptop, điện thoại, kiểm tra tận nơi",
+      "description": "",
+      "images": [
+        "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Dịch vụ",
+      "price": 50000,
+      "acceptsXu": true,
+      "fulfillmentModes": [
+        "delivery"
+      ],
+      "stock": {
+        "mode": "open"
+      },
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    {
+      "seller": "minh",
+      "type": "service",
+      "unit": "lượt",
+      "area": "B",
+      "daysAgo": 7,
+      "title": "Lấy đồ hộ, giao nhận trong khu",
+      "description": "",
+      "images": [
+        "https://images.unsplash.com/photo-1617347454431-f49d7ff5c3b1?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Dịch vụ",
+      "price": 15000,
+      "acceptsXu": true,
+      "fulfillmentModes": [
+        "delivery"
+      ],
+      "stock": {
+        "mode": "open"
+      },
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    {
+      "seller": "lan",
+      "type": "food",
+      "unit": "combo",
+      "area": "B",
+      "daysAgo": 7,
+      "title": "Combo cơm trưa 5 ngày, đặt cả tuần",
+      "description": "",
+      "images": [
+        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Đồ ăn",
+      "price": 150000,
+      "acceptsXu": true,
+      "fulfillmentModes": [
+        "delivery",
+        "pickup"
+      ],
+      "deliveryFee": 5000,
+      "stock": {
+        "mode": "open"
+      },
+      "handover": {
+        "from": "11:00",
+        "to": "12:30"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "freeShipFrom": 100000,
+      "prepMinutes": 30
+    },
+    {
+      "seller": "lan",
+      "type": "food",
+      "unit": "combo",
+      "area": "A",
+      "daysAgo": 7,
+      "title": "Combo bữa tối gia đình: 3 món + canh",
+      "description": "",
+      "images": [
+        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Đồ ăn",
+      "price": 120000,
+      "acceptsXu": true,
+      "fulfillmentModes": [
+        "delivery",
+        "pickup"
+      ],
+      "deliveryFee": 5000,
+      "stock": {
+        "mode": "open"
+      },
+      "handover": {
+        "from": "11:00",
+        "to": "12:30"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "freeShipFrom": 100000,
+      "prepMinutes": 30
+    },
+    {
+      "seller": "sach",
+      "type": "service",
+      "unit": "combo",
+      "area": "D.302",
+      "daysAgo": 8,
+      "title": "Combo giặt sấy 4 lần trong tháng",
+      "description": "Gói giặt sấy 4 lần trong tháng cho người đi làm bận rộn: mỗi tuần một lần, tiệm lấy và trả đồ đúng ngày bạn chọn.\n• Dùng trong 30 ngày kể từ ngày mua\n• Mỗi lần tối đa 5kg (chọn 8kg nếu giặt nhiều)\n• Rẻ hơn so với giặt lẻ từng lần",
+      "images": [
+        "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500&h=375&fit=crop&q=70",
+        "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Dịch vụ",
+      "price": 220000,
+      "acceptsXu": true,
+      "optionGroups": [
+        {
+          "name": "Khối lượng mỗi lần",
+          "multi": false,
+          "required": true,
+          "choices": [
+            {
+              "label": "Tối đa 5kg",
+              "price": 0
+            },
+            {
+              "label": "Tối đa 8kg",
+              "price": 80000
+            }
+          ]
+        },
+        {
+          "name": "Nước xả",
+          "multi": false,
+          "required": true,
+          "choices": [
+            {
+              "label": "Hương nhẹ",
+              "price": 0
+            },
+            {
+              "label": "Không mùi",
+              "price": 0
+            }
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "type": "multi",
+          "label": "Bạn muốn giặt vào thứ mấy mỗi tuần?",
+          "required": true,
+          "opts": [
+            "Thứ 2",
+            "Thứ 3",
+            "Thứ 4",
+            "Thứ 5",
+            "Thứ 6",
+            "Thứ 7",
+            "Chủ nhật"
+          ]
+        }
+      ],
+      "fulfillmentModes": [
+        "delivery"
+      ],
+      "deliveryFee": 0,
+      "needSchedule": true,
+      "stock": {
+        "mode": "open"
+      },
+      "highlights": [
+        {
+          "icon": "clock",
+          "label": "Giờ nhận đơn",
+          "value": "06:00 – 21:00"
+        },
+        {
+          "icon": "bolt",
+          "label": "Trả đồ",
+          "value": "Trong khoảng 24 giờ"
+        },
+        {
+          "icon": "pin",
+          "label": "Cách nhận",
+          "value": "Giao tận nơi"
+        }
+      ],
+      "info": [
+        {
+          "label": "Điều kiện hủy",
+          "value": "Không hoàn lại các lần chưa dùng sau 30 ngày"
+        },
+        {
+          "label": "Lưu ý cho khách",
+          "value": "Đổi ngày giặt được nếu báo trước 1 ngày"
+        }
+      ],
+      "place": {
+        "mode": "buyer"
+      },
+      "handover": {
+        "from": "06:00",
+        "to": "21:00"
+      },
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "bank": {
+        "bankName": "Vietcombank",
+        "no": "0123456789",
+        "holder": "TIEM SACH THOM (MAU)"
+      },
+      "priceType": "fixed",
+      "estimate": false,
+      "areas": [
+        "Vinhomes Grand Park"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "timeMode": "slot",
+      "repeat": true,
+      "pickupAtBuyer": true,
+      "noteEnabled": true
+    },
+    {
+      "seller": "ba",
+      "type": "service",
+      "unit": "combo",
+      "area": "A",
+      "daysAgo": 8,
+      "title": "Combo dọn nhà 3 buổi, giảm 15%",
+      "description": "",
+      "images": [
+        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&h=375&fit=crop&q=70"
+      ],
+      "category": "Dịch vụ",
+      "price": 315000,
+      "acceptsXu": true,
+      "fulfillmentModes": [
+        "delivery"
+      ],
+      "stock": {
+        "mode": "open"
+      },
+      "payMethods": [
+        "cash",
+        "transfer",
+        "xu"
+      ],
+      "priceType": "fixed",
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ]
+    },
+    {
+      "seller": "lan",
+      "type": "food",
+      "unit": "phần",
+      "area": "B",
+      "daysAgo": 12,
+      "title": "Tiệm xôi Yuumi - Nhận đơn đồ ăn sáng 29/10",
+      "description": "ahhgdiQDUIQGWUILHAJKCB",
+      "images": [
+        "/uploads/posts/fc4728-1.jpg",
+        "/uploads/posts/fc4728-2.jpg",
+        "/uploads/posts/fc4728-3.jpg",
+        "/uploads/posts/fc4728-4.jpg"
+      ],
+      "category": "Cơm nhà làm",
+      "price": 12000,
+      "acceptsXu": true,
+      "optionGroups": [
+        {
+          "name": "Topping",
+          "multi": true,
+          "required": false,
+          "choices": [
+            {
+              "label": "Thêm chả",
+              "price": 5000
+            },
+            {
+              "label": "Thêm trứng",
+              "price": 5000
+            }
+          ]
+        }
+      ],
+      "fulfillmentModes": [
+        "delivery",
+        "pickup"
+      ],
+      "deliveryFee": 5000,
+      "needSchedule": false,
+      "stock": {
+        "mode": "open"
+      },
+      "status": "open",
+      "items": [
+        {
+          "id": "i1",
+          "name": "Xôi bắp",
+          "price": 15000,
+          "unit": "phần",
+          "dailyQty": 20
+        },
+        {
+          "id": "i2",
+          "name": "Xôi mặn",
+          "price": 20000,
+          "unit": "phần",
+          "dailyQty": 30
+        },
+        {
+          "id": "i3",
+          "name": "Bắp hầm",
+          "price": 12000,
+          "unit": "phần",
+          "dailyQty": 20
+        },
+        {
+          "id": "i4",
+          "name": "Súp cua",
+          "price": 20000,
+          "unit": "phần",
+          "dailyQty": 20
+        }
+      ],
+      "handover": {
+        "from": "11:00",
+        "to": "12:30"
+      },
+      "payMethods": [
+        "cash",
+        "transfer"
+      ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0123456789",
+        "holder": "BEP CO LAN (MAU)"
+      },
+      "priceType": "fixed",
+      "quickOptions": [
+        "Gói lá"
+      ],
+      "areas": [
+        "Bcons"
+      ],
+      "dates": [
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16"
+      ],
+      "noteEnabled": true,
+      "freeShipFrom": 100000,
+      "prepMinutes": 30,
+      "orderWindow": {
+        "from": "20:00",
+        "to": "08:00",
+        "days": []
+      }
+    }
+  ]
+}
