@@ -350,7 +350,7 @@
 .rbtn:disabled { background: #D9D3CF; }
 .modal footer .ghostbtn { height: 44px; padding: 0 14px; background: none; color: var(--smoke); text-decoration: underline; text-underline-offset: 3px; font: inherit; }
 
-.done { padding: 28px 28px 26px; display: grid; justify-items: center; gap: 10px; text-align: center; }
+.done { padding: 28px 28px 26px; display: grid; justify-items: center; gap: 10px; text-align: center; overflow-y: auto; min-height: 0; }
 .done .mascot { width: 150px; margin-bottom: 2px; }
 .done h2 { margin: 0; font-size: 22px; }
 .done .sub2 { margin: 0; color: var(--smoke); line-height: 1.5; max-width: 340px; }
