@@ -1,3 +1,4 @@
+import type { PostBank } from './post';
 /** Đơn đã đặt (phía Mua) */
 export type PlacedStatus =
   | 'pending' | 'confirmed' | 'pricing' | 'preparing' | 'delivering' | 'ready' | 'done' | 'cancelled' | 'declined';
@@ -10,6 +11,8 @@ export type JobStatus =
 export type PaymentMethod = 'cash' | 'transfer';
 
 export interface Order {
+  /** Tài khoản nhận chuyển khoản của người bán, server chụp lúc đặt (chỉ đơn chuyển khoản). Mock không có: lấy từ bài */
+  bank?: PostBank;
   _id: string;
   /** Mã hiển thị, ví dụ AG-O3012 (đơn đặt) hoặc AG-J1998 (việc nhận) */
   code: string;

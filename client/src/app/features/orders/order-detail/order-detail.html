@@ -97,7 +97,7 @@
                 @if (d.utensils) { <dt>Dụng cụ</dt><dd>Có lấy</dd> }
               }
               <dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}
-                @if (o.paymentMethod === 'transfer' && o.status !== 'cancelled' && o.status !== 'declined' && job()?.bank; as b) { <app-bank-pay [bank]="b" [amount]="o.total" [content]="o.code" /> }
+                @if (o.paymentMethod === 'transfer' && o.status !== 'cancelled' && o.status !== 'declined' && (o.bank ?? job()?.bank); as b) { <app-bank-pay [bank]="b" [amount]="o.total" [content]="o.code" /> }
               </dd>
               @if (o.note) { <dt>Ghi chú</dt><dd class="noteval">{{ o.note }}</dd> }
             </dl>

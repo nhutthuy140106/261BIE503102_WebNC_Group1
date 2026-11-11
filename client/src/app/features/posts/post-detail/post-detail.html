@@ -290,7 +290,7 @@
               @if (o.detail?.when) { <div><dt>Thời gian</dt><dd>{{ o.detail?.when }}</dd></div> }
               <div><dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd></div>
             </dl>
-            @if (o.paymentMethod === 'transfer' && v.tpl.bank; as b) {
+            @if (o.paymentMethod === 'transfer' && (o.bank ?? v.tpl.bank); as b) {
               <app-bank-pay [bank]="b" [amount]="o.total" [content]="o.code" />
             }
             <div class="stepper mini" [style.--n]="doneSteps(o).length">

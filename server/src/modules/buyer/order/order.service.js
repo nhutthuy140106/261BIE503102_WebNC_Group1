@@ -84,7 +84,7 @@ function priceOrder(post, input, xuVoucher = null, now = new Date()) {
 
 // Bước 1: kiểm tra + tính tiền, CHƯA ghi gì vào DB (giỏ nháp gọi bước này cho mọi món trước khi tạo đơn nào)
 async function prepare(user, input) {
-  const post = await Post.findById(input.postId).populate('seller', 'name avatar');
+  const post = await Post.findById(input.postId).select('+bank').populate('seller', 'name avatar');
   if (!post) throw ApiError.notFound('Bài không tồn tại');
   if (post.status !== 'open') throw ApiError.invalidState('Bài đã hết hàng, đã đóng hoặc không còn hiển thị');
   if (isLimited(post) && post.stock.left < input.quantity) throw ApiError.invalidState('Không đủ số lượng còn lại');
@@ -151,7 +151,7 @@ async function commit(user, input, { post, priced, address, xuVoucher, component
     buyer: user._id,
     seller: post.seller._id,
     post: post._id,
-    snapshot: { title: post.title, type: post.type, image: post.images[0], sellerName: post.seller.name, sellerAvatar: post.seller.avatar || null, unitPrice: priced.promo ? priced.promo.price : post.price, originalPrice: priced.promo ? priced.promo.original : undefined, promoLabel: priced.promo ? priced.promo.label : undefined, unit: post.unit,
+    snapshot: { bank: input.payment === 'transfer' && post.bank && post.bank.no ? post.bank.toObject() : undefined, title: post.title, type: post.type, image: post.images[0], sellerName: post.seller.name, sellerAvatar: post.seller.avatar || null, unitPrice: priced.promo ? priced.promo.price : post.price, originalPrice: priced.promo ? priced.promo.original : undefined, promoLabel: priced.promo ? priced.promo.label : undefined, unit: post.unit,
       ...(components.length ? { combo: components.map(({ post: p, qty }) => ({ postId: p._id, title: p.title, qty, unitPrice: p.price })), listPrice: post.combo.listPrice } : {}) },
     quantity: input.quantity,
     selections: priced.selections,

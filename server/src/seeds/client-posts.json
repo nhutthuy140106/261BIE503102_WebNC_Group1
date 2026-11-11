@@ -41,6 +41,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "VietinBank",
+        "no": "0000100685",
+        "holder": "QUAN PHO BA TU (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Vinhomes Grand Park"
@@ -61,6 +66,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "TPBank",
+        "no": "0000100822",
+        "holder": "CO BA (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -81,6 +91,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "VPBank",
+        "no": "0000100959",
+        "holder": "CHI NGAN (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -101,6 +116,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0000101233",
+        "holder": "QUAN NHA MAY (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -126,6 +146,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "BIDV",
+        "no": "0000101370",
+        "holder": "MINH (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -146,6 +171,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "ACB",
+        "no": "0000100548",
+        "holder": "CHI HOA (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -165,6 +195,11 @@
         "cash",
         "transfer"
       ],
+      "bank": {
+        "bankName": "Techcombank",
+        "no": "0000101507",
+        "holder": "ANH TUNG (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Vinhomes Grand Park"
@@ -185,6 +220,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "VPBank",
+        "no": "0000100959",
+        "holder": "CHI NGAN (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -205,6 +245,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0000101233",
+        "holder": "QUAN NHA MAY (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -230,6 +275,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "ACB",
+        "no": "0000101644",
+        "holder": "MINH KHOA (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -249,6 +299,11 @@
         "cash",
         "transfer"
       ],
+      "bank": {
+        "bankName": "VietinBank",
+        "no": "0000101781",
+        "holder": "ANH TUAN (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -268,6 +323,11 @@
         "cash",
         "transfer"
       ],
+      "bank": {
+        "bankName": "TPBank",
+        "no": "0000101918",
+        "holder": "ANH QUAN (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Vinhomes Grand Park"
@@ -287,6 +347,11 @@
         "cash",
         "transfer"
       ],
+      "bank": {
+        "bankName": "ACB",
+        "no": "0000100548",
+        "holder": "CHI HOA (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -307,6 +372,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0000102329",
+        "holder": "THU HA (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -326,6 +396,11 @@
         "cash",
         "transfer"
       ],
+      "bank": {
+        "bankName": "TPBank",
+        "no": "0000101918",
+        "holder": "ANH QUAN (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -1119,6 +1194,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "ACB",
+        "no": "0000100548",
+        "holder": "CHI HOA (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -1156,6 +1236,11 @@
         "cash",
         "transfer"
       ],
+      "bank": {
+        "bankName": "Vietcombank",
+        "no": "0000101096",
+        "holder": "PHUONG (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -1196,6 +1281,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "MBBank",
+        "no": "0000101233",
+        "holder": "QUAN NHA MAY (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -1417,6 +1507,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "BIDV",
+        "no": "0000101370",
+        "holder": "MINH (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -1456,6 +1551,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "Techcombank",
+        "no": "0000101507",
+        "holder": "ANH TUNG (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -1495,6 +1595,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "BIDV",
+        "no": "0000101370",
+        "holder": "MINH (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"
@@ -1770,6 +1875,11 @@
         "transfer",
         "xu"
       ],
+      "bank": {
+        "bankName": "TPBank",
+        "no": "0000100822",
+        "holder": "CO BA (MAU)"
+      },
       "priceType": "fixed",
       "areas": [
         "Bcons"

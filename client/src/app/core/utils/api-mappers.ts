@@ -147,6 +147,7 @@ export function orderFromApi(o: Raw): Order {
     status: mapState(o.state) as PlacedStatus,
     total: o.total ?? 0,
     paymentMethod: o.payment === 'transfer' ? 'transfer' : 'cash',
+    bank: s.bank?.no ? { bankName: s.bank.bankName ?? '', no: s.bank.no, holder: s.bank.holder ?? '', qr: s.bank.qr || undefined } : undefined,
     note: o.note || undefined,
     createdAt: o.createdAt,
     history: (o.history ?? []).map((h: Raw) => ({ state: mapState(h.state), at: h.at })),

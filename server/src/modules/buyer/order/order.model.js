@@ -13,6 +13,8 @@ const orderSchema = new Schema({
     title: String, type: { type: String }, image: String, sellerName: String, sellerAvatar: { type: String, default: null }, unitPrice: Number, originalPrice: Number, promoLabel: String, unit: String,
     // combo: chụp từng món (cho MỘT combo) và tổng giá lẻ lúc đặt
     combo: [{ postId: Schema.Types.ObjectId, title: String, qty: Number, unitPrice: Number, _id: false }], listPrice: Number,
+    // tài khoản nhận chuyển khoản của người bán, chụp lúc đặt (chỉ đơn trả bằng chuyển khoản). Bài công khai không lộ `bank`; người mua chỉ thấy nó qua đơn của mình
+    bank: new Schema({ bankName: String, no: String, holder: String, qr: String }, { _id: false }),
   }, { _id: false }),
   quantity: { type: Number, required: true, min: 1 },
   selections: [{ group: String, choices: [{ label: String, price: Number, _id: false }], _id: false }],
