@@ -51,7 +51,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
    * Riêng Khám phá hiện mọi bài của khu, kể cả bài đã có ở các khối trên.
    */
   protected readonly clock = inject(ClockService);
-  /** Bài đang trong Giờ vàng (kết thúc sớm nhất xếp trước), tối đa 8 (hai hàng) */
+  /** Bài đang trong Giờ vàng (kết thúc sớm nhất xếp trước), tối đa 4 (một hàng), phần còn lại ở "Xem thêm" */
   protected readonly dealsNow = computed(() => {
     const now = this.clock.now();
     const shown = new Set(this.featured().map((p) => p._id)); // bài đã ở "Nổi bật" thì không lặp lại ở đây
@@ -60,7 +60,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       .map((p) => ({ p, d: dealAt(p, now) }))
       .filter((x): x is { p: Post; d: NonNullable<typeof x.d> } => x.d !== null)
       .sort((a, b) => a.d.endsAt - b.d.endsAt)
-      .slice(0, 8);
+      .slice(0, 4);
   });
   protected readonly dealsLeft = computed(() => {
     const first = this.dealsNow()[0];
@@ -75,13 +75,13 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       .filter((x): x is { p: Post; u: NonNullable<typeof x.u> } => x.u !== null)
       .sort((a, b) => a.u.inMin - b.u.inMin)[0] ?? null;
   });
-  protected readonly featured = computed(() => this.posts().filter((p) => p.promoted).slice(0, 8));
+  protected readonly featured = computed(() => this.posts().filter((p) => p.promoted).slice(0, 4));
   protected readonly forYouShown = computed(() => {
     const taken = new Set(this.featured().map((p) => p._id));
     return this.forYou().filter((p) => !taken.has(p._id) && inArea(p, this.area.current())).slice(0, 4);
   });
   protected readonly nearby = computed(() => {
-    const taken = new Set([...this.featured(), ...this.forYouShown()].map((p) => p._id));
+    const taken = new Set([...this.featured(), ...this.forYouShown(), ...this.dealsNow().map((x) => x.p)].map((p) => p._id));
     return this.posts().filter((p) => p.kind !== 'job' && !p.promoted && !taken.has(p._id)).slice(0, 4);
   });
   protected readonly jobs = computed(() => {

@@ -18,7 +18,7 @@ const Report = require('../modules/buyer/report/report.model');
 const orders = require('../modules/buyer/order/order.service');
 const offers = require('../modules/buyer/offer/offer.service');
 const { USERS, POSTS, JOBS, COMBOS, COMBO_PROMOS, IMG, img } = require('./data');
-const { ENRICH, BANK_BY_NAME } = require('./post-enrich');
+const { ENRICH, BANK_BY_NAME, IMAGE_BY_TITLE } = require('./post-enrich');
 const { addActivity } = require('./activity-extra');
 
 // Mật khẩu tài khoản mẫu lấy từ biến môi trường SEED_PASSWORD (.env), không viết cứng trong repo
@@ -92,8 +92,10 @@ async function seed() {
   const nameOfKey = Object.fromEntries(USERS.map((x) => [x.key, x.name]));
   const enrich = (d) => {
     const add = ENRICH[d.title];
-    if (!add) return d;
+    if (!add && !IMAGE_BY_TITLE[d.title]) return d;
     const out = { ...d };
+    if (IMAGE_BY_TITLE[d.title]) out.images = [IMAGE_BY_TITLE[d.title]];
+    if (!add) return out;
     for (const [k, v] of Object.entries(add)) if (v !== undefined && (out[k] == null || (Array.isArray(out[k]) && !out[k].length))) out[k] = v;
     const bank = BANK_BY_NAME[nameOfKey[d.seller]];
     if (bank && !out.bank && (out.payMethods || []).includes('transfer')) out.bank = bank;
@@ -102,7 +104,7 @@ async function seed() {
   // Hai bài trùng hẳn bài khác (cùng người bán, cùng nội dung/ảnh) — bỏ khỏi dữ liệu mẫu, giữ bản đầy đủ hơn
   const DUPLICATE_TITLES = new Set(['Tiệm xôi Yuumi - Nhận đơn đồ ăn sáng', 'Sửa laptop, điện thoại, kiểm tra tận nơi']);
   const ALL_POSTS = [...POSTS.map((d) => enrich({ ...d, ...(CLIENT.extras[d.title] || {}) })),
-    ...CLIENT.extra.map((d, i) => ({ key: `fe${i}`, ...d }))].filter((d) => !DUPLICATE_TITLES.has(d.title));
+    ...CLIENT.extra.map((d, i) => enrich({ key: `fe${i}`, ...d }))].filter((d) => !DUPLICATE_TITLES.has(d.title));
   for (const [i, { key, seller, daysAgo, images, promo, ...d }] of ALL_POSTS.entries()) {
     if (promo) promos[key] = promo;
     p[key] = await Post.create({ ...toStock(d), seller: u[seller]._id, images: (images || []).map(img) });

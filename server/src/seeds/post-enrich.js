@@ -31,6 +31,23 @@ const goods = (o) => ({ areas: BCONS, payMethods: CT, priceType: 'fixed', dates:
 const service = (o) => ({ areas: BCONS, payMethods: CT, dates: DATES, noteEnabled: true, ...o });
 const g = (name, choices, extra = {}) => ({ name, multi: false, required: false, choices: choices.map(([label, price = 0]) => ({ label, price })), ...extra });
 
+// Ảnh riêng cho bài từng dùng chung ảnh với bài khác (Unsplash, đã mở xem từng ảnh để chắc đúng chủ đề). Khóa = tiêu đề bài.
+const IMAGE_BY_TITLE = {
+  'Bánh mì que pate nhà làm': 'https://images.unsplash.com/photo-1647169953827-a7c85f324caf?w=800&q=70',
+  'Bún bò Huế cay vừa': 'https://images.unsplash.com/photo-1597345637412-9fd611e758f3?w=800&q=70',
+  'Bún chả Hà Nội, nem rán giòn': 'https://images.unsplash.com/photo-1583316175701-0bc5f25a0a44?w=800&q=70',
+  'Cháo sườn sáng, nấu mỗi ngày': 'https://images.unsplash.com/photo-1543363364-98d2b51b47fb?w=800&q=70',
+  'Nước ép cam tươi': 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=800&q=70',
+  'Salad ức gà': 'https://images.unsplash.com/photo-1572448910681-3341d74893d2?w=800&q=70',
+  'Giày chạy bộ size 41, mới đi 3 lần': 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800&q=70',
+  'Cắt tóc nam tại nhà': 'https://images.unsplash.com/photo-1647140655214-e4a2d914971f?w=800&q=70',
+  'Làm móng tay, sơn gel tại nhà': 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&q=70',
+  'Giao nhận hộ trong khu': 'https://images.unsplash.com/photo-1617347454431-f49d7ff5c3b1?w=800&q=70',
+  'Lấy đồ hộ, giao nhận trong khu': 'https://images.unsplash.com/photo-1572195577046-2f25894c06fc?w=800&q=70',
+  'Sửa laptop, điện thoại — kiểm tra tận nơi': 'https://images.unsplash.com/photo-1746017240064-83e015ac117d?w=800&q=70',
+  'Giặt hấp đồ vest': 'https://images.unsplash.com/photo-1451933335233-c41672c8f378?w=800&q=70',
+};
+
 const ENRICH = {
   /* ---------- Đồ ăn & uống ---------- */
   'Bánh mì que pate nhà làm': food({
@@ -273,4 +290,4 @@ const ENRICH = {
   }),
 };
 
-module.exports = { ENRICH, BANK_BY_NAME };
+module.exports = { ENRICH, BANK_BY_NAME, IMAGE_BY_TITLE };

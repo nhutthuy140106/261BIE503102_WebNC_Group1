@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 const env = require('../src/config/env');
-const { ENRICH, BANK_BY_NAME } = require('../src/seeds/post-enrich');
+const { ENRICH, BANK_BY_NAME, IMAGE_BY_TITLE } = require('../src/seeds/post-enrich');
 
 const APPLY = process.argv.includes('--apply');
 const isEmpty = (v) => v == null || (Array.isArray(v) && !v.length) || (typeof v === 'object' && !Array.isArray(v) && !Object.keys(v).length);
@@ -31,19 +31,21 @@ const isEmpty = (v) => v == null || (Array.isArray(v) && !v.length) || (typeof v
   const used = new Set();
   let touched = 0;
   for (const p of all) {
-    const add = ENRICH[p.title];
-    if (!add) continue;
+    const add = ENRICH[p.title] || {};
+    const image = IMAGE_BY_TITLE[p.title];
+    if (!ENRICH[p.title] && !image) continue;
     used.add(p.title);
     const set = {};
     for (const [k, v] of Object.entries(add)) if (v !== undefined && isEmpty(p[k])) set[k] = v;
     const bank = BANK_BY_NAME[nameOf[String(p.seller)]];
-    if (bank && isEmpty(p.bank) && (add.payMethods || p.payMethods || []).includes('transfer')) set.bank = bank;
+    if (ENRICH[p.title] && bank && isEmpty(p.bank) && (add.payMethods || p.payMethods || []).includes('transfer')) set.bank = bank;
+    if (image && !((p.images || []).length === 1 && p.images[0] === image)) set.images = [image]; // ảnh thì ghi đè (đổi ảnh trùng)
     if (!Object.keys(set).length) continue;
     touched++;
     console.log(`${APPLY ? 'GHI' : 'sẽ ghi'}: ${p.title.slice(0, 50)} ← ${Object.keys(set).join(', ')}`);
     if (APPLY) await posts.updateOne({ _id: p._id }, { $set: set });
   }
-  const missing = Object.keys(ENRICH).filter((t) => !used.has(t));
+  const missing = [...Object.keys(ENRICH), ...Object.keys(IMAGE_BY_TITLE)].filter((t) => !used.has(t));
   console.log(`\n${touched} bài ${APPLY ? 'đã cập nhật' : 'sẽ cập nhật'}.${missing.length ? ` Không thấy trong DB: ${missing.join(' | ')}` : ''}`);
   await mongoose.disconnect();
 })().catch((e) => { console.error(e); process.exit(1); });
