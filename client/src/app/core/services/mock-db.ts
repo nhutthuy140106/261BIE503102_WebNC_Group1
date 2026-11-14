@@ -53,6 +53,11 @@ export class MockDb {
     );
   }
 
+  /** Chỉ đọc bản đã lưu (bộ nhớ hoặc localStorage); chưa có thì null, KHÔNG tải file mẫu */
+  peek<T>(name: string): T[] | null {
+    return (this.mem.get(name) as T[] | undefined) ?? this.readStorage<T>(name);
+  }
+
   save<T>(name: string, rows: T[]): void {
     this.mem.set(name, rows);
     try {

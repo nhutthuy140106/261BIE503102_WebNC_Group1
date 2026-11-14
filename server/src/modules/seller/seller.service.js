@@ -9,6 +9,7 @@ const offers = require('../buyer/offer/offer.service');
 const xu = require('../buyer/xu/xu.service');
 const { notify } = require('../shared/notify');
 const verification = require('./verification.service');
+const shop = require('./shop.service');
 const ApiError = require('../../utils/ApiError');
 
 /* ---------------------------------------------------------------- Bài đăng (đồ ăn / đồ dùng / dịch vụ) */
@@ -27,7 +28,12 @@ async function ownPost(user, id) {
   return p;
 }
 
-const listPosts = (user) => Post.find({ seller: user._id }).select('+bank').sort({ createdAt: -1 });
+/** Bài của tôi, mỗi bài kèm lượt xem, lượt lưu, số đã bán thật */
+async function listPosts(user) {
+  const posts = await Post.find({ seller: user._id }).select('+bank').sort({ createdAt: -1 });
+  const m = await shop.postMetrics(posts.map((p) => p._id));
+  return posts.map((p) => ({ ...p.toJSON(), views: m.views.get(String(p._id)) || 0, saves: m.saves.get(String(p._id)) || 0, sold: m.sold.get(String(p._id)) || 0 }));
+}
 
 /** Chỉ người đã được AntGo duyệt hồ sơ mới đăng bán / đăng việc */
 async function requireVerified(user) {

@@ -13,6 +13,8 @@ export interface SellerPerson {
   name: string;
   avatar: string;
   phone: string;
+  /** Chế độ thật: id tài khoản của người này (để mở hội thoại) */
+  userId?: string;
 }
 
 /** Bài đăng của tôi — `stock`: số phần còn / số cái / buổi trống / số người cần, tùy loại */
@@ -223,6 +225,8 @@ export interface SellerChat {
   name: string;
   avatar?: string;
   unread: number;
+  /** Chế độ thật: id tài khoản người bên kia; `tmp-…` là hội thoại mới chưa gửi tin nào lên server */
+  userId?: string;
   /** đơn / việc đang nói tới */
   ctx: { type: 'order' | 'job'; id: string } | null;
   messages: SellerMsg[];

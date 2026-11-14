@@ -26,8 +26,13 @@ async function gameState(userId, day = today()) {
   return { plays: rows.length, playsLeft: Math.max(0, GAME.maxPlays - rows.length), capLeft: Math.max(0, GAME.dailyCap - earned) };
 }
 
+// Chỉ mục duy nhất (user, key) được Mongoose tạo bất đồng bộ lúc khởi động; đợi nó xong rồi mới ghi sổ,
+// kẻo hai lần ghi sớm có thể cùng lọt qua và cộng đôi Xu chào mừng
+const indexesReady = XuEntry.init().catch(() => undefined);
+
 // Ghi một dòng; trùng key thì bỏ qua (idempotent)
 async function addEntry(userId, data) {
+  await indexesReady;
   try { return await XuEntry.create({ user: userId, ...data }); }
   catch (e) { if (e.code === 11000) return null; throw e; }
 }

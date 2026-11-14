@@ -2,7 +2,9 @@ const router = require('express').Router();
 const { z } = require('zod');
 const service = require('./seller.service');
 const verification = require('./verification.service');
+const shop = require('./shop.service');
 const asyncHandler = require('../../utils/asyncHandler');
+const ApiError = require('../../utils/ApiError');
 const { body, ids } = require('../../middlewares/validate');
 const { auth } = require('../../middlewares/auth');
 
@@ -101,5 +103,57 @@ const verifyBody = z.object({
  */
 router.get('/verification', asyncHandler(async (req, res) => res.json({ data: await verification.mine(req.user) })));
 router.post('/verification', body(verifyBody), asyncHandler(async (req, res) => res.status(201).json({ data: await verification.submit(req.user, req.body) })));
+
+
+const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Giờ dạng HH:mm');
+const shopBody = z.object({
+  name: z.string().trim().min(2, 'Tên gian hàng tối thiểu 2 ký tự').max(60).optional(),
+  kind: z.string().trim().max(40).optional(),
+  address: z.string().trim().max(80).optional(),
+  bio: z.string().trim().max(600).optional(),
+  cover: z.string().nullable().optional(),
+  replyTime: z.string().trim().max(60).optional(),
+});
+const hoursBody = z.object({ hours: z.array(z.object({ on: z.boolean(), from: hhmm, to: hhmm })).length(7, 'Cần đủ giờ của 7 ngày') });
+const dateParam = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ngày dạng yyyy-mm-dd');
+const offBody = z.object({ date: dateParam, note: z.string().trim().max(120).optional() });
+const pauseBody = z.object({ until: dateParam });
+const replyBody = z.object({ text: z.string().trim().min(2, 'Phản hồi tối thiểu 2 ký tự').max(500) });
+
+/**
+ * @openapi
+ * /seller/shop:
+ *   get: { tags: [Bán & Đăng việc], summary: "Hồ sơ gian hàng của tôi + số liệu thật (đánh giá, đơn hoàn thành, người theo dõi, lượt xem), giờ nhận đơn, ngày nghỉ, tạm ngưng", security: [{ cookieAuth: [] }], responses: { 200: { description: "{ shop, hours[7], offs[], pause }" } } }
+ *   put: { tags: [Bán & Đăng việc], summary: "Sửa hồ sơ gian hàng (tên, loại, địa chỉ, giới thiệu, ảnh bìa, thời gian trả lời)", security: [{ cookieAuth: [] }], responses: { 200: { description: OK } } }
+ * /seller/shop/hours:
+ *   put: { tags: [Bán & Đăng việc], summary: "Giờ nhận đơn 7 ngày (hours[0] = Thứ Hai)", security: [{ cookieAuth: [] }], responses: { 200: { description: OK } } }
+ * /seller/shop/offs:
+ *   put: { tags: [Bán & Đăng việc], summary: "Thêm / sửa ngày nghỉ { date, note }", security: [{ cookieAuth: [] }], responses: { 200: { description: OK } } }
+ * /seller/shop/offs/{date}:
+ *   delete: { tags: [Bán & Đăng việc], summary: Bỏ ngày nghỉ, security: [{ cookieAuth: [] }], responses: { 200: { description: OK } } }
+ * /seller/shop/pause:
+ *   put: { tags: [Bán & Đăng việc], summary: "Tạm ngưng nhận đơn đến ngày { until }", security: [{ cookieAuth: [] }], responses: { 200: { description: OK } } }
+ *   delete: { tags: [Bán & Đăng việc], summary: Mở lại nhận đơn, security: [{ cookieAuth: [] }], responses: { 200: { description: OK } } }
+ * /seller/stats:
+ *   get: { tags: [Bán & Đăng việc], summary: "Hiệu quả theo 5 mốc today · 7 · 30 · 90 · year (thu nhập, đơn xong, đánh giá, lượt xem, lượt lưu, biểu đồ) — tính từ dữ liệu thật", security: [{ cookieAuth: [] }], responses: { 200: { description: "{ data: { today, 7, 30, 90, year } }" } } }
+ * /seller/reviews:
+ *   get: { tags: [Bán & Đăng việc], summary: Đánh giá khách dành cho tôi, security: [{ cookieAuth: [] }], responses: { 200: { description: "{ data: Review[] }" } } }
+ * /seller/reviews/{id}/reply:
+ *   post: { tags: [Bán & Đăng việc], summary: Phản hồi một đánh giá (mỗi đánh giá một lần), security: [{ cookieAuth: [] }], responses: { 200: { description: OK }, 409: { description: Đã phản hồi } } }
+ */
+router.get('/shop', asyncHandler(async (req, res) => res.json({ data: await shop.getShop(req.user) })));
+router.put('/shop', body(shopBody), asyncHandler(async (req, res) => res.json({ data: await shop.updateShop(req.user, req.body) })));
+router.put('/shop/hours', body(hoursBody), asyncHandler(async (req, res) => res.json({ data: await shop.setHours(req.user, req.body.hours) })));
+router.put('/shop/offs', body(offBody), asyncHandler(async (req, res) => res.json({ data: await shop.setOff(req.user, req.body.date, req.body.note || '') })));
+router.delete('/shop/offs/:date', asyncHandler(async (req, res) => {
+  const date = dateParam.safeParse(req.params.date);
+  if (!date.success) throw ApiError.badRequest('Ngày dạng yyyy-mm-dd');
+  res.json({ data: await shop.setOff(req.user, date.data, null) });
+}));
+router.put('/shop/pause', body(pauseBody), asyncHandler(async (req, res) => res.json({ data: await shop.setPause(req.user, req.body.until) })));
+router.delete('/shop/pause', asyncHandler(async (req, res) => res.json({ data: await shop.setPause(req.user, null) })));
+router.get('/stats', asyncHandler(async (req, res) => res.json({ data: await shop.stats(req.user) })));
+router.get('/reviews', asyncHandler(async (req, res) => res.json({ data: await shop.listReviews(req.user) })));
+router.post('/reviews/:id/reply', ids('id'), body(replyBody), asyncHandler(async (req, res) => res.json({ data: await shop.replyReview(req.user, req.params.id, req.body.text) })));
 
 module.exports = router;

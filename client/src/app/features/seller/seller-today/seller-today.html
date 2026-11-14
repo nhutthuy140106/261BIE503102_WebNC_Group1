@@ -92,14 +92,14 @@
       @if (stats(); as d) {
         <div class="card kpis">
           <div class="kduo">
-            <div class="kbig"><span class="lb">Tổng tiền đã bán</span><b>{{ d.income | vnd }}</b><span class="up">▲ {{ up(d.incomeUp) }}</span></div>
-            <div class="kbig"><span class="lb">Tổng tiền đã thuê</span><b>{{ d.paid | vnd }}</b><span class="up">▲ {{ up(d.paidUp) }}</span></div>
+            <div class="kbig"><span class="lb">Tổng tiền đã bán</span><b>{{ d.income | vnd }}</b><span class="up" [class.down]="down(d.incomeUp)">{{ down(d.incomeUp) ? '▼' : '▲' }} {{ up(d.incomeUp) }}</span></div>
+            <div class="kbig"><span class="lb">Tổng tiền đã thuê</span><b>{{ d.paid | vnd }}</b><span class="up" [class.down]="down(d.paidUp)">{{ down(d.paidUp) ? '▼' : '▲' }} {{ up(d.paidUp) }}</span></div>
           </div>
           <div class="kgrid">
-            <div class="kt"><span>Đơn hoàn thành</span><b>{{ d.done }}</b><span class="up">▲ {{ up(d.doneUp) }}</span></div>
-            <div class="kt"><span>Việc thuê xong</span><b>{{ d.hired }}</b><span class="up">▲ {{ up(d.hiredUp) }}</span></div>
+            <div class="kt"><span>Đơn hoàn thành</span><b>{{ d.done }}</b><span class="up" [class.down]="down(d.doneUp)">{{ down(d.doneUp) ? '▼' : '▲' }} {{ up(d.doneUp) }}</span></div>
+            <div class="kt"><span>Việc thuê xong</span><b>{{ d.hired }}</b><span class="up" [class.down]="down(d.hiredUp)">{{ down(d.hiredUp) ? '▼' : '▲' }} {{ up(d.hiredUp) }}</span></div>
             <div class="kt"><span>Đánh giá</span><b><span class="st">★</span> {{ d.rating }}</b><small>{{ d.ratingCount }} đánh giá</small></div>
-            <div class="kt"><span>Lượt xem bài</span><b>{{ d.views | vnd: '' }}</b><span class="up">▲ {{ up(d.viewsUp) }}</span></div>
+            <div class="kt"><span>Lượt xem bài</span><b>{{ d.views | vnd: '' }}</b><span class="up" [class.down]="down(d.viewsUp)">{{ down(d.viewsUp) ? '▼' : '▲' }} {{ up(d.viewsUp) }}</span></div>
           </div>
           <a class="kmore" routerLink="/seller/insights">Xem báo cáo chi tiết<svg class="i"><use href="#right" /></svg></a>
         </div>

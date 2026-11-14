@@ -14,7 +14,7 @@ const { addActivity } = require('../src/seeds/activity-extra');
     const dir = path.join(__dirname, '..', 'backups');
     fs.mkdirSync(dir, { recursive: true });
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    for (const c of ['reviews', 'offers', 'jobs', 'notifications', 'counters']) {
+    for (const c of ['reviews', 'offers', 'jobs', 'notifications', 'counters', 'orders', 'shops', 'postviews', 'shopfollows', 'sellerverifications']) {
       const file = path.join(dir, `${c}-${stamp}.json`);
       fs.writeFileSync(file, JSON.stringify(await mongoose.connection.db.collection(c).find({}).toArray()));
       if (!fs.existsSync(file)) throw new Error('Sao lưu thất bại, dừng lại');
@@ -22,7 +22,7 @@ const { addActivity } = require('../src/seeds/activity-extra');
     console.log(`Đã sao lưu → server/backups/*-${stamp}.json`);
   }
   const r = await addActivity({ dryRun: !apply });
-  console.log(`${apply ? 'Đã thêm' : 'Sẽ thêm'}: ${r.reviews} đánh giá, ${r.offers} đề nghị nhận việc.`);
+  console.log(`${apply ? 'Đã thêm' : 'Sẽ thêm'}: ${r.reviews} đánh giá, ${r.offers} đề nghị nhận việc, ${r.orders} đơn lịch sử.`);
   if (r.skipped.length) console.log('Bỏ qua:\n - ' + r.skipped.join('\n - '));
   await mongoose.disconnect();
 })().catch((e) => { console.error(e); process.exit(1); });

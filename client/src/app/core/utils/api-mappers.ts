@@ -92,6 +92,9 @@ export function postFromApi(p: Raw): Post {
     highlights: arr(p.highlights),
     info: arr(p.info),
     promoted: p.promoted || undefined,
+    sold: typeof p.sold === 'number' ? p.sold : undefined,
+    views: typeof p.views === 'number' ? p.views : undefined,
+    saves: typeof p.saves === 'number' ? p.saves : undefined,
     comboDetail: p.comboDetail
       ? {
           items: p.comboDetail.items.map((i: Raw) => ({ postId: String(i.postId), qty: i.qty, title: i.title, unitPrice: i.unitPrice, unit: i.unit || undefined, image: i.image || undefined, available: i.available !== false })),

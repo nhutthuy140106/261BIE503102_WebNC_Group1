@@ -1,10 +1,10 @@
 import { Deadline, LIMITS } from '../utils/countdown';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, switchMap, tap, throwError } from 'rxjs';
 import { DATASET_BASE, useMock } from '../config/api.config';
 import { AppError } from '../models/api';
-import { mergeServerSpace } from '../utils/seller-mappers';
+import { dateOfOffset, mergeServerSpace } from '../utils/seller-mappers';
 import { OFFER_STATE_LABEL, Offer } from '../models/offer';
 import { CreateOrderBody, Order } from '../models/order';
 import { Post, PostKind } from '../models/post';
@@ -287,7 +287,7 @@ export class SellerSpaceService {
         });
       }
     }
-    for (const r of this.reviews().filter((x) => !x.reply)) {
+    for (const r of this.reviews().filter((x) => !x.reply).slice(0, this.live ? 5 : undefined)) {
       const ord = this.orders().find((o) => o.id === r.orderId);
       out.push({
         key: 'r-' + r.id, type: 'review', kind: 'food', tag: 'Đánh giá', status: 'Đánh giá', top: ord?.code ?? r.post, title: ord?.title ?? r.post,
@@ -440,11 +440,12 @@ export class SellerSpaceService {
   /** Chế độ thật: đọc lại đơn / bài / việc từ server và ghép vào khu Bán */
   private syncServer(): Observable<unknown> {
     if (!this.live || !this.auth.isLoggedIn()) return of(null);
-    return forkJoin([this.buyerApi.incomingSellerOrders(), this.buyerApi.myPosts()]).pipe(
-      tap(([orders, posts]) => {
+    const soft = <T>(o: Observable<T>): Observable<T | undefined> => o.pipe(catchError(() => of(undefined)));
+    return forkJoin([this.buyerApi.incomingSellerOrders(), this.buyerApi.myPosts(), soft(this.buyerApi.shopInfo()), soft(this.buyerApi.serverStats()), soft(this.buyerApi.serverReviews()), soft(this.buyerApi.serverChats((oid) => this.sharedOffers().find((o) => o._id === oid)?.jobId))]).pipe(
+      tap(([orders, posts, shop, stats, reviews, chats]) => {
         const cur = this.state();
         if (!cur) return;
-        const next = mergeServerSpace(cur, orders, posts);
+        const next = mergeServerSpace(cur, orders, posts, { shop, stats, reviews, chats });
         this.state.set(next);
         this.db.save(this.dbName, [next]);
         this.refreshShared();
@@ -466,7 +467,7 @@ export class SellerSpaceService {
     const cur = this.state();
     if (cur) return of(cur);
     // thật: lần đầu chưa có bản lưu riêng nên đọc bộ mẫu làm khung (giờ mở cửa, chat…), rồi thay phần giao dịch bằng dữ liệu server
-    const stored = this.live ? this.db.list<SellerSpace>(this.dbName).pipe(catchError(() => of([] as SellerSpace[]))) : this.db.list<SellerSpace>(this.dbName);
+    const stored = this.live ? of(this.db.peek<SellerSpace>(this.dbName) ?? []) : this.db.list<SellerSpace>(this.dbName);
     return stored.pipe(
       switchMap((rows) => (rows[0]?.version === SellerSpaceService.VERSION ? of(structuredClone(rows[0])) : this.reset(rows[0]?.posts))),
       tap((s) => {
@@ -558,13 +559,33 @@ export class SellerSpaceService {
     return `Đã dùng ${cost} Xu — “${p.title}” ${p.kind === 'job' ? 'được ghim đầu danh sách việc' : 'lên Nổi bật trong khu'} 3 ngày`;
   }
 
+  /** Chế độ thật: ghi lên server; lỗi thì báo và đọc lại bản đúng */
+  private saveRemote(call: Observable<unknown>, what: string): void {
+    call.subscribe({
+      error: (e: unknown) => {
+        this.notifications.push(`Không lưu được ${what}: ${e instanceof AppError ? e.message : 'lỗi không rõ'}`, '/seller');
+        this.syncServer().subscribe();
+      },
+    });
+  }
+
   setShop(patch: Partial<SellerShop>): void {
     this.patch((s) => Object.assign(s.shop, patch));
+    if (!this.live) return;
+    const body: Record<string, unknown> = {};
+    if (patch.name !== undefined) body['name'] = patch.name;
+    if (patch.kind !== undefined) body['kind'] = patch.kind;
+    if (patch.bio !== undefined) body['bio'] = patch.bio;
+    if (patch.cover !== undefined) body['cover'] = patch.cover;
+    if (patch.at !== undefined) body['address'] = patch.at;
+    if (patch.reply !== undefined) body['replyTime'] = patch.reply;
+    if (Object.keys(body).length) this.saveRemote(this.buyerApi.updateShop(body), 'hồ sơ gian hàng');
   }
 
   /** Giờ nhận đơn theo thứ (0 = Thứ Hai … 6 = Chủ nhật) */
   setHours(hours: DayHours[]): void {
     this.patch((s) => (s.hours = hours));
+    if (this.live) this.saveRemote(this.buyerApi.saveHours(hours), 'giờ nhận đơn');
   }
 
   /** Thêm / bỏ ngày nghỉ (d = số ngày so với hôm nay) */
@@ -574,12 +595,14 @@ export class SellerSpaceService {
       if (note !== null) s.offs.push({ day: d, note });
       s.offs.sort((a, b) => a.day - b.day);
     });
+    if (this.live) this.saveRemote(this.buyerApi.saveOff(dateOfOffset(d), note), 'ngày nghỉ');
   }
 
   readonly offs = computed(() => this.state()?.offs ?? []);
 
   setPause(p: SellerPause | null): void {
     this.patch((s) => (s.pause = p));
+    if (this.live) this.saveRemote(this.buyerApi.savePause(p), 'trạng thái tạm ngưng');
   }
 
   orderActions(o: SellerOrderView): [SellerOrderAct, string, boolean][] {
@@ -904,6 +927,7 @@ export class SellerSpaceService {
       const r = s.reviews.find((x) => x.id === reviewId);
       if (r) r.reply = text;
     });
+    if (this.live) this.saveRemote(this.buyerApi.replyToReview(reviewId, text), 'phản hồi đánh giá');
   }
 
   // ---------------- Messenger ----------------
@@ -911,6 +935,7 @@ export class SellerSpaceService {
   /** Mở (hoặc tạo) hội thoại với một người, gắn đơn / việc đang nói tới. Trả về id hội thoại. */
   openChat(name: string, ctx: SellerChat['ctx']): string {
     const cur = this.chats().find((c) => c.name.toLowerCase() === name.toLowerCase());
+    if (this.live) return this.openLiveChat(name, ctx, cur);
     if (cur && (!ctx || (cur.ctx?.type === ctx.type && cur.ctx.id === ctx.id))) return cur.id;
     const id = cur?.id ?? 'c' + Date.now();
     this.patch((s) => {
@@ -921,8 +946,23 @@ export class SellerSpaceService {
     return id;
   }
 
+  /** Thật: có hội thoại với người này rồi thì dùng lại; chưa có thì dựng bản tạm, tạo thật ở server lúc gửi tin đầu tiên */
+  private openLiveChat(name: string, ctx: SellerChat['ctx'], cur: SellerChat | undefined): string {
+    if (cur && (!ctx || (cur.ctx?.type === ctx.type && cur.ctx.id === ctx.id))) return cur.id;
+    const person = this.person(name);
+    const userId = person?.userId ?? cur?.userId;
+    const id = cur?.id ?? 'tmp-' + (userId ?? Date.now());
+    this.patch((s) => {
+      const c = s.chats.find((x) => x.id === id);
+      if (c) c.ctx = ctx;
+      else s.chats.unshift({ id, name, avatar: person?.avatar, unread: 0, userId, ctx, messages: [] });
+    });
+    return id;
+  }
+
   markRead(id: string): void {
     if (!this.chats().find((c) => c.id === id)?.unread) return;
+    if (this.live && !id.startsWith('tmp-')) this.saveRemote(this.buyerApi.readChat(id), 'trạng thái đã đọc');
     this.patch((s) => {
       const c = s.chats.find((x) => x.id === id);
       if (c) c.unread = 0;
@@ -931,6 +971,10 @@ export class SellerSpaceService {
 
   /** Gửi tin (bản mẫu: chỉ lưu trong trình duyệt, không tự đổi trạng thái đơn / việc) */
   sendMessage(id: string, text: string, media?: SellerMsg['media']): void {
+    if (this.live) {
+      if (!text.trim()) return void this.notifications.push('Chế độ thật hiện chỉ gửi được chữ, chưa gửi ảnh / video / tệp.', '/seller/messenger');
+      media = undefined;
+    }
     this.patch((s) => {
       const c = s.chats.find((x) => x.id === id);
       if (!c) return;
@@ -939,6 +983,12 @@ export class SellerSpaceService {
       c.messages.push({ from: 'me', text, time: now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }), date, ...(media ? { media } : {}) });
       s.chats = [c, ...s.chats.filter((x) => x.id !== id)];
     });
+    if (!this.live) return;
+    const chat = this.chats().find((c) => c.id === id);
+    if (!chat) return;
+    // hội thoại tạm: tạo ở server (kèm đơn / việc đang nói tới) rồi mới gửi
+    const ready: Observable<string> = id.startsWith('tmp-') ? (chat.userId ? this.buyerApi.openConversation(chat.userId, chat.ctx) : throwError(() => new AppError('Chưa biết tài khoản người nhận.', 400, 'BAD_REQUEST'))) : of(id);
+    this.saveRemote(ready.pipe(switchMap((cid) => this.buyerApi.sendChat(cid, text.trim())), tap(() => this.syncServer().subscribe())), 'tin nhắn');
   }
 
   // ---------------- lịch ----------------

@@ -50,6 +50,7 @@ require('./modules/buyer').mount(app);
 app.use('/api/admin/seller-verifications', require('./modules/seller/admin-verification.routes'));
 app.use('/api/admin', require('./modules/admin/admin.routes'));
 app.use('/api/seller', require('./modules/seller/seller.routes'));
+app.use('/api/shops', require('./modules/seller/shop.routes'));
 if (!isProd) app.use('/api/dev', require('./modules/dev/dev.routes'));
 
 app.use(notFound);

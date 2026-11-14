@@ -6,10 +6,10 @@ import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { Offer } from '../models/offer';
 import { Order } from '../models/order';
-import { SellerOrder } from '../models/seller';
+import { DayHours, SellerChat, SellerOrder, SellerPause, SellerReview, SellerStats, StatsRange } from '../models/seller';
 import { PayMethod, Post, PostItem, PostKind, PostQuestion, PostStatus, OptionGroup, PriceType } from '../models/post';
 import { jobFromApi, postFromApi } from '../utils/api-mappers';
-import { jobBodyToApi, postBodyToApi, posterOfferFromApi, sellerOrderFromApi } from '../utils/seller-mappers';
+import { ServerShop, chatContextToApi, jobBodyToApi, sellerChatFromApi, postBodyToApi, posterOfferFromApi, sellerOrderFromApi, sellerReviewFromApi } from '../utils/seller-mappers';
 import { PosterAction, SellerOrderAction, applyPoster, applySellerOrder } from '../utils/seller-state';
 import { ApiService } from './api';
 import { AuthService } from './auth';
@@ -253,6 +253,63 @@ export class SellerService {
         return next;
       }),
     );
+  }
+
+  // ---- Gian hàng (chỉ chế độ thật): hồ sơ, giờ nhận đơn, ngày nghỉ, tạm ngưng, thống kê, đánh giá ----
+  shopInfo(): Observable<ServerShop> {
+    return this.api.get<ServerShop>('/seller/shop');
+  }
+
+  updateShop(body: { name?: string; kind?: string; address?: string; bio?: string; cover?: string | null; replyTime?: string }): Observable<ServerShop> {
+    return this.api.put<ServerShop>('/seller/shop', body);
+  }
+
+  saveHours(hours: DayHours[]): Observable<ServerShop> {
+    return this.api.put<ServerShop>('/seller/shop/hours', { hours });
+  }
+
+  /** `date` = yyyy-mm-dd; note null = bỏ ngày nghỉ */
+  saveOff(date: string, note: string | null): Observable<ServerShop> {
+    return note === null ? this.api.delete(`/seller/shop/offs/${date}`).pipe(switchMap(() => this.shopInfo())) : this.api.put<ServerShop>('/seller/shop/offs', { date, note });
+  }
+
+  savePause(pause: SellerPause | null): Observable<ServerShop> {
+    return pause ? this.api.put<ServerShop>('/seller/shop/pause', { until: pause.until }) : this.api.delete('/seller/shop/pause').pipe(switchMap(() => this.shopInfo()));
+  }
+
+  serverStats(): Observable<Record<StatsRange, SellerStats>> {
+    return this.api.get<Record<StatsRange, SellerStats>>('/seller/stats');
+  }
+
+  serverReviews(): Observable<SellerReview[]> {
+    return this.api.get<unknown[]>('/seller/reviews').pipe(map((l) => l.map((r) => sellerReviewFromApi(r))));
+  }
+
+  replyToReview(id: string, text: string): Observable<unknown> {
+    return this.api.post<unknown>(`/seller/reviews/${id}/reply`, { text });
+  }
+
+  // ---- Messenger (chỉ chế độ thật): dùng chung kho hội thoại với phía Mua ----
+  serverChats(jobOfOffer: (offerId: string) => string | undefined): Observable<SellerChat[]> {
+    return this.api.get<{ _id: string }[]>('/conversations').pipe(
+      switchMap((list) => {
+        const top = list.slice(0, 30);
+        return top.length ? forkJoin(top.map((c) => this.api.get<unknown[]>(`/conversations/${c._id}/messages`, { limit: 100 }).pipe(map((m) => sellerChatFromApi(c, m as never[], this.me, jobOfOffer))))) : of([] as SellerChat[]);
+      }),
+    );
+  }
+
+  /** Mở (hoặc lấy lại) hội thoại với một người, gắn đơn / việc đang nói tới. Trả về id hội thoại ở server */
+  openConversation(withUser: string, ctx: SellerChat['ctx']): Observable<string> {
+    return this.api.post<{ _id: string }>('/conversations', { withUser, context: chatContextToApi(ctx) }).pipe(map((c) => c._id));
+  }
+
+  sendChat(conversationId: string, text: string): Observable<unknown> {
+    return this.api.post<unknown>(`/conversations/${conversationId}/messages`, { text });
+  }
+
+  readChat(conversationId: string): Observable<unknown> {
+    return this.api.post<unknown>(`/conversations/${conversationId}/read`);
   }
 
   /** Chỉ chế độ thật: đơn khách đặt ở server, đã đổi sang dạng hiển thị của khu Bán */

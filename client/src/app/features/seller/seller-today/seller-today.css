@@ -108,3 +108,6 @@ section.sec { margin-top: 36px; }
   .xuband { flex-wrap: wrap; }
   .needgroup .gh { flex-wrap: wrap; }
 }
+
+.up.down { background: #fbe4e1; color: #b3372b; }
+.kbig .up.down { background: rgba(255, 140, 120, .2); color: #ffb3a6; }

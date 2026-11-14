@@ -49,6 +49,7 @@ async function getPost(identity, user) {
   if (!id) throw ApiError.badRequest('Mã hoặc slug bài sai định dạng');
   const post = await Post.findById(id).populate('seller', SELLER_FIELDS);
   if (!post || (post.status === 'hidden' && !(user && user.role === 'admin'))) throw ApiError.notFound('Không tìm thấy bài');
+  require('../../seller/shop.service').countView(post, user).catch(() => undefined); // lượt xem cho mục Hiệu quả của người bán; lỗi đếm không làm hỏng việc mở bài
   if (!(post.combo && post.combo.items && post.combo.items.length)) return post;
   // combo: kèm danh sách món (tên, giá lẻ, ảnh) và số tiền tiết kiệm so với mua lẻ (tính trên giá đang áp dụng, cả Giờ vàng)
   const comps = await Post.find({ _id: { $in: post.combo.items.map((i) => i.postId) } }).select('title price unit images status');

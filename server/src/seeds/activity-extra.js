@@ -296,7 +296,7 @@ async function addActivity({ dryRun = false } = {}) {
   const users = await User.find({ status: 'active' });
   const byName = new Map();
   for (const x of users) if (!byName.has(x.name)) byName.set(x.name, x); // trùng tên (tài khoản thật) → lấy tài khoản đầu = tài khoản mẫu
-  const out = { reviews: 0, offers: 0, skipped: [] };
+  const out = { reviews: 0, offers: 0, orders: 0, skipped: [] };
 
   /* Đánh giá */
   const posts = await Post.find({}).select('title seller');
@@ -336,6 +336,121 @@ async function addActivity({ dryRun = false } = {}) {
       out.offers++;
     } catch (e) { out.skipped.push(`việc: ${jobTitle} / ${who} (${e.message})`); }
   }
+  /* Lịch sử giao dịch: mỗi đánh giá mẫu trỏ tới một ĐƠN đã hoàn thành có thật (cùng id), để "đã bán", doanh thu, thống kê Hiệu quả có số thật */
+  const { nextCode } = require('../modules/shared/counter.model');
+  const Order = require('../modules/buyer/order/order.model');
+  const { PostView, ShopFollow, dayKey } = require('../modules/seller/engagement.model');
+  const Shop = require('../modules/seller/shop.model');
+  const hash = (str) => { let h = 0; for (const c of str) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
+  const postById = new Map((await Post.find({}).select('title price unit images type seller fulfillmentModes payMethods deliveryFee')).map((p) => [String(p._id), p]));
+  const userById = new Map(users.map((u) => [String(u._id), u]));
+  const sellerNameOf = (p) => (userById.get(String(p.seller)) || {}).name || '';
+  // Mốc thời gian của đơn lịch sử (cố định theo id): rải trong 56 ngày, nghiêng về gần đây; đánh giá đến sau khi đơn xong
+  const timing = (id) => {
+    const h = hash(String(id));
+    const ageDays = Math.floor(56 * ((h % 1000) / 1000) ** 1.35);
+    const d = new Date(Date.now() - ageDays * DAY);
+    d.setHours(8 + ((h >> 3) % 12), (h >> 5) % 60, 0, 0);
+    if (d.getTime() > Date.now() - 40 * 60000) d.setDate(d.getDate() - 1); // giờ ngẫu nhiên rơi vào tương lai → lùi sang hôm trước (không dồn về "bây giờ")
+    const done = d;
+    const lastStep = 4 + (h % 6);
+    const placed = new Date(done.getTime() - lastStep * 25 * 60000);
+    const reviewAt = new Date(Math.min(done.getTime() + (3 + (h % 40)) * HOUR, Date.now() - 5 * 60000));
+    return { h, placed, done, reviewAt, lastStep };
+  };
+  const historyOf = (fulfillment, t) => {
+    const last = fulfillment === 'delivery' ? 'delivering' : 'ready';
+    return [['waiting', 0], ['confirmed', 1], ['preparing', 2], [last, 3], ['done', t.lastStep]].map(([state, n]) => ({ state, at: new Date(t.placed.getTime() + n * 25 * 60000) }));
+  };
+  let ordersMade = 0;
+  for (const r of await Review.find({ targetType: 'order', post: { $ne: null } }).select('reviewer target targetId post createdAt').lean()) {
+    if (await Order.exists({ _id: r.targetId })) continue;
+    const post = postById.get(String(r.post));
+    const buyer = userById.get(String(r.reviewer));
+    if (!post || !buyer) continue;
+    if (dryRun) { ordersMade++; continue; }
+    const t = timing(r.targetId);
+    const h = t.h;
+    const qty = 1 + (h % 7 === 0 ? 1 : 0);
+    const modes = post.fulfillmentModes && post.fulfillmentModes.length ? post.fulfillmentModes : ['pickup'];
+    const fulfillment = modes[h % modes.length];
+    const fee = fulfillment === 'delivery' ? post.deliveryFee || 0 : 0;
+    const total = post.price * qty + fee;
+    const history = historyOf(fulfillment, t);
+    await Order.collection.insertOne({
+      _id: r.targetId, code: await nextCode('order', 'AG-O'), buyer: buyer._id, seller: r.target, post: post._id,
+      snapshot: { title: post.title, type: post.type, image: post.images[0], sellerName: sellerNameOf(post), sellerAvatar: null, unitPrice: post.price, unit: post.unit },
+      quantity: qty, selections: [], answers: [], fulfillment,
+      address: fulfillment === 'delivery' ? { name: buyer.name, phone: buyer.phone, block: buyer.area, unit: '', note: '', label: 'home' } : undefined,
+      utensils: false, note: '', payment: (post.payMethods || []).includes('transfer') && h % 3 === 0 ? 'transfer' : 'cash',
+      breakdown: { items: post.price * qty, deliveryFee: fee, discount: 0, surcharge: 0, promoSaved: 0 }, total,
+      state: 'done', history, reviewed: true, sample: true, createdAt: t.placed, updatedAt: t.done, __v: 0,
+    });
+    ordersMade++;
+  }
+  out.orders = ordersMade;
+  if (!dryRun) {
+    for (const [title, list] of Object.entries(allReviews)) {
+      for (const [who] of list) {
+        const targetId = new mongoose.Types.ObjectId(crypto.createHash('md5').update(`${title}|${who}`).digest('hex').slice(0, 24));
+        const ord = await Order.collection.findOne({ _id: targetId });
+        if (!ord) continue;
+        const t = timing(targetId);
+        await Order.collection.updateOne({ _id: targetId }, { $set: { createdAt: t.placed, updatedAt: t.done, history: historyOf(ord.fulfillment, t), sample: true } });
+        const rv = await Review.collection.findOne({ targetType: 'order', targetId });
+        if (rv) await Review.collection.updateOne({ _id: rv._id }, { $set: { createdAt: t.reviewAt, updatedAt: t.reviewAt, ...(rv.reply && rv.reply.text ? { 'reply.at': new Date(t.reviewAt.getTime() + 6 * HOUR) } : {}) } });
+      }
+    }
+  }
+
+  /* Lượt xem bài 60 ngày gần nhất (bài càng nhiều đánh giá càng nhiều người xem) + người theo dõi + hồ sơ gian hàng của người bán mẫu */
+  const reviewsPerPost = new Map();
+  for (const r of await Review.find({ targetType: 'order', post: { $ne: null } }).select('post').lean()) reviewsPerPost.set(String(r.post), (reviewsPerPost.get(String(r.post)) || 0) + 1);
+  const ops = [];
+  for (const p of postById.values()) {
+    const base = 2 + (reviewsPerPost.get(String(p._id)) || 0) * 2;
+    for (let age = 0; age < 60; age++) {
+      const d = new Date(Date.now() - age * DAY);
+      const count = Math.max(1, Math.round((base * (1 + (hash(`${p._id}${age}`) % 5))) / (1 + age / 40)));
+      ops.push({ updateOne: { filter: { post: p._id, date: dayKey(d) }, update: { $setOnInsert: { seller: p.seller, count } }, upsert: true } });
+    }
+  }
+  if (!dryRun && ops.length) await PostView.collection.bulkWrite(ops, { ordered: false });
+
+  const fans = users.filter((u) => u.role !== 'admin' && /^09000000\d\d$/.test(u.phone));
+  const KIND = { food: 'Đồ ăn nhà làm', goods: 'Đồ dùng còn tốt', service: 'Dịch vụ tại nhà' };
+  const BIO = {
+    food: 'Nấu và bán đồ ăn nhà làm cho hàng xóm trong khu: nguyên liệu tươi mỗi ngày, ít dầu, nêm vừa miệng. Đặt trước giờ nhận đơn là kịp bữa.',
+    goods: 'Nhượng lại đồ dùng trong nhà còn tốt, mô tả đúng tình trạng, cho xem và thử trước khi mua. Ưu tiên hàng xóm cùng khu để giao nhận tiện.',
+    service: 'Nhận làm dịch vụ tại nhà cho hàng xóm trong khu: đúng hẹn, báo giá rõ trước khi làm, làm xong dọn gọn.',
+  };
+  const BIO_OF = {
+    'Bếp Cô Lan': 'Cô nấu cơm nhà mỗi ngày cho mấy cháu đi làm trong khu: ít dầu, nêm vừa, rau luộc theo mùa. Thực đơn ngày mai cô đăng vào buổi tối, đặt trước 10:30 là kịp trưa.',
+    'Giặt sấy Mỹ Linh': 'Giặt sấy gấp, lấy và trả tận cửa trong khu Vinhomes. Cân trước mặt khách, tính giá minh bạch, đồ nhạy cảm giặt riêng.',
+    'Tiệm Sạch Thơm': 'Tiệm giặt sấy và rau củ sạch cho cư dân Vinhomes Grand Park: giao nhận tận tòa, trả đồ trong ngày.',
+    'Quán Nhà Mây': 'Quán nhỏ trong khu: cà phê, trà sữa, nước ép làm tươi từng ly. Giao nhanh trong khu, có combo cho văn phòng.',
+  };
+  const KIND_OF = { 'Bếp Cô Lan': 'Bếp nhà làm', 'Giặt sấy Mỹ Linh': 'Giặt sấy', 'Tiệm Sạch Thơm': 'Giặt sấy & rau sạch', 'Quán Nhà Mây': 'Quán cà phê, trà sữa', 'Quán Phở Bà Tư': 'Quán phở, bún', 'Cô Ba': 'Đồ ăn sáng' };
+  const REPLY = ['Thường trả lời trong 10 phút', 'Thường trả lời trong 30 phút', 'Thường trả lời trong 1 giờ', 'Thường trả lời trong 15 phút'];
+  const typeOf = new Map();
+  for (const p of postById.values()) if (!typeOf.has(String(p.seller))) typeOf.set(String(p.seller), p.type);
+  for (const u of users) {
+    const type = typeOf.get(String(u._id));
+    if (!type) continue;
+    const h = hash(String(u._id));
+    if (dryRun) continue;
+    const pool = fans.filter((f) => String(f._id) !== String(u._id));
+    for (let i = 0; i < 3 + (h % 8) && i < pool.length; i++) {
+      const f = pool[(h + i * 5) % pool.length];
+      await ShopFollow.updateOne({ user: f._id, shop: u._id }, { $setOnInsert: { user: f._id, shop: u._id } }, { upsert: true });
+    }
+    const lan = u.name === 'Bếp Cô Lan';
+    await Shop.updateOne({ user: u._id }, { $setOnInsert: {
+      user: u._id, name: u.name, kind: KIND_OF[u.name] || KIND[type], address: `Block ${u.area || 'B'}${lan ? ', tầng 5' : ''}`, bio: BIO_OF[u.name] || BIO[type], replyTime: REPLY[h % REPLY.length],
+      hours: Array.from({ length: 7 }, (_, i) => ({ on: lan ? i !== 6 : true, from: lan ? '09:00' : '08:00', to: lan ? '13:00' : '20:00' })),
+    } }, { upsert: true });
+  }
+
   /* Xác minh người bán: ai đang có bài hoặc việc thì đã được duyệt sẵn (người mới đăng ký thì phải nộp hồ sơ và chờ admin) */
   const Verification = require('../modules/seller/verification.model');
   const owners = new Map();

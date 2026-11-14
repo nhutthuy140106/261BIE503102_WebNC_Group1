@@ -231,6 +231,11 @@ export class SellerInsights implements OnInit, AfterViewInit {
     return v.replace(/^\+/, '');
   }
 
+  /** Số liệu giảm so với kỳ trước (chữ bắt đầu bằng dấu trừ) → hiện mũi tên xuống, màu cảnh báo */
+  protected down(v: string): boolean {
+    return /^[-−]/.test(v);
+  }
+
   protected cap(s: string): string {
     return s.charAt(0).toUpperCase() + s.slice(1);
   }

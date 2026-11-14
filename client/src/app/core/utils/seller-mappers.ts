@@ -1,7 +1,7 @@
 import { Offer } from '../models/offer';
 import { Question } from '../models/social';
 import { Post } from '../models/post';
-import { Fulfil, SellerJob, SellerOrder, SellerOrderItem, SellerOrderState, SellerPost, SellerSpace } from '../models/seller';
+import { DayHours, Fulfil, SellerChat, SellerMsg, SellerJob, SellerOrder, SellerOrderItem, SellerOrderState, SellerPause, SellerPost, SellerReview, SellerShop, SellerSpace, SellerStats, StatsRange } from '../models/seller';
 import type { PostBody } from '../services/seller';
 import { areaLabel, offerFromApi, questionFromApi } from './api-mappers';
 import { initialAvatar } from './order-link';
@@ -81,7 +81,7 @@ export function sellerOrderFromApi(o: Raw, now = new Date()): SellerOrder {
     image: s.image || undefined,
     title: s.title ?? '',
     items,
-    buyer: { name: buyerName, avatar: o.buyer?.avatar || initialAvatar(buyerName), phone: a.phone ?? o.buyer?.phone ?? '' },
+    buyer: { name: buyerName, avatar: o.buyer?.avatar || initialAvatar(buyerName), phone: a.phone ?? o.buyer?.phone ?? '', userId: o.buyer?._id },
     fulfil,
     address: fulfil === 'pickup' ? 'Khách tự đến lấy' : place || 'Chưa có địa chỉ',
     day: dayDiff(at, now),
@@ -124,7 +124,7 @@ function serverPost(p: Post): SellerPost {
   const left = p.stock?.mode === 'limit' ? p.stock.left ?? 0 : p.stock?.mode === 'once' ? 1 : 99;
   return {
     id: p._id, kind: p.kind, title: p.title, image: p.images[0], price: p.price, unit: p.priceUnit, stock: left, max: left, on: !p.closed,
-    views: 0, saves: 0, sold: 0, category: p.category ?? (p.kind === 'job' ? 'Việc vặt' : ''), buyerPostId: p._id,
+    views: p.views ?? 0, saves: p.saves ?? 0, sold: p.sold ?? 0, category: p.category ?? (p.kind === 'job' ? 'Việc vặt' : ''), buyerPostId: p._id,
     formType: p.kind === 'food' ? (p.category === 'Đồ uống' ? 'drink' : 'food') : p.kind,
   };
 }
@@ -138,11 +138,72 @@ function serverJob(p: Post, id: string): SellerJob {
   };
 }
 
+
+/** Hồ sơ gian hàng + giờ nhận đơn + ngày nghỉ + tạm ngưng, như server trả về từ GET /seller/shop */
+export interface ServerShop { shop: SellerShop; hours: DayHours[]; offs: { date: string; note: string }[]; pause: SellerPause | null }
+
+const pad = (n: number) => String(n).padStart(2, '0');
+export const dayKey = (d: Date): string => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+/** Ngày cách hôm nay `d` ngày → yyyy-mm-dd; ngược lại yyyy-mm-dd → số ngày so với hôm nay */
+export const dateOfOffset = (d: number, now = new Date()): string => dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() + d));
+export const offsetOfDate = (date: string, now = new Date()): number => {
+  const [y, m, dd] = date.split('-').map(Number);
+  return Math.round((new Date(y, m - 1, dd).getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 864e5);
+};
+
+/** Ngày nghỉ của server (yyyy-mm-dd) → dạng khu Bán đang dùng (số ngày so với hôm nay); ngày đã qua bỏ đi */
+export function offsFromApi(offs: { date: string; note: string }[], now = new Date()): { day: number; note: string }[] {
+  return offs.map((o) => ({ day: offsetOfDate(o.date, now), note: o.note })).filter((o) => o.day >= 0).sort((a, b) => a.day - b.day);
+}
+
+/** "2 giờ trước", "3 ngày trước"; quá 30 ngày thì ghi ngày tháng */
+export function agoText(iso: string, now = Date.now()): string {
+  const min = Math.max(0, Math.round((now - new Date(iso).getTime()) / 60000));
+  if (min < 1) return 'vừa xong';
+  if (min < 60) return `${min} phút trước`;
+  if (min < 1440) return `${Math.round(min / 60)} giờ trước`;
+  if (min < 43200) return `${Math.round(min / 1440)} ngày trước`;
+  const d = new Date(iso);
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+}
+
+/** Đánh giá khách dành cho tôi → thẻ đánh giá ở khu Bán */
+export function sellerReviewFromApi(r: Raw, now = Date.now()): SellerReview {
+  const name: string = r.reviewer?.name ?? 'Khách';
+  return {
+    id: r._id, by: { name, avatar: r.reviewer?.avatar || initialAvatar(name), phone: r.reviewer?.phone ?? '' }, stars: r.rating, at: agoText(r.createdAt, now),
+    orderId: String(r.targetId ?? ''), post: r.post?.title ?? '', text: r.comment ?? '', reply: r.reply?.text || undefined,
+  };
+}
+
+
+/** Hội thoại của server (kèm tin nhắn) → hội thoại ở Messenger của người bán. `ctx` chuyển sang dạng khu Bán: đơn → order, việc / đề nghị → job (id việc dạng `j-<id server>`) */
+export function sellerChatFromApi(c: Raw, msgs: Raw[], myId: string, jobOfOffer: (offerId: string) => string | undefined = () => undefined): SellerChat {
+  const name: string = c.with?.name ?? 'Người dùng';
+  const ctxId = c.context?.id ? String(c.context.id) : '';
+  const jobId = c.context?.type === 'job' ? ctxId : c.context?.type === 'offer' ? jobOfOffer(ctxId) : undefined;
+  const ctx: SellerChat['ctx'] = c.context?.type === 'order' && ctxId ? { type: 'order', id: ctxId } : jobId ? { type: 'job', id: 'j-' + jobId } : null;
+  const messages: SellerMsg[] = [...msgs].reverse().map((m) => {
+    const d = new Date(m.createdAt);
+    const mine = m.sender === myId || m.sender?._id === myId;
+    return { from: mine ? 'me' : 'them', text: m.text, time: `${pad(d.getHours())}:${pad(d.getMinutes())}`, date: dayKey(d) };
+  });
+  return { id: c._id, name, avatar: c.with?.avatar || undefined, unread: c.unread ?? 0, userId: c.with?._id, ctx, messages };
+}
+
+/** Ngữ cảnh của hội thoại khi tạo mới ở server: id việc `j-<id>` → `<id>` */
+export function chatContextToApi(ctx: SellerChat['ctx']): { type: 'order' | 'job'; id: string } | undefined {
+  return ctx ? { type: ctx.type, id: ctx.type === 'job' ? ctx.id.replace(/^j-/, '') : ctx.id } : undefined;
+}
+
+/** Phần thật ghép thêm vào khu Bán ngoài đơn / bài / việc */
+export interface ServerExtras { shop?: ServerShop; stats?: Record<StatsRange, SellerStats>; reviews?: SellerReview[]; chats?: SellerChat[] }
+
 /**
  * Chế độ thật: Giao dịch / Bài đăng / Việc lấy từ server, thay cho dữ liệu mẫu. Phần chỉ có ở máy (form đăng bài, chat, giờ mở cửa…) giữ nguyên.
  * Bài khớp nhau qua `buyerPostId` (= id bài trên server).
  */
-export function mergeServerSpace(s: SellerSpace, orders: SellerOrder[], posts: Post[]): SellerSpace {
+export function mergeServerSpace(s: SellerSpace, orders: SellerOrder[], posts: Post[], extra: ServerExtras = {}, now = new Date()): SellerSpace {
   const byBid = new Map(s.posts.filter((p) => p.buyerPostId).map((p) => [p.buyerPostId as string, p]));
   const jobById = new Map(s.jobs.map((j) => [j.id, j]));
   const outPosts: SellerPost[] = [];
@@ -162,5 +223,12 @@ export function mergeServerSpace(s: SellerSpace, orders: SellerOrder[], posts: P
   }
   // bài chưa lên server (đăng lỗi mạng): giữ lại để người bán thấy
   for (const p of s.posts) if (!p.buyerPostId) outPosts.push(p);
-  return { ...s, orders, posts: outPosts, jobs: outJobs };
+  return {
+    ...s, orders, posts: outPosts, jobs: outJobs,
+    ...(extra.shop ? { shop: { ...s.shop, ...extra.shop.shop }, hours: extra.shop.hours, offs: offsFromApi(extra.shop.offs, now), pause: extra.shop.pause } : {}),
+    ...(extra.stats ? { stats: extra.stats } : {}),
+    ...(extra.reviews ? { reviews: extra.reviews } : {}),
+    // hội thoại mới mở ở máy mà chưa gửi tin nào lên server (`tmp-`) vẫn giữ, trừ khi server đã có hội thoại với người đó
+    ...(extra.chats ? { chats: [...extra.chats, ...s.chats.filter((c) => c.id.startsWith('tmp-') && !extra.chats?.some((x) => x.userId === c.userId))] } : {}),
+  };
 }

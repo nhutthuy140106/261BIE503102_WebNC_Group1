@@ -1,7 +1,7 @@
 import { Post } from '../models/post';
 import { SellerSpace } from '../models/seller';
 import type { PostBody } from '../services/seller';
-import { areaCode, jobBodyToApi, mergeServerSpace, postBodyToApi, posterOfferFromApi, sellerOrderFromApi } from './seller-mappers';
+import { agoText, areaCode, chatContextToApi, dateOfOffset, jobBodyToApi, mergeServerSpace, offsFromApi, offsetOfDate, postBodyToApi, posterOfferFromApi, sellerChatFromApi, sellerOrderFromApi, sellerReviewFromApi } from './seller-mappers';
 
 const NOW = new Date('2026-11-14T10:00:00');
 
@@ -122,5 +122,70 @@ describe('mergeServerSpace', () => {
     const sp = next.posts.find((p) => p.buyerPostId === 'j9')!;
     const job = next.jobs.find((j) => j.id === sp.jobId)!;
     expect(job).toMatchObject({ title: 'Tưới cây', pay: 60000, head: 2, exact: 'B-0512', closed: false });
+  });
+});
+
+describe('gian hàng thật: ngày nghỉ, đánh giá, hội thoại', () => {
+  const NOW = new Date('2026-11-14T10:00:00');
+
+  it('ngày ↔ số ngày so với hôm nay, ngày nghỉ đã qua bị bỏ, xếp theo ngày', () => {
+    expect(dateOfOffset(0, NOW)).toBe('2026-11-14');
+    expect(dateOfOffset(3, NOW)).toBe('2026-11-17');
+    expect(offsetOfDate('2026-11-20', NOW)).toBe(6);
+    expect(offsFromApi([{ date: '2026-11-20', note: 'b' }, { date: '2026-11-10', note: 'đã qua' }, { date: '2026-11-15', note: 'a' }], NOW)).toEqual([{ day: 1, note: 'a' }, { day: 6, note: 'b' }]);
+  });
+
+  it('mốc thời gian dạng chữ', () => {
+    const now = new Date('2026-11-14T12:00:00').getTime();
+    expect(agoText('2026-11-14T11:59:40', now)).toBe('vừa xong');
+    expect(agoText('2026-11-14T11:30:00', now)).toBe('30 phút trước');
+    expect(agoText('2026-11-14T09:00:00', now)).toBe('3 giờ trước');
+    expect(agoText('2026-11-11T12:00:00', now)).toBe('3 ngày trước');
+    expect(agoText('2026-08-01T12:00:00', now)).toBe('01/08/2026');
+  });
+
+  it('đánh giá của khách → thẻ đánh giá ở khu Bán (có phản hồi thì hiện phản hồi)', () => {
+    const r = sellerReviewFromApi({ _id: 'r1', rating: 4, comment: 'Ngon', targetId: 'o9', createdAt: '2026-11-14T08:00:00', reviewer: { name: 'Ngọc Thủy', avatar: null, phone: '0900000001' }, post: { title: 'Phở bò' }, reply: { text: 'Cảm ơn bạn' } }, new Date('2026-11-14T10:00:00').getTime());
+    expect(r).toMatchObject({ id: 'r1', stars: 4, text: 'Ngon', orderId: 'o9', post: 'Phở bò', reply: 'Cảm ơn bạn', at: '2 giờ trước', by: { name: 'Ngọc Thủy', phone: '0900000001' } });
+    expect(sellerReviewFromApi({ _id: 'r2', rating: 5, createdAt: '2026-11-14T08:00:00', reviewer: { name: 'A' } }).reply).toBeUndefined();
+  });
+
+  it('hội thoại: tin cũ nhất lên đầu, phân biệt tin của mình, ngữ cảnh đơn / việc / đề nghị', () => {
+    const msgs = [{ sender: 'them1', text: 'Mới', createdAt: '2026-11-14T10:05:00' }, { sender: 'me1', text: 'Cũ', createdAt: '2026-11-14T10:00:00' }]; // server trả mới nhất trước
+    const c = sellerChatFromApi({ _id: 'c1', with: { _id: 'them1', name: 'Thủy', avatar: 'a.png' }, unread: 2, context: { type: 'order', id: 'o1' } }, msgs, 'me1');
+    expect(c).toMatchObject({ id: 'c1', name: 'Thủy', userId: 'them1', unread: 2, ctx: { type: 'order', id: 'o1' } });
+    expect(c.messages.map((m) => [m.from, m.text])).toEqual([['me', 'Cũ'], ['them', 'Mới']]);
+    expect(c.messages[0].time).toBe('10:00');
+    expect(sellerChatFromApi({ _id: 'c2', with: { name: 'B' }, context: { type: 'job', id: 'j7' } }, [], 'me1').ctx).toEqual({ type: 'job', id: 'j-j7' });
+    expect(sellerChatFromApi({ _id: 'c3', with: { name: 'B' }, context: { type: 'offer', id: 'f1' } }, [], 'me1', (f) => (f === 'f1' ? 'j9' : undefined)).ctx).toEqual({ type: 'job', id: 'j-j9' });
+    expect(sellerChatFromApi({ _id: 'c4', with: { name: 'B' } }, [], 'me1').ctx).toBeNull();
+  });
+
+  it('ngữ cảnh gửi lên server: việc bỏ tiền tố j-', () => {
+    expect(chatContextToApi({ type: 'job', id: 'j-abc' })).toEqual({ type: 'job', id: 'abc' });
+    expect(chatContextToApi({ type: 'order', id: 'o1' })).toEqual({ type: 'order', id: 'o1' });
+    expect(chatContextToApi(null)).toBeUndefined();
+  });
+
+  it('mergeServerSpace: hồ sơ, giờ, ngày nghỉ, tạm ngưng, thống kê, đánh giá, hội thoại lấy từ server; hội thoại tạm giữ nếu server chưa có', () => {
+    const base = { version: 'v', shop: { name: 'Cũ', bio: 'cũ', followers: 1 }, hours: [], offs: [{ day: 1, note: 'mẫu' }], stats: { 7: { label: 'mẫu' } }, pause: null, reviews: [], orders: [], jobs: [], posts: [],
+      chats: [{ id: 'tmp-u2', name: 'B', userId: 'u2', unread: 0, ctx: null, messages: [] }, { id: 'tmp-u1', name: 'A', userId: 'u1', unread: 0, ctx: null, messages: [] }] } as unknown as SellerSpace;
+    const next = mergeServerSpace(base, [], [], {
+      shop: { shop: { name: 'Mới', followers: 9 } as never, hours: [{ on: true, from: '09:00', to: '13:00' }], offs: [{ date: '2026-11-16', note: 'nghỉ' }], pause: { until: '2026-11-30' } },
+      stats: { 7: { label: 'thật' } } as never, reviews: [{ id: 'r1' } as never], chats: [{ id: 'c1', name: 'A', userId: 'u1', unread: 0, ctx: null, messages: [] }],
+    }, NOW);
+    expect(next.shop).toMatchObject({ name: 'Mới', bio: 'cũ', followers: 9 });
+    expect(next.hours).toEqual([{ on: true, from: '09:00', to: '13:00' }]);
+    expect(next.offs).toEqual([{ day: 2, note: 'nghỉ' }]);
+    expect(next.pause).toEqual({ until: '2026-11-30' });
+    expect((next.stats as never as Record<string, { label: string }>)['7'].label).toBe('thật');
+    expect(next.reviews).toHaveLength(1);
+    expect(next.chats.map((c) => c.id)).toEqual(['c1', 'tmp-u2']);
+  });
+
+  it('không có phần thật thì giữ nguyên dữ liệu cũ (server lỗi một phần vẫn không mất gì)', () => {
+    const base = { version: 'v', shop: { name: 'Cũ' }, hours: [{ on: true, from: '08:00', to: '20:00' }], offs: [], stats: {}, pause: null, reviews: [{ id: 'x' }], orders: [], jobs: [], posts: [], chats: [{ id: 'c' }] } as unknown as SellerSpace;
+    const next = mergeServerSpace(base, [], []);
+    expect(next.shop.name).toBe('Cũ'); expect(next.reviews).toHaveLength(1); expect(next.chats).toHaveLength(1);
   });
 });

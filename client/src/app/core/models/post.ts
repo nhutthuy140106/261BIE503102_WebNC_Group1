@@ -118,6 +118,9 @@ export interface Post {
   reviewCount?: number;
   /** Số lượt đã bán / đã đặt (chỉ bài bán, không có ở việc làm) */
   sold?: number;
+  /** Chỉ danh sách bài của người bán (server tính): lượt xem, lượt lưu */
+  views?: number;
+  saves?: number;
   /** Bài quảng bá bằng AntXu — hiện nhãn "QUẢNG BÁ" */
   promoted?: boolean;
   /** Người bán trả AntXu để món dễ ra hơn trong trang Quay món (có nhãn "Quảng bá"); khác với `promoted` ở trang chủ */
