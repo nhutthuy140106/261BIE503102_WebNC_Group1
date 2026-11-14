@@ -1,20 +1,52 @@
 <main class="al">
-  <section class="card" aria-labelledby="alT">
-    <div class="brand"><b>AntGo</b><span>Quản trị</span></div>
-    <h1 id="alT">Đăng nhập quản trị</h1>
-    <p class="lead">Dành cho quản trị viên và người kiểm duyệt của AntGo.</p>
+  <div class="frame">
+    <header class="top">
+      <a class="logo" routerLink="/" aria-label="AntGo">AntGo<span>Quản trị</span></a>
+      <nav class="pillnav" aria-label="Liên kết nhanh">
+        <a routerLink="/">Về AntGo</a>
+        <a routerLink="/help">Trợ giúp</a>
+        <a routerLink="/" class="cta">Trang người dùng <i aria-hidden="true">→</i></a>
+      </nav>
+    </header>
 
-    @if (needsServer) {
-      <div class="warn" role="status">Bạn đang xem bằng dữ liệu mẫu nên không có khu Quản trị. Hãy bật server rồi mở lại với <b>?mock=0</b>. <a href="/admin/login?mock=0">Mở với máy chủ thật</a></div>
-    }
+    <aside class="side left" aria-hidden="true">
+      <p class="note n1">“Hồ sơ người bán được đối chiếu giấy tờ trước khi cho đăng bán.”<b>– Xác minh người bán</b></p>
+      <p class="note n2">“Mỗi báo cáo xem được bối cảnh bài, đơn và người liên quan ngay tại chỗ.”<b>– Xử lý báo cáo</b></p>
+      <p class="note n3">“Khách báo vấn đề mà người bán im lặng thì AntGo vào phân xử.”<b>– Đơn &amp; tranh chấp</b></p>
+    </aside>
+    <aside class="side right" aria-hidden="true">
+      <p class="note n4">“Mọi thao tác của quản trị viên đều để lại dấu vết, không sửa được.”<b>– Nhật ký thao tác</b></p>
+      <p class="note n5">“Voucher, Xu và thông báo chung do quản trị viên chủ động điều chỉnh.”<b>– Voucher &amp; Xu</b></p>
+      <p class="note n6">“Người kiểm duyệt xử lý nội dung, không đụng được tài khoản và Xu.”<b>– Phân quyền</b></p>
+    </aside>
 
-    <form (ngSubmit)="submit()" novalidate>
-      <div class="field"><label for="alP">Số điện thoại</label><input id="alP" name="phone" type="tel" inputmode="numeric" autocomplete="username" maxlength="10" [(ngModel)]="phone" placeholder="0900000099" /></div>
-      <div class="field"><label for="alW">Mật khẩu</label>
-        <div class="pw"><input id="alW" name="password" [type]="show ? 'text' : 'password'" autocomplete="current-password" [(ngModel)]="password" /><button type="button" (click)="show = !show" [attr.aria-pressed]="show">{{ show ? 'Ẩn' : 'Hiện' }}</button></div></div>
-      @if (error()) { <p class="err" role="alert">{{ error() }}</p> }
-      <button type="submit" class="go" [disabled]="busy()">{{ busy() ? 'Đang đăng nhập…' : 'Đăng nhập' }}</button>
-    </form>
-    <p class="back"><a routerLink="/">← Về trang AntGo</a></p>
-  </section>
+    <section class="mid" aria-labelledby="alT">
+      <span class="badge"><i></i>Khu quản trị AntGo</span>
+      <h1 id="alT">Quản trị khu,<br />rõ từng việc cần làm.</h1>
+      <p class="sub">Duyệt hồ sơ, xử lý báo cáo, phân xử đơn và theo dõi cả khu trong một nơi.</p>
+
+      @if (needsServer) {
+        <div class="warn" role="status">Bạn đang xem bằng dữ liệu mẫu nên không có khu Quản trị. Hãy bật server rồi mở lại với <b>?mock=0</b>. <a href="/admin/login?mock=0">Mở với máy chủ thật</a></div>
+      }
+
+      <form class="form" (ngSubmit)="submit()" novalidate aria-label="Đăng nhập quản trị">
+        <div class="field"><label for="alP">Số điện thoại</label><input id="alP" name="phone" type="tel" inputmode="numeric" autocomplete="username" maxlength="10" [(ngModel)]="phone" placeholder="Số điện thoại quản trị" /></div>
+        <div class="field"><label for="alW">Mật khẩu</label>
+          <div class="pw"><input id="alW" name="password" [type]="show ? 'text' : 'password'" autocomplete="current-password" [(ngModel)]="password" placeholder="Mật khẩu" /><button type="button" (click)="show = !show" [attr.aria-pressed]="show">{{ show ? 'Ẩn' : 'Hiện' }}</button></div></div>
+        @if (error()) { <p class="err" role="alert">{{ error() }}</p> }
+        <button type="submit" class="go" [disabled]="busy()"><span>{{ busy() ? 'Đang đăng nhập…' : 'Đăng nhập' }}</span><i aria-hidden="true">→</i></button>
+      </form>
+    </section>
+
+    <footer class="trust">
+      <span class="lbl">Minh bạch &amp; an toàn</span>
+      <ul>
+        <li><svg class="i"><use href="#shield" /></svg>Xác minh người bán</li>
+        <li><svg class="i"><use href="#receipt" /></svg>Nhật ký thao tác</li>
+        <li><svg class="i"><use href="#users" /></svg>Phân quyền 2 vai trò</li>
+        <li><svg class="i"><use href="#chat" /></svg>Hộp thư hỗ trợ</li>
+      </ul>
+      <span class="more">và nhiều công cụ khác</span>
+    </footer>
+  </div>
 </main>
