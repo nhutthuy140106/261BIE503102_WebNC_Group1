@@ -46,6 +46,11 @@ const IMAGE_BY_TITLE = {
   'Lấy đồ hộ, giao nhận trong khu': 'https://images.unsplash.com/photo-1572195577046-2f25894c06fc?w=800&q=70',
   'Sửa laptop, điện thoại — kiểm tra tận nơi': 'https://images.unsplash.com/photo-1746017240064-83e015ac117d?w=800&q=70',
   'Giặt hấp đồ vest': 'https://images.unsplash.com/photo-1451933335233-c41672c8f378?w=800&q=70',
+  'Nồi chiên không dầu 5L (đã dùng)': 'https://images.unsplash.com/photo-1695089028114-ce28248f0ab9?w=800&q=70',
+  'Nấu cơm gia đình': 'https://images.unsplash.com/photo-1758522483965-54af5d922b7c?w=800&q=70',
+  'Bộ hộp cơm inox ×6': 'https://images.unsplash.com/photo-1556807539-98320ad1e615?w=800&q=70',
+  'Cơm sườn rim': 'https://images.unsplash.com/photo-1570275239925-4af0aa93a0dc?w=800&q=70',
+  'Canh chua cá': 'https://images.unsplash.com/photo-1616557938378-1128a35743a3?w=800&q=70',
 };
 
 const ENRICH = {
