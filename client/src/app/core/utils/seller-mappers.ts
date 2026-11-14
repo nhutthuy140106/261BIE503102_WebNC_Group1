@@ -218,7 +218,10 @@ export function mergeServerSpace(s: SellerSpace, orders: SellerOrder[], posts: P
       outJobs.push(prev ? { ...prev, title: j.title, pay: j.pay, unit: j.unit, when: j.when || prev.when, desc: j.desc, closed: j.closed, head: j.head, exact: j.exact || prev.exact, offers: [], questions: [] } : j);
       outPosts.push({ ...fresh, ...(old ? { form: old.form, formType: old.formType, views: old.views, saves: old.saves, sold: old.sold, promo: old.promo } : {}), jobId: jid, on: fresh.on });
     } else {
-      outPosts.push(old ? { ...fresh, form: old.form, formType: old.formType ?? fresh.formType, views: old.views, saves: old.saves, sold: old.sold, promo: old.promo, icon: old.icon } : fresh);
+      // dữ liệu form lưu trên server là bản đúng nhất (mở lại được trên mọi máy); chưa có thì dùng bản lưu ở máy
+      const fd = p.formData;
+      const withForm = fd ? { form: fd.form, formType: fd.type as SellerPost['formType'] } : old ? { form: old.form, formType: old.formType ?? fresh.formType } : {};
+      outPosts.push(old ? { ...fresh, ...withForm, views: old.views, saves: old.saves, sold: old.sold, promo: old.promo, icon: old.icon } : { ...fresh, ...withForm });
     }
   }
   // bài chưa lên server (đăng lỗi mạng): giữ lại để người bán thấy

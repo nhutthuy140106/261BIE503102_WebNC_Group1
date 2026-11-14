@@ -250,3 +250,31 @@ test('xác minh người bán: chưa duyệt thì không đăng được; nộp 
   assert.equal((await api('POST', '/seller/posts', { token: q, body: newPost({ title: 'Sửa xe đạp tại nhà', type: 'service', category: 'Dịch vụ', unit: 'lần' }) })).status, 201, 'duyệt xong thì đăng được');
   assert.equal((await api('POST', '/seller/verification', { token: q, body: verifyBody() })).status, 409, 'đã duyệt thì không nộp lại');
 });
+
+test('dữ liệu form đăng bài lưu cùng bài: chủ bài đọc lại được, người khác và API công khai không thấy; quá lớn bị từ chối', async () => {
+  const t = tok.lan;
+  const formData = { type: 'food', form: { common: { title: 'Bánh mì trứng nhà làm', images: ['/images/uploads/a.jpg'] }, spec: { items: [{ name: 'Bánh mì', price: 20000 }] } } };
+  const made = await api('POST', '/seller/posts', { token: t, body: newPost({ title: 'Bánh mì có dữ liệu form', formData }) });
+  assert.equal(made.status, 201, JSON.stringify(made.body));
+  const id = made.body.data._id;
+
+  const mine = (await api('GET', '/seller/posts', { token: t })).body.data.find((p) => p._id === id);
+  assert.deepEqual(mine.formData, formData, 'chủ bài đọc lại đúng từng ô');
+  assert.equal((await api('GET', `/posts/${id}`)).body.data.formData, undefined, 'API công khai không trả dữ liệu form');
+  assert.ok(!(await api('GET', '/posts?limit=100')).body.data.some((p) => p.formData), 'danh sách công khai không có dữ liệu form');
+  assert.ok(!(await api('GET', '/seller/posts', { token: tok.hoa })).body.data.some((p) => p._id === id), 'người bán khác không thấy bài này');
+
+  // sửa lại: dữ liệu form được ghi đè bằng bản mới; sửa trường khác (không gửi formData) thì giữ nguyên
+  const next = { ...formData, form: { ...formData.form, spec: { items: [{ name: 'Bánh mì', price: 25000 }] } } };
+  await api('PUT', `/seller/posts/${id}`, { token: t, body: { ...newPost({ title: 'Bánh mì có dữ liệu form' }), formData: next } });
+  assert.deepEqual((await api('GET', '/seller/posts', { token: t })).body.data.find((p) => p._id === id).formData, next);
+  await api('PUT', `/seller/posts/${id}`, { token: t, body: { title: 'Bánh mì đã đổi tên', price: 26000 } });
+  const after = (await api('GET', '/seller/posts', { token: t })).body.data.find((p) => p._id === id);
+  assert.equal(after.title, 'Bánh mì đã đổi tên'); assert.equal(after.price, 26000);
+  assert.deepEqual(after.formData, next, 'sửa nhanh chỉ đổi đúng các trường gửi lên, dữ liệu form và các phần khác còn nguyên');
+  assert.deepEqual(after.areas, ['Bcons']); assert.equal(after.priceType, 'fixed');
+
+  const big = { type: 'food', form: { blob: 'x'.repeat(450000) } };
+  assert.equal((await api('POST', '/seller/posts', { token: t, body: newPost({ title: 'Form quá lớn', formData: big }) })).status, 422);
+  await api('DELETE', `/seller/posts/${id}`, { token: t });
+});

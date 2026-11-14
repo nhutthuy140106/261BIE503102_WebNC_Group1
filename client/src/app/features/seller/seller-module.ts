@@ -10,6 +10,7 @@ import { SellerShop } from './seller-shop/seller-shop';
 import { SellerPosts } from './seller-posts/seller-posts';
 import { SellerCalendar } from './seller-calendar/seller-calendar';
 import { SellerPostForm } from './seller-post-form/seller-post-form';
+import { SellerPostQuick } from './seller-post-quick/seller-post-quick';
 import { SellerOrders } from './seller-orders/seller-orders';
 import { SellerOrderDetail } from './seller-order-detail/seller-order-detail';
 import { SellerJobDetail } from './seller-job-detail/seller-job-detail';
@@ -26,7 +27,7 @@ import { SellerMoneyInput } from './components/money-input/money-input';
 
 @NgModule({
   declarations: [
-    SellerLayout, SellerToday, SellerInsights, SellerMessenger, SellerShop, SellerPosts, SellerCalendar, SellerPostForm, SellerVerify, SellerOrders, SellerOrderDetail, SellerJobDetail,
+    SellerLayout, SellerToday, SellerInsights, SellerMessenger, SellerShop, SellerPosts, SellerCalendar, SellerPostForm, SellerPostQuick, SellerVerify, SellerOrders, SellerOrderDetail, SellerJobDetail,
     SellerTaskCard, SellerDayAgenda, SellerPostCard, SellerConfirmDialog, SellerPickDialog, SellerSteps, SellerTimeInput, SellerBankSelect, SellerMoneyInput,
   ],
   imports: [SharedModule, SellerRoutingModule],

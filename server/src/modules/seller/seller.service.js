@@ -24,14 +24,14 @@ const SELLER_STATUS = ['draft', 'open', 'closed']; // soldout do hệ thống; h
 const pick = (src, keys) => Object.fromEntries(keys.filter((k) => src[k] !== undefined).map((k) => [k, src[k]]));
 
 async function ownPost(user, id) {
-  const p = await Post.findOne({ _id: id, seller: user._id }).select('+bank');
+  const p = await Post.findOne({ _id: id, seller: user._id }).select('+bank +formData');
   if (!p) throw ApiError.notFound('Không tìm thấy bài của bạn');
   return p;
 }
 
 /** Bài của tôi, mỗi bài kèm lượt xem, lượt lưu, số đã bán thật */
 async function listPosts(user) {
-  const posts = await Post.find({ seller: user._id }).select('+bank').sort({ createdAt: -1 });
+  const posts = await Post.find({ seller: user._id }).select('+bank +formData').sort({ createdAt: -1 });
   const m = await shop.postMetrics(posts.map((p) => p._id));
   return posts.map((p) => ({ ...p.toJSON(), views: m.views.get(String(p._id)) || 0, saves: m.saves.get(String(p._id)) || 0, sold: m.sold.get(String(p._id)) || 0 }));
 }

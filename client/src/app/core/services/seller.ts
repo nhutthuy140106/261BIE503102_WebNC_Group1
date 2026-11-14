@@ -68,6 +68,8 @@ export interface PostBody {
   serviceMenu?: Post['serviceMenu'];
   timeLabel?: string;
   noSchedule?: boolean;
+  /** Dữ liệu form đăng bài (để mở lại đúng từng ô khi sửa); chỉ gửi ở chế độ thật */
+  formData?: { type: string; form: Record<string, unknown> };
   /** Chỉ việc làm */
   job?: { start?: string; end?: string; allDay?: boolean; head?: number; payUnit?: string; due?: string; payBy?: 'cash' | 'transfer'; building?: string; windows?: string[] };
 }
@@ -252,6 +254,18 @@ export class SellerService {
         this.db.save('seller-orders', rows.map((r) => (r._id === id ? next : r)));
         return next;
       }),
+    );
+  }
+
+  /** Sửa nhanh (chế độ thật): chỉ gửi các trường chính đã sửa, phần còn lại của bài giữ nguyên. Bài việc làm: tên, mô tả, tiền công, đơn vị. */
+  quickEdit(post: Post, f: { title: string; description: string; price: number; unit: string; images: string[]; open: boolean; left?: number }): Observable<unknown> {
+    if (post.kind === 'job') {
+      return this.api.put<unknown>(`/seller/jobs/${post._id}`, { title: f.title, desc: f.description, pay: f.price, unit: f.unit }).pipe(
+        switchMap(() => this.api.patch<unknown>(`/seller/jobs/${post._id}`, { closed: !f.open })),
+      );
+    }
+    return this.api.put<unknown>(`/seller/posts/${post._id}`, { title: f.title, description: f.description, price: f.price, unit: f.unit, images: f.images }).pipe(
+      switchMap(() => this.api.patch<unknown>(`/seller/posts/${post._id}`, { closed: !f.open, ...(f.left !== undefined ? { stockLeft: f.left } : {}) })),
     );
   }
 

@@ -110,6 +110,11 @@ const postSchema = new Schema({
   status: { type: String, enum: ['draft', 'open', 'soldout', 'closed', 'hidden'], default: 'open', index: true },
   hiddenReason: { type: String, default: '' },        // Admin gỡ bài: lý do
   statusBeforeHidden: String,                         // để mở lại đúng trạng thái cũ
+  // Dữ liệu form đăng bài của khu Bán ({ type, form }) để MỞ LẠI ĐÚNG TỪNG Ô khi sửa (trên mọi máy). Chỉ chủ bài đọc được, không bao giờ trả ra API công khai.
+  formData: {
+    type: Schema.Types.Mixed, select: false,
+    validate: { validator: (v) => v == null || JSON.stringify(v).length <= 400000, message: 'Dữ liệu form quá lớn (tối đa ~400 KB)' },
+  },
   searchText: { type: String, select: false, index: true }, // tên+mô tả+danh mục đã bỏ dấu, phục vụ tìm kiếm tương đối
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 

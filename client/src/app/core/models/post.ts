@@ -121,6 +121,8 @@ export interface Post {
   /** Chỉ danh sách bài của người bán (server tính): lượt xem, lượt lưu */
   views?: number;
   saves?: number;
+  /** Chỉ chủ bài đọc được: dữ liệu form đăng bài ({ type, form }) để mở lại đúng từng ô khi sửa */
+  formData?: { type: string; form: Record<string, unknown> };
   /** Bài quảng bá bằng AntXu — hiện nhãn "QUẢNG BÁ" */
   promoted?: boolean;
   /** Người bán trả AntXu để món dễ ra hơn trong trang Quay món (có nhãn "Quảng bá"); khác với `promoted` ở trang chủ */

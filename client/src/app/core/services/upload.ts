@@ -35,6 +35,12 @@ export class UploadService {
     );
   }
 
+  /** Ảnh đang ở dạng data: / blob: (ảnh người bán vừa chọn) → tải lên server, trả địa chỉ thật; đã là địa chỉ thật thì giữ nguyên */
+  uploadDataUrl(url: string): Observable<string> {
+    if (!/^(data|blob):/.test(url)) return of(url);
+    return from(fetch(url).then((r) => r.blob())).pipe(switchMap((blob) => this.upload(new File([blob], 'anh.jpg', { type: blob.type || 'image/jpeg' }))));
+  }
+
   /**
    * Tệp đính kèm tin nhắn (ảnh, video, ghi âm, PDF / Office). Địa chỉ đã là của server thì giữ nguyên;
    * địa chỉ tạm của trình duyệt (blob: / data:) thì tải nội dung lên server rồi đổi sang địa chỉ thật.

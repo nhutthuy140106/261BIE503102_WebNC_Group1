@@ -1,7 +1,7 @@
 import { SelectOption } from '../../../shared/components/select/select';
 import { Component, DestroyRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { map, of, switchMap } from 'rxjs';
+import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import { Promo, discounted, promoLabel } from '../../../core/utils/promo';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +13,7 @@ import { SellerService } from '../../../core/services/seller';
 import { cleaningPrice, formToPostFields, unpricedService } from './post-mapper';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
+import { UploadService } from '../../../core/services/upload';
 import { useMock } from '../../../core/config/api.config';
 import {
   AMENITIES, ASK_QUICK, ASK_TYPES, BLOCKS, GENERIC_PLACES, REPAIR_PLACES, CATS, DRINK_UNITS, FOOD_UNITS, GOODS_UNITS, SVC_UNITS, ymd, CONDITIONS, DAYS, FOOD_TAGS, FormType, ICE, JOB_UNITS, PRICE_TYPES, Q_TYPES, SVC_PLACES, SVC_PRESETS, SVC_TIMES, SWEET,
@@ -51,6 +52,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   private readonly sellerApi = inject(SellerService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly uploads = inject(UploadService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroy = inject(DestroyRef);
@@ -214,9 +216,8 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       const id = this.route.snapshot.paramMap.get('id');
       const p = id ? this.seller.posts().find((x) => x.id === id) : undefined;
       if (p && !p.form && !useMock('seller')) {
-        // bài lấy từ server không kèm dữ liệu form đăng bài: mở sửa rồi lưu sẽ ghi đè bằng form trống
-        this.toast.show('Bài này chưa có dữ liệu form để sửa ở đây. Bạn có thể tạm ngưng, đổi giá hoặc xóa bài ở danh sách.');
-        this.router.navigate(['/seller/posts']);
+        // bài chưa có dữ liệu form đăng bài (bài mẫu, bài đăng bằng API): mở form trống rồi lưu sẽ ghi đè mất nội dung → sang trình sửa nhanh
+        this.router.navigate(['/seller/posts', p.id, 'quick'], { replaceUrl: true });
       } else if (p) {
         this.editId.set(p.id);
         this.setType(p.formType ?? (p.kind === 'food' ? 'food' : p.kind), false);
@@ -778,12 +779,38 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     };
     // bài đăng từ trước khi có liên kết: ghi đè bản cũ bên Mua (cùng tên) thay vì tạo bài trùng
     const target = p.buyerPostId || !this.editId() ? of(p.buyerPostId) : this.sellerApi.myPosts().pipe(map((l) => l.find((x) => x.title === prevTitle)?._id));
-    target.pipe(switchMap((id) => this.sellerApi.savePost(body, id))).subscribe({
-      next: (saved) => {
-        if (!p.buyerPostId) this.seller.setPost(p.id, { buyerPostId: saved._id });
-      },
-      error: () => undefined,
-    });
+    const live = !useMock('seller');
+    // thật: ảnh đang ở dạng data:/blob: phải tải lên server trước (nhúng vào bài sẽ vượt giới hạn 1 MB); form đầy đủ lưu cùng bài để mở lại đúng từng ô
+    const ready: Observable<V> = live ? this.uploadInline(p.form as V) : of(p.form as V);
+    ready
+      .pipe(
+        switchMap((form) => {
+          const fc = form['common'] as V;
+          const sent = live ? { ...body, images: fc['images'] as string[], formData: { type: this.type(), form } } : body;
+          return target.pipe(switchMap((id) => this.sellerApi.savePost(sent, id)), map((saved) => ({ saved, form })));
+        }),
+      )
+      .subscribe({
+        next: ({ saved, form }) => {
+          this.seller.setPost(p.id, { ...(p.buyerPostId ? {} : { buyerPostId: saved._id }), ...(live ? { form, image: (form['common'] as V)['images']?.[0] } : {}) });
+        },
+        error: (e: Error) => {
+          // mẫu: bỏ qua như cũ; thật: báo rõ để người bán không tưởng là đã đăng
+          if (live) this.toast.show(`Chưa đăng được lên máy chủ: ${e.message || 'lỗi không rõ'}. Bài vẫn được giữ trong máy, bạn thử lưu lại nhé.`);
+        },
+      });
+  }
+
+  /** Thay ảnh bài và ảnh QR (nếu là data:/blob:) bằng địa chỉ ảnh trên server; trả bản sao form đã thay */
+  private uploadInline(raw: V): Observable<V> {
+    const form = structuredClone(raw) as V;
+    const c = form['common'] as V;
+    const bank = (form['spec'] as V)?.['bank'] as V | undefined;
+    const jobs: Observable<void>[] = [];
+    const imgs = (c['images'] as string[]) ?? [];
+    imgs.forEach((u, i) => { if (/^(data|blob):/.test(u)) jobs.push(this.uploads.uploadDataUrl(u).pipe(map((x) => void (imgs[i] = x)))); });
+    if (bank && typeof bank['qr'] === 'string' && /^(data|blob):/.test(bank['qr'])) jobs.push(this.uploads.uploadDataUrl(bank['qr']).pipe(map((x) => void (bank['qr'] = x))));
+    return jobs.length ? forkJoin(jobs).pipe(map(() => form)) : of(form);
   }
 
   // ---------------- sửa bài cũ ----------------

@@ -439,6 +439,11 @@ export class SellerSpaceService {
     this.db.list<Question>('questions').subscribe((rows) => this.sharedQuestions.set(rows));
   }
 
+  /** Đọc lại dữ liệu từ server (chế độ thật) sau khi sửa bài ở màn hình khác; chế độ mẫu không làm gì */
+  refreshFromServer(): void {
+    if (this.live) this.syncServer().subscribe();
+  }
+
   /** Chế độ thật: đọc lại đơn / bài / việc từ server và ghép vào khu Bán */
   private syncServer(): Observable<unknown> {
     if (!this.live || !this.auth.isLoggedIn()) return of(null);

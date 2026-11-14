@@ -189,3 +189,20 @@ describe('gian hàng thật: ngày nghỉ, đánh giá, hội thoại', () => {
     expect(next.shop.name).toBe('Cũ'); expect(next.reviews).toHaveLength(1); expect(next.chats).toHaveLength(1);
   });
 });
+
+describe('dữ liệu form đăng bài lấy từ server', () => {
+  const base = { version: 'v', shop: {}, hours: [], offs: [], stats: {}, pause: null, reviews: [], chats: [], orders: [], jobs: [],
+    posts: [{ id: 'p1', kind: 'food', title: 'Cũ', buyerPostId: 's1', price: 1, stock: 1, max: 1, on: true, views: 3, saves: 1, sold: 2, category: 'x', form: { cũ: true }, formType: 'food' }] } as unknown as SellerSpace;
+  const post = (id: string, over: Partial<Post> = {}): Post => ({ _id: id, kind: 'food', title: 'T' + id, description: '', images: ['i.jpg'], sellerId: 'u', sellerName: 'u', block: 'Block B', price: 20000, createdAt: '2026-11-14', ...over }) as Post;
+
+  it('server có dữ liệu form thì dùng bản của server (mở lại được trên mọi máy), thay bản lưu ở máy', () => {
+    const next = mergeServerSpace(base, [], [post('s1', { formData: { type: 'drink', form: { mới: true } } })]);
+    expect(next.posts[0]).toMatchObject({ form: { mới: true }, formType: 'drink', views: 3, sold: 2 });
+  });
+
+  it('server chưa có dữ liệu form thì giữ bản ở máy; bài mới của server không có form (sẽ dùng trình sửa nhanh)', () => {
+    const next = mergeServerSpace(base, [], [post('s1'), post('s2')]);
+    expect(next.posts.find((p) => p.buyerPostId === 's1')).toMatchObject({ form: { cũ: true }, formType: 'food' });
+    expect(next.posts.find((p) => p.buyerPostId === 's2')?.form).toBeUndefined();
+  });
+});
