@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { z } = require('zod');
 const service = require('./order.service');
 const v = require('./order.validation');
 const asyncHandler = require('../../../utils/asyncHandler');
@@ -98,6 +99,26 @@ const { auth } = require('../../../middlewares/auth');
  *       200: { description: "{ data: { simulated, note, shop:{lat,lng}, home:{lat,lng}, courier:{lat,lng,phase,etaMin,distanceKm} } }; phase = waiting | preparing | delivering | delivered" }
  *       403: { description: Không phải đơn của bạn }
  *       404: { description: Không có đơn, hoặc NO_TRACKING }
+ * /orders/{id}/approve-quote:
+ *   post:
+ *     tags: [Đơn hàng]
+ *     summary: Đồng ý giá cuối người bán báo (giặt sấy sau khi cân, sửa chữa sau khi kiểm tra) — tổng tiền đổi sang giá mới, đơn chuyển "đang làm"
+ *     security: [{ cookieAuth: [] }]
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+ *     responses:
+ *       200: { description: Đơn ở trạng thái preparing, total = giá cuối + phí giao, oldTotal = tổng lúc đặt }
+ *       403: { description: Không phải đơn của bạn }
+ *       409: { description: Không có giá cuối nào đang chờ }
+ * /orders/{id}/reject-quote:
+ *   post:
+ *     tags: [Đơn hàng]
+ *     summary: Từ chối giá cuối — đơn hủy (sửa chữa chỉ trả phí kiểm tra; giặt sấy không mất tiền giặt)
+ *     security: [{ cookieAuth: [] }]
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+ *     requestBody: { content: { application/json: { schema: { type: object, properties: { reason: { type: string } } } } } }
+ *     responses:
+ *       200: { description: Đơn ở trạng thái cancelled }
+ *       409: { description: Không có giá cuối nào đang chờ }
  * /orders/{id}/approve-surcharge:
  *   post:
  *     tags: [Đơn hàng]
@@ -123,6 +144,10 @@ router.post('/:id/cancel-request', ids('id'), body(v.reason), asyncHandler(async
   res.json({ data: await service.requestCancel(req.user, req.params.id, req.body.reason) })));
 router.post('/:id/return-request', ids('id'), body(v.reason), asyncHandler(async (req, res) =>
   res.json({ data: await service.requestReturn(req.user, req.params.id, req.body.reason) })));
+router.post('/:id/approve-quote', ids('id'), asyncHandler(async (req, res) =>
+  res.json({ data: await service.approveQuote(req.user, req.params.id) })));
+router.post('/:id/reject-quote', ids('id'), body(z.object({ reason: z.string().trim().max(300).optional() })), asyncHandler(async (req, res) =>
+  res.json({ data: await service.rejectQuote(req.user, req.params.id, req.body.reason || '') })));
 router.post('/:id/approve-surcharge', ids('id'), asyncHandler(async (req, res) =>
   res.json({ data: await service.approveSurcharge(req.user, req.params.id) })));
 

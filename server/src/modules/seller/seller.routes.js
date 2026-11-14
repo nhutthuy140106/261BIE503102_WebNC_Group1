@@ -15,7 +15,11 @@ const anyObject = z.object({}).passthrough();
 const patchPost = z.object({ closed: z.boolean().optional(), price: z.number().int().min(0).optional(), stockLeft: z.number().int().min(0).optional() })
   .refine((v) => Object.keys(v).length > 0, 'Cần ít nhất một trường để sửa');
 const patchJob = z.object({ closed: z.boolean() });
-const surcharge = z.object({ amount: z.number().int().min(1000).optional(), reason: z.string().trim().optional() });
+const surcharge = z.object({
+  amount: z.number().int().min(1000).optional(), reason: z.string().trim().optional(),
+  // báo giá (đơn giặt sấy / sửa chữa): các dòng giá cuối
+  lines: z.array(z.object({ name: z.string().trim().min(1).max(120), qty: z.number().positive().max(10000), price: z.number().min(0).max(100000000) })).max(30).optional(),
+});
 
 /**
  * @openapi
@@ -64,7 +68,7 @@ router.delete('/jobs/:id', ids('id'), asyncHandler(async (req, res) => { await s
  * /seller/orders/{id}/{action}:
  *   post:
  *     tags: [Bán & Đăng việc]
- *     summary: "Người bán xử lý đơn: confirm · prepare · deliver · ready · complete · decline · approveCancel · keepOrder · surcharge (amount, reason) · approveReturn · rejectReturn"
+ *     summary: "Người bán xử lý đơn: confirm · prepare · deliver · ready · complete · decline · approveCancel · keepOrder · surcharge (amount, reason) · approveReturn · rejectReturn · đơn có báo giá: pickUp (đã lấy đồ / đã kiểm tra) · quote (lines) · returned (trả đồ / hoàn thành)"
  *     security: [{ cookieAuth: [] }]
  *     responses: { 200: { description: Đơn đã cập nhật }, 403: { description: Không phải đơn của bạn }, 409: { description: Sai trạng thái } }
  */

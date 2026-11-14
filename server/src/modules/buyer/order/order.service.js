@@ -8,6 +8,7 @@ const { parsePaging } = require('../../../utils/pagination');
 const xu = require('../xu/xu.service');
 const { effectivePrice } = require('../../../utils/promo');
 const { compute: computeTracking, canTrack } = require('./tracking');
+const { release, flowOf } = require('../../shared/order-release');
 
 // Bài giới hạn số lượng (stock.mode = 'limit'): chỉ loại này mới trừ kho theo từng đơn
 const isLimited = (p) => !!p.stock && p.stock.mode === 'limit' && typeof p.stock.left === 'number';
@@ -15,7 +16,7 @@ const isLimited = (p) => !!p.stock && p.stock.mode === 'limit' && typeof p.stock
 // Voucher AntXu tạm (Q11): sau này lấy từ model Voucher. Chỉ áp cho bài có acceptsXu.
 const VOUCHERS = { XU10: { amount: 10000 }, XU5: { amount: 5000 } };
 
-const CANCELABLE = ['waiting', 'confirmed', 'preparing'];
+const CANCELABLE = ['waiting', 'confirmed', 'picked', 'pricing', 'preparing'];
 const RETURN_WINDOW_DAYS = 7; // giả định, chờ Q6
 
 /** Tính tiền ở server từ giá bài hiện tại + lựa chọn; ném 422 nếu lựa chọn sai. */
@@ -148,6 +149,7 @@ async function commit(user, input, { post, priced, address, xuVoucher, component
 
   const order = await Order.create({
     code: await nextCode('order', 'AG-O'),
+    flow: flowOf(post),
     buyer: user._id,
     seller: post.seller._id,
     post: post._id,
@@ -246,5 +248,35 @@ async function approveSurcharge(user, id) {
   return o;
 }
 
+/** Người mua đồng ý giá cuối người bán báo: tổng tiền đổi sang giá mới, đơn chuyển sang "đang làm" */
+async function approveQuote(user, id) {
+  const o = await getOwned(user, id);
+  if (o.state !== 'pricing' || !o.quote || o.quote.status !== 'pending') throw ApiError.invalidState('Đơn này không có giá cuối nào đang chờ bạn duyệt');
+  const ship = (o.breakdown && o.breakdown.deliveryFee) || 0;
+  o.oldTotal = o.total;
+  o.total = o.quote.total + ship;
+  o.breakdown.items = o.quote.total;
+  o.quote.status = 'approved';
+  o.state = 'preparing';
+  o.history.push({ state: 'preparing', at: new Date() });
+  await o.save();
+  await notify(o.seller, { type: 'order_quote_ok', title: `Khách đồng ý giá cuối đơn ${o.code}, bắt đầu làm`, link: { type: 'order', id: o._id } });
+  return o;
+}
+
+/** Người mua từ chối giá cuối: đơn hủy (sửa chữa: chỉ trả phí kiểm tra đã tính lúc đặt; giặt sấy: không mất tiền giặt) */
+async function rejectQuote(user, id, reason = '') {
+  const o = await getOwned(user, id);
+  if (o.state !== 'pricing' || !o.quote || o.quote.status !== 'pending') throw ApiError.invalidState('Đơn này không có giá cuối nào đang chờ bạn duyệt');
+  o.quote.status = 'rejected';
+  o.quote.rejectReason = reason;
+  o.state = 'cancelled';
+  o.history.push({ state: 'cancelled', at: new Date() });
+  await o.save();
+  await release(o);
+  await notify(o.seller, { type: 'order_quote_rejected', title: `Khách không đồng ý giá cuối đơn ${o.code}`, body: reason, link: { type: 'order', id: o._id } });
+  return o;
+}
+
 module.exports = {
-  tracking, create, prepare, commit, list, getVisible, requestCancel, requestReturn, approveSurcharge, priceOrder };
+  approveQuote, rejectQuote, tracking, create, prepare, commit, list, getVisible, requestCancel, requestReturn, approveSurcharge, priceOrder };

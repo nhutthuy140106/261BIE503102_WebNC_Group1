@@ -9,6 +9,7 @@ const offers = require('../buyer/offer/offer.service');
 const xu = require('../buyer/xu/xu.service');
 const { notify } = require('../shared/notify');
 const verification = require('./verification.service');
+const { release } = require('../shared/order-release');
 const shop = require('./shop.service');
 const postStats = require('../shared/post-stats');
 const ApiError = require('../../utils/ApiError');
@@ -133,8 +134,14 @@ const STEPS = {
   ready: { from: ['preparing'], to: 'ready' },
   complete: { from: ['delivering', 'ready'], to: 'done' },
   decline: { from: ['waiting'], to: 'declined' },
+  // đơn có báo giá: đã lấy đồ / đã kiểm tra → báo giá (khách duyệt) → làm → trả đồ / hoàn thành
+  pickUp: { from: ['confirmed'], to: 'picked' },
+  returned: { from: ['preparing'], to: 'done' },
 };
-const ORDER_CANCELABLE = ['waiting', 'confirmed', 'preparing'];
+const ORDER_CANCELABLE = ['waiting', 'confirmed', 'picked', 'pricing', 'preparing'];
+// bước chỉ dành cho đơn có báo giá (giặt sấy, sửa chữa) / chỉ dành cho đơn thường
+const FLOW_ONLY = new Set(['pickUp', 'quote', 'returned']);
+const PLAIN_ONLY = new Set(['prepare', 'deliver', 'ready', 'complete']);
 
 async function ownOrder(user, id) {
   const o = await Order.findById(id);
@@ -145,23 +152,7 @@ async function ownOrder(user, id) {
 
 const listOrders = (user) => Order.find({ seller: user._id }).sort({ createdAt: -1 }).limit(300).populate('buyer', 'name avatar phone area');
 
-/** Hủy/từ chối đơn: trả lại số lượng đã trừ và voucher */
-async function release(o) {
-  const give = async (id, n) => {
-    const p = await Post.findById(id).select('stock status');
-    if (!p) return;
-    if (p.stock && p.stock.mode === 'limit' && typeof p.stock.left === 'number') {
-      await Post.updateOne({ _id: id }, { $inc: { 'stock.left': n }, ...(p.status === 'soldout' ? { status: 'open' } : {}) });
-    } else if (p.stock && p.stock.mode === 'once' && p.status === 'soldout') {
-      await Post.updateOne({ _id: id }, { status: 'open' });
-    }
-  };
-  if (o.snapshot && o.snapshot.combo && o.snapshot.combo.length) for (const c of o.snapshot.combo) await give(c.postId, c.qty * o.quantity);
-  else await give(o.post, o.quantity);
-  await xu.restoreVoucher(o.buyer, o.voucherCode);
-}
-
-const STATE_TEXT = { confirmed: 'đã được xác nhận', preparing: 'đang được chuẩn bị', delivering: 'đang giao', ready: 'đã sẵn sàng', done: 'đã hoàn thành', declined: 'bị từ chối', cancelled: 'đã được hủy' };
+const STATE_TEXT = { confirmed: 'đã được xác nhận', picked: 'đã lấy đồ / đã kiểm tra', pricing: 'đã có giá cuối, chờ bạn duyệt', preparing: 'đang được chuẩn bị', delivering: 'đang giao', ready: 'đã sẵn sàng', done: 'đã hoàn thành', declined: 'bị từ chối', cancelled: 'đã được hủy' };
 
 async function move(o, to) {
   o.state = to;
@@ -176,7 +167,17 @@ async function move(o, to) {
 
 async function orderAction(user, id, action, payload = {}) {
   const o = await ownOrder(user, id);
-  if (STEPS[action]) {
+  if (FLOW_ONLY.has(action) && !o.flow) throw ApiError.invalidState('Bước này chỉ dành cho đơn giặt sấy hoặc sửa chữa có báo giá');
+  if (PLAIN_ONLY.has(action) && o.flow) throw ApiError.invalidState('Đơn có báo giá đi theo các bước: lấy đồ / kiểm tra → báo giá → làm → trả đồ');
+  if (action === 'quote') {
+    if (o.state !== 'picked') throw ApiError.invalidState('Chỉ báo giá được sau khi đã lấy đồ / kiểm tra');
+    if (o.cancelRequest && o.cancelRequest.status === 'pending') throw ApiError.invalidState('Khách đang xin hủy đơn, hãy trả lời yêu cầu hủy trước');
+    const lines = (payload.lines || []).filter((l) => l && String(l.name || '').trim());
+    if (!lines.length || lines.some((l) => !(l.qty > 0) || !(l.price >= 0))) throw ApiError.validation('Cần ít nhất một dòng giá hợp lệ', [{ field: 'lines', message: 'Mỗi dòng có tên, số lượng > 0 và đơn giá ≥ 0' }]);
+    const clean = lines.map((l) => ({ name: String(l.name).trim().slice(0, 120), qty: Math.round(l.qty * 100) / 100, price: Math.round(l.price) }));
+    o.quote = { lines: clean, total: Math.round(clean.reduce((n, l) => n + l.qty * l.price, 0)), at: new Date(), status: 'pending' };
+    await move(o, 'pricing');
+  } else if (STEPS[action]) {
     const step = STEPS[action];
     if (!step.from.includes(o.state)) throw ApiError.invalidState(`Không thể thực hiện khi đơn đang ở trạng thái "${o.state}"`);
     if (o.cancelRequest && o.cancelRequest.status === 'pending' && action !== 'decline') throw ApiError.invalidState('Khách đang xin hủy đơn, hãy trả lời yêu cầu hủy trước');

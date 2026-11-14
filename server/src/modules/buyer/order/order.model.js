@@ -1,7 +1,8 @@
 const { Schema, model } = require('mongoose');
 
 // Q6 chưa chốt: bộ trạng thái này là bản thử, sửa ở ORDER_STATES là đủ
-const ORDER_STATES = ['waiting', 'confirmed', 'preparing', 'delivering', 'ready', 'done', 'cancelled', 'declined'];
+// picked / pricing: chỉ có ở đơn có bước báo giá (giặt sấy: đã lấy đồ → báo giá sau khi cân; sửa chữa: đã kiểm tra → báo giá)
+const ORDER_STATES = ['waiting', 'confirmed', 'picked', 'pricing', 'preparing', 'delivering', 'ready', 'done', 'cancelled', 'declined'];
 
 const orderSchema = new Schema({
   code: { type: String, required: true, unique: true },               // AG-O####
@@ -33,11 +34,21 @@ const orderSchema = new Schema({
   cancelRequest: { reason: String, at: Date, status: { type: String, enum: ['pending', 'accepted', 'rejected'] }, _id: false },
   returnRequest: { reason: String, at: Date, status: { type: String, enum: ['pending', 'accepted', 'rejected'] }, _id: false },
   surcharge: { amount: Number, reason: String, status: { type: String, enum: ['pending', 'approved'] }, _id: false },
+  // Đơn có bước báo giá (xem shared/order-release.js › flowOf): người bán báo giá cuối, người mua đồng ý hoặc từ chối
+  flow: { type: String, enum: ['laundry', 'repair'] },
+  quote: new Schema({
+    lines: [{ name: String, qty: Number, price: Number, _id: false }],
+    total: Number,                                        // giá cuối chưa gồm phí giao
+    at: Date,
+    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    rejectReason: String,
+  }, { _id: false }),
+  oldTotal: Number,                                       // tổng tiền lúc đặt, giữ lại khi giá cuối được duyệt
   reviewed: { type: Boolean, default: false },
 }, { timestamps: true });
 
 orderSchema.statics.STATES = ORDER_STATES;
-orderSchema.statics.ACTIVE = ['waiting', 'confirmed', 'preparing', 'delivering', 'ready'];
+orderSchema.statics.ACTIVE = ['waiting', 'confirmed', 'picked', 'pricing', 'preparing', 'delivering', 'ready'];
 orderSchema.statics.HISTORY = ['done', 'cancelled', 'declined'];
 
 module.exports = model('Order', orderSchema);

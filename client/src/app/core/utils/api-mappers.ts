@@ -134,14 +134,36 @@ export function jobFromApi(j: Raw): Post {
 }
 
 const ORDER_STATE: Record<string, PlacedStatus> = {
-  waiting: 'pending', confirmed: 'confirmed', preparing: 'preparing', delivering: 'delivering', ready: 'delivering',
+  waiting: 'pending', confirmed: 'confirmed', picked: 'confirmed', pricing: 'pricing', preparing: 'preparing', delivering: 'delivering', ready: 'delivering',
   done: 'done', cancelled: 'cancelled', declined: 'cancelled',
 };
+
+const money = (n: number): string => `${Math.round(n).toLocaleString('vi-VN')}đ`;
+
+/** Đơn có bước báo giá: giá cuối chờ duyệt / đã duyệt / bị từ chối, theo `quote` của server */
+function quoteFields(o: Raw): Partial<Order> {
+  if (!o.flow) return {};
+  const seller: string = o.snapshot?.sellerName ?? 'Người bán';
+  const ship: number = o.breakdown?.deliveryFee ?? 0;
+  const q = o.quote;
+  const out: Partial<Order> = { priceCheck: o.flow === 'repair' ? 'quote' : 'estimate' };
+  if (o.oldTotal != null) out.oldTotal = o.oldTotal;
+  if (q?.status === 'pending') {
+    out.newPrice = { total: (q.total ?? 0) + ship, reason: o.flow === 'repair' ? 'Giá sau khi kiểm tra' : 'Giá sau khi cân thực tế', lines: (q.lines ?? []).map((l: Raw) => [l.name, Math.round(l.qty * l.price)] as [string, number]) };
+  } else if (q?.status === 'approved') {
+    out.priceDone = true;
+  } else if (q?.status === 'rejected') {
+    const after = o.flow === 'repair' ? `Bạn chỉ trả phí kiểm tra ${money(o.total ?? 0)}, ${seller} trả lại máy. Đơn kết thúc.` : `Đơn hủy, ${seller} trả lại đồ cho bạn và không tính tiền giặt.`;
+    out.priceRejected = after + (q.rejectReason ? ` Lý do bạn gửi: ${q.rejectReason}` : '');
+  }
+  return out;
+}
 
 export function orderFromApi(o: Raw): Order {
   const s = o.snapshot ?? {};
   const mapState = (st: string): string => ORDER_STATE[st] ?? st;
   return {
+    ...quoteFields(o),
     _id: o._id,
     code: o.code,
     type: 'placed',
@@ -152,13 +174,16 @@ export function orderFromApi(o: Raw): Order {
     counterpartId: typeof o.seller === 'object' ? o.seller?._id : o.seller,
     image: s.image || undefined,
     category: s.type,
+    kind: s.type === 'goods' || s.type === 'service' ? s.type : 'food',
+    sellerLinked: true, // đơn thật: người bán xử lý ở khu Bán, không dùng nút mô phỏng
     status: mapState(o.state) as PlacedStatus,
     total: o.total ?? 0,
     paymentMethod: o.payment === 'transfer' ? 'transfer' : 'cash',
     bank: s.bank?.no ? { bankName: s.bank.bankName ?? '', no: s.bank.no, holder: s.bank.holder ?? '', qr: s.bank.qr || undefined } : undefined,
     note: o.note || undefined,
     createdAt: o.createdAt,
-    history: (o.history ?? []).map((h: Raw) => ({ state: mapState(h.state), at: h.at })),
+    // "đã lấy đồ / đã kiểm tra" (picked) phía Mua vẫn là Đã xác nhận nên không ghi thêm một mốc trùng
+    history: (o.history ?? []).filter((h: Raw) => h.state !== 'picked').map((h: Raw) => ({ state: mapState(h.state), at: h.at })),
     cancelRequested: o.cancelRequest?.status === 'pending' || undefined,
     surcharge: o.surcharge?.amount
       ? { amount: o.surcharge.amount, reason: o.surcharge.reason ?? '', state: o.surcharge.status === 'approved' ? 'approved' : 'pending' }

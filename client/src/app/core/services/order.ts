@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, filter, forkJoin, map, of, switchMap } from 'rxjs';
+import { Observable, throwError, filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { CreateOrderBody, Order } from '../models/order';
@@ -156,8 +156,22 @@ export class OrderService {
    * Dùng cho các bước người mua bấm (hủy, duyệt giá, đổi lịch, báo vấn đề, đánh giá…) và cho nút
    * "giả lập phía người bán" ở bản mẫu. Máy chủ chưa có endpoint cho các bước này (docs/handoff.md).
    */
+  /** Người mua đồng ý giá cuối người bán báo (giặt sấy, sửa chữa) — chế độ thật */
+  approveQuote(id: string): Observable<Order> {
+    return this.api.post<unknown>(`/orders/${id}/approve-quote`).pipe(map(orderFromApi));
+  }
+
+  /** Người mua từ chối giá cuối — chế độ thật: đơn hủy */
+  rejectQuote(id: string, reason = ''): Observable<Order> {
+    return this.api.post<unknown>(`/orders/${id}/reject-quote`, { reason }).pipe(map(orderFromApi));
+  }
+
   update(id: string, patch: Partial<Order>, line?: string): Observable<Order> {
-    if (!useMock('order')) throw new AppError('Bước này cần máy chủ hỗ trợ, chưa có API.', 501, 'NOT_IMPLEMENTED');
+    if (!useMock('order')) {
+      // Đánh giá đơn đã lưu qua API đánh giá; ở đây chỉ ghi nhận trên màn hình (không còn báo lỗi nhầm)
+      if (Object.keys(patch).every((k) => k === 'rated')) return this.getOrder(id).pipe(map((o) => ({ ...o, ...patch })));
+      return throwError(() => new AppError('Bước này cần máy chủ hỗ trợ, chưa có API.', 501, 'NOT_IMPLEMENTED'));
+    }
     return this.placed().pipe(
       map((rows) => {
         const cur = rows.find((r) => r._id === id);

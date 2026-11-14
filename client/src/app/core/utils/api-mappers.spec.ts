@@ -42,6 +42,20 @@ describe('api-mappers', () => {
     expect(orderFromApi({ _id: 'o2', state: 'waiting' }).surcharge).toBeUndefined();
   });
 
+  it('đơn giặt sấy / sửa chữa: giá cuối chờ duyệt, đã duyệt, bị từ chối', () => {
+    const base = { _id: 'q', state: 'pricing', flow: 'laundry', breakdown: { deliveryFee: 10000 }, snapshot: { sellerName: 'Mỹ Linh' }, history: [{ state: 'picked', at: 't' }, { state: 'pricing', at: 't2' }] };
+    const pending = orderFromApi({ ...base, quote: { status: 'pending', total: 100000, lines: [{ name: 'Giặt', qty: 2, price: 50000 }] } });
+    expect(pending.priceCheck).toBe('estimate');
+    expect(pending.newPrice).toEqual({ total: 110000, reason: 'Giá sau khi cân thực tế', lines: [['Giặt', 100000]] });
+    expect(pending.status).toBe('pricing');
+    expect(pending.history?.map((h) => h.state)).toEqual(['pricing']);
+    expect(orderFromApi({ ...base, state: 'preparing', quote: { status: 'approved', total: 1, lines: [] } }).priceDone).toBe(true);
+    const rej = orderFromApi({ ...base, flow: 'repair', state: 'cancelled', total: 50000, quote: { status: 'rejected', total: 1, lines: [], rejectReason: 'Đắt' } });
+    expect(rej.priceCheck).toBe('quote');
+    expect(rej.priceRejected).toContain('Đắt');
+    expect(orderFromApi({ _id: 'n', state: 'waiting' }).newPrice).toBeUndefined();
+  });
+
   it('đề nghị: lấy việc lồng bên trong; thiếu lịch sử thì dựng từ createdAt', () => {
     const f = offerFromApi({ _id: 'f', code: 'AG-J1', state: 'offered', intro: 'hi', slots: [], createdAt: 't', job: { _id: 'j', title: 'T', pay: 5, poster: { _id: 'u', name: 'A', area: 'C' } } });
     expect(f).toMatchObject({ jobId: 'j', jobTitle: 'T', pay: 5, posterName: 'A', block: 'Block C' });

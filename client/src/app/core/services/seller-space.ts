@@ -119,9 +119,11 @@ const NEXT: Record<string, SellerOrderState> = {
   // giặt sấy, sửa chữa
   pickUp: 'picked', quote: 'pricing', approveQuote: 'preparing', rejectQuote: 'cancelled', returned: 'done',
 };
-/** Hành động của khu Bán → /api/seller/orders/:id/:action (bước báo giá giặt sấy / sửa chữa chưa có ở server) */
+/** Hành động của khu Bán → /api/seller/orders/:id/:action. approveQuote / rejectQuote là việc của KHÁCH (phía Mua), không có ở đây */
 const LIVE_ORDER_ACT: Partial<Record<SellerOrderAct, string>> = {
   confirm: 'confirm', prepare: 'prepare', deliver: 'deliver', ready: 'ready', complete: 'complete', decline: 'decline', approveCancel: 'approveCancel', keepOrder: 'keepOrder', surcharge: 'surcharge',
+  // đơn có báo giá (giặt sấy, sửa chữa): đã lấy đồ / đã kiểm tra → báo giá → trả đồ / hoàn thành (khách duyệt giá ở phía Mua)
+  pickUp: 'pickUp', quote: 'quote', returned: 'returned',
 };
 /** pickUp / quote / approveQuote / rejectQuote / returned: luồng giặt sấy, sửa chữa (approveQuote, rejectQuote = khách trả lời giá, phía Mua bấm; bản mẫu giả lập) */
 export type SellerOrderAct = 'confirm' | 'decline' | 'prepare' | 'deliver' | 'ready' | 'complete' | 'approveCancel' | 'keepOrder' | 'surcharge' | 'pickUp' | 'quote' | 'approveQuote' | 'rejectQuote' | 'returned';
@@ -805,7 +807,7 @@ export class SellerSpaceService {
     if (!o) return '';
     if (this.live) {
       const act = LIVE_ORDER_ACT[a];
-      if (!act) return 'Bước báo giá (giặt sấy, sửa chữa) chưa chạy ở chế độ thật — mở ?mock=1 để thử.';
+      if (!act) return 'Bước này do khách thực hiện ở phía Mua (đồng ý / từ chối giá), bạn sẽ thấy đơn tự cập nhật.';
       this.buyerApi.sellerOrderAct(id, act, data).subscribe({
         next: () => this.syncServer().subscribe(),
         error: (e: unknown) => this.notifications.push(`Không thực hiện được: ${e instanceof AppError ? e.message : 'lỗi không rõ'}`, `/seller/orders/${id}`),

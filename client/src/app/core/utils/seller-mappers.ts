@@ -50,7 +50,7 @@ const dayDiff = (iso: string, now = new Date()): number => {
 };
 
 const STATE: Record<string, SellerOrderState> = {
-  waiting: 'waiting', confirmed: 'confirmed', preparing: 'preparing', delivering: 'delivering', ready: 'ready', done: 'done', declined: 'declined', cancelled: 'cancelled',
+  waiting: 'waiting', confirmed: 'confirmed', picked: 'picked', pricing: 'pricing', preparing: 'preparing', delivering: 'delivering', ready: 'ready', done: 'done', declined: 'declined', cancelled: 'cancelled',
 };
 
 /** Đơn của server (kèm `buyer` đã populate) → đơn hiển thị ở khu Bán. Tổng tiền luôn khớp đơn: phần chênh so với giá món thành một dòng riêng. */
@@ -69,7 +69,8 @@ export function sellerOrderFromApi(o: Raw, now = new Date()): SellerOrder {
   const surchargeOk: number = o.surcharge?.status === 'approved' ? o.surcharge.amount ?? 0 : 0;
   const items: SellerOrderItem[] = [{ name: s.title ?? 'Đơn hàng', qty: o.quantity ?? 1, option, price: s.unitPrice ?? 0 }];
   const rest = (o.total ?? 0) - ship - surchargeOk - items.reduce((n, i) => n + i.qty * i.price, 0);
-  if (rest) items.push({ name: rest > 0 ? 'Tùy chọn cộng giá' : 'Giảm giá', qty: 1, option: '', price: rest });
+  // đơn đã có giá cuối: tổng tiền lấy theo giá cuối (quote), không cần dòng chênh
+  if (rest && !o.quote) items.push({ name: rest > 0 ? 'Tùy chọn cộng giá' : 'Giảm giá', qty: 1, option: '', price: rest });
   const at: string = o.scheduledAt ?? o.createdAt;
   const history = (o.history ?? []) as Raw[];
   const cancelPending = o.cancelRequest?.status === 'pending';
@@ -98,6 +99,8 @@ export function sellerOrderFromApi(o: Raw, now = new Date()): SellerOrder {
     cancelAt: cancelPending ? o.cancelRequest.at : undefined,
     stepAt: history.length ? history[history.length - 1].at : o.createdAt,
     buyerOrderId: o._id,
+    ...(o.flow ? { flow: o.flow as 'laundry' | 'repair' } : {}),
+    quote: o.quote && o.quote.status !== 'rejected' ? { lines: (o.quote.lines ?? []).map((l: Raw) => ({ name: l.name, qty: l.qty, price: l.price })), total: o.quote.total ?? 0, ok: o.quote.status === 'approved' } : null,
   };
 }
 

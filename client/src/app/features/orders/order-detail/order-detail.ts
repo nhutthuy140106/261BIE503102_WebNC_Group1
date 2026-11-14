@@ -1,5 +1,6 @@
 import { Component, DestroyRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { useMock } from '../../../core/config/api.config';
 import { AppError } from '../../../core/models/api';
@@ -390,6 +391,19 @@ export class OrderDetail implements OnInit {
   }
 
   /** Cập nhật đơn đã đặt + Xu (cộng khi xong / đánh giá, trả voucher khi hủy, thu lại khi hoàn tiền hết) */
+  /** Chế độ thật: đồng ý / từ chối giá cuối ở server, rồi hiện đơn mới */
+  private respondQuote(call: Observable<Order>, msg: string): void {
+    call.subscribe({
+      next: (n) => {
+        this.order.set(n);
+        this.close();
+        this.toast.show(msg);
+        if (n.status === 'cancelled') this.xu.returnVoucher(n.code);
+      },
+      error: (e: Error) => this.fail(e),
+    });
+  }
+
   private move(patch: Partial<Order>, line: string, msg?: string, after?: DlgType): void {
     const o = this.order();
     if (!o) return;
@@ -570,12 +584,14 @@ export class OrderDetail implements OnInit {
     if (d === 'approve') {
       const np = o.newPrice;
       if (!np) return;
+      if (!useMock('order')) return this.respondQuote(this.orderService.approveQuote(o._id), 'Đã đồng ý giá mới, đơn làm tiếp');
       return this.move({ status: 'preparing', oldTotal: o.total, total: np.total, priceDone: true, newPrice: null }, 'Bạn đồng ý giá cuối ' + this.vnd(np.total), 'Đã đồng ý giá mới, đơn làm tiếp');
     }
     if (d === 'reject') {
       const pc = o.priceCheck;
       const after = pc === 'quote' ? 'Bạn chỉ trả phí kiểm tra ' + this.vnd(o.total) + ', ' + n + ' trả lại máy. Đơn kết thúc.' : pc === 'surcharge' ? n + ' không lấy đồ nữa, đơn hủy và bạn không phải trả gì.' : 'Đơn hủy, ' + n + ' trả lại đồ cho bạn và không tính tiền giặt.';
       const why = this.text().trim();
+      if (!useMock('order')) return this.respondQuote(this.orderService.rejectQuote(o._id, why), 'Đã từ chối giá mới');
       return this.move({ status: 'cancelled', cancelFrom: 'pricing', priceRejected: after + (why ? ' Lý do bạn gửi: ' + why : ''), newPrice: null }, 'Bạn từ chối giá cuối' + (why ? ': ' + why : ''), 'Đã từ chối giá mới');
     }
   }
