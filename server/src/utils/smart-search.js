@@ -48,17 +48,21 @@ function lev(a, b, max = 2) {
   return prev[b.length];
 }
 
+/** Cụm đồng nghĩa của truy vấn (cả cụm, không tách từ): "day kem" → ["gia su", "day hoc", ...]. */
+function synonymPhrases(q) {
+  const toks = tokens(q);
+  const keys = [...toks, ...toks.slice(1).map((t, i) => `${toks[i]} ${t}`)];
+  const out = new Set();
+  for (const k of keys) for (const s of SYN.get(k) || []) if (s !== k) out.add(s);
+  return [...out].map((s) => s.split(' ').filter((x) => x.length >= 2));
+}
+
 /** Từ khóa → các từ có thể khớp, kèm trọng số (gốc 1, đồng nghĩa 0.6). */
 function expand(q) {
   const out = new Map();
   const add = (t, w) => { if (!out.has(t) || out.get(t) < w) out.set(t, w); };
-  const toks = tokens(q);
-  for (const t of toks) {
-    add(t, 1);
-    for (const s of SYN.get(t) || []) for (const part of s.split(' ')) add(part, 0.6);
-  }
-  const bi = toks.slice(1).map((t, i) => `${toks[i]} ${t}`); // cụm hai từ: "tra sua", "ca phe"
-  for (const phrase of bi) for (const s of SYN.get(phrase) || []) for (const part of s.split(' ')) add(part, 0.6);
+  for (const t of tokens(q)) add(t, 1);
+  for (const parts of synonymPhrases(q)) for (const part of parts) add(part, 0.6);
   return out;
 }
 
@@ -67,7 +71,8 @@ function expand(q) {
  * Điểm = Σ trọng số từ × idf (khớp đúng 1 | gõ sai gần 0.7 | tiền tố 0.8 | đồng nghĩa 0.6). Trả [{ doc, score }] đã sắp, bỏ điểm 0.
  */
 function rank(docs, q) {
-  const terms = expand(q);
+  const terms = new Map(tokens(q).map((t) => [t, 1]));
+  const phrases = synonymPhrases(q);
   if (!terms.size) return [];
   const docToks = docs.map((d) => new Set(tokens(d.searchText || '')));
   const df = new Map();
@@ -92,6 +97,10 @@ function rank(docs, q) {
     .map((doc, i) => {
       let score = 0;
       for (const [v, w] of matched) if (docToks[i].has(v)) score += w * idf(v);
+      // đồng nghĩa: chỉ tính khi bài có ĐỦ mọi từ của cụm ("gia su" không được khớp lẻ "giá")
+      for (const parts of phrases) {
+        if (parts.length && parts.every((t) => docToks[i].has(t))) score += 0.6 * parts.reduce((a, t) => a + idf(t), 0);
+      }
       return { doc, score };
     })
     .filter((x) => x.score > 0)

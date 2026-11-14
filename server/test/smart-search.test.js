@@ -30,3 +30,9 @@ test('đồng nghĩa: "lau nhà" ra dọn nhà, "cf" mở rộng sang cà phê',
 test('không liên quan thì rỗng', () => {
   assert.deepEqual(rank(docs, 'xyzqwerty'), []);
 });
+
+test('đồng nghĩa phải khớp đủ cụm: "dạy kèm" không ra bài chỉ có chữ "giá"', () => {
+  const ds = [{ id: 'x', searchText: 'Điện thoại giá rẻ bất ngờ' }, { id: 'y', searchText: 'Gia sư toán lớp 9' }];
+  assert.deepEqual(rank([ds[0]], 'dạy kèm'), []);
+  assert.equal(rank(ds, 'dạy kèm')[0].doc.id, 'y');
+});
