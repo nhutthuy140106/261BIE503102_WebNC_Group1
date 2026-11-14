@@ -1,11 +1,11 @@
 .cards { display: grid; gap: 12px; }
-.rc { display: grid; gap: 8px; padding: 14px 16px; border: 1px solid var(--a-line); border-radius: 12px; background: #fff; }
+.rc { display: grid; gap: 8px; padding: 16px 18px; border: 1px solid var(--a-line); border-radius: 16px; background: var(--a-card); }
 .rc header { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; color: var(--a-ink); }
 .meta { margin: 0; color: var(--a-mute); font-size: 13px; }
-.meta code { background: var(--a-bg); padding: 1px 6px; border-radius: 6px; }
+.meta code { background: var(--a-chip); padding: 1px 6px; border-radius: 6px; }
 .detail { margin: 0; color: var(--a-ink); }
-.note { margin: 0; padding: 8px 12px; border-radius: 10px; background: var(--a-bg); font-size: 14px; }
-.ctxbtn { justify-self: start; padding: 0; color: var(--a-accent); font-weight: 600; font-size: 13.5px; cursor: pointer; }
+.note { margin: 0; padding: 8px 12px; border-radius: 12px; background: var(--a-chip); font-size: 14px; }
+.ctxbtn { justify-self: start; padding: 0; color: var(--a-accent-ink); font-weight: 600; font-size: 13.5px; cursor: pointer; }
 .ctxbtn:hover { text-decoration: underline; }
 .ctx { display: grid; gap: 3px; padding: 10px 12px; border-radius: 10px; background: var(--a-accent-soft); font-size: 14px; }
 label { font-weight: 600; font-size: 13px; color: var(--a-ink); }

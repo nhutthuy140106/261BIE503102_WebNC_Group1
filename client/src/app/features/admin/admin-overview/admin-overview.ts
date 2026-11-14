@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { AdminApi, Dashboard, msgOf } from '../../../core/services/admin-api';
+import { AuthService } from '../../../core/services/auth';
 
 const STATE_LABEL: Record<string, string> = {
   waiting: 'Chờ xác nhận', confirmed: 'Đã xác nhận', picked: 'Đã lấy đồ', pricing: 'Chờ duyệt giá', preparing: 'Đang chuẩn bị',
@@ -18,6 +19,7 @@ interface Bar { x: number; y: number; w: number; h: number; v: number; day: stri
 })
 export class AdminOverview implements OnInit {
   private readonly api = inject(AdminApi);
+  protected readonly me = inject(AuthService).currentUser;
   protected readonly data = signal<Dashboard | null>(null);
   protected readonly error = signal('');
   protected days = 14;

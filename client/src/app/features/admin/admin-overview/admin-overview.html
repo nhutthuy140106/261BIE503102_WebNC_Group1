@@ -1,7 +1,7 @@
 <div class="head">
   <div>
-    <h1>Tổng quan</h1>
-    <p class="lead">Việc cần xử lý và tình hình hoạt động của khu.</p>
+    <h1>Xin chào, {{ me()?.fullName }}</h1>
+    <p class="lead">Đây là việc cần xử lý và tình hình hoạt động của khu hôm nay.</p>
   </div>
   <div class="bar" style="margin: 0">
     <select name="days" [(ngModel)]="days" (ngModelChange)="load()" aria-label="Khoảng thời gian">
@@ -26,12 +26,12 @@
   </section>
 
   <div class="kpis">
-    <div class="kpi"><span>Người dùng</span><b>{{ d.totals.users }}</b><small>{{ d.totals.lockedUsers }} bị khóa</small></div>
-    <div class="kpi"><span>Bài đang mở</span><b>{{ d.totals.openPosts }}</b><small>{{ d.totals.hiddenPosts }} bị ẩn · {{ d.totals.posts }} tổng</small></div>
-    <div class="kpi"><span>Đơn hàng</span><b>{{ d.totals.orders }}</b><small>{{ d.totals.doneOrders }} hoàn thành</small></div>
-    <div class="kpi"><span>Tổng giao dịch</span><b>{{ d.totals.gmv | vnd }}</b><small>đơn đã hoàn thành</small></div>
-    <div class="kpi"><span>Tỷ lệ hoàn thành</span><b>{{ d.totals.completionRate }}%</b><small>trên tổng số đơn</small></div>
-    <div class="kpi" [class.hotk]="d.totals.cancelRate >= 20"><span>Tỷ lệ hủy / từ chối</span><b>{{ d.totals.cancelRate }}%</b><small>trên tổng số đơn</small></div>
+    <div class="kpi"><span class="ic"><svg class="i"><use href="#users" /></svg></span><span>Người dùng</span><b>{{ d.totals.users }}</b><small>{{ d.totals.lockedUsers }} bị khóa</small></div>
+    <div class="kpi"><span class="ic"><svg class="i"><use href="#bag" /></svg></span><span>Bài đang mở</span><b>{{ d.totals.openPosts }}</b><small>{{ d.totals.hiddenPosts }} bị ẩn · {{ d.totals.posts }} tổng</small></div>
+    <div class="kpi"><span class="ic"><svg class="i"><use href="#receipt" /></svg></span><span>Đơn hàng</span><b>{{ d.totals.orders }}</b><small>{{ d.totals.doneOrders }} hoàn thành</small></div>
+    <div class="kpi"><span class="ic"><svg class="i"><use href="#coin" /></svg></span><span>Tổng giao dịch</span><b>{{ d.totals.gmv | vnd }}</b><small>đơn đã hoàn thành</small></div>
+    <div class="kpi"><span class="ic"><svg class="i"><use href="#check" /></svg></span><span>Tỷ lệ hoàn thành</span><b>{{ d.totals.completionRate }}%</b><small>trên tổng số đơn</small></div>
+    <div class="kpi" [class.hotk]="d.totals.cancelRate >= 20"><span class="ic"><svg class="i"><use href="#xmark" /></svg></span><span>Tỷ lệ hủy / từ chối</span><b>{{ d.totals.cancelRate }}%</b><small>trên tổng số đơn</small></div>
   </div>
 
   <div class="grid2">

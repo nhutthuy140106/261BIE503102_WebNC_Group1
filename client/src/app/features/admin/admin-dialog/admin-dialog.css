@@ -1,13 +1,13 @@
-.ov { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: rgba(27, 39, 64, .5); }
-.dlg { width: min(460px, 100%); display: grid; gap: 8px; padding: 22px; border-radius: 14px; background: #fff; color: var(--a-ink); box-shadow: 0 20px 50px rgba(27, 39, 64, .3); }
+.ov { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: rgba(5, 9, 18, .7); backdrop-filter: blur(3px); }
+.dlg { border: 1px solid var(--a-line2); width: min(460px, 100%); display: grid; gap: 8px; padding: 22px; border-radius: 14px; background: var(--a-card); color: var(--a-ink); box-shadow: 0 20px 50px rgba(27, 39, 64, .3); }
 h2 { margin: 0; font-size: 18px; }
 p { margin: 0; color: var(--a-mute); font-size: 14px; }
 label { font-weight: 600; font-size: 14px; margin-top: 4px; }
-textarea { padding: 10px 12px; border: 1px solid var(--a-line); border-radius: 10px; font: inherit; resize: vertical; }
+textarea { padding: 10px 12px; border: 1px solid var(--a-line2); border-radius: 12px; background: var(--a-input); color: var(--a-ink); font: inherit; resize: vertical; }
 textarea:focus { outline: 2px solid var(--a-accent-soft); border-color: var(--a-accent); }
 .e { color: var(--a-danger); }
 .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
-.btn { height: 38px; padding: 0 16px; border: 1px solid var(--a-line); border-radius: 10px; background: #fff; color: var(--a-ink); font: inherit; font-weight: 600; cursor: pointer; }
-.btn.main { background: var(--a-accent); border-color: var(--a-accent); color: #fff; }
+.btn { height: 38px; padding: 0 16px; border: 1px solid var(--a-line2); border-radius: 10px; background: var(--a-card2); color: var(--a-ink); font: inherit; font-weight: 600; cursor: pointer; }
+.btn.main { background: linear-gradient(180deg, var(--a-accent2), var(--a-accent)); border-color: var(--a-accent); color: #fff; }
 .btn.danger { background: var(--a-danger); border-color: var(--a-danger); color: #fff; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
