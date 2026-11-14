@@ -5,7 +5,7 @@ h1 .pill { vertical-align: middle; margin-left: 6px; font-size: 13px; }
 .judge { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--a-warn-line); }
 .judge h3 { margin: 0 0 10px; font-size: 15px; }
 .opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
-.opt { display: flex; gap: 8px; align-items: flex-start; padding: 10px; border: 1px solid var(--a-line); border-radius: 10px; background: var(--a-card); cursor: pointer; }
+.opt { display: flex; gap: 8px; align-items: flex-start; padding: 10px; border: 1px solid var(--a-line); border-radius: 10px; background: var(--a-glass); cursor: pointer; }
 .opt:has(input:checked) { border-color: var(--a-accent); background: var(--a-accent-soft); }
 .opt input { margin-top: 3px; accent-color: var(--a-accent); }
 .opt b { display: block; font-size: 14px; }

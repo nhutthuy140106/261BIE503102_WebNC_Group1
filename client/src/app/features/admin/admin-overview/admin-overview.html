@@ -35,53 +35,79 @@
   </div>
 
   <div class="grid2">
+    <!-- cột: giao dịch hoàn thành theo ngày -->
     <section class="panel">
-      <h2>Giao dịch hoàn thành theo ngày <small>tổng {{ sum(d.series.revenue) | vnd }}</small></h2>
-      <div class="chart">
-        <svg viewBox="0 0 600 150" preserveAspectRatio="none" role="img" aria-label="Biểu đồ giao dịch theo ngày">
-          @for (b of bars(d.series.revenue, d.days, top(d.series.revenue)); track b.day) {
-            <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" rx="2" class="c1"><title>{{ dayLabel(b.day) }}: {{ b.v | vnd }}</title></rect>
-          }
-        </svg>
-        <div class="ax"><span>{{ dayLabel(d.days[0]) }}</span><span>cao nhất {{ top(d.series.revenue) | vnd }}</span><span>{{ dayLabel(d.days[d.days.length - 1]) }}</span></div>
+      <h2>Giao dịch hoàn thành <small>tổng {{ sum(d.series.revenue) | vnd }}</small></h2>
+      @let mx = niceMax(d.series.revenue);
+      <div class="bc">
+        <div class="y" aria-hidden="true">@for (t of ticks(mx, true); track t.pct) { <span [style.bottom.%]="t.pct">{{ t.text }}</span> }</div>
+        <div class="plot" role="img" aria-label="Biểu đồ giao dịch hoàn thành theo ngày">
+          @for (t of ticks(mx); track t.pct) { <i class="gl" [style.bottom.%]="t.pct"></i> }
+          <div class="cols">
+            @for (v of d.series.revenue; track $index) {
+              <div class="col" [attr.title]="dayFull(d.days[$index]) + ': ' + (v | vnd)"><i class="b" [style.height.%]="pct(v, mx)"></i></div>
+            }
+          </div>
+        </div>
+        <div class="xs" aria-hidden="true">@for (l of xLabels(d.days); track $index) { <span>{{ l }}</span> }</div>
       </div>
     </section>
+
+    <!-- vành khuyên: đơn theo trạng thái -->
     <section class="panel">
-      <h2>Đơn mới và đơn hoàn thành <small>{{ sum(d.series.newOrders) }} mới · {{ sum(d.series.doneOrders) }} xong</small></h2>
-      <div class="chart">
-        <svg viewBox="0 0 600 150" preserveAspectRatio="none" role="img" aria-label="Biểu đồ đơn theo ngày">
-          @for (b of bars(d.series.newOrders, d.days, top(d.series.newOrders, d.series.doneOrders), 0, 2); track b.day) {
-            <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" rx="2" class="c2"><title>{{ dayLabel(b.day) }}: {{ b.v }} đơn mới</title></rect>
-          }
-          @for (b of bars(d.series.doneOrders, d.days, top(d.series.newOrders, d.series.doneOrders), 1, 2); track b.day) {
-            <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" rx="2" class="c1"><title>{{ dayLabel(b.day) }}: {{ b.v }} đơn hoàn thành</title></rect>
-          }
-        </svg>
-        <div class="ax"><span>{{ dayLabel(d.days[0]) }}</span><span class="lg"><i class="c2"></i>mới <i class="c1"></i>hoàn thành</span><span>{{ dayLabel(d.days[d.days.length - 1]) }}</span></div>
-      </div>
+      <h2>Đơn theo trạng thái <small>{{ d.totals.orders }} đơn</small></h2>
+      @if (slices(d).length) {
+        <div class="donut-wrap">
+          <svg class="donut" viewBox="0 0 140 140" role="img" aria-label="Biểu đồ đơn theo trạng thái">
+            <circle cx="70" cy="70" r="54" class="track" />
+            @for (s of slices(d); track s.key) {
+              <circle cx="70" cy="70" r="54" class="seg" [attr.stroke]="s.color" [attr.stroke-dasharray]="s.len + ' ' + (C - s.len)" [attr.stroke-dashoffset]="s.off"><title>{{ s.label }}: {{ s.n }}</title></circle>
+            }
+            <text x="70" y="68" class="dn">{{ d.totals.orders }}</text><text x="70" y="86" class="dl">đơn</text>
+          </svg>
+          <ul class="legend">
+            @for (s of slices(d); track s.key) { <li><i [style.background]="s.color"></i><span>{{ s.label }}</span><b>{{ s.pct }}%</b></li> }
+          </ul>
+        </div>
+      } @else { <p class="empty">Chưa có đơn nào.</p> }
     </section>
   </div>
 
   <div class="grid2">
     <section class="panel">
-      <h2>Đơn theo trạng thái</h2>
-      @if (states(d).length) {
-        <ul class="hb">
-          @for (s of states(d); track s.key) {
-            <li><span class="l">{{ s.label }}</span><span class="t"><i [class]="'f ' + tone(s.key)" [style.width.%]="s.pct"></i></span><b>{{ s.n }}</b></li>
-          }
-        </ul>
-      } @else { <p class="empty">Chưa có đơn nào.</p> }
+      <h2>Đơn mới và đơn hoàn thành <small>{{ sum(d.series.newOrders) }} mới · {{ sum(d.series.doneOrders) }} xong</small></h2>
+      @let mo = niceMax(d.series.newOrders, d.series.doneOrders);
+      <div class="bc">
+        <div class="y" aria-hidden="true">@for (t of ticks(mo); track t.pct) { <span [style.bottom.%]="t.pct">{{ t.text }}</span> }</div>
+        <div class="plot" role="img" aria-label="Biểu đồ đơn mới và đơn hoàn thành theo ngày">
+          @for (t of ticks(mo); track t.pct) { <i class="gl" [style.bottom.%]="t.pct"></i> }
+          <div class="cols">
+            @for (v of d.series.newOrders; track $index) {
+              <div class="col two" [attr.title]="dayFull(d.days[$index]) + ': ' + v + ' mới, ' + d.series.doneOrders[$index] + ' hoàn thành'">
+                <i class="b soft" [style.height.%]="pct(v, mo)"></i><i class="b" [style.height.%]="pct(d.series.doneOrders[$index], mo)"></i>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="xs" aria-hidden="true">@for (l of xLabels(d.days); track $index) { <span>{{ l }}</span> }</div>
+      </div>
+      <p class="lg"><i class="soft"></i>Đơn mới <i></i>Hoàn thành</p>
     </section>
+
     <section class="panel">
       <h2>Người dùng mới <small>{{ sum(d.series.newUsers) }} người</small></h2>
-      <div class="chart">
-        <svg viewBox="0 0 600 150" preserveAspectRatio="none" role="img" aria-label="Người dùng mới theo ngày">
-          @for (b of bars(d.series.newUsers, d.days, top(d.series.newUsers)); track b.day) {
-            <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" rx="2" class="c3"><title>{{ dayLabel(b.day) }}: {{ b.v }} người</title></rect>
-          }
-        </svg>
-        <div class="ax"><span>{{ dayLabel(d.days[0]) }}</span><span>cao nhất {{ top(d.series.newUsers) }} người/ngày</span><span>{{ dayLabel(d.days[d.days.length - 1]) }}</span></div>
+      @let mu = niceMax(d.series.newUsers);
+      <div class="bc">
+        <div class="y" aria-hidden="true">@for (t of ticks(mu); track t.pct) { <span [style.bottom.%]="t.pct">{{ t.text }}</span> }</div>
+        <div class="plot" role="img" aria-label="Người dùng mới theo ngày">
+          @for (t of ticks(mu); track t.pct) { <i class="gl" [style.bottom.%]="t.pct"></i> }
+          <div class="cols">
+            @for (v of d.series.newUsers; track $index) {
+              <div class="col" [attr.title]="dayFull(d.days[$index]) + ': ' + v + ' người'"><i class="b blue" [style.height.%]="pct(v, mu)"></i></div>
+            }
+          </div>
+        </div>
+        <div class="xs" aria-hidden="true">@for (l of xLabels(d.days); track $index) { <span>{{ l }}</span> }</div>
       </div>
     </section>
   </div>
@@ -89,14 +115,12 @@
   <section class="panel">
     <h2>Người bán có giao dịch cao nhất</h2>
     @if (d.topSellers.length) {
-      <table class="tbl">
-        <thead><tr><th>#</th><th>Người bán</th><th class="num">Đơn hoàn thành</th><th class="num">Tổng giao dịch</th></tr></thead>
-        <tbody>
-          @for (s of d.topSellers; track s.id; let i = $index) {
-            <tr class="click" [routerLink]="['/admin/users', s.id]"><td data-l="#">{{ i + 1 }}</td><td data-l="Người bán"><b>{{ s.name }}</b></td><td data-l="Đơn hoàn thành" class="num">{{ s.orders }}</td><td data-l="Tổng giao dịch" class="num">{{ s.revenue | vnd }}</td></tr>
-          }
-        </tbody>
-      </table>
+      <ul class="hbars">
+        @for (s of d.topSellers; track s.id; let i = $index) {
+          <li><a [routerLink]="['/admin/users', s.id]"><span class="rk">{{ i + 1 }}</span><span class="nm">{{ s.name }}<small>{{ s.orders }} đơn hoàn thành</small></span>
+            <span class="tr"><i [style.width.%]="pct(s.revenue, topMax(d))"></i></span><b>{{ s.revenue | vnd }}</b></a></li>
+        }
+      </ul>
     } @else { <p class="empty">Chưa có đơn hoàn thành.</p> }
   </section>
 } @else if (!error()) {

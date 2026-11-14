@@ -1,5 +1,5 @@
 .ov { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: rgba(5, 9, 18, .7); backdrop-filter: blur(3px); }
-.dlg { border: 1px solid var(--a-line2); width: min(460px, 100%); display: grid; gap: 8px; padding: 22px; border-radius: 14px; background: var(--a-card); color: var(--a-ink); box-shadow: 0 20px 50px rgba(27, 39, 64, .3); }
+.dlg { border: 1px solid var(--a-line2); width: min(460px, 100%); display: grid; gap: 8px; padding: 22px; border-radius: 14px; background: #111A2D; color: var(--a-ink); box-shadow: 0 20px 50px rgba(27, 39, 64, .3); }
 h2 { margin: 0; font-size: 18px; }
 p { margin: 0; color: var(--a-mute); font-size: 14px; }
 label { font-weight: 600; font-size: 14px; margin-top: 4px; }
