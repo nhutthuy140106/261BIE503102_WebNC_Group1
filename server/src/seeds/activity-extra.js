@@ -260,6 +260,24 @@ const OFFERS = [
   ['Chị Hoa', 'Phụ bếp nấu cỗ 8 người', 'Mình từng phụ bếp ở nhà hàng nhỏ, làm nhanh và gọn.', [['offered', 18]]],
 ];
 
+// Bài quảng bá (Nổi bật trong khu) và Giờ vàng thêm cho trang chủ đông hơn — khớp client/public/datasets/posts.json
+const PROMOTED_TITLES = ['Phở bò tái, nước dùng hầm xương', 'Cà phê sữa đá', 'Trà sữa trân châu đường đen', 'Dọn nhà theo giờ', 'Tắm và cắt tỉa lông thú cưng tại nhà', 'Cơm nhà làm, thực đơn đổi mỗi ngày', 'Bowl rau củ healthy, giao trưa', 'Giặt sấy gấp, lấy và trả tận cửa trong ngày'];
+const ALL_DAY = ['00:00', '23:59'];
+const gold = (value, from, to) => ({ kind: 'percent', value, from, to, days: [0, 1, 2, 3, 4, 5, 6], active: true });
+const DEALS = {
+  'Dọn nhà theo giờ': gold(10, ...ALL_DAY),
+  'Tắm và cắt tỉa lông thú cưng tại nhà': gold(15, ...ALL_DAY),
+  'Đậu sốt cà chua': gold(10, ...ALL_DAY),
+  'Cà phê hạt rang mộc': gold(8, ...ALL_DAY),
+  'Giặt hấp đồ vest': gold(10, ...ALL_DAY),
+  'Combo cơm trưa 5 ngày, đặt cả tuần': gold(12, ...ALL_DAY),
+  'Cơm gà kho gừng': gold(8, ...ALL_DAY),
+  'Nấu cơm gia đình': gold(10, ...ALL_DAY),
+  'Cơm sườn rim': gold(10, ...ALL_DAY),
+  'Vệ sinh máy lạnh': gold(10, ...ALL_DAY),
+  'Combo bữa tối gia đình: 3 món + canh': gold(15, ...ALL_DAY),
+};
+
 /**
  * Thêm đánh giá + đề nghị vào DB đang kết nối (idempotent: đánh giá có targetId cố định theo tiêu đề+người; đề nghị trùng thì bỏ qua).
  * Trả { reviews, offers, skipped }. dryRun = chỉ đếm.
@@ -317,6 +335,17 @@ async function addActivity({ dryRun = false } = {}) {
       await Offer.collection.updateOne({ _id: x._id }, { $set: { state: steps[steps.length - 1][0], history, createdAt: history[0].at, updatedAt: history[history.length - 1].at } });
       out.offers++;
     } catch (e) { out.skipped.push(`việc: ${jobTitle} / ${who} (${e.message})`); }
+  }
+  /* Nổi bật + Giờ vàng: chỉ điền khi bài chưa có */
+  for (const t of PROMOTED_TITLES) {
+    const post = postByTitle.get(t);
+    if (!post) continue;
+    if (!dryRun) await Post.collection.updateOne({ _id: post._id, promoted: { $ne: true } }, { $set: { promoted: true } });
+  }
+  for (const [t, promo] of Object.entries(DEALS)) {
+    const post = postByTitle.get(t);
+    if (!post) { out.skipped.push(`giờ vàng: ${t}`); continue; }
+    if (!dryRun) await Post.collection.updateOne({ _id: post._id, promo: { $exists: false } }, { $set: { promo } });
   }
   if (!dryRun) for (const j of jobs) await offerService.syncOfferCount(j._id);
   return out;

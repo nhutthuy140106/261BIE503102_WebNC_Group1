@@ -74,8 +74,8 @@
     "category": "Dịch vụ",
     "price": 18000,
     "priceUnit": "kg",
-    "rating": 4.4,
-    "reviewCount": 5,
+    "rating": 4.7,
+    "reviewCount": 6,
     "sold": 41,
     "promoted": true,
     "acceptsXu": true,
@@ -275,8 +275,8 @@
     "category": "Đồ ăn",
     "price": 35000,
     "priceUnit": "phần",
-    "rating": 4.3,
-    "reviewCount": 10,
+    "rating": 4.8,
+    "reviewCount": 8,
     "sold": 82,
     "promoted": true,
     "acceptsXu": true,
@@ -345,8 +345,8 @@
     "category": "Đồ ăn",
     "price": 55000,
     "priceUnit": "phần",
-    "rating": 4.3,
-    "reviewCount": 10,
+    "rating": 4.6,
+    "reviewCount": 5,
     "sold": 93,
     "promoted": true,
     "acceptsXu": true,
@@ -410,8 +410,8 @@
     "category": "Đồ ăn",
     "price": 45000,
     "priceUnit": "tô",
-    "rating": 4.3,
-    "reviewCount": 10,
+    "rating": 4.7,
+    "reviewCount": 7,
     "sold": 104,
     "acceptsXu": true,
     "template": "food",
@@ -454,7 +454,8 @@
       "bankName": "VietinBank",
       "no": "0000100685",
       "holder": "QUAN PHO BA TU (MAU)"
-    }
+    },
+    "promoted": true
   },
   {
     "_id": "7989ab729b170abe639d2599",
@@ -508,6 +509,15 @@
       "bankName": "TPBank",
       "no": "0000100822",
       "holder": "CO BA (MAU)"
+    },
+    "promoted": true,
+    "promo": {
+      "kind": "percent",
+      "value": 10,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
     }
   },
   {
@@ -527,8 +537,8 @@
     "category": "Đồ ăn",
     "price": 40000,
     "priceUnit": "combo",
-    "rating": 4.3,
-    "reviewCount": 10,
+    "rating": 4.7,
+    "reviewCount": 6,
     "sold": 81,
     "acceptsXu": true,
     "template": "food",
@@ -582,7 +592,7 @@
     "category": "Dịch vụ",
     "price": 150000,
     "priceUnit": "lần",
-    "rating": 4.6,
+    "rating": 4.8,
     "reviewCount": 5,
     "sold": 62,
     "template": "clean",
@@ -615,6 +625,15 @@
       "bankName": "Vietcombank",
       "no": "0000101096",
       "holder": "PHUONG (MAU)"
+    },
+    "promoted": true,
+    "promo": {
+      "kind": "percent",
+      "value": 15,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
     }
   },
   {
@@ -640,7 +659,7 @@
     "category": "Đồ uống",
     "price": 25000,
     "priceUnit": "ly",
-    "sold": 19,
+    "sold": 42,
     "acceptsXu": true,
     "template": "drink",
     "agoMin": 4920,
@@ -682,7 +701,10 @@
       "bankName": "MBBank",
       "no": "0000101233",
       "holder": "QUAN NHA MAY (MAU)"
-    }
+    },
+    "rating": 4.7,
+    "reviewCount": 7,
+    "promoted": true
   },
   {
     "_id": "2aaf04ea6838cbb90b8e053d",
@@ -701,7 +723,7 @@
     "category": "Dịch vụ",
     "price": 50000,
     "priceUnit": "lượt",
-    "sold": 10,
+    "sold": 35,
     "acceptsXu": true,
     "template": "clean",
     "agoMin": 5160,
@@ -734,7 +756,9 @@
       "bankName": "BIDV",
       "no": "0000101370",
       "holder": "MINH (MAU)"
-    }
+    },
+    "rating": 4.8,
+    "reviewCount": 5
   },
   {
     "_id": "2229ab0ca991c313f731b807",
@@ -754,7 +778,7 @@
     "price": 40000,
     "priceUnit": "phần",
     "rating": 4.3,
-    "reviewCount": 10,
+    "reviewCount": 6,
     "sold": 80,
     "acceptsXu": true,
     "template": "food",
@@ -816,7 +840,7 @@
     "category": "Dịch vụ",
     "price": 150000,
     "priceUnit": "máy",
-    "sold": 14,
+    "sold": 20,
     "template": "fix",
     "agoMin": 5640,
     "createdAt": "2026-10-10T08:00:00.000Z",
@@ -847,6 +871,16 @@
       "bankName": "Techcombank",
       "no": "0000101507",
       "holder": "ANH TUNG (MAU)"
+    },
+    "rating": 4.6,
+    "reviewCount": 5,
+    "promo": {
+      "kind": "percent",
+      "value": 10,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
     }
   },
   {
@@ -866,7 +900,7 @@
     "category": "Đồ ăn",
     "price": 30000,
     "priceUnit": "phần",
-    "sold": 5,
+    "sold": 20,
     "acceptsXu": true,
     "template": "food",
     "agoMin": 5880,
@@ -900,6 +934,16 @@
       "bankName": "VPBank",
       "no": "0000100959",
       "holder": "CHI NGAN (MAU)"
+    },
+    "rating": 4.6,
+    "reviewCount": 5,
+    "promo": {
+      "kind": "percent",
+      "value": 10,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
     }
   },
   {
@@ -966,7 +1010,10 @@
       "bankName": "MBBank",
       "no": "0000101233",
       "holder": "QUAN NHA MAY (MAU)"
-    }
+    },
+    "rating": 4.3,
+    "reviewCount": 6,
+    "promoted": true
   },
   {
     "_id": "eb4bf2366571c8a0324e260a",
@@ -985,7 +1032,7 @@
     "category": "Đồ uống",
     "price": 120000,
     "priceUnit": "250g",
-    "sold": 9,
+    "sold": 30,
     "acceptsXu": true,
     "template": "drink",
     "agoMin": 6360,
@@ -1019,6 +1066,16 @@
       "bankName": "MBBank",
       "no": "0000101233",
       "holder": "QUAN NHA MAY (MAU)"
+    },
+    "rating": 4.6,
+    "reviewCount": 5,
+    "promo": {
+      "kind": "percent",
+      "value": 8,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
     }
   },
   {
@@ -1252,7 +1309,7 @@
     "category": "Dịch vụ",
     "price": 250000,
     "priceUnit": "buổi",
-    "sold": 8,
+    "sold": 30,
     "template": "clean",
     "agoMin": 7560,
     "createdAt": "2026-10-10T08:00:00.000Z",
@@ -1287,6 +1344,16 @@
     },
     "stock": {
       "mode": "open"
+    },
+    "rating": 4.8,
+    "reviewCount": 5,
+    "promo": {
+      "kind": "percent",
+      "value": 10,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
     }
   },
   {
@@ -1348,7 +1415,10 @@
       "bankName": "VPBank",
       "no": "0000102055",
       "holder": "BAC SON (MAU)"
-    }
+    },
+    "rating": 4.6,
+    "reviewCount": 6,
+    "promoted": true
   },
   {
     "_id": "910d74c98b78aef7460221c8",
@@ -1400,7 +1470,9 @@
       "bankName": "Vietcombank",
       "no": "0000102192",
       "holder": "BAN LINH (MAU)"
-    }
+    },
+    "rating": 4.7,
+    "reviewCount": 3
   },
   {
     "_id": "312728497bf7e074011fdbe2",
@@ -1420,8 +1492,8 @@
     "category": "Đồ ăn",
     "price": 45000,
     "priceUnit": "hộp",
-    "rating": 4.3,
-    "reviewCount": 10,
+    "rating": 4.2,
+    "reviewCount": 5,
     "sold": 77,
     "acceptsXu": true,
     "template": "food",
@@ -1607,7 +1679,17 @@
       "holder": "GIAT SAY MY LINH (MAU)"
     },
     "needSchedule": true,
-    "acceptsXu": false
+    "acceptsXu": false,
+    "rating": 4.8,
+    "reviewCount": 4,
+    "promo": {
+      "kind": "percent",
+      "value": 10,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
+    }
   },
   {
     "_id": "b1c88c532540338a95346b95",
@@ -1626,7 +1708,7 @@
     "category": "Đồ ăn",
     "price": 35000,
     "priceUnit": "phần",
-    "sold": 7,
+    "sold": 42,
     "acceptsXu": true,
     "template": "food",
     "agoMin": 8760,
@@ -1660,6 +1742,16 @@
       "bankName": "Techcombank",
       "no": "0000100411",
       "holder": "TIEM BANH NHA MAY (MAU)"
+    },
+    "rating": 4.3,
+    "reviewCount": 7,
+    "promo": {
+      "kind": "percent",
+      "value": 20,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
     }
   },
   {
@@ -1713,6 +1805,16 @@
       "bankName": "VPBank",
       "no": "0000102055",
       "holder": "BAC SON (MAU)"
+    },
+    "rating": 4.2,
+    "reviewCount": 6,
+    "promo": {
+      "kind": "percent",
+      "value": 15,
+      "from": "17:00",
+      "to": "22:00",
+      "days": [],
+      "active": true
     }
   },
   {
@@ -1732,7 +1834,7 @@
     "category": "Dịch vụ",
     "price": 30000,
     "priceUnit": "lần",
-    "sold": 11,
+    "sold": 40,
     "acceptsXu": true,
     "template": "trip",
     "agoMin": 9240,
@@ -1765,7 +1867,9 @@
       "bankName": "BIDV",
       "no": "0000101370",
       "holder": "MINH (MAU)"
-    }
+    },
+    "rating": 4.6,
+    "reviewCount": 5
   },
   {
     "_id": "b01f30adb4100dd41c90a854",
@@ -1868,7 +1972,9 @@
       "bankName": "Techcombank",
       "no": "0000101507",
       "holder": "ANH TUNG (MAU)"
-    }
+    },
+    "rating": 4.5,
+    "reviewCount": 3
   },
   {
     "_id": "f037d575836173f5e7bddc03",
@@ -1887,7 +1993,7 @@
     "category": "Dịch vụ",
     "price": 15000,
     "priceUnit": "lượt",
-    "sold": 6,
+    "sold": 30,
     "acceptsXu": true,
     "template": "trip",
     "agoMin": 9960,
@@ -1920,7 +2026,9 @@
       "bankName": "BIDV",
       "no": "0000101370",
       "holder": "MINH (MAU)"
-    }
+    },
+    "rating": 4.6,
+    "reviewCount": 5
   },
   {
     "_id": "7d6d3ecc8997bc9733d4a12e",
@@ -1939,8 +2047,8 @@
     "category": "Đồ ăn",
     "price": 150000,
     "priceUnit": "combo",
-    "rating": 4.3,
-    "reviewCount": 10,
+    "rating": 4.8,
+    "reviewCount": 4,
     "sold": 75,
     "acceptsXu": true,
     "template": "food",
@@ -1981,6 +2089,14 @@
     "prepMinutes": 30,
     "stock": {
       "mode": "open"
+    },
+    "promo": {
+      "kind": "percent",
+      "value": 12,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
     }
   },
   {
@@ -2000,8 +2116,8 @@
     "category": "Đồ ăn",
     "price": 120000,
     "priceUnit": "combo",
-    "rating": 4.3,
-    "reviewCount": 10,
+    "rating": 4.8,
+    "reviewCount": 5,
     "sold": 86,
     "acceptsXu": true,
     "template": "food",
@@ -2042,6 +2158,14 @@
     "prepMinutes": 30,
     "stock": {
       "mode": "open"
+    },
+    "promo": {
+      "kind": "percent",
+      "value": 15,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
     }
   },
   {
@@ -2143,8 +2267,8 @@
     "category": "Dịch vụ",
     "price": 220000,
     "priceUnit": "combo",
-    "rating": 4.4,
-    "reviewCount": 5,
+    "rating": 4.8,
+    "reviewCount": 4,
     "sold": 33,
     "acceptsXu": true,
     "agoMin": 10920,
@@ -2900,9 +3024,9 @@
     },
     "serviceInfo": {},
     "distance": 150,
-    "rating": 0,
-    "reviewCount": 0,
-    "sold": 0,
+    "rating": 4.6,
+    "reviewCount": 5,
+    "sold": 20,
     "promoted": false,
     "agoMin": 469
   },
@@ -3060,9 +3184,9 @@
     ],
     "pickupAtBuyer": true,
     "distance": 150,
-    "rating": 0,
-    "reviewCount": 0,
-    "sold": 0,
+    "rating": 4.6,
+    "reviewCount": 5,
+    "sold": 35,
     "promoted": false,
     "agoMin": 6356
   },
@@ -3350,9 +3474,9 @@
       "KTX Khu B"
     ],
     "distance": 150,
-    "rating": 0,
-    "reviewCount": 0,
-    "sold": 0,
+    "rating": 4.7,
+    "reviewCount": 9,
+    "sold": 63,
     "promoted": false,
     "agoMin": 17583
   },
@@ -3468,9 +3592,9 @@
       "to": "12:30"
     },
     "distance": 150,
-    "rating": 0,
-    "reviewCount": 0,
-    "sold": 0,
+    "rating": 4.7,
+    "reviewCount": 6,
+    "sold": 42,
     "promoted": false,
     "agoMin": 17611,
     "areas": [
@@ -3500,8 +3624,8 @@
     "category": "Cơm nhà làm",
     "price": 35000,
     "priceUnit": "phần",
-    "rating": 4.8,
-    "reviewCount": 14,
+    "rating": 4.6,
+    "reviewCount": 5,
     "sold": 48,
     "promoted": false,
     "acceptsXu": true,
@@ -3608,7 +3732,15 @@
         "unit": "phần",
         "dailyQty": 10
       }
-    ]
+    ],
+    "promo": {
+      "kind": "percent",
+      "value": 8,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
+    }
   },
   {
     "_id": "149d439536b3216fdaeeb975",
@@ -3630,8 +3762,8 @@
     "category": "Cơm nhà làm",
     "price": 45000,
     "priceUnit": "phần",
-    "rating": 4.6,
-    "reviewCount": 8,
+    "rating": 4.8,
+    "reviewCount": 5,
     "sold": 22,
     "promoted": false,
     "acceptsXu": false,
@@ -3703,7 +3835,15 @@
     ],
     "quickOptions": [
       "Ít ngọt"
-    ]
+    ],
+    "promo": {
+      "kind": "percent",
+      "value": 10,
+      "from": "00:00",
+      "to": "23:59",
+      "days": [],
+      "active": true
+    }
   },
   {
     "_id": "729fae923d5a4fd12aabfe22",
@@ -3726,8 +3866,8 @@
     "category": "Món nước",
     "price": 25000,
     "priceUnit": "tô",
-    "rating": 4.5,
-    "reviewCount": 4,
+    "rating": 4.7,
+    "reviewCount": 3,
     "sold": 9,
     "promoted": false,
     "acceptsXu": false,
@@ -3883,9 +4023,9 @@
     "category": "Đồ bếp",
     "price": 180000,
     "priceUnit": "bộ",
-    "rating": 5,
-    "reviewCount": 1,
-    "sold": 4,
+    "rating": 4.8,
+    "reviewCount": 4,
+    "sold": 28,
     "promoted": false,
     "acceptsXu": true,
     "priceType": "fixed",
@@ -3970,9 +4110,9 @@
     "category": "Nấu ăn",
     "price": 1200000,
     "priceUnit": "buổi",
-    "rating": 4.9,
-    "reviewCount": 3,
-    "sold": 3,
+    "rating": 5,
+    "reviewCount": 4,
+    "sold": 16,
     "promoted": false,
     "acceptsXu": false,
     "priceType": "from",
@@ -4111,8 +4251,8 @@
     "price": 600000,
     "priceUnit": "tuần",
     "rating": 4.7,
-    "reviewCount": 2,
-    "sold": 2,
+    "reviewCount": 3,
+    "sold": 15,
     "promoted": false,
     "acceptsXu": true,
     "priceType": "fixed",

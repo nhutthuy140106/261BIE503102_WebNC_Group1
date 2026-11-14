@@ -51,15 +51,16 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
    * Riêng Khám phá hiện mọi bài của khu, kể cả bài đã có ở các khối trên.
    */
   protected readonly clock = inject(ClockService);
-  /** Bài đang trong Giờ vàng (kết thúc sớm nhất xếp trước), tối đa 4 */
+  /** Bài đang trong Giờ vàng (kết thúc sớm nhất xếp trước), tối đa 8 (hai hàng) */
   protected readonly dealsNow = computed(() => {
     const now = this.clock.now();
+    const shown = new Set(this.featured().map((p) => p._id)); // bài đã ở "Nổi bật" thì không lặp lại ở đây
     return this.posts()
-      .filter((p) => p.kind !== 'job' && !p.closed)
+      .filter((p) => p.kind !== 'job' && !p.closed && !shown.has(p._id))
       .map((p) => ({ p, d: dealAt(p, now) }))
       .filter((x): x is { p: Post; d: NonNullable<typeof x.d> } => x.d !== null)
       .sort((a, b) => a.d.endsAt - b.d.endsAt)
-      .slice(0, 4);
+      .slice(0, 8);
   });
   protected readonly dealsLeft = computed(() => {
     const first = this.dealsNow()[0];
@@ -74,7 +75,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       .filter((x): x is { p: Post; u: NonNullable<typeof x.u> } => x.u !== null)
       .sort((a, b) => a.u.inMin - b.u.inMin)[0] ?? null;
   });
-  protected readonly featured = computed(() => this.posts().filter((p) => p.promoted).slice(0, 4));
+  protected readonly featured = computed(() => this.posts().filter((p) => p.promoted).slice(0, 8));
   protected readonly forYouShown = computed(() => {
     const taken = new Set(this.featured().map((p) => p._id));
     return this.forYou().filter((p) => !taken.has(p._id) && inArea(p, this.area.current())).slice(0, 4);
