@@ -15,12 +15,13 @@
   background-attachment: fixed;
   position: relative;
 }
-/* nền: lưới ô kẻ mờ (giống trang đăng nhập) + một vệt sáng chéo nhẹ; chỉ để trang trí, không bắt chuột */
-:host::before { content: ''; position: fixed; left: 264px; right: 0; top: 0; bottom: 0; pointer-events: none; z-index: 0;
-  background-image: linear-gradient(rgba(255, 255, 255, .075) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .075) 1px, transparent 1px); background-size: 56px 56px;
-  -webkit-mask-image: radial-gradient(95% 85% at 60% 10%, #000 0%, rgba(0, 0, 0, .65) 50%, rgba(0, 0, 0, .2) 100%); mask-image: radial-gradient(95% 85% at 60% 10%, #000 0%, rgba(0, 0, 0, .65) 50%, rgba(0, 0, 0, .2) 100%); }
-:host::after { content: ''; position: fixed; right: -140px; top: 70px; width: 820px; height: 150px; transform: rotate(-24deg); pointer-events: none; z-index: 0; filter: blur(34px);
-  background: linear-gradient(90deg, transparent, rgba(255, 170, 120, .26) 40%, rgba(255, 210, 180, .36) 55%, transparent); }
+/* nền: một vệt sáng chéo; ô caro chỉ nằm TRONG vệt sáng và mờ dần ra mép (không phủ cả trang) */
+:host::before { content: ''; position: fixed; right: -160px; top: 30px; width: 980px; height: 260px; transform: rotate(-22deg); pointer-events: none; z-index: 0;
+  background-image: linear-gradient(rgba(255, 205, 170, .34) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 205, 170, .34) 1px, transparent 1px), linear-gradient(90deg, transparent, rgba(255, 170, 120, .1) 50%, transparent);
+  background-size: 34px 34px, 34px 34px, 100% 100%; filter: blur(.7px);
+  -webkit-mask-image: radial-gradient(closest-side, #000 22%, rgba(0, 0, 0, .55) 55%, transparent 100%); mask-image: radial-gradient(closest-side, #000 22%, rgba(0, 0, 0, .55) 55%, transparent 100%); }
+:host::after { content: ''; position: fixed; right: -140px; top: 70px; width: 860px; height: 170px; transform: rotate(-22deg); pointer-events: none; z-index: 0; filter: blur(40px);
+  background: linear-gradient(90deg, transparent, rgba(255, 170, 120, .2) 40%, rgba(255, 210, 180, .3) 55%, transparent); }
 .adm { position: relative; z-index: 1; display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; }
 .side { position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; padding: 20px 14px; background: rgba(8, 13, 24, .82); backdrop-filter: blur(14px); border-right: 1px solid var(--a-line); color: var(--a-side-ink); }
 .brand { display: flex; align-items: center; gap: 10px; padding: 4px 10px 18px; color: #fff; }
@@ -47,7 +48,6 @@
 .need p { margin: 0 0 14px; color: var(--a-mute); }
 .need a { display: inline-block; padding: 10px 20px; border-radius: 12px; background: linear-gradient(180deg, var(--a-accent2), var(--a-accent)); color: #fff; font-weight: 700; }
 @media (max-width: 900px) {
-  :host::before { left: 0; }
   .adm { grid-template-columns: 1fr; }
   .side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px; padding: 10px; }
   .brand { padding: 0 8px; }
