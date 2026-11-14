@@ -154,6 +154,14 @@ test('đơn → đánh giá → số liệu thật: shop, thống kê, bài (đ�
   const rv = await api('POST', '/reviews', { token: thuy, body: { targetType: 'order', targetId: o._id, rating: 5, comment: 'Phở ngon' } });
   assert.equal(rv.status, 201, JSON.stringify(rv.body));
 
+  // điểm sao / số đánh giá / số đã bán lưu sẵn trên bài và hiện ở mọi API trả bài (người mua thấy ở thẻ bài, trang chi tiết, danh sách)
+  const pub = (await api('GET', `/posts/${post._id}`, { token: lan })).body.data; // chủ bài xem: không tính lượt xem
+  assert.equal(pub.rating, 5); assert.equal(pub.reviewCount, 1); assert.equal(pub.sold, 2);
+  const inList = (await api('GET', '/posts?limit=100')).body.data.find((p) => p._id === post._id);
+  assert.equal(inList.rating, 5); assert.equal(inList.reviewCount, 1);
+  const other = (await api('GET', '/posts?limit=100')).body.data.find((p) => p._id !== post._id);
+  assert.equal(other.reviewCount, 0); assert.equal(other.rating, undefined, 'bài chưa có đánh giá thì không có điểm');
+
   const mine = (await api('GET', '/seller/posts', { token: lan })).body.data.find((p) => p._id === post._id);
   assert.equal(mine.views, viewsBefore + 1, 'chủ bài tự xem không tính, người khác xem tính 1');
   assert.equal(mine.sold, 2, 'đã bán = tổng số lượng các đơn đã hoàn thành');

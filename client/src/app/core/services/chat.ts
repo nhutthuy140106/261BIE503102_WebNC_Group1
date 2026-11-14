@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map, of } from 'rxjs';
+import { Observable, map, of, switchMap } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { Conversation, Message } from '../models/social';
 import { conversationFromApi, messageFromApi } from '../utils/api-mappers';
 import { ApiService } from './api';
 import { AuthService } from './auth';
+import { ChatMedia, UploadService } from './upload';
 import { MockDb } from './mock-db';
 
 const COLLECTION = 'conversations';
@@ -16,6 +17,7 @@ export class ChatService {
   private readonly api = inject(ApiService);
   private readonly db = inject(MockDb);
   private readonly auth = inject(AuthService);
+  private readonly uploads = inject(UploadService);
 
   list(): Observable<Conversation[]> {
     return useMock('chat') ? this.db.list<Conversation>(COLLECTION) : this.api.get<unknown[]>('/conversations').pipe(map((l) => l.map(conversationFromApi)));
@@ -33,9 +35,14 @@ export class ChatService {
   }
 
   send(conversationId: string, text: string, media?: Message['media']): Observable<Message> {
-    if (!useMock('chat')) return this.api.post<unknown>(`/conversations/${conversationId}/messages`, { text }).pipe(
-      map((m) => messageFromApi(m, this.auth.currentUser()?._id ?? '')),
-    );
+    if (!useMock('chat')) {
+      // có tệp đính kèm: tải lên server trước, rồi gửi tin kèm địa chỉ thật
+      const uploaded: Observable<ChatMedia | undefined> = media ? this.uploads.uploadMedia(media) : of(undefined);
+      return uploaded.pipe(
+        switchMap((m) => this.api.post<unknown>(`/conversations/${conversationId}/messages`, { text, ...(m ? { media: { kind: m.kind, url: m.url, name: m.name, size: m.size, sec: m.sec } } : {}) })),
+        map((m) => messageFromApi(m, this.auth.currentUser()?._id ?? '')),
+      );
+    }
     return this.db.list<Conversation>(COLLECTION).pipe(
       map((rows) => {
         const t = text.trim();

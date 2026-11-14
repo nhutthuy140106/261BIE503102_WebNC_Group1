@@ -92,6 +92,8 @@ export function postFromApi(p: Raw): Post {
     highlights: arr(p.highlights),
     info: arr(p.info),
     promoted: p.promoted || undefined,
+    rating: typeof p.rating === 'number' ? p.rating : undefined,
+    reviewCount: typeof p.reviewCount === 'number' ? p.reviewCount : undefined,
     sold: typeof p.sold === 'number' ? p.sold : undefined,
     views: typeof p.views === 'number' ? p.views : undefined,
     saves: typeof p.saves === 'number' ? p.saves : undefined,
@@ -213,7 +215,7 @@ export function conversationFromApi(c: Raw): Conversation {
 const CONTEXT_LABEL: Record<string, string> = { order: 'Đơn hàng', offer: 'Việc đã nhận', post: 'Bài đăng', job: 'Việc làm' };
 
 export function messageFromApi(m: Raw, myId: string): Message {
-  return { _id: m._id, mine: m.sender === myId || m.sender?._id === myId, text: m.text, createdAt: m.createdAt };
+  return { _id: m._id, mine: m.sender === myId || m.sender?._id === myId, text: m.text ?? '', ...(m.media ? { media: { kind: m.media.kind, url: m.media.url, name: m.media.name, size: m.media.size, sec: m.media.sec } } : {}), createdAt: m.createdAt };
 }
 
 /** Link thông báo của BE `{type, id}` → đường dẫn FE. */

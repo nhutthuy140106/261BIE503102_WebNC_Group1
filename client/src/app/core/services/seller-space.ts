@@ -22,6 +22,7 @@ import { MockDb } from './mock-db';
 import { NotificationService } from './notification';
 import { QuestionService } from './question';
 import { SellerService } from './seller';
+import { ChatMedia, UploadService } from './upload';
 import { XuService } from './xu';
 
 /** Đơn kèm các giá trị tính sẵn để hiển thị */
@@ -154,6 +155,7 @@ export class SellerSpaceService {
   private readonly http = inject(HttpClient);
   private readonly xuSvc = inject(XuService);
   private readonly buyerApi = inject(SellerService);
+  private readonly uploads = inject(UploadService);
   private readonly auth = inject(AuthService);
   private readonly notifications = inject(NotificationService);
   private readonly offerStore = inject(JobOfferService);
@@ -576,6 +578,7 @@ export class SellerSpaceService {
     if (patch.name !== undefined) body['name'] = patch.name;
     if (patch.kind !== undefined) body['kind'] = patch.kind;
     if (patch.bio !== undefined) body['bio'] = patch.bio;
+    if (patch.avatar !== undefined) body['avatar'] = patch.avatar;
     if (patch.cover !== undefined) body['cover'] = patch.cover;
     if (patch.at !== undefined) body['address'] = patch.at;
     if (patch.reply !== undefined) body['replyTime'] = patch.reply;
@@ -971,10 +974,7 @@ export class SellerSpaceService {
 
   /** Gửi tin (bản mẫu: chỉ lưu trong trình duyệt, không tự đổi trạng thái đơn / việc) */
   sendMessage(id: string, text: string, media?: SellerMsg['media']): void {
-    if (this.live) {
-      if (!text.trim()) return void this.notifications.push('Chế độ thật hiện chỉ gửi được chữ, chưa gửi ảnh / video / tệp.', '/seller/messenger');
-      media = undefined;
-    }
+    if (this.live && !text.trim() && !media) return; // tin rỗng
     this.patch((s) => {
       const c = s.chats.find((x) => x.id === id);
       if (!c) return;
@@ -988,7 +988,9 @@ export class SellerSpaceService {
     if (!chat) return;
     // hội thoại tạm: tạo ở server (kèm đơn / việc đang nói tới) rồi mới gửi
     const ready: Observable<string> = id.startsWith('tmp-') ? (chat.userId ? this.buyerApi.openConversation(chat.userId, chat.ctx) : throwError(() => new AppError('Chưa biết tài khoản người nhận.', 400, 'BAD_REQUEST'))) : of(id);
-    this.saveRemote(ready.pipe(switchMap((cid) => this.buyerApi.sendChat(cid, text.trim())), tap(() => this.syncServer().subscribe())), 'tin nhắn');
+    // có tệp đính kèm (ảnh, video, ghi âm, tệp): tải lên server trước, rồi gửi tin kèm địa chỉ thật
+    const sent: Observable<ChatMedia | undefined> = media ? this.uploads.uploadMedia(media) : of(undefined);
+    this.saveRemote(ready.pipe(switchMap((cid) => sent.pipe(switchMap((m) => this.buyerApi.sendChat(cid, text.trim(), m)))), tap(() => this.syncServer().subscribe())), media ? 'tệp đính kèm' : 'tin nhắn');
   }
 
   // ---------------- lịch ----------------

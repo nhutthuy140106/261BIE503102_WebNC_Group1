@@ -186,7 +186,7 @@ export function sellerChatFromApi(c: Raw, msgs: Raw[], myId: string, jobOfOffer:
   const messages: SellerMsg[] = [...msgs].reverse().map((m) => {
     const d = new Date(m.createdAt);
     const mine = m.sender === myId || m.sender?._id === myId;
-    return { from: mine ? 'me' : 'them', text: m.text, time: `${pad(d.getHours())}:${pad(d.getMinutes())}`, date: dayKey(d) };
+    return { from: mine ? 'me' : 'them', text: m.text ?? '', time: `${pad(d.getHours())}:${pad(d.getMinutes())}`, date: dayKey(d), ...(m.media ? { media: { kind: m.media.kind, url: m.media.url, name: m.media.name, size: m.media.size, sec: m.media.sec } } : {}) };
   });
   return { id: c._id, name, avatar: c.with?.avatar || undefined, unread: c.unread ?? 0, userId: c.with?._id, ctx, messages };
 }

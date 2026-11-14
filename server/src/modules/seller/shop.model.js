@@ -10,6 +10,7 @@ const shopSchema = new Schema({
   kind: { type: String, trim: true, maxlength: 40, default: '' },        // "Bếp nhà làm", "Giặt sấy"…
   address: { type: String, trim: true, maxlength: 80, default: '' },     // "Block B, tầng 5"
   bio: { type: String, trim: true, maxlength: 600, default: '' },
+  avatar: { type: String, default: null },                              // ảnh đại diện riêng của gian hàng; trống = dùng ảnh tài khoản
   cover: { type: String, default: null },
   replyTime: { type: String, trim: true, maxlength: 60, default: '' },   // chữ hiển thị: "Thường trả lời trong 10 phút"
   // 7 ngày, [0] = Thứ Hai … [6] = Chủ nhật

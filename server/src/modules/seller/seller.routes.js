@@ -111,7 +111,9 @@ const shopBody = z.object({
   kind: z.string().trim().max(40).optional(),
   address: z.string().trim().max(80).optional(),
   bio: z.string().trim().max(600).optional(),
-  cover: z.string().nullable().optional(),
+  // ảnh phải do server cấp (POST /uploads) hoặc link https — không nhận chuỗi ảnh nhúng sẵn (base64) làm phình dữ liệu
+  avatar: z.string().regex(/^(\/images\/uploads\/[\w./-]+|https:\/\/\S+)$/, 'Ảnh đại diện phải tải lên qua /uploads').max(500).nullable().optional(),
+  cover: z.string().regex(/^(\/images\/uploads\/[\w./-]+|https:\/\/\S+)$/, 'Ảnh bìa phải tải lên qua /uploads').max(500).nullable().optional(),
   replyTime: z.string().trim().max(60).optional(),
 });
 const hoursBody = z.object({ hours: z.array(z.object({ on: z.boolean(), from: hhmm, to: hhmm })).length(7, 'Cần đủ giờ của 7 ngày') });

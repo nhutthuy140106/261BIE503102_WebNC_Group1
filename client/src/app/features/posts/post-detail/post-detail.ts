@@ -13,6 +13,9 @@ import { AuthPromptService } from '../../../core/services/auth-prompt';
 import { DrawerService } from '../../../core/services/drawer';
 import { OrderService } from '../../../core/services/order';
 import { PostService } from '../../../core/services/post';
+import { ReviewService } from '../../../core/services/review';
+import { SampleReview } from '../../../core/models/post-template';
+import { useMock } from '../../../core/config/api.config';
 import { RecommendService } from '../../../core/services/recommend';
 import { SavedService } from '../../../core/services/saved';
 import { NotificationService } from '../../../core/services/notification';
@@ -51,6 +54,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   private readonly orderService = inject(OrderService);
   private readonly addressService = inject(AddressService);
   private readonly recommend = inject(RecommendService);
+  private readonly reviewService = inject(ReviewService);
   private readonly prompt = inject(AuthPromptService);
   private readonly toast = inject(ToastService);
   private readonly notifications = inject(NotificationService);
@@ -114,7 +118,9 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected readonly tried = signal(false);
 
   // ----- đánh giá (điểm và số lượt tính từ dữ liệu) -----
-  protected readonly reviews = computed(() => this.view()?.reviews ?? []);
+  /** Chế độ thật: đánh giá thật của bài (null = đang tải); chế độ mẫu dùng đánh giá mẫu nằm sẵn trong bài */
+  private readonly liveReviews = signal<SampleReview[] | null>(null);
+  protected readonly reviews = computed(() => (useMock('review') ? this.view()?.reviews ?? [] : this.liveReviews() ?? []));
   protected readonly rate = computed(() => {
     const r = this.reviews();
     return r.length ? (r.reduce((s, x) => s + x[4], 0) / r.length).toFixed(1).replace('.', ',') : 'Mới';
@@ -263,6 +269,8 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         next: (r) => {
           const p = r?.post ?? null;
           this.post.set(p);
+          this.liveReviews.set(null);
+          if (p && !useMock('review')) this.reviewService.forPost(p._id).subscribe({ next: (rows) => this.liveReviews.set(rows), error: () => this.liveReviews.set([]) });
           this.addresses.set(r?.addresses ?? []);
           this.similar.set([]);
           this.checkout.set(false);

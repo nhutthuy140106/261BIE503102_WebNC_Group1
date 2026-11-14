@@ -14,7 +14,19 @@ const openSchema = z.object({
   withUser: oid,
   context: z.object({ type: z.enum(['order', 'offer', 'post', 'job']), id: oid }).optional(),
 });
-const sendSchema = z.object({ text: z.string({ error: 'Tin nhắn không được để trống' }).trim().min(1, 'Tin nhắn không được để trống').max(2000, 'Tin nhắn tối đa 2000 ký tự') });
+// Địa chỉ tệp chỉ nhận loại do chính server cấp (POST /uploads/media): không cho gắn link ngoài vào tin nhắn
+const mediaSchema = z.object({
+  kind: z.enum(['image', 'video', 'audio', 'file']),
+  url: z.string().regex(/^\/images\/uploads\/chat\/[\w.-]+$/, 'Tệp đính kèm phải tải lên qua /uploads/media'),
+  name: z.string().trim().max(120).optional(),
+  size: z.number().int().min(0).max(30 * 1024 * 1024).optional(),
+  sec: z.number().min(0).max(3600).optional(),
+});
+const sendSchema = z.object({
+  text: z.string().trim().max(2000, 'Tin nhắn tối đa 2000 ký tự').optional().default(''),
+  media: mediaSchema.optional(),
+}).refine((v) => v.text.length > 0 || v.media, { message: 'Tin nhắn không được để trống', path: ['text'] });
+const MEDIA_LABEL = { image: 'Đã gửi một ảnh', video: 'Đã gửi một video', audio: 'Đã gửi một tin nhắn thoại', file: 'Đã gửi một tệp' };
 const pageSchema = z.object({ page: z.coerce.number().int().min(1).optional(), limit: z.coerce.number().int().min(1).max(100).optional() });
 
 // 403 nếu không thuộc hội thoại (nhắn tin KHÔNG đổi trạng thái đơn)
@@ -130,11 +142,12 @@ router.get('/:id/messages', ids('id'), query(pageSchema), asyncHandler(async (re
 
 router.post('/:id/messages', ids('id'), body(sendSchema), asyncHandler(async (req, res) => {
   const c = await member(req.user, req.params.id);
-  const msg = await Message.create({ conversation: c._id, sender: req.user._id, text: req.body.text, readBy: [req.user._id] });
-  c.lastMessage = { text: msg.text, at: msg.createdAt, sender: req.user._id };
+  const msg = await Message.create({ conversation: c._id, sender: req.user._id, text: req.body.text, media: req.body.media, readBy: [req.user._id] });
+  const preview = msg.text || MEDIA_LABEL[msg.media.kind];
+  c.lastMessage = { text: preview, at: msg.createdAt, sender: req.user._id };
   await c.save();
   const other = c.participants.find((p) => String(p) !== String(req.user._id));
-  await notify(other, { type: 'message_new', title: `${req.user.name} nhắn cho bạn`, body: msg.text.slice(0, 80), link: c.context && c.context.type ? c.context : undefined });
+  await notify(other, { type: 'message_new', title: `${req.user.name} nhắn cho bạn`, body: preview.slice(0, 80), link: c.context && c.context.type ? c.context : undefined });
   res.status(201).json({ data: msg });
 }));
 

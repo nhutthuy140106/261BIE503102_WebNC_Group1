@@ -1,12 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { Observable, catchError, from, map, of, switchMap, throwError } from 'rxjs';
 import { API_BASE, useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { toAppError } from './api';
 
 export const UPLOAD_MAX_BYTES = 2 * 1024 * 1024;
 export const UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+
+/** Tệp đính kèm tin nhắn (cùng dạng Message.media / SellerMsg.media) */
+export interface ChatMedia { kind: 'image' | 'video' | 'audio' | 'file'; url: string; name?: string; size?: number; sec?: number }
 
 /** Kiểm tra phía client để báo lỗi sớm; server (D2) vẫn kiểm tra lại loại + dung lượng. */
 export function validateImage(file: Pick<File, 'type' | 'size'>): string | null {
@@ -25,9 +28,27 @@ export class UploadService {
     if (problem) return throwError(() => new AppError(problem, 422, 'VALIDATION_ERROR', [{ field: 'file', message: problem }]));
     if (useMock('upload')) return of(URL.createObjectURL(file));
     const form = new FormData();
-    form.append('file', file);
-    return this.http.post<{ data: { url: string } }>(`${API_BASE}/uploads`, form).pipe(
-      map((r) => r.data.url),
+    form.append('images', file); // server nhận field `images`, trả mảng [{ url }]
+    return this.http.post<{ data: { url: string }[] }>(`${API_BASE}/uploads`, form).pipe(
+      map((r) => r.data[0].url),
+      catchError(toAppError),
+    );
+  }
+
+  /**
+   * Tệp đính kèm tin nhắn (ảnh, video, ghi âm, PDF / Office). Địa chỉ đã là của server thì giữ nguyên;
+   * địa chỉ tạm của trình duyệt (blob: / data:) thì tải nội dung lên server rồi đổi sang địa chỉ thật.
+   */
+  uploadMedia(media: ChatMedia): Observable<ChatMedia> {
+    if (useMock('upload') || /^(\/images\/|https?:)/.test(media.url)) return of(media);
+    return from(fetch(media.url).then((r) => r.blob())).pipe(
+      switchMap((blob) => {
+        const form = new FormData();
+        if (media.kind === 'audio') form.append('hint', 'audio');
+        form.append('file', blob, media.name || `${media.kind}-${Date.now()}`);
+        return this.http.post<{ data: { kind: ChatMedia['kind']; url: string; name?: string; size?: number } }>(`${API_BASE}/uploads/media`, form);
+      }),
+      map((r) => ({ ...media, kind: media.kind === 'audio' ? 'audio' : r.data.kind, url: r.data.url, name: r.data.name ?? media.name, size: r.data.size ?? media.size })),
       catchError(toAppError),
     );
   }

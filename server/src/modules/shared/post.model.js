@@ -101,6 +101,10 @@ const postSchema = new Schema({
   condition: sub({ level: String, note: String }),    // đồ dùng: độ mới + mô tả lỗi
   highlights: [{ icon: { type: String, enum: ['clock', 'bolt', 'pin', 'check', 'receipt'] }, label: String, value: String, _id: false }], // 3 ô đầu bài
   info: [{ label: String, value: String, _id: false }],                    // thông tin người bán điền, hiện dưới Mô tả
+  // Số liệu do HỆ THỐNG cập nhật (shared/post-stats.js) mỗi khi có đánh giá mới hoặc đơn hoàn thành; người bán không tự đặt được
+  rating: { type: Number, min: 0, max: 5 },           // điểm sao trung bình; trống = chưa có đánh giá
+  reviewCount: { type: Number, default: 0, min: 0 },
+  sold: { type: Number, default: 0, min: 0 },         // tổng số lượng ở các đơn đã hoàn thành
   promoted: { type: Boolean, default: false },        // do HỆ THỐNG gán khi trả Xu, người bán không nhập
   spinPromo: { type: Boolean, default: false },
   status: { type: String, enum: ['draft', 'open', 'soldout', 'closed', 'hidden'], default: 'open', index: true },

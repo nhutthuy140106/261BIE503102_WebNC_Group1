@@ -5,6 +5,8 @@ import { AppError } from '../models/api';
 import { Review, ReviewSummary } from '../models/social';
 import { ApiService } from './api';
 import { AuthService } from './auth';
+import { SampleReview } from '../models/post-template';
+import { reviewPostTitle, sampleReviewFromApi } from '../utils/review-mappers';
 import { MockDb } from './mock-db';
 
 const COLLECTION = 'reviews';
@@ -32,6 +34,18 @@ export class ReviewService {
           rows.filter((r) => (!filter.targetId || r.targetId === filter.targetId) && (!filter.rating || r.rating === filter.rating)),
         ),
       ),
+    );
+  }
+
+  /** Chế độ thật: đánh giá của một bài, dạng dòng đánh giá trên trang bài (mới nhất trước). Chế độ mẫu không dùng (đánh giá mẫu nằm sẵn trong bài). */
+  forPost(postId: string): Observable<SampleReview[]> {
+    return this.api.get<{ items: unknown[] }>('/reviews', { postId, limit: 100 }).pipe(map((d) => d.items.map((r) => sampleReviewFromApi(r))));
+  }
+
+  /** Chế độ thật: đánh giá khách dành cho một người bán, kèm tên bài đã mua (cho dòng "Đã đặt: …") */
+  forSeller(userId: string): Observable<{ rows: SampleReview[]; bought: string[] }> {
+    return this.api.get<{ items: unknown[] }>('/reviews', { userId, limit: 100 }).pipe(
+      map((d) => ({ rows: d.items.map((r) => sampleReviewFromApi(r)), bought: d.items.map((r) => reviewPostTitle(r)) })),
     );
   }
 

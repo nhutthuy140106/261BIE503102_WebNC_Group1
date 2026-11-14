@@ -60,6 +60,9 @@ test('bài của tôi: đăng, sửa, đóng/mở, đổi giá, xóa; không đ�
   assert.equal(created.status, 201, JSON.stringify(created.body));
   const p = created.body.data;
   assert.equal(p.promoted, false, 'không tự bật quảng bá');
+  const faked = (await api('POST', '/seller/posts', { token: t, body: newPost({ title: 'Bài thử gian lận điểm', rating: 5, reviewCount: 99, sold: 999 }) })).body.data;
+  assert.ok(!faked.rating && faked.reviewCount === 0 && faked.sold === 0, 'không tự đặt điểm sao, số đánh giá, số đã bán');
+  await api('DELETE', `/seller/posts/${faked._id}`, { token: t });
   assert.equal(p.hiddenReason, '', 'không tự đặt lý do gỡ');
   assert.equal(p.status, 'open');
 

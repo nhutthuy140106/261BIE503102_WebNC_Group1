@@ -11,13 +11,13 @@
 } @else {
   <!-- cùng bố cục với "Gian hàng của tôi" ở khu Bán (seller-shop); gian hàng của chính mình lấy thêm ảnh bìa, giới thiệu… từ hồ sơ bên Bán -->
   <div class="shophead">
-    <div class="sh-top" [class.cover]="own()?.cover" [style.background-image]="own()?.cover ? 'url(' + own()!.cover + ')' : null">
-      <div class="avw"><app-avatar [src]="own()?.avatar || posts()[0].sellerAvatar" [name]="name()" [size]="96" /></div>
+    <div class="sh-top" [class.cover]="profile()?.cover" [style.background-image]="profile()?.cover ? 'url(' + profile()!.cover + ')' : null">
+      <div class="avw"><app-avatar [src]="profile()?.avatar || posts()[0].sellerAvatar" [name]="name()" [size]="96" /></div>
       <div class="nm">
         <h1>{{ name() }}</h1>
         <p>
-          <span><svg class="i"><use href="#pin" /></svg>{{ own()?.at || block() }}@if (!own() && area()) { · {{ area() }} }</span>
-          @if (own(); as sh) {
+          <span><svg class="i"><use href="#pin" /></svg>{{ profile()?.at || block() }}@if (!profile() && area()) { · {{ area() }} }</span>
+          @if (profile(); as sh) {
             <span><svg class="i"><use href="#home" /></svg>{{ sh.since }}</span>
             <span><svg class="i"><use href="#chat" /></svg>{{ sh.reply }}</span>
           }
@@ -32,18 +32,18 @@
         }
       </div>
     </div>
-    <div class="sh-stats" [style.grid-template-columns]="'repeat(' + (own() ? 4 : 3) + ', 1fr)'">
+    <div class="sh-stats" [style.grid-template-columns]="'repeat(' + (profile() ? 4 : 3) + ', 1fr)'">
       <div>
-        @if (rating(); as r) { <b><svg class="i"><use href="#star" /></svg>{{ r.avg }}</b><span>{{ r.count }} đánh giá</span> }
+        @if (rating(); as r) { <b><svg class="i"><use href="#star" /></svg>{{ fmt(r.avg) }}</b><span>{{ r.count }} đánh giá</span> }
         @else { <b>—</b><span>Chưa có đánh giá</span> }
       </div>
       <div><b>{{ posts().length }}</b><span>bài đang đăng</span></div>
-      <div><b>{{ own()?.doneCount ?? done() }}</b><span>đơn / việc hoàn thành</span></div>
-      @if (own(); as sh) { <div><b>{{ sh.followers }}</b><span>người theo dõi</span></div> }
+      <div><b>{{ profile()?.doneCount ?? done() }}</b><span>đơn / việc hoàn thành</span></div>
+      @if (profile(); as sh) { <div><b>{{ sh.followers }}</b><span>người theo dõi</span></div> }
     </div>
   </div>
 
-  @if (own()?.bio; as bio) { <p class="bio">{{ bio }}</p> }
+  @if (profile()?.bio; as bio) { <p class="bio">{{ bio }}</p> }
 
   <div class="tabs">
     <button type="button" [class.on]="tab() === 'selling'" (click)="tab.set('selling')">Đang bán<small>{{ selling().length }}</small></button>

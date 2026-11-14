@@ -88,7 +88,10 @@ router.post('/orders/:id/advance', ids('id'), body(z.object({ to: z.string().opt
   o.history.push({ state: to, at: new Date() });
   if (to === 'cancelled' && o.cancelRequest) o.cancelRequest.status = 'accepted';
   await o.save();
-  if (to === 'done') await xu.award(o.buyer, 'order', o._id, { total: o.total });
+  if (to === 'done') {
+    await xu.award(o.buyer, 'order', o._id, { total: o.total });
+    await require('../shared/post-stats').refresh(o.post);
+  }
   if (to === 'cancelled' || to === 'declined') await xu.restoreVoucher(o.buyer, o.voucherCode);
   await notify(o.buyer, { type: 'order_state', title: `Đơn ${o.code}: ${to}`, link: { type: 'order', id: o._id } });
   res.json({ data: o });

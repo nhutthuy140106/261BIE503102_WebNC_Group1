@@ -12,7 +12,7 @@ const Saved = require('../buyer/saved/saved.model');
 const { notify } = require('../shared/notify');
 const ApiError = require('../../utils/ApiError');
 
-const SHOP_FIELDS = ['name', 'kind', 'address', 'bio', 'cover', 'replyTime'];
+const SHOP_FIELDS = ['name', 'kind', 'address', 'bio', 'avatar', 'cover', 'replyTime'];
 
 /** Có hồ sơ gian hàng rồi thì lấy, chưa có thì tạo bản mặc định theo tài khoản */
 async function ensureShop(user) {
@@ -41,7 +41,7 @@ async function presentShop(user, s) {
   return {
     shop: {
       name: s.name || user.name, kind: s.kind, at: s.address || `Block ${user.area || 'B'}`, since: `Hàng xóm từ ${new Date(user.createdAt).getFullYear()}`,
-      reply: s.replyTime, bio: s.bio, avatar: user.avatar || '', cover: s.cover || null, followers, shopViews: views[0] ? views[0].n : 0,
+      reply: s.replyTime, bio: s.bio, avatar: s.avatar || user.avatar || '', cover: s.cover || null, followers, shopViews: views[0] ? views[0].n : 0,
       rating: rating.count ? rating.avg.toFixed(1).replace('.', ',') : '—', reviewCount: rating.count, doneCount: doneOrders + doneHires,
     },
     hours: s.hours.map((h) => ({ on: h.on, from: h.from, to: h.to })),
@@ -135,6 +135,15 @@ async function countView(post, viewer) {
   await PostView.updateOne({ post: post._id, date: dayKey() }, { $setOnInsert: { seller: sellerId }, $inc: { count: 1 } }, { upsert: true });
 }
 
+/** Trang gian hàng công khai (không có thống kê riêng của chủ): hồ sơ + số liệu thật + người xem đã theo dõi chưa */
+async function publicShop(shopId, viewer) {
+  const user = await User.findById(shopId);
+  if (!user || user.status === 'locked') throw ApiError.notFound('Không tìm thấy gian hàng');
+  const full = await presentShop(user, await ensureShop(user));
+  const following = viewer ? !!(await ShopFollow.exists({ user: viewer._id, shop: user._id })) : false;
+  return { shop: full.shop, hours: full.hours, pause: full.pause, following };
+}
+
 async function follow(user, shopId) {
   if (String(user._id) === String(shopId)) throw ApiError.invalidState('Bạn không thể theo dõi gian hàng của chính mình');
   if (!(await User.exists({ _id: shopId }))) throw ApiError.notFound('Không tìm thấy gian hàng');
@@ -147,4 +156,4 @@ async function unfollow(user, shopId) {
   return { following: false, followers: await ShopFollow.countDocuments({ shop: shopId }) };
 }
 
-module.exports = { getShop, updateShop, setHours, setOff, setPause, stats, listReviews, replyReview, postMetrics, countView, follow, unfollow, ensureShop };
+module.exports = { publicShop, getShop, updateShop, setHours, setOff, setPause, stats, listReviews, replyReview, postMetrics, countView, follow, unfollow, ensureShop };

@@ -14,7 +14,7 @@ const { addActivity } = require('../src/seeds/activity-extra');
     const dir = path.join(__dirname, '..', 'backups');
     fs.mkdirSync(dir, { recursive: true });
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    for (const c of ['reviews', 'offers', 'jobs', 'notifications', 'counters', 'orders', 'shops', 'postviews', 'shopfollows', 'sellerverifications']) {
+    for (const c of ['reviews', 'offers', 'jobs', 'notifications', 'counters', 'orders', 'shops', 'postviews', 'shopfollows', 'sellerverifications', 'posts']) {
       const file = path.join(dir, `${c}-${stamp}.json`);
       fs.writeFileSync(file, JSON.stringify(await mongoose.connection.db.collection(c).find({}).toArray()));
       if (!fs.existsSync(file)) throw new Error('Sao lưu thất bại, dừng lại');

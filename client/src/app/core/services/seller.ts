@@ -304,8 +304,8 @@ export class SellerService {
     return this.api.post<{ _id: string }>('/conversations', { withUser, context: chatContextToApi(ctx) }).pipe(map((c) => c._id));
   }
 
-  sendChat(conversationId: string, text: string): Observable<unknown> {
-    return this.api.post<unknown>(`/conversations/${conversationId}/messages`, { text });
+  sendChat(conversationId: string, text: string, media?: { kind: string; url: string; name?: string; size?: number; sec?: number }): Observable<unknown> {
+    return this.api.post<unknown>(`/conversations/${conversationId}/messages`, { text, ...(media ? { media: { kind: media.kind, url: media.url, name: media.name, size: media.size, sec: media.sec } } : {}) });
   }
 
   readChat(conversationId: string): Observable<unknown> {

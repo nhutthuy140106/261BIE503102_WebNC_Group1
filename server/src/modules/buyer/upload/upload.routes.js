@@ -73,4 +73,65 @@ router.post(
   }),
 );
 
+
+// ---- Tệp đính kèm tin nhắn: ảnh, video, ghi âm, tệp (PDF / Word / Excel / PowerPoint). Nhận dạng bằng chữ ký đầu file, không tin đuôi hay mimetype client gửi ----
+const MEDIA_DIR = path.join(DIR, 'chat');
+const MB = 1024 * 1024;
+const MEDIA_LIMIT = { image: 5 * MB, video: 25 * MB, audio: 10 * MB, file: 10 * MB };
+const OFFICE_EXT = ['docx', 'xlsx', 'pptx', 'zip'];
+const LEGACY_EXT = ['doc', 'xls', 'ppt'];
+
+/** { kind, ext } hoặc null. `hint` chỉ dùng để chọn giữa video và âm thanh khi cả hai cùng là webm */
+function sniffMedia(buf, hint, originalExt) {
+  const img = sniff(buf);
+  if (img) return { kind: 'image', ext: img };
+  const head = (a, b) => buf.length >= b && buf.subarray(a, b);
+  const at = (off, str) => buf.length >= off + str.length && buf.subarray(off, off + str.length).toString('latin1') === str;
+  if (at(4, 'ftyp')) return at(8, 'M4A ') || at(8, 'M4B ') ? { kind: 'audio', ext: 'm4a' } : { kind: 'video', ext: 'mp4' };
+  if (buf.length > 4 && buf[0] === 0x1a && buf[1] === 0x45 && buf[2] === 0xdf && buf[3] === 0xa3) return { kind: hint === 'audio' ? 'audio' : 'video', ext: 'webm' };
+  if (at(0, 'OggS')) return { kind: 'audio', ext: 'ogg' };
+  if (at(0, 'ID3') || (buf.length > 2 && buf[0] === 0xff && (buf[1] & 0xe0) === 0xe0)) return { kind: 'audio', ext: 'mp3' };
+  if (at(0, 'RIFF') && at(8, 'WAVE')) return { kind: 'audio', ext: 'wav' };
+  if (at(0, '%PDF')) return { kind: 'file', ext: 'pdf' };
+  if (head(0, 4) && buf[0] === 0x50 && buf[1] === 0x4b && buf[2] === 0x03 && buf[3] === 0x04) return { kind: 'file', ext: OFFICE_EXT.includes(originalExt) ? originalExt : 'zip' };
+  if (buf.length > 8 && buf.subarray(0, 8).equals(Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]))) return { kind: 'file', ext: LEGACY_EXT.includes(originalExt) ? originalExt : 'doc' };
+  return null;
+}
+
+/**
+ * @openapi
+ * /uploads/media:
+ *   post:
+ *     tags: [Upload]
+ *     summary: Tải một tệp đính kèm tin nhắn (ảnh ≤ 5 MB, video ≤ 25 MB, ghi âm ≤ 10 MB, PDF / Office ≤ 10 MB)
+ *     description: multipart/form-data, field `file` (một tệp), tùy chọn field `hint` = audio khi tệp webm là ghi âm. Trả `{ kind, url, name, size }`; đưa nguyên `kind`, `url`, `name`, `size` vào `media` của POST /conversations/{id}/messages.
+ *     security: [{ cookieAuth: [] }]
+ *     responses:
+ *       201: { description: "{ data: { kind, url: '/images/uploads/chat/<tên>', name, size } }" }
+ *       413: { description: Tệp quá lớn }
+ *       422: { description: Không có tệp hoặc loại tệp không được nhận }
+ */
+router.post(
+  '/media',
+  auth,
+  fileUpload({
+    limits: { fileSize: 25 * MB, files: 1 },
+    abortOnLimit: true,
+    limitHandler: (req, res) => res.status(413).json({ error: { code: 'PAYLOAD_TOO_LARGE', message: 'Tệp quá lớn (tối đa 25 MB cho video, 10 MB cho tệp và ghi âm, 5 MB cho ảnh)' } }),
+    parseNested: false,
+  }),
+  asyncHandler(async (req, res) => {
+    const f = req.files && req.files.file && [].concat(req.files.file)[0];
+    if (!f) throw ApiError.validation('Chưa chọn tệp (field "file")');
+    const original = path.basename(f.name || 'tep').slice(0, 100);
+    const found = f.truncated ? null : sniffMedia(f.data, req.body && req.body.hint, path.extname(original).slice(1).toLowerCase());
+    if (!found) throw ApiError.validation(`"${original}" không phải loại tệp được nhận (ảnh, video, ghi âm, PDF hoặc tệp Office)`);
+    if (f.size > MEDIA_LIMIT[found.kind]) throw new ApiError(413, 'PAYLOAD_TOO_LARGE', `Tệp loại này tối đa ${MEDIA_LIMIT[found.kind] / MB} MB`);
+    await fs.promises.mkdir(MEDIA_DIR, { recursive: true });
+    const name = `${crypto.randomUUID()}.${found.ext}`; // không dùng tên client => không có path traversal
+    await fs.promises.writeFile(path.join(MEDIA_DIR, name), f.data);
+    res.status(201).json({ data: { kind: found.kind, url: `/images/uploads/chat/${name}`, name: original, size: f.size } });
+  }),
+);
+
 module.exports = router;

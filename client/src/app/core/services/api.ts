@@ -41,6 +41,11 @@ export class ApiService {
     return this.http.patch<{ data: T }>(API_BASE + path, body).pipe(map((r) => r.data), catchError(toAppError));
   }
 
+  /** DELETE mà server trả dữ liệu về (vd. bỏ theo dõi trả số người theo dõi mới) */
+  deleteData<T>(path: string): Observable<T> {
+    return this.http.delete<{ data: T }>(API_BASE + path).pipe(map((r) => r.data), catchError(toAppError));
+  }
+
   delete(path: string): Observable<void> {
     return this.http.delete<unknown>(API_BASE + path).pipe(map(() => void 0), catchError(toAppError));
   }

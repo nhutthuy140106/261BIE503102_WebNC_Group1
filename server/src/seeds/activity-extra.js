@@ -355,7 +355,9 @@ async function addActivity({ dryRun = false } = {}) {
     const done = d;
     const lastStep = 4 + (h % 6);
     const placed = new Date(done.getTime() - lastStep * 25 * 60000);
-    const reviewAt = new Date(Math.min(done.getTime() + (3 + (h % 40)) * HOUR, Date.now() - 5 * 60000));
+    // đánh giá đến sau khi đơn xong 3–42 giờ; nếu chưa tới lúc đó thì rải đều giữa lúc xong và bây giờ (không dồn cùng một phút)
+    const span = Math.max(0, Date.now() - 5 * 60000 - done.getTime());
+    const reviewAt = new Date(done.getTime() + Math.min((3 + (h % 40)) * HOUR, span * (0.3 + (h % 70) / 100)));
     return { h, placed, done, reviewAt, lastStep };
   };
   const historyOf = (fulfillment, t) => {
@@ -450,6 +452,8 @@ async function addActivity({ dryRun = false } = {}) {
       hours: Array.from({ length: 7 }, (_, i) => ({ on: lan ? i !== 6 : true, from: lan ? '09:00' : '08:00', to: lan ? '13:00' : '20:00' })),
     } }, { upsert: true });
   }
+
+  if (!dryRun) await require('../modules/shared/post-stats').refreshAll(); // điểm sao, số đánh giá, số đã bán lưu sẵn trên từng bài
 
   /* Xác minh người bán: ai đang có bài hoặc việc thì đã được duyệt sẵn (người mới đăng ký thì phải nộp hồ sơ và chờ admin) */
   const Verification = require('../modules/seller/verification.model');

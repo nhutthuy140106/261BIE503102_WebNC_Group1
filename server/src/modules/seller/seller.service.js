@@ -10,12 +10,13 @@ const xu = require('../buyer/xu/xu.service');
 const { notify } = require('../shared/notify');
 const verification = require('./verification.service');
 const shop = require('./shop.service');
+const postStats = require('../shared/post-stats');
 const ApiError = require('../../utils/ApiError');
 
 /* ---------------------------------------------------------------- Bài đăng (đồ ăn / đồ dùng / dịch vụ) */
 
 // Người bán KHÔNG được tự đặt các trường do hệ thống/quản trị quyết định
-const POST_PROTECTED = new Set(['_id', '__v', 'seller', 'promoted', 'spinPromo', 'hiddenReason', 'statusBeforeHidden', 'searchText', 'createdAt', 'updatedAt', 'slug', 'deal']);
+const POST_PROTECTED = new Set(['_id', '__v', 'seller', 'rating', 'reviewCount', 'sold', 'promoted', 'spinPromo', 'hiddenReason', 'statusBeforeHidden', 'searchText', 'createdAt', 'updatedAt', 'slug', 'deal']);
 // lấy tên trường cấp trên cùng (vd 'stock.mode' → 'stock') để trường lồng nhau cũng được nhận
 const POST_FIELDS = [...new Set(Object.keys(Post.schema.paths).map((p) => p.split('.')[0]))].filter((p) => !POST_PROTECTED.has(p));
 const SELLER_STATUS = ['draft', 'open', 'closed']; // soldout do hệ thống; hidden do admin
@@ -166,7 +167,10 @@ async function move(o, to) {
   o.state = to;
   o.history.push({ state: to, at: new Date() });
   await o.save();
-  if (to === 'done') await xu.award(o.buyer, 'order', o._id, { total: o.total });
+  if (to === 'done') {
+    await xu.award(o.buyer, 'order', o._id, { total: o.total });
+    await postStats.refresh(o.post);
+  }
   await notify(o.buyer, { type: 'order_state', title: `Đơn ${o.code} ${STATE_TEXT[to] || to}`, link: { type: 'order', id: o._id } });
 }
 
