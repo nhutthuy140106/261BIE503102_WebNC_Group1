@@ -92,6 +92,9 @@ export function sellerOrderFromApi(o: Raw, now = new Date()): SellerOrder {
     note: o.note ?? '',
     state: STATE[o.state] ?? 'waiting',
     cancelRequest: cancelPending ? o.cancelRequest.reason || 'Khách xin hủy đơn' : null,
+    cancelWhy: o.cancelInfo?.reason || undefined,
+    ...(o.state === 'declined' && o.cancelInfo?.reason ? { declineReason: o.cancelInfo.reason } : {}),
+    issue: o.issue?.st ? { st: o.issue.st, type: o.issue.type ?? '', text: o.issue.text ?? '', photos: o.issue.photos ?? 0, images: o.issue.images?.length ? o.issue.images : undefined, reply: o.issue.reply || undefined, amount: o.issue.amount, result: o.issue.result || undefined } : null,
     surcharge: o.surcharge?.amount ? { amount: o.surcharge.amount, reason: o.surcharge.reason ?? '', ok: o.surcharge.status === 'approved' } : null,
     answers: (o.answers ?? []).map((x: Raw) => [x.question, x.value] as [string, string]),
     history: history.map((h) => [STATE[h.state] ?? 'waiting', hm(h.at)] as [SellerOrderState, string]),
@@ -115,6 +118,7 @@ export function posterOfferFromApi(f: Raw): Offer {
     workerBlock: areaLabel(f.worker?.area),
     cancelReason: f.cancel?.reason || undefined,
     paid: !!f.paidAt,
+    posterRated: f.posterRating?.stars ? { stars: f.posterRating.stars, text: f.posterRating.text ?? '' } : undefined,
   };
 }
 

@@ -153,6 +153,23 @@ const otpLimiter = rateLimit({
  */
 /**
  * @openapi
+ * /auth/profile:
+ *   patch:
+ *     tags: [Auth]
+ *     summary: Sửa hồ sơ của mình (tên, ảnh đại diện, email, giới tính, ngày sinh, giới thiệu)
+ *     description: Trường nào gửi lên mới đổi; chuỗi rỗng = xóa. `avatar` chỉ nhận ảnh đã tải lên AntGo (/images/uploads/...) hoặc https.
+ *     security: [{ cookieAuth: [] }]
+ *     responses: { 200: { description: "{ data: User }" }, 422: { description: Dữ liệu chưa hợp lệ } }
+ * /auth/password/change:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Đổi mật khẩu khi đang đăng nhập (cần mật khẩu hiện tại)
+ *     security: [{ cookieAuth: [] }]
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object, required: [current, next], properties: { current: { type: string }, next: { type: string } } } } } }
+ *     responses: { 204: { description: Đã đổi }, 409: { description: Tài khoản Google chưa có mật khẩu }, 422: { description: Sai mật khẩu hiện tại / mật khẩu mới chưa đạt } }
+ */
+/**
+ * @openapi
  * /auth/otp/send:
  *   post:
  *     tags: [Auth]
@@ -195,5 +212,7 @@ router.post('/google', loginLimiter, body(v.google), c.google);
 router.post('/google/complete', loginLimiter, body(v.googleComplete), c.googleComplete);
 router.post('/logout', c.logout);
 router.get('/profile', auth, c.profile);
+router.patch('/profile', auth, body(v.profile), c.updateProfile);
+router.post('/password/change', auth, loginLimiter, body(v.passwordChange), c.changePassword);
 
 module.exports = router;

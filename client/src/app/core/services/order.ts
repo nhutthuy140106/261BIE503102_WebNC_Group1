@@ -166,12 +166,22 @@ export class OrderService {
     return this.api.post<unknown>(`/orders/${id}/reject-quote`, { reason }).pipe(map(orderFromApi));
   }
 
+  /** Chế độ thật: đổi thay đổi của màn hình chi tiết đơn thành đúng API của server */
+  private liveUpdate(id: string, patch: Partial<Order>): Observable<Order> {
+    // đánh giá đã lưu qua API đánh giá; ở đây chỉ ghi nhận lên màn hình
+    if (Object.keys(patch).every((k) => k === 'rated')) return this.getOrder(id).pipe(map((o) => ({ ...o, ...patch })));
+    const post = (path: string, body: object = {}) => this.api.post<unknown>(`/orders/${id}/${path}`, body).pipe(map(orderFromApi));
+    if (patch.status === 'cancelled' && patch.cancelBy === 'buyer') return post('cancel', { reason: patch.cancelWhy || 'Khách hủy đơn' });
+    if (patch.cancelRequested) return this.requestCancel(id, patch.cancelWhy || 'Khách xin hủy đơn');
+    if (patch.status === 'done') return post('confirm-received');
+    const iss = patch.issue;
+    if (iss?.st === 'open') return post('issue', { type: iss.type, text: iss.text || undefined, photos: iss.photos, ...(iss.images?.length ? { images: iss.images } : {}) });
+    if (iss?.st === 'closed') return post('issue/close', { result: iss.result });
+    return throwError(() => new AppError('Bước này chưa dùng được với máy chủ.', 501, 'NOT_IMPLEMENTED'));
+  }
+
   update(id: string, patch: Partial<Order>, line?: string): Observable<Order> {
-    if (!useMock('order')) {
-      // Đánh giá đơn đã lưu qua API đánh giá; ở đây chỉ ghi nhận trên màn hình (không còn báo lỗi nhầm)
-      if (Object.keys(patch).every((k) => k === 'rated')) return this.getOrder(id).pipe(map((o) => ({ ...o, ...patch })));
-      return throwError(() => new AppError('Bước này cần máy chủ hỗ trợ, chưa có API.', 501, 'NOT_IMPLEMENTED'));
-    }
+    if (!useMock('order')) return this.liveUpdate(id, patch);
     return this.placed().pipe(
       map((rows) => {
         const cur = rows.find((r) => r._id === id);

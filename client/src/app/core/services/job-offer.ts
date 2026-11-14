@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map, switchMap } from 'rxjs';
+import { Observable, map, switchMap, throwError } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { CreateOfferBody, Offer, OfferAction } from '../models/offer';
@@ -140,7 +140,12 @@ export class JobOfferService {
    * Máy chủ chưa có endpoint cho các bước này (docs/handoff.md).
    */
   patch(id: string, patch: Partial<Offer>, _line?: string): Observable<Offer> {
-    if (!useMock('offer')) throw new AppError('Bước này cần máy chủ hỗ trợ, chưa có API.', 501, 'NOT_IMPLEMENTED');
+    if (!useMock('offer')) {
+      // xác nhận đã nhận tiền công; đánh giá đã lưu qua API đánh giá (ở đây chỉ ghi lên màn hình)
+      if (patch.paid) return this.api.post<unknown>(`/offers/${id}/confirm-paid`).pipe(map(offerFromApi));
+      if (Object.keys(patch).every((k) => k === 'rated')) return this.get(id).pipe(map((o) => ({ ...o, ...patch })));
+      return throwError(() => new AppError('Bước này chưa dùng được với máy chủ.', 501, 'NOT_IMPLEMENTED'));
+    }
     return this.mutate(id, (o) => ({
       ...o,
       ...patch,
@@ -156,8 +161,7 @@ export class JobOfferService {
     if (!useMock('seller')) {
       // thật: chọn / từ chối / xác nhận hoàn thành do server xử lý (đổi trạng thái, loại các đề nghị khác, cộng Xu, báo người làm)
       if (a !== 'rate') return this.api.post<unknown>(`/seller/offers/${id}/${a}`).pipe(map(posterOfferFromApi));
-      // người đăng việc đánh giá người làm: server chưa có API này → chỉ ghi nhận trên màn hình
-      return this.all().pipe(map((rows) => ({ ...(rows.find((r) => r._id === id) as Offer), posterRated: { stars: data.stars ?? 5, text: data.text ?? '' } })));
+      return this.api.post<unknown>(`/seller/offers/${id}/rate`, { stars: data.stars ?? 5, text: data.text ?? '' }).pipe(map(posterOfferFromApi));
     }
     return this.all().pipe(
       map((rows) => {

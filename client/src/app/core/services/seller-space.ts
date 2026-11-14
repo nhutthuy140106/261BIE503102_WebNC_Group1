@@ -124,9 +124,11 @@ const LIVE_ORDER_ACT: Partial<Record<SellerOrderAct, string>> = {
   confirm: 'confirm', prepare: 'prepare', deliver: 'deliver', ready: 'ready', complete: 'complete', decline: 'decline', approveCancel: 'approveCancel', keepOrder: 'keepOrder', surcharge: 'surcharge',
   // đơn có báo giá (giặt sấy, sửa chữa): đã lấy đồ / đã kiểm tra → báo giá → trả đồ / hoàn thành (khách duyệt giá ở phía Mua)
   pickUp: 'pickUp', quote: 'quote', returned: 'returned',
+  // khách báo vấn đề sau khi nhận: làm lại / hoàn tiền / nhận lại hàng / từ chối
+  issueRedo: 'issueRedo', issueRefund: 'issueRefund', issueReturn: 'issueReturn', issueReject: 'issueReject',
 };
 /** pickUp / quote / approveQuote / rejectQuote / returned: luồng giặt sấy, sửa chữa (approveQuote, rejectQuote = khách trả lời giá, phía Mua bấm; bản mẫu giả lập) */
-export type SellerOrderAct = 'confirm' | 'decline' | 'prepare' | 'deliver' | 'ready' | 'complete' | 'approveCancel' | 'keepOrder' | 'surcharge' | 'pickUp' | 'quote' | 'approveQuote' | 'rejectQuote' | 'returned';
+export type SellerOrderAct = 'confirm' | 'decline' | 'prepare' | 'deliver' | 'ready' | 'complete' | 'approveCancel' | 'keepOrder' | 'surcharge' | 'pickUp' | 'quote' | 'approveQuote' | 'rejectQuote' | 'returned' | 'issueRedo' | 'issueRefund' | 'issueReturn' | 'issueReject';
 
 export const toMin = (t: string): number => {
   const m = /^(\d+):(\d+)/.exec(t || '');
@@ -802,7 +804,7 @@ export class SellerSpaceService {
   }
 
   /** Người bán đổi bước đơn. Trả về câu báo cho toast. */
-  orderAct(id: string, a: SellerOrderAct, data: { reason?: string; amount?: number; lines?: { name: string; qty: number; price: number }[] } = {}): string {
+  orderAct(id: string, a: SellerOrderAct, data: { reason?: string; reply?: string; amount?: number; lines?: { name: string; qty: number; price: number }[] } = {}): string {
     const o = this.orders().find((x) => x.id === id);
     if (!o) return '';
     if (this.live) {
@@ -864,6 +866,8 @@ export class SellerSpaceService {
       approveQuote: `${o.buyer.name} đã đồng ý giá — bắt đầu ${o.flow === 'repair' ? 'sửa' : 'giặt'}`,
       rejectQuote: `${o.buyer.name} không đồng ý giá — đơn hủy, chỉ thu phí kiểm tra`,
       returned: o.flow === 'repair' ? `${o.code} đã hoàn thành — ${o.buyer.name} được báo` : `Đã trả đồ ${o.code} — ${o.buyer.name} được báo`,
+      issueRedo: `Đã báo ${o.buyer.name}: bạn nhận làm lại`, issueRefund: `Đã báo ${o.buyer.name}: bạn hoàn ${money(data.amount ?? 0)}`,
+      issueReturn: `Đã báo ${o.buyer.name}: bạn nhận lại hàng`, issueReject: `Đã gửi ${o.buyer.name} lý do bạn chưa đồng ý`,
     }[a];
   }
 

@@ -43,6 +43,10 @@ const orderSchema = new Schema({
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     rejectReason: String,
   }, { _id: false }),
+  // ai hủy và vì sao (người mua hủy ngay / người bán từ chối hoặc hủy / hệ thống tự hủy khi quá hạn)
+  cancelInfo: { by: { type: String, enum: ['buyer', 'seller', 'system'] }, reason: String, late: Boolean, _id: false },
+  // báo vấn đề sau khi nhận (đồ ăn 2 giờ, đồ dùng / dịch vụ 24 giờ): người bán chọn làm lại / hoàn tiền / nhận lại hàng / từ chối
+  issue: new Schema({ st: { type: String, enum: ['open', 'redo', 'refund', 'returnAgreed', 'rejected', 'closed'] }, type: { type: String }, text: String, photos: Number, images: [String], reply: String, amount: Number, result: String, at: Date }, { _id: false }),
   oldTotal: Number,                                       // tổng tiền lúc đặt, giữ lại khi giá cuối được duyệt
   reviewed: { type: Boolean, default: false },
 }, { timestamps: true });

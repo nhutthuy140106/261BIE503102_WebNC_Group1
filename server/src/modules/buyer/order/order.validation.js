@@ -24,4 +24,13 @@ exports.list = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional(),
 });
 
-exports.reason = z.object({ reason: z.string({ error: 'Cần ghi lý do' }).trim().min(5, 'Lý do tối thiểu 5 ký tự').max(300) });
+exports.reason = z.object({ reason: z.string({ error: 'Cần ghi lý do' }).trim().min(2, 'Hãy ghi lý do').max(300) });
+
+exports.cancelNow = z.object({ reason: z.string().trim().min(2, 'Hãy ghi lý do').max(300) });
+exports.issue = z.object({
+  type: z.string().trim().min(2, 'Hãy chọn vấn đề').max(300),
+  text: z.string().trim().max(500).optional(),
+  photos: z.number().int().min(0).max(4).optional(),
+  images: z.array(z.string().regex(/^\/images\/uploads\/[\w./-]+$/, 'Ảnh phải tải lên qua AntGo')).max(4).optional(),
+});
+exports.issueClose = z.object({ result: z.string().trim().max(200).optional() });

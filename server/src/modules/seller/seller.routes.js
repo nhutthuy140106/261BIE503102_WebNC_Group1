@@ -16,7 +16,7 @@ const patchPost = z.object({ closed: z.boolean().optional(), price: z.number().i
   .refine((v) => Object.keys(v).length > 0, 'Cần ít nhất một trường để sửa');
 const patchJob = z.object({ closed: z.boolean() });
 const surcharge = z.object({
-  amount: z.number().int().min(1000).optional(), reason: z.string().trim().optional(),
+  amount: z.number().int().min(1000).optional(), reason: z.string().trim().optional(), reply: z.string().trim().max(300).optional(),
   // báo giá (đơn giặt sấy / sửa chữa): các dòng giá cuối
   lines: z.array(z.object({ name: z.string().trim().min(1).max(120), qty: z.number().positive().max(10000), price: z.number().min(0).max(100000000) })).max(30).optional(),
 });
@@ -85,6 +85,7 @@ router.post('/orders/:id/:action', ids('id'), body(surcharge), asyncHandler(asyn
  *   post: { tags: [Bán & Đăng việc], summary: Trả lời hỏi đáp của việc tôi đăng, security: [{ cookieAuth: [] }], responses: { 200: { description: OK } } }
  */
 router.get('/offers', asyncHandler(async (req, res) => res.json({ data: await service.listOffers(req.user) })));
+router.post('/offers/:id/rate', ids('id'), body(z.object({ stars: z.number().int().min(1).max(5), text: z.string().trim().max(500).optional() })), asyncHandler(async (req, res) => res.json({ data: await service.rateOffer(req.user, req.params.id, req.body) })));
 router.post('/offers/:id/:action', ids('id'), asyncHandler(async (req, res) => res.json({ data: await service.offerAction(req.user, req.params.id, req.params.action) })));
 router.post('/questions/:id/answer', ids('id'), body(z.object({ text: z.string().trim().min(2) })), asyncHandler(async (req, res) => res.json({ data: await service.answerQuestion(req.user, req.params.id, req.body.text) })));
 

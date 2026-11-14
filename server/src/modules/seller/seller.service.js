@@ -144,26 +144,19 @@ const FLOW_ONLY = new Set(['pickUp', 'quote', 'returned']);
 const PLAIN_ONLY = new Set(['prepare', 'deliver', 'ready', 'complete']);
 
 async function ownOrder(user, id) {
-  const o = await Order.findById(id);
+  const o = await applyOne(await Order.findById(id));
   if (!o) throw ApiError.notFound('Không tìm thấy đơn');
   if (String(o.seller) !== String(user._id)) throw ApiError.forbidden('Chỉ người bán của đơn mới thao tác được');
   return o;
 }
 
-const listOrders = (user) => Order.find({ seller: user._id }).sort({ createdAt: -1 }).limit(300).populate('buyer', 'name avatar phone area');
-
-const STATE_TEXT = { confirmed: 'đã được xác nhận', picked: 'đã lấy đồ / đã kiểm tra', pricing: 'đã có giá cuối, chờ bạn duyệt', preparing: 'đang được chuẩn bị', delivering: 'đang giao', ready: 'đã sẵn sàng', done: 'đã hoàn thành', declined: 'bị từ chối', cancelled: 'đã được hủy' };
-
-async function move(o, to) {
-  o.state = to;
-  o.history.push({ state: to, at: new Date() });
-  await o.save();
-  if (to === 'done') {
-    await xu.award(o.buyer, 'order', o._id, { total: o.total });
-    await postStats.refresh(o.post);
-  }
-  await notify(o.buyer, { type: 'order_state', title: `Đơn ${o.code} ${STATE_TEXT[to] || to}`, link: { type: 'order', id: o._id } });
+async function listOrders(user) {
+  await sweep({ seller: user._id });
+  return Order.find({ seller: user._id }).sort({ createdAt: -1 }).limit(300).populate('buyer', 'name avatar phone area');
 }
+
+const { move } = require('../shared/order-move');
+const { applyOne, sweep } = require('../shared/order-deadlines');
 
 async function orderAction(user, id, action, payload = {}) {
   const o = await ownOrder(user, id);
@@ -183,12 +176,17 @@ async function orderAction(user, id, action, payload = {}) {
     if (o.cancelRequest && o.cancelRequest.status === 'pending' && action !== 'decline') throw ApiError.invalidState('Khách đang xin hủy đơn, hãy trả lời yêu cầu hủy trước');
     const to = typeof step.to === 'function' ? step.to(o) : step.to;
     await move(o, to);
-    if (to === 'declined') await release(o);
+    if (to === 'declined') {
+      o.cancelInfo = { by: 'seller', reason: String(payload.reason || '').trim() || 'Người bán không nhận đơn này' };
+      await o.save();
+      await release(o);
+    }
   } else if (action === 'approveCancel' || action === 'keepOrder') {
     if (!o.cancelRequest || o.cancelRequest.status !== 'pending') throw ApiError.invalidState('Đơn này không có yêu cầu hủy nào đang chờ');
     if (action === 'approveCancel') {
       if (!ORDER_CANCELABLE.includes(o.state)) throw ApiError.invalidState('Đơn đã qua bước có thể hủy');
       o.cancelRequest.status = 'accepted';
+      o.cancelInfo = { by: 'buyer', reason: o.cancelRequest.reason };
       await move(o, 'cancelled');
       await release(o);
     } else {
@@ -203,6 +201,18 @@ async function orderAction(user, id, action, payload = {}) {
     o.surcharge = { amount: payload.amount, reason: payload.reason, status: 'pending' };
     await o.save();
     await notify(o.buyer, { type: 'order_surcharge', title: `Đơn ${o.code} có phụ thu, cần bạn đồng ý`, link: { type: 'order', id: o._id } });
+  } else if (['issueRedo', 'issueRefund', 'issueReturn', 'issueReject'].includes(action)) {
+    if (!o.issue || o.issue.st !== 'open') throw ApiError.invalidState('Đơn này không có yêu cầu báo vấn đề nào đang chờ');
+    const reply = String(payload.reply || '').trim().slice(0, 300);
+    if (action === 'issueRefund' || action === 'issueReturn') {
+      if (!(payload.amount >= 1000) || payload.amount > o.total) throw ApiError.validation('Số tiền hoàn không hợp lệ', [{ field: 'amount', message: 'Nhập số tiền từ 1.000đ tới tổng đơn' }]);
+      o.issue.amount = payload.amount;
+    }
+    o.issue.st = { issueRedo: 'redo', issueRefund: 'refund', issueReturn: 'returnAgreed', issueReject: 'rejected' }[action];
+    o.issue.reply = reply;
+    await o.save();
+    const said = { issueRedo: 'nhận làm lại', issueRefund: 'đồng ý hoàn tiền', issueReturn: 'đồng ý nhận lại hàng', issueReject: 'không đồng ý' }[action];
+    await notify(o.buyer, { type: 'order_issue_reply', title: `Người bán ${said} cho yêu cầu của đơn ${o.code}`, body: reply, link: { type: 'order', id: o._id } });
   } else if (action === 'approveReturn' || action === 'rejectReturn') {
     if (!o.returnRequest || o.returnRequest.status !== 'pending') throw ApiError.invalidState('Đơn này không có yêu cầu trả hàng nào đang chờ');
     o.returnRequest.status = action === 'approveReturn' ? 'accepted' : 'rejected';
@@ -265,6 +275,19 @@ async function offerAction(user, id, action) {
   return offer.populate([{ path: 'worker', select: 'name avatar phone area' }, { path: 'job', populate: { path: 'poster', select: 'name avatar area' } }]);
 }
 
+/** Người đăng việc đánh giá người làm sau khi việc hoàn thành (một lần) */
+async function rateOffer(user, id, { stars, text = '' }) {
+  const offer = await Offer.findById(id);
+  if (!offer) throw ApiError.notFound('Không tìm thấy đề nghị');
+  await ownJob(user, offer.job);
+  if (offer.state !== 'done') throw ApiError.invalidState('Chỉ đánh giá được khi việc đã hoàn thành');
+  if (offer.posterRating && offer.posterRating.stars) throw ApiError.duplicate('Bạn đã đánh giá người làm này rồi');
+  offer.posterRating = { stars, text: text.trim().slice(0, 500), at: new Date() };
+  await offer.save();
+  await notify(offer.worker, { type: 'review_new', title: `${user.name} đã đánh giá bạn ${stars} sao`, body: text, link: { type: 'offer', id: offer._id } });
+  return offer.populate([{ path: 'worker', select: 'name avatar phone area' }, { path: 'job', populate: { path: 'poster', select: 'name avatar area' } }]);
+}
+
 /* ---------------------------------------------------------------- Hỏi đáp của việc tôi đăng */
 
 async function answerQuestion(user, id, text) {
@@ -279,5 +302,5 @@ async function answerQuestion(user, id, text) {
 module.exports = {
   listPosts, createPost, updatePost, patchPost, removePost,
   listJobs, createJob, updateJob, patchJob, removeJob,
-  listOrders, orderAction, listOffers, offerAction, answerQuestion,
+  listOrders, orderAction, listOffers, offerAction, rateOffer, answerQuestion,
 };

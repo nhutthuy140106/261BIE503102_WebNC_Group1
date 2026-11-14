@@ -90,6 +90,8 @@ export interface OrderIssue {
   want: string;
   text: string;
   photos: number;
+  /** Ảnh đã tải lên (đơn thật) */
+  images?: string[];
   reply?: string;
   amount?: number;
   result?: string;

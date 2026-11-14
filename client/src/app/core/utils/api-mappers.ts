@@ -1,8 +1,9 @@
 import { Offer, OfferState, StateEntry } from '../models/offer';
-import { Order, PlacedStatus } from '../models/order';
+import { Order, OrderDetail, PlacedStatus } from '../models/order';
 import { Post, PostKind } from '../models/post';
 import { AppNotification, Conversation, Message, Question } from '../models/social';
 import { User } from '../models/user';
+import { placedStepNames } from './placed-steps';
 
 /**
  * Chuyển dữ liệu BE (docs/api-buyer-job.md, `Post`/`Job`/`Order`/`Offer`…) sang model của FE.
@@ -28,6 +29,10 @@ export function userFromApi(u: Raw): User {
     avatar: u.avatar || undefined,
     xu: typeof u.xu === 'number' ? u.xu : undefined,
     role: u.role === 'admin' ? 'admin' : 'user',
+    email: u.email || undefined,
+    gender: u.gender || undefined,
+    birthday: u.birthday || undefined,
+    bio: u.bio || undefined,
   };
 }
 
@@ -159,11 +164,48 @@ function quoteFields(o: Raw): Partial<Order> {
   return out;
 }
 
+/** Nội dung đơn (món đã chọn, câu trả lời, địa chỉ, giờ, tiền) dựng từ đơn của server để màn hình chi tiết hiện đủ */
+function detailFromApi(o: Raw): OrderDetail {
+  const s = o.snapshot ?? {};
+  const kind = s.type === 'goods' || s.type === 'service' ? s.type : 'food';
+  const pickup = o.fulfillment === 'pickup';
+  const a = o.address;
+  const lines: string[] = [
+    ...((o.selections ?? []) as Raw[]).filter((x) => (x.choices ?? []).length).map((x) => `${x.group}: ${(x.choices as Raw[]).map((c) => c.label).join(', ')}`),
+    ...((o.answers ?? []) as Raw[]).filter((x) => x.value && !String(x.value).startsWith('data:')).map((x) => `${x.question}: ${x.value}`),
+  ];
+  const b = o.breakdown ?? {};
+  return {
+    lines,
+    quantity: o.quantity,
+    unit: s.unit || undefined,
+    place: pickup ? 'Tự đến lấy' : 'Giao tận nơi',
+    pickup,
+    address: !pickup && a ? [a.name, a.unit, areaLabel(a.block)].filter(Boolean).join(' · ') + (a.note ? ` (${a.note})` : '') : undefined,
+    when: o.scheduledAt ? new Date(o.scheduledAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : undefined,
+    utensils: o.utensils || undefined,
+    voucher: o.voucherCode || undefined,
+    // tạm tính suy từ tổng để bảng chi phí luôn cộng đúng (kể cả khi đã có phụ thu)
+    subtotal: (o.total ?? 0) - (b.deliveryFee ?? 0) + (b.discount ?? 0),
+    fee: b.deliveryFee ?? 0,
+    discount: b.discount ?? 0,
+    steps: placedStepNames(kind, !!o.flow, pickup),
+  };
+}
+
+/** Lúc đơn hoàn thành (ms), lấy từ lịch sử — dùng tính hạn báo vấn đề */
+function doneAtOf(o: Raw): number | undefined {
+  if (o.state !== 'done') return undefined;
+  const h = ([...(o.history ?? [])] as Raw[]).reverse().find((x) => x.state === 'done');
+  return h?.at ? new Date(h.at).getTime() : undefined;
+}
+
 export function orderFromApi(o: Raw): Order {
   const s = o.snapshot ?? {};
   const mapState = (st: string): string => ORDER_STATE[st] ?? st;
   return {
     ...quoteFields(o),
+    detail: detailFromApi(o),
     _id: o._id,
     code: o.code,
     type: 'placed',
@@ -185,6 +227,12 @@ export function orderFromApi(o: Raw): Order {
     // "đã lấy đồ / đã kiểm tra" (picked) phía Mua vẫn là Đã xác nhận nên không ghi thêm một mốc trùng
     history: (o.history ?? []).filter((h: Raw) => h.state !== 'picked').map((h: Raw) => ({ state: mapState(h.state), at: h.at })),
     cancelRequested: o.cancelRequest?.status === 'pending' || undefined,
+    cancelDenied: o.cancelRequest?.status === 'rejected' && !['cancelled', 'declined', 'done'].includes(o.state) ? 'người bán vẫn giữ đơn, bạn nhắn để trao đổi thêm nhé.' : undefined,
+    ...(o.cancelInfo ? { cancelBy: o.cancelInfo.by === 'buyer' ? ('buyer' as const) : ('seller' as const), cancelWhy: o.cancelInfo.reason || undefined, cancelLate: o.cancelInfo.late || undefined } : {}),
+    doneAt: doneAtOf(o),
+    apptIn: o.scheduledAt ? (new Date(o.scheduledAt).getTime() - Date.now()) / 3600e3 : undefined,
+    issue: o.issue?.st ? { st: o.issue.st, type: o.issue.type ?? '', want: '', text: o.issue.text ?? '', photos: o.issue.photos ?? 0, images: o.issue.images?.length ? o.issue.images : undefined, reply: o.issue.reply || undefined, amount: o.issue.amount, result: o.issue.result || undefined } : undefined,
+    rated: o.review ? { s: o.review.rating, t: o.review.comment ?? '' } : o.reviewed ? { s: 5, t: '' } : undefined,
     surcharge: o.surcharge?.amount
       ? { amount: o.surcharge.amount, reason: o.surcharge.reason ?? '', state: o.surcharge.status === 'approved' ? 'approved' : 'pending' }
       : undefined,
@@ -213,6 +261,10 @@ export function offerFromApi(f: Raw): Offer {
     history: offerHistory(f.history).length ? offerHistory(f.history) : f.createdAt ? [{ state: f.state, at: f.createdAt }] : [],
     exactAddress: job.exactAddress || undefined,
     reportNote: f.report?.note || undefined,
+    cancelReason: f.cancel?.reason || undefined,
+    paid: !!f.paidAt,
+    rated: f.review ? { s: f.review.rating, t: f.review.comment ?? '' } : f.reviewed ? { s: 5, t: '' } : undefined,
+    posterRated: f.posterRating?.stars ? { stars: f.posterRating.stars, text: f.posterRating.text ?? '' } : undefined,
   };
 }
 

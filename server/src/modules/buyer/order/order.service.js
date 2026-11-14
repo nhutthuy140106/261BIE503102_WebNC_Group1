@@ -9,6 +9,9 @@ const xu = require('../xu/xu.service');
 const { effectivePrice } = require('../../../utils/promo');
 const { compute: computeTracking, canTrack } = require('./tracking');
 const { release, flowOf } = require('../../shared/order-release');
+const { move } = require('../../shared/order-move');
+const { applyOne, sweep } = require('../../shared/order-deadlines');
+const Review = require('../review/review.model');
 
 // Bài giới hạn số lượng (stock.mode = 'limit'): chỉ loại này mới trừ kho theo từng đơn
 const isLimited = (p) => !!p.stock && p.stock.mode === 'limit' && typeof p.stock.left === 'number';
@@ -181,6 +184,7 @@ async function create(user, input) {
 
 async function list(user, { state, ...paging }) {
   const { page, limit, skip } = parsePaging(paging);
+  await sweep({ buyer: user._id });
   const filter = { buyer: user._id };
   if (state === 'active') filter.state = { $in: Order.ACTIVE };
   if (state === 'history') filter.state = { $in: Order.HISTORY };
@@ -193,7 +197,7 @@ async function list(user, { state, ...paging }) {
 
 // Xem đơn: người mua hoặc người bán của đơn (admin cũng được); người khác 403
 async function getVisible(user, id) {
-  const o = await Order.findById(id);
+  const o = await applyOne(await Order.findById(id));
   if (!o) throw ApiError.notFound('Không tìm thấy đơn');
   const mine = [o.buyer, o.seller].some((u) => String(u) === String(user._id));
   if (!mine && user.role !== 'admin') throw ApiError.forbidden('Đây không phải đơn của bạn');
@@ -248,6 +252,74 @@ async function approveSurcharge(user, id) {
   return o;
 }
 
+/** Gắn đánh giá của người mua (nếu có) vào đơn để màn hình hiện "Bạn đã đánh giá …" */
+async function present(x) {
+  const arr = Array.isArray(x) ? x : [x];
+  const done = arr.filter((o) => o && o.reviewed).map((o) => o._id);
+  const rows = done.length ? await Review.find({ targetType: 'order', targetId: { $in: done } }).select('targetId rating comment') : [];
+  const by = new Map(rows.map((r) => [String(r.targetId), r]));
+  const out = arr.map((o) => {
+    const j = o.toJSON();
+    const r = by.get(String(o._id));
+    if (r) j.review = { rating: r.rating, comment: r.comment || '' };
+    return j;
+  });
+  return Array.isArray(x) ? out : out[0];
+}
+
+const LATE_MS = 2 * 3600 * 1000;
+const ISSUE_HOURS = { food: 2, goods: 24, service: 24 };
+
+/** Người mua hủy NGAY khi người bán chưa bắt đầu làm (chờ xác nhận / đã xác nhận). Đã làm thì chỉ xin hủy. */
+async function cancelNow(user, id, reason) {
+  const o = await getOwned(user, id);
+  if (!['waiting', 'confirmed'].includes(o.state)) throw ApiError.invalidState('Người bán đã bắt đầu nên không hủy ngay được, hãy gửi yêu cầu hủy');
+  const late = o.snapshot.type === 'service' && o.state === 'confirmed' && !!o.scheduledAt && new Date(o.scheduledAt).getTime() - Date.now() < LATE_MS;
+  o.cancelInfo = { by: 'buyer', reason, late };
+  await move(o, 'cancelled', { quiet: true });
+  await release(o);
+  await notify(o.seller, { type: 'order_cancelled', title: `Khách đã hủy đơn ${o.code}`, body: reason, link: { type: 'order', id: o._id } });
+  return o;
+}
+
+/** Người mua xác nhận đã nhận đủ hàng / kết quả dịch vụ → đơn hoàn thành (cộng Xu, tăng số đã bán) */
+async function confirmReceived(user, id) {
+  const o = await getOwned(user, id);
+  if (!['delivering', 'ready'].includes(o.state)) throw ApiError.invalidState('Đơn chưa tới bước nhận hàng');
+  await move(o, 'done', { quiet: true });
+  await notify(o.seller, { type: 'order_done', title: `Khách đã xác nhận nhận đủ đơn ${o.code}`, link: { type: 'order', id: o._id } });
+  return o;
+}
+
+/** Báo vấn đề (đồ ăn / dịch vụ) hoặc yêu cầu trả hàng (đồ dùng) trong thời hạn sau khi hoàn thành */
+async function openIssue(user, id, { type, text = '', photos = 0, images = [] }) {
+  if (images.length) photos = images.length;
+  const o = await getOwned(user, id);
+  if (o.state !== 'done') throw ApiError.invalidState('Chỉ báo vấn đề sau khi đơn hoàn thành');
+  if (o.issue && o.issue.st) throw ApiError.duplicate('Đơn này đã có yêu cầu báo vấn đề');
+  const hours = ISSUE_HOURS[o.snapshot.type] || 24;
+  const doneAt = (o.history.slice().reverse().find((h) => h.state === 'done') || {}).at || o.updatedAt;
+  if (Date.now() - new Date(doneAt).getTime() > hours * 3600 * 1000) throw ApiError.invalidState(`Đã quá ${hours} giờ kể từ khi hoàn thành`);
+  if (o.snapshot.type !== 'service' && !photos) throw ApiError.validation('Cần ít nhất 1 ảnh để người bán kiểm tra', [{ field: 'photos', message: 'Cần ít nhất 1 ảnh' }]);
+  o.issue = { st: 'open', type, text, photos, images, at: new Date() };
+  await o.save();
+  await notify(o.seller, { type: 'order_issue', title: `Khách báo vấn đề đơn ${o.code}`, body: type, link: { type: 'order', id: o._id } });
+  return o;
+}
+
+/** Người mua đóng yêu cầu (đã được làm lại / đã nhận tiền hoàn / thôi không theo nữa) */
+async function closeIssue(user, id, result) {
+  const o = await getOwned(user, id);
+  if (!o.issue || !o.issue.st || o.issue.st === 'closed') throw ApiError.invalidState('Không có yêu cầu nào đang mở');
+  const st = o.issue.st;
+  const money = (n) => `${Math.round(n || 0).toLocaleString('vi-VN')}đ`;
+  o.issue.result = result || (st === 'redo' ? 'đã được làm lại' : st === 'refund' ? `đã nhận tiền hoàn ${money(o.issue.amount)}` : st === 'returnAgreed' ? `đã trả hàng và nhận lại ${money(o.issue.amount)}` : 'bạn đã đóng yêu cầu');
+  o.issue.st = 'closed';
+  await o.save();
+  await notify(o.seller, { type: 'order_issue_closed', title: `Khách đã đóng yêu cầu của đơn ${o.code}`, body: o.issue.result, link: { type: 'order', id: o._id } });
+  return o;
+}
+
 /** Người mua đồng ý giá cuối người bán báo: tổng tiền đổi sang giá mới, đơn chuyển sang "đang làm" */
 async function approveQuote(user, id) {
   const o = await getOwned(user, id);
@@ -279,4 +351,5 @@ async function rejectQuote(user, id, reason = '') {
 }
 
 module.exports = {
+  present, cancelNow, confirmReceived, openIssue, closeIssue,
   approveQuote, rejectQuote, tracking, create, prepare, commit, list, getVisible, requestCancel, requestReturn, approveSurcharge, priceOrder };

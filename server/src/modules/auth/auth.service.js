@@ -97,4 +97,24 @@ function endSession(req, res) {
   });
 }
 
-module.exports = { register, resetPassword, phoneTaken, verifyLogin, googleLogin, googleComplete, startSession, endSession };
+/** Sửa hồ sơ của chính mình (tên, ảnh, email, giới tính, ngày sinh, giới thiệu) */
+async function updateProfile(user, data) {
+  const u = await User.findById(user._id);
+  if (data.name !== undefined) u.name = data.name;
+  if (data.avatar !== undefined) u.avatar = data.avatar;
+  for (const k of ['email', 'gender', 'birthday', 'bio']) if (data[k] !== undefined) u[k] = data[k] === '' ? undefined : data[k];
+  await u.save();
+  return u;
+}
+
+/** Đổi mật khẩu khi đang đăng nhập: phải nhập đúng mật khẩu hiện tại */
+async function changePassword(user, { current, next }) {
+  const u = await User.findById(user._id).select('+password');
+  if (!u.password) throw ApiError.invalidState('Tài khoản này đăng nhập bằng Google nên chưa có mật khẩu');
+  if (!(await bcrypt.compare(current, u.password))) throw ApiError.validation('Mật khẩu hiện tại chưa đúng', [{ field: 'current', message: 'Mật khẩu hiện tại chưa đúng' }]);
+  if (current === next) throw ApiError.validation('Mật khẩu mới phải khác mật khẩu cũ', [{ field: 'next', message: 'Mật khẩu mới phải khác mật khẩu cũ' }]);
+  u.password = await bcrypt.hash(next, 10);
+  await u.save();
+}
+
+module.exports = { updateProfile, changePassword, register, resetPassword, phoneTaken, verifyLogin, googleLogin, googleComplete, startSession, endSession };

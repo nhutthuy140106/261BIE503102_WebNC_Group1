@@ -58,6 +58,18 @@
         </div>
       </div>
 
+      @if (o.issue; as is) {
+        <div class="box" id="issue">
+          <h2>Khách báo vấn đề</h2>
+          <dl class="info">
+            <div><dt><svg class="i"><use href="#question" /></svg>Vấn đề</dt><dd>@for (r of splitReasons(is.type); track $index) { {{ r }}@if (!$last) { · } }</dd></div>
+            @if (is.text) { <div><dt><svg class="i"><use href="#pencil" /></svg>Khách mô tả</dt><dd>{{ is.text }}</dd></div> }
+            @if (is.images?.length) { <div><dt><svg class="i"><use href="#photo" /></svg>Ảnh</dt><dd><span class="ansphotos">@for (ph of is.images; track $index) { <a class="ansphoto" [href]="ph" target="_blank" rel="noopener"><img [src]="ph" alt="Ảnh khách gửi" /></a> }</span></dd></div> }
+            <div><dt><svg class="i"><use href="#clock" /></svg>Trạng thái</dt><dd>{{ issueText(is.st) }}@if (is.amount) { <small>{{ is.amount | vnd }}</small> }@if (is.reply) { <small>Bạn trả lời: “{{ is.reply }}”</small> }@if (is.result) { <small>{{ is.result }}</small> }</dd></div>
+          </dl>
+        </div>
+      }
+
       @if (review(); as rv) {
         <div class="box" id="review">
           <h2>Đánh giá của khách</h2>
@@ -90,6 +102,7 @@
         } @else {
           <p>{{ guideText() }}</p>
         }
+        @if (o.cancelWhy && (o.state === 'cancelled' || o.state === 'declined')) { <p class="muted">Lý do: {{ o.cancelWhy }}</p> }
         @switch (form()) {
           @case ('decline') {
             <form class="form" (submit)="decline($event)">
@@ -133,7 +146,20 @@
               <div class="row2"><button type="button" class="btn" (click)="form.set(null)">Thôi</button><button type="submit" class="btn primary">Gửi báo giá</button></div>
             </form>
           }
+          @case ('issue') {
+            <form class="form" (submit)="sendIssue($event, ia.value, ir.value)">
+              <span class="ftitle">Trả lời khách</span>
+              @for (opt of issueOptions(); track opt.act) {
+                <label class="rd" [class.on]="issueChoice() === opt.act"><input type="radio" name="isc" [checked]="issueChoice() === opt.act" (change)="issueChoice.set(opt.act)" />{{ opt.label }}</label>
+              }
+              <input #ia appMoney class="input" placeholder="Số tiền hoàn, ví dụ 20.000" [hidden]="!issueMoney()" />
+              <textarea #ir class="input" placeholder="Lời nhắn cho khách (bắt buộc nếu không đồng ý)" maxlength="300"></textarea>
+              <span class="muted small">Tiền hoàn do bạn chuyển trực tiếp cho khách, AntGo không giữ tiền.</span>
+              <div class="row2"><button type="button" class="btn" (click)="form.set(null)">Thôi</button><button type="submit" class="btn primary">Gửi khách</button></div>
+            </form>
+          }
           @default {
+            @if (o.issue?.st === 'open') { <button type="button" class="btn primary" (click)="openIssue()">Trả lời khách báo vấn đề</button> }
             @if (o.flow && o.quote && o.state === 'pricing') {
               <div class="qbox">
                 @for (l of o.quote.lines; track $index) { <div><span>{{ l.name }}@if (o.flow === 'laundry') { × {{ l.qty }} }</span><b>{{ l.qty * l.price | vnd }}</b></div> }

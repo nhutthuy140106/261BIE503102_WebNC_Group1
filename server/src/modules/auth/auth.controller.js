@@ -40,6 +40,15 @@ exports.logout =asyncHandler(async (req, res) => {
 // FE (authGuard) hỏi endpoint này: 200 + user nếu còn phiên, 401 nếu không
 exports.profile = (req, res) => res.json({ data: req.user });
 
+exports.updateProfile = asyncHandler(async (req, res) => {
+  res.json({ data: await service.updateProfile(req.user, req.body) });
+});
+
+exports.changePassword = asyncHandler(async (req, res) => {
+  await service.changePassword(req.user, req.body);
+  res.status(204).end();
+});
+
 exports.otpSend = asyncHandler(async (req, res) => {
   res.json({ data: await otp.send(req.body.phone, req.body.purpose) });
 });

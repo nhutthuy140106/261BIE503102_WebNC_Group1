@@ -86,6 +86,10 @@ export interface SellerOrder {
   /** Khách xin hủy: lý do. null = không có yêu cầu */
   cancelRequest?: string | null;
   declineReason?: string;
+  /** Lý do hủy / từ chối (đơn thật), kể cả đơn tự hủy khi quá hạn */
+  cancelWhy?: string;
+  /** Khách báo vấn đề sau khi nhận (đơn thật): người bán trả lời làm lại / hoàn tiền / nhận lại hàng / từ chối */
+  issue?: { st: 'open' | 'redo' | 'refund' | 'returnAgreed' | 'rejected' | 'closed'; type: string; text: string; photos: number; images?: string[]; reply?: string; amount?: number; result?: string } | null;
   surcharge?: { amount: number; reason: string; ok: boolean } | null;
   answers?: [string, string][];
   /** laundry = đơn giặt sấy: tiệm qua lấy đồ, cân lại, báo giá cho khách duyệt rồi mới giặt · repair = đơn sửa chữa: kiểm tra, báo giá, khách duyệt rồi mới sửa */

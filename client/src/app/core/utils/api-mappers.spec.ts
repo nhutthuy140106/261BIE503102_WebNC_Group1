@@ -56,6 +56,26 @@ describe('api-mappers', () => {
     expect(orderFromApi({ _id: 'n', state: 'waiting' }).newPrice).toBeUndefined();
   });
 
+  it('đơn thật: dựng nội dung đơn, lý do hủy, đánh giá, yêu cầu báo vấn đề', () => {
+    const o = orderFromApi({
+      _id: 'd', state: 'cancelled', fulfillment: 'delivery', payment: 'cash', quantity: 2, total: 98000,
+      snapshot: { type: 'food', unit: 'tô', title: 'Phở' }, selections: [{ group: 'Thêm', choices: [{ label: 'Quẩy', price: 3000 }] }], answers: [{ question: 'Dị ứng', value: 'Không' }],
+      address: { name: 'Thủy', unit: 'B-1204', block: 'B', note: 'Gọi trước' }, scheduledAt: '2026-11-20T04:30:00.000Z',
+      breakdown: { items: 96000, deliveryFee: 8000, discount: 6000 }, voucherCode: 'XU-1',
+      cancelInfo: { by: 'system', reason: 'Người bán chưa xác nhận kịp nên đơn tự hủy' },
+      issue: { st: 'refund', type: 'Món bị nguội', photos: 1, images: ['/images/uploads/a.jpg'], amount: 20000, reply: 'Xin lỗi' },
+      review: { rating: 4, comment: 'Ngon' },
+    });
+    expect(o.detail).toMatchObject({ quantity: 2, unit: 'tô', place: 'Giao tận nơi', fee: 8000, discount: 6000, subtotal: 96000, voucher: 'XU-1' });
+    expect(o.detail?.lines).toEqual(['Thêm: Quẩy', 'Dị ứng: Không']);
+    expect(o.detail?.address).toContain('B-1204');
+    expect(o.cancelBy).toBe('seller');
+    expect(o.cancelWhy).toContain('tự hủy');
+    expect(o.issue).toMatchObject({ st: 'refund', amount: 20000, images: ['/images/uploads/a.jpg'] });
+    expect(o.rated).toEqual({ s: 4, t: 'Ngon' });
+    expect(orderFromApi({ _id: 'e', state: 'preparing', cancelRequest: { status: 'rejected' } }).cancelDenied).toContain('giữ đơn');
+  });
+
   it('đề nghị: lấy việc lồng bên trong; thiếu lịch sử thì dựng từ createdAt', () => {
     const f = offerFromApi({ _id: 'f', code: 'AG-J1', state: 'offered', intro: 'hi', slots: [], createdAt: 't', job: { _id: 'j', title: 'T', pay: 5, poster: { _id: 'u', name: 'A', area: 'C' } } });
     expect(f).toMatchObject({ jobId: 'j', jobTitle: 'T', pay: 5, posterName: 'A', block: 'Block C' });

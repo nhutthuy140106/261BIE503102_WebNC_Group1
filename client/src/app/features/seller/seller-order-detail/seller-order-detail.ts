@@ -69,7 +69,9 @@ export class SellerOrderDetail implements OnInit {
 
   /** Khung hành động đang mở form nào */
   protected readonly parseMoney = parseMoney;
-  protected readonly form = signal<'decline' | 'surcharge' | 'quote' | null>(null);
+  protected readonly form = signal<'decline' | 'surcharge' | 'quote' | 'issue' | null>(null);
+  /** Cách trả lời yêu cầu báo vấn đề của khách */
+  protected readonly issueChoice = signal<SellerOrderAct>('issueRedo');
   /** Báo giá giặt sấy: số cân / đếm thực tế từng dòng */
   protected readonly quoteQty = signal<number[]>([]);
   /** Báo giá sửa chữa: các hạng mục do thợ tự nhập sau khi kiểm tra */
@@ -160,6 +162,42 @@ export class SellerOrderDetail implements OnInit {
     if (a === 'pickUp' || a === 'returned') return this.ask.set(a);
     if (a === 'confirm' || a === 'approveCancel') return this.ask.set(a);
     this.toast.show(this.seller.orderAct(this.o()!.id, a));
+  }
+
+  /** Các cách người bán trả lời khách báo vấn đề: đồ dùng thì nhận lại hàng, còn lại làm lại hoặc hoàn tiền */
+  protected issueOptions(): { act: SellerOrderAct; label: string; money: boolean }[] {
+    const k = this.o()?.kind;
+    return k === 'goods'
+      ? [{ act: 'issueReturn', label: 'Nhận lại hàng và hoàn tiền', money: true }, { act: 'issueReject', label: 'Không đồng ý', money: false }]
+      : [{ act: 'issueRedo', label: k === 'food' ? 'Làm lại món' : 'Làm lại miễn phí', money: false }, { act: 'issueRefund', label: 'Hoàn một phần / toàn bộ tiền', money: true }, { act: 'issueReject', label: 'Không đồng ý', money: false }];
+  }
+
+  protected issueMoney(): boolean {
+    return !!this.issueOptions().find((x) => x.act === this.issueChoice())?.money;
+  }
+
+  protected openIssue(): void {
+    this.issueChoice.set(this.issueOptions()[0].act);
+    this.form.set('issue');
+  }
+
+  protected sendIssue(e: Event, amount: string, reply: string): void {
+    e.preventDefault();
+    const a = this.issueChoice();
+    const opt = this.issueOptions().find((x) => x.act === a);
+    const n = parseMoney(amount) ?? 0;
+    if (opt?.money && (n < 1000 || n > this.o()!.total)) return this.toast.show('Nhập số tiền hoàn từ 1.000đ tới tổng đơn');
+    if (a === 'issueReject' && !reply.trim()) return this.toast.show('Viết lý do để khách hiểu vì sao chưa đồng ý');
+    this.form.set(null);
+    this.toast.show(this.seller.orderAct(this.o()!.id, a, { ...(opt?.money ? { amount: n } : {}), reply: reply.trim() }));
+  }
+
+  protected issueText(st: string): string {
+    return ({ open: 'Đang chờ bạn trả lời', redo: 'Bạn nhận làm lại', refund: 'Bạn đồng ý hoàn tiền', returnAgreed: 'Bạn đồng ý nhận lại hàng', rejected: 'Bạn không đồng ý', closed: 'Đã xong' } as Record<string, string>)[st] ?? '';
+  }
+
+  protected splitReasons(t: string): string[] {
+    return t.split(';').map((x) => x.trim()).filter(Boolean);
   }
 
   protected decline(e: Event): void {

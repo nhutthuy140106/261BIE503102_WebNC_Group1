@@ -332,7 +332,7 @@ export class SellerService {
   }
 
   /** Chỉ chế độ thật: người bán xử lý đơn (confirm · prepare · deliver · ready · complete · decline · approveCancel · keepOrder · surcharge) */
-  sellerOrderAct(id: string, action: string, data: { amount?: number; reason?: string; lines?: { name: string; qty: number; price: number }[] } = {}): Observable<SellerOrder> {
+  sellerOrderAct(id: string, action: string, data: { amount?: number; reason?: string; reply?: string; lines?: { name: string; qty: number; price: number }[] } = {}): Observable<SellerOrder> {
     return this.api.post<unknown>(`/seller/orders/${id}/${action}`, data).pipe(map((o) => sellerOrderFromApi(o)));
   }
 
