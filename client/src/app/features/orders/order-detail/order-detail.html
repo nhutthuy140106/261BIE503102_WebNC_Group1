@@ -120,7 +120,8 @@
                 <div class="rqchips">@for (r of splitReasons(iss.type); track $index) { <span>{{ r }}</span> }</div>
               </div>
               @if (iss.text) { <div class="rq1"><span class="rql">Mô tả</span><p>{{ iss.text }}</p></div> }
-              @if (iss.photos) { <div class="rq1"><span class="rql">Ảnh kèm</span><p>{{ iss.photos }} ảnh</p></div> }
+              @if (iss.images?.length) { <div class="rq1"><span class="rql">Ảnh kèm</span><p class="rqpics">@for (ph of iss.images; track $index) { <a [href]="ph" target="_blank" rel="noopener"><img [src]="ph" alt="Ảnh bạn đã gửi" /></a> }</p></div> }
+              @else if (iss.photos) { <div class="rq1"><span class="rql">Ảnh kèm</span><p>{{ iss.photos }} ảnh</p></div> }
             </div>
           </section>
         }

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, map } from 'rxjs';
+import { Observable, forkJoin, map, of } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { Post } from '../models/post';
 import { postFromApi } from '../utils/api-mappers';
@@ -7,6 +7,7 @@ import { inArea } from '../utils/post-area';
 import { rankSimilar } from '../utils/recommend';
 import { ApiService } from './api';
 import { AreaService } from './area';
+import { AuthService } from './auth';
 import { OrderService } from './order';
 import { PostService } from './post';
 import { SavedService } from './saved';
@@ -18,6 +19,7 @@ export class RecommendService {
   private readonly posts = inject(PostService);
   private readonly orders = inject(OrderService);
   private readonly saved = inject(SavedService);
+  private readonly auth = inject(AuthService);
   private readonly area = inject(AreaService);
 
   similar(postId: string, limit = 4): Observable<Post[]> {
@@ -33,7 +35,8 @@ export class RecommendService {
 
   /** Gợi ý theo bài đã lưu + bài đã đặt; chưa có dữ liệu thì trả rỗng để ẩn khối. */
   forYou(limit = 4): Observable<Post[]> {
-    if (!useMock('recommend')) return this.api.get<unknown[]>('/me/recommendations', { limit }).pipe(map((l) => l.map(postFromApi)));
+    // thật: gợi ý theo cá nhân cần đăng nhập — khách gọi sẽ nhận 401 và bị đẩy về trang đăng nhập, nên khách thì ẩn khối
+    if (!useMock('recommend')) return this.auth.currentUser() ? this.api.get<unknown[]>('/me/recommendations', { limit }).pipe(map((l) => l.map(postFromApi))) : of([]);
     return forkJoin({ all: this.posts.getPosts(), orders: this.orders.getOrders() }).pipe(
       map(({ all, orders }) => {
         const ids = new Set([...this.saved.ids(), ...orders.filter((o) => o.type === 'placed').map((o) => o.postId)]);

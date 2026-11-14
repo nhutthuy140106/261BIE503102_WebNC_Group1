@@ -316,6 +316,8 @@ async function closeIssue(user, id, result) {
   o.issue.result = result || (st === 'redo' ? 'đã được làm lại' : st === 'refund' ? `đã nhận tiền hoàn ${money(o.issue.amount)}` : st === 'returnAgreed' ? `đã trả hàng và nhận lại ${money(o.issue.amount)}` : 'bạn đã đóng yêu cầu');
   o.issue.st = 'closed';
   await o.save();
+  // hoàn hết tiền hoặc trả lại hàng: không còn là đơn thành công → thu lại Xu
+  if (st === 'returnAgreed' || (st === 'refund' && (o.issue.amount || 0) >= o.total)) await xu.revokeOrder(o.buyer, o._id, o.code);
   await notify(o.seller, { type: 'order_issue_closed', title: `Khách đã đóng yêu cầu của đơn ${o.code}`, body: o.issue.result, link: { type: 'order', id: o._id } });
   return o;
 }

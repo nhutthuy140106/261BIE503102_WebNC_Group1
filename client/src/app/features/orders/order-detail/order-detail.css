@@ -358,3 +358,6 @@ a.pbtn.link { text-decoration: none; }
 
 .paybox { margin-top: 16px; }
 .paybox h3 { margin: 0; font-size: 15px; }
+
+.rqpics { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.rqpics img { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; border: 1px solid #E5E7EB; }

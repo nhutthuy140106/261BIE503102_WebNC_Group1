@@ -72,7 +72,8 @@ async function googleComplete(req, { phone }) {
   const p = req.session && req.session.googleSignup;
   if (!p || Date.now() - p.at > GOOGLE_PENDING_MS) throw ApiError.invalidState('Phiên đăng nhập Google đã hết hạn, vui lòng bấm đăng nhập Google lại');
   if (await User.exists({ phone })) throw ApiError.duplicate('Số điện thoại đã được đăng ký');
-  return User.create({ googleId: p.googleId, email: p.email, name: p.name, avatar: p.avatar, phone, role: 'enduser' });
+  if (otpRequired) await otp.consume(phone, 'register'); // phải nhập đúng mã gửi tới số này, giống đăng ký thường
+  return User.create({ googleId: p.googleId, email: p.email, name: p.name, avatar: p.avatar, phone, role: 'enduser', phoneVerifiedAt: otpRequired ? new Date() : undefined });
 }
 
 // Đổi Session ID sau khi đăng nhập (chống session fixation) nhưng giữ nháp giỏ hàng của khách vãng lai

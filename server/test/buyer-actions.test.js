@@ -147,3 +147,21 @@ test('người đăng việc đánh giá người làm sau khi xong; người l�
   assert.deepEqual(mine.review, { rating: 5, comment: 'Chị Hoa trả công đúng hẹn' });
   assert.equal(mine.posterRating.stars, 5, 'người làm thấy cả đánh giá của người đăng');
 });
+
+test('hoàn tiền hết cho đơn thì thu lại Xu đã cộng; hoàn một phần thì giữ Xu', async () => {
+  const XuEntry = require('../src/modules/buyer/xu/xu.model').XuEntry;
+  const run = async (amount) => {
+    // người mua riêng (Xu cộng tối đa 3 đơn/ngày, Thủy đã hết lượt ở các test trên)
+    const o = (await api('POST', '/orders', { token: tok.quoc, body: { postId: (await pho())._id, quantity: 1, fulfillment: 'pickup', payment: 'cash' } })).body.data;
+    for (const a of ['confirm', 'prepare', 'ready']) await act(tok.lan, o._id, a);
+    await api('POST', `/orders/${o._id}/confirm-received`, { token: tok.quoc });
+    await api('POST', `/orders/${o._id}/issue`, { token: tok.quoc, body: { type: 'Thiếu món', photos: 1 } });
+    await act(tok.lan, o._id, 'issueRefund', { amount: amount ?? o.total });
+    await api('POST', `/orders/${o._id}/issue/close`, { token: tok.quoc, body: {} });
+    return { id: o._id, got: await XuEntry.findOne({ key: `order:${o._id}` }), revoked: await XuEntry.findOne({ key: `revoke:order:${o._id}` }) };
+  };
+  const part = await run(10000);
+  assert.ok(part.got && !part.revoked, 'hoàn một phần: giữ Xu');
+  const full = await run();
+  assert.ok(full.got && full.revoked && full.revoked.delta === -full.got.delta, 'hoàn hết: thu lại đúng số Xu đã cộng');
+});

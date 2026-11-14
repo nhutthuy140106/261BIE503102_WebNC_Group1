@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
+import { landingGuard } from './core/guards/landing-guard';
 import { sellerMatchGuard } from './core/guards/seller-match-guard';
 import { NotFound } from './core/not-found/not-found';
 
@@ -10,7 +11,7 @@ import { NotFound } from './core/not-found/not-found';
  * Route '**' (404) phải đặt CUỐI mảng.
  */
 const routes: Routes = [
-  { path: '', loadChildren: () => import('./features/home/home-module').then((m) => m.HomeModule), pathMatch: 'full' },
+  { path: '', canActivate: [landingGuard], loadChildren: () => import('./features/home/home-module').then((m) => m.HomeModule), pathMatch: 'full' },
   { path: 'welcome', loadChildren: () => import('./features/landing/landing-module').then((m) => m.LandingModule) },
   { path: 'legal', loadChildren: () => import('./features/legal/legal-module').then((m) => m.LegalModule) },
   { path: 'search', loadChildren: () => import('./features/search/search-module').then((m) => m.SearchModule) },

@@ -107,6 +107,15 @@ async function award(userId, kind, refId, ctx = {}) {
   } catch (e) { console.error('Không cộng được Xu:', e.message); return null; }
 }
 
+// Đơn được hoàn tiền hết (hoặc trả lại hàng) thì thu lại Xu đã cộng cho đơn đó; không có Xu để thu thì bỏ qua
+async function revokeOrder(userId, orderId, code) {
+  try {
+    const got = await XuEntry.findOne({ user: userId, key: `order:${orderId}`, delta: { $gt: 0 } });
+    if (!got) return null;
+    return await addEntry(userId, { delta: -got.delta, title: `Thu lại Xu · đơn ${code} được hoàn tiền`, kind: 'other', key: `revoke:order:${orderId}`, day: today() });
+  } catch (e) { if (e.code !== 11000) console.error('Không thu lại được Xu:', e.message); return null; }
+}
+
 // Voucher của chính người dùng, còn hạn, chưa dùng; trả { doc, def } hoặc null
 async function findVoucher(userId, code) {
   if (!code || !XU_CODE.test(String(code).toUpperCase())) return null;
@@ -118,4 +127,4 @@ const claimVoucher = (doc) => XuVoucher.findOneAndUpdate({ _id: doc._id, usedAt:
 // Đơn bị hủy/từ chối thì trả lại voucher
 const restoreVoucher = (userId, code) => (code && XU_CODE.test(code) ? XuVoucher.updateOne({ user: userId, code }, { $unset: { usedAt: 1 } }) : null);
 
-module.exports = { overview, playGame, redeem, balance, award, findVoucher, claimVoucher, restoreVoucher, XU_CODE, GAME, CATALOG, today };
+module.exports = { overview, playGame, redeem, balance, award, revokeOrder, findVoucher, claimVoucher, restoreVoucher, XU_CODE, GAME, CATALOG, today };

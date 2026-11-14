@@ -29,7 +29,7 @@ for (const g of SYNONYM_GROUPS) for (const t of g) SYN.set(t, g);
 const STOP = new Set(['toi', 'minh', 'can', 'muon', 'tim', 'cho', 'co', 'khong', 'nao', 'gi', 'nhe', 'la', 'mot', 'cai', 'nhung', 'va', 'giup', 'voi']);
 const tokens = (s) => stripAccents(s).split(/[^a-z0-9]+/).filter((t) => t.length >= 2 && !STOP.has(t));
 
-const squash = (s) => s.replace(/(.)+/g, '$1');
+const squash = (s) => s.replace(/(.)\1+/g, '$1'); // gộp chữ lặp liền nhau: coom → com
 
 /** Khoảng cách chỉnh sửa (Levenshtein), dừng sớm khi vượt max. */
 function lev(a, b, max = 2) {
@@ -92,6 +92,13 @@ function rank(docs, q) {
       else if (t.length >= 4 && v.length >= 3 && lev(t, v, max) <= max) put(v, w * 0.7);
       else if (t.length >= 4 && v.length >= 4 && (v.startsWith(t) || t.startsWith(v))) put(v, w * 0.8);
     }
+  }
+  // Truy vấn là một khái niệm đã biết ("day kem" = gia sư) mà kho không có bài nào nói về khái niệm đó và cũng không có bài chứa đủ các từ gốc
+  // → trả rỗng, đừng đưa bài chỉ trùng một từ lẻ ("dày", "kem"…) làm người dùng tưởng là kết quả
+  if (phrases.length) {
+    const hasPhrase = (i) => phrases.some((parts) => parts.length && parts.every((x) => docToks[i].has(x)));
+    const hasAll = (i) => [...terms.keys()].every((x) => [...matched.keys()].some((v) => docToks[i].has(v) && (v === x || lev(x, v, 2) <= 2 || squash(x) === squash(v))));
+    if (!docs.some((_, i) => hasPhrase(i) || hasAll(i))) return [];
   }
   return docs
     .map((doc, i) => {

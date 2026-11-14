@@ -36,3 +36,7 @@ test('đồng nghĩa phải khớp đủ cụm: "dạy kèm" không ra bài ch�
   assert.deepEqual(rank([ds[0]], 'dạy kèm'), []);
   assert.equal(rank(ds, 'dạy kèm')[0].doc.id, 'y');
 });
+
+test('khái niệm đã biết mà kho không có bài nào thì trả rỗng, không đưa bài chỉ trùng một từ lẻ', () => {
+  assert.deepEqual(rank([...docs, { id: 'e', searchText: 'bun cha day du nem ran' }], 'day kem'), []);
+});
