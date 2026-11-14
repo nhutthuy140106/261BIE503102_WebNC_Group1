@@ -1,0 +1,45 @@
+<h1>Xác minh người bán</h1>
+<p class="lead">Đối chiếu giấy tờ với thông tin khai báo rồi duyệt. Người bán chưa được duyệt sẽ không đăng bài hay đăng việc được.</p>
+<div class="tabs" role="tablist">
+  @for (t of tabs; track t.key) { <button type="button" role="tab" [attr.aria-selected]="tab() === t.key" [class.on]="tab() === t.key" (click)="pick(t.key)">{{ t.label }}</button> }
+</div>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+
+@if (rows(); as list) {
+  <div class="list">
+    @for (v of list; track v._id) {
+      <article class="vc">
+        <header>
+          <div class="who"><app-avatar [name]="v.user.name" [src]="v.user.avatar ?? ''" [size]="40" /><div><h3>{{ v.body.shopName }}</h3><span class="sub">{{ v.user.name }} · {{ v.user.phone }} · Khu {{ v.user.area }}</span></div></div>
+          <div class="sub" style="text-align: right">Nộp {{ v.submittedAt | date: 'dd/MM/yyyy HH:mm' }}<br />@if (v.status === 'approved') { <span class="pill ok">Đã duyệt</span> } @else if (v.status === 'rejected') { <span class="pill bad">Đã từ chối</span> } @else { <span class="pill warn">Chờ duyệt</span> }</div>
+        </header>
+        <dl class="kv">
+          <dt>Họ tên trên giấy tờ</dt><dd>{{ v.body.fullName }}</dd>
+          <dt>Số CCCD</dt><dd class="mono">{{ v.body.idNumber }}</dd>
+          <dt>Loại gian hàng</dt><dd>{{ type(v.body.shopType) }}</dd>
+          @if (v.body.intro) { <dt>Giới thiệu</dt><dd>{{ v.body.intro }}</dd> }
+          @if (v.status === 'rejected' && v.rejectReason) { <dt>Lý do từ chối</dt><dd>{{ v.rejectReason }}</dd> }
+        </dl>
+        <div class="docs">
+          <figure><button type="button" (click)="big.set(v.body.idFront)" aria-label="Phóng to mặt trước CCCD"><img [src]="v.body.idFront" alt="Mặt trước CCCD" loading="lazy" /></button><figcaption>Mặt trước CCCD</figcaption></figure>
+          <figure><button type="button" (click)="big.set(v.body.idBack)" aria-label="Phóng to mặt sau CCCD"><img [src]="v.body.idBack" alt="Mặt sau CCCD" loading="lazy" /></button><figcaption>Mặt sau CCCD</figcaption></figure>
+          <figure><button type="button" (click)="big.set(v.body.selfie)" aria-label="Phóng to ảnh chân dung"><img [src]="v.body.selfie" alt="Ảnh chân dung" loading="lazy" /></button><figcaption>Ảnh chân dung</figcaption></figure>
+        </div>
+        @if (v.status === 'pending') {
+          <div class="btns"><button type="button" class="btn danger" (click)="acting.set({ v: v, approve: false })">Từ chối</button><button type="button" class="btn main" (click)="acting.set({ v: v, approve: true })">Duyệt hồ sơ</button></div>
+        }
+      </article>
+    } @empty { <p class="empty">Không có hồ sơ nào ở mục này.</p> }
+  </div>
+  @if (total() > 10) {
+    <div class="pager"><span>{{ total() }} hồ sơ · Trang {{ page }}/{{ pages() }}</span><button type="button" class="btn" [disabled]="page <= 1" (click)="go(page - 1)">Trước</button><button type="button" class="btn" [disabled]="page >= pages()" (click)="go(page + 1)">Sau</button></div>
+  }
+} @else { <div class="sk"></div><div class="sk"></div> }
+
+@if (big(); as src) { <div class="lb" (click)="big.set(null)" (keydown.escape)="big.set(null)" role="dialog" aria-label="Xem ảnh lớn"><img [src]="src" alt="Ảnh giấy tờ phóng to" /></div> }
+@if (acting(); as a) {
+  <app-admin-dialog [title]="a.approve ? 'Duyệt hồ sơ ' + a.v.body.shopName + '?' : 'Từ chối hồ sơ ' + a.v.body.shopName + '?'"
+    [message]="a.approve ? 'Người bán sẽ đăng bài và đăng việc được ngay, và nhận thông báo.' : 'Người bán nhận lý do bên dưới và có thể nộp lại hồ sơ.'"
+    [confirmLabel]="a.approve ? 'Duyệt hồ sơ' : 'Từ chối'" [danger]="!a.approve" [withReason]="!a.approve" reasonLabel="Lý do từ chối (gửi cho người bán)" [busy]="busy()"
+    (confirmed)="confirm($event)" (cancelled)="acting.set(null)" />
+}

@@ -9,7 +9,7 @@ const paging = { page: z.coerce.number().int().min(1).optional(), limit: z.coerc
 const reason = z.object({ reason: z.string({ error: 'Cần ghi lý do' }).trim().min(5, 'Lý do tối thiểu 5 ký tự').max(300) });
 
 const userList = z.object({
-  role: z.enum(['enduser', 'admin']).optional(),
+  role: z.enum(['enduser', 'moderator', 'admin']).optional(),
   status: z.enum(['active', 'locked']).optional(),
   q: z.string().trim().max(60).optional(),
   ...paging,
@@ -21,14 +21,15 @@ const postList = z.object({
   ...paging,
 });
 const reportList = z.object({ state: z.enum(['open', 'reviewing', 'resolved', 'rejected']).optional(), ...paging });
-const roleBody = z.object({ role: z.enum(['enduser', 'admin'], { error: 'role phải là enduser hoặc admin' }) });
+const roleBody = z.object({ role: z.enum(['enduser', 'moderator', 'admin'], { error: 'role phải là enduser, moderator hoặc admin' }) });
 const transitionBody = z.object({
   to: z.enum(['reviewing', 'resolved', 'rejected'], { error: 'to phải là reviewing, resolved hoặc rejected' }),
   note: z.string().trim().max(500).optional(),
 }).refine((o) => o.to === 'reviewing' || (o.note && o.note.length >= 3), { message: 'Cần ghi chú khi kết thúc báo cáo', path: ['note'] });
 
 // Toàn bộ /admin/*: chưa đăng nhập 401, không phải admin 403
-router.use(auth, requireRole('admin'));
+router.use(auth, requireRole('admin', 'moderator'));
+const adminOnly = requireRole('admin'); // khóa/mở khóa tài khoản, đổi vai trò: chỉ admin
 
 const list = (fn) => asyncHandler(async (req, res) => {
   const { items, meta } = await fn(req.valid.query);
@@ -99,9 +100,9 @@ const one = (fn) => asyncHandler(async (req, res) => res.json({ data: await fn(r
  */
 router.get('/users', query(userList), list(service.listUsers));
 router.get('/users/:id', ids('id'), one((req) => service.getUser(req.params.id)));
-router.post('/users/:id/lock', ids('id'), body(reason), one((req) => service.lockUser(req.user, req.params.id, req.body.reason)));
-router.post('/users/:id/unlock', ids('id'), one((req) => service.unlockUser(req.user, req.params.id)));
-router.patch('/users/:id/role', ids('id'), body(roleBody), one((req) => service.setRole(req.user, req.params.id, req.body.role)));
+router.post('/users/:id/lock', adminOnly, ids('id'), body(reason), one((req) => service.lockUser(req.user, req.params.id, req.body.reason)));
+router.post('/users/:id/unlock', adminOnly, ids('id'), one((req) => service.unlockUser(req.user, req.params.id)));
+router.patch('/users/:id/role', adminOnly, ids('id'), body(roleBody), one((req) => service.setRole(req.user, req.params.id, req.body.role)));
 
 /**
  * @openapi
@@ -192,5 +193,6 @@ router.get('/reports/:id', ids('id'), one((req) => service.getReport(req.params.
 router.post('/reports/:id/transition', ids('id'), body(transitionBody), one((req) => service.transitionReport(req.user, req.params.id, req.body.to, req.body.note)));
 
 router.get('/stats', one(() => service.stats()));
+router.use(require('./admin-extra.routes'));
 
 module.exports = router;

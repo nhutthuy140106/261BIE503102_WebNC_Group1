@@ -9,7 +9,7 @@ export interface AdminUser {
   name: string;
   phone: string;
   block: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'moderator';
   status: 'active' | 'locked';
   avatar: string | null;
   createdAt: string;
@@ -138,7 +138,7 @@ export class AdminService {
           name: String(u['name'] ?? ''),
           phone: String(u['phone'] ?? ''),
           block: String(u['area'] ?? ''),
-          role: u['role'] === 'admin' ? ('admin' as const) : ('user' as const),
+          role: u['role'] === 'admin' ? ('admin' as const) : u['role'] === 'moderator' ? ('moderator' as const) : ('user' as const),
           status: u['status'] === 'locked' ? ('locked' as const) : ('active' as const),
           avatar: (u['avatar'] as string | null) ?? null,
           createdAt: String(u['createdAt'] ?? ''),

@@ -17,6 +17,21 @@
         </header>
         <p class="meta">{{ r.reporterName }} báo cáo · {{ target(r.targetType) }} <code>{{ r.targetId }}</code></p>
         <p class="detail">{{ r.detail }}</p>
+        <button type="button" class="ctxbtn" (click)="toggleCtx(r)">{{ ctx()[r._id] ? 'Ẩn bối cảnh' : 'Xem bối cảnh' }}</button>
+        @if (ctx()[r._id] === 'loading') { <div class="sk" style="height: 52px"></div> }
+        @else if (ctx()[r._id] === 'none') { <p class="note">Không tải được bối cảnh.</p> }
+        @else if (c(r); as x) {
+          <div class="ctx">
+            @if (!x.found) { <p class="note">Đối tượng bị báo cáo không còn tồn tại.</p> } @else {
+              <b>{{ x.title }}</b>
+              <span class="sub">Trạng thái: {{ x.status }}@if (x.price) { · {{ x.price | vnd }} }</span>
+              @if (x.owner; as ow) { <span>Chủ: <a class="lnk" [routerLink]="['/admin/users', ow._id]">{{ ow.name }}</a> ({{ ow.phone }}) @if (ow.status === 'locked') { <span class="pill bad">Đã khóa</span> }</span> }
+              @if (x.buyer && x.seller) { <span>Mua: <a class="lnk" [routerLink]="['/admin/users', x.buyer._id]">{{ x.buyer.name }}</a> · Bán: <a class="lnk" [routerLink]="['/admin/users', x.seller._id]">{{ x.seller.name }}</a></span> }
+              <span class="sub">{{ x.reportsAboutTarget }} báo cáo về đối tượng này</span>
+              @if (x.orderId) { <a class="lnk" [routerLink]="['/admin/orders', x.orderId]">Mở đơn để xem chi tiết và phân xử →</a> }
+            }
+          </div>
+        }
 
         @if (r.state === 'open' || r.state === 'reviewing') {
           <label [for]="'n' + r._id">Ghi chú của admin</label>

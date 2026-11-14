@@ -1,0 +1,40 @@
+<h1>Hộp thư hỗ trợ</h1>
+<p class="lead">Câu hỏi và góp ý người dùng gửi từ trang Trợ giúp. Trả lời xong, họ nhận thông báo trong ứng dụng.</p>
+<div class="tabs" role="tablist">
+  @for (t of tabs; track t.k) { <button type="button" role="tab" [attr.aria-selected]="tab() === t.k" [class.on]="tab() === t.k" (click)="pick(t.k)">{{ t.t }}</button> }
+</div>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+
+<div class="split">
+  <div class="inbox">
+    @if (rows(); as list) {
+      @for (t of list; track t._id) {
+        <button type="button" class="it" [class.on]="sel()?._id === t._id" (click)="open(t)">
+          <span class="r1"><b>{{ t.user.name }}</b><span class="sub">{{ t.updatedAt | date: 'dd/MM HH:mm' }}</span></span>
+          <span class="r2"><span class="mono">{{ t.code }}</span> · {{ topic(t.topic) }}</span>
+          <span class="r3">{{ last(t) }}</span>
+        </button>
+      } @empty { <p class="empty">Không có phiếu nào ở mục này.</p> }
+    } @else { <div class="sk"></div><div class="sk"></div><div class="sk"></div> }
+  </div>
+
+  <section class="thread panel">
+    @if (sel(); as t) {
+      <header>
+        <div><h2><span class="mono">{{ t.code }}</span> <span class="pill" [ngClass]="tone(t.state)">{{ state(t.state) }}</span></h2>
+          <p class="sub">{{ t.user.name }} · {{ t.user.phone }} · {{ topic(t.topic) }} · <a class="lnk" [routerLink]="['/admin/users', t.user._id]">Xem hồ sơ</a></p></div>
+        @if (t.state !== 'closed') { <button type="button" class="btn" [disabled]="busy()" (click)="close()">Đóng phiếu</button> }
+      </header>
+      <ul class="msgs">
+        @for (m of t.messages; track m.at) { <li [class.staff]="m.by === 'staff'"><span class="sub">{{ m.by === 'staff' ? 'AntGo' : t.user.name }} · {{ m.at | date: 'dd/MM HH:mm' }}</span><p>{{ m.text }}</p></li> }
+      </ul>
+      @if (t.state !== 'closed') {
+        <form (ngSubmit)="send()">
+          <div class="field"><label for="rp">Trả lời</label><textarea id="rp" name="rp" rows="3" [(ngModel)]="text" maxlength="1500" placeholder="Viết ngắn gọn, lịch sự, nêu rõ bước tiếp theo"></textarea>
+            @if (textErr) { <span class="e" role="alert">Vui lòng nhập nội dung trả lời.</span> }</div>
+          <div class="btns"><button type="submit" class="btn main" [disabled]="busy()">Gửi trả lời</button></div>
+        </form>
+      } @else { <p class="note">Phiếu đã đóng. Người dùng cần gửi phiếu mới nếu còn thắc mắc.</p> }
+    } @else { <p class="empty">Chọn một phiếu bên trái để xem và trả lời.</p> }
+  </section>
+</div>

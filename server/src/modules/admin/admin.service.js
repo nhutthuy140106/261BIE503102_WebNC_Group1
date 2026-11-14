@@ -132,7 +132,8 @@ async function listReports(q) {
 async function getReport(id) {
   const r = await Report.findById(id).populate('reporter', 'name phone');
   if (!r) throw ApiError.notFound('Không tìm thấy báo cáo');
-  return r;
+  const { reportContext } = require('./admin-extra.service'); // tải muộn: tránh vòng phụ thuộc
+  return { ...r.toJSON(), context: await reportContext(r) };
 }
 
 async function transitionReport(admin, id, to, note) {

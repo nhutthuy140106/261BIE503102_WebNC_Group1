@@ -13,7 +13,7 @@ export interface User {
   /** Số dư AntXu */
   xu?: number;
   /** Vai trò do SERVER quyết định, client không được tự gán */
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'moderator';
 }
 
 export type Block = 'A' | 'B' | 'C' | 'D';

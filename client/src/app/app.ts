@@ -14,7 +14,7 @@ export class App implements OnInit {
   private readonly router = inject(Router);
   private readonly saved = inject(SavedService);
 
-  /** Trang giới thiệu và đăng nhập tự có bố cục toàn màn hình nên không dùng header/footer chung. */
+  /** Trang giới thiệu, đăng nhập và khu Quản trị tự có bố cục toàn màn hình nên không dùng header/footer chung. */
   private static readonly BARE_PAGES = ['/welcome', '/auth/login', '/auth/register', '/auth/forgot'];
   protected readonly bare = signal(false);
 
@@ -24,7 +24,9 @@ export class App implements OnInit {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((e) => {
-        this.bare.set(App.BARE_PAGES.includes(e.urlAfterRedirects.split(/[?#]/)[0]));
+        const path = e.urlAfterRedirects.split(/[?#]/)[0];
+        // khu Quản trị có khung riêng (thanh bên), không dùng header/footer của phía Mua
+        this.bare.set(App.BARE_PAGES.includes(path) || path === '/admin' || path.startsWith('/admin/'));
         // khách đã bấm ♡ rồi đăng nhập: về lại trang thì lưu bài đó
         if (this.auth.isLoggedIn()) this.saved.applyResume();
       });

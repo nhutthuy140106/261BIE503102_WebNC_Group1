@@ -1,0 +1,49 @@
+<h1>Voucher &amp; Xu</h1>
+<p class="lead">Danh mục voucher người dùng đổi bằng AntXu. Muốn cộng/trừ Xu cho một người, vào hồ sơ người đó ở mục Người dùng.</p>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+@if (ok()) { <div class="okmsg" role="status">{{ ok() }}</div> }
+
+<div class="grid2">
+  <div>
+    @if (rows(); as list) {
+      <table class="tbl">
+        <thead><tr><th>Voucher</th><th>Ưu đãi</th><th class="num">Giá đổi</th><th class="num">Đã đổi</th><th>Trạng thái</th>@if (isAdmin()) { <th></th> }</tr></thead>
+        <tbody>
+          @for (v of list; track v._id) {
+            <tr>
+              <td data-l="Voucher"><b>{{ v.title }}</b><div class="sub"><span class="mono">{{ v.cid }}</span> · {{ v.cond || 'Không điều kiện' }}</div></td>
+              <td data-l="Ưu đãi">{{ v.ship ? 'Miễn phí giao' : '−' + (v.amount | vnd) }}@if (v.min) { <div class="sub">đơn từ {{ v.min | vnd }}</div> }</td>
+              <td data-l="Giá đổi" class="num">{{ v.cost }} Xu</td>
+              <td data-l="Đã đổi" class="num">{{ v.redeemed }}</td>
+              <td data-l="Trạng thái"><span class="pill" [class.ok]="v.active" [class.mute]="!v.active">{{ v.active ? 'Đang bán' : 'Đã tắt' }}</span></td>
+              @if (isAdmin()) { <td class="act"><button type="button" class="btn" (click)="edit(v)">Sửa</button> <button type="button" class="btn" [class.danger]="v.active" [disabled]="busy()" (click)="toggle(v)">{{ v.active ? 'Tắt' : 'Bật' }}</button></td> }
+            </tr>
+          } @empty { <tr><td colspan="6"><p class="empty">Chưa có voucher.</p></td></tr> }
+        </tbody>
+      </table>
+    } @else { <div class="sk"></div><div class="sk"></div><div class="sk"></div> }
+  </div>
+
+  @if (isAdmin()) {
+    <section class="panel">
+      <h2>{{ editing() ? 'Sửa voucher' : 'Tạo voucher mới' }}</h2>
+      <form (ngSubmit)="save()">
+        <div class="row2">
+          <div class="field"><label for="vc">Mã (không đổi được sau khi tạo)</label><input id="vc" name="vc" [(ngModel)]="f.cid" [disabled]="!!editing()" placeholder="vd. tet30" maxlength="20" /></div>
+          <div class="field"><label for="vk">Loại ưu đãi</label><select id="vk" name="vk" [(ngModel)]="f.kind"><option value="amount">Giảm tiền</option><option value="ship">Miễn phí giao</option></select></div>
+        </div>
+        <div class="field"><label for="vt">Tên voucher</label><input id="vt" name="vt" [(ngModel)]="f.title" maxlength="80" placeholder="vd. Giảm 30.000đ dịp Tết" /></div>
+        <div class="field"><label for="vd">Điều kiện hiển thị</label><input id="vd" name="vd" [(ngModel)]="f.cond" maxlength="120" placeholder="vd. Đơn từ 200.000đ" /></div>
+        <div class="row2">
+          @if (f.kind === 'amount') { <div class="field"><label for="va">Giảm (đ)</label><input id="va" type="number" name="va" [(ngModel)]="f.amount" min="1000" step="1000" /></div> }
+          <div class="field"><label for="vm">Đơn tối thiểu (đ)</label><input id="vm" type="number" name="vm" [(ngModel)]="f.min" min="0" step="1000" /></div>
+          <div class="field"><label for="vx">Giá đổi (Xu)</label><input id="vx" type="number" name="vx" [(ngModel)]="f.cost" min="1" step="1" /></div>
+        </div>
+        @if (formErr) { <p class="e" role="alert">{{ formErr }}</p> }
+        <div class="btns">@if (editing()) { <button type="button" class="btn" (click)="reset()">Hủy sửa</button> }<button type="submit" class="btn main" [disabled]="busy()">{{ editing() ? 'Lưu thay đổi' : 'Tạo voucher' }}</button></div>
+      </form>
+    </section>
+  } @else {
+    <section class="panel"><p class="note">Chỉ quản trị viên được tạo hoặc sửa voucher. Người kiểm duyệt chỉ xem.</p></section>
+  }
+</div>

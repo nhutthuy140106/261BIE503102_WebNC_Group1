@@ -1,0 +1,38 @@
+<h1>Đơn &amp; tranh chấp</h1>
+<p class="lead">Theo dõi mọi đơn trong khu. Khi khách báo vấn đề mà người bán không trả lời hoặc từ chối, admin vào xem và phân xử.</p>
+<div class="bar">
+  <input type="search" name="q" [(ngModel)]="q" (ngModelChange)="filter(300)" placeholder="Tìm theo mã đơn (vd. AG-O1012)" aria-label="Tìm theo mã đơn" />
+  <select name="state" [(ngModel)]="state" (ngModelChange)="filter()" aria-label="Lọc trạng thái">
+    <option value="">Mọi trạng thái</option>
+    @for (s of states; track s[0]) { <option [value]="s[0]">{{ s[1] }}</option> }
+  </select>
+  <select name="issue" [(ngModel)]="issue" (ngModelChange)="filter()" aria-label="Lọc báo vấn đề">
+    <option value="">Mọi đơn</option><option value="open">Báo vấn đề đang chờ xử lý</option><option value="any">Có báo vấn đề (mọi trạng thái)</option>
+  </select>
+</div>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+
+@if (rows(); as list) {
+  @if (list.length) {
+    <table class="tbl">
+      <thead><tr><th>Đơn</th><th>Người mua → Người bán</th><th class="num">Tổng tiền</th><th>Trạng thái</th><th>Cần chú ý</th><th>Ngày đặt</th></tr></thead>
+      <tbody>
+        @for (o of list; track o._id) {
+          <tr class="click" [routerLink]="['/admin/orders', o._id]">
+            <td data-l="Đơn"><b class="mono">{{ o.code }}</b><div class="sub">{{ o.title }}</div></td>
+            <td data-l="Người mua → Người bán">{{ o.buyer.name }} → {{ o.seller.name }}</td>
+            <td data-l="Tổng tiền" class="num">{{ o.total | vnd }}</td>
+            <td data-l="Trạng thái"><span class="pill" [ngClass]="tone(o.state)">{{ label(o.state) }}</span></td>
+            <td data-l="Cần chú ý">
+              @if (o.issue) { <span class="pill" [ngClass]="issueTone(o.issue.st)">Báo vấn đề: {{ issueLabel(o.issue.st) }}</span> }
+              @else if (o.cancelPending) { <span class="pill warn">Khách xin hủy</span> }
+              @else { <span class="sub">—</span> }
+            </td>
+            <td data-l="Ngày đặt">{{ o.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <div class="pager"><span>{{ total() }} đơn · Trang {{ page }}/{{ pages() }}</span><button type="button" class="btn" [disabled]="page <= 1" (click)="go(page - 1)">Trước</button><button type="button" class="btn" [disabled]="page >= pages()" (click)="go(page + 1)">Sau</button></div>
+  } @else { <p class="empty">Không có đơn phù hợp.</p> }
+} @else { <div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div> }

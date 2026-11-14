@@ -13,10 +13,11 @@ import { Component } from '@angular/core';
   `,
   styles: [
     `
-      .f { max-width: 520px; margin: 60px auto; text-align: center; display: grid; gap: 10px; }
+      :host { display: block; min-height: 100vh; background: #F3F5F8; padding: 1px 16px; }
+      .f { max-width: 520px; margin: 90px auto; text-align: center; display: grid; gap: 10px; }
       h1 { margin: 0; font-size: 24px; color: #22304A; }
-      p { margin: 0; color: #4b5563; }
-      .go { justify-self: center; margin-top: 8px; padding: 10px 22px; border-radius: 10px; background: #D85A1C; color: #fff; font-weight: 700; }
+      p { margin: 0; color: #667085; }
+      .go { justify-self: center; margin-top: 8px; padding: 10px 22px; border-radius: 10px; background: #1F7A74; color: #fff; font-weight: 700; }
     `,
   ],
 })

@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { AppError } from '../../../core/models/api';
 import { REPORT_REASON_LABEL, ReportReason } from '../../../core/models/social';
 import { AdminReport, AdminService, ReportState } from '../../../core/services/admin';
+import { AdminApi, ReportContext } from '../../../core/services/admin-api';
 
 const TARGET: Record<string, string> = { order: 'Đơn hàng', offer: 'Đề nghị', post: 'Bài đăng', job: 'Việc làm', user: 'Người dùng' };
 
@@ -14,6 +15,9 @@ const TARGET: Record<string, string> = { order: 'Đơn hàng', offer: 'Đề ngh
 })
 export class AdminReports implements OnInit {
   private readonly admin = inject(AdminService);
+  private readonly api = inject(AdminApi);
+  /** Bối cảnh đã tải theo từng báo cáo (bài/đơn/người bị báo, số báo cáo cùng đối tượng) */
+  protected readonly ctx = signal<Record<string, ReportContext | 'loading' | 'none'>>({});
 
   protected readonly tabs: { key: ReportState; label: string }[] = [
     { key: 'open', label: 'Mới' },
@@ -61,6 +65,25 @@ export class AdminReports implements OnInit {
     this.run(this.admin.transition(r._id, to, note), () => {
       this.tab.set(to);
     });
+  }
+
+  protected toggleCtx(r: AdminReport): void {
+    const cur = this.ctx()[r._id];
+    if (cur) {
+      const { [r._id]: _drop, ...rest } = this.ctx();
+      this.ctx.set(rest);
+      return;
+    }
+    this.ctx.update((c) => ({ ...c, [r._id]: 'loading' }));
+    this.api.reportDetail(r._id).subscribe({
+      next: (d) => this.ctx.update((c) => ({ ...c, [r._id]: d.context })),
+      error: () => this.ctx.update((c) => ({ ...c, [r._id]: 'none' })),
+    });
+  }
+
+  protected c(r: AdminReport): ReportContext | null {
+    const v = this.ctx()[r._id];
+    return v && v !== 'loading' && v !== 'none' ? v : null;
   }
 
   protected confirmHide(reason: string): void {

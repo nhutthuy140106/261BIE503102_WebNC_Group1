@@ -1,13 +1,44 @@
-.adm { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; align-items: start; padding: 12px 0 32px; }
-.side { display: grid; align-content: start; gap: 4px; position: sticky; top: 88px; }
-.side h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; margin: 0 12px 8px; }
-.side a { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; font-weight: 500; color: #22304A; }
-.side a .i { width: 18px; height: 18px; fill: currentColor; flex: none; }
-.side a:hover { background: #FBF4F1; }
-.side a.on { background: #22304A; color: #fff; font-weight: 600; }
-.content { min-width: 0; }
-@media (max-width: 800px) {
-  .adm { grid-template-columns: 1fr; gap: 16px; }
-  .side { display: flex; flex-wrap: wrap; position: static; }
-  .side h2 { display: none; }
+/* Bảng màu khu Quản trị (phong cách AntGo: chữ xanh đen, bo 10–12px, phẳng; khác phía Mua ở chỗ màu nhấn là xanh ngọc, cam dành riêng cho "cần xử lý"). */
+:host {
+  --a-bg: #F3F5F8; --a-card: #FFFFFF; --a-line: #E3E8EF; --a-ink: #22304A; --a-mute: #667085;
+  --a-side: #1B2740; --a-side-hover: #26345A; --a-side-ink: #C5D0E4;
+  --a-accent: #1F7A74; --a-accent-soft: #E1F1EF;
+  --a-warn: #D85A1C; --a-warn-ink: #B4440F; --a-warn-soft: #FDEEE4;
+  --a-danger: #B42318; --a-danger-soft: #FDECEA;
+  --a-ok: #1F7A4D; --a-ok-soft: #E6F4EC;
+  display: block; min-height: 100vh; background: var(--a-bg); color: var(--a-ink);
+}
+.adm { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100vh; }
+.side { position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; padding: 18px 12px; background: var(--a-side); color: var(--a-side-ink); }
+.brand { display: flex; align-items: center; gap: 10px; padding: 4px 10px 16px; color: #fff; }
+.brand b { font-size: 18px; letter-spacing: -.01em; }
+.brand span { padding: 2px 8px; border-radius: 999px; background: rgba(255, 255, 255, .14); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.grp { margin: 14px 10px 6px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #8190AE; }
+.side nav { display: grid; gap: 2px; }
+.side nav a { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 9px; font-weight: 500; color: var(--a-side-ink); }
+.side nav a .i { width: 18px; height: 18px; fill: currentColor; flex: none; opacity: .85; }
+.side nav a:hover { background: var(--a-side-hover); color: #fff; }
+.side nav a.on { background: var(--a-accent); color: #fff; font-weight: 600; }
+.dot { margin-left: auto; min-width: 20px; padding: 0 6px; height: 20px; border-radius: 999px; background: var(--a-warn); color: #fff; font-size: 11.5px; font-weight: 700; display: inline-grid; place-items: center; }
+.me { margin-top: auto; padding: 14px 10px 0; border-top: 1px solid rgba(255, 255, 255, .1); display: grid; gap: 10px; }
+.me .who { display: grid; gap: 1px; color: #fff; }
+.me .who small { color: #8190AE; font-size: 12px; }
+.me .links { display: flex; gap: 8px; }
+.me .links a, .me .links button { flex: 1; padding: 8px 10px; border: 1px solid rgba(255, 255, 255, .18); border-radius: 9px; color: var(--a-side-ink); font-weight: 600; font-size: 13px; text-align: center; cursor: pointer; background: transparent; }
+.me .links a:hover, .me .links button:hover { background: var(--a-side-hover); color: #fff; }
+.content { min-width: 0; padding: 28px 36px 48px; max-width: 1240px; }
+.top { display: none; }
+.need { margin: 40px auto; max-width: 520px; padding: 22px; text-align: center; border: 1px solid var(--a-line); border-radius: 12px; background: #fff; }
+.need h2 { margin: 0 0 8px; }
+.need p { margin: 0 0 14px; color: var(--a-mute); }
+.need a { display: inline-block; padding: 10px 20px; border-radius: 10px; background: var(--a-accent); color: #fff; font-weight: 700; }
+@media (max-width: 900px) {
+  .adm { grid-template-columns: 1fr; }
+  .side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px; padding: 10px; }
+  .brand { padding: 0 8px; }
+  .grp, .me .who { display: none; }
+  .side nav { display: flex; flex-wrap: wrap; }
+  .side nav a { padding: 8px 10px; }
+  .me { margin: 0 0 0 auto; padding: 0; border: 0; }
+  .content { padding: 18px 16px 40px; }
 }

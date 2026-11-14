@@ -12,6 +12,8 @@ const verification = require('./verification.service');
 const { release } = require('../shared/order-release');
 const shop = require('./shop.service');
 const postStats = require('../shared/post-stats');
+const settings = require('../shared/setting.model');
+const { stripAccents } = require('../../utils/text');
 const ApiError = require('../../utils/ApiError');
 
 /* ---------------------------------------------------------------- Bài đăng (đồ ăn / đồ dùng / dịch vụ) */
@@ -42,8 +44,18 @@ async function requireVerified(user) {
   if (!(await verification.isApproved(user._id))) throw new ApiError(403, 'NOT_VERIFIED', 'Bạn cần được AntGo xác minh người bán trước khi đăng');
 }
 
+/** Từ khóa cấm do admin đặt: bài/việc chứa từ cấm bị từ chối kèm từ vi phạm */
+async function checkBanned(...texts) {
+  const list = await settings.get('bannedKeywords');
+  if (!list || !list.length) return;
+  const hay = stripAccents(texts.filter(Boolean).join(' '));
+  const hit = list.find((k) => k && hay.includes(stripAccents(k)));
+  if (hit) throw ApiError.validation('Nội dung chứa từ bị cấm', [{ field: 'title', message: `Nội dung chứa từ không được phép: "${hit}". Hãy sửa lại rồi đăng` }]);
+}
+
 async function createPost(user, data) {
   await requireVerified(user);
+  await checkBanned(data.title, data.description);
   const doc = pick(data, POST_FIELDS);
   if (doc.status && !SELLER_STATUS.includes(doc.status)) throw ApiError.validation('Trạng thái bài không hợp lệ', [{ field: 'status', message: 'Chỉ được chọn nháp, đang bán hoặc đóng' }]);
   return Post.create({ ...doc, seller: user._id });
@@ -52,6 +64,7 @@ async function createPost(user, data) {
 async function updatePost(user, id, data) {
   const p = await ownPost(user, id);
   if (p.status === 'hidden') throw ApiError.invalidState('Bài đã bị quản trị gỡ, không sửa được');
+  await checkBanned(data.title, data.description);
   const doc = pick(data, POST_FIELDS);
   if (doc.status && !SELLER_STATUS.includes(doc.status)) throw ApiError.validation('Trạng thái bài không hợp lệ', [{ field: 'status', message: 'Chỉ được chọn nháp, đang bán hoặc đóng' }]);
   p.set(doc);
@@ -96,6 +109,7 @@ const listJobs = (user) => Job.find({ poster: user._id }).sort({ createdAt: -1 }
 
 async function createJob(user, data) {
   await requireVerified(user);
+  await checkBanned(data.title, data.desc);
   return Job.create({ ...pick(data, JOB_FIELDS), poster: user._id });
 }
 

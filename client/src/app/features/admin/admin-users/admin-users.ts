@@ -46,6 +46,10 @@ export class AdminUsers implements OnInit {
     this.load();
   }
 
+  protected isAdmin(): boolean {
+    return this.me()?.role === 'admin';
+  }
+
   protected isSelf(u: AdminUser): boolean {
     return this.me()?._id === u._id;
   }

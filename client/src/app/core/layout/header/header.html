@@ -135,7 +135,7 @@
               <a routerLink="/xu" class="uitem" (click)="userOpen.set(false)"><img class="uxu" src="assets/clean/antxu.png" alt="" />AntXu &amp; voucher<em>{{ xu.balance() }} Xu</em></a>
               <a routerLink="/orders" [queryParams]="{ f: 'history' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#receipt" /></svg>Lịch sử đơn hàng</a>
               <div class="usep"></div>
-              @if (auth.currentUser()?.role === 'admin') {
+              @if (auth.currentUser()?.role === 'admin' || auth.currentUser()?.role === 'moderator') {
                 <a routerLink="/admin" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#shield" /></svg>Quản trị</a>
               }
               <a routerLink="/help" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#p-help" /></svg>Trợ giúp &amp; hỗ trợ</a>

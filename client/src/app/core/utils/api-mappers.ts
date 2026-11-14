@@ -28,7 +28,7 @@ export function userFromApi(u: Raw): User {
     block: areaLabel(u.area),
     avatar: u.avatar || undefined,
     xu: typeof u.xu === 'number' ? u.xu : undefined,
-    role: u.role === 'admin' ? 'admin' : 'user',
+    role: u.role === 'admin' ? 'admin' : u.role === 'moderator' ? 'moderator' : 'user',
     email: u.email || undefined,
     gender: u.gender || undefined,
     birthday: u.birthday || undefined,

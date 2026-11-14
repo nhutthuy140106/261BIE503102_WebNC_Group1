@@ -1,0 +1,41 @@
+<h1>Cài đặt &amp; xuất dữ liệu</h1>
+<p class="lead">Thiết lập chung của hệ thống. Mỗi thay đổi đều được ghi vào nhật ký thao tác.</p>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+@if (ok()) { <div class="okmsg" role="status">{{ ok() }}</div> }
+
+@if (loaded()) {
+  <div class="grid2">
+    <div class="stack">
+      <section class="panel">
+        <h2>Từ khóa bị cấm <small>{{ count('bannedKeywords') }} từ</small></h2>
+        <p class="sub" style="margin: 0 0 10px">Bài hoặc việc có tiêu đề/mô tả chứa từ này sẽ bị từ chối khi đăng hoặc sửa. So khớp không phân biệt hoa thường và dấu.</p>
+        <div class="field"><label for="kw">Mỗi dòng một từ hoặc cụm từ</label><textarea id="kw" name="kw" rows="6" [(ngModel)]="text.bannedKeywords" [readOnly]="!isAdmin()" placeholder="vd. hàng giả"></textarea></div>
+        @if (isAdmin()) { <div class="btns"><button type="button" class="btn main" [disabled]="busy()" (click)="save('bannedKeywords', 'từ khóa cấm')">Lưu từ khóa</button></div> }
+      </section>
+    </div>
+    <div class="stack">
+      <section class="panel">
+        <h2>Khu vực <small>{{ count('areas') }} khu</small></h2>
+        <div class="field"><label for="ar">Mỗi dòng một khu (A, B, Shop 5…)</label><textarea id="ar" name="ar" rows="4" [(ngModel)]="text.areas" [readOnly]="!isAdmin()"></textarea></div>
+        @if (isAdmin()) { <div class="btns"><button type="button" class="btn main" [disabled]="busy()" (click)="save('areas', 'khu vực')">Lưu khu vực</button></div> }
+      </section>
+      <section class="panel">
+        <h2>Danh mục bài <small>{{ count('categories') }} mục</small></h2>
+        <div class="field"><label for="ct">Mỗi dòng một danh mục</label><textarea id="ct" name="ct" rows="5" [(ngModel)]="text.categories" [readOnly]="!isAdmin()"></textarea></div>
+        @if (isAdmin()) { <div class="btns"><button type="button" class="btn main" [disabled]="busy()" (click)="save('categories', 'danh mục')">Lưu danh mục</button></div> }
+        <p class="sub" style="margin-top: 8px">Khu vực và danh mục được công khai ở API <span class="mono">/api/meta</span> để các màn hình lấy về dùng.</p>
+      </section>
+      @if (isAdmin()) {
+        <section class="panel">
+          <h2>Xuất dữ liệu (CSV)</h2>
+          <p class="sub" style="margin: 0 0 10px">File mở được bằng Excel. Mỗi lần xuất đều ghi vào nhật ký.</p>
+          <div class="btns" style="justify-content: flex-start">
+            <button type="button" class="btn" [disabled]="busy()" (click)="download('users')">Người dùng</button>
+            <button type="button" class="btn" [disabled]="busy()" (click)="download('orders')">Đơn hàng</button>
+            <button type="button" class="btn" [disabled]="busy()" (click)="download('reports')">Báo cáo</button>
+          </div>
+        </section>
+      } @else { <section class="panel"><p class="note">Chỉ quản trị viên được sửa cài đặt và xuất dữ liệu. Người kiểm duyệt chỉ xem.</p></section> }
+    </div>
+  </div>
+} @else if (!error()) { <div class="sk"></div><div class="sk"></div> }
