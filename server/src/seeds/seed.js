@@ -19,6 +19,7 @@ const orders = require('../modules/buyer/order/order.service');
 const offers = require('../modules/buyer/offer/offer.service');
 const { USERS, POSTS, JOBS, COMBOS, COMBO_PROMOS, IMG, img } = require('./data');
 const { ENRICH, BANK_BY_NAME } = require('./post-enrich');
+const { addActivity } = require('./activity-extra');
 
 // Mật khẩu tài khoản mẫu lấy từ biến môi trường SEED_PASSWORD (.env), không viết cứng trong repo
 const getPassword = () => {
@@ -98,8 +99,10 @@ async function seed() {
     if (bank && !out.bank && (out.payMethods || []).includes('transfer')) out.bank = bank;
     return out;
   };
+  // Hai bài trùng hẳn bài khác (cùng người bán, cùng nội dung/ảnh) — bỏ khỏi dữ liệu mẫu, giữ bản đầy đủ hơn
+  const DUPLICATE_TITLES = new Set(['Tiệm xôi Yuumi - Nhận đơn đồ ăn sáng', 'Sửa laptop, điện thoại, kiểm tra tận nơi']);
   const ALL_POSTS = [...POSTS.map((d) => enrich({ ...d, ...(CLIENT.extras[d.title] || {}) })),
-    ...CLIENT.extra.map((d, i) => ({ key: `fe${i}`, ...d }))];
+    ...CLIENT.extra.map((d, i) => ({ key: `fe${i}`, ...d }))].filter((d) => !DUPLICATE_TITLES.has(d.title));
   for (const [i, { key, seller, daysAgo, images, promo, ...d }] of ALL_POSTS.entries()) {
     if (promo) promos[key] = promo;
     p[key] = await Post.create({ ...toStock(d), seller: u[seller]._id, images: (images || []).map(img) });
@@ -260,6 +263,7 @@ async function seed() {
   await Job.updateMany({ _id: { $in: [j.meo._id, j.tuoiCay._id, j.thung._id] } }, { status: 'closed' });
   await Job.updateOne({ _id: j.thung._id }, { status: 'done' });
   for (const job of Object.values(j)) await offers.syncOfferCount(job._id);
+  await addActivity(); // đánh giá + đề nghị nhận việc thêm cho web "đã dùng lâu" (seeds/activity-extra.js)
 
   /* ---------- Hỏi đáp công khai ---------- */
   const qa = async (job, author, text, hoursAgo, answerBy, answerText) => {

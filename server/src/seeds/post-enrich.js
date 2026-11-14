@@ -120,7 +120,7 @@ const ENRICH = {
     quickOptions: ['Lấy thìa nhựa', 'Thêm đá lạnh'],
     info: [{ label: 'Hạn dùng', value: 'Giữ ngăn mát, ngon nhất trong 2 ngày kể từ lúc nhận' }],
   }),
-  'Tiệm xôi Yuumi - Nhận đơn đồ ăn sáng': food({
+  'Tiệm xôi Yuumi - Nhận đơn đồ ăn sáng 29/10': food({
     orderWindow: { from: '05:00', to: '09:30', days: [] }, prepMinutes: 10, handover: { from: '05:30', to: '10:00' },
     quickOptions: ['Thêm hành phi', 'Lấy dụng cụ ăn uống'],
     info: [{ label: 'Lưu ý', value: 'Đặt trước 8 giờ sáng để kịp phần, quá giờ có thể hết xôi' }],

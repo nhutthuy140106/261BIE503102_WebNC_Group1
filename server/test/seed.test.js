@@ -123,7 +123,7 @@ test('seed dùng được qua API: Thủy thấy đơn, việc, đánh giá; bà
   }
   const jobs = (await api('GET', '/jobs?limit=100')).body.data;
   assert.ok(jobs.every((j) => j.exactAddress === undefined));
-  assert.equal(jobs.find((j) => j.title.startsWith('Lấy giúp')).offerCount, 2, 'thẻ việc đếm đúng số đề nghị đang chờ');
+  assert.equal(jobs.find((j) => j.title.startsWith('Lấy giúp')).offerCount, 3, 'thẻ việc đếm đúng số đề nghị đang chờ');
 
   const admin = await login('0900000099');
   const stats = (await api('GET', '/admin/stats', admin)).body.data;
