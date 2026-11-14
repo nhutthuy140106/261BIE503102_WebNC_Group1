@@ -7,6 +7,7 @@ const Order = require('../buyer/order/order.model');
 const Offer = require('../buyer/offer/offer.model');
 const Question = require('../buyer/question/question.model');
 const Job = require('../shared/job.model');
+const SellerVerification = require('../seller/verification.model');
 const offers = require('../buyer/offer/offer.service');
 const { notify } = require('../shared/notify');
 const ApiError = require('../../utils/ApiError');
@@ -153,6 +154,20 @@ router.post('/questions/:id/answer', ids('id'), body(z.object({ text: z.string()
   q.answer = { text: req.body.text, by: req.user._id, at: new Date() };
   await q.save();
   res.json({ data: q });
+}));
+
+// Thay cho đội quản trị AntGo khi thử: tự duyệt / từ chối / xóa hồ sơ xác minh người bán CỦA CHÍNH MÌNH (thật thì admin duyệt: /api/admin/seller-verifications)
+router.post('/seller-verification/:action', asyncHandler(async (req, res) => {
+  const { action } = req.params;
+  const cur = await SellerVerification.findOne({ user: req.user._id });
+  if (action === 'reset') { await SellerVerification.deleteOne({ user: req.user._id }); return res.json({ data: { status: 'none' } }); }
+  if (!['approve', 'reject'].includes(action)) throw ApiError.badRequest('action phải là approve, reject hoặc reset');
+  if (!cur) throw ApiError.invalidState('Bạn chưa nộp hồ sơ');
+  cur.status = action === 'approve' ? 'approved' : 'rejected';
+  cur.reviewedAt = new Date();
+  cur.rejectReason = action === 'reject' ? (req.body && req.body.reason) || 'Ảnh giấy tờ chưa rõ, vui lòng chụp lại' : '';
+  await cur.save();
+  res.json({ data: require('../seller/verification.service').present(cur) });
 }));
 
 module.exports = router;

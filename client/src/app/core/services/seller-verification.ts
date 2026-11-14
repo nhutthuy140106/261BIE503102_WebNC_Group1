@@ -40,15 +40,19 @@ export class SellerVerificationService {
 
   // ---- Chỉ dùng cho thanh "Bản mẫu": giả lập phía AntGo duyệt hồ sơ ----
   simulateApprove(): Observable<SellerVerification> {
+    // thật: server có đường dev (chỉ ngoài production) để tự duyệt hồ sơ của chính mình, thay cho admin
+    if (!useMock('seller')) return this.api.post<SellerVerification>('/dev/seller-verification/approve').pipe(tap((v) => this.state.set(v)));
     return this.write({ ...this.read(), status: 'approved', reviewedAt: new Date().toISOString(), rejectReason: undefined });
   }
 
   simulateReject(reason: string): Observable<SellerVerification> {
+    if (!useMock('seller')) return this.api.post<SellerVerification>('/dev/seller-verification/reject', { reason }).pipe(tap((v) => this.state.set(v)));
     return this.write({ ...this.read(), status: 'rejected', reviewedAt: new Date().toISOString(), rejectReason: reason });
   }
 
   /** Xóa hồ sơ mẫu để thử lại từ đầu. */
   simulateReset(): Observable<SellerVerification> {
+    if (!useMock('seller')) return this.api.post<SellerVerification>('/dev/seller-verification/reset').pipe(tap((v) => this.state.set(v)));
     try {
       localStorage.removeItem(this.storageKey);
     } catch {

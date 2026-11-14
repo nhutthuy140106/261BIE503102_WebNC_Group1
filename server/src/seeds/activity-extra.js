@@ -336,6 +336,19 @@ async function addActivity({ dryRun = false } = {}) {
       out.offers++;
     } catch (e) { out.skipped.push(`việc: ${jobTitle} / ${who} (${e.message})`); }
   }
+  /* Xác minh người bán: ai đang có bài hoặc việc thì đã được duyệt sẵn (người mới đăng ký thì phải nộp hồ sơ và chờ admin) */
+  const Verification = require('../modules/seller/verification.model');
+  const owners = new Map();
+  for (const p of await Post.find({}).select('seller type')) owners.set(String(p.seller), p.type);
+  for (const j of jobs) if (!owners.has(String(j.poster))) owners.set(String(j.poster), 'service');
+  for (const u of users) {
+    const type = owners.get(String(u._id));
+    if (!type || u.role === 'admin') continue;
+    if (dryRun) continue;
+    await Verification.updateOne({ user: u._id }, { $setOnInsert: { user: u._id, status: 'approved', reviewedAt: new Date(), submittedAt: new Date(),
+      body: { fullName: u.name, idNumber: '000000000000', idFront: 'mau-mat-truoc.jpg', idBack: 'mau-mat-sau.jpg', selfie: 'mau-chan-dung.jpg', shopName: u.name, shopType: type, intro: '' } } }, { upsert: true });
+  }
+
   /* Nổi bật + Giờ vàng: chỉ điền khi bài chưa có */
   for (const t of PROMOTED_TITLES) {
     const post = postByTitle.get(t);

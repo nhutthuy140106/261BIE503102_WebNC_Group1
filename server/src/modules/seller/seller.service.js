@@ -8,6 +8,7 @@ const Question = require('../buyer/question/question.model');
 const offers = require('../buyer/offer/offer.service');
 const xu = require('../buyer/xu/xu.service');
 const { notify } = require('../shared/notify');
+const verification = require('./verification.service');
 const ApiError = require('../../utils/ApiError');
 
 /* ---------------------------------------------------------------- Bài đăng (đồ ăn / đồ dùng / dịch vụ) */
@@ -28,7 +29,13 @@ async function ownPost(user, id) {
 
 const listPosts = (user) => Post.find({ seller: user._id }).select('+bank').sort({ createdAt: -1 });
 
+/** Chỉ người đã được AntGo duyệt hồ sơ mới đăng bán / đăng việc */
+async function requireVerified(user) {
+  if (!(await verification.isApproved(user._id))) throw new ApiError(403, 'NOT_VERIFIED', 'Bạn cần được AntGo xác minh người bán trước khi đăng');
+}
+
 async function createPost(user, data) {
+  await requireVerified(user);
   const doc = pick(data, POST_FIELDS);
   if (doc.status && !SELLER_STATUS.includes(doc.status)) throw ApiError.validation('Trạng thái bài không hợp lệ', [{ field: 'status', message: 'Chỉ được chọn nháp, đang bán hoặc đóng' }]);
   return Post.create({ ...doc, seller: user._id });
@@ -79,7 +86,10 @@ async function ownJob(user, id) {
 
 const listJobs = (user) => Job.find({ poster: user._id }).sort({ createdAt: -1 });
 
-const createJob = (user, data) => Job.create({ ...pick(data, JOB_FIELDS), poster: user._id });
+async function createJob(user, data) {
+  await requireVerified(user);
+  return Job.create({ ...pick(data, JOB_FIELDS), poster: user._id });
+}
 
 async function updateJob(user, id, data) {
   const job = await ownJob(user, id);

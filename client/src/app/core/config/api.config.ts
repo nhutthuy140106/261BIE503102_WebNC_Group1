@@ -38,8 +38,7 @@ export type ServiceName =
 
 /** `false` = service đó gọi API thật dù USE_MOCK còn bật; `true` = ép mock. */
 export const MOCK_OVERRIDES: Partial<Record<ServiceName, boolean>> = {
-  // Khu Bán & Đăng việc chưa có endpoint thật (decisions F5) → vẫn mock
-  seller: true,
+  // Khu Bán & Đăng việc đã có API thật (/api/seller) → theo cờ chung ?mock=0|1, không còn ép mock
 };
 
 export function useMock(name: ServiceName): boolean {

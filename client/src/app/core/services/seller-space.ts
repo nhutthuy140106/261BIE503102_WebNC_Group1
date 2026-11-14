@@ -1,8 +1,10 @@
 import { Deadline, LIMITS } from '../utils/countdown';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, catchError, map, of, switchMap, tap } from 'rxjs';
-import { DATASET_BASE } from '../config/api.config';
+import { Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { DATASET_BASE, useMock } from '../config/api.config';
+import { AppError } from '../models/api';
+import { mergeServerSpace } from '../utils/seller-mappers';
 import { OFFER_STATE_LABEL, Offer } from '../models/offer';
 import { CreateOrderBody, Order } from '../models/order';
 import { Post, PostKind } from '../models/post';
@@ -116,6 +118,10 @@ const NEXT: Record<string, SellerOrderState> = {
   // giặt sấy, sửa chữa
   pickUp: 'picked', quote: 'pricing', approveQuote: 'preparing', rejectQuote: 'cancelled', returned: 'done',
 };
+/** Hành động của khu Bán → /api/seller/orders/:id/:action (bước báo giá giặt sấy / sửa chữa chưa có ở server) */
+const LIVE_ORDER_ACT: Partial<Record<SellerOrderAct, string>> = {
+  confirm: 'confirm', prepare: 'prepare', deliver: 'deliver', ready: 'ready', complete: 'complete', decline: 'decline', approveCancel: 'approveCancel', keepOrder: 'keepOrder', surcharge: 'surcharge',
+};
 /** pickUp / quote / approveQuote / rejectQuote / returned: luồng giặt sấy, sửa chữa (approveQuote, rejectQuote = khách trả lời giá, phía Mua bấm; bản mẫu giả lập) */
 export type SellerOrderAct = 'confirm' | 'decline' | 'prepare' | 'deliver' | 'ready' | 'complete' | 'approveCancel' | 'keepOrder' | 'surcharge' | 'pickUp' | 'quote' | 'approveQuote' | 'rejectQuote' | 'returned';
 
@@ -159,6 +165,12 @@ export class SellerSpaceService {
   /** khớp trường `version` trong datasets/seller-space.json */
   private static readonly VERSION = '2026-11-10-c';
 
+  /** Chế độ thật (?mock=0): Giao dịch, Bài đăng, Việc lấy từ server; dữ liệu chỉ có ở máy lưu riêng, không lẫn với bản mẫu */
+  private readonly live = !useMock('seller');
+  private get dbName(): string {
+    return this.live ? SellerSpaceService.NAME + '-real' : SellerSpaceService.NAME;
+  }
+
   private readonly state = signal<SellerSpace | null>(null);
   readonly ready = computed(() => this.state() !== null);
 
@@ -185,9 +197,11 @@ export class SellerSpaceService {
     // tab phía Mua vừa đặt đơn / đổi đơn: trang Bán đang mở thấy ngay, không cần tải lại
     this.db.changes.subscribe((name) => {
       if (name === 'offers' || name === 'questions') return this.refreshShared();
-      if (name !== SellerSpaceService.NAME || !this.state()) return;
+      if (name !== this.dbName || !this.state()) return;
       this.db.list<SellerSpace>(name).subscribe((rows) => rows[0] && this.state.set(structuredClone(rows[0])));
     });
+    // thật: đơn / đề nghị mới của khách đến server, trang Bán đang mở tự cập nhật sau mỗi 20 giây
+    if (this.live && typeof window !== 'undefined') setInterval(() => this.state() && this.auth.isLoggedIn() && this.syncServer().subscribe(), 20000);
   }
 
   readonly orders = computed<SellerOrderView[]>(() =>
@@ -320,6 +334,7 @@ export class SellerSpaceService {
   }
 
   private taskDeadline(t: SellerTask): Deadline | null {
+    if (this.live) return null; // thật: hạn xử lý do server tính (chưa có), không hiện đếm ngược giả
     if (t.orderId && (t.type === 'order' || t.type === 'cancel' || t.type === 'step')) {
       const o = this.state()?.orders.find((x) => x.id === t.orderId);
       return o ? this.orderDeadline(o) : null;
@@ -340,7 +355,8 @@ export class SellerSpaceService {
    * việc chưa chọn người thì đóng và báo người đề nghị · người làm báo xong thì tự xác nhận hoàn thành.
    */
   private expire(): void {
-    if (!this.state()) return;
+    // thật: việc tự hủy / tự xác nhận khi quá hạn phải do server làm (chưa có) — không để trình duyệt tự bấm thay người bán
+    if (!this.state() || this.live) return;
     const now = this.now();
     for (const t of this.tasks()) {
       const d = t.deadline;
@@ -405,8 +421,36 @@ export class SellerSpaceService {
   /** Nạp dữ liệu (lần đầu đọc JSON, sau đó lấy bản đã lưu trong trình duyệt) */
   /** Đọc lại đề nghị, hỏi đáp từ kho chung */
   private refreshShared(): void {
+    if (this.live) {
+      if (!this.auth.isLoggedIn()) return;
+      this.offerStore.all().subscribe({ next: (rows) => this.sharedOffers.set(rows), error: () => undefined });
+      // hỏi đáp của từng việc tôi đăng
+      this.buyerApi.myPosts().pipe(
+        switchMap((l) => {
+          const jobs = l.filter((p) => p.kind === 'job');
+          return jobs.length ? forkJoin(jobs.map((j) => this.questionStore.list(j._id))) : of([] as Question[][]);
+        }),
+      ).subscribe({ next: (rows) => this.sharedQuestions.set(rows.flat()), error: () => undefined });
+      return;
+    }
     this.offerStore.all().subscribe((rows) => this.sharedOffers.set(rows));
     this.db.list<Question>('questions').subscribe((rows) => this.sharedQuestions.set(rows));
+  }
+
+  /** Chế độ thật: đọc lại đơn / bài / việc từ server và ghép vào khu Bán */
+  private syncServer(): Observable<unknown> {
+    if (!this.live || !this.auth.isLoggedIn()) return of(null);
+    return forkJoin([this.buyerApi.incomingSellerOrders(), this.buyerApi.myPosts()]).pipe(
+      tap(([orders, posts]) => {
+        const cur = this.state();
+        if (!cur) return;
+        const next = mergeServerSpace(cur, orders, posts);
+        this.state.set(next);
+        this.db.save(this.dbName, [next]);
+        this.refreshShared();
+      }),
+      catchError(() => of(null)),
+    );
   }
 
   /** Người nhận việc vừa gửi đề nghị hoặc câu hỏi ở phía Mua: báo người đăng, đưa vào Cần bạn xử lý */
@@ -421,12 +465,15 @@ export class SellerSpaceService {
     this.refreshShared();
     const cur = this.state();
     if (cur) return of(cur);
-    return this.db.list<SellerSpace>(SellerSpaceService.NAME).pipe(
+    // thật: lần đầu chưa có bản lưu riêng nên đọc bộ mẫu làm khung (giờ mở cửa, chat…), rồi thay phần giao dịch bằng dữ liệu server
+    const stored = this.live ? this.db.list<SellerSpace>(this.dbName).pipe(catchError(() => of([] as SellerSpace[]))) : this.db.list<SellerSpace>(this.dbName);
+    return stored.pipe(
       switchMap((rows) => (rows[0]?.version === SellerSpaceService.VERSION ? of(structuredClone(rows[0])) : this.reset(rows[0]?.posts))),
       tap((s) => {
         this.state.set(s);
         this.fillTimes();
       }),
+      switchMap((s) => (this.live ? this.syncServer().pipe(map(() => this.state() ?? s)) : of(s))),
     );
   }
 
@@ -437,7 +484,7 @@ export class SellerSpaceService {
       map((s) => (keepPosts?.length ? { ...s, posts: [...keepPosts.filter((p) => !s.posts.some((x) => x.id === p.id)), ...s.posts] } : s)),
       tap((s) => {
         this.state.set(s);
-        this.db.save(SellerSpaceService.NAME, [s]);
+        this.db.save(this.dbName, [s]);
       }),
     );
   }
@@ -450,7 +497,7 @@ export class SellerSpaceService {
     const next = structuredClone(s);
     fn(next);
     this.state.set(next);
-    this.db.save(SellerSpaceService.NAME, [next]);
+    this.db.save(this.dbName, [next]);
   }
 
   setPost(id: string, patch: Partial<SellerPost>): void {
@@ -666,6 +713,8 @@ export class SellerSpaceService {
 
   /** Khách đặt bài có liên kết: thêm đơn vào Giao dịch. Trả về true nếu đơn thuộc một bài của khu Bán */
   receiveOrder(order: Order, post: Post, body: CreateOrderBody): Observable<boolean> {
+    // thật: đơn nằm ở server, khu Bán đọc về qua syncServer (không tự ghép bản sao ở máy)
+    if (this.live) return this.syncServer().pipe(map(() => false));
     return this.load().pipe(
       map(() => {
         const sp = this.posts().find((p) => p.buyerPostId === post._id);
@@ -688,6 +737,7 @@ export class SellerSpaceService {
 
   /** Người mua đổi đơn (hủy, xin hủy, duyệt giá, phụ thu, đã nhận…): đơn phía Bán đổi theo */
   syncFromBuyer(order: Order): void {
+    if (this.live) return void this.syncServer().subscribe();
     this.load().subscribe({
       next: () =>
         this.patch((s) => {
@@ -722,6 +772,15 @@ export class SellerSpaceService {
   orderAct(id: string, a: SellerOrderAct, data: { reason?: string; amount?: number; lines?: { name: string; qty: number; price: number }[] } = {}): string {
     const o = this.orders().find((x) => x.id === id);
     if (!o) return '';
+    if (this.live) {
+      const act = LIVE_ORDER_ACT[a];
+      if (!act) return 'Bước báo giá (giặt sấy, sửa chữa) chưa chạy ở chế độ thật — mở ?mock=1 để thử.';
+      this.buyerApi.sellerOrderAct(id, act, data).subscribe({
+        next: () => this.syncServer().subscribe(),
+        error: (e: unknown) => this.notifications.push(`Không thực hiện được: ${e instanceof AppError ? e.message : 'lỗi không rõ'}`, `/seller/orders/${id}`),
+      });
+      return this.orderMessage(o, a, data);
+    }
     this.patch((s) => {
       const t = s.orders.find((x) => x.id === id)!;
       if (t.buyerOrderId) {
@@ -757,6 +816,11 @@ export class SellerSpaceService {
       if (!t.buyerOrderId && a === 'confirm' && t.kind !== 'food') t.items.forEach((i) => stockBy(i.name, -i.qty, t.kind === 'goods'));
     });
     this.syncToBuyer(id, a, data);
+    return this.orderMessage(o, a, data);
+  }
+
+  /** Câu báo hiện ở toast sau khi người bán đổi bước đơn */
+  private orderMessage(o: SellerOrderView, a: SellerOrderAct, data: { amount?: number }): string {
     return {
       confirm: `Đã xác nhận ${o.code} — ${o.buyer.name} được báo, đơn vào lịch`, decline: `Đã từ chối ${o.code} — khách được báo và có thể đặt nơi khác`,
       prepare: 'Đã chuyển sang Đang thực hiện', deliver: 'Đã báo khách: đơn đang được giao', ready: 'Đã báo khách đến lấy', complete: `${o.code} đã hoàn thành`,

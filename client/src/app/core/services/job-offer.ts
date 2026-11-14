@@ -4,6 +4,7 @@ import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { CreateOfferBody, Offer, OfferAction } from '../models/offer';
 import { offerFromApi } from '../utils/api-mappers';
+import { posterOfferFromApi } from '../utils/seller-mappers';
 import { applyAction, canDo } from '../utils/offer-state';
 import { Post } from '../models/post';
 import { ApiService } from './api';
@@ -40,6 +41,8 @@ export class JobOfferService {
 
   /** Mọi đề nghị trong kho */
   all(): Observable<Offer[]> {
+    // thật: đề nghị gửi tới việc của TÔI (phía người đăng việc); mẫu: cả kho chung
+    if (!useMock('seller')) return this.api.get<unknown[]>('/seller/offers').pipe(map((l) => l.map(posterOfferFromApi)));
     return this.db.list<Offer>(COLLECTION);
   }
 
@@ -150,6 +153,12 @@ export class JobOfferService {
    * Chưa có API (chỉ dữ liệu mẫu), giống các bước khác của phía Bán.
    */
   posterAct(id: string, a: 'choose' | 'reject' | 'confirmDone' | 'rate', data: { exact?: string; head?: number; stars?: number; text?: string } = {}): Observable<Offer> {
+    if (!useMock('seller')) {
+      // thật: chọn / từ chối / xác nhận hoàn thành do server xử lý (đổi trạng thái, loại các đề nghị khác, cộng Xu, báo người làm)
+      if (a !== 'rate') return this.api.post<unknown>(`/seller/offers/${id}/${a}`).pipe(map(posterOfferFromApi));
+      // người đăng việc đánh giá người làm: server chưa có API này → chỉ ghi nhận trên màn hình
+      return this.all().pipe(map((rows) => ({ ...(rows.find((r) => r._id === id) as Offer), posterRated: { stars: data.stars ?? 5, text: data.text ?? '' } })));
+    }
     return this.all().pipe(
       map((rows) => {
         const cur = rows.find((r) => r._id === id);

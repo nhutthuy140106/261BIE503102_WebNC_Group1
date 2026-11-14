@@ -13,6 +13,7 @@ import { SellerService } from '../../../core/services/seller';
 import { cleaningPrice, formToPostFields, unpricedService } from './post-mapper';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
+import { useMock } from '../../../core/config/api.config';
 import {
   AMENITIES, ASK_QUICK, ASK_TYPES, BLOCKS, GENERIC_PLACES, REPAIR_PLACES, CATS, DRINK_UNITS, FOOD_UNITS, GOODS_UNITS, SVC_UNITS, ymd, CONDITIONS, DAYS, FOOD_TAGS, FormType, ICE, JOB_UNITS, PRICE_TYPES, Q_TYPES, SVC_PLACES, SVC_PRESETS, SVC_TIMES, SWEET,
   choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, windowGroup, menuGroup, datesBetween, toDrinkSizes, toGenericSpec, toGenericOptions, toJobWindows, toOrderOptions,
@@ -212,7 +213,11 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     this.seller.load().subscribe(() => {
       const id = this.route.snapshot.paramMap.get('id');
       const p = id ? this.seller.posts().find((x) => x.id === id) : undefined;
-      if (p) {
+      if (p && !p.form && !useMock('seller')) {
+        // bài lấy từ server không kèm dữ liệu form đăng bài: mở sửa rồi lưu sẽ ghi đè bằng form trống
+        this.toast.show('Bài này chưa có dữ liệu form để sửa ở đây. Bạn có thể tạm ngưng, đổi giá hoặc xóa bài ở danh sách.');
+        this.router.navigate(['/seller/posts']);
+      } else if (p) {
         this.editId.set(p.id);
         this.setType(p.formType ?? (p.kind === 'food' ? 'food' : p.kind), false);
         this.restore(p);

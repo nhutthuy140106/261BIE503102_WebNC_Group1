@@ -121,6 +121,8 @@ export function jobFromApi(j: Raw): Post {
       offers: j.offerCount ?? 0,
       status: j.status === 'open' ? 'open' : 'taken',
       windows: j.windows ?? [],
+      head: j.headcount ?? undefined,
+      building: j.exactAddress || undefined,
     },
   };
 }

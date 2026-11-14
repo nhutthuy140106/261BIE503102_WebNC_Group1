@@ -32,7 +32,14 @@ before(async () => {
   await require('./fixture')();
   server = require('../src/app').listen(0);
   base = `http://localhost:${server.address().port}/api`;
-  for (const [k, p] of [['thuy', '0900000001'], ['lan', '0900000002'], ['hoa', '0900000004'], ['quoc', '0900000005']]) tok[k] = await login(p);
+  for (const [k, p] of [['thuy', '0900000001'], ['lan', '0900000002'], ['hoa', '0900000004'], ['quoc', '0900000005'], ['admin', '0900000099']]) tok[k] = await login(p);
+  // Bếp Cô Lan và Chị Hoa đã được duyệt xác minh người bán; Quốc Anh chưa nộp
+  const User = mongoose.model('User');
+  const Verification = require('../src/modules/seller/verification.model');
+  for (const phone of ['0900000002', '0900000004']) {
+    const u = await User.findOne({ phone });
+    await Verification.create({ user: u._id, status: 'approved', body: { fullName: u.name, idNumber: '012345678901', idFront: 'a.jpg', idBack: 'b.jpg', selfie: 'c.jpg', shopName: u.name, shopType: 'food' } });
+  }
 });
 after(async () => { server.close(); await mongoose.disconnect(); await mongod.stop(); });
 
@@ -205,4 +212,38 @@ test('người đăng việc từ chối một đề nghị; đóng/mở việc;
   assert.equal((await api('POST', `/seller/questions/${q._id}/answer`, { token: hoa, body: { text: 'Bé 8 tháng nhé' } })).body.data.answer.text, 'Bé 8 tháng nhé');
 
   assert.equal((await api('DELETE', `/seller/jobs/${job._id}`, { token: hoa })).status, 204);
+});
+
+const verifyBody = (extra = {}) => ({ fullName: 'Quốc Anh', idNumber: '079123456789', idFront: 'truoc.jpg', idBack: 'sau.jpg', selfie: 'chan-dung.jpg', shopName: 'Sửa xe Quốc Anh', shopType: 'service', intro: 'Sửa xe đạp, xe máy tại nhà', ...extra });
+
+test('xác minh người bán: chưa duyệt thì không đăng được; nộp hồ sơ → admin duyệt → đăng được', async () => {
+  const q = tok.quoc;
+  assert.equal((await api('GET', '/seller/verification', { token: q })).body.data.status, 'none');
+  assert.equal((await api('POST', '/seller/posts', { token: q, body: newPost() })).status, 403, 'chưa xác minh');
+  assert.equal((await api('POST', '/seller/jobs', { token: q, body: { title: 'Phụ sửa xe', pay: 50000, area: 'B' } })).status, 403);
+
+  assert.equal((await api('POST', '/seller/verification', { token: q, body: verifyBody({ idNumber: '123' }) })).status, 422, 'CCCD phải 12 số');
+  const sent = await api('POST', '/seller/verification', { token: q, body: verifyBody() });
+  assert.equal(sent.status, 201, JSON.stringify(sent.body));
+  assert.equal(sent.body.data.status, 'pending');
+  assert.equal((await api('POST', '/seller/verification', { token: q, body: verifyBody() })).status, 409, 'đang chờ thì không nộp lại');
+  assert.equal((await api('POST', '/seller/posts', { token: q, body: newPost() })).status, 403, 'đang chờ vẫn chưa đăng được');
+
+  assert.equal((await api('GET', '/admin/seller-verifications', { token: q })).status, 403, 'người thường không vào được');
+  const pending = (await api('GET', '/admin/seller-verifications', { token: tok.admin })).body.data;
+  const mine = pending.find((v) => v.user.name === 'Quốc Anh');
+  assert.ok(mine, 'admin thấy hồ sơ chờ duyệt');
+
+  assert.equal((await api('POST', `/admin/seller-verifications/${mine._id}/reject`, { token: tok.admin, body: { reason: 'abc' } })).status, 422, 'từ chối phải có lý do');
+  assert.equal((await api('POST', `/admin/seller-verifications/${mine._id}/reject`, { token: tok.admin, body: { reason: 'Ảnh giấy tờ bị mờ, hãy chụp lại' } })).body.data.status, 'rejected');
+  const rej = (await api('GET', '/seller/verification', { token: q })).body.data;
+  assert.equal(rej.status, 'rejected'); assert.match(rej.rejectReason, /mờ/);
+  assert.equal((await api('POST', `/admin/seller-verifications/${mine._id}/approve`, { token: tok.admin })).status, 409, 'đã xử lý rồi');
+
+  assert.equal((await api('POST', '/seller/verification', { token: q, body: verifyBody() })).status, 201, 'bị từ chối thì nộp lại được');
+  const again = (await api('GET', '/admin/seller-verifications', { token: tok.admin })).body.data.find((v) => v.user.name === 'Quốc Anh');
+  assert.equal((await api('POST', `/admin/seller-verifications/${again._id}/approve`, { token: tok.admin })).body.data.status, 'approved');
+  assert.equal((await api('GET', '/seller/verification', { token: q })).body.data.status, 'approved');
+  assert.equal((await api('POST', '/seller/posts', { token: q, body: newPost({ title: 'Sửa xe đạp tại nhà', type: 'service', category: 'Dịch vụ', unit: 'lần' }) })).status, 201, 'duyệt xong thì đăng được');
+  assert.equal((await api('POST', '/seller/verification', { token: q, body: verifyBody() })).status, 409, 'đã duyệt thì không nộp lại');
 });
