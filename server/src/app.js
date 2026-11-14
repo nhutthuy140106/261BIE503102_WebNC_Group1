@@ -48,6 +48,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', require('./modules/auth/auth.routes'));
 require('./modules/buyer').mount(app);
 app.use('/api/admin', require('./modules/admin/admin.routes'));
+app.use('/api/seller', require('./modules/seller/seller.routes'));
 if (!isProd) app.use('/api/dev', require('./modules/dev/dev.routes'));
 
 app.use(notFound);

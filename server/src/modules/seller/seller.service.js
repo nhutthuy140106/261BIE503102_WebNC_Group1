@@ -1,0 +1,262 @@
+// Phía Bán & Đăng việc: bài của tôi, việc của tôi, đơn khách đặt, đề nghị nhận việc, hỏi đáp.
+// Thay cho các đường tạm ở modules/dev (chỉ giữ để test cũ chạy). Người bán/người đăng việc chỉ thao tác trên dữ liệu CỦA MÌNH.
+const Post = require('../shared/post.model');
+const Job = require('../shared/job.model');
+const Order = require('../buyer/order/order.model');
+const Offer = require('../buyer/offer/offer.model');
+const Question = require('../buyer/question/question.model');
+const offers = require('../buyer/offer/offer.service');
+const xu = require('../buyer/xu/xu.service');
+const { notify } = require('../shared/notify');
+const ApiError = require('../../utils/ApiError');
+
+/* ---------------------------------------------------------------- Bài đăng (đồ ăn / đồ dùng / dịch vụ) */
+
+// Người bán KHÔNG được tự đặt các trường do hệ thống/quản trị quyết định
+const POST_PROTECTED = new Set(['_id', '__v', 'seller', 'promoted', 'spinPromo', 'hiddenReason', 'statusBeforeHidden', 'searchText', 'createdAt', 'updatedAt', 'slug', 'deal']);
+// lấy tên trường cấp trên cùng (vd 'stock.mode' → 'stock') để trường lồng nhau cũng được nhận
+const POST_FIELDS = [...new Set(Object.keys(Post.schema.paths).map((p) => p.split('.')[0]))].filter((p) => !POST_PROTECTED.has(p));
+const SELLER_STATUS = ['draft', 'open', 'closed']; // soldout do hệ thống; hidden do admin
+
+const pick = (src, keys) => Object.fromEntries(keys.filter((k) => src[k] !== undefined).map((k) => [k, src[k]]));
+
+async function ownPost(user, id) {
+  const p = await Post.findOne({ _id: id, seller: user._id }).select('+bank');
+  if (!p) throw ApiError.notFound('Không tìm thấy bài của bạn');
+  return p;
+}
+
+const listPosts = (user) => Post.find({ seller: user._id }).select('+bank').sort({ createdAt: -1 });
+
+async function createPost(user, data) {
+  const doc = pick(data, POST_FIELDS);
+  if (doc.status && !SELLER_STATUS.includes(doc.status)) throw ApiError.validation('Trạng thái bài không hợp lệ', [{ field: 'status', message: 'Chỉ được chọn nháp, đang bán hoặc đóng' }]);
+  return Post.create({ ...doc, seller: user._id });
+}
+
+async function updatePost(user, id, data) {
+  const p = await ownPost(user, id);
+  if (p.status === 'hidden') throw ApiError.invalidState('Bài đã bị quản trị gỡ, không sửa được');
+  const doc = pick(data, POST_FIELDS);
+  if (doc.status && !SELLER_STATUS.includes(doc.status)) throw ApiError.validation('Trạng thái bài không hợp lệ', [{ field: 'status', message: 'Chỉ được chọn nháp, đang bán hoặc đóng' }]);
+  p.set(doc);
+  await p.save();
+  return p;
+}
+
+/** Sửa nhanh: đóng/mở bài, đổi giá, số còn lại (bài giới hạn số lượng) */
+async function patchPost(user, id, { closed, price, stockLeft }) {
+  const p = await ownPost(user, id);
+  if (p.status === 'hidden') throw ApiError.invalidState('Bài đã bị quản trị gỡ, không sửa được');
+  if (closed !== undefined) p.status = closed ? 'closed' : 'open';
+  if (price !== undefined) p.price = price;
+  if (stockLeft !== undefined) {
+    if (!p.stock || p.stock.mode !== 'limit') throw ApiError.invalidState('Bài này không giới hạn số lượng');
+    p.stock.left = stockLeft;
+    p.status = stockLeft === 0 ? 'soldout' : (p.status === 'soldout' ? 'open' : p.status);
+  }
+  await p.save();
+  return p;
+}
+
+async function removePost(user, id) {
+  const p = await ownPost(user, id);
+  if (await Order.exists({ post: p._id, state: { $in: Order.ACTIVE } })) throw ApiError.invalidState('Bài còn đơn đang xử lý, hãy đóng bài thay vì xóa');
+  if (await Post.exists({ 'combo.items.postId': p._id })) throw ApiError.invalidState('Bài đang nằm trong một combo, hãy gỡ khỏi combo trước');
+  await p.deleteOne();
+}
+
+/* ---------------------------------------------------------------- Việc làm (người đăng việc) */
+
+const JOB_FIELDS = ['title', 'category', 'desc', 'pay', 'unit', 'workTime', 'windows', 'area', 'distance', 'exactAddress', 'headcount'];
+
+async function ownJob(user, id) {
+  const job = await Job.findById(id);
+  if (!job) throw ApiError.notFound('Không tìm thấy việc');
+  if (String(job.poster) !== String(user._id)) throw ApiError.forbidden('Chỉ người đăng việc mới thao tác được');
+  return job;
+}
+
+const listJobs = (user) => Job.find({ poster: user._id }).sort({ createdAt: -1 });
+
+const createJob = (user, data) => Job.create({ ...pick(data, JOB_FIELDS), poster: user._id });
+
+async function updateJob(user, id, data) {
+  const job = await ownJob(user, id);
+  if (job.status === 'done' || job.status === 'cancelled') throw ApiError.invalidState('Việc đã kết thúc, không sửa được');
+  job.set(pick(data, JOB_FIELDS));
+  await job.save();
+  return job;
+}
+
+async function patchJob(user, id, { closed }) {
+  const job = await ownJob(user, id);
+  if (closed && job.status === 'open') job.status = 'closed';
+  else if (closed === false && job.status === 'closed') {
+    const taken = await Offer.countDocuments({ job: job._id, state: { $in: ['chosen', 'working', 'reported', 'done'] } });
+    if (taken >= job.headcount) throw ApiError.invalidState('Việc đã đủ người, không mở lại được');
+    job.status = 'open';
+  }
+  await job.save();
+  return job;
+}
+
+async function removeJob(user, id) {
+  const job = await ownJob(user, id);
+  if (await Offer.exists({ job: job._id, state: { $in: Offer.ACTIVE } })) throw ApiError.invalidState('Việc còn đề nghị đang hoạt động, hãy đóng việc thay vì xóa');
+  await job.deleteOne();
+}
+
+/* ---------------------------------------------------------------- Đơn khách đặt */
+
+const STEPS = {
+  confirm: { from: ['waiting'], to: 'confirmed' },
+  prepare: { from: ['confirmed'], to: 'preparing' },
+  deliver: { from: ['preparing'], to: (o) => (o.fulfillment === 'delivery' ? 'delivering' : 'ready') },
+  ready: { from: ['preparing'], to: 'ready' },
+  complete: { from: ['delivering', 'ready'], to: 'done' },
+  decline: { from: ['waiting'], to: 'declined' },
+};
+const ORDER_CANCELABLE = ['waiting', 'confirmed', 'preparing'];
+
+async function ownOrder(user, id) {
+  const o = await Order.findById(id);
+  if (!o) throw ApiError.notFound('Không tìm thấy đơn');
+  if (String(o.seller) !== String(user._id)) throw ApiError.forbidden('Chỉ người bán của đơn mới thao tác được');
+  return o;
+}
+
+const listOrders = (user) => Order.find({ seller: user._id }).sort({ createdAt: -1 }).limit(300).populate('buyer', 'name avatar phone area');
+
+/** Hủy/từ chối đơn: trả lại số lượng đã trừ và voucher */
+async function release(o) {
+  const give = async (id, n) => {
+    const p = await Post.findById(id).select('stock status');
+    if (!p) return;
+    if (p.stock && p.stock.mode === 'limit' && typeof p.stock.left === 'number') {
+      await Post.updateOne({ _id: id }, { $inc: { 'stock.left': n }, ...(p.status === 'soldout' ? { status: 'open' } : {}) });
+    } else if (p.stock && p.stock.mode === 'once' && p.status === 'soldout') {
+      await Post.updateOne({ _id: id }, { status: 'open' });
+    }
+  };
+  if (o.snapshot && o.snapshot.combo && o.snapshot.combo.length) for (const c of o.snapshot.combo) await give(c.postId, c.qty * o.quantity);
+  else await give(o.post, o.quantity);
+  await xu.restoreVoucher(o.buyer, o.voucherCode);
+}
+
+const STATE_TEXT = { confirmed: 'đã được xác nhận', preparing: 'đang được chuẩn bị', delivering: 'đang giao', ready: 'đã sẵn sàng', done: 'đã hoàn thành', declined: 'bị từ chối', cancelled: 'đã được hủy' };
+
+async function move(o, to) {
+  o.state = to;
+  o.history.push({ state: to, at: new Date() });
+  await o.save();
+  if (to === 'done') await xu.award(o.buyer, 'order', o._id, { total: o.total });
+  await notify(o.buyer, { type: 'order_state', title: `Đơn ${o.code} ${STATE_TEXT[to] || to}`, link: { type: 'order', id: o._id } });
+}
+
+async function orderAction(user, id, action, payload = {}) {
+  const o = await ownOrder(user, id);
+  if (STEPS[action]) {
+    const step = STEPS[action];
+    if (!step.from.includes(o.state)) throw ApiError.invalidState(`Không thể thực hiện khi đơn đang ở trạng thái "${o.state}"`);
+    if (o.cancelRequest && o.cancelRequest.status === 'pending' && action !== 'decline') throw ApiError.invalidState('Khách đang xin hủy đơn, hãy trả lời yêu cầu hủy trước');
+    const to = typeof step.to === 'function' ? step.to(o) : step.to;
+    await move(o, to);
+    if (to === 'declined') await release(o);
+  } else if (action === 'approveCancel' || action === 'keepOrder') {
+    if (!o.cancelRequest || o.cancelRequest.status !== 'pending') throw ApiError.invalidState('Đơn này không có yêu cầu hủy nào đang chờ');
+    if (action === 'approveCancel') {
+      if (!ORDER_CANCELABLE.includes(o.state)) throw ApiError.invalidState('Đơn đã qua bước có thể hủy');
+      o.cancelRequest.status = 'accepted';
+      await move(o, 'cancelled');
+      await release(o);
+    } else {
+      o.cancelRequest.status = 'rejected';
+      await o.save();
+      await notify(o.buyer, { type: 'order_cancel_rejected', title: `Người bán giữ đơn ${o.code}, chưa đồng ý hủy`, link: { type: 'order', id: o._id } });
+    }
+  } else if (action === 'surcharge') {
+    if (!Order.ACTIVE.includes(o.state)) throw ApiError.invalidState('Chỉ báo phụ thu khi đơn đang xử lý');
+    if (o.surcharge && o.surcharge.status === 'pending') throw ApiError.duplicate('Đã có một khoản phụ thu đang chờ khách đồng ý');
+    if (!(payload.amount >= 1000) || !payload.reason || payload.reason.length < 3) throw ApiError.validation('Cần số tiền phụ thu và lý do', [{ field: 'amount', message: 'Nhập số tiền (từ 1.000đ) và lý do' }]);
+    o.surcharge = { amount: payload.amount, reason: payload.reason, status: 'pending' };
+    await o.save();
+    await notify(o.buyer, { type: 'order_surcharge', title: `Đơn ${o.code} có phụ thu, cần bạn đồng ý`, link: { type: 'order', id: o._id } });
+  } else if (action === 'approveReturn' || action === 'rejectReturn') {
+    if (!o.returnRequest || o.returnRequest.status !== 'pending') throw ApiError.invalidState('Đơn này không có yêu cầu trả hàng nào đang chờ');
+    o.returnRequest.status = action === 'approveReturn' ? 'accepted' : 'rejected';
+    await o.save();
+    await notify(o.buyer, { type: 'order_return_reply', title: `Yêu cầu trả hàng đơn ${o.code} ${action === 'approveReturn' ? 'được đồng ý' : 'bị từ chối'}`, link: { type: 'order', id: o._id } });
+  } else {
+    throw ApiError.badRequest('Thao tác không hợp lệ');
+  }
+  await o.populate('buyer', 'name avatar phone area');
+  return o;
+}
+
+/* ---------------------------------------------------------------- Đề nghị nhận việc của việc tôi đăng */
+
+async function listOffers(user) {
+  const jobIds = (await Job.find({ poster: user._id }).select('_id')).map((j) => j._id);
+  return Offer.find({ job: { $in: jobIds } }).sort({ createdAt: -1 }).limit(300)
+    .populate('worker', 'name avatar phone area')
+    .populate({ path: 'job', populate: { path: 'poster', select: 'name avatar area' } });
+}
+
+async function offerAction(user, id, action) {
+  const offer = await Offer.findById(id);
+  if (!offer) throw ApiError.notFound('Không tìm thấy đề nghị');
+  const job = await ownJob(user, offer.job);
+  if (action === 'choose') {
+    if (offer.state !== 'offered') throw ApiError.invalidState('Chỉ chọn được đề nghị đang chờ');
+    if (job.status !== 'open') throw ApiError.invalidState('Việc đã đóng');
+    offers.push(offer, 'chosen');
+    await offer.save();
+    const chosen = await Offer.countDocuments({ job: job._id, state: { $in: ['chosen', 'working', 'reported', 'done'] } });
+    if (chosen >= job.headcount) {
+      job.status = 'closed';
+      await job.save();
+      for (const o of await Offer.find({ job: job._id, state: 'offered' })) {
+        offers.push(o, 'rejected');
+        await o.save();
+        await notify(o.worker, { type: 'offer_rejected', title: 'Việc đã có người nhận', body: job.title, link: { type: 'job', id: job._id } });
+      }
+    }
+    await offers.syncOfferCount(job._id);
+    await notify(offer.worker, { type: 'offer_chosen', title: 'Bạn được chọn làm việc', body: job.title, link: { type: 'offer', id: offer._id } });
+  } else if (action === 'reject') {
+    if (offer.state !== 'offered') throw ApiError.invalidState('Chỉ từ chối được đề nghị đang chờ');
+    offers.push(offer, 'rejected');
+    await offer.save();
+    await offers.syncOfferCount(job._id);
+    await notify(offer.worker, { type: 'offer_rejected', title: 'Đề nghị của bạn chưa được chọn', body: job.title, link: { type: 'job', id: job._id } });
+  } else if (action === 'confirmDone') {
+    if (offer.state !== 'reported') throw ApiError.invalidState('Chỉ xác nhận được khi người làm đã báo hoàn thành');
+    offers.push(offer, 'done');
+    await offer.save();
+    const finished = await Offer.countDocuments({ job: job._id, state: 'done' });
+    if (finished >= job.headcount) await Job.updateOne({ _id: job._id }, { status: 'done' });
+    await xu.award(offer.worker, 'job', offer._id);
+    await notify(offer.worker, { type: 'offer_done', title: 'Việc đã được xác nhận hoàn thành', link: { type: 'offer', id: offer._id } });
+  } else {
+    throw ApiError.badRequest('Thao tác không hợp lệ');
+  }
+  return offer.populate([{ path: 'worker', select: 'name avatar phone area' }, { path: 'job', populate: { path: 'poster', select: 'name avatar area' } }]);
+}
+
+/* ---------------------------------------------------------------- Hỏi đáp của việc tôi đăng */
+
+async function answerQuestion(user, id, text) {
+  const q = await Question.findById(id);
+  if (!q) throw ApiError.notFound('Không tìm thấy câu hỏi');
+  await ownJob(user, q.job);
+  q.answer = { text, by: user._id, at: new Date() };
+  await q.save();
+  return q;
+}
+
+module.exports = {
+  listPosts, createPost, updatePost, patchPost, removePost,
+  listJobs, createJob, updateJob, patchJob, removeJob,
+  listOrders, orderAction, listOffers, offerAction, answerQuestion,
+};
