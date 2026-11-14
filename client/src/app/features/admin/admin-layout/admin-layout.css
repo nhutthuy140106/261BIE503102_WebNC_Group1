@@ -16,11 +16,11 @@
   position: relative;
 }
 /* nền: một vệt sáng chéo; ô caro chỉ nằm TRONG vệt sáng và mờ dần ra mép (không phủ cả trang) */
-:host::before { content: ''; position: fixed; right: -160px; top: 30px; width: 980px; height: 260px; transform: rotate(-22deg); pointer-events: none; z-index: 0;
-  background-image: linear-gradient(rgba(255, 205, 170, .34) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 205, 170, .34) 1px, transparent 1px), linear-gradient(90deg, transparent, rgba(255, 170, 120, .1) 50%, transparent);
-  background-size: 34px 34px, 34px 34px, 100% 100%; filter: blur(.7px);
+:host::before { content: ''; position: fixed; right: -420px; top: -110px; width: 1500px; height: 600px; transform: rotate(-22deg); pointer-events: none; z-index: 0;
+  background-image: linear-gradient(rgba(255, 205, 170, .3) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(255, 205, 170, .3) 1.5px, transparent 1.5px), linear-gradient(90deg, transparent, rgba(255, 170, 120, .12) 50%, transparent);
+  background-size: 112px 112px, 112px 112px, 100% 100%; filter: blur(1.1px);
   -webkit-mask-image: radial-gradient(closest-side, #000 22%, rgba(0, 0, 0, .55) 55%, transparent 100%); mask-image: radial-gradient(closest-side, #000 22%, rgba(0, 0, 0, .55) 55%, transparent 100%); }
-:host::after { content: ''; position: fixed; right: -140px; top: 70px; width: 860px; height: 170px; transform: rotate(-22deg); pointer-events: none; z-index: 0; filter: blur(40px);
+:host::after { content: ''; position: fixed; right: -300px; top: 40px; width: 1300px; height: 260px; transform: rotate(-22deg); pointer-events: none; z-index: 0; filter: blur(40px);
   background: linear-gradient(90deg, transparent, rgba(255, 170, 120, .2) 40%, rgba(255, 210, 180, .3) 55%, transparent); }
 .adm { position: relative; z-index: 1; display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; }
 .side { position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; padding: 20px 14px; background: rgba(8, 13, 24, .82); backdrop-filter: blur(14px); border-right: 1px solid var(--a-line); color: var(--a-side-ink); }
