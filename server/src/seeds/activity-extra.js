@@ -283,12 +283,16 @@ async function addActivity({ dryRun = false } = {}) {
   /* Đánh giá */
   const posts = await Post.find({}).select('title seller');
   const postByTitle = new Map(posts.map((p) => [p.title, p]));
-  for (const [title, list] of Object.entries(REVIEWS)) {
+  const { REVIEWS_MORE } = require('./activity-more');
+  const allReviews = {};
+  for (const src of [REVIEWS, REVIEWS_MORE]) for (const [t, l] of Object.entries(src)) allReviews[t] = [...(allReviews[t] || []), ...l];
+  for (const [title, list] of Object.entries(allReviews)) {
     const post = postByTitle.get(title);
     if (!post) { if (list.length) out.skipped.push(`bài: ${title}`); continue; }
     for (const [who, rating, comment, daysAgo, reply] of list) {
       const reviewer = byName.get(who);
       if (!reviewer || String(reviewer._id) === String(post.seller)) { out.skipped.push(`${title} / ${who}`); continue; }
+      if (await Review.exists({ reviewer: reviewer._id, post: post._id })) continue; // mỗi người chỉ đánh giá một bài một lần (cũng làm chạy lại không nhân đôi)
       const targetId = new mongoose.Types.ObjectId(crypto.createHash('md5').update(`${title}|${who}`).digest('hex').slice(0, 24));
       const at = new Date(Date.now() - daysAgo * DAY);
       const doc = { reviewer: reviewer._id, target: post.seller, targetType: 'order', targetId, post: post._id, rating, comment, images: [], createdAt: at, updatedAt: at, __v: 0 };
