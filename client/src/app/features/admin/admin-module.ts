@@ -7,6 +7,7 @@ import { AdminAudit } from './admin-audit/admin-audit';
 import { AdminDialog } from './admin-dialog/admin-dialog';
 import { AdminForbidden } from './admin-forbidden/admin-forbidden';
 import { AdminLayout } from './admin-layout/admin-layout';
+import { AdminLogin } from './admin-login/admin-login';
 import { AdminOrderDetail } from './admin-order-detail/admin-order-detail';
 import { AdminOrders } from './admin-orders/admin-orders';
 import { AdminOverview } from './admin-overview/admin-overview';
@@ -20,6 +21,7 @@ import { AdminVerifications } from './admin-verifications/admin-verifications';
 import { AdminVouchers } from './admin-vouchers/admin-vouchers';
 
 const routes: Routes = [
+  { path: 'login', component: AdminLogin },
   { path: '403', component: AdminForbidden },
   {
     path: '',
@@ -45,7 +47,7 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [
-    AdminLayout, AdminOverview, AdminUsers, AdminUserDetail, AdminPosts, AdminReports, AdminDialog, AdminForbidden,
+    AdminLayout, AdminLogin, AdminOverview, AdminUsers, AdminUserDetail, AdminPosts, AdminReports, AdminDialog, AdminForbidden,
     AdminVerifications, AdminOrders, AdminOrderDetail, AdminAudit, AdminSupport, AdminVouchers, AdminAnnouncements, AdminSettings,
   ],
   imports: [SharedModule, RouterModule.forChild(routes)],

@@ -12,7 +12,7 @@ export const adminGuard: CanActivateFn = (_route, state) => {
     .pipe(
       map((ok) =>
         !ok
-          ? router.createUrlTree(['/auth/login'], { queryParams: { returnUrl: state.url } })
+          ? router.createUrlTree(['/admin/login'], { queryParams: { returnUrl: state.url } })
           : ['admin', 'moderator'].includes(auth.currentUser()?.role ?? '')
             ? true
             : router.createUrlTree(['/admin/403']),

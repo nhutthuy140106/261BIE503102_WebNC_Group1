@@ -1,0 +1,20 @@
+<main class="al">
+  <section class="card" aria-labelledby="alT">
+    <div class="brand"><b>AntGo</b><span>Quản trị</span></div>
+    <h1 id="alT">Đăng nhập quản trị</h1>
+    <p class="lead">Dành cho quản trị viên và người kiểm duyệt của AntGo.</p>
+
+    @if (needsServer) {
+      <div class="warn" role="status">Bạn đang xem bằng dữ liệu mẫu nên không có khu Quản trị. Hãy bật server rồi mở lại với <b>?mock=0</b>. <a href="/admin/login?mock=0">Mở với máy chủ thật</a></div>
+    }
+
+    <form (ngSubmit)="submit()" novalidate>
+      <div class="field"><label for="alP">Số điện thoại</label><input id="alP" name="phone" type="tel" inputmode="numeric" autocomplete="username" maxlength="10" [(ngModel)]="phone" placeholder="0900000099" /></div>
+      <div class="field"><label for="alW">Mật khẩu</label>
+        <div class="pw"><input id="alW" name="password" [type]="show ? 'text' : 'password'" autocomplete="current-password" [(ngModel)]="password" /><button type="button" (click)="show = !show" [attr.aria-pressed]="show">{{ show ? 'Ẩn' : 'Hiện' }}</button></div></div>
+      @if (error()) { <p class="err" role="alert">{{ error() }}</p> }
+      <button type="submit" class="go" [disabled]="busy()">{{ busy() ? 'Đang đăng nhập…' : 'Đăng nhập' }}</button>
+    </form>
+    <p class="back"><a routerLink="/">← Về trang AntGo</a></p>
+  </section>
+</main>

@@ -59,7 +59,7 @@ const routes: Routes = [
   },
   {
     path: 'admin',
-    canActivate: [authGuard],
+    // không đặt authGuard ở đây: /admin/login phải vào được khi chưa đăng nhập; adminGuard trong admin-module lo phần còn lại
     loadChildren: () => import('./features/admin/admin-module').then((m) => m.AdminModule),
   },
   { path: '**', component: NotFound },
