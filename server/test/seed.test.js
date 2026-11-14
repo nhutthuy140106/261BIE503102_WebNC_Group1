@@ -57,6 +57,20 @@ test('seed đầy đủ: đủ vai trò, nhiều bài/việc, có dữ liệu gi
   for (const s of ['open', 'reviewing', 'resolved']) assert.ok(await M('Report').countDocuments({ state: s }), `thiếu báo cáo ${s}`);
 });
 
+test('mọi bài mở bán đều đủ thông tin như bài người bán đăng thật (khu vực, thanh toán, loại giá, tài khoản)', async () => {
+  const posts = await Post.find({ status: 'open' }).select('+bank').lean();
+  const bad = [];
+  for (const p of posts) {
+    const miss = [];
+    if (!p.areas || !p.areas.length) miss.push('areas');
+    if (!p.payMethods || !p.payMethods.length) miss.push('payMethods');
+    if (!p.priceType) miss.push('priceType');
+    if ((p.payMethods || []).includes('transfer') && !(p.bank && p.bank.no)) miss.push('bank');
+    if (miss.length) bad.push(`${p.title}: ${miss.join(',')}`);
+  }
+  assert.deepEqual(bad, [], 'bài còn thiếu thông tin');
+});
+
 test('seed chạy lại: không nhân đôi, không đụng người dùng thật, mã đơn không trùng', async () => {
   const real = await M('User').create({ name: 'Người thật', phone: '0988888888', password: 'x'.repeat(20) });
   const realOrder = await M('Order').create({

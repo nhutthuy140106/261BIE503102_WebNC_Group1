@@ -18,6 +18,7 @@ const Report = require('../modules/buyer/report/report.model');
 const orders = require('../modules/buyer/order/order.service');
 const offers = require('../modules/buyer/offer/offer.service');
 const { USERS, POSTS, JOBS, COMBOS, COMBO_PROMOS, IMG, img } = require('./data');
+const { ENRICH, BANK_BY_NAME } = require('./post-enrich');
 
 // Mật khẩu tài khoản mẫu lấy từ biến môi trường SEED_PASSWORD (.env), không viết cứng trong repo
 const getPassword = () => {
@@ -86,7 +87,18 @@ async function seed() {
   const CLIENT = require('./client-posts.json');
   const p = {};
   const promos = {}; // Giờ vàng gán SAU khi tạo đơn mẫu, để tổng tiền đơn mẫu không đổi theo giờ chạy seed
-  const ALL_POSTS = [...POSTS.map((d) => ({ ...d, ...(CLIENT.extras[d.title] || {}) })),
+  // post-enrich.js: điền thông tin cho bài còn "trơ" (chỉ trường đang trống, không đè dữ liệu có sẵn)
+  const nameOfKey = Object.fromEntries(USERS.map((x) => [x.key, x.name]));
+  const enrich = (d) => {
+    const add = ENRICH[d.title];
+    if (!add) return d;
+    const out = { ...d };
+    for (const [k, v] of Object.entries(add)) if (v !== undefined && (out[k] == null || (Array.isArray(out[k]) && !out[k].length))) out[k] = v;
+    const bank = BANK_BY_NAME[nameOfKey[d.seller]];
+    if (bank && !out.bank && (out.payMethods || []).includes('transfer')) out.bank = bank;
+    return out;
+  };
+  const ALL_POSTS = [...POSTS.map((d) => enrich({ ...d, ...(CLIENT.extras[d.title] || {}) })),
     ...CLIENT.extra.map((d, i) => ({ key: `fe${i}`, ...d }))];
   for (const [i, { key, seller, daysAgo, images, promo, ...d }] of ALL_POSTS.entries()) {
     if (promo) promos[key] = promo;
@@ -99,6 +111,7 @@ async function seed() {
     p[c.key] = await Post.create({
       type: 'food', category: 'Combo', title: c.title, description: c.description, unit: c.unit, seller: u[c.seller]._id, area: c.area, distance: c.distance,
       images: [img(IMG[c.image])], fulfillmentModes: ['delivery', 'pickup'], deliveryFee: c.deliveryFee, acceptsXu: !!c.acceptsXu,
+      ...(({ seller, key, daysAgo, ...rest }) => rest)(enrich({ title: c.title, seller: c.seller })),
       price: c.comboPrice, combo: { items: c.items.map(([k, qty]) => ({ postId: p[k]._id, qty })), comboPrice: c.comboPrice },
     });
     await backdate(Post, p[c.key]._id, ago(c.daysAgo * DAY + i * 13 * 60000));
@@ -162,7 +175,7 @@ async function seed() {
   const addrMe = String((await Address.findOne({ user: u.thuy._id, isDefault: { $ne: true } }))._id);
   o.prep = await place('thuy', 'bunCha', { fulfillment: 'delivery', addressId: addr.thuy });
   await advance(o.prep, 'preparing', 0.02);
-  o.deliver2 = await place('thuy', 'comChay', { fulfillment: 'delivery', addressId: addrMe, note: 'Đưa cho mẹ' });
+  o.deliver2 = await place('thuy', 'comChay', { fulfillment: 'delivery', addressId: addrMe, note: 'Đưa cho mẹ', selections: [{ group: 'Loại cơm', choices: ['Gạo lứt'] }] });
   await advance(o.deliver2, 'delivering', 0.03);
   o.ready = await place('thuy', 'banhFlan', {});
   await advance(o.ready, 'ready', 0.5);
