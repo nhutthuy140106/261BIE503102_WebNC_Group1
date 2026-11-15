@@ -15,16 +15,16 @@
     } @else {
       <div class="photo">
         @if (post.images.length) { <img [src]="post.images[0]" alt="" loading="lazy" /> }
+        <!-- Giờ vàng nằm trên ảnh, góc dưới bên trái, giống thẻ ở trang chủ -->
+        <app-deal-tag class="deal" [post]="post" />
       </div>
     }
     <div class="body">
     <span class="kind">{{ kindText }}</span>
-    <app-deal-tag [post]="post" />
     <h3>{{ post.title }}</h3>
     @if (true) {
       <div class="prrow"><div class="price"><app-price [post]="post" /> @if (post | unit; as u) { <small>/ {{ u }}</small> }</div>@if (post.sold) { <span class="sold">{{ post.kind === 'service' ? 'Đã đặt' : 'Đã bán' }} {{ post.sold | count }}</span> }</div>
     }
-    @if (post.combo) { <div style="margin: -2px 0 4px"><app-combo-saving [post]="post" /></div> }
     <div class="area">
       <span class="loc"><svg class="i"><use href="#pin" /></svg>{{ post.block }}@if (post.job?.building) { · {{ post.job?.building }} }@if (post.distance != null) { · {{ post.distance | distance }} }</span>
       @if (isJob && post.job) {

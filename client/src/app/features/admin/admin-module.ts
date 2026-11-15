@@ -4,6 +4,7 @@ import { adminGuard } from '../../core/guards/admin-guard';
 import { SharedModule } from '../../shared/shared-module';
 import { AdminAnnouncements } from './admin-announcements/admin-announcements';
 import { AdminAudit } from './admin-audit/admin-audit';
+import { AdminSelect } from './admin-select/admin-select';
 import { AdminDialog } from './admin-dialog/admin-dialog';
 import { AdminForbidden } from './admin-forbidden/admin-forbidden';
 import { AdminLayout } from './admin-layout/admin-layout';
@@ -46,7 +47,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [
+  declarations: [AdminSelect, 
     AdminLayout, AdminLogin, AdminOverview, AdminUsers, AdminUserDetail, AdminPosts, AdminReports, AdminDialog, AdminForbidden,
     AdminVerifications, AdminOrders, AdminOrderDetail, AdminAudit, AdminSupport, AdminVouchers, AdminAnnouncements, AdminSettings,
   ],

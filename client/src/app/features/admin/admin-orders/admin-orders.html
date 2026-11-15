@@ -1,14 +1,9 @@
 <h1>Đơn &amp; tranh chấp</h1>
 <p class="lead">Theo dõi mọi đơn trong khu. Khi khách báo vấn đề mà người bán không trả lời hoặc từ chối, admin vào xem và phân xử.</p>
 <div class="bar">
-  <input type="search" name="q" [(ngModel)]="q" (ngModelChange)="filter(300)" placeholder="Tìm theo mã đơn (vd. AG-O1012)" aria-label="Tìm theo mã đơn" />
-  <select name="state" [(ngModel)]="state" (ngModelChange)="filter()" aria-label="Lọc trạng thái">
-    <option value="">Mọi trạng thái</option>
-    @for (s of states; track s[0]) { <option [value]="s[0]">{{ s[1] }}</option> }
-  </select>
-  <select name="issue" [(ngModel)]="issue" (ngModelChange)="filter()" aria-label="Lọc báo vấn đề">
-    <option value="">Mọi đơn</option><option value="open">Báo vấn đề đang chờ xử lý</option><option value="any">Có báo vấn đề (mọi trạng thái)</option>
-  </select>
+  <input type="search" name="q" [(ngModel)]="q" (ngModelChange)="filter(300)" placeholder="Tìm theo mã đơn (VD: AG-O1012)" aria-label="Tìm theo mã đơn" />
+  <app-admin-select name="state" ariaLabel="Lọc trạng thái" [(ngModel)]="state" (ngModelChange)="filter()" [options]="stateOptions" />
+  <app-admin-select name="issue" ariaLabel="Lọc báo vấn đề" [(ngModel)]="issue" (ngModelChange)="filter()" [options]="[{ value: '', label: 'Mọi đơn' }, { value: 'open', label: 'Báo vấn đề đang chờ xử lý' }, { value: 'any', label: 'Có báo vấn đề (mọi trạng thái)' }]" />
 </div>
 @if (error()) { <div class="err" role="alert">{{ error() }}</div> }
 

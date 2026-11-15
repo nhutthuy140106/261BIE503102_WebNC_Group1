@@ -5,16 +5,19 @@ import { AreaService } from '../../../core/services/area';
 import { PostService } from '../../../core/services/post';
 import { RecommendService } from '../../../core/services/recommend';
 import { SavedService } from '../../../core/services/saved';
+import { ClockService } from '../../../core/services/clock';
+import { dealAt } from '../../../core/utils/promo';
 import { inArea } from '../../../core/utils/post-area';
 
-type Key = 'featured' | 'foryou' | 'nearby' | 'jobs';
-type Sort = 'near' | 'new' | 'low' | 'high';
+type Key = 'featured' | 'foryou' | 'nearby' | 'jobs' | 'deals';
+type Sort = 'near' | 'new' | 'low' | 'high' | 'end';
 
 const TITLES: Record<Key, string> = {
   featured: 'Nổi bật trong khu',
   foryou: 'Gợi ý cho bạn',
   nearby: 'Gần bạn',
   jobs: 'Việc mới quanh bạn',
+  deals: 'Đang giảm giá lúc này',
 };
 
 /**
@@ -33,6 +36,7 @@ export class SectionList implements OnInit {
   protected readonly saved = inject(SavedService);
   private readonly recommend = inject(RecommendService);
   private readonly area = inject(AreaService);
+  private readonly clock = inject(ClockService);
   protected readonly forYou = signal<Post[]>([]);
 
   protected readonly key = signal<Key>('featured');
@@ -44,7 +48,9 @@ export class SectionList implements OnInit {
   protected readonly title = computed(() => TITLES[this.key()]);
   protected readonly isJobs = computed(() => this.key() === 'jobs');
   protected readonly sortOptions = computed(() =>
-    this.isJobs()
+    this.key() === 'deals'
+      ? [{ key: 'end', label: 'Sắp hết giờ' }, { key: 'near', label: 'Gần nhất' }, { key: 'low', label: 'Giá thấp đến cao' }, { key: 'high', label: 'Giá cao đến thấp' }]
+      : this.isJobs()
       ? [{ key: 'near', label: 'Gần nhất' }, { key: 'new', label: 'Mới nhất' }, { key: 'high', label: 'Tiền công cao nhất' }]
       : [{ key: 'near', label: 'Gần nhất' }, { key: 'new', label: 'Mới nhất' }, { key: 'low', label: 'Giá thấp đến cao' }, { key: 'high', label: 'Giá cao đến thấp' }],
   );
@@ -55,10 +61,12 @@ export class SectionList implements OnInit {
   protected readonly items = computed(() => {
     const k = this.key();
     const far = Number.MAX_SAFE_INTEGER;
-    const list = (k === 'foryou' ? this.forYou() : this.all().filter((p) => (k === 'jobs' ? p.kind === 'job' : k === 'featured' ? !!p.promoted : p.kind !== 'job' && !p.promoted))).filter((p) => inArea(p, this.area.current()));
+    const now = this.clock.now();
+    const list = (k === 'foryou' ? this.forYou() : k === 'deals' ? this.all().filter((p) => p.kind !== 'job' && !p.closed && dealAt(p, now) !== null) : this.all().filter((p) => (k === 'jobs' ? p.kind === 'job' : k === 'featured' ? !!p.promoted : p.kind !== 'job' && !p.promoted))).filter((p) => inArea(p, this.area.current()));
     const s = this.sort();
+    const ends = (p: Post) => dealAt(p, now)?.endsAt ?? far;
     return [...list].sort((a, b) =>
-      s === 'low' ? a.price - b.price : s === 'high' ? b.price - a.price : s === 'new' ? b.createdAt.localeCompare(a.createdAt) : (a.distance ?? far) - (b.distance ?? far),
+      s === 'end' ? ends(a) - ends(b) : s === 'low' ? a.price - b.price : s === 'high' ? b.price - a.price : s === 'new' ? b.createdAt.localeCompare(a.createdAt) : (a.distance ?? far) - (b.distance ?? far),
     );
   });
 
@@ -66,8 +74,10 @@ export class SectionList implements OnInit {
     this.route.paramMap.subscribe((p) => {
       const k = p.get('key') as Key;
       this.key.set(k in TITLES ? k : 'featured');
+      // giảm giá: mặc định bài sắp hết giờ xếp trước
+      this.sort.set(this.key() === 'deals' ? 'end' : 'near');
     });
-    this.recommend.forYou().subscribe({ next: (l) => this.forYou.set(l), error: () => this.forYou.set([]) });
+    this.recommend.forYou(20).subscribe({ next: (l) => this.forYou.set(l), error: () => this.forYou.set([]) });
     this.postService.getPosts().subscribe({
       next: (l) => {
         this.all.set(l);

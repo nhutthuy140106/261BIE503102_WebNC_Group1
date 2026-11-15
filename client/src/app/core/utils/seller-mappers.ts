@@ -132,7 +132,7 @@ function serverPost(p: Post): SellerPost {
   return {
     id: p._id, kind: p.kind, title: p.title, image: p.images[0], price: p.price, unit: p.priceUnit, stock: left, max: left, on: !p.closed,
     views: p.views ?? 0, saves: p.saves ?? 0, sold: p.sold ?? 0, category: p.category ?? (p.kind === 'job' ? 'Việc vặt' : ''), buyerPostId: p._id,
-    formType: p.kind === 'food' ? (p.category === 'Đồ uống' ? 'drink' : 'food') : p.kind,
+    formType: p.combo?.items?.length ? 'combo' : p.kind === 'food' ? (p.category === 'Đồ uống' ? 'drink' : 'food') : p.kind,
   };
 }
 
@@ -228,6 +228,8 @@ export function mergeServerSpace(s: SellerSpace, orders: SellerOrder[], posts: P
       // dữ liệu form lưu trên server là bản đúng nhất (mở lại được trên mọi máy); chưa có thì dùng bản lưu ở máy
       const fd = p.formData;
       const withForm = fd ? { form: fd.form, formType: fd.type as SellerPost['formType'] } : old ? { form: old.form, formType: old.formType ?? fresh.formType } : {};
+      // bài là combo trên server thì luôn là combo, dù bản lưu ở máy ghi loại khác
+      if (fresh.formType === 'combo') (withForm as Partial<SellerPost>).formType = 'combo';
       outPosts.push(old ? { ...fresh, ...withForm, views: old.views, saves: old.saves, sold: old.sold, promo: old.promo, icon: old.icon } : { ...fresh, ...withForm });
     }
   }

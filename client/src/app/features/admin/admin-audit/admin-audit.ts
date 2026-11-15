@@ -14,6 +14,9 @@ export class AdminAudit implements OnInit {
   protected readonly rows = signal<AuditRow[] | null>(null);
   protected readonly total = signal(0);
   protected readonly error = signal('');
+  protected get groupOptions(): { value: unknown; label: string }[] {
+    return this.groups.map((g) => ({ value: g.v, label: g.t }));
+  }
   protected readonly groups = [
     { v: '', t: 'Mọi thao tác' }, { v: 'user', t: 'Người dùng' }, { v: 'post', t: 'Bài đăng' }, { v: 'report', t: 'Báo cáo' },
     { v: 'order', t: 'Đơn hàng' }, { v: 'xu', t: 'Cộng/trừ Xu' }, { v: 'voucher', t: 'Voucher' }, { v: 'ticket', t: 'Hỗ trợ' },

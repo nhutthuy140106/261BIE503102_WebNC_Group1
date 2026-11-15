@@ -138,7 +138,7 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
   return [
     ...(shown?.noQuick ? [] : row('Phạm vi phục vụ', s['serviceArea'])),
     // các thông tin trước đây ở 3 ô đầu bài: chuyển xuống đây để không mất
-    ...(shown?.generic ? [...row('Thời gian làm dự kiến', s['turnaround']), ...row('Bảo hành', s['warranty'])] : []),
+    ...(shown?.generic ? row('Bảo hành', s['warranty']) : []),
     ...(s['priceType'] === 'quote' ? row('Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ, trừ vào tiền làm nếu bạn đồng ý giá` : 'Miễn phí') : []),
     ...(preset === 'Giặt sấy'
       ? [...row('Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : ''), ...row('Cách trả đồ', [f['delivery'] ? 'Giao tận nơi' : '', f['pickup'] ? 'Tự đến lấy' : ''].filter(Boolean).join(', '))]
@@ -156,8 +156,12 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
   ];
 }
 
-/** 3 ô đầu bài của giặt sấy, lưu trú (các mẫu không có mục Thông tin nhanh và Nơi làm trong form); mẫu khác thì không có */
-function serviceHighlights(s: V): Post['highlights'] {
+/**
+ * 3 ô đầu bài dịch vụ (trừ Lưu trú có bộ riêng): Giờ nhận lịch · Nơi làm · ô 3 theo loại (Trả đồ / Phí kiểm tra / Phí giao / Thời lượng / Buổi học / Thời gian làm).
+ * Luôn đủ 3 ô; ô nào người bán chưa có số liệu thì ghi "Nhắn người bán" để khách biết cần hỏi.
+ * Thẻ xem trước trong form và trang chi tiết phía Mua cùng dùng hàm này nên luôn khớp nhau.
+ */
+export function serviceHighlights(s: V): NonNullable<Post['highlights']> {
   const preset = String(s['preset'] ?? '');
   const cell = (icon: NonNullable<Post['highlights']>[number]['icon'], label: string, value: unknown) => (String(value ?? '').trim() ? [{ icon, label, value: String(value).trim() }] : []);
   const where = String(s['where'] ?? '').trim();
@@ -169,7 +173,6 @@ function serviceHighlights(s: V): Post['highlights'] {
     : preset === 'Sửa chữa' ? 'Tại nhà bạn'
     : SVC_PRESETS[preset]?.noPlace ? ({ buyer: 'Tại nhà bạn', seller: 'Bạn mang tới', none: '' } as V)[SVC_PRESETS[preset].place]
     : ({ buyer: 'Tại nhà bạn', seller: where || 'Bạn mang tới', choice: 'Tại nhà bạn hoặc bạn mang tới', ab: 'Lấy ở A, giao tới B' } as V)[String(s['place'])];
-  const pays = payOf(s).map((m) => ({ cash: 'Tiền mặt', transfer: 'Chuyển khoản', xu: 'AntXu' })[m]).join(', ');
   // lưu trú: giờ nhận phòng · địa điểm (tòa nhà) · đặt cọc
   if (preset === 'Lưu trú')
     return [
@@ -177,10 +180,24 @@ function serviceHighlights(s: V): Post['highlights'] {
       ...cell('pin', 'Địa điểm', place),
       ...cell('receipt', 'Đặt cọc', +s['deposit'] ? `${+s['deposit']}% khi đặt phòng` : 'Không cần đặt cọc'),
     ];
+  const ASK = 'Nhắn người bán';
+  const vnd = (n: number) => Math.round(n).toLocaleString('vi-VN') + 'đ';
+  const turnaround = String(s['turnaround'] ?? '').trim();
+  const items = ((s['items'] as V[]) ?? []).filter((i) => String(i?.['name'] ?? '').trim());
+  const priced = items.filter((i) => +i['price'] > 0).sort((a, b) => +a['price'] - +b['price']);
+  // ô 3 theo loại dịch vụ: lấy đúng thông tin người bán đã nhập ở form (không bắt nhập thêm ô riêng cho ô này)
+  const third: [NonNullable<Post['highlights']>[number]['icon'], string, string] =
+    preset === 'Giặt sấy' ? ['bolt', 'Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : '']
+    : preset === 'Sửa chữa' ? ['receipt', 'Phí kiểm tra', +s['inspect'] > 0 ? vnd(+s['inspect']) : 'Miễn phí']
+    : courier ? ['receipt', 'Phí giao', priced.length ? `Từ ${vnd(+priced[0]['price'])} / ${priced[0]['unit'] || 'lượt'}` : '']
+    : preset === 'Chăm sóc' ? ['clock', 'Thời lượng', +s['durMin'] > 0 && +s['durMax'] > 0 ? `${+s['durMin']}–${+s['durMax']} giờ / lần` : '']
+    : preset === 'Gia sư' ? ['clock', 'Buổi học', String(items[0]?.['name'] ?? '').trim()]
+    : ['clock', 'Thời gian làm', turnaround];
+  const when = SVC_PRESETS[preset]?.noSchedule ? 'Thỏa thuận khi đặt' : s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : '';
   return [
-    ...cell('clock', courier ? 'Giờ giao hàng' : 'Giờ nhận lịch', SVC_PRESETS[preset]?.noSchedule ? '' : preset === 'Lưu trú' ? (s['checkIn'] ? `Nhận phòng từ ${s['checkIn']}` : '') : s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
-    ...cell('pin', 'Nơi làm', place),
-    ...cell('receipt', 'Thanh toán', pays),
+    ...cell('clock', courier ? 'Giờ giao hàng' : 'Giờ nhận lịch', when || ASK),
+    ...cell('pin', 'Nơi làm', place || ASK),
+    ...cell(third[0], third[1], third[2] || ASK),
   ];
 }
 
@@ -202,6 +219,24 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
   const base = { category: c['category'] as string, payMethods: payOf(s), bank: bankOf(s) };
 
   switch (type) {
+    case 'combo': {
+      const sc = (s['schedule'] as V) ?? {};
+      const lines = ((s['includes'] as string[]) ?? []).map((x) => String(x ?? '').trim()).filter(Boolean);
+      return {
+        ...base, ...fulfilOf(s),
+        priceType: 'fixed',
+        optionGroups: [],
+        noteEnabled: !!s['kitchenNote'],
+        dates: (sc['dates'] as string[]) ?? [],
+        orderWindow: sc['orderFrom'] && sc['orderTo'] && sc['orderFrom'] !== sc['orderTo'] ? { from: sc['orderFrom'], to: sc['orderTo'], days: [] } : undefined,
+        prepMinutes: +sc['prep'] > 0 ? +sc['prep'] : undefined,
+        handover: sc['pickFrom'] && sc['pickTo'] ? { from: sc['pickFrom'], to: sc['pickTo'] } : undefined,
+        stock: { mode: 'open' },
+        needSchedule: false,
+        // combo tự đặt giá: món trong combo chỉ là chữ cho khách đọc (hiện ở phần thông tin của bài)
+        info: row('Combo gồm', lines.join(' + ')),
+      };
+    }
     case 'food':
     case 'drink': {
       const items = itemsOf(s);

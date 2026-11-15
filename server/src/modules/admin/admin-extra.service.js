@@ -10,7 +10,7 @@ const Report = require('../buyer/report/report.model');
 const Notification = require('../buyer/notification/notification.model');
 const { Conversation, Message } = require('../buyer/chat/chat.model');
 const Ticket = require('../buyer/support/support.model');
-const { XuEntry, VoucherDefinition } = require('../buyer/xu/xu.model');
+const { XuEntry, XuVoucher, VoucherDefinition } = require('../buyer/xu/xu.model');
 const xu = require('../buyer/xu/xu.service');
 const SellerVerification = require('../seller/verification.model');
 const { AuditLog, audit } = require('../shared/audit-log.model');
@@ -253,7 +253,9 @@ async function listVouchers() {
 
 async function createVoucher(admin, data) {
   await listVouchers(); // bảo đảm đã nạp bộ mặc định trước khi thêm
-  if (await VoucherDefinition.exists({ cid: data.cid })) throw ApiError.duplicate('Mã voucher này đã tồn tại');
+  // trùng mã không phân biệt hoa thường: "TET30" và "tet30" là cùng một mã
+  const escaped = data.cid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (await VoucherDefinition.exists({ cid: new RegExp(`^${escaped}$`, 'i') })) throw ApiError.duplicate('Mã voucher này đã tồn tại');
   if (!data.ship && !(data.amount > 0)) throw ApiError.validation('Cần số tiền giảm hoặc miễn phí giao', [{ field: 'amount', message: 'Nhập số tiền giảm (> 0) hoặc chọn miễn phí giao' }]);
   const v = await VoucherDefinition.create(data);
   await audit(admin, 'voucher.create', 'voucher', v._id, `${v.cid} · ${v.title}`);
@@ -263,8 +265,15 @@ async function createVoucher(admin, data) {
 async function updateVoucher(admin, id, data) {
   const v = await VoucherDefinition.findById(id);
   if (!v) throw ApiError.notFound('Không tìm thấy voucher');
+  // đổi mã: không được trùng voucher khác (không phân biệt hoa thường); voucher người dùng đã đổi tự đổi theo mã mới để không mất liên kết
+  const oldCid = v.cid;
+  if (data.cid && data.cid !== oldCid) {
+    const clash = await VoucherDefinition.exists({ _id: { $ne: v._id }, cid: new RegExp(`^${escapeRegex(data.cid)}$`, 'i') });
+    if (clash) throw ApiError.duplicate('Mã voucher này đã tồn tại');
+  }
   v.set(data);
   await v.save();
+  if (v.cid !== oldCid) await XuVoucher.updateMany({ cid: oldCid }, { $set: { cid: v.cid } });
   await audit(admin, data.active === false ? 'voucher.disable' : data.active === true ? 'voucher.enable' : 'voucher.update', 'voucher', v._id, `${v.cid} · ${v.title}`);
   return v;
 }

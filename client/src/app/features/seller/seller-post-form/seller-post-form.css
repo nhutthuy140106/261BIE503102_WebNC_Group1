@@ -5,8 +5,8 @@
 .fhead p { margin: 6px 0 0; color: var(--smoke); }
 
 /* cùng kích thước 4 nút đăng bài ở trang Hôm nay (.posts4) */
-.tpl { margin-top: 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.tpl button { display: flex; align-items: center; gap: 14px; height: 90px; padding: 0 20px; border: 1px solid var(--border); border-radius: 16px; background: #fff; text-align: left; white-space: nowrap; }
+.tpl { margin-top: 22px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.tpl button { display: flex; align-items: center; gap: 10px; height: 90px; padding: 0 14px; border: 1px solid var(--border); border-radius: 16px; background: #fff; text-align: left; white-space: nowrap; }
 .tpl button:hover:not(:disabled) { border-color: #e2cfc6; }
 .tpl button:disabled { opacity: .45; cursor: not-allowed; }
 .tpl button.on { border-color: var(--accent); background: #fff6f1; box-shadow: 0 0 0 1px var(--accent) inset; opacity: 1; }
@@ -311,3 +311,4 @@ textarea.small { min-height: 64px; }
   .items.q .iline, .items.q.g .iline { grid-template-columns: 1fr 1fr 40px; }
   .items.q .iline > input[formcontrolname="qty"], .items.q .iline > input[formcontrolname="guests"] { grid-column: span 2; }
 }
+@media (max-width: 1100px) { .tpl { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

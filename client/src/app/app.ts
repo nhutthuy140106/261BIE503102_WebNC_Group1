@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, Scroll } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from './core/services/auth';
 import { SavedService } from './core/services/saved';
@@ -30,5 +30,24 @@ export class App implements OnInit {
         // khách đã bấm ♡ rồi đăng nhập: về lại trang thì lưu bài đó
         if (this.auth.isLoggedIn()) this.saved.applyResume();
       });
+    // Bấm Quay lại: về đúng chỗ đang lướt. Trang tải dữ liệu chậm nên lúc Angular cuộn thì trang còn ngắn (đang quay chờ) và bị kẹt ở đầu trang;
+    // ta đợi nội dung dài ra đủ rồi mới cuộn.
+    this.router.events.pipe(filter((e): e is Scroll => e instanceof Scroll)).subscribe((e) => {
+      if (e.position) this.restoreScroll(e.position[1]);
+    });
+  }
+
+  private restoreScroll(y: number): void {
+    if (y <= 0) return;
+    const start = performance.now();
+    const step = () => {
+      const enough = document.documentElement.scrollHeight >= y + window.innerHeight;
+      if (enough || performance.now() - start > 2500) {
+        window.scrollTo(0, y);
+        return;
+      }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 }

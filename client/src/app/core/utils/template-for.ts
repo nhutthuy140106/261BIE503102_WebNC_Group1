@@ -38,15 +38,18 @@ function receiveFact(place: PlaceBlock): PostTemplate['facts'][number] | null {
   return ['pin', 'Cách nhận', [delivers ? 'Giao tận nơi' : '', picks ? 'Tự đến lấy' : ''].filter(Boolean).join(', ')];
 }
 
-/** Đồ ăn & uống: Giờ nhận đặt · Cách nhận · Thời gian chuẩn bị */
+/**
+ * Đồ ăn & uống: LUÔN đủ 3 ô, cùng thứ tự — Giờ nhận đặt · Cách nhận · Thời gian chuẩn bị.
+ * Người bán chưa điền ô nào thì ô đó ghi "Nhắn người bán" để khách biết cần hỏi, thay vì biến mất.
+ */
 function foodFacts(post: Post, place: PlaceBlock): PostTemplate['facts'] {
+  const ASK = 'Nhắn người bán';
   const w = post.orderWindow;
-  const out: PostTemplate['facts'] = [];
-  if (w) out.push(['clock', 'Giờ nhận đặt', `${w.from} – ${w.to}`]);
-  const r = receiveFact(place);
-  if (r) out.push(r);
-  if (post.prepMinutes) out.push(['bolt', 'Thời gian chuẩn bị', `Khoảng ${post.prepMinutes} phút`]);
-  return out;
+  return [
+    ['clock', 'Giờ nhận đặt', w ? `${w.from} – ${w.to}` : ASK],
+    receiveFact(place) ?? ['pin', 'Cách nhận', ASK],
+    ['bolt', 'Thời gian chuẩn bị', post.prepMinutes ? `Khoảng ${post.prepMinutes} phút` : ASK]
+  ];
 }
 
 /** Chữ ngắn cho "Nơi làm" của dịch vụ */
@@ -62,16 +65,22 @@ function placeText(place: PlaceBlock): string {
 
 /** Dịch vụ: Thời gian hoàn thành · Nơi làm · Bảo hành (báo giá sau mà chưa ghi bảo hành thì ô 3 là Phí kiểm tra); còn thiếu ô thì thêm Giờ nhận lịch */
 function serviceFacts(post: Post, place: PlaceBlock): PostTemplate['facts'] {
-  if (post.highlights?.length) return post.highlights.map((h) => [h.icon, h.label, h.value]);
-  const out: PostTemplate['facts'] = [];
-  const info = post.serviceInfo;
-  if (info?.turnaround) out.push(['clock', 'Thời gian hoàn thành', info.turnaround]);
-  const where = placeText(place);
-  if (where) out.push(['pin', 'Nơi làm', where]);
-  if (info?.warranty) out.push(['shield', 'Bảo hành', info.warranty]);
-  else if (post.priceType === 'quote') out.push(['receipt', 'Phí kiểm tra', vnd(post.inspectFee ?? 0)]);
-  if (out.length < 3 && post.handover) out.push(['clock', 'Giờ nhận lịch', `${post.handover.from} – ${post.handover.to}`]);
-  return out;
+  const hl = post.highlights ?? [];
+  // Lưu trú có bộ 3 ô riêng (nhận – trả phòng · địa điểm · đặt cọc)
+  if (hl.some((h) => h.label === 'Nhận – trả phòng')) return hl.map((h) => [h.icon, h.label, h.value]);
+  // Còn lại: LUÔN 3 ô cố định Giờ nhận lịch · Nơi làm · Thời gian hoàn thành; thiếu số liệu thì ghi "Nhắn người bán"
+  const ASK = 'Nhắn người bán';
+  const FIRST = ['Giờ nhận lịch', 'Giờ giao hàng', 'Nơi làm', 'Thanh toán'];
+  const when = hl.find((h) => h.label === 'Giờ nhận lịch' || h.label === 'Giờ giao hàng')?.value ?? (post.handover ? `${post.handover.from} – ${post.handover.to}` : '');
+  const where = hl.find((h) => h.label === 'Nơi làm')?.value ?? placeText(place);
+  // ô 3 theo loại dịch vụ (Trả đồ, Phí kiểm tra, Phí giao, Thời lượng, Buổi học, Thời gian làm); bài cũ chưa có thì lấy thời gian làm dự kiến
+  const third = hl.find((h) => !FIRST.includes(h.label));
+  const old = post.serviceInfo?.turnaround;
+  return [
+    ['clock', 'Giờ nhận lịch', when || ASK],
+    ['pin', 'Nơi làm', where || ASK],
+    third ? [third.icon, third.label, third.value] : ['clock', 'Thời gian làm', old || ASK],
+  ];
 }
 
 const COND: Record<string, string> = { '100': 'Mới 100%', '90': 'Mới 90%', '80': 'Còn 80%', '50': 'Còn 50%' };

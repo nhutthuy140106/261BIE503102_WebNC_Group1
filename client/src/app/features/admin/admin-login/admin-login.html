@@ -3,41 +3,44 @@
   <div class="glow g2" aria-hidden="true"></div>
   <div class="mesh" aria-hidden="true"></div>
 
-  <section class="hero">
+  <header class="bar">
     <a class="logo" routerLink="/" aria-label="AntGo">AntGo<span>Quản trị</span></a>
+  </header>
 
-    <div class="copy">
+  <div class="stage">
+    <section class="copy" aria-label="Giới thiệu">
       <span class="badge"><i></i>Khu quản trị AntGo</span>
       <h1>Quản trị cả khu,<br /><em>gọn trong một nơi.</em></h1>
       <p class="sub">Duyệt hồ sơ người bán, xử lý báo cáo, phân xử đơn hàng và theo dõi số liệu theo ngày.</p>
-      <ul class="feats">
-        <li><span><svg class="i"><use href="#shield" /></svg></span><div><b>Xác minh người bán</b><small>Đối chiếu giấy tờ trước khi cho đăng bán</small></div></li>
-        <li><span><svg class="i"><use href="#receipt" /></svg></span><div><b>Đơn &amp; tranh chấp</b><small>Phân xử khi hai bên không thống nhất</small></div></li>
-        <li><span><svg class="i"><use href="#clock" /></svg></span><div><b>Nhật ký minh bạch</b><small>Mọi thao tác đều có dấu vết, không sửa được</small></div></li>
-      </ul>
-    </div>
+      <div class="row">
+        <ul class="feats">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" /><path pathLength="1" d="M9 12l2 2 4-4" /></svg>Xác minh người bán</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" /><path pathLength="1" d="M9 8h6M9 12h6" /></svg>Đơn &amp; tranh chấp</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle pathLength="1" cx="12" cy="12" r="9" /><path pathLength="1" d="M12 7v5l3 2" /></svg>Nhật ký minh bạch</li>
+        </ul>
+        <img class="ant" src="assets/clean/ant-admin.png" alt="" aria-hidden="true" />
+      </div>
+    </section>
 
-    <img class="ant" src="assets/clean/ride_wave.png" alt="" aria-hidden="true" />
-    <p class="foot">© AntGo · Dành cho quản trị viên và người kiểm duyệt</p>
-  </section>
+    <section class="side" aria-labelledby="alT">
+      <div class="card">
+        <h2 id="alT">Chào mừng trở lại</h2>
+        <p class="lead">Đăng nhập để vào khu quản trị.</p>
 
-  <section class="side" aria-labelledby="alT">
-    <div class="card">
-      <h2 id="alT">Chào mừng trở lại</h2>
-      <p class="lead">Đăng nhập để vào khu quản trị.</p>
+        @if (needsServer) {
+          <div class="warn" role="status">Bạn đang xem bằng dữ liệu mẫu nên không có khu Quản trị. Hãy bật server rồi mở lại với <b>?mock=0</b>. <a href="/admin/login?mock=0">Mở với máy chủ thật</a></div>
+        }
 
-      @if (needsServer) {
-        <div class="warn" role="status">Bạn đang xem bằng dữ liệu mẫu nên không có khu Quản trị. Hãy bật server rồi mở lại với <b>?mock=0</b>. <a href="/admin/login?mock=0">Mở với máy chủ thật</a></div>
-      }
+        <form (ngSubmit)="submit()" novalidate aria-label="Đăng nhập quản trị">
+          <div class="field"><label for="alP">Số điện thoại</label><input id="alP" name="phone" type="tel" inputmode="numeric" autocomplete="username" maxlength="10" [(ngModel)]="phone" placeholder="Số điện thoại quản trị" /></div>
+          <div class="field"><label for="alW">Mật khẩu</label>
+            <div class="pw"><input id="alW" name="password" [type]="show ? 'text' : 'password'" autocomplete="current-password" [(ngModel)]="password" placeholder="Nhập mật khẩu" /><button type="button" (click)="show = !show" [attr.aria-pressed]="show">{{ show ? 'Ẩn' : 'Hiện' }}</button></div></div>
+          @if (error()) { <p class="err" role="alert">{{ error() }}</p> }
+          <button type="submit" class="go" [disabled]="busy()">{{ busy() ? 'Đang đăng nhập…' : 'Đăng nhập' }}</button>
+        </form>
+      </div>
+    </section>
+  </div>
 
-      <form (ngSubmit)="submit()" novalidate aria-label="Đăng nhập quản trị">
-        <div class="field"><label for="alP">Số điện thoại</label><input id="alP" name="phone" type="tel" inputmode="numeric" autocomplete="username" maxlength="10" [(ngModel)]="phone" placeholder="Số điện thoại quản trị" /></div>
-        <div class="field"><label for="alW">Mật khẩu</label>
-          <div class="pw"><input id="alW" name="password" [type]="show ? 'text' : 'password'" autocomplete="current-password" [(ngModel)]="password" placeholder="Nhập mật khẩu" /><button type="button" (click)="show = !show" [attr.aria-pressed]="show">{{ show ? 'Ẩn' : 'Hiện' }}</button></div></div>
-        @if (error()) { <p class="err" role="alert">{{ error() }}</p> }
-        <button type="submit" class="go" [disabled]="busy()"><span>{{ busy() ? 'Đang đăng nhập…' : 'Đăng nhập' }}</span><i aria-hidden="true">→</i></button>
-      </form>
-      <p class="back"><a routerLink="/">← Về trang AntGo</a></p>
-    </div>
-  </section>
+  <footer class="foot">© AntGo · Dành cho quản trị viên và người kiểm duyệt</footer>
 </main>

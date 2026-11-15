@@ -118,7 +118,7 @@ describe('formToPostFields', () => {
     it('gia sư: không báo giá sau, giá ước tính, lịch hẹn, nơi làm', () => {
       const f = formToPostFields('service', { common: {}, spec: { preset: 'Gia sư', priceType: 'quote', estimate: true, repeat: true, place: 'choice', homeFee: 20000, from: '08:00', to: '18:00', dates: ['2026-11-10'], pay: ['cash'], items: [{ name: 'Buổi 90 phút', price: 150000, unit: 'buổi' }], options: [], questions: [] } }, 'service');
       expect(f).toMatchObject({ priceType: 'fixed', estimate: undefined, repeat: false, noSchedule: true, dates: [], handover: undefined, place: { mode: 'none' }, deliveryFee: 0 });
-      expect(f.highlights?.map((x) => x.label)).toEqual(['Thanh toán']);
+      expect(f.highlights?.map((x) => [x.label, x.value])).toEqual([['Giờ nhận lịch', 'Thỏa thuận khi đặt'], ['Nơi làm', 'Nhắn người bán'], ['Buổi học', 'Buổi 90 phút']]);
     });
 
     it('giặt sấy cũng không còn báo giá sau', () => {
@@ -126,22 +126,47 @@ describe('formToPostFields', () => {
     });
   });
 
-  describe('3 ô đầu bài của dịch vụ: giờ nhận lịch, nơi làm, thanh toán', () => {
+  describe('combo', () => {
+    const combo = (spec: Record<string, unknown>) =>
+      formToPostFields('combo', { common: { category: 'Combo' }, spec: { pay: ['cash'], fulfil: { delivery: true, pickup: true, fee: 5000 }, schedule: { dates: ['2026-11-20'], orderFrom: '06:00', orderTo: '10:30', prep: 30, pickFrom: '11:00', pickTo: '13:00' }, ...spec } }, 'food');
+
+    it('là bài đồ ăn thường: món trong combo chỉ là chữ, không gắn bài lẻ, không có tiết kiệm', () => {
+      const f = combo({ comboPrice: 60000, includes: ['Cơm gà', ' Canh rau ', '', 'Trà đá'] });
+      expect(f.info).toEqual([{ label: 'Combo gồm', value: 'Cơm gà + Canh rau + Trà đá' }]);
+      expect(f).not.toHaveProperty('combo');
+      expect(f).toMatchObject({ priceType: 'fixed', stock: { mode: 'open' }, prepMinutes: 30, orderWindow: { from: '06:00', to: '10:30' } });
+    });
+
+    it('chưa ghi món nào thì không có dòng thông tin', () => {
+      expect(combo({ comboPrice: 1, includes: ['', ' '] }).info).toEqual([]);
+    });
+  });
+
+  describe('3 ô đầu bài của dịch vụ: giờ nhận lịch, nơi làm, ô 3 theo loại', () => {
     const svc = (spec: Record<string, unknown>) =>
       formToPostFields('service', { common: {}, spec: { items: [], options: [], questions: [], serviceArea: 'Trong khu', place: 'buyer', pay: ['cash', 'transfer'], from: '08:00', to: '18:00', ...spec } }, 'service');
     const cells = (f: ReturnType<typeof svc>) => f.highlights?.map((x) => [x.label, x.value]);
 
     it('mẫu thường: theo nơi làm người bán chọn', () => {
-      expect(cells(svc({ preset: 'Dọn dẹp' }))).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Tại nhà bạn'], ['Thanh toán', 'Tiền mặt, Chuyển khoản']]);
-      expect(cells(svc({ preset: 'Khác', place: 'choice', pay: ['cash', 'xu'] }))?.slice(1)).toEqual([['Nơi làm', 'Tại nhà bạn hoặc bạn mang tới'], ['Thanh toán', 'Tiền mặt, AntXu']]);
+      expect(cells(svc({ preset: 'Dọn dẹp', turnaround: '3 giờ' }))).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Tại nhà bạn'], ['Thời gian làm', '3 giờ']]);
+      // chưa có số liệu thì ghi rõ để khách biết cần hỏi, không bỏ ô
+      expect(cells(svc({ preset: 'Dọn dẹp' }))?.[2]).toEqual(['Thời gian làm', 'Nhắn người bán']);
+      expect(cells(svc({ preset: 'Khác', place: 'choice', turnaround: '1 ngày' }))?.slice(1)).toEqual([['Nơi làm', 'Tại nhà bạn hoặc bạn mang tới'], ['Thời gian làm', '1 ngày']]);
       // làm đẹp không còn mục Nơi làm: luôn làm tại nhà khách
       expect(cells(svc({ preset: 'Làm đẹp', place: 'choice' }))?.[1]).toEqual(['Nơi làm', 'Tại nhà bạn']);
       expect(cells(svc({ preset: 'Khác', place: 'seller', where: 'Tòa S2, tầng 3' }))?.[1]).toEqual(['Nơi làm', 'Tòa S2, tầng 3']);
     });
 
+    it('ô 3 lấy đúng ô người bán đã nhập theo từng loại', () => {
+      expect(cells(svc({ preset: 'Sửa chữa', inspect: 30000 }))?.[2]).toEqual(['Phí kiểm tra', '30.000đ']);
+      expect(cells(svc({ preset: 'Sửa chữa', inspect: 0 }))?.[2]).toEqual(['Phí kiểm tra', 'Miễn phí']);
+      expect(cells(svc({ preset: 'Giao nhận', items: [{ name: 'Đồ to', price: 25000, unit: 'lượt' }, { name: 'Lấy đồ', price: 15000, unit: 'lượt' }] }))?.[2]).toEqual(['Phí giao', 'Từ 15.000đ / lượt']);
+      expect(cells(svc({ preset: 'Chăm sóc', durMin: 2, durMax: 6 }))?.[2]).toEqual(['Thời lượng', '2–6 giờ / lần']);
+    });
+
     it('giặt sấy: tiệm lấy đồ tại nhà, trả đồ và cách trả đồ xuống phần thông tin', () => {
       const f = svc({ preset: 'Giặt sấy', returnHours: 12, fulfil: { delivery: true, pickup: true, fee: 10000 } });
-      expect(cells(f)).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Lấy đồ tại nhà bạn'], ['Thanh toán', 'Tiền mặt, Chuyển khoản']]);
+      expect(cells(f)).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Lấy đồ tại nhà bạn'], ['Trả đồ', 'Trong khoảng 12 giờ']]);
       expect(f.info).toEqual([{ label: 'Trả đồ', value: 'Trong khoảng 12 giờ' }, { label: 'Cách trả đồ', value: 'Giao tận nơi, Tự đến lấy' }]);
       expect(f).toMatchObject({ fulfillmentModes: ['delivery', 'pickup'], deliveryFee: 10000, pickupAtBuyer: true });
     });
@@ -176,9 +201,10 @@ describe('formToPostFields', () => {
       }
     });
 
-    it('mẫu Khác: thời gian làm dự kiến và bảo hành xuống phần thông tin', () => {
+    it('mẫu Khác: thời gian hoàn thành lên ô đầu bài, bảo hành xuống phần thông tin', () => {
       const f = svc({ preset: 'Khác', turnaround: '2 giờ', warranty: '1 tháng' });
-      expect(f.info).toEqual(expect.arrayContaining([{ label: 'Thời gian làm dự kiến', value: '2 giờ' }, { label: 'Bảo hành', value: '1 tháng' }]));
+      expect(f.highlights?.[2]).toEqual({ icon: 'clock', label: 'Thời gian làm', value: '2 giờ' });
+      expect(f.info).toEqual(expect.arrayContaining([{ label: 'Bảo hành', value: '1 tháng' }]));
     });
   });
 

@@ -14,6 +14,10 @@ export class AdminOrders implements OnInit {
   private readonly api = inject(AdminApi);
   private readonly route = inject(ActivatedRoute);
 
+  /** Lựa chọn cho ô lọc trạng thái (thêm mục "Mọi trạng thái" ở đầu) */
+  protected get stateOptions(): { value: unknown; label: string }[] {
+    return [{ value: '', label: 'Mọi trạng thái' }, ...this.states.map((s) => ({ value: s[0], label: s[1] }))];
+  }
   protected readonly states = Object.entries(ORDER_STATE);
   protected readonly rows = signal<OrderRow[] | null>(null);
   protected readonly total = signal(0);

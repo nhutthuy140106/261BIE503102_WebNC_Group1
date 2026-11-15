@@ -2,12 +2,8 @@
 <p class="lead">Ẩn bài vi phạm (người bán sẽ nhận được lý do) hoặc hiện lại khi đã sửa.</p>
 <div class="bar">
   <input type="search" name="q" [(ngModel)]="q" (ngModelChange)="filter(300)" placeholder="Tìm theo tiêu đề hoặc người bán" aria-label="Tìm bài đăng" />
-  <select name="type" [(ngModel)]="type" (ngModelChange)="filter()" aria-label="Lọc loại">
-    <option value="">Mọi loại</option><option value="food">Đồ ăn</option><option value="goods">Đồ dùng</option><option value="service">Dịch vụ</option>
-  </select>
-  <select name="status" [(ngModel)]="status" (ngModelChange)="filter()" aria-label="Lọc trạng thái">
-    <option value="">Mọi trạng thái</option><option value="open">Đang mở</option><option value="soldout">Hết hàng</option><option value="closed">Đã đóng</option><option value="hidden">Bị ẩn</option>
-  </select>
+  <app-admin-select name="type" ariaLabel="Lọc loại" [(ngModel)]="type" (ngModelChange)="filter()" [options]="[{ value: '', label: 'Mọi loại' }, { value: 'food', label: 'Đồ ăn' }, { value: 'goods', label: 'Đồ dùng' }, { value: 'service', label: 'Dịch vụ' }]" />
+  <app-admin-select name="status" ariaLabel="Lọc trạng thái" [(ngModel)]="status" (ngModelChange)="filter()" [options]="[{ value: '', label: 'Mọi trạng thái' }, { value: 'open', label: 'Đang mở' }, { value: 'soldout', label: 'Hết hàng' }, { value: 'closed', label: 'Đã đóng' }, { value: 'hidden', label: 'Bị ẩn' }]" />
 </div>
 @if (error()) { <div class="err" role="alert">{{ error() }}</div> }
 

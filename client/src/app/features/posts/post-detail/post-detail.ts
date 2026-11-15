@@ -26,7 +26,6 @@ import { MAX_PHOTOS } from '../../../core/utils/order-draft';
 import { canPickDate, firstOpenDate, lastOpenDate } from '../../../core/utils/open-dates';
 import { formatDateTime } from '../../../core/utils/status-label';
 import { ClockService } from '../../../core/services/clock';
-import { comboSaving } from '../../../core/utils/combo';
 import { countdown, clockVN, dealAt } from '../../../core/utils/promo';
 import { windowSlots, windowStateAt } from '../../../core/utils/order-window';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
@@ -366,11 +365,6 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     });
   }
 
-  /** Combo: tiết kiệm theo giá đang trả (tự đổi khi vào/ra Giờ vàng) */
-  protected readonly saving = computed(() => {
-    const p = this.post();
-    return p ? comboSaving(p, this.clock.now()) : 0;
-  });
   protected readonly comboUnavailable = computed(() => this.post()?.comboDetail?.items.some((i) => !i.available) ?? false);
 
   protected dealEnds(): string {

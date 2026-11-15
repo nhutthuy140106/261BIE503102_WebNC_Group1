@@ -2,12 +2,8 @@
 <p class="lead">Khóa tài khoản vi phạm hoặc mở khóa khi đã xử lý xong.</p>
 <div class="bar">
   <input type="search" name="q" [(ngModel)]="q" (ngModelChange)="filter(300)" placeholder="Tìm theo tên hoặc số điện thoại" aria-label="Tìm người dùng" />
-  <select name="role" [(ngModel)]="role" (ngModelChange)="filter()" aria-label="Lọc vai trò">
-    <option value="">Mọi vai trò</option><option value="user">Người dùng</option><option value="moderator">Người kiểm duyệt</option><option value="admin">Quản trị</option>
-  </select>
-  <select name="status" [(ngModel)]="status" (ngModelChange)="filter()" aria-label="Lọc trạng thái">
-    <option value="">Mọi trạng thái</option><option value="active">Đang hoạt động</option><option value="locked">Bị khóa</option>
-  </select>
+  <app-admin-select name="role" ariaLabel="Lọc vai trò" [(ngModel)]="role" (ngModelChange)="filter()" [options]="[{ value: '', label: 'Mọi vai trò' }, { value: 'user', label: 'Người dùng' }, { value: 'moderator', label: 'Người kiểm duyệt' }, { value: 'admin', label: 'Quản trị' }]" />
+  <app-admin-select name="status" ariaLabel="Lọc trạng thái" [(ngModel)]="status" (ngModelChange)="filter()" [options]="[{ value: '', label: 'Mọi trạng thái' }, { value: 'active', label: 'Đang hoạt động' }, { value: 'locked', label: 'Bị khóa' }]" />
 </div>
 @if (error()) { <div class="err" role="alert">{{ error() }}</div> }
 

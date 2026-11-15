@@ -7,10 +7,10 @@
   <section class="panel">
     <h2>Soạn thông báo</h2>
     <form (ngSubmit)="ask()">
-      <div class="field"><label for="at">Tiêu đề</label><input id="at" name="at" [(ngModel)]="title" maxlength="100" placeholder="vd. Cuối tuần có mưa lớn" /></div>
+      <div class="field"><label for="at">Tiêu đề</label><input id="at" name="at" [(ngModel)]="title" maxlength="100" placeholder="VD: Cuối tuần có mưa lớn" /></div>
       <div class="field"><label for="ab">Nội dung (không bắt buộc)</label><textarea id="ab" name="ab" rows="4" [(ngModel)]="body" maxlength="500"></textarea></div>
       <div class="field"><label for="aa">Gửi tới</label>
-        <select id="aa" name="aa" [(ngModel)]="area"><option value="all">Toàn khu (mọi người dùng)</option>@for (a of areas(); track a) { <option [value]="a">Chỉ khu {{ a }}</option> }</select>
+        <app-admin-select inputId="aa" name="aa" [(ngModel)]="area" [options]="areaOptions()" />
         <small>Thông báo đã gửi không thu hồi được, hãy đọc lại trước khi gửi.</small></div>
       @if (formErr) { <p class="e" role="alert">{{ formErr }}</p> }
       <div class="btns"><button type="submit" class="btn main" [disabled]="busy()">Gửi thông báo</button></div>

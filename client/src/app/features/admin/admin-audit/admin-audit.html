@@ -1,9 +1,7 @@
 <h1>Nhật ký thao tác</h1>
 <p class="lead">Mọi thao tác của quản trị viên đều được ghi lại để truy vết. Nhật ký chỉ xem, không sửa hay xóa được.</p>
 <div class="bar">
-  <select name="action" [(ngModel)]="action" (ngModelChange)="filter()" aria-label="Lọc loại thao tác">
-    @for (g of groups; track g.v) { <option [value]="g.v">{{ g.t }}</option> }
-  </select>
+  <app-admin-select name="action" ariaLabel="Lọc loại thao tác" [(ngModel)]="action" (ngModelChange)="filter()" [options]="groupOptions" />
 </div>
 @if (error()) { <div class="err" role="alert">{{ error() }}</div> }
 

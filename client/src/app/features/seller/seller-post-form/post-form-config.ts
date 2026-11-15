@@ -8,7 +8,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
  * giá · số lượng · thời gian · địa điểm · tùy chọn cộng giá · câu hỏi riêng · tình trạng bán + 3 ô thông tin nhanh.
  * Việc làm: theo trang chi tiết việc phía Mua (thời gian làm, địa điểm, số người cần, tiền công, thanh toán).
  */
-export type FormType = 'food' | 'drink' | 'goods' | 'service' | 'job';
+export type FormType = 'food' | 'drink' | 'combo' | 'goods' | 'service' | 'job';
 
 export const DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 /** Khu của nền tảng (core/config/areas.ts) — cùng danh sách ô "Khu vực đang xem" ở header */
@@ -25,6 +25,7 @@ export const AMENITIES = ['Wi-Fi', 'Máy lạnh', 'Nước nóng', 'Tủ lạnh'
 export const CATS: Record<FormType, string[]> = {
   food: ['Cơm nhà làm', 'Món nước', 'Bánh & tráng miệng', 'Đồ ăn vặt', 'Đồ chay'],
   drink: ['Cà phê', 'Trà sữa', 'Trà trái cây', 'Nước ép', 'Sinh tố', 'Khác'],
+  combo: ['Combo'],
   goods: ['Đồ bếp', 'Đồ gia dụng', 'Điện tử', 'Nội thất', 'Quần áo', 'Sách & học tập', 'Đồ trẻ em', 'Thể thao', 'Khác'],
   service: ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận', 'Chăm sóc', 'Gia sư', 'Làm đẹp', 'Lưu trú', 'Khác'],
   job: ['Giao nhận', 'Mua hộ', 'Việc nhà', 'Sửa chữa nhỏ', 'Khuân vác', 'Trông trẻ / thú cưng', 'Gia sư', 'Xếp hàng giữ chỗ', 'Hỗ trợ máy tính', 'Khác'],
@@ -203,7 +204,7 @@ export const nextDays = (n: number) => Array.from({ length: n }, (_, i) => ymd(n
 
 /** Lịch bán đồ ăn / đồ uống: chọn từng ngày bán trên lịch (`dates`, chọn nhiều) */
 const sellSchedule = (fb: FormBuilder, prep: number) =>
-  fb.group({ mode: ['daily'], days: fb.control<number[]>([0, 1, 2, 3, 4, 5]), dates: fb.control<string[]>(nextDays(7)), orderFrom: ['06:00'], orderTo: ['10:30'], prep: [prep, Validators.min(0)], pickFrom: ['11:00'], pickTo: ['13:00'], batchDate: [''] });
+  fb.group({ mode: ['daily'], days: fb.control<number[]>([0, 1, 2, 3, 4, 5]), dates: fb.control<string[]>(nextDays(7)), orderFrom: ['06:00'], orderTo: ['10:30'], prep: [prep, [Validators.required, Validators.min(1)]], pickFrom: ['11:00'], pickTo: ['13:00'], batchDate: [''] });
 
 /** Thông tin nhận chuyển khoản: bắt buộc khi bật "Chuyển khoản" (kiểm tra ở extraError); `name` = mã ngân hàng (banks.ts) */
 const bankGroup = (fb: FormBuilder) => fb.group({ name: [''], no: [''], holder: [''], qr: [''] });
@@ -228,6 +229,20 @@ export function foodGroup(fb: FormBuilder) {
     pay: fb.control<string[]>(['cash']),
     bank: bankGroup(fb),
     fresh: [false, Validators.requiredTrue],
+  });
+}
+
+/** Combo: một bài đồ ăn như bình thường, người bán tự đặt tên, tự liệt kê món và tự đặt giá (hệ thống không tính gì thêm) */
+export function comboGroup(fb: FormBuilder) {
+  return fb.group({
+    /** các món trong combo: người bán tự gõ từng dòng chữ, không gắn với bài lẻ nào */
+    includes: fb.array([fb.control(''), fb.control('')]),
+    comboPrice: [null as number | null, [Validators.required, Validators.min(1000)]],
+    kitchenNote: [true],
+    schedule: sellSchedule(fb, 30),
+    fulfil: fulfil(fb),
+    pay: fb.control<string[]>(['cash']),
+    bank: bankGroup(fb),
   });
 }
 

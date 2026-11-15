@@ -11,6 +11,9 @@ import { Announcement, AdminApi, msgOf } from '../../../core/services/admin-api'
 export class AdminAnnouncements implements OnInit {
   private readonly api = inject(AdminApi);
   protected readonly rows = signal<Announcement[] | null>(null);
+  protected areaOptions(): { value: unknown; label: string }[] {
+    return [{ value: 'all', label: 'Toàn khu (mọi người dùng)' }, ...this.areas().map((a) => ({ value: a, label: 'Chỉ khu ' + a }))];
+  }
   protected readonly areas = signal<string[]>(['A', 'B', 'C', 'D']);
   protected readonly error = signal('');
   protected readonly ok = signal('');

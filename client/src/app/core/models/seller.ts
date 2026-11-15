@@ -45,7 +45,7 @@ export interface SellerPost {
   buyerPostId?: string;
   /** dữ liệu form đăng bài (để mở lại đúng khi sửa) + loại form: food / drink / goods / service / job */
   form?: Record<string, unknown>;
-  formType?: 'food' | 'drink' | 'goods' | 'service' | 'job';
+  formType?: 'food' | 'drink' | 'combo' | 'goods' | 'service' | 'job';
 }
 
 /** Trạng thái đơn khách đặt — nhìn từ phía người bán */

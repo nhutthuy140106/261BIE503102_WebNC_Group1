@@ -117,6 +117,43 @@
           <label class="ck pledge" [class.badck]="bad('spec.fresh')"><input type="checkbox" formControlName="fresh" /><span>Tôi cam kết món ăn được chế biến trong ngày và đảm bảo an toàn vệ sinh thực phẩm.</span></label>
         }
 
+        <!-- ================= COMBO ================= -->
+        @case ('combo') {
+          <section class="sec">
+            <header><span class="no">2</span><span><b>Nội dung combo</b></span></header>
+            <div class="bd">
+              <div class="grp" formArrayName="includes">
+                <span class="lbl">Combo gồm những món nào?</span>
+                <div class="lines sub">
+                  @for (m of arr('spec.includes').controls; track $index; let mi = $index) {
+                    <div class="line">
+                      <input class="input" [formControlName]="mi" maxlength="60" [placeholder]="mi === 0 ? 'Ví dụ: Cơm gà xối mỡ' : mi === 1 ? 'Ví dụ: Canh rau' : 'Ví dụ: Trà đá'" [attr.aria-label]="'Món ' + (mi + 1)" />
+                      @if (arr('spec.includes').length > 2) { <button type="button" class="rm" aria-label="Bỏ món" (click)="removeAt('spec.includes', mi)"><svg class="i"><use href="#xmark" /></svg></button> }
+                    </div>
+                  }
+                </div>
+                <button type="button" class="mini sub" (click)="addStr('spec.includes')"><svg class="i"><use href="#plus" /></svg>Thêm món</button>
+                <span class="hint">Khách thấy danh sách này ở trang bài. Bạn tự ghi, không cần đăng các món lẻ trước.</span>
+              </div>
+              <div class="fld" [class.bad]="bad('spec.comboPrice')">
+                <label for="cbp">Giá combo</label>
+                <span class="money"><input appMoney id="cbp" class="input" formControlName="comboPrice" placeholder="Ví dụ: 85.000" /></span>
+                <span class="err">Nhập giá combo từ 1.000đ</span>
+              </div>
+              <div class="checks">
+                <label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú cho quán</span></label>
+              </div>
+              <ng-container *ngTemplateOutlet="promoBox" />
+            </div>
+          </section>
+          <ng-container *ngTemplateOutlet="sellSchedule; context: { n: 3 }" />
+          <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 4 }" />
+          <section class="sec">
+            <header><span class="no">5</span><span><b>Thanh toán</b></span></header>
+            <div class="bd"><ng-container *ngTemplateOutlet="payPills" /></div>
+          </section>
+        }
+
         <!-- ================= ĐỒ UỐNG ================= -->
         @case ('drink') {
           <section class="sec">
@@ -331,9 +368,9 @@
                   <div class="fld"><label for="dmax">Nhiều nhất (giờ)</label><input id="dmax" class="input" type="number" min="1" formControlName="durMax" /></div>
                 </div>
               }
-              @if (svcPreset().generic) {
+              @if (needsTurnaround()) {
                 <div class="row">
-                  <div class="fld"><label for="gta">Thời gian làm dự kiến <span class="hint">(không bắt buộc)</span></label><input id="gta" class="input" formControlName="turnaround" maxlength="40" placeholder="Ví dụ: khoảng 2 giờ" /></div>
+                  <div class="fld"><label for="gta">Thời gian làm dự kiến <span class="req">*</span></label><input id="gta" class="input" formControlName="turnaround" maxlength="40" placeholder="Ví dụ: khoảng 2 giờ" /></div>
                 </div>
               }
               @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning && !svcPreset().noRepeat) {

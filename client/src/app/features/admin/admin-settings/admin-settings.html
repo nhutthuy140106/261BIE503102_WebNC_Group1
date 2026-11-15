@@ -9,7 +9,7 @@
       <section class="panel">
         <h2>Từ khóa bị cấm <small>{{ count('bannedKeywords') }} từ</small></h2>
         <p class="sub" style="margin: 0 0 10px">Bài hoặc việc có tiêu đề/mô tả chứa từ này sẽ bị từ chối khi đăng hoặc sửa. So khớp không phân biệt hoa thường và dấu.</p>
-        <div class="field"><label for="kw">Mỗi dòng một từ hoặc cụm từ</label><textarea id="kw" name="kw" rows="6" [(ngModel)]="text.bannedKeywords" [readOnly]="!isAdmin()" placeholder="vd. hàng giả"></textarea></div>
+        <div class="field"><label for="kw">Mỗi dòng một từ hoặc cụm từ</label><textarea id="kw" name="kw" rows="6" [(ngModel)]="text.bannedKeywords" [readOnly]="!isAdmin()" placeholder="VD: hàng giả"></textarea></div>
         @if (isAdmin()) { <div class="btns"><button type="button" class="btn main" [disabled]="busy()" (click)="save('bannedKeywords', 'từ khóa cấm')">Lưu từ khóa</button></div> }
       </section>
     </div>

@@ -63,38 +63,25 @@
 .popline button { padding: 6px 14px; border: 1px solid var(--border); background: var(--card); border-radius: 999px; color: var(--smoke); font-size: 13px; font-weight: 500; }
 .popline button:hover { color: var(--ink); border-color: var(--ink); }
 
-/* ===== Kiếm thêm gần nhà ===== */
-.kband { margin-top: 64px; display: grid; grid-template-columns: 200px minmax(0, 1fr) minmax(0, 1.05fr); gap: 36px; align-items: center; padding: 40px 48px 40px 32px; border-radius: 24px; background: #22304a; color: #e9e6f0; }
-.earn-ant { width: 200px; margin: -70px 0 -40px; filter: drop-shadow(0 14px 18px rgba(0, 0, 0, .25)); }
+/* ===== Kiếm thêm gần nhà: 2 cột (kiến + lời mời | 3 bước), sát dải Vườn AntGo phía trên ===== */
+.kband { margin-top: 56px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 44px; align-items: center; padding: 38px 52px 38px 36px; border-radius: 20px; background: #22304a; color: #e9e6f0; }
+.earn-main { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.earn-ant { flex: none; width: 168px; margin: -58px 0 -34px; filter: drop-shadow(0 14px 18px rgba(0, 0, 0, .28)); }
 .earn-kick { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #f4a37a; }
-.kband h2 { margin: 10px 0 0; font-size: 27px; line-height: 1.25; letter-spacing: -.02em; font-weight: 700; color: #fff6ea; }
+.kband h2 { margin: 10px 0 0; font-size: 25px; line-height: 1.25; letter-spacing: -.02em; font-weight: 700; color: #fff6ea; }
 .earn-btns { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
-.earn-go { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 20px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; }
+.earn-go { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 22px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; }
 .earn-go svg { width: 16px; height: 16px; }
 .earn-ghost { display: inline-flex; align-items: center; height: 46px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255, 246, 234, .28); color: #fff6ea; font-weight: 600; }
 .earn-ghost:hover { background: rgba(255, 246, 234, .08); }
-.earn-steps { display: grid; gap: 18px; }
-.earn-steps li { display: flex; gap: 14px; align-items: flex-start; }
-.earn-steps li > b { width: 30px; height: 30px; flex: none; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 246, 234, .1); color: #f4a37a; font-size: 14px; }
-.earn-steps span { font-size: 13.5px; line-height: 1.5; color: #b9b6c8; }
-.earn-steps strong { display: block; color: #fff6ea; font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-@media (max-width: 1000px) { .kband { grid-template-columns: 1fr; } .earn-ant { display: none; } }
+/* 3 bước nối nhau bằng một đường dọc: thấy ngay đây là chuỗi từng bước */
+.earn-steps { position: relative; display: grid; gap: 22px; padding: 4px 0 4px 26px; border-left: 1px solid rgba(255, 246, 234, .14); }
+.earn-steps li { position: relative; display: flex; gap: 14px; align-items: flex-start; }
+.earn-steps li > b { position: absolute; left: -41px; top: 0; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(180deg, #F27A3F, #D85A1C); color: #fff; font-size: 14px; font-weight: 700; box-shadow: 0 0 0 5px #22304a; }
+.earn-steps span { font-size: 14px; line-height: 1.5; color: #d6d3e2; }
+.earn-steps strong { display: block; color: #fff; font-size: 15.5px; font-weight: 700; margin-bottom: 2px; }
+@media (max-width: 1000px) { .kband { grid-template-columns: 1fr; gap: 28px; } .earn-ant { display: none; } .earn-main { display: block; } }
 
-/* ===== Khám phá ===== */
-.ffilter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
-.ffilter > button { height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--smoke); font-weight: 500; font-size: 13px; }
-.ffilter > button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
-.sortbox { margin-left: auto; position: relative; }
-.sortbtn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); font-size: 13px; color: var(--smoke); }
-.sortbtn b { color: var(--ink); font-weight: 600; }
-.sortbtn svg { width: 14px; height: 14px; transition: transform .2s; }
-.sortbox.open .sortbtn svg { transform: rotate(180deg); }
-.sortmenu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; min-width: 200px; padding: 6px; border-radius: 12px; background: var(--card); border: 1px solid var(--border); box-shadow: 0 16px 36px -14px rgba(34, 48, 74, .3); display: none; }
-.sortbox.open .sortmenu { display: block; }
-.sortmenu button { width: 100%; display: flex; justify-content: space-between; align-items: center; height: 36px; padding: 0 10px; border-radius: 8px; font-size: 13px; text-align: left; }
-.sortmenu button:hover { background: var(--soft); }
-.sortmenu button.on { color: var(--ink); font-weight: 600; }
-.sortmenu button.on::after { content: '✓'; }
 .rise { display: block; animation: rise .45s cubic-bezier(.2, .8, .2, 1) both; }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
 
@@ -118,25 +105,23 @@
   .trust { gap: 6px 16px; font-size: 13px; flex-wrap: wrap; justify-content: center; }
   .explore { margin-top: 32px; }
   .bigsearch { height: 50px; padding-left: 16px; }
-  .kband { padding: 28px 20px; margin-top: 44px; gap: 24px; }
+  .kband { padding: 28px 20px 28px 22px; margin-top: 40px; gap: 24px; }
+  .earn-steps { padding-left: 22px; }
+  .earn-steps li > b { left: -37px; }
   .kband h2 { font-size: 22px; }
 }
 
 .popline .spinlink { padding: 6px 14px; border: 1px dashed var(--accent); border-radius: 999px; color: var(--accent); font-size: 13px; font-weight: 600; }
 .popline .spinlink:hover { background: var(--accent-soft); }
 
-.gband { margin-top: 48px; display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1px solid var(--line, #F0E2DC); border-radius: 14px; background: #FBF4F1; color: #22304A; }
-.gband img { flex: none; }
-.gband span:nth-of-type(1) { flex: 1; min-width: 0; font-size: 14px; }
-.gband b { display: block; font-size: 16px; }
-.gband small { color: #6b7280; }
-.gband .gobtn { flex: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #D85A1C; }
-.gband .gobtn svg { width: 14px; height: 14px; fill: currentColor; }
-.gband:hover { background: #f6e8e1; }
-@media (max-width: 640px) { .gband { flex-wrap: wrap; } .gband .gobtn { margin-left: 58px; } }
-
-.goldclock { display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; padding: 3px 10px; border-radius: 999px; background: #FBF4F1; border: 1px solid #F0E2DC; color: #22304A; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; vertical-align: middle; }
-.goldclock .i { width: 14px; height: 14px; fill: currentColor; }
+@media (max-width: 640px) { 
+.goldclock { display: inline-flex; align-items: center; gap: 8px; margin-left: 12px; padding: 4px 6px 4px 12px; border-radius: 999px; background: #FFF1EA; border: 1px solid #F8D7C6; color: #B34A14; font-size: 13px; font-weight: 600; vertical-align: middle; }
+.goldclock .i { width: 15px; height: 15px; fill: currentColor; }
+.goldclock .lbl { letter-spacing: .01em; }
+/* đồng hồ đếm ngược: mỗi số một ô, chữ số đều nhau (không dùng font Mona Sans vì số 1, 4 của nó lạ mắt) */
+.goldclock .cd { display: inline-flex; align-items: center; gap: 3px; }
+.goldclock .cd b { min-width: 27px; padding: 3px 5px; border-radius: 7px; background: linear-gradient(180deg, #F27A3F, #D85A1C); color: #fff; font: 700 14px/1.2 'Segoe UI', system-ui, Roboto, Arial, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: .02em; text-align: center; box-shadow: 0 1px 0 rgba(0, 0, 0, .12), inset 0 1px 0 rgba(255, 255, 255, .25); }
+.goldclock .cd i { font: 700 14px/1 'Segoe UI', system-ui, Arial, sans-serif; font-style: normal; color: #D85A1C; }
 .goldnext { margin-top: 36px; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid #F0E2DC; border-radius: 12px; background: #FBF4F1; color: #22304A; }
 .goldnext span { flex: 1; min-width: 0; font-size: 14px; }
 .goldnext .i { width: 16px; height: 16px; fill: currentColor; flex: none; }

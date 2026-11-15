@@ -7,7 +7,7 @@ import { SELLER_KIND_ICON, SellerOrderState } from '../../../core/models/seller'
 import { SellerOrderAct, SellerSpaceService, dayLabel } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import { dueText } from '../../../core/utils/countdown';
-import { parseMoney } from '../components/money-input/money-input';
+import { parseMoney } from '../../../shared/directives/money-input';
 
 /** Câu hướng dẫn ở khung hành động, theo bước hiện tại */
 const GUIDE: Record<SellerOrderState, string> = {

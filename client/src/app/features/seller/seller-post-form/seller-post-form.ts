@@ -10,14 +10,14 @@ import { KIND_LABEL, PostKind } from '../../../core/models/post';
 import { JOB_STEP_NAMES, SELLER_KIND_ICON, SellerPost, orderStepNames } from '../../../core/models/seller';
 import { AuthService } from '../../../core/services/auth';
 import { SellerService } from '../../../core/services/seller';
-import { cleaningPrice, formToPostFields, unpricedService } from './post-mapper';
+import { cleaningPrice, formToPostFields, serviceHighlights, unpricedService } from './post-mapper';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
 import { UploadService } from '../../../core/services/upload';
 import { useMock } from '../../../core/config/api.config';
 import {
   AMENITIES, ASK_QUICK, ASK_TYPES, BLOCKS, GENERIC_PLACES, REPAIR_PLACES, CATS, DRINK_UNITS, FOOD_UNITS, GOODS_UNITS, SVC_UNITS, ymd, CONDITIONS, DAYS, FOOD_TAGS, FormType, ICE, JOB_UNITS, PRICE_TYPES, Q_TYPES, SVC_PLACES, SVC_PRESETS, SVC_TIMES, SWEET,
-  choice, commonGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, windowGroup, menuGroup, datesBetween, toDrinkSizes, toGenericSpec, toGenericOptions, toJobWindows, toOrderOptions,
+  choice, commonGroup, comboGroup, drinkGroup, foodGroup, goodsGroup, itemGroup, jobGroup, optGroup, questionGroup, quickGroup, serviceGroup, windowGroup, menuGroup, datesBetween, toDrinkSizes, toGenericSpec, toGenericOptions, toJobWindows, toOrderOptions,
 } from './post-form-config';
 
 /** Ngày bán: 1 ngày → dd/mm/yyyy, nhiều ngày → ngày đầu - ngày cuối */
@@ -30,6 +30,7 @@ type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 
 const TYPES: { t: FormType | 'foodish'; kind: PostKind; icon: string; label: string; sub: string }[] = [
   { t: 'foodish', kind: 'food', icon: 'fork', label: 'Bán đồ ăn & uống', sub: 'Món theo phần, đồ uống theo ly' },
+  { t: 'combo', kind: 'food', icon: 'bag', label: 'Đăng combo', sub: 'Gộp nhiều món, bạn tự đặt giá' },
   { t: 'goods', kind: 'goods', icon: 'package', label: 'Bán đồ dùng', sub: 'Đồ mới hoặc đã dùng' },
   { t: 'service', kind: 'service', icon: 'wrench', label: 'Đăng dịch vụ', sub: 'Bạn làm, khách đặt lịch' },
   { t: 'job', kind: 'job', icon: 'hand', label: 'Đăng việc cần người', sub: 'Hàng xóm gửi đề nghị, bạn chọn' },
@@ -184,6 +185,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   private basePrice(): { price: number; from: boolean } {
     const s = this.v()['spec'] as V;
     if (this.type() === 'goods') return { price: +s['price'] || 0, from: false };
+    if (this.type() === 'combo') return { price: +s['comboPrice'] || 0, from: false };
     const { low, from } = this.lowest(this.items(s));
     return { price: low ? +low['price'] : 0, from };
   }
@@ -224,7 +226,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         this.restore(p);
       } else {
         const q = this.route.snapshot.queryParamMap.get('type');
-        this.setType(q === 'goods' || q === 'service' || q === 'job' || q === 'drink' ? q : 'food', false);
+        this.setType(q === 'goods' || q === 'service' || q === 'job' || q === 'drink' || q === 'combo' ? q : 'food', false);
       }
     });
   }
@@ -232,7 +234,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   // ---------------- dựng / đổi loại form ----------------
 
   private build(t: FormType, preset = 'Giặt sấy'): FormGroup {
-    const spec = t === 'food' ? foodGroup(this.fb) : t === 'drink' ? drinkGroup(this.fb) : t === 'goods' ? goodsGroup(this.fb) : t === 'service' ? serviceGroup(this.fb, preset) : jobGroup(this.fb);
+    const spec = t === 'food' ? foodGroup(this.fb) : t === 'drink' ? drinkGroup(this.fb) : t === 'combo' ? comboGroup(this.fb) : t === 'goods' ? goodsGroup(this.fb) : t === 'service' ? serviceGroup(this.fb, preset) : jobGroup(this.fb);
     const g = this.fb.group({ common: commonGroup(this.fb, t), spec });
     g.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => this.v.set(g.getRawValue()));
     return g;
@@ -251,6 +253,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   }
 
   protected readonly foodish = () => this.type() === 'food' || this.type() === 'drink';
+
 
   /** Khu hiện ở phần xem trước: bài bán ghi mọi khu đã chọn, việc làm một khu */
   protected areaText(): string {
@@ -364,6 +367,11 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
   }
 
   /** các dòng bảng giá / thực đơn đã điền đủ tên + giá */
+  /** Các món người bán ghi trong combo (bỏ dòng trống) */
+  private comboLines(s: V): string[] {
+    return ((s['includes'] as string[]) ?? []).map((x) => String(x ?? '').trim()).filter(Boolean);
+  }
+
   private items(s: V): V[] {
     return ((s['items'] as V[]) ?? []).filter((it) => String(it['name'] ?? '').trim() && +it['price'] > 0);
   }
@@ -508,6 +516,21 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
           sched: this.promoText(), steps: orderStepNames('food'),
         };
       }
+      case 'combo': {
+        const sc = s['schedule'] as V;
+        const lines = this.comboLines(s);
+        const price = +s['comboPrice'] || 0;
+        return {
+          price: price ? money(price) : '—', unit: 'combo', kind: 'Combo', action: `Đặt combo · ${money(price)}`, xu: (s['pay'] ?? []).includes('xu'),
+          facts: [
+            ['clock', 'Giờ nhận đặt', `${sc['orderFrom']} – ${sc['orderTo']}, ${dateList(sc['dates'])}`],
+            ['pin', 'Hình thức nhận', how(s['fulfil'])],
+            ['bolt', 'Thời gian chuẩn bị', `Khoảng ${sc['prep']} phút · nhận ${sc['pickFrom']} – ${sc['pickTo']}`],
+            ['fork', 'Gồm', lines.length ? lines.join(' + ') : 'Chưa ghi món'],
+          ],
+          sched: this.promoText(), steps: orderStepNames('food'),
+        };
+      }
       case 'drink': {
         const its = this.items(s);
         const { low, from } = this.lowest(its);
@@ -540,68 +563,13 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         const its = this.items(s);
         const { low, from } = this.lowest(its);
         const pr = pt === 'quote' ? 'Báo giá sau' : low ? `${from ? 'từ ' : ''}${money(low['price'])}` : '—';
-        const quick = !this.svcPreset().noQuick;
-        if (this.svcPreset().generic) {
-          const fee = +s['homeFee'] ? ` (+${money(s['homeFee'])})` : '';
-          const mine = String(s['where'] ?? '').trim();
-          return {
-            price: pr, unit: pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ', action: 'Đặt lịch', xu: (s['pay'] ?? []).includes('xu'),
-            facts: [
-              ['pin', 'Nơi làm', s['place'] === 'seller' ? mine || 'Tại chỗ người bán' : s['place'] === 'choice' ? `Tại nhà khách${fee} hoặc ${mine || 'tại chỗ người bán'}` : `Tại nhà khách${fee}`],
-              pt === 'quote'
-                ? ['receipt', 'Phí kiểm tra', `${+s['inspect'] ? money(s['inspect']) : 'Miễn phí'} · báo giá trước khi làm`]
-                : ['receipt', 'Bảng giá', its.length ? `${its.map((x) => x['name']).slice(0, 3).join(', ')}${its.length > 3 ? ` +${its.length - 3}` : ''}` : 'Chưa có dịch vụ'],
-              String(s['turnaround'] ?? '').trim() ? ['clock', 'Thời gian làm', s['turnaround']] : ['clock', 'Giờ nhận lịch', `${s['from']} – ${s['to']}, ${dateList(s['dates'])}`],
-            ] as [string, string, string][],
-            sched: this.promoText(), steps: orderStepNames('service'),
-          };
-        }
-        if (this.svcPreset().laundry) {
-          return {
-            price: pr, unit: pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ', action: 'Đặt lịch', xu: (s['pay'] ?? []).includes('xu'),
-            facts: [
-              ['clock', 'Giờ nhận đơn', `${s['from']} – ${s['to']}, ${dateList(s['dates'])}`],
-              ['bolt', 'Trả đồ', `Trong khoảng ${s['returnHours'] || 24} giờ${s['estimate'] ? ' · giá theo cân thực tế' : ''}`],
-              ['pin', 'Hình thức nhận', how(s['fulfil'])],
-            ] as [string, string, string][],
-            sched: this.promoText(), steps: orderStepNames('service'),
-          };
-        }
-        if (this.svcPreset().repair) {
-          const place = REPAIR_PLACES.find((m) => m[0] === s['place'])?.[1] ?? '';
-          return {
-            price: pr, unit: pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ', action: 'Đặt lịch sửa', xu: (s['pay'] ?? []).includes('xu'),
-            facts: [
-              ['pin', 'Nơi sửa', s['place'] === 'choice' ? `Thợ đến nhà${+s['homeFee'] ? ` (+${money(s['homeFee'])})` : ''} hoặc khách mang tới` : place],
-              ['receipt', 'Phí kiểm tra', `${+s['inspect'] ? money(s['inspect']) : 'Miễn phí'} · báo giá trước khi sửa`],
-              ['clock', 'Thời gian hoàn thành', s['turnaround'] || 'Báo sau khi kiểm tra'],
-            ] as [string, string, string][],
-            sched: this.promoText(), steps: orderStepNames('service'),
-          };
-        }
-        if (this.svcPreset().stay) {
-          const am = (s['amenities'] as string[]) ?? [];
-          return {
-            price: pr, unit: low ? low['unit'] : 'đêm', kind: 'Dịch vụ', action: 'Đặt phòng', xu: (s['pay'] ?? []).includes('xu'),
-            facts: [
-              ['clock', 'Nhận / trả phòng', `Nhận từ ${s['checkIn']} · trả trước ${s['checkOut']}`],
-              ['check', 'Tiện nghi', am.length ? `${am.slice(0, 3).join(', ')}${am.length > 3 ? ` +${am.length - 3}` : ''}` : 'Chưa chọn'],
-              ['shield', 'Hủy & cọc', `${+s['freeCancelDays'] ? `Hủy miễn phí trước ${s['freeCancelDays']} ngày` : 'Không hoàn tiền khi hủy'}${+s['deposit'] ? ` · cọc ${s['deposit']}%` : ''}`],
-            ] as [string, string, string][],
-            sched: this.promoText(), steps: orderStepNames('service'),
-          };
-        }
-        // 3 ô thông tin nhanh: lấy 3 ô đầu có nội dung
-        const facts = ([
-          ['receipt', 'Phí kiểm tra', pt === 'quote' ? `${money(s['inspect'])} · trừ vào tiền sửa` : ''],
-          ['clock', 'Thời gian hoàn thành', quick ? s['turnaround'] : ''],
-          ['pin', 'Phạm vi phục vụ', quick ? s['serviceArea'] : ''],
-          ['shield', 'Bảo hành', quick ? s['warranty'] : ''],
-          ['receipt', 'Bảng giá', pt === 'list' && its.length ? `${its.map((x) => x['name']).slice(0, 3).join(', ')}${its.length > 3 ? ` +${its.length - 3}` : ''}${s['estimate'] ? ' · giá ước tính' : ''}` : ''],
-        ] as [string, string, string][]).filter((x) => String(x[2] ?? '').trim()).slice(0, 3);
+        const stay = !!this.svcPreset().stay;
         return {
-          price: pr, unit: pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ', action: 'Đặt lịch', xu: (s['pay'] ?? []).includes('xu'),
-          facts, sched: this.promoText(), steps: orderStepNames('service'),
+          price: pr, unit: stay ? (low ? low['unit'] : 'đêm') : pt === 'quote' || !low ? '' : low['unit'], kind: 'Dịch vụ',
+          action: stay ? 'Đặt phòng' : this.svcPreset().repair ? 'Đặt lịch sửa' : 'Đặt lịch', xu: (s['pay'] ?? []).includes('xu'),
+          // 3 ô đầu bài: đúng bộ cố định mà khách sẽ thấy (cùng hàm với lúc lưu bài)
+          facts: serviceHighlights(s).map((h) => [h.icon, h.label, h.value] as [string, string, string]),
+          sched: this.promoText(), steps: orderStepNames('service'),
         };
       }
       default: {
@@ -632,6 +600,11 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
 
   // ---------------- lưu ----------------
 
+  /** Mẫu mà ô 3 đầu bài là "Thời gian làm" do người bán tự nhập (các mẫu khác lấy từ ô đã có: trả đồ, phí kiểm tra, phí giao, thời lượng, tên buổi học) */
+  protected needsTurnaround(): boolean {
+    return ['Dọn dẹp', 'Làm đẹp', 'Khác'].includes(String(this.form.get('spec.preset')?.value ?? ''));
+  }
+
   /** Kiểm tra thêm ngoài validator của từng ô; trả về câu báo lỗi đầu tiên */
   private extraError(): string | null {
     const t = this.type();
@@ -648,9 +621,21 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
       const q = ((s['questions'] as V[]) ?? []).find((x) => (x['type'] === 'choice' || x['type'] === 'multi') && !(x['choices'] as V[])?.length);
       if (q) return `Câu hỏi “${q['label']}”: thêm ít nhất một lựa chọn`;
     }
-    if (t !== 'food' && t !== 'drink' && !(s['dates'] as string[])?.length) return t === 'job' ? 'Chọn ngày làm trên lịch' : 'Chọn ít nhất một ngày trên lịch';
+    if (t === 'service') {
+      const sp = this.svcPreset();
+      if (this.needsTurnaround() && !String(s['turnaround'] ?? '').trim()) return 'Nhập thời gian làm dự kiến (ví dụ: khoảng 2 giờ)';
+    }
+    if (t === 'combo' && this.comboLines(s).length < 2) return 'Combo: ghi ít nhất 2 món trong combo';
+    if (t !== 'food' && t !== 'drink' && t !== 'combo' && !(s['dates'] as string[])?.length) return t === 'job' ? 'Chọn ngày làm trên lịch' : 'Chọn ít nhất một ngày trên lịch';
     if (s['fulfil'] && !(s['fulfil'] as V)['delivery'] && !(s['fulfil'] as V)['pickup']) return t === 'goods' ? 'Chọn ít nhất một cách nhận hàng' : 'Chọn ít nhất một cách nhận món';
-    if ((t === 'food' || t === 'drink') && !((s['schedule'] as V)['dates'] as string[])?.length) return 'Chọn ít nhất một ngày bán trên lịch';
+    if ((t === 'food' || t === 'drink' || t === 'combo') && !((s['schedule'] as V)['dates'] as string[])?.length) return 'Chọn ít nhất một ngày bán trên lịch';
+    // đồ ăn / đồ uống: khách luôn thấy 3 ô Giờ nhận đặt · Cách nhận · Thời gian chuẩn bị nên cả ba phải có số liệu
+    if (t === 'food' || t === 'drink' || t === 'combo') {
+      const sc = s['schedule'] as V;
+      if (!sc['orderFrom'] || !sc['orderTo']) return 'Lịch bán: chọn giờ nhận đặt và giờ đóng đơn';
+      if (sc['orderTo'] <= sc['orderFrom']) return 'Lịch bán: giờ đóng đơn phải sau giờ nhận đặt';
+      if (!(+sc['prep'] >= 1)) return t === 'drink' ? 'Lịch bán: nhập thời gian pha (phút)' : 'Lịch bán: nhập thời gian chuẩn bị (phút)';
+    }
     if (t !== 'job' && !(s['pay'] as string[])?.length) return 'Chọn ít nhất một cách nhận tiền';
     if (t !== 'job' && (s['pay'] as string[]).includes('transfer')) {
       const b = s['bank'] as V;
@@ -711,6 +696,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
         const total = its.some((x) => !(+x['qty'] > 0)) ? 99 : its.reduce((n, x) => n + +x['qty'], 0);
         return { price: low ? +low['price'] : 0, unit: `/ ${low?.['unit'] || 'ly'}`, priceFrom: from, stock: total, max: total || 50 };
       }
+      case 'combo': return { price: +s['comboPrice'] || 0, unit: '/ combo', stock: 99, max: 20 };
       case 'goods': return { price: +s['price'] || 0, unit: `/ ${s['unit']}`, stock: +s['stock'] || 1, max: Math.max(+s['stock'] || 1, 20) };
       case 'service': {
         if (this.svcPreset().cleaning) {
@@ -729,7 +715,7 @@ export class SellerPostForm implements OnInit, CanComponentDeactivate {
     const raw = this.form.getRawValue() as V;
     const c = raw['common'] as V;
     const cur = this.editId() ? this.seller.posts().find((p) => p.id === this.editId()) : undefined;
-    const kind: PostKind = t === 'drink' ? 'food' : t;
+    const kind: PostKind = t === 'drink' || t === 'combo' ? 'food' : t;
     const id = cur?.id ?? 'n' + Date.now();
     return {
       ...(cur ?? { views: 0, saves: 0, sold: 0 }),

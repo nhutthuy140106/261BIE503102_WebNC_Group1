@@ -65,7 +65,7 @@
         <section class="panel">
           <h2>Vai trò</h2>
           <div class="field"><label for="rl">Vai trò trong hệ thống</label>
-            <select id="rl" name="rl" [(ngModel)]="role" [disabled]="isSelf()"><option value="enduser">Người dùng</option><option value="moderator">Người kiểm duyệt</option><option value="admin">Quản trị</option></select>
+            <app-admin-select inputId="rl" name="rl" [(ngModel)]="role" [disabled]="isSelf()" [options]="[{ value: 'enduser', label: 'Người dùng' }, { value: 'moderator', label: 'Người kiểm duyệt' }, { value: 'admin', label: 'Quản trị' }]" />
             <small>Người kiểm duyệt xử lý báo cáo, bài, đơn, hỗ trợ; không khóa tài khoản, không sửa voucher/Xu, không gửi thông báo hệ thống.</small></div>
           <div class="btns"><button type="button" class="btn main" [disabled]="busy() || isSelf() || role === p.user.role" (click)="saveRole()">Lưu vai trò</button></div>
           @if (isSelf()) { <p class="sub">Bạn không đổi được vai trò của chính mình.</p> }
@@ -73,7 +73,7 @@
         <section class="panel">
           <h2>Cộng / trừ Xu</h2>
           <form (ngSubmit)="adjust()">
-            <div class="field"><label for="dx">Số Xu (âm = trừ)</label><input id="dx" type="number" name="dx" [(ngModel)]="delta" step="1" placeholder="vd. 50 hoặc -20" /></div>
+            <div class="field"><label for="dx">Số Xu (âm = trừ)</label><input id="dx" type="number" name="dx" [(ngModel)]="delta" step="1" placeholder="VD: 50 hoặc -20" /></div>
             <div class="field"><label for="rs">Lý do (người dùng đọc được)</label><textarea id="rs" name="rs" rows="2" [(ngModel)]="reason" maxlength="300" placeholder="Ít nhất 5 ký tự"></textarea></div>
             @if (xuErr) { <p class="e" role="alert">{{ xuErr }}</p> }
             <div class="btns"><button type="submit" class="btn main" [disabled]="busy()">Cập nhật Xu</button></div>

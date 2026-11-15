@@ -27,7 +27,10 @@ export class AdminOverview implements OnInit {
   protected readonly me = inject(AuthService).currentUser;
   protected readonly data = signal<Dashboard | null>(null);
   protected readonly error = signal('');
-  protected days = 14;
+  /** Cung đang rê chuột trên vành khuyên + vị trí con trỏ (tính trong khung vành khuyên) để vẽ chú thích riêng */
+  protected readonly hov = signal<{ label: string; n: number; pct: number; color: string } | null>(null);
+  protected readonly tipPos = signal({ x: 0, y: 0 });
+  protected days = 7;
   /** Chu vi vành khuyên r = 54 */
   protected readonly C = 2 * Math.PI * 54;
 
@@ -93,6 +96,18 @@ export class AdminOverview implements OnInit {
 
   protected dayFull(k: string): string {
     return k.slice(8) + '/' + k.slice(5, 7);
+  }
+
+  protected hover(s: Slice | null, e?: MouseEvent): void {
+    this.hov.set(s ? { label: s.label, n: s.n, pct: s.pct, color: s.color } : null);
+    if (s && e) this.moveTip(e);
+  }
+
+  protected moveTip(e: MouseEvent): void {
+    const wrap = (e.currentTarget as Element).closest('.donut-wrap');
+    if (!wrap) return;
+    const r = wrap.getBoundingClientRect();
+    this.tipPos.set({ x: e.clientX - r.left, y: e.clientY - r.top });
   }
 
   protected slices(d: Dashboard): Slice[] {

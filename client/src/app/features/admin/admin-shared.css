@@ -33,7 +33,8 @@ select option { background: var(--a-glass); color: var(--a-ink); }
 .field textarea { height: auto; padding: 10px 12px; resize: vertical; }
 .field small { color: var(--a-mute); font-size: 12.5px; }
 .field .e, .e { color: var(--a-danger); font-size: 13px; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } /* minmax(0, …): ô nhập không được đẩy cột rộng ra ngoài khung */
+.row2 > .field, .field input, .field select { min-width: 0; }
 .chk { display: flex; align-items: center; gap: 8px; font-weight: 500; }
 .chk input { height: auto; width: 16px; accent-color: var(--a-accent); }
 
@@ -52,6 +53,7 @@ select option { background: var(--a-glass); color: var(--a-ink); }
 .tbl tbody tr.click { cursor: pointer; }
 .tbl tbody tr.click:hover td { background: var(--a-hover); }
 .tbl td.num, .tbl th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tbl td.num.ctr, .tbl th.num.ctr { text-align: center; } /* cột số muốn căn giữa (ví dụ Giá đổi, Đã đổi của voucher) */
 .who { display: flex; align-items: center; gap: 10px; }
 .who b { display: block; }
 .who small, .sub { color: var(--a-mute); font-size: 12.5px; }
@@ -105,3 +107,63 @@ select option { background: var(--a-glass); color: var(--a-ink); }
   .tbl td.act::before { content: none; }
 }
 @media (min-width: 761px) { .tbl td:not(:first-child):not(.act) { white-space: nowrap; } .tbl td:first-child { min-width: 190px; } }
+
+/* Trang có bảng bên trái, biểu mẫu bên phải (Voucher): bảng không được tràn đè lên biểu mẫu khi cửa sổ hẹp — bảng cuộn ngang trong khung của nó, biểu mẫu giữ bề rộng vừa phải, màn hẹp thì xếp dọc */
+.grid2.vgrid { grid-template-columns: minmax(0, 1fr) 360px; }
+.grid2 > .tw { min-width: 0; overflow-x: auto; border-radius: 16px; }
+@media (min-width: 901px) { .grid2 > .tw .tbl { min-width: 640px; } }
+@media (max-width: 1240px) { .grid2.vgrid { grid-template-columns: 1fr; } }
+
+/* Nút thao tác trong bảng (Sửa, Tắt, Duyệt…): nhỏ gọn, bo tròn, nền mờ — thay cho nút to nền đặc */
+.tbl td.act .btn { height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; margin-left: 8px; background: rgba(255, 255, 255, .05); border-color: rgba(255, 255, 255, .13); color: var(--a-ink); transition: background .15s, border-color .15s, color .15s; }
+.tbl td.act .btn:hover { background: rgba(255, 255, 255, .11); border-color: rgba(255, 255, 255, .24); }
+.tbl td.act .btn.danger { background: rgba(245, 133, 133, .1); border-color: transparent; color: #FF9E9E; }
+.tbl td.act .btn.danger:hover { background: rgba(245, 133, 133, .2); }
+.field app-admin-select { display: block; }
+.row2 { align-items: start; } /* hai ô cạnh nhau luôn thẳng hàng theo mép trên, dù nhãn dài ngắn khác nhau */
+
+/* Ô tiền hiện dạng 30.000 nhưng vẫn có mũi tên tăng / giảm GỐC của trình duyệt (giống ô Giá đổi): một ô số trong suốt phủ kín ô tiền, rê chuột vào đâu trong ô cũng hiện mũi tên.
+   Đang gõ (ô có class editing) thì lớp phủ thu về đúng vùng mũi tên bên phải để không cản việc gõ. */
+.stepwrap { position: relative; }
+.stepwrap > input:not(.spin) { width: 100%; }
+.field .stepwrap input.spin { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 12px; background: transparent; color: transparent; caret-color: transparent; box-shadow: none; outline: none; cursor: text; z-index: 2; }
+.field .stepwrap input.spin::-webkit-inner-spin-button { cursor: pointer; margin-right: 6px; }
+.field .stepwrap.editing input.spin { left: auto; width: 30px; }
+/* đang gõ trong ô: mũi tên luôn hiện (như ô Giá đổi khi bấm vào), không cần rê chuột */
+.field .stepwrap.editing input.spin::-webkit-inner-spin-button { opacity: 1; }
+
+/* mã voucher trong bảng: thẻ nhỏ nổi bật nằm trước dòng điều kiện, nhìn là thấy ngay */
+.vsub { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 4px; }
+.vcode { display: inline-block; padding: 2px 10px; border: 1px solid rgba(245, 138, 91, .45); border-radius: 999px; background: var(--a-accent-soft); color: var(--a-accent-ink); font-size: 13px; font-weight: 600; }
+
+/* Trang có bảng rộng + nút tạo ở đầu trang; biểu mẫu mở trong hộp thoại (Voucher) */
+.pagehead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.pagehead .lead { max-width: 620px; }
+.addbtn { flex: none; height: 40px; padding: 0 20px; }
+.twide { min-width: 0; overflow-x: auto; border-radius: 16px; }
+.vov { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: rgba(5, 9, 18, .5); backdrop-filter: blur(6px); animation: vfade .15s ease both; }
+.vdlg { width: min(520px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; padding: 22px 24px 20px; border: 1px solid rgba(255, 255, 255, .2); border-radius: 20px; background: linear-gradient(160deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, .04) 55%, rgba(255, 255, 255, .07)); -webkit-backdrop-filter: blur(26px) saturate(1.5); backdrop-filter: blur(26px) saturate(1.5); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 0 0 1px rgba(255, 255, 255, .04), 0 30px 80px rgba(0, 0, 0, .55); animation: vpop .18s ease both; }
+.vdlg header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.vdlg h2 { margin: 0; font-size: 19px; }
+.vdlg .x { width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: var(--a-mute); font-size: 24px; line-height: 1; cursor: pointer; }
+.vdlg .x:hover { background: rgba(255, 255, 255, .08); color: var(--a-ink); }
+.vdlg .btns { margin-top: 6px; }
+@keyframes vfade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes vpop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+.vdlg .field input, .vdlg .stepwrap input:not(.spin) { background: rgba(8, 14, 30, .55); border-color: rgba(255, 255, 255, .14); }
+.vdlg app-admin-select { --a-input: rgba(8, 14, 30, .55); }
+
+/* bảng voucher: các cột chia đều theo tỉ lệ để không bị trống một khoảng lớn bên phải; mã voucher có khung, giữ nguyên hoa thường như đã nhập */
+@media (min-width: 901px) {
+  .tbl.vt { table-layout: fixed; min-width: 800px; }
+  .tbl.vt th:nth-child(1) { width: 22%; } .tbl.vt th:nth-child(2) { width: 15%; } .tbl.vt th:nth-child(3) { width: 12%; } .tbl.vt th:nth-child(4) { width: 13%; }
+  .tbl.vt th:nth-child(5) { width: 9%; } .tbl.vt th:nth-child(6) { width: 8%; } .tbl.vt th:nth-child(7) { width: 11%; } .tbl.vt th:nth-child(8) { width: 138px; }
+  .tbl.vt td, .tbl.vt td:not(:first-child):not(.act) { overflow-wrap: anywhere; white-space: normal; } /* mã hoặc tên dài không có khoảng trắng vẫn tự xuống dòng trong cột, không đè sang cột bên cạnh */
+  .tbl.vt td.act { padding-right: 12px; white-space: nowrap; }
+}
+}
+.vcode { display: inline-block; max-width: 100%; word-break: break-all; line-height: 1.4; padding: 3px 12px; border: 1px solid rgba(245, 138, 91, .5); border-radius: 8px; background: var(--a-accent-soft); color: var(--a-accent-ink); font-size: 13.5px; font-weight: 600; text-transform: none; overflow-wrap: anywhere; }
+
+/* ô bắt buộc: dấu * đỏ ở nhãn; thiếu hoặc sai thì viền đỏ sau khi bấm Tạo */
+.req { color: var(--a-danger); font-weight: 700; }
+.field.bad input, .field.bad .trigger { border-color: var(--a-danger); box-shadow: 0 0 0 3px var(--a-danger-soft); }

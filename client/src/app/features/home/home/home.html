@@ -93,8 +93,8 @@
   @if (dealsNow().length) {
     <section class="sec gold">
       <div class="sh">
-        <h2>Đang giảm giá lúc này <span class="goldclock" role="timer" aria-label="Thời gian còn lại"><svg class="i"><use href="#clock" /></svg>còn {{ dealsLeft() }}</span></h2>
-        <a class="more" routerLink="/search">Xem thêm <svg class="i"><use href="#right" /></svg></a>
+        <h2>Đang giảm giá lúc này <span class="goldclock" role="timer" [attr.aria-label]="'Còn ' + dealsLeft()"><svg class="i"><use href="#clock" /></svg><span class="lbl">Kết thúc sau</span><span class="cd">@for (u of dealsParts(); track $index) { @if ($index) { <i>:</i> } <b>{{ u }}</b> }</span></span></h2>
+        <a class="more" routerLink="/search/section/deals">Xem tất cả <svg class="i"><use href="#right" /></svg></a>
       </div>
       <div class="grid">
         @for (x of dealsNow(); track x.p._id) {
@@ -124,27 +124,22 @@
     </div>
   </section>
 
-  <!-- Kiếm thêm Xu: dải gọn dẫn vào Vườn AntGo -->
-  <a class="gband" routerLink="/vuon">
-    <img src="assets/clean/antxu.png" alt="" width="44" height="44" />
-    <span><b>Vườn AntGo · chơi vui, nhận Xu mỗi ngày</b><small>Hái xu, tưới cây, nuôi thú cưng — Xu đổi voucher giảm giá khi đặt đơn.</small></span>
-    <span class="gobtn">Chơi ngay <svg class="i"><use href="#right" /></svg></span>
-  </a>
-
   <!-- Kiếm thêm gần nhà: dải xanh đen khác nhịp, giới thiệu nhận việc vặt (điểm khác biệt của AntGo) -->
   <section class="kband">
-    <img class="earn-ant" src="assets/clean/point.png" alt="" />
-    <div>
-      <span class="earn-kick">Kiếm thêm gần nhà</span>
-      <h2>Rảnh tay? Giúp hàng xóm,<br />nhận tiền công ngay trong khu.</h2>
-      <div class="earn-btns">
-        <a class="earn-go" routerLink="/search" [queryParams]="{ kind: 'job' }">Xem việc gần nhà <svg class="i"><use href="#right" /></svg></a>
+    <div class="earn-main">
+      <img class="earn-ant" src="assets/clean/point.png" alt="" />
+      <div class="earn-text">
+        <span class="earn-kick">Kiếm thêm gần nhà</span>
+        <h2>Rảnh tay? Giúp hàng xóm,<br />nhận tiền công ngay trong khu.</h2>
+        <div class="earn-btns">
+          <a class="earn-go" routerLink="/search" [queryParams]="{ kind: 'job' }">Xem việc gần nhà <svg class="i"><use href="#right" /></svg></a>
+        </div>
       </div>
     </div>
     <ol class="earn-steps">
-      <li><b>1</b><span><strong>Chọn việc vừa sức</strong>Mua hộ, dọn nhà, trông thú cưng, kèm học… ngay trong khu bạn ở.</span></li>
-      <li><b>2</b><span><strong>Gửi đề nghị, chờ được chọn</strong>Giới thiệu ngắn và giờ bạn rảnh. Người đăng chọn một người phù hợp.</span></li>
-      <li><b>3</b><span><strong>Làm xong, nhận tiền trực tiếp</strong>Báo hoàn thành kèm ảnh, người đăng trả công tận tay hoặc chuyển khoản.</span></li>
+      <li><b>1</b><span><strong>Chọn việc vừa sức</strong>Mua hộ, dọn nhà, trông thú cưng ngay trong khu.</span></li>
+      <li><b>2</b><span><strong>Gửi đề nghị, chờ được chọn</strong>Giới thiệu ngắn và giờ rảnh, người đăng sẽ chọn.</span></li>
+      <li><b>3</b><span><strong>Làm xong, nhận tiền trực tiếp</strong>Báo xong kèm ảnh, nhận công tận tay hoặc chuyển khoản.</span></li>
     </ol>
   </section>
 

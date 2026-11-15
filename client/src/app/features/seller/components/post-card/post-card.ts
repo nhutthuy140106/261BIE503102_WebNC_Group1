@@ -3,7 +3,7 @@ import { postTag } from '../../../../core/utils/post-tag';
 import { SELLER_KIND_ICON, SELLER_LANE, SellerPost } from '../../../../core/models/seller';
 import { SellerSpaceService } from '../../../../core/services/seller-space';
 import { ToastService } from '../../../../core/services/toast';
-import { parseMoney } from '../money-input/money-input';
+import { parseMoney } from '../../../../shared/directives/money-input';
 
 /**
  * Thẻ một bài ở "Tình trạng bán" (trang Hôm nay) và trang Bài đăng:

@@ -1,3 +1,4 @@
-:host { display: inline; }
+/* Angular bỏ khoảng trắng giữa các thẻ, nên giá mới / giá gốc / đơn vị phải tự chừa khoảng cách bằng margin. */
+:host { display: inline; margin-right: .3em; }
 .now { color: #D85A1C; }
-.was { font-size: .8em; font-weight: 400; color: #8b8f98; text-decoration: line-through; }
+.was { margin-left: .4em; font-size: .8em; font-weight: 400; color: #8b8f98; text-decoration: line-through; }

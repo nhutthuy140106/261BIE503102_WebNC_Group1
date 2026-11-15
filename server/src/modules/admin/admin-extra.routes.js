@@ -69,7 +69,7 @@ router.post('/users/:id/xu', adminOnly, ids('id'), body(z.object({
 })), one((req) => service.adjustXu(req.user, req.params.id, req.body)));
 
 const voucherBody = z.object({
-  cid: z.string().trim().regex(/^[a-z0-9-]{2,20}$/, 'Mã gồm chữ thường, số, gạch ngang (2–20 ký tự)'),
+  cid: z.string().trim().min(2, 'Mã tối thiểu 2 ký tự').max(30, 'Mã tối đa 30 ký tự'),
   title: z.string().trim().min(3, 'Cần tên voucher').max(80),
   cond: z.string().trim().max(120).default(''),
   amount: z.number().int().min(0).default(0), ship: z.boolean().default(false), min: z.number().int().min(0).default(0),
@@ -78,6 +78,7 @@ const voucherBody = z.object({
 router.get('/vouchers', one(() => service.listVouchers()));
 router.post('/vouchers', adminOnly, body(voucherBody), asyncHandler(async (req, res) => res.status(201).json({ data: await service.createVoucher(req.user, req.body) })));
 router.patch('/vouchers/:id', adminOnly, ids('id'), body(z.object({
+  cid: z.string().trim().min(2, 'Mã tối thiểu 2 ký tự').max(30, 'Mã tối đa 30 ký tự').optional(),
   title: z.string().trim().min(3).max(80).optional(), cond: z.string().trim().max(120).optional(),
   amount: z.number().int().min(0).optional(), ship: z.boolean().optional(), min: z.number().int().min(0).optional(),
   cost: z.number().int().min(1).max(100000).optional(), active: z.boolean().optional(),
