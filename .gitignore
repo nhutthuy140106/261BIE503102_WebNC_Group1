@@ -49,3 +49,9 @@ docs/bao-cao/~WRL*.tmp
 docs/antgo-mock-export.json
 
 server/backups/
+
+# Bản Word cũ của Chương 1 (chỉ giữ bản đầy đủ Chuong-1-Gioi-thieu-v4-day-du.docx trong Git)
+docs/bao-cao/Chuong-1-Gioi-thieu.docx
+docs/bao-cao/Chuong-1-Gioi-thieu-v3.docx
+docs/bao-cao/Chuong-1-Gioi-thieu-v4.docx
+docs/bao-cao/Chuong-1-Gioi-thieu-v4.truoc-chuong-3.docx
