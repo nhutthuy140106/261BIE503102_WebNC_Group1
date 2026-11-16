@@ -39,6 +39,8 @@ export interface AdminReport {
   detail: string;
   state: ReportState;
   adminNote: string;
+  /** Hướng xử lý đã áp dụng (rỗng khi chưa kết thúc) */
+  action?: string;
   createdAt: string;
   /** Tóm tắt đối tượng bị báo cáo (server kèm sẵn ở danh sách) */
   target?: { found: boolean; title: string; status: string; ownerName: string; orderId: string };
@@ -239,6 +241,7 @@ export class AdminService {
           detail: String(x['detail'] ?? ''),
           state: x['state'] as ReportState,
           adminNote: String(x['adminNote'] ?? ''),
+          action: String(x['action'] ?? ''),
           createdAt: String(x['createdAt'] ?? ''),
           target: x['target'] as AdminReport['target'],
         })),
@@ -246,15 +249,16 @@ export class AdminService {
     );
   }
 
-  transition(id: string, to: ReportState, note: string): Observable<void> {
+  transition(id: string, to: ReportState, note: string, action?: string): Observable<void> {
     if (this.mock) {
       const r = this.reports.find((x) => x._id === id);
       if (r) {
         r.state = to;
         if (note) r.adminNote = note;
+        r.action = to === 'rejected' ? 'none' : action ?? '';
       }
       return of(undefined);
     }
-    return this.api.post<unknown>(`/admin/reports/${id}/transition`, { to, note }).pipe(map(() => undefined));
+    return this.api.post<unknown>(`/admin/reports/${id}/transition`, { to, note, action }).pipe(map(() => undefined));
   }
 }

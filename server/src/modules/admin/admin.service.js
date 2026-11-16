@@ -145,16 +145,29 @@ async function getReport(id) {
   return { ...r.toJSON(), context: await reportContext(r) };
 }
 
-async function transitionReport(admin, id, to, note) {
+const ACTION_MSG = { hide_post: 'Bài bị báo cáo đã được gỡ.', lock_user: 'Tài khoản bị báo cáo đã bị khóa.', warn_owner: 'Người bị báo cáo đã được nhắc nhở.', order_ruled: 'Đơn bị báo cáo đã được phân xử.', other: 'AntGo đã áp dụng biện pháp xử lý.' };
+
+async function transitionReport(admin, id, to, note, action) {
   const r = await Report.findById(id);
   if (!r) throw ApiError.notFound('Không tìm thấy báo cáo');
   if (!REPORT_FLOW[r.state].includes(to)) throw ApiError.invalidState(`Không thể chuyển báo cáo từ "${r.state}" sang "${to}"`);
+  if (to === 'resolved') {
+    // hướng xử lý có tác động thật thì làm luôn (bỏ qua nếu đã làm trước đó)
+    if (action === 'hide_post' && r.targetType === 'post') {
+      const p = await Post.findById(r.targetId);
+      if (p && p.status !== 'hidden') await hidePost(admin, r.targetId, note || 'Vi phạm quy định');
+    } else if (action === 'lock_user' && r.targetType === 'user') {
+      const u = await User.findById(r.targetId);
+      if (u && u.status !== 'locked') await lockUser(admin, r.targetId, note || 'Vi phạm quy định');
+    }
+    r.action = action;
+  } else if (to === 'rejected') r.action = 'none';
   r.state = to; r.handledBy = admin._id;
   if (note) r.adminNote = note;
   r.history.push({ state: to, at: new Date(), note: note || '' });
   await r.save();
   await audit(admin, `report.${to}`, 'report', r._id, note || '');
-  await notify(r.reporter, { type: 'report_state', title: 'Báo cáo của bạn đã được cập nhật', body: REPORT_MSG[to] + (note ? ` Kết luận: ${note}` : ''), link: { type: 'report', id: r._id } });
+  await notify(r.reporter, { type: 'report_state', title: 'Báo cáo của bạn đã được cập nhật', body: REPORT_MSG[to] + (to === 'resolved' && ACTION_MSG[action] ? ' ' + ACTION_MSG[action] : '') + (note ? ` Kết luận: ${note}` : ''), link: { type: 'report', id: r._id } });
   return r;
 }
 

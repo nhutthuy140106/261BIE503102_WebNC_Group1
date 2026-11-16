@@ -25,7 +25,9 @@ const roleBody = z.object({ role: z.enum(['enduser', 'moderator', 'admin'], { er
 const transitionBody = z.object({
   to: z.enum(['reviewing', 'resolved', 'rejected'], { error: 'to phải là reviewing, resolved hoặc rejected' }),
   note: z.string().trim().max(500).optional(),
-}).refine((o) => o.to === 'reviewing' || (o.note && o.note.length >= 3), { message: 'Cần ghi chú khi kết thúc báo cáo', path: ['note'] });
+  action: z.enum(['hide_post', 'lock_user', 'warn_owner', 'order_ruled', 'other']).optional(),
+}).refine((o) => o.to === 'reviewing' || (o.note && o.note.length >= 3), { message: 'Cần ghi chú khi kết thúc báo cáo', path: ['note'] })
+  .refine((o) => o.to !== 'resolved' || !!o.action, { message: 'Chọn hướng xử lý khi đánh dấu đã xử lý', path: ['action'] });
 
 // Toàn bộ /admin/*: chưa đăng nhập 401, không phải admin 403
 router.use(auth, requireRole('admin', 'moderator'));
@@ -190,7 +192,7 @@ router.post('/posts/:id/unhide', ids('id'), one((req) => service.unhidePost(req.
  */
 router.get('/reports', query(reportList), list(service.listReports));
 router.get('/reports/:id', ids('id'), one((req) => service.getReport(req.params.id)));
-router.post('/reports/:id/transition', ids('id'), body(transitionBody), one((req) => service.transitionReport(req.user, req.params.id, req.body.to, req.body.note)));
+router.post('/reports/:id/transition', ids('id'), body(transitionBody), one((req) => service.transitionReport(req.user, req.params.id, req.body.to, req.body.note, req.body.action)));
 
 router.get('/stats', one(() => service.stats()));
 router.use(require('./admin-extra.routes'));

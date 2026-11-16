@@ -15,7 +15,7 @@
           <b>{{ reason(r.reason) }}</b>
           <span class="sub">{{ r.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
         </header>
-        <p class="meta"><span class="chip">{{ r.reporterName }} báo cáo</span><span class="chip">{{ target(r.targetType) }} <code>{{ r.targetId }}</code></span></p>
+        <p class="meta"><span class="chip">Người báo cáo: <b>{{ r.reporterName }}</b></span><span class="chip">{{ target(r.targetType) }} <code>{{ r.targetId }}</code></span></p>
         <blockquote class="detail">{{ r.detail }}</blockquote>
         <button type="button" class="ctxbtn" (click)="toggleCtx(r)">{{ ctx()[r._id] ? 'Ẩn bối cảnh' : 'Xem bối cảnh' }}</button>
         @if (ctx()[r._id] === 'loading') { <div class="sk" style="height: 52px"></div> }
@@ -40,10 +40,22 @@
           <textarea [id]="'n' + r._id" rows="2" [name]="'n' + r._id" [(ngModel)]="notes[r._id]" maxlength="300" [placeholder]="r.state === 'reviewing' ? 'Bắt buộc khi kết thúc báo cáo' : 'Không bắt buộc'"></textarea>
           @if (noteErr === r._id) { <small class="e" role="alert">Vui lòng ghi chú kết quả xử lý (ít nhất 3 ký tự).</small> }
           </div>
-        } @else if (r.adminNote) {
-          <p class="note"><b>Ghi chú:</b> {{ r.adminNote }}</p>
+        } @else {
+          <div class="done">
+            <p class="note"><b>Hướng xử lý:</b> {{ actionLabel(r.action) }}</p>
+            @if (r.adminNote) { <p class="note"><b>Ghi chú:</b> {{ r.adminNote }}</p> }
+          </div>
         }
 
+          @if (r.state === 'reviewing') {
+            <div class="acts" role="radiogroup" aria-label="Hướng xử lý">
+              <span class="lbl">Hướng xử lý (khi chọn "Đã xử lý")</span>
+              @for (a of actionsFor(r.targetType); track a.key) {
+                <button type="button" role="radio" class="opt" [attr.aria-checked]="actions[r._id] === a.key" [class.on]="actions[r._id] === a.key" (click)="actions[r._id] = a.key">{{ a.label }}</button>
+              }
+              @if (actionErr === r._id) { <small class="e" role="alert">Chọn một hướng xử lý.</small> }
+            </div>
+          }
         <footer>
           @if (r.targetType === 'post' && r.state !== 'resolved' && r.state !== 'rejected') {
             <button type="button" class="btn danger" (click)="hideFor.set(r)">Ẩn bài này</button>

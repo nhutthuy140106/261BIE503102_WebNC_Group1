@@ -34,6 +34,24 @@ export class AdminReports implements OnInit {
   /** Ghi chú đang soạn theo từng báo cáo */
   protected notes: Record<string, string> = {};
   protected noteErr = '';
+  /** Hướng xử lý đang chọn theo từng báo cáo */
+  protected actions: Record<string, string> = {};
+  protected actionErr = '';
+
+  /** Hướng xử lý hợp với từng loại đối tượng; hai mục đầu của bài/người dùng tác động thật khi bấm "Đã xử lý" */
+  protected actionsFor(type: string): { key: string; label: string }[] {
+    const first: Record<string, { key: string; label: string }[]> = {
+      post: [{ key: 'hide_post', label: 'Ẩn bài đăng' }],
+      user: [{ key: 'lock_user', label: 'Khóa tài khoản' }],
+      order: [{ key: 'order_ruled', label: 'Đã phân xử đơn' }],
+    };
+    return [...(first[type] ?? []), { key: 'warn_owner', label: 'Nhắc nhở người bị báo cáo' }, { key: 'other', label: 'Biện pháp khác' }];
+  }
+
+  protected actionLabel(a?: string): string {
+    const all: Record<string, string> = { hide_post: 'Đã ẩn bài đăng', lock_user: 'Đã khóa tài khoản', warn_owner: 'Đã nhắc nhở người bị báo cáo', order_ruled: 'Đã phân xử đơn', other: 'Biện pháp khác', none: 'Không vi phạm — không xử lý' };
+    return a ? all[a] ?? a : 'Chưa ghi nhận';
+  }
 
   ngOnInit(): void {
     this.load();
@@ -74,8 +92,13 @@ export class AdminReports implements OnInit {
       this.noteErr = r._id;
       return;
     }
+    if (to === 'resolved' && !this.actions[r._id]) {
+      this.actionErr = r._id;
+      return;
+    }
     this.noteErr = '';
-    this.run(this.admin.transition(r._id, to, note), () => {
+    this.actionErr = '';
+    this.run(this.admin.transition(r._id, to, note, this.actions[r._id]), () => {
       this.tab.set(to);
     });
   }
