@@ -63,10 +63,12 @@
       </section>
       @if (isAdmin()) {
         <section class="panel">
-          <h2>Cộng / trừ Xu</h2>
+          <h2>Điều chỉnh Xu</h2>
           <form (ngSubmit)="adjust()">
-            <div class="field"><label for="dx">Số Xu (âm = trừ)</label><input id="dx" type="number" name="dx" [(ngModel)]="delta" step="1" placeholder="VD: 50 hoặc -20" /></div>
-            <div class="field"><label for="rs">Lý do (người dùng đọc được)</label><textarea id="rs" name="rs" rows="2" [(ngModel)]="reason" maxlength="300" placeholder="Ít nhất 5 ký tự"></textarea></div>
+            <div class="field"><label for="dx">Số Xu</label><input id="dx" type="number" name="dx" [(ngModel)]="delta" step="1" placeholder="VD: 50 hoặc -20" />
+              <small class="hint">Mỗi lần điều chỉnh từ 1 đến 1.000 Xu. Số dương để cộng, số âm để trừ; không trừ quá số dư hiện có.</small></div>
+            <div class="field"><label for="rs">Lý do (người dùng đọc được)</label><textarea id="rs" name="rs" rows="2" [(ngModel)]="reason" maxlength="300" placeholder="Ít nhất 5 ký tự"></textarea>
+              <small class="hint">Lý do hiển thị nguyên văn trong lịch sử Xu của người dùng.</small></div>
             @if (xuErr) { <p class="e" role="alert">{{ xuErr }}</p> }
             <div class="btns"><button type="submit" class="btn main" [disabled]="busy()">Cập nhật Xu</button></div>
           </form>

@@ -74,6 +74,12 @@ if (process.env.ONLY === 'ordd') {
   await ev(`(document.querySelector('tbody tr.click, tbody tr a')||{click(){}}).click()`); await sleep(3500); await shot('o-chi-tiet', 1500);
   ws.close(); ps.kill(); process.exit(0);
 }
+if (process.env.ONLY === 'xu') {
+  await go('/admin/users'); await sleep(1500);
+  await type('input[type=search]', 'Cô Lan'); await sleep(2500);
+  await ev(`(document.querySelector('tbody tr a')||{click(){}}).click()`); await sleep(3500); await shot('u-xu', 1500);
+  ws.close(); ps.kill(); process.exit(0);
+}
 if (process.env.ONLY === 'reports') {   // chỉ chụp trang Báo cáo (kiểm bố cục thẻ)
   await go('/admin/reports'); await shot('r-moi', 1300);
   await ev(`([...document.querySelectorAll('.tabs button')].find(b=>b.textContent.includes('Đang xem xét'))||{click(){}}).click()`); await sleep(1200);

@@ -248,7 +248,7 @@ async function adjustXu(admin, id, { delta, reason }) {
   const u = await User.findById(id);
   if (!u) throw ApiError.notFound('Không tìm thấy người dùng');
   if (delta < 0 && (await xu.balance(u._id)) + delta < 0) throw ApiError.invalidState('Số dư Xu không đủ để trừ');
-  await xu.adjust(u._id, delta, `${delta > 0 ? 'AntGo cộng' : 'AntGo trừ'} Xu: ${reason}`);
+  await xu.adjust(u._id, delta, reason);
   await audit(admin, delta > 0 ? 'xu.grant' : 'xu.deduct', 'user', u._id, `${delta > 0 ? '+' : ''}${delta} · ${reason}`);
   await notify(u._id, { type: 'xu', title: `${delta > 0 ? 'Bạn được cộng' : 'Bạn bị trừ'} ${Math.abs(delta)} Xu`, body: reason });
   return { balance: await xu.balance(u._id) };

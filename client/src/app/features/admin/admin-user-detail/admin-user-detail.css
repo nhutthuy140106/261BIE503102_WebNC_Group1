@@ -14,3 +14,4 @@ h1 { margin: 0; }
 .led .minus { color: var(--a-danger); }
 @media (max-width: 1000px) { .stat { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .stat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.hint { font-size: 12px; font-style: italic; color: var(--a-mute); }
