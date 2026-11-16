@@ -1,4 +1,5 @@
 // Hoạt động "đã dùng lâu" cho dữ liệu mẫu: thêm đánh giá cho bài và đề nghị nhận việc cho việc làm, để web nhìn như có người dùng thật.
+const SELFIES = ['1507003211169-0a1dd7228f2d', '1438761681033-6461ffad8d80', '1544005313-94ddf0286df2', '1500648767791-00dcc994a43e', '1494790108377-be9c29b29330', '1507591064344-4c6ce005b128'].map((id) => `https://images.unsplash.com/photo-${id}?w=400&h=400&fit=crop&crop=faces&q=70`); // ảnh chân dung mẫu cho hồ sơ xác minh
 // Dùng ở seeds/seed.js (cuối seed) và scripts/add-activity.js (thêm vào DB đang chạy, chạy lại không nhân đôi).
 // Khóa theo TIÊU ĐỀ bài / việc và TÊN người dùng — không phụ thuộc id, nên dùng được cho cả DB đã có.
 // Đánh giá: [người đánh giá, số sao, nhận xét, số ngày trước, phản hồi người bán?]. Chỉ dùng tài khoản mẫu, không bao giờ là chính người bán.
@@ -465,7 +466,7 @@ async function addActivity({ dryRun = false } = {}) {
     if (!type || u.role === 'admin') continue;
     if (dryRun) continue;
     await Verification.updateOne({ user: u._id }, { $setOnInsert: { user: u._id, status: 'approved', reviewedAt: new Date(), submittedAt: new Date(),
-      body: { fullName: u.name, idNumber: '000000000000', idFront: 'mau-mat-truoc.jpg', idBack: 'mau-mat-sau.jpg', selfie: 'mau-chan-dung.jpg', shopName: u.name, shopType: type, intro: '' } } }, { upsert: true });
+      body: { fullName: u.name, idNumber: '000000000000', idFront: '/images/admin-demo/cccd-truoc.jpg', idBack: '/images/admin-demo/cccd-sau.jpg', selfie: SELFIES[Math.abs([...String(u.name)].reduce((a, c) => a + c.charCodeAt(0), 0)) % SELFIES.length], shopName: u.name, shopType: type, intro: '' } } }, { upsert: true });
   }
 
   /* Nổi bật + Giờ vàng: chỉ điền khi bài chưa có */

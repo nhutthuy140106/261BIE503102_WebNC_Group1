@@ -81,7 +81,7 @@ if (process.env.ONLY === 'xu') {
   ws.close(); ps.kill(); process.exit(0);
 }
 if (process.env.ONLY === 'verif') {
-  await go('/admin/verifications'); await sleep(2500); await shot('v-xac-minh', 1400);
+  await go('/admin/verifications'); await sleep(2500); await ev(`([...document.querySelectorAll('.tabs button')].find(b=>b.textContent.includes('Đã duyệt'))||{click(){}}).click()`); await sleep(2500); await shot('v-xac-minh', 1400);
   ws.close(); ps.kill(); process.exit(0);
 }
 if (process.env.ONLY === 'reports') {   // chỉ chụp trang Báo cáo (kiểm bố cục thẻ)
