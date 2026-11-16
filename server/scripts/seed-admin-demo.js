@@ -12,6 +12,8 @@ const User = require('../src/modules/shared/user.model');
 const Post = require('../src/modules/shared/post.model');
 const Order = require('../src/modules/buyer/order/order.model');
 const Report = require('../src/modules/buyer/report/report.model');
+const Job = require('../src/modules/shared/job.model');
+const Offer = require('../src/modules/buyer/offer/offer.model');
 const Ticket = require('../src/modules/buyer/support/support.model');
 const Verification = require('../src/modules/seller/verification.model');
 const Announcement = require('../src/modules/admin/announcement.model');
@@ -95,6 +97,32 @@ async function main(apply) {
     const doc = new Report({
       reporter: r.by._id, targetType: r.t, targetId: r.id, reason: r.reason, detail: r.detail, state: r.state, adminNote: r.note || '',
       handledBy: r.state === 'open' ? undefined : admin._id, history: r.state === 'open' ? [] : [{ state: r.state, at: ago(...r.ago), note: r.note || '' }],
+    });
+    doc.createdAt = ago(...r.ago);
+    await doc.save({ timestamps: false });
+  }
+
+  /* --- 3b. Báo cáo bổ sung để thử đủ các nút xử lý: đơn có báo vấn đề chờ phân xử, đơn đang chạy, việc làm, đề nghị --- */
+  const issueOpen = await Order.findOne({ 'issue.text': issueDefs[1].text });
+  const issueRej = await Order.findOne({ 'issue.text': issueDefs[0].text });
+  const activeOrder = await Order.findOne({ state: { $in: Order.ACTIVE }, _id: { $nin: liveOrders[0] ? [liveOrders[0]._id] : [] } }).sort({ createdAt: -1 });
+  const openJob = await Job.findOne({ status: 'open' }).sort({ createdAt: -1 });
+  const anOffer = await Offer.findOne({}).sort({ createdAt: -1 });
+  const moreDefs = [
+    { by: need('0900000005'), t: 'order', o: issueOpen, reason: 'not_received', detail: 'Người bán chưa trả lời báo vấn đề của mình và cũng không nhận hoàn tiền (mẫu thử nút Phân xử đơn).', state: 'reviewing', ago: [0, 5] },
+    { by: need('0900000013'), t: 'order', o: issueRej, reason: 'quality', detail: 'Người bán từ chối hoàn tiền dù món giao thiếu, mình xin AntGo xem lại (mẫu thử nút Phân xử đơn).', state: 'open', ago: [0, 9] },
+    { by: need('0900000014'), t: 'order', o: activeOrder, reason: 'other', detail: 'Đơn đã xác nhận từ sáng nhưng người bán không chuẩn bị và không phản hồi (mẫu thử nút Hủy đơn).', state: 'reviewing', ago: [0, 3] },
+    { by: need('0900000004'), t: 'job', id: openJob && openJob._id, reason: 'abuse', detail: 'Việc này có vẻ lừa đảo: yêu cầu chuyển tiền cọc trước khi đến làm (mẫu thử nút Đóng việc).', state: 'reviewing', ago: [1, 2] },
+    { by: need('0900000003'), t: 'offer', id: anOffer && anOffer._id, reason: 'abuse', detail: 'Người gửi đề nghị để lại số điện thoại và rủ trao đổi ngoài ứng dụng (mẫu thử nút Nhắc nhở).', state: 'open', ago: [1, 6] },
+  ];
+  for (const r of moreDefs) {
+    const id = r.id || (r.o && r.o._id);
+    if (!id || (await Report.exists({ detail: r.detail }))) continue;
+    out.reports++;
+    if (!apply) continue;
+    const doc = new Report({
+      reporter: r.by._id, targetType: r.t, targetId: id, reason: r.reason, detail: r.detail, state: r.state, adminNote: '',
+      handledBy: r.state === 'open' ? undefined : admin._id, history: r.state === 'open' ? [] : [{ state: r.state, at: ago(...r.ago), note: '' }],
     });
     doc.createdAt = ago(...r.ago);
     await doc.save({ timestamps: false });
