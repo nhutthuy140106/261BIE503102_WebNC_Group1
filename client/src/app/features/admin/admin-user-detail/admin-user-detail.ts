@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AdminApi, UserProfile, msgOf } from '../../../core/services/admin-api';
 import { AuthService } from '../../../core/services/auth';
-import { ORDER_STATE, ROLE, orderTone } from '../admin-labels';
+import { ORDER_STATE, orderTone } from '../admin-labels';
 
 const VERIF: Record<string, string> = { none: 'Chưa nộp hồ sơ', pending: 'Chờ duyệt', approved: 'Đã xác minh', rejected: 'Bị từ chối' };
 
@@ -28,7 +28,6 @@ export class AdminUserDetail implements OnInit {
   protected delta: number | null = null;
   protected reason = '';
   protected xuErr = '';
-  protected role = '';
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -37,7 +36,6 @@ export class AdminUserDetail implements OnInit {
 
   protected isAdmin(): boolean { return this.me()?.role === 'admin'; }
   protected isSelf(): boolean { return this.me()?._id === this.id; }
-  protected roleName = (r: string): string => ROLE[r] ?? r;
   protected verif = (s: string): string => VERIF[s] ?? s;
   protected state = (s: string): string => ORDER_STATE[s] ?? s;
   protected tone = orderTone;
@@ -48,10 +46,6 @@ export class AdminUserDetail implements OnInit {
     if (this.reason.trim().length < 5) { this.xuErr = 'Vui lòng ghi lý do (ít nhất 5 ký tự).'; return; }
     this.xuErr = '';
     this.run(this.api.adjustXu(this.id, d, this.reason.trim()), 'Đã cập nhật Xu và thông báo cho người dùng.', () => { this.delta = null; this.reason = ''; });
-  }
-
-  protected saveRole(): void {
-    this.run(this.api.setRole(this.id, this.role), 'Đã đổi vai trò.');
   }
 
   protected lock(reason: string): void {
@@ -72,7 +66,7 @@ export class AdminUserDetail implements OnInit {
 
   private load(): void {
     this.api.profile(this.id).subscribe({
-      next: (p) => { this.p.set(p); this.role = p.user.role; },
+      next: (p) => { this.p.set(p); },
       error: (e: unknown) => this.error.set(msgOf(e, 'Không tải được hồ sơ.')),
     });
   }

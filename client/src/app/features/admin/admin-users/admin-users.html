@@ -2,7 +2,6 @@
 <p class="lead">Khóa tài khoản vi phạm hoặc mở khóa khi đã xử lý xong.</p>
 <div class="bar">
   <input type="search" name="q" [(ngModel)]="q" (ngModelChange)="filter(300)" placeholder="Tìm theo tên hoặc số điện thoại" aria-label="Tìm người dùng" />
-  <app-admin-select name="role" ariaLabel="Lọc vai trò" [(ngModel)]="role" (ngModelChange)="filter()" [options]="[{ value: '', label: 'Mọi vai trò' }, { value: 'user', label: 'Người dùng' }, { value: 'moderator', label: 'Người kiểm duyệt' }, { value: 'admin', label: 'Quản trị' }]" />
   <app-admin-select name="status" ariaLabel="Lọc trạng thái" [(ngModel)]="status" (ngModelChange)="filter()" [options]="[{ value: '', label: 'Mọi trạng thái' }, { value: 'active', label: 'Đang hoạt động' }, { value: 'locked', label: 'Bị khóa' }]" />
 </div>
 @if (error()) { <div class="err" role="alert">{{ error() }}</div> }
@@ -10,15 +9,14 @@
 @if (rows(); as list) {
   @if (list.length) {
     <table class="tbl fixed">
-      <colgroup><col /><col style="width: 130px" /><col style="width: 70px" /><col style="width: 120px" /><col style="width: 110px" /><col style="width: 110px" /><col style="width: 190px" /></colgroup>
-      <thead><tr><th>Người dùng</th><th>Số điện thoại</th><th>Block</th><th>Vai trò</th><th>Trạng thái</th><th>Ngày tạo</th><th></th></tr></thead>
+      <colgroup><col /><col style="width: 130px" /><col style="width: 70px" /><col style="width: 110px" /><col style="width: 110px" /><col style="width: 190px" /></colgroup>
+      <thead><tr><th>Người dùng</th><th>Số điện thoại</th><th>Block</th><th>Trạng thái</th><th>Ngày tạo</th><th></th></tr></thead>
       <tbody>
         @for (u of list; track u._id) {
           <tr>
             <td data-l="Người dùng"><div class="who"><app-avatar [name]="u.name" [src]="u.avatar ?? ''" [size]="34" /><div><b><a [routerLink]="['/admin/users', u._id]" class="lnk">{{ u.name }}</a></b>@if (u.lockedReason) { <small>Lý do khóa: {{ u.lockedReason }}</small> }</div></div></td>
             <td data-l="Số điện thoại">{{ u.phone }}</td>
             <td data-l="Block">{{ u.block }}</td>
-            <td data-l="Vai trò">{{ u.role === 'admin' ? 'Quản trị' : u.role === 'moderator' ? 'Người kiểm duyệt' : 'Người dùng' }}</td>
             <td data-l="Trạng thái"><span class="pill" [class.ok]="u.status === 'active'" [class.warn]="u.status === 'locked'">{{ u.status === 'active' ? 'Hoạt động' : 'Bị khóa' }}</span></td>
             <td data-l="Ngày tạo">{{ u.createdAt | date: 'dd/MM/yyyy' }}</td>
             <td class="act">
@@ -26,7 +24,7 @@
               @if (!isAdmin()) {
               } @else if (u.status === 'locked') {
                 <button type="button" class="btn" (click)="target.set({ user: u, lock: false })">Mở khóa</button>
-              } @else if (isSelf(u) || u.role === 'admin') {
+              } @else if (isSelf(u)) {
                 <span class="sub">Không khóa được</span>
               } @else {
                 <button type="button" class="btn danger" (click)="target.set({ user: u, lock: true })">Khóa</button>

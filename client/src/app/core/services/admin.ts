@@ -130,12 +130,12 @@ export class AdminService {
   }
 
   // ---------------- Người dùng ----------------
-  listUsers(f: { q: string; role: string; status: string; page: number }): Observable<Paged<AdminUser>> {
+  listUsers(f: { q: string; status: string; page: number }): Observable<Paged<AdminUser>> {
     if (this.mock) {
-      const rows = this.users.filter((u) => (!f.q || pick(u.name + ' ' + u.phone, f.q)) && (!f.role || u.role === f.role) && (!f.status || u.status === f.status));
+      const rows = this.users.filter((u) => (!f.q || pick(u.name + ' ' + u.phone, f.q)) && u.role === 'user' && (!f.status || u.status === f.status));
       return of({ items: rows.slice((f.page - 1) * PAGE_SIZE, f.page * PAGE_SIZE), total: rows.length, limit: PAGE_SIZE });
     }
-    return this.api.getList<Record<string, unknown>>('/admin/users', { q: f.q || null, role: f.role === 'user' ? 'enduser' : f.role || null, status: f.status || null, page: f.page, limit: PAGE_SIZE }).pipe(
+    return this.api.getList<Record<string, unknown>>('/admin/users', { q: f.q || null, status: f.status || null, page: f.page, limit: PAGE_SIZE }).pipe(
       map((r) => ({
         items: r.data.map((u) => ({
           _id: String(u['_id']),

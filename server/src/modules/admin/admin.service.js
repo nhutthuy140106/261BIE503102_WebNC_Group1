@@ -15,8 +15,7 @@ const page = (q) => parsePaging(q);
 
 async function listUsers(q) {
   const { page: p, limit, skip } = page(q);
-  const filter = {};
-  if (q.role) filter.role = q.role;
+  const filter = { role: { $nin: ['admin', 'moderator'] } }; // trang Người dùng chỉ quản lý người dùng; tài khoản quản trị không nằm ở đây
   if (q.status) filter.status = q.status;
   if (q.q) {
     const re = new RegExp(escapeRegex(q.q.trim()), 'i');

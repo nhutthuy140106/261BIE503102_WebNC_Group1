@@ -5,9 +5,9 @@
 @if (p(); as p) {
   <div class="head">
     <div class="who"><app-avatar [name]="p.user.name" [src]="p.user.avatar ?? ''" [size]="52" />
-      <div><h1>{{ p.user.name }}</h1><p class="lead">{{ p.user.phone }} · Khu {{ p.user.area }} · {{ roleName(p.user.role) }}
+      <div><h1>{{ p.user.name }}</h1><p class="lead">{{ p.user.phone }} · Khu {{ p.user.area }}
         <span class="pill" [class.ok]="p.user.status === 'active'" [class.bad]="p.user.status === 'locked'">{{ p.user.status === 'active' ? 'Hoạt động' : 'Bị khóa' }}</span></p></div></div>
-    @if (isAdmin() && !isSelf() && p.user.role !== 'admin') {
+    @if (isAdmin() && !isSelf()) {
       <div class="btns">
         @if (p.user.status === 'locked') { <button type="button" class="btn" (click)="lockDlg.set(false)">Mở khóa</button> }
         @else { <button type="button" class="btn danger" (click)="lockDlg.set(true)">Khóa tài khoản</button> }
@@ -62,14 +62,6 @@
         </dl>
       </section>
       @if (isAdmin()) {
-        <section class="panel">
-          <h2>Vai trò</h2>
-          <div class="field"><label for="rl">Vai trò trong hệ thống</label>
-            <app-admin-select inputId="rl" name="rl" [(ngModel)]="role" [disabled]="isSelf()" [options]="[{ value: 'enduser', label: 'Người dùng' }, { value: 'moderator', label: 'Người kiểm duyệt' }, { value: 'admin', label: 'Quản trị' }]" />
-            <small>Người kiểm duyệt xử lý báo cáo, bài, đơn, hỗ trợ; không khóa tài khoản, không sửa voucher/Xu, không gửi thông báo hệ thống.</small></div>
-          <div class="btns"><button type="button" class="btn main" [disabled]="busy() || isSelf() || role === p.user.role" (click)="saveRole()">Lưu vai trò</button></div>
-          @if (isSelf()) { <p class="sub">Bạn không đổi được vai trò của chính mình.</p> }
-        </section>
         <section class="panel">
           <h2>Cộng / trừ Xu</h2>
           <form (ngSubmit)="adjust()">
