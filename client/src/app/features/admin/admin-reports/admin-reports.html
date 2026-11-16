@@ -34,39 +34,30 @@
         }
 
         <div class="work">
-        @if (r.state === 'open' || r.state === 'reviewing') {
-          <div class="nb">
-          <label [for]="'n' + r._id">Ghi chú của admin</label>
-          <textarea [id]="'n' + r._id" rows="2" [name]="'n' + r._id" [(ngModel)]="notes[r._id]" maxlength="300" [placeholder]="r.state === 'reviewing' ? 'Bắt buộc khi kết thúc báo cáo' : 'Không bắt buộc'"></textarea>
-          @if (noteErr === r._id) { <small class="e" role="alert">Vui lòng ghi chú kết quả xử lý (ít nhất 3 ký tự).</small> }
-          </div>
-        } @else {
-          <div class="done">
-            <p class="note"><b>Hướng xử lý:</b> {{ actionLabel(r.action) }}</p>
-            @if (r.adminNote) { <p class="note"><b>Ghi chú:</b> {{ r.adminNote }}</p> }
-          </div>
-        }
-
-          @if (r.state === 'reviewing') {
-            <div class="acts" role="radiogroup" aria-label="Hướng xử lý">
-              <span class="lbl">Hướng xử lý (khi chọn "Đã xử lý")</span>
-              @for (a of actionsFor(r.targetType); track a.key) {
-                <button type="button" role="radio" class="opt" [attr.aria-checked]="actions[r._id] === a.key" [class.on]="actions[r._id] === a.key" (click)="actions[r._id] = a.key">{{ a.label }}</button>
-              }
-              @if (actionErr === r._id) { <small class="e" role="alert">Chọn một hướng xử lý.</small> }
+          @if (r.state === 'resolved' || r.state === 'rejected') {
+            <div class="done">
+              <p class="note"><b>Hướng xử lý:</b> {{ actionLabel(r.action) }}</p>
+              @if (r.adminNote) { <p class="note"><b>Ghi chú:</b> {{ r.adminNote }}</p> }
+            </div>
+          } @else if (r.state === 'open') {
+            <footer class="start">
+              <button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'reviewing', '', '')">Bắt đầu xem xét</button>
+            </footer>
+          } @else {
+            <div class="acts">
+              <span class="lbl">Chọn cách xử lý — người báo cáo và người bị báo cáo sẽ nhận thông báo kèm lý do</span>
+              <div class="row">
+                @for (a of actionsFor(r.targetType); track a.key) {
+                  @if (a.key === 'order_ruled') {
+                    <a class="btn danger" [routerLink]="['/admin/orders', r.targetId]">Phân xử đơn →</a>
+                  } @else {
+                    <button type="button" class="btn" [class.danger]="a.danger" (click)="pick.set({ r: r, a: a })">{{ a.label }}</button>
+                  }
+                }
+                <button type="button" class="btn" (click)="pick.set({ r: r, a: { key: 'none', label: 'Không vi phạm' } })">Không vi phạm</button>
+              </div>
             </div>
           }
-        <footer>
-          @if (r.targetType === 'post' && r.state !== 'resolved' && r.state !== 'rejected') {
-            <button type="button" class="btn danger" (click)="hideFor.set(r)">Ẩn bài này</button>
-          }
-          @if (r.state === 'open') {
-            <button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'reviewing')">Bắt đầu xem xét</button>
-          } @else if (r.state === 'reviewing') {
-            <button type="button" class="btn" [disabled]="busy()" (click)="move(r, 'rejected')">Từ chối</button>
-            <button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'resolved')">Đã xử lý</button>
-          }
-        </footer>
         </div>
       </article>
     } @empty { <p class="empty">Không có báo cáo ở mục này.</p> }
@@ -75,7 +66,7 @@
   <div class="sk"></div><div class="sk"></div><div class="sk"></div>
 }
 
-@if (hideFor(); as r) {
-  <app-admin-dialog title="Ẩn bài bị báo cáo?" message="Bài sẽ không còn hiện với người dùng khác; người bán nhận được lý do." confirmLabel="Ẩn bài" [danger]="true"
-    [withReason]="true" reasonLabel="Lý do ẩn (gửi cho người bán)" [busy]="busy()" (confirmed)="confirmHide($event)" (cancelled)="hideFor.set(null)" />
+@if (pick(); as p) {
+  <app-admin-dialog [title]="p.a.label + '?'" [message]="msgFor(p.a.key)" [confirmLabel]="p.a.label" [danger]="!!p.a.danger"
+    [withReason]="true" reasonLabel="Lý do / kết luận (gửi cho người báo cáo và người bị báo cáo)" [busy]="busy()" (confirmed)="confirmPick($event)" (cancelled)="pick.set(null)" />
 }

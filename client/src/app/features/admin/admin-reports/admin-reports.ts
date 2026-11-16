@@ -30,26 +30,31 @@ export class AdminReports implements OnInit {
   protected readonly tab = signal<ReportState>('open');
   protected readonly error = signal('');
   protected readonly busy = signal(false);
-  protected readonly hideFor = signal<AdminReport | null>(null);
-  /** Ghi chú đang soạn theo từng báo cáo */
-  protected notes: Record<string, string> = {};
-  protected noteErr = '';
-  /** Hướng xử lý đang chọn theo từng báo cáo */
-  protected actions: Record<string, string> = {};
-  protected actionErr = '';
 
-  /** Hướng xử lý hợp với từng loại đối tượng; hai mục đầu của bài/người dùng tác động thật khi bấm "Đã xử lý" */
-  protected actionsFor(type: string): { key: string; label: string }[] {
-    const first: Record<string, { key: string; label: string }[]> = {
-      post: [{ key: 'hide_post', label: 'Ẩn bài đăng' }],
-      user: [{ key: 'lock_user', label: 'Khóa tài khoản' }],
-      order: [{ key: 'order_ruled', label: 'Đã phân xử đơn' }],
+  /** Nút xử lý theo loại đối tượng bị báo cáo (mỗi nút làm thật rồi đóng báo cáo) */
+  protected actionsFor(type: string): { key: string; label: string; danger?: boolean }[] {
+    const first: Record<string, { key: string; label: string; danger?: boolean }[]> = {
+      post: [{ key: 'hide_post', label: 'Ẩn bài', danger: true }],
+      user: [{ key: 'lock_user', label: 'Khóa tài khoản', danger: true }],
+      order: [{ key: 'order_ruled', label: 'Phân xử đơn' }],
+      job: [{ key: 'close_job', label: 'Đóng việc', danger: true }],
     };
-    return [...(first[type] ?? []), { key: 'warn_owner', label: 'Nhắc nhở người bị báo cáo' }, { key: 'other', label: 'Biện pháp khác' }];
+    return [...(first[type] ?? []), { key: 'warn_owner', label: 'Nhắc nhở' }];
+  }
+
+  protected msgFor(key: string): string {
+    const m: Record<string, string> = {
+      hide_post: 'Bài sẽ không còn hiện với người dùng khác.',
+      lock_user: 'Người này sẽ không đăng nhập được nữa.',
+      close_job: 'Việc sẽ đóng, không nhận thêm đề nghị.',
+      warn_owner: 'Người bị báo cáo nhận một thông báo nhắc nhở; không ẩn hay khóa gì.',
+      none: 'Báo cáo được đóng; người báo cáo nhận thông báo là chưa được chấp nhận.',
+    };
+    return m[key] ?? '';
   }
 
   protected actionLabel(a?: string): string {
-    const all: Record<string, string> = { hide_post: 'Đã ẩn bài đăng', lock_user: 'Đã khóa tài khoản', warn_owner: 'Đã nhắc nhở người bị báo cáo', order_ruled: 'Đã phân xử đơn', other: 'Biện pháp khác', none: 'Không vi phạm — không xử lý' };
+    const all: Record<string, string> = { hide_post: 'Đã ẩn bài', lock_user: 'Đã khóa tài khoản', warn_owner: 'Đã nhắc nhở người bị báo cáo', order_ruled: 'Đã phân xử đơn', close_job: 'Đã đóng việc', none: 'Không vi phạm — không xử lý' };
     return a ? all[a] ?? a : 'Chưa ghi nhận';
   }
 
@@ -85,21 +90,22 @@ export class AdminReports implements OnInit {
     return TARGET[t] ?? t;
   }
 
-  /** Chuyển trạng thái; kết thúc (xử lý/từ chối) bắt buộc có ghi chú, giống server. */
-  protected move(r: AdminReport, to: ReportState): void {
-    const note = (this.notes[r._id] ?? r.adminNote ?? '').trim();
-    if ((to === 'resolved' || to === 'rejected') && note.length < 3) {
-      this.noteErr = r._id;
-      return;
-    }
-    if (to === 'resolved' && !this.actions[r._id]) {
-      this.actionErr = r._id;
-      return;
-    }
-    this.noteErr = '';
-    this.actionErr = '';
-    this.run(this.admin.transition(r._id, to, note, this.actions[r._id]), () => {
+  protected readonly pick = signal<{ r: AdminReport; a: { key: string; label: string; danger?: boolean } } | null>(null);
+
+  protected move(r: AdminReport, to: ReportState, note: string, action: string): void {
+    this.run(this.admin.transition(r._id, to, note, action), () => {
       this.tab.set(to);
+    });
+  }
+
+  /** Bấm nút xử lý → xác nhận kèm lý do → (đang xem xét) → đóng báo cáo với hướng xử lý đó */
+  protected confirmPick(reason: string): void {
+    const p = this.pick();
+    if (!p) return;
+    const none = p.a.key === 'none';
+    this.run(this.admin.transition(p.r._id, none ? 'rejected' : 'resolved', reason, none ? '' : p.a.key), () => {
+      this.pick.set(null);
+      this.tab.set(none ? 'rejected' : 'resolved');
     });
   }
 
@@ -122,11 +128,6 @@ export class AdminReports implements OnInit {
     return v && v !== 'loading' && v !== 'none' ? v : null;
   }
 
-  protected confirmHide(reason: string): void {
-    const r = this.hideFor();
-    if (r) this.run(this.admin.hidePost(r.targetId, reason), () => this.hideFor.set(null));
-  }
-
   private run(req: ReturnType<AdminService['hidePost']>, done: () => void): void {
     this.busy.set(true);
     req.subscribe({
@@ -137,7 +138,7 @@ export class AdminReports implements OnInit {
       },
       error: (e: unknown) => {
         this.busy.set(false);
-        this.hideFor.set(null);
+        this.pick.set(null);
         this.error.set(e instanceof AppError ? e.message : 'Chưa thực hiện được, bạn thử lại sau nhé.');
       },
     });

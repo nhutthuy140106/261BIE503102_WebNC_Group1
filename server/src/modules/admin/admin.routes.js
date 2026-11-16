@@ -25,7 +25,7 @@ const roleBody = z.object({ role: z.enum(['enduser', 'moderator', 'admin'], { er
 const transitionBody = z.object({
   to: z.enum(['reviewing', 'resolved', 'rejected'], { error: 'to phải là reviewing, resolved hoặc rejected' }),
   note: z.string().trim().max(500).optional(),
-  action: z.enum(['hide_post', 'lock_user', 'warn_owner', 'order_ruled', 'other']).optional(),
+  action: z.enum(['hide_post', 'lock_user', 'close_job', 'warn_owner']).optional(),
 }).refine((o) => o.to === 'reviewing' || (o.note && o.note.length >= 3), { message: 'Cần ghi chú khi kết thúc báo cáo', path: ['note'] })
   .refine((o) => o.to !== 'resolved' || !!o.action, { message: 'Chọn hướng xử lý khi đánh dấu đã xử lý', path: ['action'] });
 

@@ -145,7 +145,7 @@ async function getReport(id) {
   return { ...r.toJSON(), context: await reportContext(r) };
 }
 
-const ACTION_MSG = { hide_post: 'Bài bị báo cáo đã được gỡ.', lock_user: 'Tài khoản bị báo cáo đã bị khóa.', warn_owner: 'Người bị báo cáo đã được nhắc nhở.', order_ruled: 'Đơn bị báo cáo đã được phân xử.', other: 'AntGo đã áp dụng biện pháp xử lý.' };
+const ACTION_MSG = { hide_post: 'Bài bị báo cáo đã được gỡ.', lock_user: 'Tài khoản bị báo cáo đã bị khóa.', warn_owner: 'Người bị báo cáo đã được nhắc nhở.', order_ruled: 'Đơn bị báo cáo đã được phân xử.', close_job: 'Việc bị báo cáo đã bị đóng.' };
 
 async function transitionReport(admin, id, to, note, action) {
   const r = await Report.findById(id);
@@ -159,6 +159,15 @@ async function transitionReport(admin, id, to, note, action) {
     } else if (action === 'lock_user' && r.targetType === 'user') {
       const u = await User.findById(r.targetId);
       if (u && u.status !== 'locked') await lockUser(admin, r.targetId, note || 'Vi phạm quy định');
+    }
+    else if (action === 'close_job' && r.targetType === 'job') {
+      const j = await Job.findById(r.targetId);
+      if (j && j.status === 'open') { j.status = 'closed'; await j.save(); await audit(admin, 'job.close', 'job', j._id, note || ''); await notify(j.poster, { type: 'job_closed', title: 'Việc của bạn đã bị đóng', body: `${j.title} — lý do: ${note || 'vi phạm quy định'}`, link: { type: 'job', id: j._id } }); }
+    } else if (action === 'warn_owner') {
+      const { reportContext } = require('./admin-extra.service');
+      const c = await reportContext(r).catch(() => ({}));
+      const target = (c.owner && c.owner._id) || (c.seller && c.seller._id);
+      if (target) { await notify(target, { type: 'report_warning', title: 'AntGo nhắc nhở bạn', body: `Nội dung của bạn bị báo cáo. ${note}`, link: { type: r.targetType, id: r.targetId } }); await audit(admin, 'report.warn', r.targetType, r.targetId, note || ''); }
     }
     r.action = action;
   } else if (to === 'rejected') r.action = 'none';
