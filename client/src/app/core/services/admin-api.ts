@@ -90,7 +90,7 @@ export class AdminApi {
 
   // đơn & tranh chấp
   orders(f: { state?: string; issue?: string; q?: string; page: number }): Observable<ApiList<OrderRow>> {
-    return this.guard(() => this.api.getList<OrderRow>('/admin/orders', q({ ...f, limit: 10 })));
+    return this.guard(() => this.api.getList<OrderRow>('/admin/orders', q({ ...f, limit: 8 })));
   }
   order(id: string, chat = false): Observable<OrderDetail> {
     return this.guard(() => this.api.get<OrderDetail>(`/admin/orders/${id}`, q({ chat: chat ? '1' : '0' })));
@@ -103,7 +103,7 @@ export class AdminApi {
   }
 
   audit(f: { action?: string; targetType?: string; page: number }): Observable<ApiList<AuditRow>> {
-    return this.guard(() => this.api.getList<AuditRow>('/admin/audit', q({ ...f, limit: 20 })));
+    return this.guard(() => this.api.getList<AuditRow>('/admin/audit', q({ ...f, limit: 10 })));
   }
 
   reportDetail(id: string): Observable<ReportDetail> {

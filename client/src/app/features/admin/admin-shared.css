@@ -168,3 +168,6 @@ select option { background: var(--a-glass); color: var(--a-ink); }
 .req { color: var(--a-danger); font-weight: 700; }
 .field.bad input, .field.bad .trigger { border-color: var(--a-danger); box-shadow: 0 0 0 3px var(--a-danger-soft); }
 @media (min-width: 761px) { .tbl.fixed { table-layout: fixed; } .tbl.fixed td.cut { overflow: hidden; text-overflow: ellipsis; } .tbl.fixed td.act { text-align: right; } }
+/* Phân trang luôn nằm sát đáy màn hình: bấm Trước/Sau không phải cuộn xuống; dòng bảng gọn một dòng để mỗi trang vừa màn hình */
+.pager { position: sticky; bottom: 0; z-index: 5; padding: 12px 0 14px; margin-top: 0; background: linear-gradient(to top, var(--a-bg) 62%, transparent); }
+@media (min-width: 761px) { .tbl.fixed td:first-child { overflow: hidden; } .tbl.fixed td:first-child .sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .tbl.fixed td:first-child .who > div { min-width: 0; } .tbl.fixed td:first-child b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
