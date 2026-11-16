@@ -10,9 +10,13 @@ h1 .pill { vertical-align: middle; margin-left: 6px; font-size: 13px; }
 .opt input { margin-top: 3px; accent-color: var(--a-accent); }
 .opt b { display: block; font-size: 14px; }
 .opt small { color: var(--a-mute); font-size: 12px; }
-.tl { list-style: none; margin: 0; padding: 0 0 0 14px; border-left: 2px solid var(--a-line); display: grid; gap: 10px; }
-.tl li { position: relative; display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
-.tl li::before { content: ''; position: absolute; left: -20px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--a-accent); border: 2px solid var(--a-card); }
+/* tiến trình: chấm tròn nằm đúng trên đường nối, thẳng hàng với dòng chữ */
+.tl { list-style: none; margin: 4px 0 0; padding: 0; }
+.tl li { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 20px; padding: 0 0 16px 26px; font-size: 14px; line-height: 20px; }
+.tl li:last-child { padding-bottom: 0; }
+.tl li::before { content: ''; position: absolute; left: 0; top: 4px; box-sizing: border-box; width: 12px; height: 12px; border-radius: 50%; background: var(--a-accent); box-shadow: 0 0 0 3px var(--a-accent-soft); z-index: 1; }
+.tl li::after { content: ''; position: absolute; left: 5px; top: 16px; bottom: -4px; width: 2px; background: var(--a-line2); }
+.tl li:last-child::after { display: none; }
 .chat { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 340px; overflow-y: auto; }
 .chat li { max-width: 86%; padding: 8px 12px; border-radius: 12px; background: var(--a-chip); justify-self: start; }
 .chat li.me { justify-self: end; background: var(--a-accent-soft); }

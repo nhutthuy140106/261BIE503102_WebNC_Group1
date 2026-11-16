@@ -14,6 +14,10 @@ export interface AdminUser {
   avatar: string | null;
   createdAt: string;
   lockedReason?: string;
+  /** Hồ sơ người bán: none (chưa đăng ký) · pending · approved · rejected */
+  sellerStatus?: string;
+  /** Số lần bị báo cáo (nhắm vào người đó hoặc bài của họ) */
+  reportCount?: number;
 }
 
 export interface AdminPost {
@@ -147,6 +151,8 @@ export class AdminService {
           avatar: (u['avatar'] as string | null) ?? null,
           createdAt: String(u['createdAt'] ?? ''),
           lockedReason: (u['lockedReason'] as string) || undefined,
+          sellerStatus: String(u['sellerStatus'] ?? 'none'),
+          reportCount: Number(u['reportCount'] ?? 0),
         })),
         total: r.meta.total,
         limit: r.meta.limit,

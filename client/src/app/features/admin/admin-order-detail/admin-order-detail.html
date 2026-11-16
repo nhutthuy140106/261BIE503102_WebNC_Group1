@@ -33,7 +33,7 @@
                 <label class="opt"><input type="radio" name="d" value="reject" [(ngModel)]="decision" /><span><b>Không hoàn tiền</b><small>Báo vấn đề không có cơ sở</small></span></label>
               </div>
               @if (decision === 'refund') {
-                <div class="field"><label for="amt">Số tiền hoàn (đ)</label><input id="amt" type="number" name="amt" [(ngModel)]="amount" min="1000" [max]="o.total" step="1000" /><small>Tối đa bằng tổng đơn: {{ o.total | vnd }}. Hoàn hết thì AntGo thu lại Xu của đơn.</small></div>
+                <div class="field"><label for="amt">Số tiền hoàn (đ)</label><input appMoney id="amt" name="amt" [(ngModel)]="amount" placeholder="VD: 25.000" /><small>Tối đa bằng tổng đơn: {{ o.total | vnd }}. Hoàn hết thì AntGo thu lại Xu của đơn.</small></div>
               }
               <div class="field"><label for="nt">Lý do / giải thích (cả hai bên đều đọc được)</label><textarea id="nt" name="nt" rows="3" [(ngModel)]="note" maxlength="300" placeholder="Ít nhất 5 ký tự"></textarea>
                 @if (noteErr) { <span class="e" role="alert">Vui lòng nhập ít nhất 5 ký tự.</span> }</div>

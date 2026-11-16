@@ -69,10 +69,17 @@ if (process.env.ONLY === 'stuck') {   // mở danh sách rồi rời trang: khô
   console.log('menu sau khi rời trang:', await ev(`document.querySelectorAll('ul.menu').length`));
   ws.close(); ps.kill(); process.exit(0);
 }
+if (process.env.ONLY === 'ordd') {
+  await go('/admin/orders'); await sleep(1500);
+  await ev(`(document.querySelector('tbody tr.click, tbody tr a')||{click(){}}).click()`); await sleep(3500); await shot('o-chi-tiet', 1500);
+  ws.close(); ps.kill(); process.exit(0);
+}
 if (process.env.ONLY === 'reports') {   // chỉ chụp trang Báo cáo (kiểm bố cục thẻ)
   await go('/admin/reports'); await shot('r-moi', 1300);
   await ev(`([...document.querySelectorAll('.tabs button')].find(b=>b.textContent.includes('Đang xem xét'))||{click(){}}).click()`); await sleep(1200);
   await ev(`(document.querySelector('.ctxbtn')||{click(){}}).click()`); await sleep(1800); await shot('r-dang-xem-xet', 1500);
+  await ev(`([...document.querySelectorAll('.tabs button')].find(b=>b.textContent.includes('Đã xử lý'))||{click(){}}).click()`); await sleep(1200); await shot('r-da-xu-ly', 1300);
+  await ev(`([...document.querySelectorAll('.tabs button')].find(b=>b.textContent.includes('Từ chối'))||{click(){}}).click()`); await sleep(1200); await shot('r-tu-choi', 900);
   ws.close(); ps.kill(); process.exit(0);
 }
 if (process.env.ONLY === 'debug') {

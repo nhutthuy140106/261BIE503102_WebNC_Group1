@@ -3,6 +3,7 @@ const Post = require('../shared/post.model');
 const Job = require('../shared/job.model');
 const Order = require('../buyer/order/order.model');
 const Report = require('../buyer/report/report.model');
+const Verification = require('../seller/verification.model');
 const { audit } = require('../shared/audit-log.model');
 const { notify } = require('../shared/notify');
 const ApiError = require('../../utils/ApiError');
@@ -25,7 +26,19 @@ async function listUsers(q) {
     User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
     User.countDocuments(filter),
   ]);
-  return { items, meta: { page: p, limit, total } };
+  // kèm: trạng thái người bán (hồ sơ xác minh) và số lần bị báo cáo (báo cáo nhắm vào người đó hoặc bài của họ)
+  const ids = items.map((u) => u._id);
+  const [vers, posts] = await Promise.all([
+    Verification.find({ user: { $in: ids } }).select('user status'),
+    Post.find({ seller: { $in: ids } }).select('_id seller'),
+  ]);
+  const vOf = Object.fromEntries(vers.map((v) => [String(v.user), v.status]));
+  const owner = Object.fromEntries(posts.map((x) => [String(x._id), String(x.seller)]));
+  const reps = await Report.find({ $or: [{ targetType: 'user', targetId: { $in: ids } }, { targetType: 'post', targetId: { $in: posts.map((x) => x._id) } }] }).select('targetType targetId');
+  const nRep = {};
+  for (const r of reps) { const uid = r.targetType === 'user' ? String(r.targetId) : owner[String(r.targetId)]; nRep[uid] = (nRep[uid] || 0) + 1; }
+  const out = items.map((u) => ({ ...u.toJSON(), sellerStatus: vOf[String(u._id)] || 'none', reportCount: nRep[String(u._id)] || 0 }));
+  return { items: out, meta: { page: p, limit, total } };
 }
 
 async function getUser(id) {
