@@ -1,5 +1,5 @@
 <h1>Báo cáo vi phạm</h1>
-<p class="lead">Xem xét từng báo cáo, chọn hướng xử lý rồi ghi kết luận; người báo cáo sẽ nhận được kết luận đó.</p>
+<p class="lead">Xem xét từng báo cáo rồi ghi chú kết quả; người báo cáo sẽ được thông báo.</p>
 <div class="tabs" role="tablist">
   @for (t of tabs; track t.key) {
     <button type="button" role="tab" [attr.aria-selected]="tab() === t.key" [class.on]="tab() === t.key" (click)="tab.set(t.key)">{{ t.label }} <em>{{ count(t.key) }}</em></button>
@@ -11,64 +11,51 @@
   <div class="cards">
     @for (r of list(); track r._id) {
       <article class="rc">
-        <header class="rh">
-          <div class="obj">
-            <span class="otype">{{ target(r.targetType) }}</span>
-            <b class="otitle">{{ title(r) }}</b>
-            @if (r.target?.ownerName && r.target?.ownerName !== r.target?.title) { <span class="sub">{{ ownerLabel(r.targetType) }}: {{ r.target?.ownerName }}</span> }
-          </div>
+        <header>
+          <b>{{ reason(r.reason) }}</b>
           <span class="sub">{{ r.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
         </header>
-        <p class="by">Người báo cáo: <b>{{ r.reporterName }}</b></p>
-
-        <div class="bd">
-          <h3 class="rt">{{ reason(r.reason) }}</h3>
-          <blockquote class="detail">{{ r.detail }}</blockquote>
-          <button type="button" class="ctxbtn" (click)="toggleCtx(r)">{{ ctx()[r._id] ? 'Ẩn bối cảnh' : 'Xem bối cảnh' }}</button>
-          @if (ctx()[r._id] === 'loading') { <div class="sk" style="height: 52px"></div> }
-          @else if (ctx()[r._id] === 'none') { <p class="note">Không tải được bối cảnh.</p> }
-          @else if (c(r); as x) {
+        <p class="meta"><span class="chip">{{ r.reporterName }} báo cáo</span><span class="chip">{{ target(r.targetType) }} <code>{{ r.targetId }}</code></span></p>
+        <blockquote class="detail">{{ r.detail }}</blockquote>
+        <button type="button" class="ctxbtn" (click)="toggleCtx(r)">{{ ctx()[r._id] ? 'Ẩn bối cảnh' : 'Xem bối cảnh' }}</button>
+        @if (ctx()[r._id] === 'loading') { <div class="sk" style="height: 52px"></div> }
+        @else if (ctx()[r._id] === 'none') { <p class="note">Không tải được bối cảnh.</p> }
+        @else if (c(r); as x) {
           <div class="ctx">
-              @if (!x.found) { <p class="note">Đối tượng bị báo cáo không còn tồn tại.</p> } @else {
+            @if (!x.found) { <p class="note">Đối tượng bị báo cáo không còn tồn tại.</p> } @else {
               <b>{{ x.title }}</b>
               <span class="sub">Trạng thái: {{ objStatus(r.targetType, x.status ?? '') }}@if (x.price) { · {{ x.price | vnd }} }</span>
-                @if (x.owner; as ow) { <span>Chủ: <a class="lnk" [routerLink]="['/admin/users', ow._id]">{{ ow.name }}</a> ({{ ow.phone }}) @if (ow.status === 'locked') { <span class="pill bad">Đã khóa</span> }</span> }
-                @if (x.buyer && x.seller) { <span>Mua: <a class="lnk" [routerLink]="['/admin/users', x.buyer._id]">{{ x.buyer.name }}</a> · Bán: <a class="lnk" [routerLink]="['/admin/users', x.seller._id]">{{ x.seller.name }}</a></span> }
+              @if (x.owner; as ow) { <span>Chủ: <a class="lnk" [routerLink]="['/admin/users', ow._id]">{{ ow.name }}</a> ({{ ow.phone }}) @if (ow.status === 'locked') { <span class="pill bad">Đã khóa</span> }</span> }
+              @if (x.buyer && x.seller) { <span>Mua: <a class="lnk" [routerLink]="['/admin/users', x.buyer._id]">{{ x.buyer.name }}</a> · Bán: <a class="lnk" [routerLink]="['/admin/users', x.seller._id]">{{ x.seller.name }}</a></span> }
               <span class="sub">{{ x.reportsAboutTarget }} báo cáo về đối tượng này</span>
-                @if (x.orderId) { <a class="lnk" [routerLink]="['/admin/orders', x.orderId]">Mở đơn để xem chi tiết và phân xử →</a> }
+              @if (x.orderId) { <a class="lnk" [routerLink]="['/admin/orders', x.orderId]">Mở đơn để xem chi tiết và phân xử →</a> }
             }
           </div>
         }
-        </div>
 
-        @if (r.state === 'open') {
-          <div class="work">
-            <p class="hint">Bấm “Bắt đầu xem xét” để nhận xử lý báo cáo này; các hướng xử lý sẽ hiện ở bước sau.</p>
-            <div class="acts"><button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'reviewing')">Bắt đầu xem xét</button></div>
-          </div>
-        } @else if (r.state === 'reviewing') {
-          <div class="work">
-            <div class="nb">
-              <label [for]="'n' + r._id">Kết luận gửi người báo cáo</label>
-              <textarea [id]="'n' + r._id" rows="3" [name]="'n' + r._id" [(ngModel)]="notes[r._id]" maxlength="300" placeholder="Bắt buộc khi kết thúc. VD: Đã ẩn bài vì ảnh không đúng sản phẩm."></textarea>
-              @if (noteErr === r._id) { <small class="e" role="alert">Vui lòng ghi kết luận (ít nhất 3 ký tự).</small> }
-              <small class="hint">Kết luận này được gửi kèm thông báo cho người báo cáo và lưu vào nhật ký.</small>
-            </div>
-            <div class="acts">
-              @if (r.targetType === 'post' || r.targetType === 'user' || (r.targetType === 'order' && r.target?.orderId)) {
-                <span class="cap">Xử lý đối tượng</span>
-                @if (r.targetType === 'post' && r.target?.status !== 'hidden') { <button type="button" class="btn danger" (click)="hideFor.set(r)">Ẩn bài</button> }
-                @if (r.targetType === 'user' && r.target?.status !== 'locked') { <button type="button" class="btn danger" (click)="lockFor.set(r)">Khóa tài khoản</button> }
-                @if (r.targetType === 'order' && r.target?.orderId) { <a class="btn" [routerLink]="['/admin/orders', r.target?.orderId]">Mở đơn để phân xử</a> }
-              }
-              <span class="cap">Kết thúc báo cáo</span>
-              <button type="button" class="btn" [disabled]="busy()" (click)="move(r, 'rejected')">Báo cáo không đúng</button>
-              <button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'resolved')">Đã xử lý</button>
-            </div>
+        <div class="work">
+        @if (r.state === 'open' || r.state === 'reviewing') {
+          <div class="nb">
+          <label [for]="'n' + r._id">Ghi chú của admin</label>
+          <textarea [id]="'n' + r._id" rows="2" [name]="'n' + r._id" [(ngModel)]="notes[r._id]" maxlength="300" [placeholder]="r.state === 'reviewing' ? 'Bắt buộc khi kết thúc báo cáo' : 'Không bắt buộc'"></textarea>
+          @if (noteErr === r._id) { <small class="e" role="alert">Vui lòng ghi chú kết quả xử lý (ít nhất 3 ký tự).</small> }
           </div>
         } @else if (r.adminNote) {
-          <p class="note"><b>Kết luận:</b> {{ r.adminNote }}</p>
+          <p class="note"><b>Ghi chú:</b> {{ r.adminNote }}</p>
         }
+
+        <footer>
+          @if (r.targetType === 'post' && r.state !== 'resolved' && r.state !== 'rejected') {
+            <button type="button" class="btn danger" (click)="hideFor.set(r)">Ẩn bài này</button>
+          }
+          @if (r.state === 'open') {
+            <button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'reviewing')">Bắt đầu xem xét</button>
+          } @else if (r.state === 'reviewing') {
+            <button type="button" class="btn" [disabled]="busy()" (click)="move(r, 'rejected')">Từ chối</button>
+            <button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'resolved')">Đã xử lý</button>
+          }
+        </footer>
+        </div>
       </article>
     } @empty { <p class="empty">Không có báo cáo ở mục này.</p> }
   </div>
@@ -79,9 +66,4 @@
 @if (hideFor(); as r) {
   <app-admin-dialog title="Ẩn bài bị báo cáo?" message="Bài sẽ không còn hiện với người dùng khác; người bán nhận được lý do." confirmLabel="Ẩn bài" [danger]="true"
     [withReason]="true" reasonLabel="Lý do ẩn (gửi cho người bán)" [busy]="busy()" (confirmed)="confirmHide($event)" (cancelled)="hideFor.set(null)" />
-}
-
-@if (lockFor(); as r) {
-  <app-admin-dialog title="Khóa tài khoản bị báo cáo?" message="Người này sẽ không đăng nhập hay giao dịch được cho đến khi bạn mở khóa; họ nhận được lý do."
-    confirmLabel="Khóa tài khoản" [danger]="true" [withReason]="true" reasonLabel="Lý do khóa (gửi cho người bị khóa)" [busy]="busy()" (confirmed)="confirmLock($event)" (cancelled)="lockFor.set(null)" />
 }
