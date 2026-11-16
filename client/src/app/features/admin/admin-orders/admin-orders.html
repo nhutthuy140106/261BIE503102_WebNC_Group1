@@ -16,8 +16,8 @@
         @for (o of list; track o._id) {
           <tr class="click" [routerLink]="['/admin/orders', o._id]">
             <td data-l="Đơn"><b class="mono">{{ o.code }}</b><div class="sub">{{ o.title }}</div></td>
-            <td data-l="Người mua">{{ o.buyer.name }}</td>
-            <td data-l="Người bán">{{ o.seller.name }}</td>
+            <td data-l="Người mua" class="cut">{{ o.buyer.name }}</td>
+            <td data-l="Người bán" class="cut">{{ o.seller.name }}</td>
             <td data-l="Tổng tiền" class="num">{{ o.total | vnd }}</td>
             <td data-l="Trạng thái"><span class="pill" [ngClass]="tone(o.state)">{{ label(o.state) }}</span></td>
             <td data-l="Cần chú ý">

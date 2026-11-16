@@ -20,7 +20,7 @@
               <div><a [routerLink]="['/posts', p._id]" target="_blank" rel="noopener"><b>{{ p.title }}</b></a>@if (p.hiddenReason) { <small>Lý do ẩn: {{ p.hiddenReason }}</small> }</div>
             </div></td>
             <td data-l="Loại">{{ typeLabel(p.type) }}</td>
-            <td data-l="Người bán">{{ p.sellerName }}</td>
+            <td data-l="Người bán" class="cut">{{ p.sellerName }}</td>
             <td data-l="Giá">{{ p.price | vnd }}</td>
             <td data-l="Trạng thái"><span class="pill" [class.ok]="p.status === 'open'" [class.warn]="p.status === 'hidden'" [class.mute]="p.status === 'closed' || p.status === 'soldout'">{{ statusLabel(p.status) }}</span></td>
             <td class="act">
