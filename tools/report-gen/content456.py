@@ -3,6 +3,7 @@
 import os
 SHOTS = os.path.join(os.environ.get('TEMP', ''), 'antgo-cdp') + '\\'
 S = lambda n: SHOTS + n + '.png'
+SA = lambda n: 'd:\\Năm 1\\WEB2\\docs\\bao-cao\\hinh-admin-toi\\' + n + '.png'
 
 CH456 = [
 ('h1', 'CHƯƠNG 4. KẾT QUẢ VÀ PHÂN TÍCH'),
@@ -99,7 +100,63 @@ CH456 = [
 ('p', 'Ở k bằng 3, thuật toán đạt 61,7%, cao hơn khoảng ba lần mức chọn ngẫu nhiên 18,9%, nên tiêu chí Precision@3 cao hơn mức ngẫu nhiên được đáp ứng. Con số này thấp hơn nhiều so với lần đo trước trên 32 bài seed, khi Precision@3 đạt 96,9%; nhóm cho rằng nguyên nhân chính là seed hiện có nhiều bài và nhiều danh mục gần nhau hơn, và chưa kiểm tra riêng nguyên nhân đó. Nhãn “cùng danh mục” chỉ là xấp xỉ, nên các số trên nên được đọc là chỉ báo về xu hướng chứ không phải độ chính xác thực tế với người dùng. Gợi ý giá bằng kNN mới có bài thử kiểm tra tính hợp lý và độ tin cậy, chưa có phép đo sai số so với giá thật.'),
 
 ('h2', '4.9. Quản trị'),
-('p', '<h>[CẦN BỔ SUNG: kết quả phần quản trị. Server đã có API quản trị (khóa và mở tài khoản, ẩn và khôi phục bài, xử lý báo cáo, thống kê, nhật ký) và có một bài thử cho nhóm này; phần giao diện quản trị sẽ được hoàn thiện, chụp ảnh và trình bày ở đây sau.]</h>'),
+('p', 'Khu quản trị là không gian riêng ở đường dẫn <c>/admin</c>, dành cho người vận hành AntGo. Khu này có khung giao diện tối riêng, không dùng thanh menu của phía Mua, và chỉ chạy với máy chủ thật vì dữ liệu mẫu của client không có phần này. Các ảnh trong mục được chụp ngày 16/11/2026 trên cơ sở dữ liệu seed, có bổ sung bằng một script dữ liệu mẫu riêng cho khu quản trị: các hồ sơ xác minh, báo cáo, phiếu hỗ trợ và nhật ký trong ảnh là dữ liệu minh họa, ảnh giấy tờ trong hồ sơ là hình vẽ giả, không phải giấy tờ thật.'),
+
+('h3', '4.9.1. Đăng nhập và phân quyền'),
+('p', 'Quản trị viên đăng nhập ở trang riêng <c>/admin/login</c>. Trang này chỉ nhận tài khoản có vai trò <c>admin</c> hoặc <c>moderator</c>; tài khoản người dùng thường nhập đúng số điện thoại và mật khẩu vẫn bị từ chối và bị đăng xuất, còn người chưa đăng nhập mở <c>/admin</c> sẽ được đưa về trang này. Quyền thật do server kiểm tra ở từng API (trả 401 hoặc 403), giao diện chỉ ẩn lối vào, nên việc sửa giao diện không mở thêm được quyền. {T:aq} liệt kê phân quyền giữa hai vai trò.'),
+('tbl', 'aq', 'Phân quyền giữa quản trị viên và người kiểm duyệt', [4900, 2370, 2371],
+ ['Nhóm việc', 'Quản trị viên', 'Người kiểm duyệt'],
+ [['Xem tổng quan, đơn, báo cáo, bài đăng, hỗ trợ, nhật ký, cài đặt', 'Có', 'Có'],
+  ['Duyệt xác minh người bán, xử lý báo cáo, ẩn hoặc hiện bài, phân xử báo vấn đề, hủy đơn vi phạm, trả lời hỗ trợ', 'Có', 'Có'],
+  ['Khóa hoặc mở khóa tài khoản, đổi vai trò', 'Có', 'Không'],
+  ['Tạo, sửa, tắt voucher; cộng hoặc trừ Xu', 'Có', 'Chỉ xem voucher'],
+  ['Gửi thông báo hệ thống; sửa từ khóa cấm, khu vực, danh mục; xuất CSV', 'Có', 'Không']],
+ 'left'),
+('p', 'Người kiểm duyệt được tách riêng để có thể giao việc xử lý nội dung cho người khác mà không trao quyền khóa tài khoản hay đụng đến tiền ảo. Quản trị viên không tự khóa mình, không tự đổi vai trò của mình và không khóa được quản trị viên cuối cùng, để hệ thống không rơi vào tình trạng không còn ai quản trị. Phần giao diện của người kiểm duyệt chưa được nhóm kiểm bằng trình duyệt; quyền của vai trò này mới được kiểm bằng bài thử API.'),
+
+('h3', '4.9.2. Tổng quan và việc cần xử lý'),
+('fig', 'ad_tq', SA('01-tong-quan'), 'Trang tổng quan của khu quản trị', False, '', 0.9),
+('p', 'Trang tổng quan ({F:ad_tq}) mở đầu bằng ô “Cần xử lý hôm nay”, gom năm loại việc đang chờ: hồ sơ người bán chờ duyệt, báo cáo vi phạm chưa xử lý, đơn khách báo vấn đề, yêu cầu hủy đang chờ và phiếu hỗ trợ chưa trả lời. Các con số này cũng hiện thành chấm số cam trên thanh bên, nên người quản trị thấy việc tồn đọng ở bất kỳ trang nào. Phía dưới là sáu chỉ số và các biểu đồ theo ngày (giao dịch hoàn thành, đơn mới và đơn hoàn thành, người dùng mới, đơn theo trạng thái), mặc định xem 7 ngày và có thể chuyển đến 90 ngày. Mọi số liệu được tính từ dữ liệu thật tại thời điểm mở trang, theo múi giờ Việt Nam, không lưu cứng. Với dữ liệu seed tại thời điểm chụp, hệ thống có 27 người dùng (1 người bị khóa), 58 bài đang mở trên tổng 62 bài, 280 đơn trong đó 269 đơn hoàn thành với tổng giá trị giao dịch 26.518.000 đồng; tỷ lệ hoàn thành là 96% và tỷ lệ hủy hoặc từ chối là 2%.'),
+
+('h3', '4.9.3. Xác minh người bán'),
+('fig', 'ad_xm', SA('02-xac-minh'), 'Màn hình duyệt hồ sơ xác minh người bán', False, '', 0.62),
+('p', 'Người bán phải được xác minh trước khi đăng bài hoặc đăng việc; khi chưa được duyệt, API đăng trả lỗi 403 với mã <c>NOT_VERIFIED</c>. Màn hình ở {F:ad_xm} cho quản trị viên đối chiếu họ tên và số căn cước khai báo với ảnh mặt trước, mặt sau và ảnh chân dung (bấm vào để phóng to) rồi chọn Duyệt hồ sơ hoặc Từ chối. Từ chối bắt buộc phải kèm lý do, và lý do này được gửi lại cho người nộp để họ sửa và nộp lại. Hồ sơ được chia ba tab Chờ duyệt, Đã duyệt và Đã từ chối.'),
+
+('h3', '4.9.4. Báo cáo vi phạm'),
+('fig', 'ad_bc', SA('03b-bao-cao-boi-canh'), 'Danh sách báo cáo vi phạm với phần bối cảnh được mở', False, '', 0.62),
+('p', 'Mỗi báo cáo ({F:ad_bc}) hiển thị lý do, người báo cáo, loại đối tượng bị báo và nội dung mô tả. Nút “Xem bối cảnh” tải thêm thông tin của đối tượng bị báo: với đơn là mã đơn, tên món, trạng thái, giá và hai bên mua bán; với bài là chủ bài; kèm số báo cáo khác về cùng đối tượng và đường dẫn sang đơn hoặc hồ sơ người dùng. Nhờ vậy người xử lý không phải tự đi tìm thông tin ở nhiều màn hình. Báo cáo đi qua bốn trạng thái Mới, Đang xem xét, Đã xử lý và Từ chối; khi kết thúc, người xử lý phải ghi chú kết quả và người báo cáo được thông báo. Với báo cáo về bài đăng, nút “Ẩn bài này” ẩn bài ngay và gửi lý do cho người bán.'),
+
+('h3', '4.9.5. Đơn hàng và phân xử tranh chấp'),
+('fig', 'ad_don', SA('05-chi-tiet-don'), 'Chi tiết đơn có khách báo vấn đề và biểu mẫu phân xử', False, '', 0.92),
+('p', 'Trang chi tiết đơn ({F:ad_don}) cho quản trị viên xem toàn bộ một giao dịch: tiến trình các bước kèm giờ, thông tin thanh toán, hai bên và cách nhận hàng. Khi khách báo vấn đề mà người bán không trả lời hoặc từ chối, khung “Quyết định của AntGo” xuất hiện với ba phương án: hoàn tiền (toàn phần hoặc một phần, không vượt tổng đơn), yêu cầu làm lại, hoặc không hoàn tiền. Quyết định bắt buộc kèm lý do dài ít nhất 5 ký tự và cả hai bên đều đọc được. Nếu hoàn hết tiền, hệ thống thu lại Xu đã cộng cho đơn đó. Quản trị viên cũng có thể hủy đơn vi phạm, khi đó kho và voucher được trả lại. Tin nhắn giữa hai bên mặc định bị ẩn và chỉ xem khi cần phân xử; mỗi lần xem đều được ghi vào nhật ký với hành động <c>order.view_chat</c>, để việc đọc tin nhắn riêng tư cũng có dấu vết kiểm tra.'),
+
+('h3', '4.9.6. Người dùng, Xu và voucher'),
+('fig', 'ad_nd', SA('07-ho-so-nguoi-dung'), 'Hồ sơ một người dùng trong khu quản trị', False, '', 0.9),
+('p', 'Danh sách người dùng có tìm theo tên hoặc số điện thoại và lọc theo vai trò, trạng thái. Hồ sơ từng người ({F:ad_nd}) tổng hợp số đơn đã đặt và đã bán, số bài và việc đã đăng, số báo cáo về người này, tình trạng xác minh, sổ Xu và các đơn gần đây. Từ đây quản trị viên khóa hoặc mở khóa tài khoản, đổi vai trò (kể cả cấp vai trò người kiểm duyệt), và cộng hoặc trừ Xu. Việc cộng trừ Xu bắt buộc có lý do, người dùng nhận thông báo kèm lý do đó, và hệ thống không cho trừ quá số dư.'),
+('fig', 'ad_vc', SA('10-voucher'), 'Danh mục voucher đổi bằng AntXu', False, '', 0.55),
+('p', 'Danh mục voucher đổi bằng Xu ({F:ad_vc}) được lưu trong cơ sở dữ liệu thay vì cố định trong mã, nên quản trị viên tạo, sửa giá đổi hoặc tắt voucher mà không cần sửa chương trình. Mỗi voucher có mã tự đặt (từ 2 đến 30 ký tự, giữ đúng hoa thường), mức ưu đãi, đơn tối thiểu và giá đổi bằng Xu; mọi ô đều bắt buộc. Voucher bị tắt không đổi mới được, còn voucher người dùng đã đổi vẫn dùng bình thường. Khi chưa có dòng nào trong cơ sở dữ liệu, hệ thống dùng bộ ba voucher mặc định nhìn thấy ở hình.'),
+
+('h3', '4.9.7. Hỗ trợ, thông báo hệ thống và cài đặt'),
+('p', 'Hộp thư hỗ trợ nhận phiếu người dùng gửi từ trang Trợ giúp. Mỗi phiếu có mã dạng <c>HT-####</c>, một người có tối đa 5 phiếu chưa đóng, quản trị viên trả lời hoặc đóng phiếu, người dùng nhận thông báo và xem lại câu trả lời ngay ở trang Trợ giúp. Thông báo hệ thống gửi đến toàn khu hoặc một khu cụ thể, phải qua hộp xác nhận vì không thu hồi được, và được lưu lịch sử.'),
+('fig', 'ad_cd', SA('12-cai-dat'), 'Trang cài đặt và xuất dữ liệu', False, '', 0.62),
+('p', 'Trang cài đặt ({F:ad_cd}) gồm bốn phần. Từ khóa bị cấm: bài hoặc việc có tiêu đề hay mô tả chứa từ này bị từ chối với mã 422 khi đăng hoặc sửa; phép so khớp không phân biệt hoa thường và dấu. Danh sách khu vực và danh mục bài, được công khai ở API <c>/api/meta</c>. Xuất dữ liệu CSV cho người dùng, đơn hàng và báo cáo; tệp có dấu thứ tự byte UTF-8 để Excel đọc đúng tiếng Việt, và các ô bắt đầu bằng ký tự công thức được vô hiệu hóa để tránh chèn công thức độc hại. Mỗi lần xuất cũng được ghi nhật ký.'),
+
+('h3', '4.9.8. Nhật ký thao tác'),
+('fig', 'ad_nk', SA('13-nhat-ky'), 'Nhật ký thao tác của quản trị viên', False, '', 0.75),
+('p', 'Mọi thao tác thay đổi của quản trị viên đều được ghi vào nhật ký ({F:ad_nk}) với người thực hiện và vai trò, hành động, đối tượng, thời điểm và ghi chú lý do. Nhật ký chỉ cho xem, có lọc theo nhóm thao tác, không có chức năng sửa hay xóa, nên có thể dùng để truy vết khi có khiếu nại về quyết định của quản trị.'),
+
+('h3', '4.9.9. Kiểm thử và hạn chế'),
+('p', 'Phần API quản trị có nhóm bài thử riêng trong tệp <c>admin-ops.test.js</c> với 12 bài, kiểm các nội dung ở {T:akt}. Các bài này, cùng toàn bộ bộ bài thử của server, đều đạt khi chạy ngày 15/11/2026. Ngoài ra nhóm đã bấm thử trên trình duyệt thật bằng Microsoft Edge điều khiển qua giao thức CDP, qua 11 bước đều đạt: duyệt và từ chối hồ sơ (bắt buộc lý do), trả lời phiếu hỗ trợ, phân xử hoàn tiền một phần, gửi thông báo qua hộp xác nhận, tạo voucher, lưu từ khóa cấm và kiểm tra nhật ký có đủ dấu vết.'),
+('tbl', 'akt', 'Nội dung các bài thử API quản trị', [3300, 6341],
+ ['Nhóm', 'Nội dung kiểm'],
+ [['Phân quyền', 'Người dùng thường bị chặn, người kiểm duyệt không khóa được tài khoản hay sửa voucher, quản trị viên không tự khóa mình'],
+  ['Tổng quan', 'Số liệu bảng điều khiển khớp dữ liệu, lọc theo số ngày'],
+  ['Đơn và phân xử', 'Hoàn tiền một phần hoặc toàn phần, thu lại Xu khi hoàn hết, hủy đơn trả kho và voucher'],
+  ['Báo cáo, hỗ trợ', 'Báo cáo trả kèm bối cảnh, phiếu hỗ trợ được trả lời và thông báo cho người dùng'],
+  ['Voucher, Xu', 'Tạo, sửa, tắt voucher; cộng trừ Xu có lý do, không trừ quá số dư'],
+  ['Thông báo, cài đặt, CSV', 'Gửi thông báo toàn khu, từ khóa cấm chặn bài khi đăng, xuất CSV đúng định dạng và ghi nhật ký']],
+ 'left'),
+('p', 'Khu quản trị còn một số hạn chế. Khu vực và danh mục sửa ở trang cài đặt đã được công khai ở <c>/api/meta</c> nhưng các màn hình Mua và Bán chưa đọc từ đó, mà vẫn dùng danh sách cố định trong mã. Từ khóa cấm mới chỉ chặn khi đăng hoặc sửa, chưa tự gắn cờ các bài đã đăng từ trước. Dấu chấm số việc trên thanh bên cập nhật mỗi 60 giây chứ chưa đẩy tức thời. Quyền chỉ có hai vai trò, chưa chia nhỏ hơn. Giao diện tối của khu này cũng chưa được kiểm trên điện thoại.'),
 
 ('h2', '4.10. Đối chiếu với tiêu chí đánh giá'),
 ('p', '{T:dc} đối chiếu kết quả thực tế với từng dòng của Bảng 1.2.'),

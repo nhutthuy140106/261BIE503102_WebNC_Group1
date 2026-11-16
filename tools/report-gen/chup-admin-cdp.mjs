@@ -1,0 +1,55 @@
+// Chụp ảnh khu Quản trị (bản tối) bằng Edge headless + CDP. Cần: server cổng 3000, ng serve cổng 4200, dữ liệu mẫu admin đã seed.
+//   node chup-admin-cdp.mjs <thư mục ra> <mật khẩu admin>
+// Đăng nhập thật ở /admin/login?mock=0 rồi bấm link trong thanh bên (tải lại cả trang sẽ mất phiên FE).
+import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+const OUT = process.argv[2]; const PASS = process.argv[3];
+const prof = OUT + '/cdp-profile'; fs.mkdirSync(OUT, { recursive: true });
+const ps = spawn(EDGE, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--remote-debugging-port=9334', '--user-data-dir=' + prof, '--window-size=1440,900', 'about:blank'], { stdio: 'ignore' });
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let targets; for (let i = 0; i < 40; i++) { try { targets = await (await fetch('http://127.0.0.1:9334/json')).json(); if (targets.find(t => t.type === 'page')) break; } catch { } await sleep(500); }
+const page = targets.find(t => t.type === 'page');
+const ws = new WebSocket(page.webSocketDebuggerUrl); await new Promise(r => ws.onopen = r);
+let id = 0; const pend = new Map();
+ws.onmessage = e => { const m = JSON.parse(e.data); if (m.id && pend.has(m.id)) { pend.get(m.id)(m); pend.delete(m.id); } };
+const send = (method, params = {}) => new Promise(r => { const i = ++id; pend.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
+const ev = async (expression) => (await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result?.result?.value;
+const shot = async (name, h = 900) => {
+  await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: h, deviceScaleFactor: 1, mobile: false });
+  await sleep(1200);
+  const r = await send('Page.captureScreenshot', { format: 'png' });
+  fs.writeFileSync(OUT + '/' + name + '.png', Buffer.from(r.result.data, 'base64')); console.log('ok', name);
+};
+// bấm link trong thanh bên theo đường dẫn
+const go = async (href, wait = 3500) => { await ev(`(document.querySelector('.side a[href="${href}"]')||{click(){}}).click()`); await sleep(wait); };
+// nhập vào ô theo cách Angular nhận (gán value + bắn input)
+const type = (sel, v) => ev(`(()=>{const e=document.querySelector(${JSON.stringify(sel)});e.value=${JSON.stringify(v)};e.dispatchEvent(new Event('input',{bubbles:true}));return 1})()`);
+
+await send('Page.enable'); await send('Runtime.enable');
+await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+const base = 'http://localhost:4200';
+await send('Page.navigate', { url: base + '/admin/login?mock=0' }); await sleep(5000);
+await shot('00-dang-nhap');
+await type('#alP', '0900000099'); await type('#alW', PASS);
+await ev(`document.querySelector('button.go').click()`); await sleep(5000);
+console.log('url sau đăng nhập:', await ev('location.pathname'));
+
+await shot('01-tong-quan', 1000);
+await go('/admin/verifications'); await shot('02-xac-minh', 1000);
+await go('/admin/reports'); await shot('03-bao-cao', 1100);
+// mở "Xem bối cảnh" của báo cáo đầu tiên
+await ev(`(document.querySelector('.ctxbtn')||{click(){}}).click()`); await sleep(2000); await shot('03b-bao-cao-boi-canh', 1100);
+await go('/admin/orders'); await shot('04-don', 1000);
+await ev(`(document.querySelector('tbody tr.click, tbody tr a')||{click(){}}).click()`); await sleep(3500); await shot('05-chi-tiet-don', 1300);
+await go('/admin/users'); await shot('06-nguoi-dung', 1000);
+await type('input[type=search]', 'Cô Lan'); await sleep(2500);
+await ev(`(document.querySelector('tbody tr a')||{click(){}}).click()`); await sleep(3500); await shot('07-ho-so-nguoi-dung', 1300);
+await go('/admin/posts'); await shot('08-bai-dang', 1000);
+await go('/admin/support'); await shot('09-ho-tro', 1000);
+await go('/admin/vouchers'); await shot('10-voucher', 1000);
+await go('/admin/announcements'); await shot('11-thong-bao', 1000);
+await go('/admin/settings'); await shot('12-cai-dat', 1100);
+await go('/admin/audit'); await shot('13-nhat-ky', 1000);
+ws.close(); ps.kill();
+process.exit(0);
