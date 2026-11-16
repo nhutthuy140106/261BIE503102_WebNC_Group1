@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AntGo — Style guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@500&family=Mona+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Style guide AntGo. Mọi giá trị lấy từ client/src/styles.css (phía Mua/Bán) và admin-layout.css (khu Quản trị).
+   Hai bảng #client và #admin được chụp thành ảnh cho báo cáo (tools/report-gen/chup-style-guide.mjs). */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Mona Sans', system-ui, sans-serif; background: #ece9e6; color: #22304a; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; padding: 28px 0; }
+.board { width: 1280px; margin: 0 auto 36px; border-radius: 20px; padding: 40px 44px 44px; }
+.board h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; }
+.board .sub { margin: 4px 0 30px; font-size: 14px; }
+.grid { display: grid; gap: 22px; }
+.sec { margin-top: 30px; }
+.sec > h2 { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.lbl { font-size: 11.5px; margin-top: 6px; }
+code, .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; }
+
+/* ====== BẢNG KHÁCH (phía Mua / Bán) ====== */
+#client { background: #fff; border: 1px solid #f0e2dc; color: #22304a; }
+#client .sub, #client .lbl { color: #6a6879; }
+#client .sec > h2 { color: #d85a1c; border-color: #f0e2dc; }
+.logos { display: grid; grid-template-columns: 1.1fr 1fr 1fr 2fr; gap: 16px; align-items: stretch; }
+.logobox { border-radius: 14px; display: grid; place-items: center; padding: 22px; min-height: 120px; }
+.logobox img { height: 44px; width: auto; }
+.logobox.mascot img { height: 84px; }
+.fonts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.font { border: 1px solid #f0e2dc; border-radius: 14px; padding: 18px 20px; }
+.font .big { font-size: 40px; line-height: 1.1; margin: 6px 0 8px; }
+.font small { color: #6a6879; }
+.swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.sw { border: 1px solid #f0e2dc; border-radius: 14px; overflow: hidden; }
+.sw i { display: block; height: 62px; }
+.sw div { padding: 8px 12px 10px; font-size: 12.5px; }
+.sw b { display: block; font-size: 13px; }
+.sw .mono { color: #6a6879; }
+/* nút */
+.btn { display: inline-flex; align-items: center; gap: 8px; font: inherit; font-weight: 600; padding: 10px 16px; border: 0; border-radius: 10px; background: #d85a1c; color: #fff; cursor: default; }
+.btn.hover { background: #c24f16; }
+.btn.ghost { background: transparent; color: #22304a; border: 1px solid #f0e2dc; }
+.btn.ghost.hover { background: #fbf4f1; }
+.btn.dis { opacity: .5; }
+.btn.dark { background: #22304a; }
+.btn.danger { background: #fff; color: #c0392b; border: 1px solid #f0c9c4; }
+.btn svg { width: 18px; height: 18px; fill: currentColor; }
+.field { display: grid; gap: 4px; width: 230px; }
+.field label { font-weight: 600; }
+.field input { font: inherit; padding: 10px 12px; border: 1px solid #f0e2dc; border-radius: 10px; background: #fff; color: #22304a; }
+.field input.focus { border-color: #d85a1c; box-shadow: 0 0 0 3px #fde8dd; }
+.field input.bad { border-color: #c0392b; }
+.field .error { color: #c0392b; font-size: 13px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; border: 1px solid #f0e2dc; background: #fff; }
+.chip.on { background: #22304a; color: #fff; border-color: #22304a; }
+.chip.soft { background: #fde8dd; color: #b4441c; border-color: #fde8dd; }
+.stat { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; }
+.stat i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.seg { display: inline-flex; padding: 3px; border: 1px solid #f0e2dc; border-radius: 999px; }
+.seg span { padding: 6px 18px; border-radius: 999px; font-weight: 600; font-size: 13px; color: #6a6879; }
+.seg span.on { background: #fbf4f1; color: #22304a; }
+.pcard { width: 250px; border: 1px solid #f0e2dc; border-radius: 12px; overflow: hidden; background: #fff; }
+.pcard .ph { height: 140px; background: center/cover url('https://images.unsplash.com/photo-1572448910681-3341d74893d2?w=500&h=375&fit=crop&q=70'); position: relative; }
+.pcard .ph b { position: absolute; left: 10px; top: 10px; background: #fff; color: #d85a1c; font-size: 11px; letter-spacing: .04em; padding: 3px 8px; border-radius: 6px; }
+.pcard .bd { padding: 12px 14px 14px; }
+.pcard .bd p { font-weight: 600; }
+.pcard .bd .m { color: #6a6879; font-size: 12.5px; margin: 2px 0 8px; }
+.pcard .bd .pr { color: #d85a1c; font-weight: 700; }
+.jcard { width: 250px; border-radius: 12px; background: #fbf4f1; border: 1px solid #f0e2dc; padding: 14px; }
+.jcard .m { color: #6a6879; font-size: 12.5px; }
+.jcard .pay { font-size: 22px; font-weight: 700; margin: 8px 0 4px; }
+.icons { display: flex; gap: 14px; }
+.icons svg { width: 26px; height: 26px; fill: #22304a; }
+.rules { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.rule { border: 1px solid #f0e2dc; border-radius: 14px; padding: 16px 18px; font-size: 13px; }
+.rule b { display: block; font-size: 22px; letter-spacing: -.01em; margin-bottom: 2px; }
+.rule span { color: #6a6879; }
+
+/* ====== BẢNG ADMIN (giao diện tối) ====== */
+#admin { background: #0B1220; color: #E9EEF7; border: 1px solid #23304B; background-image: radial-gradient(760px 420px at 88% -6%, rgba(240,121,74,.14), transparent 70%), radial-gradient(600px 400px at 10% 110%, rgba(127,178,255,.08), transparent 70%); }
+#admin .sub, #admin .lbl { color: #8C9AB5; }
+#admin .sec > h2 { color: #FF9A72; border-color: #23304B; }
+#admin .sw { border-color: #2E3E5F; }
+#admin .sw div { background: #121B2E; }
+#admin .sw .mono { color: #8C9AB5; }
+#admin .font { border-color: #2E3E5F; background: #121B2E; }
+#admin .font small { color: #8C9AB5; }
+.ab { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 15px; border: 1px solid #2E3E5F; border-radius: 10px; background: #17223A; color: #E9EEF7; font-weight: 600; }
+.ab.main { background: linear-gradient(180deg, #F58A5B, #E8662F); border-color: rgba(255,190,150,.7); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 0 22px rgba(232,102,47,.4); }
+.ab.pill { height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.13); }
+.ab.pill.danger { background: rgba(245,133,133,.1); border-color: transparent; color: #FF9E9E; }
+.ab.dis { opacity: .5; }
+.ainp { width: 290px; white-space: nowrap; height: 40px; padding: 0 12px; display: flex; align-items: center; border: 1px solid #2E3E5F; border-radius: 12px; background: #0E1626; color: #8C9AB5; }
+.ainp.focus { border-color: #E8662F; color: #E9EEF7; box-shadow: 0 0 0 3px rgba(240,121,74,.15); }
+.apill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.apill.ok { background: rgba(91,209,160,.13); color: #5BD1A0; }
+.apill.warn { background: rgba(245,176,76,.13); color: #F5B04C; }
+.apill.bad { background: rgba(242,107,107,.14); color: #F58585; }
+.apill.info { background: rgba(127,178,255,.14); color: #7FB2FF; }
+.apanel { border: 1px solid #23304B; border-radius: 16px; padding: 16px 18px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.014)), rgba(15,24,43,.56); width: 300px; }
+.apanel h3 { font-size: 15px; margin-bottom: 8px; }
+.atbl { border: 1px solid #23304B; border-radius: 16px; overflow: hidden; width: 520px; font-size: 13.5px; }
+.atbl .h { display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 10px 14px; background: #17223A; color: #8C9AB5; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.atbl .r { display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 11px 14px; border-top: 1px solid #23304B; align-items: center; }
+.anav { width: 220px; border-radius: 14px; background: #080D18; padding: 12px; font-size: 13.5px; color: #9AA8C4; }
+.anav div { padding: 8px 12px; border-radius: 10px; display: flex; justify-content: space-between; }
+.anav div.on { background: #121B2E; color: #fff; border: 1px solid rgba(240,121,74,.4); font-weight: 600; }
+.anav em { font-style: normal; background: #E8662F; color: #fff; border-radius: 999px; min-width: 20px; text-align: center; font-size: 11px; font-weight: 700; line-height: 20px; }
+</style>
+</head>
+<body>
+
+<!-- ================= CLIENT ================= -->
+<section class="board" id="client">
+  <h1>AntGo — Style guide (phía Mua và Bán)</h1>
+  <p class="sub">Một màu nhấn cam con kiến trên nền trắng ấm; chữ xanh đen; mảng phụ kem ngả hồng. Cam chỉ dành cho hành động chính và giá bài quảng bá.</p>
+
+  <div class="sec">
+    <h2>1. Logo và linh vật</h2>
+    <div class="logos">
+      <div class="logobox" style="background:#fff;border:1px solid #f0e2dc"><img src="../client/public/assets/clean/logo-sm.png" alt="AntGo"></div>
+      <div class="logobox" style="background:#22304a"><img src="../client/public/assets/clean/logo-sm.png" alt="AntGo"></div>
+      <div class="logobox mascot" style="background:#fbf4f1;border:1px solid #f0e2dc"><img src="../client/public/assets/clean/ant-head.png" alt="Kiến AntGo"></div>
+      <div style="font-size:13px;color:#6a6879;align-self:center">Logo chữ AntGo màu cam dùng trên nền sáng; trên nền xanh đen (footer, khu Quản trị) giữ nguyên màu. Không kéo giãn, không đổi màu. Chừa khoảng trống quanh logo bằng chiều cao chữ. Linh vật là con kiến cam, xuất hiện ở trang giới thiệu, trạng thái trống và nút trợ lý.</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>2. Phông chữ</h2>
+    <div class="fonts">
+      <div class="font"><small>Tiêu đề thương hiệu</small><div class="big" style="font-family:'Bricolage Grotesque';font-weight:800">Một khu, một nhà.</div><small>Bricolage Grotesque 700–800 · trang giới thiệu, chữ AntGo ở trang chủ</small></div>
+      <div class="font"><small>Giao diện và nội dung</small><div class="big" style="font-weight:600">Đặt món ngay</div><small>Mona Sans 400 / 500 / 600 / 700 · cỡ chữ gốc 14px, dòng 1.5, tiêu đề khối 22px</small></div>
+      <div class="font"><small>Mã đơn, số hiệu</small><div class="big mono" style="font-size:30px;margin-top:12px">AG-01183</div><small>JetBrains Mono 500 · mã đơn, mã voucher, ID</small></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>3. Hệ màu</h2>
+    <div class="swatches">
+      <div class="sw"><i style="background:#22304a"></i><div><b>Ink — xanh đen</b><span class="mono">#22304A</span><br>chữ, thanh bước đã qua</div></div>
+      <div class="sw"><i style="background:#d85a1c"></i><div><b>Accent — cam kiến</b><span class="mono">#D85A1C</span><br>nút chính, giá quảng bá</div></div>
+      <div class="sw"><i style="background:#fde8dd"></i><div><b>Accent soft</b><span class="mono">#FDE8DD</span><br>viền focus, nhãn nhẹ</div></div>
+      <div class="sw"><i style="background:#fbf4f1"></i><div><b>Soft — kem hồng</b><span class="mono">#FBF4F1</span><br>mảng phụ, thẻ việc làm</div></div>
+      <div class="sw"><i style="background:#f0e2dc"></i><div><b>Border</b><span class="mono">#F0E2DC</span><br>viền thẻ, đường kẻ</div></div>
+      <div class="sw"><i style="background:#6a6879"></i><div><b>Smoke</b><span class="mono">#6A6879</span><br>chữ phụ</div></div>
+      <div class="sw"><i style="background:#a3a0b0"></i><div><b>Fog</b><span class="mono">#A3A0B0</span><br>chữ mờ, gợi ý</div></div>
+      <div class="sw"><i style="background:#e2a33b"></i><div><b>Chờ</b><span class="mono">#E2A33B</span><br>trạng thái chờ xác nhận</div></div>
+      <div class="sw"><i style="background:#c0392b"></i><div><b>Lỗi</b><span class="mono">#C0392B</span><br>báo lỗi, nút nguy hiểm</div></div>
+      <div class="sw"><i style="background:#1e2638"></i><div><b>Nền footer</b><span class="mono">#1E2638</span><br>chân trang xanh đen</div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>4. Thành phần</h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:26px 40px">
+      <div>
+        <div class="row">
+          <div><span class="btn"><svg viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>Đặt đơn</span><div class="lbl">Chính · bình thường</div></div>
+          <div><span class="btn hover">Đặt đơn</span><div class="lbl">Chính · rê chuột</div></div>
+          <div><span class="btn dis">Đặt đơn</span><div class="lbl">Vô hiệu</div></div>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <div><span class="btn ghost">Rút đề nghị</span><div class="lbl">Phụ (viền)</div></div>
+          <div><span class="btn ghost hover">Rút đề nghị</span><div class="lbl">Phụ · rê chuột</div></div>
+          <div><span class="btn danger">Hủy đơn</span><div class="lbl">Nguy hiểm</div></div>
+          <div><span class="btn dark">Tiếp tục</span><div class="lbl">Xanh đen</div></div>
+        </div>
+        <div class="row" style="margin-top:22px;align-items:flex-start">
+          <div class="field"><label>Số điện thoại</label><input value="0901234567"><div class="lbl">Bình thường</div></div>
+          <div class="field"><label>Số điện thoại</label><input class="focus" value="0901234"><div class="lbl">Đang nhập (viền cam)</div></div>
+          <div class="field"><label>Mật khẩu</label><input class="bad" value="123"><span class="error">Tối thiểu 8 ký tự</span></div>
+        </div>
+        <div class="row" style="margin-top:22px">
+          <span class="seg"><span class="on">Mua</span><span>Bán</span></span>
+          <span class="chip on">Đồ ăn</span><span class="chip">Đồ dùng</span><span class="chip">Dịch vụ</span><span class="chip soft">Giờ vàng</span>
+        </div>
+        <div class="row" style="margin-top:18px;gap:22px">
+          <span class="stat"><i style="background:#e2a33b"></i>Chờ xác nhận</span>
+          <span class="stat"><i style="background:#d85a1c"></i>Đang làm</span>
+          <span class="stat"><i style="background:#22304a"></i>Hoàn thành</span>
+          <span class="stat"><i style="background:#c0392b"></i>Đã hủy</span>
+        </div>
+        <div style="margin-top:22px" class="icons">
+          <svg viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>
+          <svg viewBox="0 0 256 256"><path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"/></svg>
+          <svg viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
+          <svg viewBox="0 0 256 256"><path d="M216,48H40A16,16,0,0,0,24,64V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V64A16,16,0,0,0,216,48ZM92,96a12,12,0,1,1-12,12A12,12,0,0,1,92,96ZM216,192H40V160.69l40-40a8,8,0,0,1,11.31,0L144,172.69l25.37-25.38a8,8,0,0,1,11.32,0L216,182.62Z"/></svg>
+          <span class="lbl" style="align-self:center;margin:0 0 0 6px">Bộ icon Phosphor (bản đặc), 18px trong nút, 26px khi đứng riêng</span>
+        </div>
+      </div>
+      <div class="row" style="align-items:flex-start;gap:18px">
+        <div class="pcard"><div class="ph"><b>QUẢNG BÁ</b></div><div class="bd"><p>Salad ức gà</p><div class="m">Tiệm Sạch Thơm · 0,4 km</div><span class="pr">45.000đ</span></div></div>
+        <div class="jcard"><div class="m">Chị Hoa · 2 giờ trước</div><p style="font-weight:600;margin-top:4px">Giúp chuyển đồ lên tầng 5</p><div class="pay">150.000đ</div><div class="m">Chiều nay, 15:00 · Đang mở · 2 đề nghị</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>5. Bố cục và hình khối</h2>
+    <div class="rules">
+      <div class="rule"><b>1280px</b><span>Chiều rộng nội dung tối đa, lề 40px (24px dưới 1240px, 16px trên điện thoại)</span></div>
+      <div class="rule"><b>4 cột</b><span>Lưới bài và việc làm, khoảng cách 20px; 2 cột dưới 1000px, 1 cột dưới 560px</span></div>
+      <div class="rule"><b>12 / 10px</b><span>Bo góc thẻ 12px, nút và ô nhập 10px, viên bấm bo tròn hoàn toàn</span></div>
+      <div class="rule"><b>2 kiểu thẻ</b><span>Thẻ bài có ảnh và thẻ việc làm nền kem; mọi khối đều dùng lại hai kiểu này</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ADMIN ================= -->
+<section class="board" id="admin">
+  <h1>AntGo Quản trị — Style guide</h1>
+  <p class="sub">Giao diện tối cho người vận hành: nền xanh đen đậm dần từ màu chữ của AntGo, thẻ kính mờ bo 16px, một ánh sáng cam mờ ở góc, màu nhấn cam con kiến.</p>
+
+  <div class="sec">
+    <h2>1. Phông chữ</h2>
+    <div class="fonts" style="grid-template-columns:repeat(2,1fr)">
+      <div class="font"><small>Giao diện</small><div class="big" style="font-weight:700">Xin chào, Quản trị viên</div><small>Mona Sans 400–700, dùng chung với phía Mua · tiêu đề trang 30px, số liệu lớn 28–32px</small></div>
+      <div class="font"><small>Mã, ID, số căn cước</small><div class="big mono" style="font-size:30px;margin-top:12px">AG-O1004 · HT-0012</div><small>JetBrains Mono 500</small></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>2. Hệ màu (biến --a-*)</h2>
+    <div class="swatches">
+      <div class="sw"><i style="background:#0B1220"></i><div><b>Nền</b><span class="mono">#0B1220</span></div></div>
+      <div class="sw"><i style="background:#121B2E"></i><div><b>Thẻ</b><span class="mono">#121B2E</span></div></div>
+      <div class="sw"><i style="background:#17223A"></i><div><b>Thẻ 2, đầu bảng</b><span class="mono">#17223A</span></div></div>
+      <div class="sw"><i style="background:#0E1626"></i><div><b>Ô nhập</b><span class="mono">#0E1626</span></div></div>
+      <div class="sw"><i style="background:#080D18"></i><div><b>Thanh bên</b><span class="mono">#080D18</span></div></div>
+      <div class="sw"><i style="background:#23304B"></i><div><b>Đường kẻ</b><span class="mono">#23304B</span></div></div>
+      <div class="sw"><i style="background:#E9EEF7"></i><div><b>Chữ chính</b><span class="mono">#E9EEF7</span></div></div>
+      <div class="sw"><i style="background:#8C9AB5"></i><div><b>Chữ phụ</b><span class="mono">#8C9AB5</span></div></div>
+      <div class="sw"><i style="background:linear-gradient(90deg,#E8662F,#F58A5B)"></i><div><b>Nhấn cam</b><span class="mono">#E8662F → #F58A5B</span></div></div>
+      <div class="sw"><i style="background:linear-gradient(90deg,#F5B04C 25%,#5BD1A0 25% 50%,#F58585 50% 75%,#7FB2FF 75%)"></i><div><b>Trạng thái</b><span class="mono">chờ · xong · lỗi · đang chạy</span></div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>3. Thành phần</h2>
+    <div class="grid" style="grid-template-columns:auto 1fr;gap:26px 44px;align-items:start">
+      <div class="anav"><div class="on">Tổng quan</div><div>Xác minh người bán <em>3</em></div><div>Báo cáo vi phạm <em>6</em></div><div>Đơn &amp; tranh chấp <em>2</em></div><div>Voucher &amp; Xu</div><div>Nhật ký thao tác</div></div>
+      <div>
+        <div class="row">
+          <div><span class="ab main">Duyệt hồ sơ</span><div class="lbl">Chính (cam phát sáng)</div></div>
+          <div><span class="ab">Từ chối</span><div class="lbl">Phụ</div></div>
+          <div><span class="ab pill">Sửa</span><div class="lbl">Trong bảng</div></div>
+          <div><span class="ab pill danger">Ẩn bài</span><div class="lbl">Nguy hiểm</div></div>
+          <div><span class="ab main dis">Lưu</span><div class="lbl">Vô hiệu</div></div>
+        </div>
+        <div class="row" style="margin-top:20px;align-items:flex-start">
+          <div><div class="ainp">Tìm theo tên hoặc số điện thoại</div><div class="lbl">Ô nhập</div></div>
+          <div><div class="ainp focus">Cô Lan</div><div class="lbl">Đang nhập</div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="apill ok">Hoạt động</span><span class="apill warn">Chờ duyệt</span><span class="apill bad">Đã khóa</span><span class="apill info">Đang giao</span></div>
+        </div>
+        <div class="row" style="margin-top:22px;align-items:flex-start;gap:22px">
+          <div class="apanel"><h3>Cần xử lý hôm nay</h3><div style="font-size:30px;font-weight:700">6</div><div style="color:#8C9AB5;font-size:13px">Báo cáo vi phạm chưa xử lý</div></div>
+          <div class="atbl"><div class="h"><span>Bài đăng</span><span>Giá</span><span>Trạng thái</span></div><div class="r"><b>Salad ức gà</b><span>45.000đ</span><span class="apill ok" style="width:fit-content">Đang mở</span></div><div class="r"><b>Xe đạp thể thao</b><span>1.800.000đ</span><span class="apill bad" style="width:fit-content">Bị ẩn</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>4. Quy tắc</h2>
+    <div class="rules">
+      <div class="rule"><b>Biến --a-*</b><span>Mọi màu của khu Quản trị là biến CSS ở một chỗ, đổi bảng màu chỉ sửa một nơi</span></div>
+      <div class="rule"><b>16px</b><span>Bo góc thẻ và bảng; nút bo 10px, nút trong bảng bo tròn hoàn toàn</span></div>
+      <div class="rule"><b>Hộp xác nhận</b><span>Mọi thao tác không hoàn tác được (ẩn bài, gửi thông báo) đều qua hộp xác nhận, lý do bắt buộc</span></div>
+      <div class="rule"><b>Một nhấn cam</b><span>Cam chỉ dùng cho nút chính, mục đang chọn và chấm số việc cần xử lý</span></div>
+    </div>
+  </div>
+</section>
+</body>
+</html>
