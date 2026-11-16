@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostBinding, HostListener, Input, forwardRef, inject, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, HostBinding, HostListener, Input, forwardRef, inject, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface AdminOption {
@@ -27,6 +27,13 @@ export class AdminSelect implements ControlValueAccessor {
   @Input() ariaLabel?: string;
   /** Kiểu nằm trong tiêu đề cột bảng: chỉ chữ + mũi tên, đang lọc thì đổi sang màu nhấn */
   @Input() @HostBinding('class.head') head = false;
+
+  /** Danh sách được dời ra khung ngoài cùng của khu admin để bảng/thẻ cha (overflow, backdrop-filter) không cắt được */
+  private menuEl?: HTMLElement;
+  @ViewChild('menu') protected set menuRef(r: ElementRef<HTMLElement> | undefined) {
+    this.menuEl = r?.nativeElement;
+    if (this.menuEl) (this.host.nativeElement.closest('app-admin-layout') ?? document.body).appendChild(this.menuEl);
+  }
 
   protected readonly open = signal(false);
   protected readonly value = signal<unknown>(null);
@@ -71,7 +78,7 @@ export class AdminSelect implements ControlValueAccessor {
     const r = el.getBoundingClientRect();
     // khung cha có backdrop-filter/transform làm "fixed" tính theo chính nó → trừ gốc của khung đó
     let ox = 0, oy = 0;
-    for (let p = el.parentElement; p; p = p.parentElement) {
+    for (let p: HTMLElement | null = el.closest('app-admin-layout') ?? document.body; p; p = p.parentElement) {
       const cs = getComputedStyle(p);
       if ((cs.backdropFilter && cs.backdropFilter !== 'none') || (cs.transform && cs.transform !== 'none') || cs.contain.includes('paint')) {
         const pr = p.getBoundingClientRect(); ox = pr.left; oy = pr.top; break;
@@ -89,6 +96,7 @@ export class AdminSelect implements ControlValueAccessor {
   }
 
   protected close(): void {
+    if (this.menuEl) this.host.nativeElement.appendChild(this.menuEl); // trả về chỗ cũ để Angular gỡ đúng
     this.open.set(false);
     this.onTouched();
   }
@@ -120,6 +128,6 @@ export class AdminSelect implements ControlValueAccessor {
 
   @HostListener('document:click', ['$event'])
   protected outside(e: Event): void {
-    if (this.open() && !this.host.nativeElement.contains(e.target as Node)) this.close();
+    if (this.open() && !this.host.nativeElement.contains(e.target as Node) && !this.menuEl?.contains(e.target as Node)) this.close();
   }
 }

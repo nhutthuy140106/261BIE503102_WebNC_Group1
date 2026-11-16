@@ -23,5 +23,5 @@
 :host(.head) .text.ph { color: inherit; }
 :host(.head) .text:not(.ph) { color: var(--a-accent-ink); }
 :host(.head) .chev { width: 12px; height: 12px; }
-:host(.head) .menu { right: auto; min-width: 190px; text-transform: none; letter-spacing: 0; font-weight: 400; }
-:host(.head) .menu li { font-size: 13.5px; }
+.menu.head { right: auto; min-width: 190px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+.menu.head li { font-size: 13.5px; }

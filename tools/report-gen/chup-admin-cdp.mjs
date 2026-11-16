@@ -43,7 +43,9 @@ console.log('url sau đăng nhập:', await ev('location.pathname'));
 if (process.env.ONLY === 'small') {   // cửa sổ nhỏ: danh sách thả xuống không bị cắt
   await send('Emulation.setDeviceMetricsOverride', { width: 1000, height: 520, deviceScaleFactor: 1, mobile: false });
   await go('/admin/orders'); await sleep(1500);
-  for (const [i, n] of [[0, 's-trangthai'], [2, 's-ngay']]) {
+  await ev(`(document.querySelectorAll('th app-admin-select .trigger')[0]||{click(){}}).click()`); await sleep(500);
+  await ev(`([...document.querySelectorAll('.menu li')].find(l=>l.textContent.includes('Chờ xác nhận'))||{click(){}}).click()`); await sleep(1800);
+  for (const [i, n] of [[1, 's-trangthai'], [2, 's-ngay']]) {
     await ev(`(document.querySelectorAll('th app-admin-select .trigger')[${i}]||{click(){}}).click()`); await sleep(700);
     const r = await send('Page.captureScreenshot', { format: 'png' });
     fs.writeFileSync(OUT + '/' + n + '.png', Buffer.from(r.result.data, 'base64')); console.log('ok', n);
