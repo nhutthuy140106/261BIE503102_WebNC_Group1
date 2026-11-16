@@ -174,13 +174,13 @@ pages.append(admin_page(('a-order', 'Chi tiết đơn và phân xử'), 3, col(
 
 # A5 Người dùng
 pages.append(admin_page(('a-users', 'Người dùng'), 5, col(
-    h('Người dùng', 1), row(field('Tìm theo tên hoặc số điện thoại'), blk('Mọi vai trò ▾', 38), blk('Mọi trạng thái ▾', 38), gap=12, cls='top'),
+    h('Người dùng', 1), row('<div style="flex:1">' + field('Tìm theo tên hoặc số điện thoại') + '</div>', blk('Mọi vai trò ▾', 38, '', 'flex:none;width:170px;margin-top:19px'), blk('Mọi trạng thái ▾', 38, '', 'flex:none;width:170px;margin-top:19px'), gap=12, cls='top'),
     table(['Người dùng', 'Số điện thoại', 'Block', 'Vai trò', 'Trạng thái', 'Ngày tạo', ''], 8, [2.4, 1.4, .8, 1.2, 1.2, 1.2, 1.6], True),
-    row(blk('27 người dùng · Trang 1/4', 14, 'bar s w40'), btn('Trước'), btn('Sau'), cls='end'), gap=16)))
+    row('<span class="mut">27 người dùng · Trang 1/4</span>', btn('Trước'), btn('Sau'), gap=10, cls='end'), gap=16)))
 
 # A6 Hồ sơ người dùng
 pages.append(admin_page(('a-userdetail', 'Hồ sơ người dùng'), 5, col(
-    blk('← Tất cả người dùng', 14, 'bar s w40'), row(row(img('', 64, 64), col(h('Tên người dùng', 1), blk('SĐT · khu · vai trò · trạng thái', 12, 'bar s w60'))), btn('Khóa tài khoản'), cls='between'),
+    blk('← Tất cả người dùng', 14, 'bar s w40'), row(img('', 64, 64), col(h('Tên người dùng', 1), blk('SĐT · khu · vai trò · trạng thái', 16, 'bar s w60')), btn('Khóa tài khoản'), gap=16, cls='center'),
     grid(6, [stat('đơn đã đặt') for _ in range(6)], gap=10),
     row(col('<div class="box">' + h('Đơn gần đây', 3) + table(['Đơn', 'Vai trò', 'Tiền', 'Trạng thái'], 4, [3, 1, 1.4, 1.4]) + '</div>', '<div class="box">' + h('Sổ Xu', 3) + lines(3) + '</div>', gap=14),
         col('<div class="box">' + h('Thông tin', 3) + lines(4) + '</div>', '<div class="box">' + h('Vai trò', 3) + blk('Chọn vai trò ▾', 36) + btn('Lưu vai trò') + '</div>', '<div class="box">' + h('Cộng / trừ Xu', 3) + field('Số Xu (âm = trừ)') + field('Lý do', '', True) + btn('Cập nhật Xu', True) + '</div>', gap=14), gap=18, cls='top'), gap=16)))
@@ -219,7 +219,7 @@ body { font-family: 'Mona Sans', system-ui, sans-serif; background: #d9d9d9; col
 .ico { width: 22px; height: 22px; border: 1.5px solid #888; border-radius: 4px; display: inline-block; } .av { width: 32px; height: 32px; border-radius: 50%; background: #bbb; display: inline-block; }
 .ftr { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; padding: 36px 40px; background: #cfcfcf; border-top: 1px solid #8a8a8a; }
 .fc { display: grid; gap: 10px; align-content: start; } .fc b { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #555; } .fc .b { display: block; height: 10px; background: #a8a8a8; border-radius: 2px; width: 70%; }
-.row { display: flex; align-items: flex-start; } .row.top { align-items: flex-start; } .row.between { justify-content: space-between; align-items: center; } .row.end { justify-content: flex-end; } .row.bottom { align-items: flex-end; }
+.row { display: flex; align-items: flex-start; } .row.top { align-items: flex-start; } .row.between { justify-content: space-between; align-items: center; } .row.end { justify-content: flex-end; align-items: center; } .row.center { align-items: center; } .row > .img[style*='width'] { flex: none; } .mut { color: #666; font-size: 12.5px; margin-right: 6px; } .row.bottom { align-items: flex-end; }
 .row > .col { flex: 1; min-width: 0; } .col { display: flex; flex-direction: column; min-width: 0; }
 .row > .blk, .row > .img, .row > .fld { flex: 1; }
 .row > .blk.chip, .row > .blk.bar { flex: none; }
