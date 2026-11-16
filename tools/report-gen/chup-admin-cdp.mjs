@@ -40,6 +40,17 @@ await shot('00-dang-nhap');
 await ev(`document.querySelector('button.go').click()`); await sleep(5000);
 console.log('url sau đăng nhập:', await ev('location.pathname'));
 
+if (process.env.ONLY === 'small') {   // cửa sổ nhỏ: danh sách thả xuống không bị cắt
+  await send('Emulation.setDeviceMetricsOverride', { width: 1000, height: 520, deviceScaleFactor: 1, mobile: false });
+  await go('/admin/orders'); await sleep(1500);
+  for (const [i, n] of [[0, 's-trangthai'], [2, 's-ngay']]) {
+    await ev(`(document.querySelectorAll('th app-admin-select .trigger')[${i}]||{click(){}}).click()`); await sleep(700);
+    const r = await send('Page.captureScreenshot', { format: 'png' });
+    fs.writeFileSync(OUT + '/' + n + '.png', Buffer.from(r.result.data, 'base64')); console.log('ok', n);
+    await ev(`document.body.click()`); await sleep(300);
+  }
+  ws.close(); ps.kill(); process.exit(0);
+}
 if (process.env.ONLY === 'reports') {   // chỉ chụp trang Báo cáo (kiểm bố cục thẻ)
   await go('/admin/reports'); await shot('r-moi', 1300);
   await ev(`([...document.querySelectorAll('.tabs button')].find(b=>b.textContent.includes('Đang xem xét'))||{click(){}}).click()`); await sleep(1200);

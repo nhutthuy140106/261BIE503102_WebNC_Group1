@@ -32,6 +32,8 @@ export class AdminSelect implements ControlValueAccessor {
   protected readonly value = signal<unknown>(null);
   protected readonly active = signal(-1);
   protected disabled = false;
+  /** Vị trí danh sách (position: fixed) để không bị bảng/khung cha cắt mất khi cửa sổ nhỏ */
+  protected pos: Record<string, string> = {};
 
   private onChange: (v: unknown) => void = () => {};
   private onTouched: () => void = () => {};
@@ -58,8 +60,32 @@ export class AdminSelect implements ControlValueAccessor {
   protected toggle(): void {
     if (this.disabled) return;
     if (this.open()) return this.close();
+    this.place();
     this.open.set(true);
     this.active.set(Math.max(0, this.options.findIndex((o) => o.value === this.value())));
+  }
+
+  /** Tính chỗ đặt danh sách theo khung nhìn: mở xuống nếu đủ chỗ, không thì mở lên; kẹp trong mép phải. */
+  private place(): void {
+    const el = this.host.nativeElement;
+    const r = el.getBoundingClientRect();
+    // khung cha có backdrop-filter/transform làm "fixed" tính theo chính nó → trừ gốc của khung đó
+    let ox = 0, oy = 0;
+    for (let p = el.parentElement; p; p = p.parentElement) {
+      const cs = getComputedStyle(p);
+      if ((cs.backdropFilter && cs.backdropFilter !== 'none') || (cs.transform && cs.transform !== 'none') || cs.contain.includes('paint')) {
+        const pr = p.getBoundingClientRect(); ox = pr.left; oy = pr.top; break;
+      }
+    }
+    const vw = window.innerWidth, vh = window.innerHeight, want = Math.min(280, this.options.length * 38 + 14);
+    const below = vh - r.bottom - 12, above = r.top - 12;
+    const down = below >= want || below >= above;
+    const maxH = Math.max(120, Math.min(280, down ? below : above));
+    const w = Math.max(this.head ? 190 : r.width, 0);
+    const left = Math.max(8, Math.min(r.left, vw - w - 8));
+    const s: Record<string, string> = { position: 'fixed', left: left - ox + 'px', right: 'auto', minWidth: w + 'px', maxHeight: maxH + 'px' };
+    s['top'] = (down ? r.bottom + 6 : r.top - 6 - Math.min(want, maxH)) - oy + 'px';
+    this.pos = s;
   }
 
   protected close(): void {
@@ -88,6 +114,9 @@ export class AdminSelect implements ControlValueAccessor {
     else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const o = this.options[this.active()]; if (o) this.choose(o); }
     else if (e.key === 'Escape' || e.key === 'Tab') this.close();
   }
+
+  @HostListener('window:resize') protected onResize(): void { if (this.open()) this.place(); }
+  @HostListener('window:scroll') protected onScroll(): void { if (this.open()) this.place(); }
 
   @HostListener('document:click', ['$event'])
   protected outside(e: Event): void {

@@ -4,7 +4,7 @@
   <svg class="chev" viewBox="0 0 256 256" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z" /></svg>
 </button>
 @if (open()) {
-  <ul class="menu" role="listbox">
+  <ul class="menu" role="listbox" [style]="pos">
     @for (o of options; track $index; let i = $index) {
       <li role="option" [class.sel]="o.value === value()" [class.act]="i === active()" [attr.aria-selected]="o.value === value()" (click)="choose(o)" (mouseenter)="active.set(i)">
         <span>{{ o.label }}</span>
