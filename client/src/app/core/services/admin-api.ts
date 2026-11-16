@@ -89,7 +89,7 @@ export class AdminApi {
   }
 
   // đơn & tranh chấp
-  orders(f: { state?: string; issue?: string; q?: string; page: number }): Observable<ApiList<OrderRow>> {
+  orders(f: { state?: string; issue?: string; days?: string; q?: string; page: number }): Observable<ApiList<OrderRow>> {
     return this.guard(() => this.api.getList<OrderRow>('/admin/orders', q({ ...f, limit: 8 })));
   }
   order(id: string, chat = false): Observable<OrderDetail> {

@@ -52,7 +52,7 @@ router.get('/dashboard', query(z.object({ days: z.coerce.number().int().min(7).m
 
 router.get('/orders', query(z.object({
   state: z.enum(['waiting', 'confirmed', 'picked', 'pricing', 'preparing', 'delivering', 'ready', 'done', 'cancelled', 'declined']).optional(),
-  issue: z.enum(['open', 'any']).optional(), q: z.string().trim().max(30).optional(), ...paging,
+  issue: z.enum(['open', 'any', 'cancel']).optional(), days: z.coerce.number().int().min(1).max(365).optional(), q: z.string().trim().max(30).optional(), ...paging,
 })), list(service.listOrders));
 router.get('/orders/:id', ids('id'), query(z.object({ chat: z.enum(['0', '1']).optional() })), one((req) => service.getOrder(req.user, req.params.id, { chat: req.valid.query.chat === '1' })));
 router.post('/orders/:id/issue', ids('id'), body(z.object({

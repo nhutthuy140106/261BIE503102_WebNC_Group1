@@ -46,8 +46,18 @@ if (process.env.ONLY === 'reports') {   // chỉ chụp trang Báo cáo (kiểm 
   await ev(`(document.querySelector('.ctxbtn')||{click(){}}).click()`); await sleep(1800); await shot('r-dang-xem-xet', 1500);
   ws.close(); ps.kill(); process.exit(0);
 }
+if (process.env.ONLY === 'debug') {
+  await go('/admin/orders'); await sleep(2500);
+  console.log(await ev(`(()=>{const ths=[...document.querySelectorAll('thead th')];const out=[];ths.forEach((t,i)=>{ths.forEach(o=>o.style.display=(o===t?'table-cell':'none'));out.push(Math.round(document.querySelector('thead tr').getBoundingClientRect().height))});ths.forEach(o=>o.style.display='');return JSON.stringify(out)+' now='+Math.round(document.querySelector('thead tr').getBoundingClientRect().height)})()`));
+  ws.close(); ps.kill(); process.exit(0);
+}
 if (process.env.ONLY === 'tables') {   // kiểm cột bảng cố định khi lật trang
   await go('/admin/orders'); await shot('t-don-1', 1000);
+  await ev(`(document.querySelectorAll('th app-admin-select .trigger')[1]||{click(){}}).click()`); await sleep(800); await shot('t-don-menu', 1000);
+  await ev(`([...document.querySelectorAll('th app-admin-select .menu li')].find(l=>l.textContent.includes('Đang báo vấn đề'))||{click(){}}).click()`); await sleep(1800); await shot('t-don-loc', 1000);
+  await ev(`(document.querySelectorAll('th app-admin-select .trigger')[2]||{click(){}}).click()`); await sleep(500);
+  await ev(`([...document.querySelectorAll('th app-admin-select .menu li')].find(l=>l.textContent.includes('Hôm nay'))||{click(){}}).click()`); await sleep(1800); await shot('t-don-rong', 1000);
+  await go('/admin/orders');
   await ev(`([...document.querySelectorAll('.pager .btn')].find(b=>b.textContent.includes('Sau'))||{click(){}}).click()`); await sleep(1800); await shot('t-don-2', 1000);
   await go('/admin/users'); await shot('t-user-1', 1000);
   await go('/admin/audit'); await shot('t-audit', 1000);

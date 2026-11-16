@@ -2,16 +2,14 @@
 <p class="lead">Theo dõi mọi đơn trong khu. Khi khách báo vấn đề mà người bán không trả lời hoặc từ chối, admin vào xem và phân xử.</p>
 <div class="bar">
   <input type="search" name="q" [(ngModel)]="q" (ngModelChange)="filter(300)" placeholder="Tìm theo mã đơn (VD: AG-O1012)" aria-label="Tìm theo mã đơn" />
-  <app-admin-select name="state" ariaLabel="Lọc trạng thái" [(ngModel)]="state" (ngModelChange)="filter()" [options]="stateOptions" />
-  <app-admin-select name="issue" ariaLabel="Lọc báo vấn đề" [(ngModel)]="issue" (ngModelChange)="filter()" [options]="[{ value: '', label: 'Mọi đơn' }, { value: 'open', label: 'Báo vấn đề đang chờ xử lý' }, { value: 'any', label: 'Có báo vấn đề (mọi trạng thái)' }]" />
 </div>
 @if (error()) { <div class="err" role="alert">{{ error() }}</div> }
 
 @if (rows(); as list) {
-  @if (list.length) {
+  @if (true) {
     <table class="tbl fixed">
       <colgroup><col /><col style="width: 120px" /><col style="width: 165px" /><col style="width: 125px" /><col style="width: 130px" /><col style="width: 235px" /><col style="width: 140px" /></colgroup>
-      <thead><tr><th>Đơn</th><th>Người mua</th><th>Người bán</th><th class="num">Tổng tiền</th><th>Trạng thái</th><th>Cần chú ý</th><th>Ngày đặt</th></tr></thead>
+      <thead><tr><th>Đơn</th><th>Người mua</th><th>Người bán</th><th class="num">Tổng tiền</th><th class="hf"><app-admin-select [head]="true" name="state" ariaLabel="Lọc theo trạng thái" placeholder="Trạng thái" [(ngModel)]="state" (ngModelChange)="filter()" [options]="stateOptions" /></th><th class="hf"><app-admin-select [head]="true" name="issue" ariaLabel="Lọc theo cần chú ý" placeholder="Cần chú ý" [(ngModel)]="issue" (ngModelChange)="filter()" [options]="issueOptions" /></th><th class="hf"><app-admin-select [head]="true" name="days" ariaLabel="Lọc theo ngày đặt" placeholder="Ngày đặt" [(ngModel)]="days" (ngModelChange)="filter()" [options]="dayOptions" /></th></tr></thead>
       <tbody>
         @for (o of list; track o._id) {
           <tr class="click" [routerLink]="['/admin/orders', o._id]">
@@ -27,9 +25,13 @@
             </td>
             <td data-l="Ngày đặt">{{ o.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
           </tr>
+        } @empty {
+          <tr><td colspan="7" class="emptycell">Không có đơn phù hợp với bộ lọc. Chọn lại ở tiêu đề cột để xem thêm.</td></tr>
         }
       </tbody>
     </table>
+    @if (list.length) {
     <div class="pager"><span>{{ total() }} đơn · Trang {{ page }}/{{ pages() }}</span><button type="button" class="btn" [disabled]="page <= 1" (click)="go(page - 1)">Trước</button><button type="button" class="btn" [disabled]="page >= pages()" (click)="go(page + 1)">Sau</button></div>
-  } @else { <p class="empty">Không có đơn phù hợp.</p> }
+    }
+  }
 } @else { <div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div> }

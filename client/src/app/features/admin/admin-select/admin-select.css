@@ -5,7 +5,7 @@
 .trigger:focus-visible, .trigger.open { outline: none; border-color: var(--a-accent); box-shadow: 0 0 0 3px var(--a-accent-soft); }
 .trigger:disabled { opacity: .5; cursor: not-allowed; }
 .text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.text.empty { color: var(--a-mute); }
+.text.ph { color: var(--a-mute); }
 .chev { flex: none; width: 14px; height: 14px; fill: var(--a-mute); transition: transform .18s; }
 .trigger.open .chev { transform: rotate(180deg); fill: var(--a-accent-ink); }
 
@@ -15,3 +15,13 @@
 .menu li.act { background: rgba(255, 255, 255, .08); }
 .menu li.sel { color: var(--a-accent-ink); font-weight: 600; }
 .tick { flex: none; width: 14px; height: 14px; fill: currentColor; }
+/* kiểu tiêu đề cột: không viền, không nền, thừa hưởng chữ của đầu bảng */
+:host(.head) { min-width: 0; display: flex; align-items: center; }
+:host(.head) .trigger { width: auto; height: 18px; line-height: 18px; padding: 0; gap: 6px; border: 0; background: transparent; box-shadow: none; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; }
+:host(.head) .trigger:hover:not(:disabled) { border: 0; color: var(--a-ink); }
+:host(.head) .trigger.open, :host(.head) .trigger:focus-visible { box-shadow: none; color: var(--a-ink); }
+:host(.head) .text.ph { color: inherit; }
+:host(.head) .text:not(.ph) { color: var(--a-accent-ink); }
+:host(.head) .chev { width: 12px; height: 12px; }
+:host(.head) .menu { right: auto; min-width: 190px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+:host(.head) .menu li { font-size: 13.5px; }

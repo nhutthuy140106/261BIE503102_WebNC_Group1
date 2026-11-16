@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, forwardRef, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostBinding, HostListener, Input, forwardRef, inject, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface AdminOption {
@@ -25,6 +25,8 @@ export class AdminSelect implements ControlValueAccessor {
   @Input() placeholder = 'Chọn…';
   @Input() inputId?: string;
   @Input() ariaLabel?: string;
+  /** Kiểu nằm trong tiêu đề cột bảng: chỉ chữ + mũi tên, đang lọc thì đổi sang màu nhấn */
+  @Input() @HostBinding('class.head') head = false;
 
   protected readonly open = signal(false);
   protected readonly value = signal<unknown>(null);
@@ -35,7 +37,9 @@ export class AdminSelect implements ControlValueAccessor {
   private onTouched: () => void = () => {};
 
   protected get selected(): AdminOption | undefined {
-    return this.options.find((o) => o.value === this.value());
+    const o = this.options.find((x) => x.value === this.value());
+    // kiểu tiêu đề cột: chọn "tất cả" (giá trị rỗng) thì hiện lại tên cột
+    return this.head && o && (o.value === '' || o.value === null) ? undefined : o;
   }
 
   writeValue(v: unknown): void {

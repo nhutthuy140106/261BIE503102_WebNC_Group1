@@ -19,6 +19,21 @@ export class AdminOrders implements OnInit {
     return [{ value: '', label: 'Mọi trạng thái' }, ...this.states.map((s) => ({ value: s[0], label: s[1] }))];
   }
   protected readonly states = Object.entries(ORDER_STATE);
+  /** Lọc ở tiêu đề cột "Cần chú ý" */
+  protected readonly issueOptions = [
+    { value: '', label: 'Tất cả đơn' },
+    { value: 'open', label: 'Đang báo vấn đề' },
+    { value: 'any', label: 'Từng báo vấn đề' },
+    { value: 'cancel', label: 'Đang xin hủy' },
+  ];
+  /** Lọc ở tiêu đề cột "Ngày đặt" (số ngày gần đây; rỗng = mọi lúc) */
+  protected readonly dayOptions = [
+    { value: '', label: 'Mọi lúc' },
+    { value: '1', label: 'Hôm nay' },
+    { value: '7', label: '7 ngày qua' },
+    { value: '30', label: '30 ngày qua' },
+  ];
+  protected days = '';
   protected readonly rows = signal<OrderRow[] | null>(null);
   protected readonly total = signal(0);
   protected readonly error = signal('');
@@ -54,7 +69,7 @@ export class AdminOrders implements OnInit {
 
   protected load(): void {
     this.error.set('');
-    this.api.orders({ state: this.state || undefined, issue: this.issue || undefined, q: this.q || undefined, page: this.page }).subscribe({
+    this.api.orders({ state: this.state || undefined, issue: this.issue || undefined, days: this.days || undefined, q: this.q || undefined, page: this.page }).subscribe({
       next: (r) => { this.rows.set(r.data); this.total.set(r.meta.total); },
       error: (e: unknown) => { this.rows.set([]); this.error.set(msgOf(e, 'Không tải được danh sách đơn.')); },
     });

@@ -104,6 +104,8 @@ async function listOrders(q) {
   if (q.state) filter.state = q.state;
   if (q.issue === 'open') filter['issue.st'] = 'open';
   else if (q.issue === 'any') filter['issue.st'] = { $exists: true, $ne: null };
+  else if (q.issue === 'cancel') filter['cancelRequest.status'] = 'pending';
+  if (q.days) filter.createdAt = { $gte: new Date(Date.now() - Number(q.days) * 864e5) };
   if (q.q) filter.code = new RegExp(escapeRegex(q.q.trim()), 'i');
   const [items, total] = await Promise.all([
     Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('buyer', 'name phone').populate('seller', 'name phone'),

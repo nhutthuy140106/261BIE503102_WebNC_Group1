@@ -1,6 +1,6 @@
 <button type="button" class="trigger" [id]="inputId ?? ''" [class.open]="open()" [disabled]="disabled" role="combobox" aria-haspopup="listbox"
         [attr.aria-expanded]="open()" [attr.aria-label]="ariaLabel ?? null" (click)="toggle()" (keydown)="onKey($event)">
-  <span class="text" [class.empty]="!selected">{{ selected ? selected.label : placeholder }}</span>
+  <span class="text" [class.ph]="!selected">{{ selected ? selected.label : placeholder }}</span>
   <svg class="chev" viewBox="0 0 256 256" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z" /></svg>
 </button>
 @if (open()) {
