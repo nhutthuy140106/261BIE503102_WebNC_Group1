@@ -31,6 +31,7 @@ export class AdminReports implements OnInit {
   protected readonly error = signal('');
   protected readonly busy = signal(false);
   protected readonly hideFor = signal<AdminReport | null>(null);
+  protected readonly lockFor = signal<AdminReport | null>(null);
   /** Ghi chú đang soạn theo từng báo cáo */
   protected notes: Record<string, string> = {};
   protected noteErr = '';
@@ -61,6 +62,11 @@ export class AdminReports implements OnInit {
       offer: { pending: 'Chờ chọn', chosen: 'Được chọn', rejected: 'Không được chọn', done: 'Hoàn thành' },
     };
     return map[type]?.[st] ?? st;
+  }
+
+  /** Nhãn chủ của đối tượng, theo loại đối tượng */
+  protected ownerLabel(t: string): string {
+    return t === 'job' ? 'Người đăng' : t === 'offer' ? 'Người nhận việc' : 'Cửa hàng';
   }
 
   protected target(t: string): string {
@@ -104,6 +110,17 @@ export class AdminReports implements OnInit {
     if (r) this.run(this.admin.hidePost(r.targetId, reason), () => this.hideFor.set(null));
   }
 
+  protected confirmLock(reason: string): void {
+    const r = this.lockFor();
+    if (r) this.run(this.admin.lockUser(r.targetId, reason), () => this.lockFor.set(null));
+  }
+
+  /** Tên đối tượng bị báo cáo ở đầu thẻ; đối tượng đã bị xóa thì ghi rõ */
+  protected title(r: AdminReport): string {
+    if (!r.target) return this.target(r.targetType);
+    return r.target.found ? r.target.title || this.target(r.targetType) : 'Đối tượng không còn tồn tại';
+  }
+
   private run(req: ReturnType<AdminService['hidePost']>, done: () => void): void {
     this.busy.set(true);
     req.subscribe({
@@ -115,6 +132,7 @@ export class AdminReports implements OnInit {
       error: (e: unknown) => {
         this.busy.set(false);
         this.hideFor.set(null);
+        this.lockFor.set(null);
         this.error.set(e instanceof AppError ? e.message : 'Chưa thực hiện được, bạn thử lại sau nhé.');
       },
     });

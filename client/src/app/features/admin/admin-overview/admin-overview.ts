@@ -52,11 +52,11 @@ export class AdminOverview implements OnInit {
 
   protected tasks(d: Dashboard): { label: string; n: number; to: string; q?: Record<string, string> }[] {
     return [
-      { label: 'Hồ sơ người bán chờ duyệt', n: d.todo.verifications, to: '/admin/verifications' },
-      { label: 'Báo cáo vi phạm chưa xử lý', n: d.todo.reports, to: '/admin/reports' },
-      { label: 'Khách báo vấn đề cần phân xử', n: d.todo.issues, to: '/admin/orders', q: { issue: 'open' } },
-      { label: 'Yêu cầu hủy đang chờ', n: d.todo.cancelRequests, to: '/admin/orders' },
-      { label: 'Phiếu hỗ trợ chưa trả lời', n: d.todo.tickets, to: '/admin/support' },
+      { label: 'Hồ sơ người bán', n: d.todo.verifications, to: '/admin/verifications' },
+      { label: 'Báo cáo vi phạm', n: d.todo.reports, to: '/admin/reports' },
+      { label: 'Đơn báo vấn đề', n: d.todo.issues, to: '/admin/orders', q: { issue: 'open' } },
+      { label: 'Yêu cầu hủy đơn', n: d.todo.cancelRequests, to: '/admin/orders' },
+      { label: 'Phiếu hỗ trợ', n: d.todo.tickets, to: '/admin/support' },
     ];
   }
 

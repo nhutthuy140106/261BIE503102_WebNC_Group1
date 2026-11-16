@@ -40,6 +40,8 @@ export interface AdminReport {
   state: ReportState;
   adminNote: string;
   createdAt: string;
+  /** Tóm tắt đối tượng bị báo cáo (server kèm sẵn ở danh sách) */
+  target?: { found: boolean; title: string; status: string; ownerName: string; orderId: string };
 }
 
 export interface AdminStats {
@@ -238,6 +240,7 @@ export class AdminService {
           state: x['state'] as ReportState,
           adminNote: String(x['adminNote'] ?? ''),
           createdAt: String(x['createdAt'] ?? ''),
+          target: x['target'] as AdminReport['target'],
         })),
       ),
     );

@@ -40,6 +40,12 @@ await shot('00-dang-nhap');
 await ev(`document.querySelector('button.go').click()`); await sleep(5000);
 console.log('url sau đăng nhập:', await ev('location.pathname'));
 
+if (process.env.ONLY === 'reports') {   // chỉ chụp trang Báo cáo (kiểm bố cục thẻ)
+  await go('/admin/reports'); await shot('r-moi', 1300);
+  await ev(`([...document.querySelectorAll('.tabs button')].find(b=>b.textContent.includes('Đang xem xét'))||{click(){}}).click()`); await sleep(1200);
+  await ev(`(document.querySelector('.ctxbtn')||{click(){}}).click()`); await sleep(1800); await shot('r-dang-xem-xet', 1500);
+  ws.close(); ps.kill(); process.exit(0);
+}
 await shot('01-tong-quan', 1000);
 await go('/admin/verifications'); await shot('02-xac-minh', 1000);
 await go('/admin/reports'); await shot('03-bao-cao', 1100);

@@ -119,6 +119,8 @@ async function unhidePost(admin, id) {
 // open → reviewing → resolved | rejected
 const REPORT_FLOW = { open: ['reviewing'], reviewing: ['resolved', 'rejected'], resolved: [], rejected: [] };
 
+const REPORT_MSG = { reviewing: 'AntGo đang xem xét báo cáo của bạn.', resolved: 'Báo cáo của bạn đã được xử lý.', rejected: 'Báo cáo của bạn chưa được chấp nhận.' };
+
 async function listReports(q) {
   const { page: p, limit, skip } = page(q);
   const filter = q.state ? { state: q.state } : {};
@@ -126,7 +128,14 @@ async function listReports(q) {
     Report.find(filter).sort({ createdAt: 1 }).skip(skip).limit(limit).populate('reporter', 'name phone'), // cũ nhất trước = hàng đợi
     Report.countDocuments(filter),
   ]);
-  return { items, meta: { page: p, limit, total } };
+  // kèm tóm tắt đối tượng bị báo cáo (tên bài/đơn/người, chủ/cửa hàng) để thẻ báo cáo hiện đối tượng ngay ở đầu
+  const { reportContext } = require('./admin-extra.service'); // tải muộn: tránh vòng phụ thuộc
+  const withTarget = await Promise.all(items.map(async (r) => {
+    const c = await reportContext(r).catch(() => ({ found: false }));
+    const ownerName = (c.seller && c.seller.name) || (c.owner && c.owner.name) || '';
+    return { ...r.toJSON(), target: { found: !!c.found, title: c.title || '', status: c.status || '', ownerName, orderId: c.orderId ? String(c.orderId) : '' } };
+  }));
+  return { items: withTarget, meta: { page: p, limit, total } };
 }
 
 async function getReport(id) {
@@ -145,7 +154,7 @@ async function transitionReport(admin, id, to, note) {
   r.history.push({ state: to, at: new Date(), note: note || '' });
   await r.save();
   await audit(admin, `report.${to}`, 'report', r._id, note || '');
-  await notify(r.reporter, { type: 'report_state', title: 'Báo cáo của bạn đã được cập nhật', body: `Trạng thái: ${to}`, link: { type: 'report', id: r._id } });
+  await notify(r.reporter, { type: 'report_state', title: 'Báo cáo của bạn đã được cập nhật', body: REPORT_MSG[to] + (note ? ` Kết luận: ${note}` : ''), link: { type: 'report', id: r._id } });
   return r;
 }
 
