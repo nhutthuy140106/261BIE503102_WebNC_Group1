@@ -167,4 +167,4 @@ select option { background: var(--a-glass); color: var(--a-ink); }
 /* ô bắt buộc: dấu * đỏ ở nhãn; thiếu hoặc sai thì viền đỏ sau khi bấm Tạo */
 .req { color: var(--a-danger); font-weight: 700; }
 .field.bad input, .field.bad .trigger { border-color: var(--a-danger); box-shadow: 0 0 0 3px var(--a-danger-soft); }
-@media (min-width: 761px) { .tbl.fixed { table-layout: fixed; } .tbl.fixed td:not(:first-child) { overflow: hidden; text-overflow: ellipsis; } .tbl.fixed td.act { text-align: right; } }
+@media (min-width: 761px) { .tbl.fixed { table-layout: fixed; } .tbl.fixed td:not(:first-child) { overflow: hidden; text-overflow: ellipsis; } .tbl.fixed td.act { text-align: right; overflow: visible; text-overflow: clip; } }

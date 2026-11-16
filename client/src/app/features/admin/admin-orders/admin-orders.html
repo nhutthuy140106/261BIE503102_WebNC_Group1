@@ -9,13 +9,15 @@
 
 @if (rows(); as list) {
   @if (list.length) {
-    <table class="tbl">
-      <thead><tr><th>Đơn</th><th>Người mua → Người bán</th><th class="num">Tổng tiền</th><th>Trạng thái</th><th>Cần chú ý</th><th>Ngày đặt</th></tr></thead>
+    <table class="tbl fixed">
+      <colgroup><col /><col style="width: 120px" /><col style="width: 165px" /><col style="width: 125px" /><col style="width: 130px" /><col style="width: 235px" /><col style="width: 140px" /></colgroup>
+      <thead><tr><th>Đơn</th><th>Người mua</th><th>Người bán</th><th class="num">Tổng tiền</th><th>Trạng thái</th><th>Cần chú ý</th><th>Ngày đặt</th></tr></thead>
       <tbody>
         @for (o of list; track o._id) {
           <tr class="click" [routerLink]="['/admin/orders', o._id]">
             <td data-l="Đơn"><b class="mono">{{ o.code }}</b><div class="sub">{{ o.title }}</div></td>
-            <td data-l="Người mua → Người bán">{{ o.buyer.name }} → {{ o.seller.name }}</td>
+            <td data-l="Người mua">{{ o.buyer.name }}</td>
+            <td data-l="Người bán">{{ o.seller.name }}</td>
             <td data-l="Tổng tiền" class="num">{{ o.total | vnd }}</td>
             <td data-l="Trạng thái"><span class="pill" [ngClass]="tone(o.state)">{{ label(o.state) }}</span></td>
             <td data-l="Cần chú ý">

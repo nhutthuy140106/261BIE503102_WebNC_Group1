@@ -46,6 +46,13 @@ if (process.env.ONLY === 'reports') {   // chỉ chụp trang Báo cáo (kiểm 
   await ev(`(document.querySelector('.ctxbtn')||{click(){}}).click()`); await sleep(1800); await shot('r-dang-xem-xet', 1500);
   ws.close(); ps.kill(); process.exit(0);
 }
+if (process.env.ONLY === 'tables') {   // kiểm cột bảng cố định khi lật trang
+  await go('/admin/orders'); await shot('t-don-1', 1000);
+  await ev(`([...document.querySelectorAll('.pager .btn')].find(b=>b.textContent.includes('Sau'))||{click(){}}).click()`); await sleep(1800); await shot('t-don-2', 1000);
+  await go('/admin/users'); await shot('t-user-1', 1000);
+  await go('/admin/audit'); await shot('t-audit', 1000);
+  ws.close(); ps.kill(); process.exit(0);
+}
 await shot('01-tong-quan', 1000);
 await go('/admin/verifications'); await shot('02-xac-minh', 1000);
 await go('/admin/reports'); await shot('03-bao-cao', 1100);
