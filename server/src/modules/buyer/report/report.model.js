@@ -9,7 +9,7 @@ const reportSchema = new Schema({
   detail: { type: String, required: true },
   images: [String],
   state: { type: String, enum: ['open', 'reviewing', 'resolved', 'rejected'], default: 'open', index: true },
-  action: { type: String, enum: ['', 'hide_post', 'lock_user', 'close_job', 'warn_owner', 'order_ruled', 'other', 'none'], default: '' }, // hướng xử lý admin đã thực hiện
+  action: { type: String, enum: ['', 'hide_post', 'lock_user', 'close_job', 'cancel_order', 'warn_owner', 'order_ruled', 'other', 'none'], default: '' }, // hướng xử lý admin đã thực hiện
   adminNote: { type: String, default: '' },                 // ghi chú xử lý; người báo cáo đọc được
   handledBy: { type: Schema.Types.ObjectId, ref: 'User' },  // admin phụ trách (không trả cho người báo cáo)
   history: [{ state: String, at: Date, note: String, _id: false }],

@@ -265,7 +265,7 @@ test('báo cáo về đơn: hủy đơn thì báo cáo tự đóng; xử lý th�
   assert.equal(c.status, 200);
   const after = await Report.findById(rep._id);
   assert.equal(after.state, 'resolved');
-  assert.equal(after.action, 'order_ruled');
+  assert.equal(after.action, 'cancel_order');
 
   // nhắc nhở thẳng từ trạng thái Mới (không cần "bắt đầu xem xét")
   const r2 = await Report.create({ reporter: ids.thuy, targetType: 'user', targetId: ids.lan, reason: 'abuse', detail: 'Nhắn tin thô tục' });

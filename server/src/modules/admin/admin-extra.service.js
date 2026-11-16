@@ -131,10 +131,10 @@ async function getOrder(admin, id, { chat = false } = {}) {
 const ISSUE_DECISIONS = { refund: 'refund', redo: 'redo', reject: 'closed' };
 
 /** Phân xử/hủy đơn xong thì các báo cáo đang chờ về đơn đó tự đóng với hướng "đã phân xử đơn" */
-async function closeOrderReports(admin, orderId, note) {
+async function closeOrderReports(admin, orderId, note, action = 'order_ruled') {
   const open = await Report.find({ targetType: 'order', targetId: orderId, state: { $in: ['open', 'reviewing'] } });
   for (const r of open) {
-    r.state = 'resolved'; r.action = 'order_ruled'; r.handledBy = admin._id; r.adminNote = note;
+    r.state = 'resolved'; r.action = action; r.handledBy = admin._id; r.adminNote = note;
     r.history.push({ state: 'resolved', at: new Date(), note });
     await r.save();
     await notify(r.reporter, { type: 'report_state', title: 'Báo cáo của bạn đã được cập nhật', body: `Báo cáo của bạn đã được xử lý. Đơn bị báo cáo đã được phân xử. Kết luận: ${note}`, link: { type: 'report', id: r._id } });
@@ -174,7 +174,7 @@ async function cancelOrder(admin, id, reason) {
   await release(o);
   await notify(o.seller, { type: 'order_cancelled', title: `AntGo đã hủy đơn ${o.code}`, body: reason, link: { type: 'order', id: o._id } });
   await audit(admin, 'order.cancel', 'order', o._id, reason);
-  await closeOrderReports(admin, o._id, `AntGo hủy đơn: ${reason}`);
+  await closeOrderReports(admin, o._id, `AntGo hủy đơn: ${reason}`, 'cancel_order');
   return o;
 }
 

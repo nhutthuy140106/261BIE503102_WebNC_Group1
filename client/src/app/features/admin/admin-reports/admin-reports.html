@@ -39,7 +39,7 @@
         <div class="work">
           @if (r.state === 'resolved' || r.state === 'rejected') {
             <div class="done">
-              <p class="note"><b>Hướng xử lý:</b> {{ actionLabel(r.action) }}</p>
+              @if (r.state === 'resolved') { <p class="note"><b>Hướng xử lý:</b> {{ actionLabel(r.action) }}</p> }
               @if (r.adminNote) { <p class="note"><b>Ghi chú:</b> {{ r.adminNote }}</p> }
             </div>
           } @else if (r.state === 'reviewing') {

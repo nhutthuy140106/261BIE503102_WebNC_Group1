@@ -62,7 +62,8 @@ export class AdminReports implements OnInit {
   }
 
   protected actionLabel(a?: string): string {
-    const all: Record<string, string> = { hide_post: 'Đã ẩn bài', lock_user: 'Đã khóa tài khoản', warn_owner: 'Đã nhắc nhở người bị báo cáo', order_ruled: 'Đã phân xử đơn', close_job: 'Đã đóng việc', none: 'Không vi phạm — không xử lý' };
+    // đúng tên nút admin đã bấm lúc xử lý
+    const all: Record<string, string> = { hide_post: 'Ẩn bài', lock_user: 'Khóa tài khoản', warn_owner: 'Nhắc nhở', order_ruled: 'Phân xử đơn', cancel_order: 'Hủy đơn', close_job: 'Đóng việc' };
     return a ? all[a] ?? a : 'Chưa ghi nhận';
   }
 
