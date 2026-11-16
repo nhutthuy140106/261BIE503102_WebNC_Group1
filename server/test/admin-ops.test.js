@@ -253,3 +253,26 @@ test('xuất CSV: có BOM, có dấu tiếng Việt, chống chèn công thức'
   assert.ok((await api('GET', '/admin/audit?action=export', { token: tok.admin })).body.data.length >= 2, 'xuất dữ liệu để lại dấu vết');
   await mongoose.model('User').updateOne({ phone: '0900000001' }, { name: 'Ngọc Thủy' });
 });
+
+test('báo cáo về đơn: hủy đơn thì báo cáo tự đóng; xử lý thẳng từ Mới; hướng xử lý được ghi', async () => {
+  const Report = mongoose.model('Report');
+  const o = await mkOrder({ state: 'confirmed' });
+  const rep = await Report.create({ reporter: ids.thuy, targetType: 'order', targetId: o._id, reason: 'quality', detail: 'Món không đúng mô tả' });
+  const list = (await api('GET', '/admin/reports?state=open', { token: tok.admin })).body.data;
+  const row = list.find((x) => String(x._id) === String(rep._id));
+  assert.equal(row.target.status, 'confirmed', 'danh sách báo cáo kèm trạng thái đơn để chọn nút');
+  const c = await api('POST', `/admin/orders/${o._id}/cancel`, { token: tok.admin, body: { reason: 'Vi phạm quy định giao hàng' } });
+  assert.equal(c.status, 200);
+  const after = await Report.findById(rep._id);
+  assert.equal(after.state, 'resolved');
+  assert.equal(after.action, 'order_ruled');
+
+  // nhắc nhở thẳng từ trạng thái Mới (không cần "bắt đầu xem xét")
+  const r2 = await Report.create({ reporter: ids.thuy, targetType: 'user', targetId: ids.lan, reason: 'abuse', detail: 'Nhắn tin thô tục' });
+  const t = await api('POST', `/admin/reports/${r2._id}/transition`, { token: tok.admin, body: { to: 'resolved', note: 'Đã nhắc nhở', action: 'warn_owner' } });
+  assert.equal(t.status, 200);
+  assert.equal((await Report.findById(r2._id)).action, 'warn_owner');
+  // đóng mà không chọn hướng xử lý thì bị từ chối
+  const r3 = await Report.create({ reporter: ids.thuy, targetType: 'user', targetId: ids.lan, reason: 'abuse', detail: 'Lần hai' });
+  assert.equal((await api('POST', `/admin/reports/${r3._id}/transition`, { token: tok.admin, body: { to: 'resolved', note: 'Xong rồi' } })).status, 422);
+});

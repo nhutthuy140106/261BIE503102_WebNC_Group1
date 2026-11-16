@@ -32,11 +32,18 @@ export class AdminReports implements OnInit {
   protected readonly busy = signal(false);
 
   /** Nút xử lý theo loại đối tượng bị báo cáo (mỗi nút làm thật rồi đóng báo cáo) */
-  protected actionsFor(type: string): { key: string; label: string; danger?: boolean }[] {
+  protected actionsFor(r: AdminReport): { key: string; label: string; danger?: boolean }[] {
+    const type = r.targetType;
+    const st = r.target?.status ?? '';
+    const ACTIVE = ['waiting', 'confirmed', 'picked', 'pricing', 'preparing', 'delivering', 'ready'];
+    // đơn: có báo vấn đề chờ phân xử → mở trang phân xử; đơn còn đang chạy → hủy đơn; đơn đã xong và không có gì để phân xử → chỉ nhắc nhở / không vi phạm
+    const order = r.target?.issueSt === 'open' || r.target?.issueSt === 'rejected'
+      ? [{ key: 'order_ruled', label: 'Phân xử đơn', danger: true }]
+      : ACTIVE.includes(st) ? [{ key: 'cancel_order', label: 'Hủy đơn', danger: true }] : [];
     const first: Record<string, { key: string; label: string; danger?: boolean }[]> = {
       post: [{ key: 'hide_post', label: 'Ẩn bài', danger: true }],
       user: [{ key: 'lock_user', label: 'Khóa tài khoản', danger: true }],
-      order: [{ key: 'order_ruled', label: 'Phân xử đơn', danger: true }],
+      order,
       job: [{ key: 'close_job', label: 'Đóng việc', danger: true }],
     };
     return [...(first[type] ?? []), { key: 'warn_owner', label: 'Nhắc nhở' }];
@@ -47,6 +54,7 @@ export class AdminReports implements OnInit {
       hide_post: 'Bài sẽ không còn hiện với người dùng khác.',
       lock_user: 'Người này sẽ không đăng nhập được nữa.',
       close_job: 'Việc sẽ đóng, không nhận thêm đề nghị.',
+      cancel_order: 'Đơn bị hủy, kho và voucher được trả lại; cả hai bên nhận thông báo.',
       warn_owner: 'Người bị báo cáo nhận một thông báo nhắc nhở; không ẩn hay khóa gì.',
       none: 'Báo cáo được đóng; người báo cáo nhận thông báo là chưa được chấp nhận.',
     };
@@ -102,6 +110,15 @@ export class AdminReports implements OnInit {
   protected confirmPick(reason: string): void {
     const p = this.pick();
     if (!p) return;
+    if (p.a.key === 'cancel_order') {
+      // hủy đơn ở server sẽ tự đóng báo cáo về đơn này
+      this.busy.set(true);
+      this.api.cancelOrder(p.r.targetId, reason).subscribe({
+        next: () => { this.busy.set(false); this.pick.set(null); this.tab.set('resolved'); this.load(); },
+        error: (e: unknown) => { this.busy.set(false); this.pick.set(null); this.error.set(e instanceof AppError ? e.message : 'Chưa hủy được đơn, bạn thử lại sau nhé.'); },
+      });
+      return;
+    }
     const none = p.a.key === 'none';
     this.run(this.admin.transition(p.r._id, none ? 'rejected' : 'resolved', reason, none ? '' : p.a.key), () => {
       this.pick.set(null);

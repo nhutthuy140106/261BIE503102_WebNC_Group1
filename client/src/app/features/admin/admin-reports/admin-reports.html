@@ -45,7 +45,7 @@
           } @else if (r.state === 'reviewing') {
             <div class="acts">
               <div class="row">
-                @for (a of actionsFor(r.targetType); track a.key) {
+                @for (a of actionsFor(r); track a.key) {
                   @if (a.key === 'order_ruled') {
                     <a class="btn solid-danger" [routerLink]="['/admin/orders', r.targetId]">Phân xử đơn</a>
                   } @else {

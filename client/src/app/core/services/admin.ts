@@ -43,7 +43,7 @@ export interface AdminReport {
   action?: string;
   createdAt: string;
   /** Tóm tắt đối tượng bị báo cáo (server kèm sẵn ở danh sách) */
-  target?: { found: boolean; title: string; status: string; ownerName: string; orderId: string };
+  target?: { found: boolean; title: string; status: string; issueSt?: string; ownerName: string; orderId: string };
 }
 
 export interface AdminStats {

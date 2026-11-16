@@ -133,7 +133,7 @@ async function listReports(q) {
   const withTarget = await Promise.all(items.map(async (r) => {
     const c = await reportContext(r).catch(() => ({ found: false }));
     const ownerName = (c.seller && c.seller.name) || (c.owner && c.owner.name) || '';
-    return { ...r.toJSON(), target: { found: !!c.found, title: c.title || '', status: c.status || '', ownerName, orderId: c.orderId ? String(c.orderId) : '' } };
+    return { ...r.toJSON(), target: { found: !!c.found, title: c.title || '', status: c.status || '', issueSt: c.issueSt || '', ownerName, orderId: c.orderId ? String(c.orderId) : '' } };
   }));
   return { items: withTarget, meta: { page: p, limit, total } };
 }

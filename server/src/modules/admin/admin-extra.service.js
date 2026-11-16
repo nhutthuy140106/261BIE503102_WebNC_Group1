@@ -205,7 +205,7 @@ async function reportContext(r) {
     if (p) Object.assign(out, { found: true, title: p.title, status: p.status, price: p.price, owner: p.seller && { _id: p.seller._id, name: p.seller.name, phone: p.seller.phone, status: p.seller.status }, image: (p.images || [])[0] });
   } else if (r.targetType === 'order') {
     const o = await Order.findById(r.targetId).populate('buyer', 'name phone status').populate('seller', 'name phone status');
-    if (o) Object.assign(out, { found: true, title: `${o.code} · ${o.snapshot && o.snapshot.title}`, status: o.state, price: o.total, buyer: o.buyer, seller: o.seller, orderId: o._id });
+    if (o) Object.assign(out, { found: true, title: `${o.code} · ${o.snapshot && o.snapshot.title}`, status: o.state, issueSt: o.issue && o.issue.st, price: o.total, buyer: o.buyer, seller: o.seller, orderId: o._id });
   } else if (r.targetType === 'user') {
     const u = await User.findById(r.targetId);
     if (u) Object.assign(out, { found: true, title: u.name, status: u.status, owner: { _id: u._id, name: u.name, phone: u.phone, status: u.status } });
