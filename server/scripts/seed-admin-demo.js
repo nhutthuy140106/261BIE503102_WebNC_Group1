@@ -24,8 +24,8 @@ const extra = require('../src/modules/admin/admin-extra.service');
 const DAY = 864e5;
 const ago = (d, h = 0) => new Date(Date.now() - d * DAY - h * 36e5);
 const face = (id) => `https://images.unsplash.com/photo-${id}?w=400&h=400&fit=crop&crop=faces&q=70`;
-const FRONT = '/images/admin-demo/cccd-truoc.svg';
-const BACK = '/images/admin-demo/cccd-sau.svg';
+const FRONT = '/images/admin-demo/cccd-truoc.jpg';
+const BACK = '/images/admin-demo/cccd-sau.jpg';
 
 async function main(apply) {
   const out = { verifications: 0, reports: 0, issues: 0, cancelRequests: 0, tickets: 0, announcements: 0, audit: 0 };

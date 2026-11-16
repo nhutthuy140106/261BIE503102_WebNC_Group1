@@ -4,7 +4,7 @@
 .vc h3 { margin: 0; font-size: 16px; }
 .docs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .docs figure { margin: 0; display: grid; gap: 4px; }
-.docs button { padding: 0; border: 1px solid var(--a-line); border-radius: 10px; overflow: hidden; background: var(--a-bg); cursor: zoom-in; aspect-ratio: 4 / 3; }
+.docs button { padding: 0; border: 1px solid var(--a-line); border-radius: 10px; overflow: hidden; background: var(--a-bg); cursor: zoom-in; aspect-ratio: 8 / 5; }
 .docs img { width: 100%; height: 100%; object-fit: cover; }
 .docs figcaption { font-size: 12.5px; color: var(--a-mute); text-align: center; }
 .lb { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; padding: 20px; background: rgba(5, 9, 18, .88); cursor: zoom-out; }
