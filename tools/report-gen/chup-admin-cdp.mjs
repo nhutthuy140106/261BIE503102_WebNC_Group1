@@ -16,8 +16,13 @@ ws.onmessage = e => { const m = JSON.parse(e.data); if (m.id && pend.has(m.id)) 
 const send = (method, params = {}) => new Promise(r => { const i = ++id; pend.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
 const ev = async (expression) => (await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result?.result?.value;
 const shot = async (name, h = 900) => {
+  // chiều cao theo nội dung thật của trang (tối thiểu 700, tối đa h), khỏi thừa nền trống phía dưới
+  await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1600, deviceScaleFactor: 1, mobile: false });
+  await sleep(900);
+  const need = await ev(`Math.ceil((document.querySelector('.content')||document.body).getBoundingClientRect().bottom + 40)`);
+  h = Math.max(700, Math.min(h, need || h));
   await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: h, deviceScaleFactor: 1, mobile: false });
-  await sleep(1200);
+  await sleep(1000);
   const r = await send('Page.captureScreenshot', { format: 'png' });
   fs.writeFileSync(OUT + '/' + name + '.png', Buffer.from(r.result.data, 'base64')); console.log('ok', name);
 };
@@ -30,8 +35,8 @@ await send('Page.enable'); await send('Runtime.enable');
 await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
 const base = 'http://localhost:4200';
 await send('Page.navigate', { url: base + '/admin/login?mock=0' }); await sleep(5000);
+await type('#alP', '0900000099'); await type('#alW', PASS); await sleep(600);
 await shot('00-dang-nhap');
-await type('#alP', '0900000099'); await type('#alW', PASS);
 await ev(`document.querySelector('button.go').click()`); await sleep(5000);
 console.log('url sau đăng nhập:', await ev('location.pathname'));
 
@@ -46,8 +51,14 @@ await go('/admin/users'); await shot('06-nguoi-dung', 1000);
 await type('input[type=search]', 'Cô Lan'); await sleep(2500);
 await ev(`(document.querySelector('tbody tr a')||{click(){}}).click()`); await sleep(3500); await shot('07-ho-so-nguoi-dung', 1300);
 await go('/admin/posts'); await shot('08-bai-dang', 1000);
-await go('/admin/support'); await shot('09-ho-tro', 1000);
+await ev(`(document.querySelector('td.act .btn.danger')||{click(){}}).click()`); await sleep(1500); await shot('08b-hop-xac-nhan-an-bai', 1000);
+await ev(`(document.querySelector('.dlg button.btn:not(.danger), [role=dialog] button.btn')||{click(){}}).click()`); await sleep(800);
+await go('/admin/support');
+await ev(`(document.querySelector('button.it')||{click(){}}).click()`); await sleep(1500);
+await shot('09-ho-tro', 1000);
 await go('/admin/vouchers'); await shot('10-voucher', 1000);
+await ev(`([...document.querySelectorAll('button')].find(b=>b.textContent.includes('Tạo voucher'))||{click(){}}).click()`); await sleep(1500); await shot('10b-tao-voucher', 1000);
+await ev(`([...document.querySelectorAll('.vdlg button, [role=dialog] button')].find(b=>b.textContent.trim()==='Hủy'||b.textContent.trim()==='Đóng')||{click(){}}).click()`); await sleep(800);
 await go('/admin/announcements'); await shot('11-thong-bao', 1000);
 await go('/admin/settings'); await shot('12-cai-dat', 1100);
 await go('/admin/audit'); await shot('13-nhat-ky', 1000);
