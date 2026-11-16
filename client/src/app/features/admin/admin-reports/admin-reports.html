@@ -39,10 +39,6 @@
               <p class="note"><b>Hướng xử lý:</b> {{ actionLabel(r.action) }}</p>
               @if (r.adminNote) { <p class="note"><b>Ghi chú:</b> {{ r.adminNote }}</p> }
             </div>
-          } @else if (r.state === 'open') {
-            <footer class="start">
-              <button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'reviewing', '', '')">Bắt đầu xem xét</button>
-            </footer>
           } @else {
             <div class="acts">
               <span class="lbl">Chọn cách xử lý — người báo cáo và người bị báo cáo sẽ nhận thông báo kèm lý do</span>
@@ -55,6 +51,9 @@
                   }
                 }
                 <button type="button" class="btn" (click)="pick.set({ r: r, a: { key: 'none', label: 'Không vi phạm' } })">Không vi phạm</button>
+                @if (r.state === 'open') {
+                  <button type="button" class="btn main push" [disabled]="busy()" (click)="move(r, 'reviewing', '', '')">Bắt đầu xem xét</button>
+                }
               </div>
             </div>
           }

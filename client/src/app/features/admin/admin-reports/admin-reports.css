@@ -32,3 +32,4 @@ footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .acts .row { display: flex; flex-wrap: wrap; gap: 8px; }
 .acts .row .btn { width: auto; }
 .work footer.start { grid-column: 1 / -1; align-items: flex-end; }
+.acts .row .push { margin-left: auto; }

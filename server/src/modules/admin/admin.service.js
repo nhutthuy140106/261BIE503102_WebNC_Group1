@@ -117,7 +117,7 @@ async function unhidePost(admin, id) {
 /* ===================== Báo cáo ===================== */
 
 // open → reviewing → resolved | rejected
-const REPORT_FLOW = { open: ['reviewing'], reviewing: ['resolved', 'rejected'], resolved: [], rejected: [] };
+const REPORT_FLOW = { open: ['reviewing', 'resolved', 'rejected'], reviewing: ['resolved', 'rejected'], resolved: [], rejected: [] };
 
 const REPORT_MSG = { reviewing: 'AntGo đang xem xét báo cáo của bạn.', resolved: 'Báo cáo của bạn đã được xử lý.', rejected: 'Báo cáo của bạn chưa được chấp nhận.' };
 
