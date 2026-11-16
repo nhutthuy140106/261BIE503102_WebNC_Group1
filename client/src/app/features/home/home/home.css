@@ -114,7 +114,6 @@
 .popline .spinlink { padding: 6px 14px; border: 1px dashed var(--accent); border-radius: 999px; color: var(--accent); font-size: 13px; font-weight: 600; }
 .popline .spinlink:hover { background: var(--accent-soft); }
 
-@media (max-width: 640px) { 
 .goldclock { display: inline-flex; align-items: center; gap: 8px; margin-left: 12px; padding: 4px 6px 4px 12px; border-radius: 999px; background: #FFF1EA; border: 1px solid #F8D7C6; color: #B34A14; font-size: 13px; font-weight: 600; vertical-align: middle; }
 .goldclock .i { width: 15px; height: 15px; fill: currentColor; }
 .goldclock .lbl { letter-spacing: .01em; }

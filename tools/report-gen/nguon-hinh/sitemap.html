@@ -1,0 +1,88 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#fff;font-family:"Segoe UI",Arial,sans-serif;color:#22304A;width:1400px}
+.wrap{padding:24px 28px}
+.root{width:200px;margin:0 auto 0;text-align:center;background:#22304A;color:#fff;font-weight:700;padding:11px 0;border-radius:8px;font-size:15px}
+.bus{position:relative;height:30px}
+.bus:before{content:"";position:absolute;left:16.6%;right:16.6%;top:14px;border-top:2px solid #9DC3E6}
+.bus:after{content:"";position:absolute;left:50%;top:0;height:14px;border-left:2px solid #9DC3E6}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.col{position:relative}
+.col:before{content:"";position:absolute;left:50%;top:-16px;height:16px;border-left:2px solid #9DC3E6}
+.head{text-align:center;color:#fff;font-weight:700;padding:10px 6px;border-radius:8px;font-size:15px}
+.h1{background:#2E75B6}.h2{background:#D85A1C}.h3{background:#4a9d6f}
+.head small{display:block;font-weight:400;font-size:11.5px;opacity:.9;margin-top:2px}
+.list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.n{border:1.5px solid #9DC3E6;border-radius:7px;padding:6px 10px;font-size:13px;background:#f6f9fd;display:flex;justify-content:space-between;gap:8px}
+.n code{font-family:Consolas,monospace;font-size:11.5px;color:#1F4E79;white-space:nowrap}
+.c2 .n{border-color:#F4B183;background:#fdf6f1}.c2 code{color:#B5481A}
+.c3 .n{border-color:#9ccdb2;background:#f2faf5}.c3 code{color:#2f7a52}
+.sub{margin-left:22px;position:relative}
+.sub .n{background:#fff;font-size:12.5px}
+.sub:before{content:"";position:absolute;left:-12px;top:-6px;bottom:50%;border-left:2px solid #c5d3e3;border-bottom:2px solid #c5d3e3;width:10px;border-bottom-left-radius:6px}
+.note{margin-top:14px;font-size:12px;color:#6A6879;text-align:center}
+</style></head><body><div class="wrap">
+<div class="root">AntGo</div>
+<div class="bus"></div>
+<div class="cols">
+ <div class="col c1">
+  <div class="head h1">Phía Mua<small>khách và người dùng đã đăng nhập</small></div>
+  <div class="list">
+   <div class="n">Giới thiệu <code>/welcome</code></div>
+   <div class="n">Trang chủ khám phá <code>/</code></div>
+   <div class="n">Tìm kiếm, “Xem tất cả” <code>/search</code></div>
+   <div class="n">Chi tiết bài, việc làm <code>/posts/…</code></div>
+   <div class="n">Gian hàng <code>/shop/:id</code></div>
+   <div class="n">Quay món <code>/quay-mon</code></div>
+   <div class="n">Vườn AntGo <code>/vuon</code></div>
+   <div class="n">Trợ giúp, pháp lý <code>/help</code></div>
+   <div class="n">Đăng nhập, đăng ký, quên mật khẩu <code>/auth</code></div>
+   <div class="n">Đơn hàng, việc đã nhận <code>/orders</code></div>
+   <div class="sub"><div class="n">Chi tiết đơn <code>/orders/:id</code></div></div>
+   <div class="sub"><div class="n">Báo vấn đề với đơn <code>/orders/:id/report</code></div></div>
+   <div class="n">Messenger <code>/messenger</code></div>
+   <div class="n">Thông báo <code>/notifications</code></div>
+   <div class="n">Hồ sơ, địa chỉ, bài đã lưu <code>/profile</code></div>
+   <div class="n">AntXu, voucher <code>/xu</code></div>
+  </div>
+ </div>
+ <div class="col c2">
+  <div class="head h2">Phía Bán và Đăng việc<small>cần đăng nhập và xác minh người bán</small></div>
+  <div class="list">
+   <div class="n">Xác minh người bán <code>/seller/verify</code></div>
+   <div class="n">Hôm nay <code>/seller</code></div>
+   <div class="n">Giao dịch, đơn khách đặt <code>/seller/orders</code></div>
+   <div class="sub"><div class="n">Chi tiết đơn <code>/orders/:id</code></div></div>
+   <div class="n">Việc đã đăng, đề nghị <code>/seller/jobs/:id</code></div>
+   <div class="n">Lịch <code>/seller/calendar</code></div>
+   <div class="n">Bài đăng <code>/seller/posts</code></div>
+   <div class="sub"><div class="n">Đăng bài mới <code>/posts/new</code></div></div>
+   <div class="sub"><div class="n">Sửa nội dung <code>/posts/:id/edit</code></div></div>
+   <div class="sub"><div class="n">Sửa nhanh <code>/posts/:id/quick</code></div></div>
+   <div class="n">Hiệu quả kinh doanh <code>/seller/insights</code></div>
+   <div class="n">Tin nhắn với khách <code>/seller/messenger</code></div>
+   <div class="n">Hồ sơ gian hàng <code>/seller/shop</code></div>
+  </div>
+ </div>
+ <div class="col c3">
+  <div class="head h3">Quản trị<small>quyền admin hoặc moderator</small></div>
+  <div class="list">
+   <div class="n">Đăng nhập quản trị <code>/admin/login</code></div>
+   <div class="n">Tổng quan <code>/admin</code></div>
+   <div class="n">Xác minh người bán <code>/admin/verifications</code></div>
+   <div class="n">Báo cáo vi phạm <code>/admin/reports</code></div>
+   <div class="n">Đơn hàng, tranh chấp <code>/admin/orders</code></div>
+   <div class="sub"><div class="n">Chi tiết đơn <code>/orders/:id</code></div></div>
+   <div class="n">Người dùng <code>/admin/users</code></div>
+   <div class="sub"><div class="n">Hồ sơ, điều chỉnh Xu <code>/users/:id</code></div></div>
+   <div class="n">Bài đăng <code>/admin/posts</code></div>
+   <div class="n">Voucher <code>/admin/vouchers</code></div>
+   <div class="n">Hộp thư hỗ trợ <code>/admin/support</code></div>
+   <div class="n">Thông báo hệ thống <code>/admin/announcements</code></div>
+   <div class="n">Cài đặt, xuất dữ liệu <code>/admin/settings</code></div>
+   <div class="n">Nhật ký thao tác <code>/admin/audit</code></div>
+  </div>
+ </div>
+</div>
+</div></body></html>
