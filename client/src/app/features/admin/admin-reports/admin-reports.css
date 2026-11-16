@@ -41,3 +41,4 @@ footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 @media (max-width: 760px) { .rc.new > .meta, .rc.new > .detail, .rc.new > .ctxbtn, .rc.new > .ctx { margin-right: 0; } .rc.new .startbtn { position: static; transform: none; width: 100%; } }
 .acts .row .btn.solid-danger { background: #D23C3C; border-color: #E25757; color: #fff; }
 .acts .row .btn.solid-danger:hover { background: #E04848; }
+.acts .row { justify-content: flex-end; }

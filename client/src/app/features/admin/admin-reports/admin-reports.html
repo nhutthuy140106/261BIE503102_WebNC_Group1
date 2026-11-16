@@ -44,7 +44,6 @@
             </div>
           } @else if (r.state === 'reviewing') {
             <div class="acts">
-              <span class="lbl">Chọn cách xử lý — người báo cáo và người bị báo cáo sẽ nhận thông báo kèm lý do</span>
               <div class="row">
                 @for (a of actionsFor(r.targetType); track a.key) {
                   @if (a.key === 'order_ruled') {
