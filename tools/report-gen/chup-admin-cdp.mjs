@@ -53,6 +53,22 @@ if (process.env.ONLY === 'small') {   // cửa sổ nhỏ: danh sách thả xu�
   }
   ws.close(); ps.kill(); process.exit(0);
 }
+if (process.env.ONLY === 'ruling') {
+  await go('/admin/reports'); await sleep(1500);
+  await ev(`([...document.querySelectorAll('.tabs button')].find(b=>b.textContent.includes('Đang xem xét'))||{click(){}}).click()`); await sleep(1200);
+  await ev(`(document.querySelector('a.solid-danger')||{click(){}}).click()`); await sleep(3500);
+  console.log('url:', await ev('location.pathname'));
+  await shot('ruling', 1300);
+  ws.close(); ps.kill(); process.exit(0);
+}
+if (process.env.ONLY === 'stuck') {   // mở danh sách rồi rời trang: không được còn sót danh sách trên màn hình
+  await go('/admin/users'); await sleep(1500);
+  await ev(`(document.querySelector('app-admin-select .trigger')||{click(){}}).click()`); await sleep(500);
+  console.log('menu khi mở:', await ev(`document.querySelectorAll('ul.menu').length`));
+  await go('/admin/reports'); await sleep(1500);
+  console.log('menu sau khi rời trang:', await ev(`document.querySelectorAll('ul.menu').length`));
+  ws.close(); ps.kill(); process.exit(0);
+}
 if (process.env.ONLY === 'reports') {   // chỉ chụp trang Báo cáo (kiểm bố cục thẻ)
   await go('/admin/reports'); await shot('r-moi', 1300);
   await ev(`([...document.querySelectorAll('.tabs button')].find(b=>b.textContent.includes('Đang xem xét'))||{click(){}}).click()`); await sleep(1200);

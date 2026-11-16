@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, HostBinding, HostListener, Input, forwardRef, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild, HostBinding, HostListener, Input, forwardRef, inject, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface AdminOption {
@@ -18,7 +18,7 @@ export interface AdminOption {
   styleUrl: './admin-select.css',
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AdminSelect), multi: true }],
 })
-export class AdminSelect implements ControlValueAccessor {
+export class AdminSelect implements ControlValueAccessor, OnDestroy {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   @Input() options: AdminOption[] = [];
@@ -93,6 +93,11 @@ export class AdminSelect implements ControlValueAccessor {
     const s: Record<string, string> = { position: 'fixed', left: left - ox + 'px', right: 'auto', minWidth: w + 'px', maxHeight: maxH + 'px' };
     s['top'] = (down ? r.bottom + 6 : r.top - 6 - Math.min(want, maxH)) - oy + 'px';
     this.pos = s;
+  }
+
+  /** Rời trang khi danh sách đang mở: gỡ hẳn phần đã dời ra ngoài, kẻo nó mắc kẹt lại trên màn hình */
+  ngOnDestroy(): void {
+    this.menuEl?.remove();
   }
 
   protected close(): void {
