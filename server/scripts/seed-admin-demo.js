@@ -48,7 +48,7 @@ async function main(apply) {
   for (const x of people) {
     const u = apply ? await User.findOne({ phone: x.p }) : U[x.p] || { _id: x.p };
     if (!u) continue;
-    if (await Verification.exists({ user: u._id })) continue;
+    if (u._id && mongoose.isValidObjectId(u._id) && await Verification.exists({ user: u._id })) continue;
     out.verifications++;
     if (!apply) continue;
     await Verification.create({

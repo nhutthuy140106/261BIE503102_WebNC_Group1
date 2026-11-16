@@ -15,8 +15,8 @@
           <b>{{ reason(r.reason) }}</b>
           <span class="sub">{{ r.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
         </header>
-        <p class="meta">{{ r.reporterName }} báo cáo · {{ target(r.targetType) }} <code>{{ r.targetId }}</code></p>
-        <p class="detail">{{ r.detail }}</p>
+        <p class="meta"><span class="chip">{{ r.reporterName }} báo cáo</span><span class="chip">{{ target(r.targetType) }} <code>{{ r.targetId }}</code></span></p>
+        <blockquote class="detail">{{ r.detail }}</blockquote>
         <button type="button" class="ctxbtn" (click)="toggleCtx(r)">{{ ctx()[r._id] ? 'Ẩn bối cảnh' : 'Xem bối cảnh' }}</button>
         @if (ctx()[r._id] === 'loading') { <div class="sk" style="height: 52px"></div> }
         @else if (ctx()[r._id] === 'none') { <p class="note">Không tải được bối cảnh.</p> }
@@ -24,7 +24,7 @@
           <div class="ctx">
             @if (!x.found) { <p class="note">Đối tượng bị báo cáo không còn tồn tại.</p> } @else {
               <b>{{ x.title }}</b>
-              <span class="sub">Trạng thái: {{ x.status }}@if (x.price) { · {{ x.price | vnd }} }</span>
+              <span class="sub">Trạng thái: {{ objStatus(r.targetType, x.status ?? '') }}@if (x.price) { · {{ x.price | vnd }} }</span>
               @if (x.owner; as ow) { <span>Chủ: <a class="lnk" [routerLink]="['/admin/users', ow._id]">{{ ow.name }}</a> ({{ ow.phone }}) @if (ow.status === 'locked') { <span class="pill bad">Đã khóa</span> }</span> }
               @if (x.buyer && x.seller) { <span>Mua: <a class="lnk" [routerLink]="['/admin/users', x.buyer._id]">{{ x.buyer.name }}</a> · Bán: <a class="lnk" [routerLink]="['/admin/users', x.seller._id]">{{ x.seller.name }}</a></span> }
               <span class="sub">{{ x.reportsAboutTarget }} báo cáo về đối tượng này</span>
@@ -33,10 +33,13 @@
           </div>
         }
 
+        <div class="work">
         @if (r.state === 'open' || r.state === 'reviewing') {
+          <div class="nb">
           <label [for]="'n' + r._id">Ghi chú của admin</label>
           <textarea [id]="'n' + r._id" rows="2" [name]="'n' + r._id" [(ngModel)]="notes[r._id]" maxlength="300" [placeholder]="r.state === 'reviewing' ? 'Bắt buộc khi kết thúc báo cáo' : 'Không bắt buộc'"></textarea>
           @if (noteErr === r._id) { <small class="e" role="alert">Vui lòng ghi chú kết quả xử lý (ít nhất 3 ký tự).</small> }
+          </div>
         } @else if (r.adminNote) {
           <p class="note"><b>Ghi chú:</b> {{ r.adminNote }}</p>
         }
@@ -52,6 +55,7 @@
             <button type="button" class="btn main" [disabled]="busy()" (click)="move(r, 'resolved')">Đã xử lý</button>
           }
         </footer>
+        </div>
       </article>
     } @empty { <p class="empty">Không có báo cáo ở mục này.</p> }
   </div>

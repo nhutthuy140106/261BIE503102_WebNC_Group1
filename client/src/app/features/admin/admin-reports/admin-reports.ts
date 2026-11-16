@@ -3,6 +3,7 @@ import { AppError } from '../../../core/models/api';
 import { REPORT_REASON_LABEL, ReportReason } from '../../../core/models/social';
 import { AdminReport, AdminService, ReportState } from '../../../core/services/admin';
 import { AdminApi, ReportContext } from '../../../core/services/admin-api';
+import { ORDER_STATE } from '../admin-labels';
 
 const TARGET: Record<string, string> = { order: 'Đơn hàng', offer: 'Đề nghị', post: 'Bài đăng', job: 'Việc làm', user: 'Người dùng' };
 
@@ -48,6 +49,18 @@ export class AdminReports implements OnInit {
 
   protected reason(r: string): string {
     return REPORT_REASON_LABEL[r as ReportReason] ?? r;
+  }
+
+  /** Trạng thái đối tượng bị báo cáo, viết tiếng Việt theo loại đối tượng */
+  protected objStatus(type: string, st: string): string {
+    const map: Record<string, Record<string, string>> = {
+      order: ORDER_STATE,
+      post: { open: 'Đang mở', soldout: 'Hết hàng', closed: 'Đã đóng', hidden: 'Bị ẩn', draft: 'Bản nháp' },
+      user: { active: 'Hoạt động', locked: 'Đã khóa' },
+      job: { open: 'Đang mở', closed: 'Đã đóng', done: 'Hoàn thành', cancelled: 'Đã hủy' },
+      offer: { pending: 'Chờ chọn', chosen: 'Được chọn', rejected: 'Không được chọn', done: 'Hoàn thành' },
+    };
+    return map[type]?.[st] ?? st;
   }
 
   protected target(t: string): string {

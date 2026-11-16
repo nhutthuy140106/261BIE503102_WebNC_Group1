@@ -46,8 +46,8 @@ select option { background: var(--a-glass); color: var(--a-ink); }
 .tabs em { font-style: normal; font-weight: 400; opacity: .75; margin-left: 4px; }
 
 /* bảng */
-.tbl { width: 100%; border: 1px solid var(--a-line); border-radius: 16px; border-collapse: separate; border-spacing: 0; overflow: hidden; background: var(--a-glass); font-size: 14px; }
-.tbl th { text-align: left; white-space: nowrap; padding: 11px 14px; background: var(--a-card2); color: var(--a-mute); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.tbl { width: 100%; border: 1px solid var(--a-line); border-radius: 16px; border-collapse: separate; border-spacing: 0; overflow: clip; background: var(--a-glass); font-size: 14px; }
+.tbl th { position: sticky; top: 0; z-index: 3; box-shadow: 0 1px 0 var(--a-line); text-align: left; white-space: nowrap; padding: 11px 14px; background: var(--a-card2); color: var(--a-mute); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
 .tbl td { padding: 12px 14px; border-top: 1px solid var(--a-line); vertical-align: middle; color: var(--a-ink); }
 .tbl tbody tr:first-child td { border-top: 0; }
 .tbl tbody tr.click { cursor: pointer; }
@@ -167,3 +167,4 @@ select option { background: var(--a-glass); color: var(--a-ink); }
 /* ô bắt buộc: dấu * đỏ ở nhãn; thiếu hoặc sai thì viền đỏ sau khi bấm Tạo */
 .req { color: var(--a-danger); font-weight: 700; }
 .field.bad input, .field.bad .trigger { border-color: var(--a-danger); box-shadow: 0 0 0 3px var(--a-danger-soft); }
+@media (min-width: 761px) { .tbl.fixed { table-layout: fixed; } .tbl.fixed td:not(:first-child) { overflow: hidden; text-overflow: ellipsis; } .tbl.fixed td.act { text-align: right; } }

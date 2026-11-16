@@ -55,3 +55,10 @@ docs/bao-cao/Chuong-1-Gioi-thieu.docx
 docs/bao-cao/Chuong-1-Gioi-thieu-v3.docx
 docs/bao-cao/Chuong-1-Gioi-thieu-v4.docx
 docs/bao-cao/Chuong-1-Gioi-thieu-v4.truoc-chuong-3.docx
+
+# Bản dựng tạm của công cụ viết báo cáo + bản Word có Quản trị (chưa chốt tên, 23 MB)
+tools/report-gen/__pycache__/
+tools/report-gen/w/
+tools/report-gen/v4-goc.docx
+tools/report-gen/v4-moi2.docx
+docs/bao-cao/Chuong-1-Gioi-thieu-v4-day-du-co-quan-tri.docx

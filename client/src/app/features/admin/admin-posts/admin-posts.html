@@ -9,7 +9,8 @@
 
 @if (rows(); as list) {
   @if (list.length) {
-    <table class="tbl">
+    <table class="tbl fixed">
+      <colgroup><col /><col style="width: 110px" /><col style="width: 170px" /><col style="width: 130px" /><col style="width: 130px" /><col style="width: 120px" /></colgroup>
       <thead><tr><th>Bài đăng</th><th>Loại</th><th>Người bán</th><th>Giá</th><th>Trạng thái</th><th></th></tr></thead>
       <tbody>
         @for (p of list; track p._id) {

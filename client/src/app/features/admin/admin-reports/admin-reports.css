@@ -1,9 +1,10 @@
 .cards { display: grid; gap: 12px; }
-.rc { display: grid; gap: 8px; padding: 16px 18px; border: 1px solid var(--a-line); border-radius: 16px; background: var(--a-glass); }
-.rc header { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; color: var(--a-ink); }
-.meta { margin: 0; color: var(--a-mute); font-size: 13px; }
-.meta code { background: var(--a-chip); padding: 1px 6px; border-radius: 6px; }
-.detail { margin: 0; color: var(--a-ink); }
+.rc { display: grid; gap: 12px; padding: 18px 20px; border: 1px solid var(--a-line); border-radius: 16px; background: var(--a-glass); }
+.rc header { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; color: var(--a-ink); font-size: 16px; }
+.meta { margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: rgba(255, 255, 255, .05); border: 1px solid var(--a-line); color: var(--a-mute); font-size: 12.5px; }
+.chip code { color: var(--a-ink); font-size: 12px; }
+.detail { margin: 0; padding: 4px 0 4px 14px; border-left: 3px solid var(--a-accent); color: var(--a-ink); font-size: 15px; line-height: 1.5; }
 .note { margin: 0; padding: 8px 12px; border-radius: 12px; background: var(--a-chip); font-size: 14px; }
 .ctxbtn { justify-self: start; padding: 0; color: var(--a-accent-ink); font-weight: 600; font-size: 13.5px; cursor: pointer; }
 .ctxbtn:hover { text-decoration: underline; }
@@ -13,3 +14,9 @@ textarea { padding: 10px 12px; border: 1px solid var(--a-line); border-radius: 1
 textarea:focus { outline: 2px solid var(--a-accent-soft); border-color: var(--a-accent); }
 .e { color: var(--a-danger); }
 footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.work { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: end; padding-top: 12px; border-top: 1px solid var(--a-line); }
+.nb { display: grid; gap: 6px; }
+.work > .note { align-self: center; }
+.work footer { flex-direction: column; align-items: stretch; justify-content: flex-end; min-width: 150px; }
+.work footer .btn { width: 100%; }
+@media (max-width: 640px) { .work { grid-template-columns: 1fr; } .work footer { flex-direction: row; justify-content: flex-end; } .work footer .btn { width: auto; } }
