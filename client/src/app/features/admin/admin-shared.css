@@ -176,3 +176,4 @@ select option { background: var(--a-glass); color: var(--a-ink); }
 /* ô lọc nằm trong tiêu đề cột: ép chiều cao bằng các tiêu đề thường để chữ thẳng hàng */
 .tbl th.hf { padding-top: 0; padding-bottom: 0; height: 40px; }
 .tbl th.hf app-admin-select { height: 40px; position: relative; top: 9px; }
+.tbl th.mid, .tbl td.mid { text-align: center; }
