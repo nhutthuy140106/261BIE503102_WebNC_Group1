@@ -10,7 +10,7 @@
 @if (all() !== null) {
   <div class="cards">
     @for (r of list(); track r._id) {
-      <article class="rc">
+      <article class="rc" [class.new]="r.state === 'open'">
         <header>
           <b>{{ reason(r.reason) }}</b>
           <span class="sub">{{ r.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
@@ -33,27 +33,27 @@
           </div>
         }
 
+        @if (r.state === 'open') {
+          <button type="button" class="btn main startbtn" [disabled]="busy()" (click)="move(r, 'reviewing', '', '')">Bắt đầu xem xét</button>
+        }
         <div class="work">
           @if (r.state === 'resolved' || r.state === 'rejected') {
             <div class="done">
               <p class="note"><b>Hướng xử lý:</b> {{ actionLabel(r.action) }}</p>
               @if (r.adminNote) { <p class="note"><b>Ghi chú:</b> {{ r.adminNote }}</p> }
             </div>
-          } @else {
+          } @else if (r.state === 'reviewing') {
             <div class="acts">
               <span class="lbl">Chọn cách xử lý — người báo cáo và người bị báo cáo sẽ nhận thông báo kèm lý do</span>
               <div class="row">
                 @for (a of actionsFor(r.targetType); track a.key) {
                   @if (a.key === 'order_ruled') {
-                    <a class="btn danger" [routerLink]="['/admin/orders', r.targetId]">Phân xử đơn →</a>
+                    <a class="btn solid-danger" [routerLink]="['/admin/orders', r.targetId]">Phân xử đơn</a>
                   } @else {
-                    <button type="button" class="btn" [class.danger]="a.danger" (click)="pick.set({ r: r, a: a })">{{ a.label }}</button>
+                    <button type="button" class="btn" [class.solid-danger]="a.danger" [class.main]="a.key === 'warn_owner'" (click)="pick.set({ r: r, a: a })">{{ a.label }}</button>
                   }
                 }
                 <button type="button" class="btn" (click)="pick.set({ r: r, a: { key: 'none', label: 'Không vi phạm' } })">Không vi phạm</button>
-                @if (r.state === 'open') {
-                  <button type="button" class="btn main push" [disabled]="busy()" (click)="move(r, 'reviewing', '', '')">Bắt đầu xem xét</button>
-                }
               </div>
             </div>
           }

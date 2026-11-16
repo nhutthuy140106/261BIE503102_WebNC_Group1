@@ -30,6 +30,14 @@ footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .acts { grid-row: 2; }
 .work .acts { grid-column: 1 / -1; grid-row: 1; display: grid; gap: 8px; }
 .acts .row { display: flex; flex-wrap: wrap; gap: 8px; }
-.acts .row .btn { width: auto; }
+.acts .row .btn { width: 150px; }
 .work footer.start { grid-column: 1 / -1; align-items: flex-end; }
 .acts .row .push { margin-left: auto; }
+/* tab Mới: chỉ một nút "Bắt đầu xem xét", nằm dưới ngày giờ, căn giữa theo chiều dọc ở bên phải thẻ */
+.rc.new { position: relative; }
+.rc.new > .meta, .rc.new > .detail, .rc.new > .ctxbtn, .rc.new > .ctx { margin-right: 190px; }
+.rc.new .startbtn { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 160px; }
+.rc.new .work:empty { display: none; }
+@media (max-width: 760px) { .rc.new > .meta, .rc.new > .detail, .rc.new > .ctxbtn, .rc.new > .ctx { margin-right: 0; } .rc.new .startbtn { position: static; transform: none; width: 100%; } }
+.acts .row .btn.solid-danger { background: #D23C3C; border-color: #E25757; color: #fff; }
+.acts .row .btn.solid-danger:hover { background: #E04848; }

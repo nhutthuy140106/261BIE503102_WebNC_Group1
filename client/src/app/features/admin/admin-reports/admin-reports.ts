@@ -36,7 +36,7 @@ export class AdminReports implements OnInit {
     const first: Record<string, { key: string; label: string; danger?: boolean }[]> = {
       post: [{ key: 'hide_post', label: 'Ẩn bài', danger: true }],
       user: [{ key: 'lock_user', label: 'Khóa tài khoản', danger: true }],
-      order: [{ key: 'order_ruled', label: 'Phân xử đơn' }],
+      order: [{ key: 'order_ruled', label: 'Phân xử đơn', danger: true }],
       job: [{ key: 'close_job', label: 'Đóng việc', danger: true }],
     };
     return [...(first[type] ?? []), { key: 'warn_owner', label: 'Nhắc nhở' }];
