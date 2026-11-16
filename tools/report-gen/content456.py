@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Chương 4–6 + Phụ lục B. fig: (fig, key, path, caption, False, tag, keep) — tag 'B' = phụ lục B, keep = tỉ lệ chiều cao giữ lại.
 import os
-SHOTS = os.path.join(os.environ.get('TEMP', ''), 'antgo-cdp') + '\\'
+SHOTS = 'd:\\Năm 1\\WEB2\\docs\\bao-cao\\hinh-giao-dien\\'
 S = lambda n: SHOTS + n + '.png'
 SA = lambda n: 'd:\\Năm 1\\WEB2\\docs\\bao-cao\\hinh-admin-toi\\' + n + '.png'
 
@@ -21,7 +21,16 @@ CH456 = [
  'left'),
 ('p', 'Các ảnh màn hình trong chương được chụp ở chế độ dữ liệu mẫu của client, vì chế độ này chạy được mà không cần server và cho kết quả giống nhau mỗi lần chụp. Phần đúng đắn của các luồng nghiệp vụ không dựa vào ảnh mà dựa vào các bộ kiểm thử API ở mục 4.7. Không gian Bán và Đăng việc hiện chạy bằng dữ liệu mẫu ở client do server chưa có API cho phía này, nên chương này chỉ trình bày không gian Mua và Nhận việc.'),
 
-('h2', '4.2. Khám phá và tìm kiếm'),
+('h2', '4.2. Vào ứng dụng, khám phá và tìm kiếm'),
+('p', 'Khách mới mở AntGo sẽ vào trang giới thiệu ({F:c_welcome}) trước, còn người đã đăng nhập hoặc đã xem trang này rồi thì vào thẳng trang chủ. Nền trang là bầu trời hoàng hôn chuyển từ tím sang cam, có các đám mây ở hai bên. Giữa trang là dòng chữ lớn “Một khu, một nhà.” với biểu tượng con kiến nằm giữa hai vế, phía trên có nhãn nhỏ “Dành cho cư dân trong khu”, phía dưới là câu “Mua bán, đặt dịch vụ, nhận việc vặt, ngay trong khu bạn sống.” cùng nút “Bắt đầu khám phá”. Góc trên trái là logo, góc trên phải có hai nút Khám phá và Đăng nhập, còn con kiến cưỡi máy bay giấy nằm ở bên phải.'),
+('fig', 'c_welcome', S('c4-welcome'), 'Trang giới thiệu của AntGo', False, ''),
+('p', 'Trang mở bằng một đoạn chuyển động ngắn rồi dừng ở trạng thái trong ảnh; nút “Xem lại” ở góc dưới phải cho phép xem lại đoạn chuyển động đó. Trang này chỉ giới thiệu và dẫn người dùng đi tiếp, không chứa dữ liệu nào lấy từ server.'),
+('p', 'Trang đăng nhập ({F:c_login}) dùng số điện thoại và mật khẩu. Thẻ đăng nhập nằm bên trái trên nền bầu trời cam, gồm tiêu đề “Đăng nhập” cùng câu “Một tài khoản cho cả mua, bán và nhận việc trong khu.”, ô số điện thoại, ô mật khẩu có nút bật tắt hiển thị, ô “Ghi nhớ đăng nhập” và liên kết “Quên mật khẩu?”. Phía dưới là nút Đăng nhập, nút “Tiếp tục với Google” và dòng chuyển sang trang đăng ký. Con kiến đứng tựa vào mép thẻ ở bên phải.'),
+('fig', 'c_login', S('c4-login'), 'Trang đăng nhập', False, ''),
+('p', 'Ô số điện thoại gợi ý các số đã nhớ, và tùy chọn ghi nhớ chỉ lưu số điện thoại chứ không lưu mật khẩu. Đăng nhập bằng Google cũng đi qua bước nhập số điện thoại và xác nhận bằng mã, như đăng ký thường.'),
+('p', 'Đăng ký ({F:c_register}) gồm ba bước hiển thị ngay đầu thẻ: nhập số điện thoại, nhập mã xác nhận và nhập thông tin cá nhân. Bước đầu chỉ có một ô số điện thoại và nút “Gửi mã xác nhận”, hệ thống báo ngay nếu số này đã có tài khoản. Mã xác nhận (OTP) hiện được giả lập, in ra màn hình máy chủ chứ chưa gửi qua tin nhắn thật.'),
+('fig', 'c_register', S('c4-register'), 'Trang đăng ký, bước nhập số điện thoại', False, ''),
+('p', 'Sau khi vào ứng dụng, người dùng đến trang chủ, nơi bắt đầu việc khám phá.'),
 ('p', 'Trang chủ ({F:c_home}) là điểm vào của người dùng, gom bài theo ngữ cảnh thay vì theo loại: bài nổi bật trong khu, bài đang giảm giá theo giờ, việc mới quanh bạn và phần khám phá có bộ lọc.'),
 ('fig', 'c_home', S('c4-home'), 'Trang chủ của AntGo', False, '', 0.72),
 ('p', 'Ô tìm kiếm lớn nằm ngay dưới phần giới thiệu, kèm các từ khóa phổ biến để người dùng bấm thay vì gõ, và hai lối tắt đến trang Quay món và trò chơi Hái Xu. Nhãn “Quảng bá” phân biệt rõ bài trả phí với bài thường, còn nhãn “Giờ vàng” cho biết giá đang giảm theo khung giờ. Dữ liệu trang chủ lấy từ API danh sách bài đăng, có lọc theo khu, loại và giá cùng phân trang.'),
@@ -37,10 +46,17 @@ CH456 = [
 ('fig', 'c_box', S('c4-order-box'), 'Hộp xác nhận đơn hàng', False, '', 0.92),
 ('p', 'Hộp xác nhận hiện địa chỉ nhận hàng từ sổ địa chỉ, giờ nhận, cách nhận, dụng cụ ăn uống, ghi chú, voucher AntXu và hai cách thanh toán là tiền mặt hoặc chuyển khoản. Tổng tiền hiển thị ở đây chỉ để người dùng xem trước, còn số tiền chính thức do server tính lại khi tạo đơn. Luồng này được kiểm thử bằng bài thử đặt đơn, kiểm tra server tính tiền, chụp lại thông tin bài lúc đặt, hủy đơn và gửi thông báo; bài thử voucher kiểm tra voucher đổi từ AntXu dùng được một lần và được trả lại khi hủy đơn.'),
 
+('p', 'Từ trang bài, bấm vào ảnh hoặc tên người bán sẽ mở gian hàng ({F:c_shop}). Đây là trang công khai của người bán: đầu trang là ảnh bìa, ảnh đại diện, tên gian hàng, loại gian hàng, khu và thời gian trả lời, cùng hai nút Theo dõi và Nhắn tin. Bên dưới là ba ô số liệu gồm điểm đánh giá, số bài đang đăng và số đơn hoặc việc đã hoàn thành, phần giới thiệu, rồi ba tab Đang bán, Việc đang cần người và Đánh giá.'),
+('fig', 'c_shop', S('c4-shop'), 'Gian hàng của người bán', False, ''),
+('p', 'Các số liệu của gian hàng được tính từ dữ liệu thật như đơn hoàn thành và đánh giá, không lưu cứng. Nút Theo dõi cần đăng nhập và ghi lên server, nên số người theo dõi giữ nguyên sau khi tải lại trang.'),
+
 ('h2', '4.4. Theo dõi đơn hàng'),
+('p', 'Trang Đơn hàng ({F:c_orders}) gom đơn đã đặt và việc đã nhận, chia ra phần “Cần bạn xử lý” và phần “Đang diễn ra”, còn các đơn đã kết thúc nằm ở mục Lịch sử. Mỗi dòng ghi người bán hoặc người đăng việc, tên bài, ngày giờ, mã đơn, số tiền và trạng thái, kèm các nút hành động hợp lệ ở bước hiện tại.'),
+('fig', 'c_orders', S('c4-orders'), 'Danh sách đơn hàng', False, ''),
+('p', 'Trạng thái ở danh sách dùng cùng một bộ tên với thanh bước ở trang chi tiết, nên người dùng không phải học hai cách gọi cho cùng một bước.'),
 ('p', 'Đơn hàng đi qua nhiều trạng thái, và người mua theo dõi chúng ở trang chi tiết đơn. {F:c_orderfood} là đơn đồ ăn giao tận nơi đang ở bước chuẩn bị.'),
 ('fig', 'c_orderfood', S('c4-order-food'), 'Chi tiết đơn đồ ăn giao tận nơi đang chuẩn bị', False, '', 0.9),
-('p', 'Thanh bước ở đầu trang cho biết đơn đang ở đâu và ngày giờ của từng bước đã qua. Khung bên phải chỉ hiện những hành động hợp lệ với trạng thái hiện tại: khi người bán đã bắt đầu chuẩn bị, người mua không tự hủy được nữa mà chỉ gửi “Yêu cầu hủy” để người bán đồng ý, đúng với quy tắc đã nêu ở chương 3. Bản đồ giao hàng chỉ là mô phỏng, vị trí người giao được tính từ mốc thời gian của đơn nên mọi thiết bị thấy cùng một vị trí; nhóm ghi rõ điều này ngay dưới bản đồ.'),
+('p', 'Thanh bước ở đầu trang cho biết đơn đang ở đâu và ngày giờ của từng bước đã qua. Khung bên phải chỉ hiện những hành động hợp lệ với trạng thái hiện tại: khi người bán đã bắt đầu chuẩn bị, người mua không tự hủy được nữa mà chỉ gửi “Yêu cầu hủy” để người bán đồng ý, đúng với quy tắc đã nêu ở chương 3.'),
 ('p', 'Với dịch vụ có giá chưa chốt, đơn có thêm bước duyệt giá ({F:c_service}).'),
 ('fig', 'c_service', S('c4-order-service-pricing'), 'Đơn dịch vụ ở bước duyệt giá cuối kèm mã QR chuyển khoản', False, '', 0.97),
 ('p', 'Người bán báo giá cuối sau khi cân đồ thực tế, và đơn chỉ làm tiếp khi người mua đồng ý; nếu không đồng ý thì đơn không bị ép thực hiện. Khối “Chuyển khoản” hiện mã QR với số tiền và nội dung là mã đơn, và dùng tài khoản được chụp lại lúc đặt nên không đổi nếu người bán sửa tài khoản sau đó. Phần phụ thu được kiểm thử ở nhóm API đơn hàng, và phần QR có bộ kiểm thử riêng cho việc chụp tài khoản người bán vào đơn.'),
@@ -61,6 +77,18 @@ CH456 = [
 ('fig', 'c_spin', S('c4-spin'), 'Trang Quay món', False, '', 1.0),
 ('p', 'Món có nhãn quảng bá có cơ hội trúng gấp đôi nhưng tổng không quá 30%, nên quảng bá không lấn át các món còn lại. Các quy tắc AntXu đều có bài thử: cộng một lần cho mỗi đơn, voucher dùng một lần, tối đa ba lượt chơi mỗi ngày và từ chối điểm bất thường.'),
 
+('p', 'Trang Vườn AntGo ({F:c_vuon}) gom các trò chơi nhỏ để nhận thêm Xu: Hái xu (hứng xu rơi từ cây xoài trong 30 giây), Chăm cây (tưới nước mỗi ngày, sau 7 ngày cây ra trái xoài) và Nuôi thú cưng (ấp trứng và chăm bé kiến mỗi ngày, sau 7 ngày bé lớn thành kiến trưởng thành). Thanh trên cùng cho biết số Xu đã nhận từ trò chơi trong ngày trên mức tối đa 30 Xu, và mỗi thẻ ghi số lượt còn lại hoặc tiến độ chăm sóc.'),
+('fig', 'c_vuon', S('c4-vuon'), 'Trang Vườn AntGo', False, ''),
+('p', 'Hái xu đạt các mốc điểm 10, 25 và 50 sẽ mở khóa huy hiệu và mã giảm giá 5%; phần mã giảm giá của trang này hiện chỉ là mô phỏng.'),
+('p', 'Trang AntXu ({F:c_xu}) hiển thị số dư, ngày hết hạn của số Xu sắp hết hạn, các voucher có thể đổi cùng giá đổi, voucher người dùng đang có và các cách nhận thêm Xu. Mọi biến động được ghi vào sổ nên số dư truy vết được.'),
+('fig', 'c_xu', S('c4-xu'), 'Trang AntXu và voucher', False, ''),
+('p', 'Voucher đổi ở đây được chọn lại ở bước Xác nhận đơn hàng, và đơn bị hủy thì voucher được trả lại.'),
+('p', 'Trang hồ sơ cá nhân ({F:c_profile}) gom thông tin tài khoản và số Xu ở đầu trang, ba ô thống kê (đơn đã đặt, việc đã nhận, đơn trong lịch sử) và các mục bài đã lưu, địa chỉ của tôi, khu vực, AntXu và voucher, đổi mật khẩu, trợ giúp và hỗ trợ. Sổ địa chỉ dùng chung cho các đơn và cho phép đặt hộ người khác bằng cách chọn địa chỉ của họ.'),
+('fig', 'c_profile', S('c4-profile'), 'Trang hồ sơ cá nhân', False, ''),
+('p', 'Thông báo ({F:c_notif}) được tạo từ các sự kiện của đơn và việc, như yêu cầu hủy hoặc đổi trạng thái, và mở đúng đơn liên quan khi bấm vào. Chấm báo trên chuông được đếm từ chính danh sách này.'),
+('fig', 'c_notif', S('c4-notifications'), 'Danh sách thông báo', False, ''),
+('p', 'Thông báo chưa đọc có chấm cam ở đầu dòng, và đọc xong thì chấm biến mất cùng lúc với số trên biểu tượng chuông.'),
+
 ('h2', '4.7. Kết quả kiểm thử API và bảo mật'),
 ('p', 'Toàn bộ 92 bài thử của server đều đạt khi chạy ngày 14/11/2026, mất khoảng 58 giây. Các bài thử chia theo nhóm ở {T:kt}.'),
 ('tbl', 'kt', 'Kết quả kiểm thử API theo nhóm', [3500, 1000, 5141],
@@ -72,7 +100,6 @@ CH456 = [
   ['AntXu, voucher, trò chơi', '10/10', 'Cộng Xu theo quy tắc, voucher dùng một lần, trần lượt chơi mỗi ngày'],
   ['Khuyến mãi theo giờ, combo', '14/14', 'Giá theo khung giờ do server tính, tiết kiệm của combo, trừ kho theo món'],
   ['Chuyển khoản và QR', '3/3', 'Chụp tài khoản người bán vào đơn, không lộ tài khoản ở API công khai'],
-  ['Theo dõi giao hàng', '3/3', 'Bốn giai đoạn của xe, quyền xem của chủ đơn và người bán, đơn tự lấy không có bản đồ'],
   ['Tìm kiếm thông minh, gợi ý giá', '7/7', 'Chịu gõ sai, đồng nghĩa, kết quả rỗng khi không liên quan, độ tin cậy của giá gợi ý'],
   ['Trợ lý', '23/23', 'Bộ luật trả lời, công cụ gọi được, quay về bộ luật khi không gọi được mô hình'],
   ['Dữ liệu seed', '5/5', 'Số lượng và tính đúng đắn của dữ liệu mẫu']],
@@ -231,22 +258,8 @@ CH456 = [
 ('p', 'Để khắc phục việc kiểm thử giao diện còn hẹp, nhóm cần sửa lỗi biên dịch của bộ kiểm thử Angular rồi bổ sung kiểm thử thành phần cho các luồng chính, đồng thời mời cư dân trong khu dùng thử để thu lỗi thật. Việc tối ưu giao diện cho điện thoại nên được làm sau khi các luồng chính ổn định, vì đa số người dùng trong khu có thể chỉ dùng điện thoại.'),
 ('h3', '6.3.4. Học từ dữ liệu hành vi'),
 ('p', 'Để khắc phục việc thuật toán dựa vào trọng số chọn tay, bước tiếp theo là thu thập dữ liệu hành vi như lượt xem, lưu và đặt hàng, rồi dùng chúng để tinh chỉnh trọng số và bổ sung bảng từ đồng nghĩa theo cách người dùng thật tìm kiếm. Với gợi ý giá, khi có giá giao dịch thật nhóm có thể đo sai số của kNN và điều chỉnh giá trị k, thay vì chỉ kiểm tra tính hợp lý.'),
+('h3', '6.3.5. Theo dõi giao hàng trên bản đồ'),
+('p', 'Nhóm đã dựng thử một bản đồ theo dõi người giao trên trang chi tiết đơn, gồm bốn giai đoạn của xe là đang đến cửa hàng, đã lấy hàng, đang giao đến bạn và hoàn tất, chỉ chủ đơn và người bán được xem. Vì vị trí người giao hiện chỉ là mô phỏng tính từ mốc thời gian của đơn, chưa có dữ liệu định vị thật, nhóm đã gỡ phần này khỏi giao diện và để lại làm hướng mở rộng. Khi có người giao gửi vị trí thật từ điện thoại, có thể kết hợp dịch vụ bản đồ để hiển thị vị trí và thời gian dự kiến đến.'),
 ]
 
-# ---------------------------------------------------------------- Phụ lục B
-APPB = [
-('h2', 'PHỤ LỤC B. ẢNH MÀN HÌNH BỔ SUNG'),
-('p', 'Phụ lục này gồm các ảnh màn hình bổ sung cho chương 4, chụp ở chế độ dữ liệu mẫu của client ngày 14/11/2026. Dưới mỗi ảnh có đoạn nêu điểm cần chú ý.'),
-('fig', 'b_list', S('c4-orders'), 'Danh sách đơn hàng', False, 'B', 0.82),
-('p', 'Danh sách đơn gom đơn đã đặt và việc đã nhận, tách phần cần người dùng xử lý khỏi phần đang diễn ra, và chuyển các đơn đã kết thúc sang mục lịch sử. Trạng thái dùng cùng một bộ tên với thanh bước ở trang chi tiết.'),
-('fig', 'b_shop', S('c4-shop'), 'Gian hàng của người bán', False, 'B', 0.75),
-('p', 'Gian hàng là trang công khai của người bán, mở từ ảnh hoặc tên người bán ở trang chi tiết bài. Trang tóm tắt điểm đánh giá, số bài đang đăng và số đơn hoàn thành, với các tab bài đang bán, việc đang cần người và đánh giá.'),
-('fig', 'b_xu', S('c4-xu'), 'Ví AntXu và voucher', False, 'B', 0.82),
-('p', 'Trang AntXu hiển thị số dư, lịch sử cộng và trừ Xu, voucher đang có và cách đổi voucher. Mọi biến động được ghi vào sổ nên số dư truy vết được.'),
-('fig', 'b_profile', S('c4-profile'), 'Trang hồ sơ cá nhân', False, 'B', 0.82),
-('p', 'Trang hồ sơ gom bài đã lưu, sổ địa chỉ dùng chung cho các đơn và khu vực của người dùng. Sổ địa chỉ cho phép đặt hộ người khác bằng cách chọn địa chỉ của họ.'),
-('fig', 'b_notif', S('c4-notifications'), 'Danh sách thông báo', False, 'B', 0.75),
-('p', 'Thông báo được tạo từ các sự kiện của đơn và việc, như yêu cầu hủy hoặc đổi trạng thái, và mở đúng đơn liên quan khi bấm vào. Chấm báo trên chuông được đếm từ chính danh sách này.'),
-('fig', 'b_login', S('c4-login'), 'Màn hình đăng nhập', False, 'B', 0.8),
-('p', 'Đăng nhập dùng số điện thoại và mật khẩu hoặc tài khoản Google. Ô số điện thoại gợi ý các số đã nhớ, và tùy chọn ghi nhớ chỉ lưu số điện thoại chứ không lưu mật khẩu.'),
-]
+APPB = []   # Phụ lục B đã bỏ theo yêu cầu: ảnh đã đưa vào thân bài kèm mô tả

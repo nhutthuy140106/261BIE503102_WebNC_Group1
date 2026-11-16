@@ -11,7 +11,7 @@ AS = BR + r'\hinh-asis' + '\\'
 
 CH3 = [
 ('h1', 'CHƯƠNG 3. PHƯƠNG PHÁP THỰC HIỆN'),
-('p', 'Chương này trình bày cách nhóm thiết kế AntGo trước và trong khi viết mã. Nội dung đi từ quy trình làm việc của nhóm, phân tích yêu cầu và quy tắc nghiệp vụ, đến kiến trúc hệ thống, các luồng nghiệp vụ, thiết kế dữ liệu, các thuật toán tìm kiếm và gợi ý, giao diện, công cụ sử dụng và cách đo từng tiêu chí đã đặt ra ở chương 1. Các sơ đồ chính nằm trong chương, các sơ đồ bổ sung nằm ở Phụ lục A.'),
+('p', 'Chương này trình bày cách nhóm thiết kế AntGo trước và trong khi viết mã. Nội dung đi từ quy trình làm việc của nhóm, phân tích yêu cầu và quy tắc nghiệp vụ, đến kiến trúc hệ thống, các luồng nghiệp vụ, thiết kế dữ liệu, các thuật toán tìm kiếm và gợi ý, giao diện, công cụ sử dụng và cách đo từng tiêu chí đã đặt ra ở chương 1.'),
 
 # ---------------------------------------------------------------- 3.1
 ('h2', '3.1. Quy trình thực hiện'),
@@ -179,7 +179,7 @@ CH3 = [
 
 # ---------------------------------------------------------------- 3.4
 ('h2', '3.4. Mô hình nghiệp vụ và luồng dữ liệu'),
-('p', 'Nhóm mô tả hệ thống ở hai góc nhìn: quy trình nghiệp vụ bằng BPMN, thể hiện ai làm gì theo thứ tự, và luồng dữ liệu bằng DFD, thể hiện dữ liệu đi đâu và được lưu ở đâu. Quy trình tổng quan và ba luồng cốt lõi nằm trong chương; các quy trình còn lại nằm ở Phụ lục A.'),
+('p', 'Nhóm mô tả hệ thống ở hai góc nhìn: quy trình nghiệp vụ bằng BPMN, thể hiện ai làm gì theo thứ tự, và luồng dữ liệu bằng DFD, thể hiện dữ liệu đi đâu và được lưu ở đâu. Quy trình tổng quan và ba luồng cốt lõi nằm trong chương.'),
 ('h3', '3.4.1. Quy trình nghiệp vụ'),
 ('p', '{F:bp01} cho thấy vòng đời tổng quát của một thành viên, từ đăng ký đến khi một giao dịch kết thúc hoặc phát sinh vấn đề.'),
 ('land',),
@@ -205,17 +205,17 @@ CH3 = [
 ('fig', 'dfd00', DF + 'DFD00.png', 'Sơ đồ luồng dữ liệu mức 0 (ngữ cảnh)', False),
 ('p', 'Hệ thống chỉ có bốn đối tác bên ngoài: thành viên, quản trị viên, nhà cung cấp SMS và Google. Hai hệ thống ngoài chỉ nhận một loại dữ liệu hẹp, mã OTP hoặc yêu cầu xác thực, và không bao giờ nhận hồ sơ hay đơn hàng, nên thông tin giao dịch của cư dân không rời khỏi AntGo. Chiều ngược lại, kết quả gửi và kết quả xác thực là thứ duy nhất AntGo nhận về từ hai hệ thống này.'),
 ('fig', 'dfd01', DF + 'DFD01.png', 'Sơ đồ luồng dữ liệu mức 1: các quá trình chính', False),
-('p', 'Mức 1 chia hệ thống thành bảy quá trình, mỗi quá trình sở hữu một kho dữ liệu riêng: tài khoản, bài và việc, đơn, đề nghị, hội thoại và đánh giá, sổ Xu, báo cáo. Việc mỗi kho thuộc về một quá trình giúp thấy rõ quá trình nào được phép ghi vào đâu; chẳng hạn chỉ quá trình đơn mua ghi vào kho đơn, còn quá trình AntXu chỉ nhận sự kiện từ đơn rồi tự ghi sổ. Các mũi tên giữa quá trình cho thấy sự phụ thuộc: đơn mua lấy dữ liệu bài từ quá trình bài đăng, và gọi quá trình AntXu để áp voucher. Các sơ đồ mức 2 của bốn quá trình chính nằm ở Phụ lục A.'),
+('p', 'Mức 1 chia hệ thống thành bảy quá trình, mỗi quá trình sở hữu một kho dữ liệu riêng: tài khoản, bài và việc, đơn, đề nghị, hội thoại và đánh giá, sổ Xu, báo cáo. Việc mỗi kho thuộc về một quá trình giúp thấy rõ quá trình nào được phép ghi vào đâu; chẳng hạn chỉ quá trình đơn mua ghi vào kho đơn, còn quá trình AntXu chỉ nhận sự kiện từ đơn rồi tự ghi sổ. Các mũi tên giữa quá trình cho thấy sự phụ thuộc: đơn mua lấy dữ liệu bài từ quá trình bài đăng, và gọi quá trình AntXu để áp voucher.'),
 
 # ---------------------------------------------------------------- 3.5
 ('h2', '3.5. Thiết kế dữ liệu'),
 ('p', 'Dữ liệu được thiết kế ở hai mức: mô hình logic đích của toàn hệ thống và schema MongoDB đang chạy.'),
 ('h3', '3.5.1. Mô hình thực thể liên kết'),
-('p', 'Mô hình logic đích ({F:er01}) gồm 24 thực thể, bao gồm cả những thực thể nhóm mới đề xuất cho phía Bán như xác minh người bán, thay đổi đơn, khiếu nại giao dịch và xác nhận thanh toán. Schema MongoDB đang chạy ở server hiện có 16 collection, trình bày ở Phụ lục A.'),
+('p', 'Mô hình logic đích ({F:er01}) gồm 24 thực thể, bao gồm cả những thực thể nhóm mới đề xuất cho phía Bán như xác minh người bán, thay đổi đơn, khiếu nại giao dịch và xác nhận thanh toán. Schema MongoDB đang chạy ở server hiện có 16 collection.'),
 ('fig', 'er01', ER + 'ER01.png', 'Mô hình thực thể liên kết logic của AntGo', False),
 ('p', 'Mô hình dùng ký hiệu chân quạ, và quan hệ đa hình như đánh giá hay thông báo trỏ tới nhiều loại đối tượng được vẽ bằng nét đứt, vì MongoDB không có khóa ngoại để ràng buộc loại đối tượng. Dữ liệu con luôn đi cùng cha, chẳng hạn các nhóm tùy chọn món và câu hỏi riêng của bài, được nhúng thẳng vào tài liệu cha thay vì tách thành thực thể. Ngược lại, đơn tham chiếu tới người mua, người bán và bài bằng khóa ngoại, và lưu thêm một bản chụp thông tin bài lúc đặt, để sửa hoặc xóa bài sau này không làm đổi đơn đã có. Sổ AntXu được thiết kế dạng nhật ký chỉ ghi thêm, mỗi biến động là một bản ghi, và một bản ghi đảo có thể trỏ về bản ghi bị đảo, nên số dư luôn truy vết được.'),
 ('h3', '3.5.2. Từ điển dữ liệu'),
-('p', 'Bốn collection chính là User, Post, Order và Offer được mô tả ở {T:du}, {T:dp}, {T:do} và {T:df}; các collection còn lại nằm ở sơ đồ vật lý trong Phụ lục A.'),
+('p', 'Bốn collection chính là User, Post, Order và Offer được mô tả ở {T:du}, {T:dp}, {T:do} và {T:df}.'),
 ('tbl', 'du', 'Từ điển dữ liệu của User', [2300, 2100, 5241],
  ['Trường', 'Kiểu', 'Ý nghĩa và ràng buộc'],
  [['<c>name</c>', 'String', 'Tên hiển thị, tối đa 60 ký tự'],
@@ -413,3 +413,5 @@ APP = [
 ('fig', 'er03', ER + 'ER03.png', 'Mô hình dữ liệu vật lý MongoDB theo thiết kế đích', False, 'A'),
 ('p', 'So với schema hiện tại, thiết kế đích thêm các trường như thời điểm xác minh số điện thoại, hạn tranh chấp của đề nghị, và các thực thể quảng bá, định nghĩa voucher, thay đổi đơn, khiếu nại giao dịch và xác nhận thanh toán. Các phần này mới ở mức thiết kế; những phần thuộc phía Bán còn cần thống nhất với người phụ trách trước khi cài đặt.'),
 ]
+
+APP = []   # Phụ lục A đã bỏ theo yêu cầu (sơ đồ bổ sung không đưa vào báo cáo)
