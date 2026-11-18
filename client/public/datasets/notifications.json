@@ -5,7 +5,7 @@
     "link": "/orders/640b187e71d9faa9039f00ca",
     "read": false,
     "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
-    "createdAt": "2026-10-16T18:45:00.000Z",
+    "createdAt": "2026-11-17T18:45:00.000Z",
     "agoMin": 25
   },
   {
@@ -14,7 +14,7 @@
     "link": "/orders/640b187e71d9faa9039f00d2",
     "read": true,
     "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&q=70",
-    "createdAt": "2026-10-16T18:45:00.000Z",
+    "createdAt": "2026-11-17T18:45:00.000Z",
     "agoMin": 300
   },
   {
@@ -22,16 +22,18 @@
     "text": "Bếp Cô Lan đang chuẩn bị đơn AG-O3012.",
     "link": "/orders/640b187e71d9faa9039f00c9",
     "read": false,
-    "createdAt": "2026-10-16T10:10:00.000Z",
-    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70"
+    "createdAt": "2026-11-17T10:10:00.000Z",
+    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70",
+    "agoMin": 40
   },
   {
     "_id": "640b187e71d9faa9039f0503",
     "text": "Bếp Cô Lan: \"Ok con, cô nhớ rồi.\"",
     "link": "/messenger",
     "read": true,
-    "createdAt": "2026-10-16T10:08:00.000Z",
-    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70"
+    "createdAt": "2026-11-17T10:08:00.000Z",
+    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces&q=70",
+    "agoMin": 55
   },
   {
     "_id": "640b187e71d9faa9039f0505",
@@ -39,7 +41,7 @@
     "link": "/orders/640b187e71d9faa9039f00d1",
     "read": false,
     "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&q=70",
-    "createdAt": "2026-10-16T18:45:00.000Z",
+    "createdAt": "2026-11-17T18:45:00.000Z",
     "agoMin": 150
   },
   {
@@ -47,7 +49,95 @@
     "text": "Chị Ngân đã chọn bạn cho việc \"Cho mèo ăn 3 ngày khi đi vắng\".",
     "link": "/orders/640b187e71d9faa9039f00cc",
     "read": false,
-    "createdAt": "2026-10-15T11:30:00.000Z",
+    "createdAt": "2026-11-16T11:30:00.000Z",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=70",
+    "agoMin": 1500
+  },
+  {
+    "_id": "640b187e71d9faa9039f0700",
+    "text": "Quán Nhà Mây đang giao đơn AG-O3109, shipper sắp tới nơi.",
+    "link": "/orders/640b187e71d9faa9039f0603",
+    "read": false,
+    "createdAt": "2026-11-19T04:18:00Z",
+    "agoMin": 12,
+    "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0701",
+    "text": "Đơn AG-O3112 đã gửi tới Bác Sơn, đang chờ xác nhận.",
+    "link": "/orders/640b187e71d9faa9039f0604",
+    "read": false,
+    "createdAt": "2026-11-19T04:02:00Z",
+    "agoMin": 28,
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0702",
+    "text": "Cơm sườn rim của Bếp Cô Lan đang giảm giá Giờ vàng đến 10:00.",
+    "link": "/posts/149d439536b3216fdaeeb975",
+    "read": false,
+    "createdAt": "2026-11-19T03:00:00Z",
+    "agoMin": 90,
+    "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0703",
+    "text": "Anh Tùng đã xác nhận lịch vệ sinh máy lạnh AG-O3115, hẹn mai 17:00.",
+    "link": "/orders/640b187e71d9faa9039f0605",
+    "read": false,
+    "createdAt": "2026-11-18T17:50:00Z",
+    "agoMin": 640,
     "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0704",
+    "text": "Chị Hoa vừa đăng việc \"Phơi và gấp đồ cuối tuần\" ở gần bạn.",
+    "link": "/posts/job/913d839e5192643cca0e655c",
+    "read": false,
+    "createdAt": "2026-11-18T21:40:00Z",
+    "agoMin": 410,
+    "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0705",
+    "text": "Bạn nhận +10 Xu từ đơn AG-O3100 đã hoàn thành.",
+    "link": "/xu",
+    "read": true,
+    "createdAt": "2026-11-16T04:50:00Z",
+    "agoMin": 4300
+  },
+  {
+    "_id": "640b187e71d9faa9039f0706",
+    "text": "Bạn nhận +5 Xu cho đánh giá có nội dung của đơn AG-O3103.",
+    "link": "/xu",
+    "read": true,
+    "createdAt": "2026-11-14T07:50:00Z",
+    "agoMin": 7000
+  },
+  {
+    "_id": "640b187e71d9faa9039f0707",
+    "text": "Quán Nhà Mây đã gửi lời cảm ơn đánh giá của bạn cho đơn AG-O3100.",
+    "link": "/orders/640b187e71d9faa9039f0600",
+    "read": true,
+    "createdAt": "2026-11-17T04:10:00Z",
+    "agoMin": 2900,
+    "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0708",
+    "text": "Đơn AG-O3124 đã hủy theo yêu cầu của bạn.",
+    "link": "/orders/640b187e71d9faa9039f0608",
+    "read": true,
+    "createdAt": "2026-11-17T05:00:00Z",
+    "agoMin": 2850,
+    "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0709",
+    "text": "Chào mừng bạn đến AntGo! Bạn có 30 Xu chào mừng trong ví AntXu.",
+    "link": "/xu",
+    "read": true,
+    "createdAt": "2026-11-09T11:10:00Z",
+    "agoMin": 14000
   }
 ]

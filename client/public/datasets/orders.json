@@ -9,7 +9,7 @@
     "status": "preparing",
     "total": 75000,
     "paymentMethod": "cash",
-    "createdAt": "2026-10-16T10:00:00.000Z",
+    "createdAt": "2026-11-17T10:00:00.000Z",
     "counterpartAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
     "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&h=375&fit=crop&q=70",
     "counterpartId": "640b187e71d9faa9039f0065",
@@ -32,7 +32,7 @@
       "quantityLabel": "Số lượng",
       "unit": "phần",
       "whenLabel": "Thời gian",
-      "when": "16/10/2026 · 11:30",
+      "when": "17/11/2026 · 11:30",
       "placeLabel": "Hình thức nhận hàng",
       "place": "Giao tận nơi",
       "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05",
@@ -41,11 +41,11 @@
     "history": [
       {
         "state": "Bạn gửi yêu cầu",
-        "at": "2026-10-16T09:40:00Z"
+        "at": "2026-11-17T09:40:00Z"
       },
       {
         "state": "Bếp Cô Lan xác nhận",
-        "at": "2026-10-16T09:50:00Z"
+        "at": "2026-11-17T09:50:00Z"
       }
     ]
   },
@@ -59,7 +59,7 @@
     "status": "pricing",
     "total": 90000,
     "paymentMethod": "transfer",
-    "createdAt": "2026-10-16T11:00:00.000Z",
+    "createdAt": "2026-11-17T11:00:00.000Z",
     "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
     "image": "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500&h=375&fit=crop&q=70",
     "counterpartId": "640b187e71d9faa9039f006c",
@@ -96,22 +96,22 @@
       "quantityLabel": "Khối lượng ước tính",
       "unit": "kg",
       "whenLabel": "Thời gian",
-      "when": "16/10/2026 · 18:00",
+      "when": "17/11/2026 · 18:00",
       "placeLabel": "Hình thức nhận hàng",
       "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
     },
     "history": [
       {
         "state": "Bạn gửi yêu cầu",
-        "at": "2026-10-16T08:20:00Z"
+        "at": "2026-11-17T08:20:00Z"
       },
       {
         "state": "Mỹ Linh xác nhận",
-        "at": "2026-10-16T08:35:00Z"
+        "at": "2026-11-17T08:35:00Z"
       },
       {
         "state": "Mỹ Linh báo giá cuối",
-        "at": "2026-10-16T18:25:00Z"
+        "at": "2026-11-17T18:25:00Z"
       }
     ],
     "oldTotal": null
@@ -126,7 +126,7 @@
     "status": "done",
     "total": 90000,
     "paymentMethod": "cash",
-    "createdAt": "2026-10-10T07:00:00.000Z",
+    "createdAt": "2026-11-11T07:00:00.000Z",
     "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&h=375&fit=crop&q=70",
     "counterpartId": "640b187e71d9faa9039f0066",
     "category": "food",
@@ -147,7 +147,7 @@
       "quantityLabel": "Số lượng",
       "unit": "tô",
       "whenLabel": "Thời gian",
-      "when": "10/10/2026 · 12:00",
+      "when": "11/11/2026 · 12:00",
       "placeLabel": "Hình thức nhận hàng",
       "place": "Tự đến lấy",
       "utensils": false
@@ -155,15 +155,15 @@
     "history": [
       {
         "state": "Bạn gửi yêu cầu",
-        "at": "2026-10-10T09:58:00Z"
+        "at": "2026-11-11T09:58:00Z"
       },
       {
         "state": "Quán xác nhận",
-        "at": "2026-10-10T10:05:00Z"
+        "at": "2026-11-11T10:05:00Z"
       },
       {
         "state": "Bạn nhận món",
-        "at": "2026-10-10T11:45:00Z"
+        "at": "2026-11-11T11:45:00Z"
       }
     ],
     "counterpartAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70"
@@ -178,7 +178,7 @@
     "status": "done",
     "total": 72000,
     "paymentMethod": "transfer",
-    "createdAt": "2026-10-09T06:00:00.000Z",
+    "createdAt": "2026-11-10T06:00:00.000Z",
     "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
     "image": "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500&h=375&fit=crop&q=70",
     "counterpartId": "640b187e71d9faa9039f006c",
@@ -204,22 +204,22 @@
       "quantityLabel": "Khối lượng ước tính",
       "unit": "kg",
       "whenLabel": "Thời gian",
-      "when": "09/10/2026 · 18:00",
+      "when": "10/11/2026 · 18:00",
       "placeLabel": "Hình thức nhận hàng",
       "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
     },
     "history": [
       {
         "state": "Bạn gửi yêu cầu",
-        "at": "2026-10-09T06:00:00Z"
+        "at": "2026-11-10T06:00:00Z"
       },
       {
         "state": "Mỹ Linh xác nhận",
-        "at": "2026-10-09T06:20:00Z"
+        "at": "2026-11-10T06:20:00Z"
       },
       {
         "state": "Bạn nhận đồ",
-        "at": "2026-10-10T10:00:00Z"
+        "at": "2026-11-11T10:00:00Z"
       }
     ],
     "doneAgoH": 150
@@ -235,7 +235,7 @@
     "total": 150000,
     "paymentMethod": "cash",
     "note": "Nhận chìa khóa ở bảo vệ.",
-    "createdAt": "2026-10-15T09:00:00.000Z",
+    "createdAt": "2026-11-16T09:00:00.000Z",
     "counterpartAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=70",
     "category": "job",
     "counterpartId": "640b187e71d9faa9039f006e"
@@ -254,7 +254,7 @@
     "status": "confirmed",
     "total": 80000,
     "paymentMethod": "cash",
-    "createdAt": "2026-10-16T09:50:00Z",
+    "createdAt": "2026-11-17T09:50:00Z",
     "priceCheck": "quote",
     "apptIn": 5,
     "detail": {
@@ -275,7 +275,7 @@
         "Hoàn thành"
       ],
       "whenLabel": "Thời gian",
-      "when": "16/10/2026 · 19:00",
+      "when": "17/11/2026 · 19:00",
       "placeLabel": "Hình thức nhận hàng",
       "place": "Thợ đến nhà",
       "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
@@ -283,11 +283,11 @@
     "history": [
       {
         "state": "Bạn gửi yêu cầu kiểm tra",
-        "at": "2026-10-16T09:50:00Z"
+        "at": "2026-11-17T09:50:00Z"
       },
       {
         "state": "Anh Tùng xác nhận",
-        "at": "2026-10-16T10:05:00Z"
+        "at": "2026-11-17T10:05:00Z"
       }
     ]
   },
@@ -305,7 +305,7 @@
     "status": "confirmed",
     "total": 15000,
     "paymentMethod": "cash",
-    "createdAt": "2026-10-16T14:10:00Z",
+    "createdAt": "2026-11-17T14:10:00Z",
     "priceCheck": "surcharge",
     "detail": {
       "lines": [
@@ -323,18 +323,18 @@
         "Đã giao"
       ],
       "whenLabel": "Thời gian",
-      "when": "16/10/2026 · 14:30",
+      "when": "17/11/2026 · 14:30",
       "placeLabel": "Hình thức nhận hàng",
       "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
     },
     "history": [
       {
         "state": "Bạn gửi yêu cầu",
-        "at": "2026-10-16T14:10:00Z"
+        "at": "2026-11-17T14:10:00Z"
       },
       {
         "state": "Minh xác nhận",
-        "at": "2026-10-16T14:12:00Z"
+        "at": "2026-11-17T14:12:00Z"
       }
     ]
   },
@@ -352,7 +352,7 @@
     "status": "done",
     "total": 650000,
     "paymentMethod": "cash",
-    "createdAt": "2026-10-16T13:02:00Z",
+    "createdAt": "2026-11-17T13:02:00Z",
     "doneAgoH": 3,
     "detail": {
       "lines": [],
@@ -366,7 +366,7 @@
         "Hoàn thành"
       ],
       "whenLabel": "Thời gian",
-      "when": "16/10/2026 · 17:30",
+      "when": "17/11/2026 · 17:30",
       "placeLabel": "Hình thức nhận hàng",
       "pickup": true,
       "address": "Block A · căn 08.11"
@@ -374,20 +374,550 @@
     "history": [
       {
         "state": "Bạn gửi yêu cầu",
-        "at": "2026-10-16T13:02:00Z"
+        "at": "2026-11-17T13:02:00Z"
       },
       {
         "state": "Anh Quân xác nhận",
-        "at": "2026-10-16T13:10:00Z"
+        "at": "2026-11-17T13:10:00Z"
       },
       {
         "state": "Anh Quân báo sẵn sàng lấy",
-        "at": "2026-10-16T15:00:00Z"
+        "at": "2026-11-17T15:00:00Z"
       },
       {
         "state": "Bạn xác nhận đã nhận đủ",
-        "at": "2026-10-16T15:40:00Z"
+        "at": "2026-11-17T15:40:00Z"
       }
     ]
+  },
+  {
+    "_id": "640b187e71d9faa9039f0600",
+    "code": "AG-O3100",
+    "type": "placed",
+    "postId": "4856cac66cb5332fcb85a658",
+    "postTitle": "Trà sữa trân châu đường đen",
+    "counterpartName": "Quán Nhà Mây",
+    "status": "done",
+    "total": 65000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-11-16T08:30:00Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1558857563-b371033873b8?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "3879c87983cc0b2ab2a93cfa",
+    "category": "food",
+    "kind": "food",
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-11-16T08:30:00Z"
+      },
+      {
+        "state": "Quán Nhà Mây xác nhận",
+        "at": "2026-11-16T08:42:00Z"
+      },
+      {
+        "state": "Bạn nhận món",
+        "at": "2026-11-16T10:30:00Z"
+      }
+    ],
+    "detail": {
+      "lines": [],
+      "subtotal": 60000,
+      "fee": 5000,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Chờ xác nhận",
+        "Đang giao",
+        "Hoàn thành"
+      ],
+      "quantity": 2,
+      "quantityLabel": "Số lượng",
+      "unit": "ly",
+      "whenLabel": "Thời gian",
+      "when": "16/11/2026 · 16:30",
+      "placeLabel": "Hình thức nhận hàng",
+      "place": "Giao tận nơi",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05",
+      "utensils": true
+    },
+    "doneAgoH": 66,
+    "rated": {
+      "s": 5,
+      "t": "Trà thơm, trân châu dai, giao nhanh."
+    }
+  },
+  {
+    "_id": "640b187e71d9faa9039f0601",
+    "code": "AG-O3103",
+    "type": "placed",
+    "postId": "312728497bf7e074011fdbe2",
+    "postTitle": "Salad ức gà",
+    "counterpartName": "Thu Hà",
+    "status": "done",
+    "total": 50000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-11-14T04:00:00Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1572448910681-3341d74893d2?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "68c2d1ff487de0e8d299ec16",
+    "category": "food",
+    "kind": "food",
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-11-14T04:00:00Z"
+      },
+      {
+        "state": "Thu Hà xác nhận",
+        "at": "2026-11-14T04:12:00Z"
+      },
+      {
+        "state": "Bạn nhận món",
+        "at": "2026-11-14T06:00:00Z"
+      }
+    ],
+    "detail": {
+      "lines": [],
+      "subtotal": 45000,
+      "fee": 5000,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Chờ xác nhận",
+        "Đang giao",
+        "Hoàn thành"
+      ],
+      "quantity": 1,
+      "quantityLabel": "Số lượng",
+      "unit": "hộp",
+      "whenLabel": "Thời gian",
+      "when": "14/11/2026 · 12:00",
+      "placeLabel": "Hình thức nhận hàng",
+      "place": "Giao tận nơi",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05",
+      "utensils": false
+    },
+    "doneAgoH": 118,
+    "rated": {
+      "s": 4,
+      "t": "Salad tươi, ức gà hơi ít sốt một chút."
+    }
+  },
+  {
+    "_id": "640b187e71d9faa9039f0602",
+    "code": "AG-O3106",
+    "type": "placed",
+    "postId": "2229ab0ca991c313f731b807",
+    "postTitle": "Mì xào hải sản",
+    "counterpartName": "Chị Hoa",
+    "status": "done",
+    "total": 85000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-11-11T05:00:00Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "d3cb4d4e1a036f3674759c50",
+    "category": "food",
+    "kind": "food",
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-11-11T05:00:00Z"
+      },
+      {
+        "state": "Chị Hoa xác nhận",
+        "at": "2026-11-11T05:12:00Z"
+      },
+      {
+        "state": "Bạn nhận món",
+        "at": "2026-11-11T07:00:00Z"
+      }
+    ],
+    "detail": {
+      "lines": [],
+      "subtotal": 80000,
+      "fee": 5000,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Chờ xác nhận",
+        "Đang giao",
+        "Hoàn thành"
+      ],
+      "quantity": 2,
+      "quantityLabel": "Số lượng",
+      "unit": "phần",
+      "whenLabel": "Thời gian",
+      "when": "11/11/2026 · 13:00",
+      "placeLabel": "Hình thức nhận hàng",
+      "place": "Giao tận nơi",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05",
+      "utensils": true
+    },
+    "doneAgoH": 190,
+    "rated": {
+      "s": 5,
+      "t": "Mì giòn, nhiều hải sản, sẽ đặt lại."
+    }
+  },
+  {
+    "_id": "640b187e71d9faa9039f0603",
+    "code": "AG-O3109",
+    "type": "placed",
+    "postId": "b1c88c532540338a95346b95",
+    "postTitle": "Pancake mật ong",
+    "counterpartName": "Tiệm Bánh Nhà Mây",
+    "status": "delivering",
+    "total": 75000,
+    "paymentMethod": "transfer",
+    "createdAt": "2026-11-19T03:15:00Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "c8fccc0c847821e97624849c",
+    "category": "food",
+    "kind": "food",
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-11-19T03:15:00Z"
+      },
+      {
+        "state": "Tiệm Bánh Nhà Mây xác nhận",
+        "at": "2026-11-19T03:27:00Z"
+      },
+      {
+        "state": "Tiệm Bánh Nhà Mây đang giao",
+        "at": "2026-11-19T03:55:00Z"
+      }
+    ],
+    "detail": {
+      "lines": [],
+      "subtotal": 70000,
+      "fee": 5000,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Chờ xác nhận",
+        "Đang giao",
+        "Hoàn thành"
+      ],
+      "quantity": 2,
+      "quantityLabel": "Số lượng",
+      "unit": "phần",
+      "whenLabel": "Thời gian",
+      "when": "19/11/2026 · 11:15",
+      "placeLabel": "Hình thức nhận hàng",
+      "place": "Giao tận nơi",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05",
+      "utensils": true
+    }
+  },
+  {
+    "_id": "640b187e71d9faa9039f0604",
+    "code": "AG-O3112",
+    "type": "placed",
+    "postId": "a898b5da53817044d27e3ebd",
+    "postTitle": "Xiên nướng BBQ",
+    "counterpartName": "Bác Sơn",
+    "status": "pending",
+    "total": 180000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-11-19T04:02:00Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "dc7445aa449448fc6bdb17fc",
+    "category": "food",
+    "kind": "food",
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-11-19T04:02:00Z"
+      }
+    ],
+    "detail": {
+      "lines": [],
+      "subtotal": 180000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Chờ xác nhận",
+        "Đang giao",
+        "Hoàn thành"
+      ],
+      "quantity": 3,
+      "quantityLabel": "Số lượng",
+      "unit": "phần",
+      "whenLabel": "Thời gian",
+      "when": "19/11/2026 · 12:02",
+      "placeLabel": "Hình thức nhận hàng",
+      "place": "Tự đến lấy",
+      "utensils": true
+    }
+  },
+  {
+    "_id": "640b187e71d9faa9039f0605",
+    "code": "AG-O3115",
+    "type": "placed",
+    "postId": "aa67db355def9cfcf812e78d",
+    "postTitle": "Vệ sinh máy lạnh",
+    "counterpartName": "Anh Tùng",
+    "status": "confirmed",
+    "total": 300000,
+    "paymentMethod": "transfer",
+    "createdAt": "2026-11-18T10:00:00Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "d59add8526b35df5fd252118",
+    "category": "service",
+    "kind": "service",
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-11-18T10:00:00Z"
+      },
+      {
+        "state": "Anh Tùng xác nhận",
+        "at": "2026-11-18T10:12:00Z"
+      }
+    ],
+    "detail": {
+      "lines": [],
+      "subtotal": 300000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Đã xác nhận",
+        "Đang làm",
+        "Hoàn thành"
+      ],
+      "quantity": 2,
+      "quantityLabel": "Số lượng",
+      "unit": "máy",
+      "whenLabel": "Thời gian",
+      "when": "19/11/2026 · 19:00",
+      "placeLabel": "Hình thức nhận hàng",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
+    },
+    "apptIn": 20
+  },
+  {
+    "_id": "640b187e71d9faa9039f0606",
+    "code": "AG-O3118",
+    "type": "placed",
+    "postId": "f35da3243e06fc2051202856",
+    "postTitle": "Giặt hấp đồ vest",
+    "counterpartName": "Giặt sấy Mỹ Linh",
+    "status": "done",
+    "total": 90000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-11-13T02:00:00Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1451933335233-c41672c8f378?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "dc12b543e1ac00d2d4154a6b",
+    "category": "service",
+    "kind": "service",
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-11-13T02:00:00Z"
+      },
+      {
+        "state": "Giặt sấy Mỹ Linh xác nhận",
+        "at": "2026-11-13T02:12:00Z"
+      },
+      {
+        "state": "Bạn xác nhận hoàn thành",
+        "at": "2026-11-13T04:00:00Z"
+      }
+    ],
+    "detail": {
+      "lines": [],
+      "subtotal": 90000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Đã xác nhận",
+        "Đang làm",
+        "Hoàn thành"
+      ],
+      "quantity": 2,
+      "quantityLabel": "Số lượng",
+      "unit": "bộ",
+      "whenLabel": "Thời gian",
+      "when": "13/11/2026 · 11:00",
+      "placeLabel": "Hình thức nhận hàng",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
+    },
+    "doneAgoH": 144,
+    "rated": {
+      "s": 5,
+      "t": "Vest phẳng phiu, trả đúng hẹn."
+    }
+  },
+  {
+    "_id": "640b187e71d9faa9039f0607",
+    "code": "AG-O3121",
+    "type": "placed",
+    "postId": "2aaf04ea6838cbb90b8e053d",
+    "postTitle": "Dắt chó đi dạo buổi chiều",
+    "counterpartName": "Minh",
+    "status": "done",
+    "total": 50000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-11-09T09:00:00Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "79212be468b5052f881849da",
+    "category": "service",
+    "kind": "service",
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-11-09T09:00:00Z"
+      },
+      {
+        "state": "Minh xác nhận",
+        "at": "2026-11-09T09:12:00Z"
+      },
+      {
+        "state": "Bạn xác nhận hoàn thành",
+        "at": "2026-11-09T11:00:00Z"
+      }
+    ],
+    "detail": {
+      "lines": [],
+      "subtotal": 50000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Đã xác nhận",
+        "Đang làm",
+        "Hoàn thành"
+      ],
+      "quantity": 1,
+      "quantityLabel": "Số lượng",
+      "unit": "lượt",
+      "whenLabel": "Thời gian",
+      "when": "09/11/2026 · 18:00",
+      "placeLabel": "Hình thức nhận hàng",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05"
+    },
+    "doneAgoH": 234,
+    "rated": {
+      "s": 5,
+      "t": "Bé Mực rất thích, bạn Minh dắt cẩn thận."
+    }
+  },
+  {
+    "_id": "640b187e71d9faa9039f0608",
+    "code": "AG-O3124",
+    "type": "placed",
+    "postId": "a6c9f01ff90cb1c2b5d15d00",
+    "postTitle": "Cà phê sữa đá",
+    "counterpartName": "Quán Nhà Mây",
+    "status": "cancelled",
+    "total": 55000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-11-17T01:00:00Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "3879c87983cc0b2ab2a93cfa",
+    "category": "food",
+    "kind": "food",
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-11-17T01:00:00Z"
+      },
+      {
+        "state": "Bạn hủy đơn",
+        "at": "2026-11-17T01:08:00Z"
+      }
+    ],
+    "detail": {
+      "lines": [],
+      "subtotal": 50000,
+      "fee": 5000,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Chờ xác nhận",
+        "Đang giao",
+        "Hoàn thành"
+      ],
+      "quantity": 2,
+      "quantityLabel": "Số lượng",
+      "unit": "ly",
+      "whenLabel": "Thời gian",
+      "when": "17/11/2026 · 09:00",
+      "placeLabel": "Hình thức nhận hàng",
+      "place": "Giao tận nơi",
+      "address": "Ngọc Thủy · 0901234567\nBlock B · Căn 12.05",
+      "utensils": true
+    },
+    "cancelBy": "buyer",
+    "cancelWhy": "Mình đổi ý, sẽ đặt lại sau."
+  },
+  {
+    "_id": "640b187e71d9faa9039f0609",
+    "code": "AG-O3127",
+    "type": "placed",
+    "postId": "5ec84d8dbc74254770f58904",
+    "postTitle": "Bộ hộp cơm inox ×6",
+    "counterpartName": "Bếp Cô Lan",
+    "status": "done",
+    "total": 180000,
+    "paymentMethod": "cash",
+    "createdAt": "2026-11-07T07:00:00Z",
+    "counterpartAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=70",
+    "image": "https://images.unsplash.com/photo-1556807539-98320ad1e615?w=500&h=375&fit=crop&q=70",
+    "counterpartId": "27e64e583095ddf04b21f0e7",
+    "category": "goods",
+    "kind": "goods",
+    "history": [
+      {
+        "state": "Bạn gửi yêu cầu",
+        "at": "2026-11-07T07:00:00Z"
+      },
+      {
+        "state": "Bếp Cô Lan xác nhận",
+        "at": "2026-11-07T07:12:00Z"
+      },
+      {
+        "state": "Bạn xác nhận đã nhận đủ",
+        "at": "2026-11-07T09:00:00Z"
+      }
+    ],
+    "detail": {
+      "lines": [],
+      "subtotal": 180000,
+      "fee": 0,
+      "discount": 0,
+      "steps": [
+        "Đã gửi",
+        "Chờ xác nhận",
+        "Hẹn lấy hàng",
+        "Hoàn thành"
+      ],
+      "quantity": 1,
+      "quantityLabel": "Số lượng",
+      "unit": "bộ",
+      "whenLabel": "Thời gian",
+      "when": "07/11/2026 · 16:00",
+      "placeLabel": "Hình thức nhận hàng",
+      "place": "Tự đến lấy",
+      "pickup": true,
+      "address": "Block A · căn 08.11"
+    },
+    "doneAgoH": 284,
+    "rated": {
+      "s": 4,
+      "t": "Hộp tốt, đúng như mô tả."
+    }
   }
 ]
