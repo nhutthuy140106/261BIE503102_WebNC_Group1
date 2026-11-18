@@ -163,16 +163,7 @@
       @for (f of feedFilters; track f.key) {
         <button type="button" [class.on]="feedFilter() === f.key" (click)="setFilter(f.key)">{{ f.label }}</button>
       }
-      <div class="sortbox" [class.open]="sortMenuOpen()">
-        <button type="button" class="sortbtn" (click)="$event.stopPropagation(); sortMenuOpen.set(!sortMenuOpen())">
-          Sắp xếp: <b>{{ sortLabel() }}</b><svg class="i"><use href="#chev" /></svg>
-        </button>
-        <div class="sortmenu" (click)="$event.stopPropagation()">
-          @for (o of sortMenu(); track o.key) {
-            <button type="button" [class.on]="feedSort() === o.key" (click)="setSort(o.key)">{{ o.label }}</button>
-          }
-        </div>
-      </div>
+      <app-sort-menu class="sortslot" [options]="sortMenu()" [value]="feedSort()" (valueChange)="setSort($any($event))" />
     </div>
     <div class="grid">
       @for (p of feed(); track p._id) {

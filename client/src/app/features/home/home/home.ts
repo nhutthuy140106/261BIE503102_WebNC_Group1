@@ -118,9 +118,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   protected readonly feedSort = signal<FeedSort>('mix');
   /** Hạt giống của lần xáo trộn: đổi mỗi lần vào trang, nên thứ tự ngẫu nhiên nhưng ổn định khi bấm lọc / quay lại xem tiếp */
   private readonly mixSeed = Math.floor(Math.random() * 2 ** 31);
-  protected readonly sortMenuOpen = signal(false);
   protected readonly sortMenu = computed(() => this.sortOptions[this.feedFilter()].map((k) => ({ key: k, label: this.sortLabels[k] })));
-  protected readonly sortLabel = computed(() => this.sortLabels[this.feedSort()]);
 
   protected readonly feed = computed(() => {
     const f = this.feedFilter();
@@ -259,12 +257,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
 
   protected setSort(s: FeedSort): void {
     this.feedSort.set(s);
-    this.sortMenuOpen.set(false);
-  }
-
-  @HostListener('document:click')
-  closeSortMenu(): void {
-    this.sortMenuOpen.set(false);
   }
 
   // ----- khác -----

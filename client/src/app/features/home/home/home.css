@@ -91,7 +91,7 @@
 .ffilter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
 .ffilter > button { height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--smoke); font-weight: 500; font-size: 13px; }
 .ffilter > button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
-.sortbox { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--smoke); }
+.sortslot { margin-left: auto; position: relative; }
 .sortbox select { height: 34px; padding: 0 10px; border-radius: 8px; font-size: 13px; }
 
 @media (max-width: 700px) {
