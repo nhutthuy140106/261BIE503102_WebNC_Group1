@@ -13,6 +13,9 @@ const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 
+// Chạy sau proxy ngược (nginx, hosting): tin X-Forwarded-* để cookie phiên 'secure' hoạt động qua HTTPS
+if (isProd) app.set('trust proxy', 1);
+
 // Header an toàn. CSP tắt vì đây là API JSON (Swagger UI cần script nội tuyến); ảnh /images được FE khác origin nhúng nên cho cross-origin
 app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 // FE (Angular) gọi kèm cookie => phải chỉ đích danh origin và bật credentials

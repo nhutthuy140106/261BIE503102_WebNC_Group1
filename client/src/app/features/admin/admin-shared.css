@@ -161,7 +161,6 @@ select option { background: var(--a-glass); color: var(--a-ink); }
   .tbl.vt td, .tbl.vt td:not(:first-child):not(.act) { overflow-wrap: anywhere; white-space: normal; } /* mã hoặc tên dài không có khoảng trắng vẫn tự xuống dòng trong cột, không đè sang cột bên cạnh */
   .tbl.vt td.act { padding-right: 12px; white-space: nowrap; }
 }
-}
 .vcode { display: inline-block; max-width: 100%; word-break: break-all; line-height: 1.4; padding: 3px 12px; border: 1px solid rgba(245, 138, 91, .5); border-radius: 8px; background: var(--a-accent-soft); color: var(--a-accent-ink); font-size: 13.5px; font-weight: 600; text-transform: none; overflow-wrap: anywhere; }
 
 /* ô bắt buộc: dấu * đỏ ở nhãn; thiếu hoặc sai thì viền đỏ sau khi bấm Tạo */
