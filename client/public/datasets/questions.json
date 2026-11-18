@@ -14,5 +14,349 @@
     "authorName": "Phương",
     "answer": null,
     "createdAt": "2026-10-14T08:30:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0201",
+    "jobId": "afeee39565820b3997cf5e4b",
+    "text": "Nhà ở tầng 2 mà có thang máy không ạ, hay phải leo cầu thang?",
+    "authorName": "Minh",
+    "answer": "Có thang máy nhé, mang lên cửa là được. Bạn không cần leo thang.",
+    "createdAt": "2026-11-18T08:40:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0202",
+    "jobId": "afeee39565820b3997cf5e4b",
+    "text": "Mình lấy cơm ở cổng sau lúc mấy giờ ạ?",
+    "authorName": "Phương",
+    "answer": "Thường khoảng 11:40–12:00, mình sẽ nhắn bạn khi shipper tới.",
+    "createdAt": "2026-11-18T09:05:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0203",
+    "jobId": "afeee39565820b3997cf5e4b",
+    "text": "Nếu cơm nguội hay bị đổ thì sao bạn nhỉ?",
+    "authorName": "Thu Hà",
+    "answer": null,
+    "createdAt": "2026-11-18T10:20:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0204",
+    "jobId": "e5b0a82f0117a68cd9e0123a",
+    "text": "Máy hút bụi và nước lau sàn có sẵn không anh?",
+    "authorName": "Hùng Phạm",
+    "answer": "Có sẵn máy hút bụi, cây lau nhà và nước lau, bạn không cần mang gì.",
+    "createdAt": "2026-11-17T09:15:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0205",
+    "jobId": "e5b0a82f0117a68cd9e0123a",
+    "text": "Nhà có nuôi thú cưng không ạ?",
+    "authorName": "Lan Anh",
+    "answer": "Nhà có 1 bé mèo rất hiền, bạn dị ứng lông thì cho mình biết trước nhé.",
+    "createdAt": "2026-11-17T10:02:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0206",
+    "jobId": "e5b0a82f0117a68cd9e0123a",
+    "text": "Mình dọn khoảng bao lâu thì xong ạ, có cần làm cả ban công không?",
+    "authorName": "Anh Tuấn",
+    "answer": null,
+    "createdAt": "2026-11-17T14:30:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0207",
+    "jobId": "817afe1d24a680a772c9ee23",
+    "text": "Mình có cần mang máy ảnh riêng không, hay bên mình cho mượn?",
+    "authorName": "Phương",
+    "answer": "Bạn dùng máy riêng nhé, điện thoại đời mới chụp đẹp cũng được. Mình cần ảnh gốc, không cần chỉnh màu.",
+    "createdAt": "2026-11-16T19:30:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0208",
+    "jobId": "817afe1d24a680a772c9ee23",
+    "text": "Ảnh gửi lại bằng cách nào và khi nào cần xong ạ?",
+    "authorName": "Khoa Nguyễn",
+    "answer": "Gửi qua Google Drive trong vòng 2 ngày sau buổi workshop là kịp.",
+    "createdAt": "2026-11-16T20:10:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0209",
+    "jobId": "817afe1d24a680a772c9ee23",
+    "text": "Có chụp mặt người tham gia không, hay chỉ chụp sản phẩm và không gian?",
+    "authorName": "Mai Trâm",
+    "answer": null,
+    "createdAt": "2026-11-17T07:45:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f020a",
+    "jobId": "01b6928e7673171b80bf4450",
+    "text": "Bé học hình học đến phần nào rồi ạ, nhà có tài liệu riêng hay dùng sách giáo khoa?",
+    "authorName": "Chị Hoa",
+    "answer": "Bé đang ở chương Tam giác đồng dạng. Nhà có sách giáo khoa và vở bài tập, bạn dùng thêm tài liệu riêng càng tốt.",
+    "createdAt": "2026-11-15T18:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f020b",
+    "jobId": "01b6928e7673171b80bf4450",
+    "text": "Mình có thể dạy tối thứ 3 và thứ 5 được không ạ?",
+    "authorName": "Minh",
+    "answer": "Được nhé, tối thứ 3 và 5 từ 19:00 là phù hợp với nhà mình.",
+    "createdAt": "2026-11-15T18:45:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f020c",
+    "jobId": "01b6928e7673171b80bf4450",
+    "text": "Mức 100.000đ là cho mỗi buổi 90 phút đúng không ạ?",
+    "authorName": "Hùng Phạm",
+    "answer": null,
+    "createdAt": "2026-11-16T12:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f020d",
+    "jobId": "282a0cf8aca72eb70c1ddf6c",
+    "text": "Hai bé mèo có sợ người lạ không ạ, mình tới cho ăn lần đầu có cần gặp trước?",
+    "authorName": "Lan Anh",
+    "answer": "Hai bé hơi nhút nhát lúc đầu nhưng quen nhanh nếu bạn đứng yên và rót hạt. Mình sẽ cho bạn gặp trước 15 phút.",
+    "createdAt": "2026-11-14T07:50:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f020e",
+    "jobId": "282a0cf8aca72eb70c1ddf6c",
+    "text": "Chìa khóa nhà nhận như thế nào ạ?",
+    "authorName": "Phương",
+    "answer": "Mình gửi chìa khóa cho bạn trước ngày đi, bạn nhận trực tiếp ở sảnh Block B.",
+    "createdAt": "2026-11-14T08:20:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f020f",
+    "jobId": "282a0cf8aca72eb70c1ddf6c",
+    "text": "Cần chụp ảnh báo cáo mỗi ngày không ạ?",
+    "authorName": "Thu Hà",
+    "answer": null,
+    "createdAt": "2026-11-15T09:10:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0210",
+    "jobId": "435bf30c67bc36e2f466962c",
+    "text": "Danh sách mua gửi qua tin nhắn khoảng bao nhiêu món ạ?",
+    "authorName": "Khoa Nguyễn",
+    "answer": "Khoảng 8–10 món, chủ yếu rau, thịt heo và trái cây, mình gửi trước 1 tối.",
+    "createdAt": "2026-11-13T17:05:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0211",
+    "jobId": "435bf30c67bc36e2f466962c",
+    "text": "Tiền chợ mình ứng trước hay nhà mình đưa trước ạ?",
+    "authorName": "Minh",
+    "answer": null,
+    "createdAt": "2026-11-14T06:40:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0212",
+    "jobId": "be5dff4afdedfb6bf5fc77d7",
+    "text": "Thùng sách có nặng lắm không ạ, mình đi một mình có xuống được không?",
+    "authorName": "Anh Tuấn",
+    "answer": "Mỗi thùng khoảng 12–15kg, có xe đẩy ở sảnh nên đi một mình được. Mình xuống phụ bạn lên thang máy.",
+    "createdAt": "2026-11-13T10:10:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0213",
+    "jobId": "be5dff4afdedfb6bf5fc77d7",
+    "text": "Mình chuyển lúc nào cũng được hay phải giờ cố định ạ?",
+    "authorName": "Lan Anh",
+    "answer": "Linh hoạt trong buổi chiều thứ Bảy, bạn chọn khung giờ trong lúc gửi đề nghị là được.",
+    "createdAt": "2026-11-13T11:30:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0214",
+    "jobId": "be5dff4afdedfb6bf5fc77d7",
+    "text": "Đồ bếp có dễ vỡ không ạ?",
+    "authorName": "Mai Trâm",
+    "answer": null,
+    "createdAt": "2026-11-14T08:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0215",
+    "jobId": "1f52a027604c1f96a4647820",
+    "text": "Mình chưa từng bán hàng thì có làm được không ạ?",
+    "authorName": "Chị Hoa",
+    "answer": "Được nhé, buổi đầu có người kèm, chỉ cần bạn nhanh nhẹn và tính tiền cẩn thận.",
+    "createdAt": "2026-11-12T06:30:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0216",
+    "jobId": "1f52a027604c1f96a4647820",
+    "text": "Ca đứng quầy từ mấy giờ đến mấy giờ ạ?",
+    "authorName": "Hùng Phạm",
+    "answer": "Từ 5:30 đến 8:30 sáng, ba ngày đầu tuần. Tiền công 150.000đ mỗi ca.",
+    "createdAt": "2026-11-12T07:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0217",
+    "jobId": "1f52a027604c1f96a4647820",
+    "text": "Có được ăn sáng tại quầy không ạ?",
+    "authorName": "Phương",
+    "answer": null,
+    "createdAt": "2026-11-13T06:15:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0218",
+    "jobId": "c18153c6a8d12841d51d60b7",
+    "text": "Bé đang học theo sách nào ở trường ạ, và mục tiêu của buổi kèm là gì?",
+    "authorName": "Minh",
+    "answer": "Bé học Family and Friends 5. Mình muốn bé nói tự tin hơn và nhớ ngữ pháp, không cần thi chứng chỉ.",
+    "createdAt": "2026-11-12T15:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0219",
+    "jobId": "c18153c6a8d12841d51d60b7",
+    "text": "Mình dạy thử buổi đầu có được không ạ?",
+    "authorName": "Thu Hà",
+    "answer": "Được nhé, mình ưu tiên một buổi thử để bé làm quen, buổi thử vẫn tính công bình thường.",
+    "createdAt": "2026-11-12T16:10:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f021a",
+    "jobId": "c18153c6a8d12841d51d60b7",
+    "text": "Một buổi kéo dài bao lâu ạ?",
+    "authorName": "Khoa Nguyễn",
+    "answer": null,
+    "createdAt": "2026-11-13T09:20:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f021b",
+    "jobId": "913d839e5192643cca0e655c",
+    "text": "Có máy sấy hay phơi ngoài trời hoàn toàn ạ?",
+    "authorName": "Lan Anh",
+    "answer": "Phơi ngoài ban công, chiều mát thì gấp luôn. Mình có kẹp và móc sẵn.",
+    "createdAt": "2026-11-11T08:40:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f021c",
+    "jobId": "913d839e5192643cca0e655c",
+    "text": "Đồ có cả đồ lót không ạ, hay chỉ quần áo ngoài?",
+    "authorName": "Anh Tuấn",
+    "answer": null,
+    "createdAt": "2026-11-12T07:25:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f021d",
+    "jobId": "83551653a80289f958d96afb",
+    "text": "Đơn thuốc có yêu cầu bạn phải mua đúng hãng không ạ?",
+    "authorName": "Chị Hoa",
+    "answer": "Mình đánh dấu đỏ các thuốc bắt buộc đúng tên và hàm lượng, còn lại có thể thay thế cùng hoạt chất nếu nhà thuốc hết.",
+    "createdAt": "2026-11-05T15:20:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f021e",
+    "jobId": "83551653a80289f958d96afb",
+    "text": "Tiền thuốc mình ứng trước hay bạn chuyển sau ạ?",
+    "authorName": "Minh",
+    "answer": "Mình chuyển khoản trước cho bạn đúng số tiền ước tính, dư thì hoàn lại sau khi có hóa đơn.",
+    "createdAt": "2026-11-05T16:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f021f",
+    "jobId": "83551653a80289f958d96afb",
+    "text": "Mình giao thuốc tới tận phòng hay để ở bảo vệ ạ?",
+    "authorName": "Hùng Phạm",
+    "answer": null,
+    "createdAt": "2026-11-05T17:10:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0220",
+    "jobId": "f506b40928b5b7a767c76fb0",
+    "text": "Mình đi xe đạp thì có đủ thời gian giao 10–15 phần không ạ?",
+    "authorName": "Phương",
+    "answer": "Hai block gần nhau nên đủ, mỗi chuyến bạn mang khoảng 5 phần trong túi giữ nhiệt.",
+    "createdAt": "2026-11-09T16:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0221",
+    "jobId": "f506b40928b5b7a767c76fb0",
+    "text": "Túi giữ nhiệt bếp có cho mượn không ạ?",
+    "authorName": "Khoa Nguyễn",
+    "answer": "Có, bếp cho mượn túi giữ nhiệt và danh sách địa chỉ, bạn chỉ cần có mặt đúng 10:50.",
+    "createdAt": "2026-11-09T16:40:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0222",
+    "jobId": "f506b40928b5b7a767c76fb0",
+    "text": "Có tính thêm tiền khi mưa không ạ?",
+    "authorName": "Thu Hà",
+    "answer": null,
+    "createdAt": "2026-11-09T18:05:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0223",
+    "jobId": "08f86bebb2737f6a6f0fb23c",
+    "text": "Đi chợ đầu mối thì cần có mặt lúc mấy giờ ạ?",
+    "authorName": "Minh",
+    "answer": "Bạn đi từ khoảng 5:30, mang hàng về bếp trước 7:30 nhé.",
+    "createdAt": "2026-11-11T17:50:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0224",
+    "jobId": "08f86bebb2737f6a6f0fb23c",
+    "text": "Nếu có món hết hoặc giá khác thì mình xử lý thế nào ạ?",
+    "authorName": "Anh Tuấn",
+    "answer": "Bạn nhắn qua tin nhắn kèm ảnh, bếp sẽ chọn món thay thế ngay.",
+    "createdAt": "2026-11-11T18:30:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0225",
+    "jobId": "08f86bebb2737f6a6f0fb23c",
+    "text": "Bếp ứng tiền chợ khoảng bao nhiêu ạ?",
+    "authorName": "Lan Anh",
+    "answer": null,
+    "createdAt": "2026-11-12T08:10:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0226",
+    "jobId": "6f5da2cec255404e4fb44003",
+    "text": "Bếp còn nóng hay đã tắt khi mình tới dọn ạ?",
+    "authorName": "Mai Trâm",
+    "answer": "Bếp tắt từ 13:00, bạn tới sau giờ đó sẽ an toàn.",
+    "createdAt": "2026-11-08T09:10:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0227",
+    "jobId": "6f5da2cec255404e4fb44003",
+    "text": "Hóa chất tẩy rửa mình có cần mang không ạ?",
+    "authorName": "Hùng Phạm",
+    "answer": "Bếp có sẵn nước tẩy dầu mỡ và găng tay, bạn không cần mang gì.",
+    "createdAt": "2026-11-08T09:45:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0228",
+    "jobId": "6f5da2cec255404e4fb44003",
+    "text": "Dọn xong khoảng mấy tiếng ạ?",
+    "authorName": "Chị Hoa",
+    "answer": null,
+    "createdAt": "2026-11-09T07:30:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f0229",
+    "jobId": "4d6608697a8d41bed440e504",
+    "text": "Cỗ 8 người nên chuẩn bị bao nhiêu món ạ, mình chỉ sơ chế thôi đúng không?",
+    "authorName": "Phương",
+    "answer": "Khoảng 6 món, bạn chỉ sơ chế rau củ và rửa dọn lúc nấu, không phải nấu.",
+    "createdAt": "2026-11-07T10:00:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f022a",
+    "jobId": "4d6608697a8d41bed440e504",
+    "text": "Nhà khách ở Block A tầng mấy ạ, có thang máy không?",
+    "authorName": "Thu Hà",
+    "answer": "Nhà ở tầng 3, có thang máy. Địa chỉ chính xác mình gửi sau khi chọn người.",
+    "createdAt": "2026-11-07T10:30:00.000Z"
+  },
+  {
+    "_id": "640b187e71d9faa9039f022b",
+    "jobId": "4d6608697a8d41bed440e504",
+    "text": "Mình làm từ mấy giờ đến mấy giờ ạ, có được ăn cỗ không?",
+    "authorName": "Minh",
+    "answer": null,
+    "createdAt": "2026-11-08T08:20:00.000Z"
   }
 ]
