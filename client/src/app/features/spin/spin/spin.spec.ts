@@ -6,10 +6,10 @@ const mk = (title: string, price: number, kind: Post['kind'] = 'food', closed = 
 });
 
 describe('quay món', () => {
-  it('đoán nhóm theo tên: uống, ăn vặt, bữa ăn', () => {
+  it('đoán nhóm theo tên: uống hoặc bữa ăn', () => {
     expect(dishGroup('Trà sữa trân châu')).toBe('drink');
     expect(dishGroup('Cà phê sữa đá')).toBe('drink');
-    expect(dishGroup('Bánh mì que pate')).toBe('snack');
+    expect(dishGroup('Bánh mì que pate')).toBe('meal');
     expect(dishGroup('Cơm nhà làm')).toBe('meal');
     expect(dishGroup('Phở bò tái')).toBe('meal');
   });

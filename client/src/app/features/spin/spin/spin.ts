@@ -4,12 +4,11 @@ import { Post } from '../../../core/models/post';
 import { PostService } from '../../../core/services/post';
 import { createSlug, stripAccents } from '../../../core/utils/slug-helper';
 
-export type SpinTab = 'meal' | 'drink' | 'snack' | 'all';
+export type SpinTab = 'meal' | 'drink' | 'all';
 
 export const TABS: { key: SpinTab; label: string }[] = [
   { key: 'meal', label: 'Bữa ăn' },
   { key: 'drink', label: 'Đồ uống' },
-  { key: 'snack', label: 'Ăn vặt' },
   { key: 'all', label: 'Tất cả' },
 ];
 export const BUDGETS = [
@@ -20,13 +19,11 @@ export const BUDGETS = [
 ];
 
 const DRINK = ['tra', 'nuoc', 'ca phe', 'cafe', 'sinh to', 'sua', 'ep ', 'smoothie'];
-const SNACK = ['banh', 'che', 'an vat', 'xoi', 'kem', 'trai cay', 'hat'];
 
 /** Món thuộc nhóm nào, đoán theo tên (dữ liệu bài chưa có phân loại con). */
 export function dishGroup(title: string): Exclude<SpinTab, 'all'> {
   const t = ` ${stripAccents(title)} `;
   if (DRINK.some((w) => t.includes(` ${w.trim()}`) )) return 'drink';
-  if (SNACK.some((w) => t.includes(` ${w}`))) return 'snack';
   return 'meal';
 }
 
@@ -87,6 +84,8 @@ export class Spin implements OnInit, OnDestroy {
 
   protected readonly tabs = TABS;
   protected readonly budgets = BUDGETS;
+  /** Lựa chọn cho menu thả xuống Ngân sách (key là chuỗi) */
+  protected readonly budgetOptions = BUDGETS.map((b) => ({ key: String(b.value), label: b.label }));
   protected readonly itemW = signal(ITEM_W);
   /** Thẻ nằm giữa khung (món trúng, hoặc thẻ thứ 4 khi chưa quay) rộng hơn các thẻ khác để khớp ô giữa. */
   protected readonly centerIdx = signal(3);
@@ -98,6 +97,7 @@ export class Spin implements OnInit, OnDestroy {
   protected readonly foods = signal<Post[]>([]);
   protected readonly tab = signal<SpinTab>('meal');
   protected readonly budget = signal(50000);
+  protected readonly budgetKey = computed(() => String(this.budget()));
   protected readonly reel = signal<Post[]>([]);
   protected readonly offset = signal(0);
   protected readonly instant = signal(true);
@@ -137,6 +137,7 @@ export class Spin implements OnInit, OnDestroy {
   ngOnInit(): void {
     // sân khấu tràn hết chiều ngang (100vw, tính cả thanh cuộn) → chặn thanh cuộn ngang chỉ trong lúc ở trang này
     this.doc.documentElement.style.overflowX = 'clip';
+    this.doc.documentElement.classList.add('spin-page'); // chân trang sát khung quay, không chừa khoảng trắng + kiến ló đầu
     this.load();
   }
 
@@ -171,6 +172,7 @@ export class Spin implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.doc.documentElement.style.overflowX = '';
+    this.doc.documentElement.classList.remove('spin-page');
     this.timers.forEach(clearTimeout);
     cancelAnimationFrame(this.raf);
   }

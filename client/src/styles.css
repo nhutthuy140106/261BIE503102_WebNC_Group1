@@ -115,3 +115,7 @@ body.no-chat app-chat-widget { display: none; }
 /* Khu Quản trị: ẩn thanh cuộn (vẫn cuộn được bằng chuột/phím/cảm ứng) */
 html:has(app-admin-layout) { scrollbar-width: none; }
 html:has(app-admin-layout)::-webkit-scrollbar { display: none; }
+
+/* trang Quay món: khung quay chạm thẳng chân trang */
+html.spin-page .foot { margin-top: 0; }
+html.spin-page .foot .peek { display: none; }

@@ -76,22 +76,20 @@
 @keyframes fall { from { transform: translate(0, 0) rotate(0); } 50% { transform: translate(24px, 150px) rotate(180deg); } to { transform: translate(-10px, 330px) rotate(360deg); } }
 .empty-reel { margin: auto; color: var(--smoke); }
 
-.budget { display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255, 255, 255, .8); border-radius: 999px; padding: 0 8px 0 16px; background: rgba(255, 255, 255, .78); backdrop-filter: blur(6px); font-weight: 500; color: var(--smoke); }
-.budget select { border: 0; padding: 12px 4px; font-weight: 600; background: transparent; outline: none; }
+.budgetslot { position: relative; z-index: 20; }
+.budgetslot.lock { pointer-events: none; opacity: .55; }
+.budgetslot ::ng-deep .sortbtn { height: 46px; padding: 0 16px 0 20px; gap: 10px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .8); background: rgba(255, 255, 255, .78); backdrop-filter: blur(6px); font-size: 15px; font-weight: 500; color: var(--smoke); transition: background .2s, box-shadow .2s; }
+.budgetslot ::ng-deep .sortbtn:hover, .budgetslot ::ng-deep .sortbox.open .sortbtn { background: #fff; box-shadow: 0 6px 18px -8px rgba(34, 48, 74, .35); }
+.budgetslot ::ng-deep .sortbtn b { font-weight: 600; color: var(--ink); margin-left: 2px; }
+.budgetslot ::ng-deep .sortmenu { left: 0; right: 0; min-width: 100%; top: calc(100% + 8px); padding: 6px; border: 0; border-radius: 18px; background: #fff; box-shadow: 0 22px 44px -14px rgba(34, 48, 74, .38), 0 0 0 1px rgba(34, 48, 74, .05); }
+.budgetslot ::ng-deep .sortmenu button { height: 42px; padding: 0 14px; border-radius: 12px; font-size: 14.5px; color: var(--ink); }
+.budgetslot ::ng-deep .sortmenu button:hover { background: #FBF4F1; }
+.budgetslot ::ng-deep .sortmenu button.on { background: #FBF4F1; color: var(--accent); font-weight: 600; }
 
 @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
 
-.shelf { margin-top: 36px; }
-.shelf h2 { font-size: 20px; letter-spacing: -.015em; }
-.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.mini { display: grid; gap: 3px; font-size: 13px; }
-.mini img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; margin-bottom: 4px; }
-.mini b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mini:hover b { color: var(--accent); }
-
 @media (max-width: 700px) {
   .head h1 { font-size: 24px; }
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) { .strip { transition: none; } .pop, .popcard, .halo, .spark { animation: none; } .burst { display: none; } .cloud, .rays, .popcard .ant, .busy .petals i, .selbox.on, .selbox.hit, .shot::after, .needle.on, .needle.hit { animation: none; } }
 
@@ -107,10 +105,8 @@
   .go { height: 52px; padding: 0 44px; font-size: 17px; }
   .popcard .ant { width: 96px; left: -12px; top: -50px; }
   .bar2 { padding: 0 16px; }
-  .budget { flex: 1 1 100%; justify-content: space-between; }
-  .budget select { flex: 1; text-align: right; }
-  .shelf { margin-top: 28px; }
-  .grid { gap: 12px; }
+  .budgetslot { flex: 1 1 100%; }
+  .budgetslot ::ng-deep .sortbox, .budgetslot ::ng-deep .sortbtn { width: 100%; justify-content: space-between; }
 }
 
 /* popup món trúng */

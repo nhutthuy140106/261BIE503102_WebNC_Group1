@@ -32,12 +32,7 @@
               <button type="button" role="tab" class="chip" [class.on]="tab() === t.key" [attr.aria-selected]="tab() === t.key" [disabled]="spinning()" (click)="setTab(t.key)">{{ t.label }}</button>
             }
           </div>
-          <label class="budget">
-            <span>Ngân sách</span>
-            <select [value]="budget()" (change)="setBudget($any($event.target).value)" [disabled]="spinning()" aria-label="Ngân sách">
-              @for (b of budgets; track b.value) { <option [value]="b.value" [selected]="b.value === budget()">{{ b.label }}</option> }
-            </select>
-          </label>
+          <app-sort-menu class="budgetslot" [class.lock]="spinning()" prefix="Ngân sách" [options]="budgetOptions" [value]="budgetKey()" (valueChange)="setBudget($event)" />
         </div>
 
         <div class="board">
@@ -73,24 +68,7 @@
     </div>
   </div>
 
-  @if (!loading() && !error()) {
-    @if (pool().length) {
-      <section class="shelf">
-        <h2>Trong kho có gì?</h2>
-        <div class="grid">
-          @for (p of pool().slice(0, 8); track p._id) {
-            <a class="mini" [routerLink]="link(p)">
-              @if (p.images.length) { <img [src]="p.images[0]" [alt]="p.title" loading="lazy" /> }
-              <b>{{ p.title }}</b>
-              <span class="muted">{{ p.price | vnd }}@if (p.priceUnit) {/{{ p.priceUnit }}}</span>
-            </a>
-          }
-        </div>
-      </section>
-    }
-  }
-
-  <!-- món trúng hiện dạng popup nổi giữa màn hình -->
+<!-- món trúng hiện dạng popup nổi giữa màn hình -->
   @if (showResult()) {
     @if (result(); as r) {
       <div class="pop" (click)="closeResult()">
