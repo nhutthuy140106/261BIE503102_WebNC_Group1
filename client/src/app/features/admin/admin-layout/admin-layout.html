@@ -1,10 +1,33 @@
 <div class="adm">
-  <nav class="side" aria-label="Quản trị">
-    <h2>Quản trị</h2>
-    <a routerLink="/admin" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: true }"><svg class="i"><use href="#grid" /></svg>Tổng quan</a>
-    <a routerLink="/admin/users" routerLinkActive="on"><svg class="i"><use href="#users" /></svg>Người dùng</a>
-    <a routerLink="/admin/posts" routerLinkActive="on"><svg class="i"><use href="#bag" /></svg>Bài đăng</a>
-    <a routerLink="/admin/reports" routerLinkActive="on"><svg class="i"><use href="#shield" /></svg>Báo cáo vi phạm</a>
-  </nav>
-  <section class="content"><router-outlet /></section>
+  <aside class="side" aria-label="Quản trị">
+    <div class="brand"><b>AntGo</b><span>Quản trị</span></div>
+    @for (g of groups; track g.title) {
+      @if (g.title) { <div class="grp">{{ g.title }}</div> }
+      <nav>
+        @for (it of g.items; track it.to) {
+          @if (!it.adminOnly || isAdmin()) {
+            <a [routerLink]="it.to" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: !!it.exact }">
+              <svg class="i"><use [attr.href]="'#' + it.icon" /></svg>{{ it.label }}
+              @if (it.badge && it.badge() > 0) { <span class="dot" [attr.aria-label]="it.badge() + ' việc chờ'">{{ it.badge() }}</span> }
+            </a>
+          }
+        }
+      </nav>
+    }
+    <div class="me">
+      <div class="who"><b>{{ me()?.fullName }}</b><small>{{ roleLabel() }}</small></div>
+      <div class="links"><a routerLink="/">Về AntGo</a><button type="button" (click)="logout()">Đăng xuất</button></div>
+    </div>
+  </aside>
+  <section class="content">
+    @if (api.needsServer) {
+      <div class="need">
+        <h2>Khu Quản trị cần máy chủ thật</h2>
+        <p>Bạn đang xem bằng dữ liệu mẫu. Hãy bật server (cổng 3000) rồi mở lại với ?mock=0.</p>
+        <a href="/admin?mock=0">Mở với máy chủ thật</a>
+      </div>
+    } @else {
+      <router-outlet />
+    }
+  </section>
 </div>

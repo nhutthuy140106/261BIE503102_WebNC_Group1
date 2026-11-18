@@ -58,7 +58,7 @@ export interface TimeBlock {
 
 /** Khối 4 — Địa điểm: chọn giao/tự lấy · tại nhà khách · tại chỗ người bán · A→B */
 export interface PlaceBlock {
-  mode: 'choice' | 'buyer' | 'seller' | 'ab';
+  mode: 'choice' | 'buyer' | 'seller' | 'ab' | 'none';
   label: string;
   /** mode 'choice': [tên cách nhận, phụ phí] */
   choices?: [string, number][];
@@ -136,6 +136,8 @@ export interface PostTemplate {
   freeShipFrom?: number;
   /** Số phần còn của từng món trong danh sách món (khóa = lựa chọn thô); không có = không giới hạn */
   dishLeft?: Record<string, number>;
+  /** Đơn vị tính của từng dòng dịch vụ (khóa = lựa chọn thô): bên Mua ghi sau giá "1.500.000đ / khóa" thay vì trong ngoặc ở tên */
+  dishUnit?: Record<string, string>;
   /** Thông tin người bán đã điền, hiện dưới Mô tả */
   info?: { label: string; value: string }[];
   /** Có = đặt đồ uống theo từng dòng (bài đồ uống đăng từ form khu Bán) */
@@ -144,6 +146,14 @@ export interface PostTemplate {
   quick?: string[];
   /** Người bán tắt ô ghi chú */
   noteOff?: boolean;
+  /** Dịch vụ: tùy chọn cộng giá tính một lần cho cả đơn, không nhân với số lượng (như giặt sấy) */
+  optsOnce?: boolean;
+  /** Dọn dẹp: giá nằm hết ở các tùy chọn khách chọn; giá trên bài chỉ là mức thấp nhất để hiện "từ …", không cộng vào đơn */
+  priceInOpts?: boolean;
+  /** Không có lịch hẹn: khung đặt không hỏi ngày giờ */
+  noSchedule?: boolean;
+  /** Dọn dẹp: các dịch vụ, mỗi dịch vụ có tùy chọn và câu hỏi riêng */
+  menu?: { name: string; opts: OptionBlock[]; qs: QuestionBlock[] }[];
   stock: StockBlock;
   notePh: string;
   /** Các bước theo dõi đơn của loại này */

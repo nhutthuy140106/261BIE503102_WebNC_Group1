@@ -29,7 +29,7 @@ for (const g of SYNONYM_GROUPS) for (const t of g) SYN.set(t, g);
 const STOP = new Set(['toi', 'minh', 'can', 'muon', 'tim', 'cho', 'co', 'khong', 'nao', 'gi', 'nhe', 'la', 'mot', 'cai', 'nhung', 'va', 'giup', 'voi']);
 const tokens = (s) => stripAccents(s).split(/[^a-z0-9]+/).filter((t) => t.length >= 2 && !STOP.has(t));
 
-const squash = (s) => s.replace(/(.)+/g, '$1');
+const squash = (s) => s.replace(/(.)\1+/g, '$1'); // gộp chữ lặp liền nhau: coom → com
 
 /** Khoảng cách chỉnh sửa (Levenshtein), dừng sớm khi vượt max. */
 function lev(a, b, max = 2) {
@@ -48,17 +48,21 @@ function lev(a, b, max = 2) {
   return prev[b.length];
 }
 
+/** Cụm đồng nghĩa của truy vấn (cả cụm, không tách từ): "day kem" → ["gia su", "day hoc", ...]. */
+function synonymPhrases(q) {
+  const toks = tokens(q);
+  const keys = [...toks, ...toks.slice(1).map((t, i) => `${toks[i]} ${t}`)];
+  const out = new Set();
+  for (const k of keys) for (const s of SYN.get(k) || []) if (s !== k) out.add(s);
+  return [...out].map((s) => s.split(' ').filter((x) => x.length >= 2));
+}
+
 /** Từ khóa → các từ có thể khớp, kèm trọng số (gốc 1, đồng nghĩa 0.6). */
 function expand(q) {
   const out = new Map();
   const add = (t, w) => { if (!out.has(t) || out.get(t) < w) out.set(t, w); };
-  const toks = tokens(q);
-  for (const t of toks) {
-    add(t, 1);
-    for (const s of SYN.get(t) || []) for (const part of s.split(' ')) add(part, 0.6);
-  }
-  const bi = toks.slice(1).map((t, i) => `${toks[i]} ${t}`); // cụm hai từ: "tra sua", "ca phe"
-  for (const phrase of bi) for (const s of SYN.get(phrase) || []) for (const part of s.split(' ')) add(part, 0.6);
+  for (const t of tokens(q)) add(t, 1);
+  for (const parts of synonymPhrases(q)) for (const part of parts) add(part, 0.6);
   return out;
 }
 
@@ -67,7 +71,8 @@ function expand(q) {
  * Điểm = Σ trọng số từ × idf (khớp đúng 1 | gõ sai gần 0.7 | tiền tố 0.8 | đồng nghĩa 0.6). Trả [{ doc, score }] đã sắp, bỏ điểm 0.
  */
 function rank(docs, q) {
-  const terms = expand(q);
+  const terms = new Map(tokens(q).map((t) => [t, 1]));
+  const phrases = synonymPhrases(q);
   if (!terms.size) return [];
   const docToks = docs.map((d) => new Set(tokens(d.searchText || '')));
   const df = new Map();
@@ -88,10 +93,21 @@ function rank(docs, q) {
       else if (t.length >= 4 && v.length >= 4 && (v.startsWith(t) || t.startsWith(v))) put(v, w * 0.8);
     }
   }
+  // Truy vấn là một khái niệm đã biết ("day kem" = gia sư) mà kho không có bài nào nói về khái niệm đó và cũng không có bài chứa đủ các từ gốc
+  // → trả rỗng, đừng đưa bài chỉ trùng một từ lẻ ("dày", "kem"…) làm người dùng tưởng là kết quả
+  if (phrases.length) {
+    const hasPhrase = (i) => phrases.some((parts) => parts.length && parts.every((x) => docToks[i].has(x)));
+    const hasAll = (i) => [...terms.keys()].every((x) => [...matched.keys()].some((v) => docToks[i].has(v) && (v === x || lev(x, v, 2) <= 2 || squash(x) === squash(v))));
+    if (!docs.some((_, i) => hasPhrase(i) || hasAll(i))) return [];
+  }
   return docs
     .map((doc, i) => {
       let score = 0;
       for (const [v, w] of matched) if (docToks[i].has(v)) score += w * idf(v);
+      // đồng nghĩa: chỉ tính khi bài có ĐỦ mọi từ của cụm ("gia su" không được khớp lẻ "giá")
+      for (const parts of phrases) {
+        if (parts.length && parts.every((t) => docToks[i].has(t))) score += 0.6 * parts.reduce((a, t) => a + idf(t), 0);
+      }
       return { doc, score };
     })
     .filter((x) => x.score > 0)

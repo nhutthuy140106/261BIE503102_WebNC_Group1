@@ -1,8 +1,23 @@
-import { formToPostFields, jobWindows } from './post-mapper';
-import { toJobWindows } from './post-form-config';
+import { cleaningPrice, formToPostFields, jobWindows, menuOf, unpricedService } from './post-mapper';
+import { toGenericOptions, toJobWindows } from './post-form-config';
 
 const service = (questions: unknown[]) =>
   formToPostFields('service', { common: { category: 'Khác' }, spec: { items: [], questions, options: [], place: 'buyer' } }, 'service').questions ?? [];
+
+describe('mẫu Khác: câu hỏi cũ thành cài đặt tùy chọn', () => {
+  it('câu chọn có danh sách lựa chọn thành nhóm tùy chọn cộng giá, kiểu riêng thành văn bản', () => {
+    const s = toGenericOptions({
+      options: [],
+      questions: [
+        { type: 'choice', label: 'Gói', required: true, choices: [{ label: 'Cơ bản', price: 0 }, { label: 'Nâng cao', price: 50000 }] },
+        { type: 'long', label: 'Mô tả vấn đề', required: true, choices: [] },
+        { type: 'photo', label: 'Ảnh', required: false, choices: [] },
+      ],
+    });
+    expect(s['options']).toEqual([{ name: 'Gói', multi: false, required: true, choices: [{ label: 'Cơ bản', price: 0 }, { label: 'Nâng cao', price: 50000 }] }]);
+    expect(s['questions'].map((q: { label: string; type: string }) => [q.label, q.type])).toEqual([['Mô tả vấn đề', 'text'], ['Ảnh', 'photo']]);
+  });
+});
 
 describe('formToPostFields', () => {
   it('đồ uống: tùy chọn cho cả đơn nằm ở cấp bài', () => {
@@ -47,50 +62,152 @@ describe('formToPostFields', () => {
     expect(toJobWindows({})['altWindows']).toEqual([]);
   });
 
-  describe('mẫu ẩn mục trong form', () => {
-    const svc = (spec: Record<string, unknown>) => formToPostFields('service', { common: {}, spec: { items: [], options: [], questions: [], serviceArea: 'Trong khu', place: 'buyer', safety: true, ...spec } }, 'service');
+  describe('dọn dẹp: mỗi dịch vụ có tùy chọn và câu hỏi riêng, mỗi đơn một dịch vụ', () => {
+    const area = { name: 'Diện tích', multi: false, required: true, choices: [{ label: 'Dưới 50m²', price: 150000 }, { label: 'Trên 80m²', price: 350000 }] };
+    const glass = { name: 'Số ô cửa', multi: false, required: true, choices: [{ label: 'Dưới 5 ô', price: 100000 }] };
+    const pet = { type: 'choice', label: 'Nhà có nuôi thú cưng?', required: false, opts: 'Không, Có' };
+    const menu = [{ name: 'Dọn nhà', options: [area], questions: [pet] }, { name: ' ', options: [], questions: [] }, { name: 'Lau kính', options: [glass], questions: [] }];
+    const f = formToPostFields('service', { common: {}, spec: { preset: 'Dọn dẹp', menu, items: [{ name: 'cũ', price: 1, unit: 'giờ' }], options: [area], questions: [pet], estimate: true, repeat: true, place: 'seller', homeFee: 30000 } }, 'service');
 
-    it('giặt sấy: không gửi phạm vi phục vụ, nơi làm mặc định', () => {
-      const f = svc({ preset: 'Giặt sấy', from: '08:00', to: '18:00', returnHours: 12, fulfil: { delivery: true, pickup: true, fee: 0 } });
-      expect(f.info).toEqual([]);
-      expect(f.serviceInfo?.area).toBeUndefined();
+    it('gửi danh sách dịch vụ kèm tùy chọn, câu hỏi riêng; không có tùy chọn chung hay bảng giá', () => {
+      expect(f.serviceMenu?.map((m) => [m.name, m.optionGroups.map((g) => g.name), m.questions.map((q) => q.label)])).toEqual([['Dọn nhà', ['Diện tích'], ['Nhà có nuôi thú cưng?']], ['Lau kính', ['Số ô cửa'], []]]);
+      expect(f.optionGroups).toEqual([]);
+      expect(f.questions).toEqual([]);
+      expect(f.items).toBeUndefined();
+      expect(formToPostFields('service', { common: {}, spec: { preset: 'Dọn dẹp', menu, timeMode: 'datedur' } }, 'service').timeMode).toBe('slot');
+      expect(f).toMatchObject({ bookOnce: true, estimate: undefined, repeat: false, priceType: 'from', deliveryFee: 0, place: { mode: 'buyer' } });
     });
 
-    it('giặt sấy: 3 ô đầu bài lấy từ form', () => {
-      const f = svc({ preset: 'Giặt sấy', from: '08:00', to: '18:00', returnHours: 12, fulfil: { delivery: true, pickup: true, fee: 10000 } });
-      expect(f.highlights?.map((x) => [x.label, x.value])).toEqual([['Giờ nhận đơn', '08:00 – 18:00'], ['Trả đồ', 'Trong khoảng 12 giờ'], ['Cách nhận', 'Giao tận nơi, Tự đến lấy']]);
-      expect(f.info).toEqual([]);
+    it('giá trên bài là giá thấp nhất trong các dịch vụ; dịch vụ chưa có giá thì báo tên', () => {
+      expect(cleaningPrice({ menu })).toEqual({ price: 100000, from: true });
+      expect(cleaningPrice({ menu: [{ name: 'A', options: [{ ...glass }], questions: [] }] })).toEqual({ price: 100000, from: false });
+      expect(unpricedService({ menu: [...menu, { name: 'Hút bụi', options: [], questions: [] }] })).toBe('Hút bụi');
+      expect(unpricedService({ menu })).toBeNull();
+    });
+
+    it('bản cũ lưu tên dịch vụ dạng chữ: dùng tùy chọn, câu hỏi chung cũ cho từng dịch vụ', () => {
+      expect(menuOf({ menu: ['Dọn nhà', ''], options: [area], questions: [pet] })).toEqual([{ name: 'Dọn nhà', options: [area], questions: [pet] }]);
+    });
+  });
+
+
+  describe('giao nhận: không báo giá sau, khách chọn giờ nhận hàng', () => {
+    const f = formToPostFields('service', { common: {}, spec: { preset: 'Giao nhận', priceType: 'quote', inspect: 30000, estimate: true, repeat: true, timeMode: 'datedur', place: 'seller', homeFee: 20000, from: '08:00', to: '20:00', pay: ['cash'], items: [{ name: 'Lấy đồ', price: 15000, unit: 'lượt' }], options: [], questions: [{ type: 'text', label: 'Lấy ở đâu?', required: true }] } }, 'service');
+
+    it('bỏ báo giá sau, giá ước tính, lặp hằng tuần; giờ là giờ giao hàng', () => {
+      expect(f).toMatchObject({ priceType: 'fixed', inspectFee: undefined, estimate: undefined, repeat: false, timeMode: 'slot', timeLabel: 'Giờ giao hàng', place: { mode: 'ab' }, deliveryFee: 0 });
+      expect(f.highlights?.slice(0, 2).map((x) => [x.label, x.value])).toEqual([['Giờ giao hàng', '08:00 – 20:00'], ['Nơi làm', 'Giao tới nhà bạn']]);
+    });
+
+    it('ô tick nhận ứng trước tiền hàng thay cho câu hỏi theo tên', () => {
+      const q = (spec: Record<string, unknown>) => formToPostFields('service', { common: {}, spec: { preset: 'Giao nhận', items: [], options: [], ...spec } }, 'service').questions;
+      const old = [{ type: 'choice', label: 'Cần trả tiền giùm?', required: false, opts: 'Không, Có' }];
+      expect(q({ advancePay: true, questions: old })).toEqual([{ type: 'choice', label: 'Cần ứng trước tiền hàng?', required: false, opts: ['Không', 'Có'], pay: true }]);
+      expect(q({ advancePay: false, questions: old })).toEqual([]);
+      // mẫu khác: câu hỏi có chữ "trả tiền giùm" chỉ là câu hỏi thường
+      expect(formToPostFields('service', { common: {}, spec: { preset: 'Khác', items: [], options: [], questions: old } }, 'service').questions?.[0].pay).toBeUndefined();
+    });
+
+    it('chăm sóc: không báo giá sau, giá ước tính, lặp hằng tuần, nơi làm; làm tại nhà khách, tính theo giờ', () => {
+      expect(formToPostFields('service', { common: {}, spec: { preset: 'Chăm sóc', timeMode: 'slot', items: [], options: [], questions: [] } }, 'service').timeMode).toBe('datedur');
+      const f = formToPostFields('service', { common: {}, spec: { preset: 'Chăm sóc', priceType: 'quote', estimate: true, repeat: true, timeMode: 'datedur', durMin: 2, durMax: 6, place: 'seller', homeFee: 20000, items: [{ name: 'Trông trẻ', price: 60000, unit: 'giờ' }], options: [], questions: [] } }, 'service');
+      expect(f).toMatchObject({ priceType: 'fixed', estimate: undefined, repeat: false, timeMode: 'datedur', place: { mode: 'buyer' }, deliveryFee: 0 });
+      expect(f.highlights?.find((x) => x.label === 'Nơi làm')?.value).toBe('Tại nhà bạn');
+    });
+
+    it('gia sư: không báo giá sau, giá ước tính, lịch hẹn, nơi làm', () => {
+      const f = formToPostFields('service', { common: {}, spec: { preset: 'Gia sư', priceType: 'quote', estimate: true, repeat: true, place: 'choice', homeFee: 20000, from: '08:00', to: '18:00', dates: ['2026-11-10'], pay: ['cash'], items: [{ name: 'Buổi 90 phút', price: 150000, unit: 'buổi' }], options: [], questions: [] } }, 'service');
+      expect(f).toMatchObject({ priceType: 'fixed', estimate: undefined, repeat: false, noSchedule: true, dates: [], handover: undefined, place: { mode: 'none' }, deliveryFee: 0 });
+      expect(f.highlights?.map((x) => [x.label, x.value])).toEqual([['Giờ nhận lịch', 'Thỏa thuận khi đặt'], ['Nơi làm', 'Nhắn người bán'], ['Buổi học', 'Buổi 90 phút']]);
+    });
+
+    it('giặt sấy cũng không còn báo giá sau', () => {
+      expect(formToPostFields('service', { common: {}, spec: { preset: 'Giặt sấy', priceType: 'quote', inspect: 30000, items: [{ name: 'Giặt', price: 18000, unit: 'kg' }], options: [], questions: [] } }, 'service').priceType).not.toBe('quote');
+    });
+  });
+
+  describe('combo', () => {
+    const combo = (spec: Record<string, unknown>) =>
+      formToPostFields('combo', { common: { category: 'Combo' }, spec: { pay: ['cash'], fulfil: { delivery: true, pickup: true, fee: 5000 }, schedule: { dates: ['2026-11-20'], orderFrom: '06:00', orderTo: '10:30', prep: 30, pickFrom: '11:00', pickTo: '13:00' }, ...spec } }, 'food');
+
+    it('là bài đồ ăn thường: món trong combo chỉ là chữ, không gắn bài lẻ, không có tiết kiệm', () => {
+      const f = combo({ comboPrice: 60000, includes: ['Cơm gà', ' Canh rau ', '', 'Trà đá'] });
+      expect(f.info).toEqual([{ label: 'Combo gồm', value: 'Cơm gà + Canh rau + Trà đá' }]);
+      expect(f).not.toHaveProperty('combo');
+      expect(f).toMatchObject({ priceType: 'fixed', stock: { mode: 'open' }, prepMinutes: 30, orderWindow: { from: '06:00', to: '10:30' } });
+    });
+
+    it('chưa ghi món nào thì không có dòng thông tin', () => {
+      expect(combo({ comboPrice: 1, includes: ['', ' '] }).info).toEqual([]);
+    });
+  });
+
+  describe('3 ô đầu bài của dịch vụ: giờ nhận lịch, nơi làm, ô 3 theo loại', () => {
+    const svc = (spec: Record<string, unknown>) =>
+      formToPostFields('service', { common: {}, spec: { items: [], options: [], questions: [], serviceArea: 'Trong khu', place: 'buyer', pay: ['cash', 'transfer'], from: '08:00', to: '18:00', ...spec } }, 'service');
+    const cells = (f: ReturnType<typeof svc>) => f.highlights?.map((x) => [x.label, x.value]);
+
+    it('mẫu thường: theo nơi làm người bán chọn', () => {
+      expect(cells(svc({ preset: 'Dọn dẹp', turnaround: '3 giờ' }))).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Tại nhà bạn'], ['Thời gian làm', '3 giờ']]);
+      // chưa có số liệu thì ghi rõ để khách biết cần hỏi, không bỏ ô
+      expect(cells(svc({ preset: 'Dọn dẹp' }))?.[2]).toEqual(['Thời gian làm', 'Nhắn người bán']);
+      expect(cells(svc({ preset: 'Khác', place: 'choice', turnaround: '1 ngày' }))?.slice(1)).toEqual([['Nơi làm', 'Tại nhà bạn hoặc bạn mang tới'], ['Thời gian làm', '1 ngày']]);
+      // làm đẹp không còn mục Nơi làm: luôn làm tại nhà khách
+      expect(cells(svc({ preset: 'Làm đẹp', place: 'choice' }))?.[1]).toEqual(['Nơi làm', 'Tại nhà bạn']);
+      expect(cells(svc({ preset: 'Khác', place: 'seller', where: 'Tòa S2, tầng 3' }))?.[1]).toEqual(['Nơi làm', 'Tòa S2, tầng 3']);
+    });
+
+    it('ô 3 lấy đúng ô người bán đã nhập theo từng loại', () => {
+      expect(cells(svc({ preset: 'Sửa chữa', inspect: 30000 }))?.[2]).toEqual(['Phí kiểm tra', '30.000đ']);
+      expect(cells(svc({ preset: 'Sửa chữa', inspect: 0 }))?.[2]).toEqual(['Phí kiểm tra', 'Miễn phí']);
+      expect(cells(svc({ preset: 'Giao nhận', items: [{ name: 'Đồ to', price: 25000, unit: 'lượt' }, { name: 'Lấy đồ', price: 15000, unit: 'lượt' }] }))?.[2]).toEqual(['Phí giao', 'Từ 15.000đ / lượt']);
+      expect(cells(svc({ preset: 'Chăm sóc', durMin: 2, durMax: 6 }))?.[2]).toEqual(['Thời lượng', '2–6 giờ / lần']);
+    });
+
+    it('giặt sấy: tiệm lấy đồ tại nhà, trả đồ và cách trả đồ xuống phần thông tin', () => {
+      const f = svc({ preset: 'Giặt sấy', returnHours: 12, fulfil: { delivery: true, pickup: true, fee: 10000 } });
+      expect(cells(f)).toEqual([['Giờ nhận lịch', '08:00 – 18:00'], ['Nơi làm', 'Lấy đồ tại nhà bạn'], ['Trả đồ', 'Trong khoảng 12 giờ']]);
+      expect(f.info).toEqual([{ label: 'Trả đồ', value: 'Trong khoảng 12 giờ' }, { label: 'Cách trả đồ', value: 'Giao tận nơi, Tự đến lấy' }]);
       expect(f).toMatchObject({ fulfillmentModes: ['delivery', 'pickup'], deliveryFee: 10000, pickupAtBuyer: true });
     });
 
-    it('lưu trú: 3 ô đầu bài là nhận phòng, trả phòng, ở tối thiểu', () => {
-      const f = svc({ preset: 'Lưu trú', place: 'seller', checkIn: '14:00', checkOut: '12:00', minNights: 2, amenities: ['Wi-Fi'], rules: [] });
-      expect(f.highlights?.map((x) => x.value)).toEqual(['Từ 14:00', 'Trước 12:00', '2 đêm']);
-      expect(f.info?.map((x) => x.label)).not.toContain('Nhận phòng từ');
-      expect(f.info?.map((x) => x.label)).not.toContain('Phạm vi phục vụ');
+    it('lưu trú: giờ nhận phòng, tòa nhà; nhận – trả phòng ở ô đầu, không còn ở tối thiểu', () => {
+      const f = svc({ preset: 'Lưu trú', place: 'seller', building: 'Tòa S2', checkIn: '14:00', checkOut: '12:00', minNights: 2, amenities: ['Wi-Fi'], rules: [] });
+      expect(cells(f)).toEqual([['Nhận – trả phòng', 'Nhận 14:00 · Trả 12:00'], ['Địa điểm', 'Tòa S2'], ['Đặt cọc', 'Không cần đặt cọc']]);
+      expect(f.place).toEqual({ mode: 'seller', where: 'Tòa S2' });
+      expect(cells(svc({ preset: 'Lưu trú', building: 'Tòa S2', checkIn: '14:00', deposit: 30 }))?.[2]).toEqual(['Đặt cọc', '30% khi đặt phòng']);
+      expect(f.info?.some((r) => r.label === 'Ở tối thiểu')).toBe(false);
     });
 
-    it('sửa chữa: bỏ thông tin nhanh, 3 ô là nơi làm, phí kiểm tra, giờ nhận lịch', () => {
-      const f = svc({ preset: 'Sửa chữa', inspect: 50000, from: '08:00', to: '18:00', turnaround: 'còn sót', warranty: 'còn sót' });
-      expect(f.highlights?.map((x) => [x.label, x.value])).toEqual([['Nơi làm', 'Tại nhà bạn'], ['Phí kiểm tra', '50.000đ'], ['Giờ nhận lịch', '08:00 – 18:00']]);
+    it('sửa chữa bảng giá: không có phí kiểm tra, không lấy nơi sửa và phụ phí cũ còn lưu', () => {
+      const f = svc({ preset: 'Sửa chữa', priceType: 'list', inspect: 50000, place: 'seller', homeFee: 30000, turnaround: 'còn sót', warranty: 'còn sót' });
+      expect(cells(f)?.[1]).toEqual(['Nơi làm', 'Tại nhà bạn']);
+      expect(f.info?.map((x) => x.label)).not.toContain('Phí kiểm tra');
+      expect(f).toMatchObject({ place: { mode: 'buyer' }, deliveryFee: 0, inspectFee: undefined });
       expect(f.serviceInfo).toMatchObject({ turnaround: undefined, warranty: undefined, area: undefined });
-      expect(f.info?.map((x) => x.label)).not.toContain('Phạm vi phục vụ');
     });
 
-    it('mẫu Khác vẫn giữ thời gian làm và bảo hành đã điền', () => {
-      expect(svc({ preset: 'Khác', turnaround: '2 giờ', warranty: '1 tháng' }).serviceInfo).toMatchObject({ turnaround: '2 giờ', warranty: '1 tháng' });
+    it('báo giá sau: phí kiểm tra xuống phần thông tin', () => {
+      const f = svc({ preset: 'Sửa chữa', priceType: 'quote', inspect: 50000 });
+      expect(f.inspectFee).toBe(50000);
+      expect(f.info).toContainEqual({ label: 'Phí kiểm tra', value: '50.000đ, trừ vào tiền làm nếu bạn đồng ý giá' });
     });
 
-    it('không còn dòng lưu ý an toàn, kể cả bài cũ đã lưu ô này', () => {
-      for (const place of ['buyer', 'choice', 'seller']) expect(svc({ preset: 'Dọn dẹp', place }).info?.map((x) => x.label)).not.toContain('Lưu ý an toàn');
+    it('không mẫu nào còn phạm vi phục vụ hay lưu ý an toàn', () => {
+      for (const preset of ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận', 'Chăm sóc', 'Gia sư', 'Làm đẹp', 'Lưu trú', 'Khác', 'Nấu ăn']) {
+        const labels = svc({ preset, safety: true }).info?.map((x) => x.label) ?? [];
+        expect(labels).not.toContain('Phạm vi phục vụ');
+        expect(labels).not.toContain('Lưu ý an toàn');
+      }
     });
 
-    it('mẫu có đủ mục thì vẫn gửi như người bán điền', () => {
-      const f = svc({ preset: 'Dọn dẹp' });
-      expect(f.highlights).toBeUndefined();
-      expect(f.info?.map((x) => x.label)).toEqual(['Phạm vi phục vụ']);
+    it('mẫu Khác: thời gian hoàn thành lên ô đầu bài, bảo hành xuống phần thông tin', () => {
+      const f = svc({ preset: 'Khác', turnaround: '2 giờ', warranty: '1 tháng' });
+      expect(f.highlights?.[2]).toEqual({ icon: 'clock', label: 'Thời gian làm', value: '2 giờ' });
+      expect(f.info).toEqual(expect.arrayContaining([{ label: 'Bảo hành', value: '1 tháng' }]));
     });
   });
+
 
   it('đồ dùng, dịch vụ: tắt ghi chú thì khách không ghi được, mặc định theo form', () => {
     expect(formToPostFields('goods', { common: {}, spec: { kitchenNote: false } }, 'goods').noteEnabled).toBe(false);
@@ -128,8 +245,8 @@ describe('formToPostFields', () => {
   it('dịch vụ: thông tin theo mẫu, ô trống không hiện', () => {
     const spec = { items: [], questions: [], options: [], place: 'seller', serviceArea: 'Trong khu', cancelPolicy: '', customerNote: 'Để sẵn chỗ' };
     const rows = (s: object) => formToPostFields('service', { common: {}, spec: { ...spec, ...s } }, 'service').info;
-    expect(rows({})).toEqual([{ label: 'Phạm vi phục vụ', value: 'Trong khu' }, { label: 'Lưu ý cho khách', value: 'Để sẵn chỗ' }]);
-    expect(rows({ preset: 'Giặt sấy', returnHours: 24, fulfil: { delivery: true, fee: 0 } })).toEqual([{ label: 'Lưu ý cho khách', value: 'Để sẵn chỗ' }]);
+    expect(rows({})).toEqual([{ label: 'Lưu ý cho khách', value: 'Để sẵn chỗ' }]);
+    expect(rows({ preset: 'Giặt sấy', returnHours: 24, fulfil: { delivery: true, fee: 0 } })).toContainEqual({ label: 'Lưu ý cho khách', value: 'Để sẵn chỗ' });
     expect(rows({ preset: 'Lưu trú', rules: [{ on: true, label: 'Không hút thuốc' }, { on: false, label: 'Tắt' }], minNights: 2 })).toContainEqual({ label: 'Nội quy', value: 'Không hút thuốc' });
   });
 

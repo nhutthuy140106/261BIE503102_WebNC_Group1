@@ -5,7 +5,7 @@ import { DATASET_BASE } from '../config/api.config';
 
 const PREFIX = 'antgo_mock_';
 /** Đổi chuỗi này mỗi khi sửa cấu trúc dữ liệu mẫu: dữ liệu cũ lưu trong trình duyệt tự bị xóa để nạp bản mới */
-const DATA_VERSION = '2026-10-25-a';
+const DATA_VERSION = '2026-11-14-a';
 
 /**
  * Kho dữ liệu giả cho chế độ USE_MOCK: lần đầu đọc public/datasets/<name>.json,
@@ -51,6 +51,11 @@ export class MockDb {
       tap((rows) => this.mem.set(name, rows)),
       map((rows) => rows),
     );
+  }
+
+  /** Chỉ đọc bản đã lưu (bộ nhớ hoặc localStorage); chưa có thì null, KHÔNG tải file mẫu */
+  peek<T>(name: string): T[] | null {
+    return (this.mem.get(name) as T[] | undefined) ?? this.readStorage<T>(name);
   }
 
   save<T>(name: string, rows: T[]): void {

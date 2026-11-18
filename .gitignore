@@ -46,3 +46,24 @@ design/mockups/assets/clean/Kiến cam phấn khích*.png
 # file tạm của Word/Office
 docs/bao-cao/~$*
 docs/bao-cao/~WRL*.tmp
+docs/antgo-mock-export.json
+
+server/backups/
+
+# Bản Word cũ của Chương 1 (chỉ giữ bản đầy đủ Chuong-1-Gioi-thieu-v4-day-du.docx trong Git)
+docs/bao-cao/Chuong-1-Gioi-thieu.docx
+docs/bao-cao/Chuong-1-Gioi-thieu-v3.docx
+docs/bao-cao/Chuong-1-Gioi-thieu-v4.docx
+docs/bao-cao/Chuong-1-Gioi-thieu-v4.truoc-chuong-3.docx
+
+# Bản dựng tạm của công cụ viết báo cáo + bản Word có Quản trị (chưa chốt tên, 23 MB)
+tools/report-gen/__pycache__/
+tools/report-gen/w/
+tools/report-gen/v4-goc.docx
+tools/report-gen/v4-moi2.docx
+docs/bao-cao/Chuong-1-Gioi-thieu-v4-day-du-co-quan-tri.docx
+docs/bao-cao/Chuong-1-Gioi-thieu-v4-day-du-co-quan-tri*.docx
+docs/bao-cao/Chuong-1-Gioi-thieu-v4-day-du-moi.docx
+tools/report-gen/base-user.docx
+tools/report-gen/v5.docx
+docs/bao-cao/hinh-ban/cdp-profile/

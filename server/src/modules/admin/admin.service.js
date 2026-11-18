@@ -3,6 +3,7 @@ const Post = require('../shared/post.model');
 const Job = require('../shared/job.model');
 const Order = require('../buyer/order/order.model');
 const Report = require('../buyer/report/report.model');
+const Verification = require('../seller/verification.model');
 const { audit } = require('../shared/audit-log.model');
 const { notify } = require('../shared/notify');
 const ApiError = require('../../utils/ApiError');
@@ -15,8 +16,7 @@ const page = (q) => parsePaging(q);
 
 async function listUsers(q) {
   const { page: p, limit, skip } = page(q);
-  const filter = {};
-  if (q.role) filter.role = q.role;
+  const filter = { role: { $nin: ['admin', 'moderator'] } }; // trang Người dùng chỉ quản lý người dùng; tài khoản quản trị không nằm ở đây
   if (q.status) filter.status = q.status;
   if (q.q) {
     const re = new RegExp(escapeRegex(q.q.trim()), 'i');
@@ -26,7 +26,19 @@ async function listUsers(q) {
     User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
     User.countDocuments(filter),
   ]);
-  return { items, meta: { page: p, limit, total } };
+  // kèm: trạng thái người bán (hồ sơ xác minh) và số lần bị báo cáo (báo cáo nhắm vào người đó hoặc bài của họ)
+  const ids = items.map((u) => u._id);
+  const [vers, posts] = await Promise.all([
+    Verification.find({ user: { $in: ids } }).select('user status'),
+    Post.find({ seller: { $in: ids } }).select('_id seller'),
+  ]);
+  const vOf = Object.fromEntries(vers.map((v) => [String(v.user), v.status]));
+  const owner = Object.fromEntries(posts.map((x) => [String(x._id), String(x.seller)]));
+  const reps = await Report.find({ $or: [{ targetType: 'user', targetId: { $in: ids } }, { targetType: 'post', targetId: { $in: posts.map((x) => x._id) } }] }).select('targetType targetId');
+  const nRep = {};
+  for (const r of reps) { const uid = r.targetType === 'user' ? String(r.targetId) : owner[String(r.targetId)]; nRep[uid] = (nRep[uid] || 0) + 1; }
+  const out = items.map((u) => ({ ...u.toJSON(), sellerStatus: vOf[String(u._id)] || 'none', reportCount: nRep[String(u._id)] || 0 }));
+  return { items: out, meta: { page: p, limit, total } };
 }
 
 async function getUser(id) {
@@ -117,7 +129,9 @@ async function unhidePost(admin, id) {
 /* ===================== Báo cáo ===================== */
 
 // open → reviewing → resolved | rejected
-const REPORT_FLOW = { open: ['reviewing'], reviewing: ['resolved', 'rejected'], resolved: [], rejected: [] };
+const REPORT_FLOW = { open: ['reviewing', 'resolved', 'rejected'], reviewing: ['resolved', 'rejected'], resolved: [], rejected: [] };
+
+const REPORT_MSG = { reviewing: 'AntGo đang xem xét báo cáo của bạn.', resolved: 'Báo cáo của bạn đã được xử lý.', rejected: 'Báo cáo của bạn chưa được chấp nhận.' };
 
 async function listReports(q) {
   const { page: p, limit, skip } = page(q);
@@ -126,25 +140,55 @@ async function listReports(q) {
     Report.find(filter).sort({ createdAt: 1 }).skip(skip).limit(limit).populate('reporter', 'name phone'), // cũ nhất trước = hàng đợi
     Report.countDocuments(filter),
   ]);
-  return { items, meta: { page: p, limit, total } };
+  // kèm tóm tắt đối tượng bị báo cáo (tên bài/đơn/người, chủ/cửa hàng) để thẻ báo cáo hiện đối tượng ngay ở đầu
+  const { reportContext } = require('./admin-extra.service'); // tải muộn: tránh vòng phụ thuộc
+  const withTarget = await Promise.all(items.map(async (r) => {
+    const c = await reportContext(r).catch(() => ({ found: false }));
+    const ownerName = (c.seller && c.seller.name) || (c.owner && c.owner.name) || '';
+    return { ...r.toJSON(), target: { found: !!c.found, title: c.title || '', status: c.status || '', issueSt: c.issueSt || '', ownerName, orderId: c.orderId ? String(c.orderId) : '' } };
+  }));
+  return { items: withTarget, meta: { page: p, limit, total } };
 }
 
 async function getReport(id) {
   const r = await Report.findById(id).populate('reporter', 'name phone');
   if (!r) throw ApiError.notFound('Không tìm thấy báo cáo');
-  return r;
+  const { reportContext } = require('./admin-extra.service'); // tải muộn: tránh vòng phụ thuộc
+  return { ...r.toJSON(), context: await reportContext(r) };
 }
 
-async function transitionReport(admin, id, to, note) {
+const ACTION_MSG = { hide_post: 'Bài bị báo cáo đã được gỡ.', lock_user: 'Tài khoản bị báo cáo đã bị khóa.', warn_owner: 'Người bị báo cáo đã được nhắc nhở.', order_ruled: 'Đơn bị báo cáo đã được phân xử.', close_job: 'Việc bị báo cáo đã bị đóng.' };
+
+async function transitionReport(admin, id, to, note, action) {
   const r = await Report.findById(id);
   if (!r) throw ApiError.notFound('Không tìm thấy báo cáo');
   if (!REPORT_FLOW[r.state].includes(to)) throw ApiError.invalidState(`Không thể chuyển báo cáo từ "${r.state}" sang "${to}"`);
+  if (to === 'resolved') {
+    // hướng xử lý có tác động thật thì làm luôn (bỏ qua nếu đã làm trước đó)
+    if (action === 'hide_post' && r.targetType === 'post') {
+      const p = await Post.findById(r.targetId);
+      if (p && p.status !== 'hidden') await hidePost(admin, r.targetId, note || 'Vi phạm quy định');
+    } else if (action === 'lock_user' && r.targetType === 'user') {
+      const u = await User.findById(r.targetId);
+      if (u && u.status !== 'locked') await lockUser(admin, r.targetId, note || 'Vi phạm quy định');
+    }
+    else if (action === 'close_job' && r.targetType === 'job') {
+      const j = await Job.findById(r.targetId);
+      if (j && j.status === 'open') { j.status = 'closed'; await j.save(); await audit(admin, 'job.close', 'job', j._id, note || ''); await notify(j.poster, { type: 'job_closed', title: 'Việc của bạn đã bị đóng', body: `${j.title} — lý do: ${note || 'vi phạm quy định'}`, link: { type: 'job', id: j._id } }); }
+    } else if (action === 'warn_owner') {
+      const { reportContext } = require('./admin-extra.service');
+      const c = await reportContext(r).catch(() => ({}));
+      const target = (c.owner && c.owner._id) || (c.seller && c.seller._id);
+      if (target) { await notify(target, { type: 'report_warning', title: 'AntGo nhắc nhở bạn', body: `Nội dung của bạn bị báo cáo. ${note}`, link: { type: r.targetType, id: r.targetId } }); await audit(admin, 'report.warn', r.targetType, r.targetId, note || ''); }
+    }
+    r.action = action;
+  } else if (to === 'rejected') r.action = 'none';
   r.state = to; r.handledBy = admin._id;
   if (note) r.adminNote = note;
   r.history.push({ state: to, at: new Date(), note: note || '' });
   await r.save();
   await audit(admin, `report.${to}`, 'report', r._id, note || '');
-  await notify(r.reporter, { type: 'report_state', title: 'Báo cáo của bạn đã được cập nhật', body: `Trạng thái: ${to}`, link: { type: 'report', id: r._id } });
+  await notify(r.reporter, { type: 'report_state', title: 'Báo cáo của bạn đã được cập nhật', body: REPORT_MSG[to] + (to === 'resolved' && ACTION_MSG[action] ? ' ' + ACTION_MSG[action] : '') + (note ? ` Kết luận: ${note}` : ''), link: { type: 'report', id: r._id } });
   return r;
 }
 

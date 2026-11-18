@@ -4,6 +4,8 @@ import { postTag } from '../../../core/utils/post-tag';
 import { SELLER_KIND_ICON, SellerPost } from '../../../core/models/seller';
 import { SellerSpaceService } from '../../../core/services/seller-space';
 import { ToastService } from '../../../core/services/toast';
+import { UploadService } from '../../../core/services/upload';
+import { useMock } from '../../../core/config/api.config';
 import { SelectOption } from '../../../shared/components/select/select';
 
 type Tab = 'sell' | 'jobs' | 'revs';
@@ -22,6 +24,7 @@ const REPLY = ['Thường trả lời trong 10 phút', 'Thường trả lời tr
 export class SellerShop implements OnInit {
   protected readonly seller = inject(SellerSpaceService);
   private readonly toast = inject(ToastService);
+  private readonly upload = inject(UploadService);
   private readonly route = inject(ActivatedRoute);
 
   protected readonly replies = REPLY;
@@ -94,8 +97,19 @@ export class SellerShop implements OnInit {
         c.width = im.width * k;
         c.height = im.height * k;
         c.getContext('2d')?.drawImage(im, 0, 0, c.width, c.height);
-        this.seller.setShop({ [which]: c.toDataURL('image/jpeg', 0.82) });
-        this.toast.show(which === 'avatar' ? 'Đã đổi ảnh đại diện' : 'Đã thêm ảnh bìa gian hàng');
+        const done = () => this.toast.show(which === 'avatar' ? 'Đã đổi ảnh đại diện' : 'Đã thêm ảnh bìa gian hàng');
+        if (useMock('seller')) {
+          this.seller.setShop({ [which]: c.toDataURL('image/jpeg', 0.82) });
+          return done();
+        }
+        // thật: tải ảnh đã thu nhỏ lên server, hồ sơ chỉ lưu địa chỉ ảnh (không nhúng ảnh vào hồ sơ)
+        c.toBlob((blob) => {
+          if (!blob) return this.toast.show('Không xử lý được ảnh này, thử ảnh khác nhé');
+          this.upload.upload(new File([blob], `${which}.jpg`, { type: 'image/jpeg' })).subscribe({
+            next: (url) => { this.seller.setShop({ [which]: url }); done(); },
+            error: (e: Error) => this.toast.show(e.message || 'Không tải được ảnh lên'),
+          });
+        }, 'image/jpeg', 0.82);
       };
       im.src = r.result as string;
     };

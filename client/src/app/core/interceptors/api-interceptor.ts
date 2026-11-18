@@ -18,7 +18,8 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((e: unknown) => {
       if (e instanceof HttpErrorResponse && e.status === 401 && !req.url.startsWith(`${API_BASE}/auth/`)) {
         auth.currentUser.set(null);
-        router.navigate(['/auth/login'], { queryParams: { returnUrl: router.url } });
+        // khu Quản trị có trang đăng nhập riêng
+        router.navigate([router.url.startsWith('/admin') ? '/admin/login' : '/auth/login'], { queryParams: { returnUrl: router.url } });
       }
       return throwError(() => e);
     }),

@@ -3,35 +3,48 @@
   <div class="wrap top">
     <div class="brand">
       <span class="logo"><img src="assets/clean/logo-sm.png" alt="AntGo" /></span>
-      <p>Ứng dụng kết nối hàng xóm trong khu, mua bán, đặt dịch vụ và giúp nhau ngay gần nhà.</p>
+      <p class="slogan">Một khu, một nhà.</p>
+      <p>Ứng dụng kết nối hàng xóm trong khu: mua bán, đặt dịch vụ, nhận việc vặt và giúp nhau ngay gần nhà.</p>
+      <span class="area"><svg class="i"><use href="#pin" /></svg>Đang xem: {{ area.current() }}</span>
+      <a class="cta" routerLink="/help">Gửi góp ý cho AntGo</a>
     </div>
-    <div>
+    <nav aria-label="Khám phá">
       <h4>Khám phá</h4>
       <ul>
         <li><a routerLink="/search" [queryParams]="{ kind: 'food' }">Đồ ăn &amp; thức uống</a></li>
         <li><a routerLink="/search" [queryParams]="{ kind: 'goods' }">Đồ dùng</a></li>
         <li><a routerLink="/search" [queryParams]="{ kind: 'service' }">Dịch vụ</a></li>
         <li><a routerLink="/search" [queryParams]="{ kind: 'job' }">Việc làm</a></li>
-        <li><a routerLink="/profile" fragment="saved">Đã lưu</a></li>
+        <li><a routerLink="/profile" fragment="saved">Bài đã lưu</a></li>
+        <li><a routerLink="/quay-mon">Quay món nhận Xu</a></li>
         <li><a routerLink="/vuon">Vườn AntGo</a></li>
       </ul>
-    </div>
-    <div>
+    </nav>
+    <nav aria-label="Bán và đăng việc">
+      <h4>Bán &amp; Đăng việc</h4>
+      <ul>
+        <li><a routerLink="/seller/posts/new">Đăng bài bán</a></li>
+        <li><a routerLink="/seller/orders">Đơn khách đặt</a></li>
+        <li><a routerLink="/seller/shop">Gian hàng của tôi</a></li>
+        <li><a routerLink="/seller/insights">Hiệu quả bán hàng</a></li>
+        <li><a routerLink="/seller/verify">Xác minh người bán</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Hỗ trợ">
       <h4>Hỗ trợ</h4>
       <ul>
-        <li><a routerLink="/support">Trung tâm trợ giúp</a></li>
-        <li><a routerLink="/support">An toàn giao dịch</a></li>
-        <li><a routerLink="/support">Báo cáo vi phạm</a></li>
-        <li><a routerLink="/support">Liên hệ AntGo</a></li>
+        <li><a routerLink="/help">Trung tâm trợ giúp</a></li>
+        <li><a routerLink="/help">Báo cáo vi phạm</a></li>
+        <li><a routerLink="/orders">Đơn hàng của tôi</a></li>
+        <li><a routerLink="/legal/terms">Điều khoản sử dụng</a></li>
+        <li><a routerLink="/legal/privacy">Chính sách quyền riêng tư</a></li>
       </ul>
-    </div>
+    </nav>
   </div>
   <div class="bottom">
     <div class="wrap">
       <span>© 2026 AntGo</span>
-      <a routerLink="/legal/terms">Điều khoản</a>
-      <a routerLink="/legal/privacy">Quyền riêng tư</a>
-      <span class="end"><svg class="i"><use href="#pin" /></svg>Đang xem: {{ area.current() }} · Tiếng Việt</span>
+      <span class="end">Tiếng Việt</span>
     </div>
   </div>
 </footer>

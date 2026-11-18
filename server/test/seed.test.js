@@ -57,6 +57,20 @@ test('seed đầy đủ: đủ vai trò, nhiều bài/việc, có dữ liệu gi
   for (const s of ['open', 'reviewing', 'resolved']) assert.ok(await M('Report').countDocuments({ state: s }), `thiếu báo cáo ${s}`);
 });
 
+test('mọi bài mở bán đều đủ thông tin như bài người bán đăng thật (khu vực, thanh toán, loại giá, tài khoản)', async () => {
+  const posts = await Post.find({ status: 'open' }).select('+bank').lean();
+  const bad = [];
+  for (const p of posts) {
+    const miss = [];
+    if (!p.areas || !p.areas.length) miss.push('areas');
+    if (!p.payMethods || !p.payMethods.length) miss.push('payMethods');
+    if (!p.priceType) miss.push('priceType');
+    if ((p.payMethods || []).includes('transfer') && !(p.bank && p.bank.no)) miss.push('bank');
+    if (miss.length) bad.push(`${p.title}: ${miss.join(',')}`);
+  }
+  assert.deepEqual(bad, [], 'bài còn thiếu thông tin');
+});
+
 test('seed chạy lại: không nhân đôi, không đụng người dùng thật, mã đơn không trùng', async () => {
   const real = await M('User').create({ name: 'Người thật', phone: '0988888888', password: 'x'.repeat(20) });
   const realOrder = await M('Order').create({
@@ -96,7 +110,9 @@ test('seed dùng được qua API: Thủy thấy đơn, việc, đánh giá; bà
   const com = (await api('GET', '/posts?q=com nha')).body.data.find((x) => /^Cơm nhà làm/.test(x.title));
   const rv = (await api('GET', `/reviews?postId=${com._id}`)).body.data;
   assert.ok(rv.count >= 3 && rv.average >= 4 && rv.items.some((i) => i.reply));
-  assert.equal((await api('GET', '/posts?limit=100')).body.data.length, 36); // 38 bài (34 + 4 combo) trừ 2 bài bị ẩn/đóng
+  // danh sách công khai chỉ gồm bài đang mở (bài ẩn/đóng/hết hàng không có); không ghi số cứng vì seed còn tăng
+  const openCount = await mongoose.model('Post').countDocuments({ status: 'open' });
+  assert.equal((await api('GET', '/posts?limit=100')).body.data.length, Math.min(openCount, 100));
   const cheap = (await api('POST', '/assistant/chat', jar, { messages: [{ role: 'user', content: 'ăn gì dưới 50k' }] })).body;
   assert.ok((cheap.data.items || cheap.data.posts || []).length >= 3 || (await api('GET', '/posts?type=food&maxPrice=50000', jar)).body.data.length >= 3);
   // Giờ vàng: >= 6 bài có khung giờ, và mọi giờ trong ngày (giờ VN) đều có ít nhất 1 bài đang giảm để demo
@@ -107,7 +123,7 @@ test('seed dùng được qua API: Thủy thấy đơn, việc, đánh giá; bà
   }
   const jobs = (await api('GET', '/jobs?limit=100')).body.data;
   assert.ok(jobs.every((j) => j.exactAddress === undefined));
-  assert.equal(jobs.find((j) => j.title.startsWith('Lấy giúp')).offerCount, 2, 'thẻ việc đếm đúng số đề nghị đang chờ');
+  assert.equal(jobs.find((j) => j.title.startsWith('Lấy giúp')).offerCount, 3, 'thẻ việc đếm đúng số đề nghị đang chờ');
 
   const admin = await login('0900000099');
   const stats = (await api('GET', '/admin/stats', admin)).body.data;

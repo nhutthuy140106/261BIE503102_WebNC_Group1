@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, isDevMode, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, isDevMode, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { USE_MOCK } from '../../../core/config/api.config';
@@ -21,7 +21,7 @@ const DEMO_ACCOUNTS = [
   templateUrl: './login.html',
   styleUrl: '../auth-form.css',
 })
-export class Login implements OnInit {
+export class Login implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -32,6 +32,8 @@ export class Login implements OnInit {
   /** Gợi ý tài khoản dùng thử cho cả nhóm / giảng viên: chỉ khi dev + đang nối máy chủ thật */
   protected readonly demoAccounts = isDevMode() && !USE_MOCK ? DEMO_ACCOUNTS : [];
   protected readonly submitting = signal(false);
+  /** Số điện thoại đã nhớ (cookie): hiện làm gợi ý khi bấm vào ô số điện thoại. Không có mật khẩu. */
+  protected readonly rememberedPhone = this.auth.getRememberedUsername();
 
   protected readonly form = new FormGroup({
     phone: new FormControl('', { nonNullable: true, validators: [Validators.required, phoneValidator] }),
@@ -46,7 +48,65 @@ export class Login implements OnInit {
   /** Quay về form đăng nhập thường (bỏ thông tin Google đang chờ). */
   cancelGoogle(): void {
     this.auth.googlePending.set(null);
+    this.gStep.set(1);
+    clearInterval(this.timer);
     this.error.set(null);
+  }
+
+  /** Bước nhập số (1) → nhập mã gửi tới số đó (2) → tạo tài khoản */
+  protected readonly gStep = signal<1 | 2>(1);
+  protected readonly otp = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^\d{6}$/)] });
+  protected readonly devCode = signal<string | null>(null);
+  protected readonly countdown = signal(0);
+  private timer?: ReturnType<typeof setInterval>;
+
+  ngOnDestroy(): void {
+    clearInterval(this.timer);
+  }
+
+  /** Xin mã gửi tới số vừa nhập (bước 1) hoặc gửi lại (bước 2) */
+  protected sendCode(): void {
+    if (this.phoneOnly.invalid) return this.phoneOnly.markAsTouched();
+    this.submitting.set(true);
+    this.error.set(null);
+    this.auth.sendOtp(this.phoneOnly.value.trim(), 'register').subscribe({
+      next: (r) => {
+        this.submitting.set(false);
+        this.devCode.set(r.devCode ?? null);
+        this.otp.reset('');
+        this.gStep.set(2);
+        clearInterval(this.timer);
+        this.countdown.set(r.resendInSec ?? 60);
+        this.timer = setInterval(() => {
+          this.countdown.update((n) => n - 1);
+          if (this.countdown() <= 0) clearInterval(this.timer);
+        }, 1000);
+      },
+      error: (e: Error) => {
+        this.submitting.set(false);
+        this.error.set(e.message);
+      },
+    });
+  }
+
+  /** Nhập đúng mã thì tạo tài khoản luôn */
+  protected verifyCode(): void {
+    if (this.otp.invalid) return this.otp.markAsTouched();
+    this.submitting.set(true);
+    this.error.set(null);
+    this.auth.verifyOtp(this.phoneOnly.value.trim(), 'register', this.otp.value).subscribe({
+      next: () => this.completeGoogle(),
+      error: (e: Error) => {
+        this.submitting.set(false);
+        this.error.set(e.message);
+      },
+    });
+  }
+
+  protected backToPhone(): void {
+    clearInterval(this.timer);
+    this.error.set(null);
+    this.gStep.set(1);
   }
 
   completeGoogle(): void {

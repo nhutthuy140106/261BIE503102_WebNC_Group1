@@ -17,6 +17,8 @@ const offerSchema = new Schema({
   cancel: { reason: String, detail: String, at: Date, _id: false },
   paidAt: Date,                                                       // người nhận đã bấm "Đã nhận tiền công"
   reviewed: { type: Boolean, default: false },
+  // người đăng việc đánh giá người làm (người làm đánh giá người đăng thì lưu ở Review)
+  posterRating: { stars: Number, text: String, at: Date, _id: false },
 }, { timestamps: true });
 
 // mỗi (job, worker) chỉ có một đề nghị đang hoạt động

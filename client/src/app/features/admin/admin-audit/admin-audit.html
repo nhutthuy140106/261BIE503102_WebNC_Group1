@@ -1,0 +1,30 @@
+<h1>Nhật ký thao tác</h1>
+<p class="lead">Mọi thao tác của quản trị viên đều được ghi lại để truy vết. Nhật ký chỉ xem, không sửa hay xóa được.</p>
+<div class="bar">
+  <app-admin-select name="action" ariaLabel="Lọc loại thao tác" [(ngModel)]="action" (ngModelChange)="filter()" [options]="groupOptions" />
+</div>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+
+@if (rows(); as list) {
+  @if (list.length) {
+    <table class="tbl fixed">
+      <colgroup><col style="width: 140px" /><col style="width: 170px" /><col style="width: 230px" /><col style="width: 150px" /><col /></colgroup>
+      <thead><tr><th>Thời gian</th><th>Người thực hiện</th><th>Thao tác</th><th>Đối tượng</th><th>Ghi chú</th></tr></thead>
+      <tbody>
+        @for (r of list; track r._id) {
+          <tr>
+            <td data-l="Thời gian">{{ r.at | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td data-l="Người thực hiện"><b>{{ r.actor?.name || 'Đã xóa' }}</b>@if (r.actor) { <div class="sub">{{ r.actor.role === 'admin' ? 'Quản trị' : 'Kiểm duyệt' }}</div> }</td>
+            <td data-l="Thao tác"><span class="pill info">{{ label(r.action) }}</span></td>
+            <td data-l="Đối tượng">
+              @if (link(r); as l) { <a [routerLink]="l" class="lnk">{{ target(r.targetType) }}</a> } @else { {{ target(r.targetType) }} }
+              <div class="sub mono">{{ r.targetId.slice(-6) }}</div>
+            </td>
+            <td data-l="Ghi chú" style="white-space: normal; max-width: 320px">{{ r.note || '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <div class="pager"><span>{{ total() }} dòng · Trang {{ page }}/{{ pages() }}</span><button type="button" class="btn" [disabled]="page <= 1" (click)="go(page - 1)">Trước</button><button type="button" class="btn" [disabled]="page >= pages()" (click)="go(page + 1)">Sau</button></div>
+  } @else { <p class="empty">Chưa có thao tác nào phù hợp.</p> }
+} @else { <div class="sk"></div><div class="sk"></div><div class="sk"></div> }

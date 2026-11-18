@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "seed": "node src/seeds/seed.js",
-    "eval:recommend": "node scripts/eval-recommend.js"
+    "eval:recommend": "node scripts/eval-recommend.js",
+    "eval:search": "node scripts/eval-search.js"
   },
   "keywords": [],
   "author": "",

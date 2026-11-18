@@ -1,0 +1,37 @@
+<h1>Thông báo hệ thống</h1>
+<p class="lead">Gửi tin chung tới người dùng đang hoạt động, ví dụ báo bảo trì, thời tiết xấu hay chương trình mới. Tin hiện trong chuông thông báo của họ.</p>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+@if (ok()) { <div class="okmsg" role="status">{{ ok() }}</div> }
+
+<div class="grid2">
+  <section class="panel">
+    <h2>Soạn thông báo</h2>
+    <form (ngSubmit)="ask()">
+      <div class="field"><label for="at">Tiêu đề</label><input id="at" name="at" [(ngModel)]="title" maxlength="100" placeholder="VD: Cuối tuần có mưa lớn" /></div>
+      <div class="field"><label for="ab">Nội dung (không bắt buộc)</label><textarea id="ab" name="ab" rows="4" [(ngModel)]="body" maxlength="500"></textarea></div>
+      <div class="field"><label for="aa">Gửi tới</label>
+        <app-admin-select inputId="aa" name="aa" [(ngModel)]="area" [options]="areaOptions()" />
+        <small>Thông báo đã gửi không thu hồi được, hãy đọc lại trước khi gửi.</small></div>
+      @if (formErr) { <p class="e" role="alert">{{ formErr }}</p> }
+      <div class="btns"><button type="submit" class="btn main" [disabled]="busy()">Gửi thông báo</button></div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Đã gửi gần đây</h2>
+    @if (rows(); as list) {
+      @for (a of list; track a._id) {
+        <article class="hist">
+          <b>{{ a.title }}</b>
+          @if (a.body) { <p>{{ a.body }}</p> }
+          <span class="sub">{{ a.at | date: 'dd/MM/yyyy HH:mm' }} · {{ a.area === 'all' ? 'Toàn khu' : 'Khu ' + a.area }} · {{ a.recipients }} người · {{ a.sentBy?.name }}</span>
+        </article>
+      } @empty { <p class="empty">Chưa gửi thông báo nào.</p> }
+    } @else { <div class="sk"></div><div class="sk"></div> }
+  </section>
+</div>
+
+@if (confirming()) {
+  <app-admin-dialog title="Gửi thông báo này?" [message]="'Tới ' + (area === 'all' ? 'toàn bộ người dùng' : 'người dùng khu ' + area) + ': “' + title.trim() + '”. Không thu hồi được sau khi gửi.'"
+    confirmLabel="Gửi ngay" (confirmed)="send()" (cancelled)="confirming.set(false)" />
+}

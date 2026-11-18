@@ -57,10 +57,15 @@
         </a>
       }
       <a routerLink="/search" class="iconbtn msearch" title="Tìm kiếm" aria-label="Tìm kiếm"><svg class="i"><use href="#search" /></svg></a>
-      <button type="button" class="iconbtn" id="savedBtn" title="Đã lưu" (click)="openSaved()">
-        <svg class="i"><use href="#heart" /></svg>
-        @if (saved.ids().length) { <span class="cnt">{{ saved.ids().length }}</span> }
-      </button>
+      @if (sellMode()) {
+        <!-- khu Bán không có bài đã lưu: chỗ nút tim là Messenger của người bán -->
+        <a routerLink="/seller/messenger" routerLinkActive="on" class="iconbtn" title="Messenger" aria-label="Messenger"><svg class="i"><use href="#chat" /></svg></a>
+      } @else {
+        <button type="button" class="iconbtn" id="savedBtn" title="Đã lưu" (click)="openSaved()">
+          <svg class="i"><use href="#heart" /></svg>
+          @if (saved.ids().length) { <span class="cnt">{{ saved.ids().length }}</span> }
+        </button>
+      }
       @if (auth.isLoggedIn()) {
         <span class="nwrap">
           <button type="button" class="iconbtn" [class.on]="notifOpen()" title="Thông báo" (click)="toggleNotif()">
@@ -130,7 +135,7 @@
               <a routerLink="/xu" class="uitem" (click)="userOpen.set(false)"><img class="uxu" src="assets/clean/antxu.png" alt="" />AntXu &amp; voucher<em>{{ xu.balance() }} Xu</em></a>
               <a routerLink="/orders" [queryParams]="{ f: 'history' }" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#receipt" /></svg>Lịch sử đơn hàng</a>
               <div class="usep"></div>
-              @if (auth.currentUser()?.role === 'admin') {
+              @if (auth.currentUser()?.role === 'admin' || auth.currentUser()?.role === 'moderator') {
                 <a routerLink="/admin" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#shield" /></svg>Quản trị</a>
               }
               <a routerLink="/help" class="uitem" (click)="userOpen.set(false)"><svg class="i"><use href="#p-help" /></svg>Trợ giúp &amp; hỗ trợ</a>

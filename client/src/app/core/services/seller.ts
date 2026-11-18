@@ -1,12 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import type { Promo } from '../utils/promo';
 import type { OrderWindow } from '../utils/order-window';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, switchMap, throwError } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { Offer } from '../models/offer';
 import { Order } from '../models/order';
+import { DayHours, SellerChat, SellerOrder, SellerPause, SellerReview, SellerStats, StatsRange } from '../models/seller';
 import { PayMethod, Post, PostItem, PostKind, PostQuestion, PostStatus, OptionGroup, PriceType } from '../models/post';
+import { jobFromApi, postFromApi } from '../utils/api-mappers';
+import { ServerShop, chatContextToApi, jobBodyToApi, sellerChatFromApi, postBodyToApi, posterOfferFromApi, sellerOrderFromApi, sellerReviewFromApi } from '../utils/seller-mappers';
 import { PosterAction, SellerOrderAction, applyPoster, applySellerOrder } from '../utils/seller-state';
 import { ApiService } from './api';
 import { AuthService } from './auth';
@@ -61,6 +64,12 @@ export interface PostBody {
   serviceInfo?: Post['serviceInfo'];
   highlights?: Post['highlights'];
   pickupAtBuyer?: boolean;
+  bookOnce?: boolean;
+  serviceMenu?: Post['serviceMenu'];
+  timeLabel?: string;
+  noSchedule?: boolean;
+  /** Dữ liệu form đăng bài (để mở lại đúng từng ô khi sửa); chỉ gửi ở chế độ thật */
+  formData?: { type: string; form: Record<string, unknown> };
   /** Chỉ việc làm */
   job?: { start?: string; end?: string; allDay?: boolean; head?: number; payUnit?: string; due?: string; payBy?: 'cash' | 'transfer'; building?: string; windows?: string[] };
 }
@@ -80,9 +89,24 @@ export class SellerService {
     return this.auth.currentUser()?._id ?? '';
   }
 
+  /** Bài / việc server trả về chỉ có id người bán: điền tên, ảnh của tôi để hiển thị giống bài đọc từ phía Mua */
+  private mine<T extends Post>(p: T): T {
+    const u = this.auth.currentUser();
+    return { ...p, sellerId: this.me, sellerName: u?.fullName ?? p.sellerName, sellerAvatar: u?.avatar ?? p.sellerAvatar };
+  }
+
+  /** Thử đường dẫn bài; không có thì thử đường dẫn việc (cùng một id không thể nằm ở cả hai) */
+  private postOrJob<T>(call: (base: 'posts' | 'jobs') => Observable<T>): Observable<T> {
+    return call('posts').pipe(catchError((e: unknown) => (e instanceof AppError && e.status === 404 ? call('jobs') : throwError(() => e))));
+  }
+
   // ---- Bài đăng của tôi ----
   myPosts(): Observable<Post[]> {
-    if (!useMock('seller')) return this.api.get<Post[]>('/seller/posts');
+    if (!useMock('seller')) {
+      return forkJoin([this.api.get<unknown[]>('/seller/posts'), this.api.get<unknown[]>('/seller/jobs')]).pipe(
+        map(([posts, jobs]) => [...posts.map((x) => this.mine(postFromApi(x))), ...jobs.map((x) => this.mine(jobFromApi(x)))].sort((a, b) => b.createdAt.localeCompare(a.createdAt))),
+      );
+    }
     return this.db.list<Post>('posts').pipe(map((l) => l.filter((p) => p.sellerId === this.me).sort((a, b) => b.createdAt.localeCompare(a.createdAt))));
   }
 
@@ -97,7 +121,13 @@ export class SellerService {
   }
 
   savePost(body: PostBody, id?: string): Observable<Post> {
-    if (!useMock('seller')) return id ? this.api.put<Post>(`/seller/posts/${id}`, body) : this.api.post<Post>('/seller/posts', body);
+    if (!useMock('seller')) {
+      const job = body.kind === 'job';
+      const path = `/seller/${job ? 'jobs' : 'posts'}`;
+      const data = job ? jobBodyToApi(body) : postBodyToApi(body);
+      const saved = id ? this.api.put<unknown>(`${path}/${id}`, data) : this.api.post<unknown>(path, data);
+      return saved.pipe(map((x) => this.mine(job ? jobFromApi(x) : postFromApi(x))));
+    }
     return this.db.list<Post>('posts').pipe(
       map((rows) => {
         const user = this.auth.currentUser();
@@ -115,7 +145,7 @@ export class SellerService {
           priceType: body.priceType, estimate: body.estimate, inspectFee: body.inspectFee, items: body.items?.length ? body.items : undefined,
           optionGroups: body.optionGroups, questions: body.questions, fulfillmentModes: body.fulfillmentModes, deliveryFee: body.deliveryFee,
           needSchedule: body.needSchedule, payMethods: body.payMethods, bank: body.bank, quickOptions: body.quickOptions, noteEnabled: body.noteEnabled, template: body.template, freeShipFrom: body.freeShipFrom, areas: body.areas, info: body.info, dates: body.dates, timeMode: body.timeMode, duration: body.duration,
-          repeat: body.repeat, place: body.place, highlights: body.highlights, pickupAtBuyer: body.pickupAtBuyer, stock: body.stock, prepMinutes: body.prepMinutes, handover: body.handover, condition: body.condition, serviceInfo: body.serviceInfo,
+          repeat: body.repeat, place: body.place, highlights: body.highlights, pickupAtBuyer: body.pickupAtBuyer, bookOnce: body.bookOnce, serviceMenu: body.serviceMenu, timeLabel: body.timeLabel, noSchedule: body.noSchedule, stock: body.stock, prepMinutes: body.prepMinutes, handover: body.handover, condition: body.condition, serviceInfo: body.serviceInfo,
           job: body.kind === 'job' ? { ...body.job, due: body.job?.due ?? body.due ?? '', offers: 0, status: 'open' } : undefined,
         };
         if (id) {
@@ -134,7 +164,7 @@ export class SellerService {
 
   /** Ẩn bài khỏi phía Mua (đóng) hoặc mở lại. */
   setClosed(id: string, closed: boolean): Observable<Post> {
-    if (!useMock('seller')) return this.api.patch<Post>(`/seller/posts/${id}`, { closed });
+    if (!useMock('seller')) return this.postOrJob((b) => this.api.patch<unknown>(`/seller/${b}/${id}`, { closed })).pipe(map((x) => this.mine((x as { type?: string }).type ? postFromApi(x) : jobFromApi(x))));
     return this.db.list<Post>('posts').pipe(
       map((rows) => {
         const cur = rows.find((r) => r._id === id && r.sellerId === this.me);
@@ -148,6 +178,7 @@ export class SellerService {
 
   /** Số còn lại của bài có giới hạn số lượng: đơn trừ đi hoặc trả lại thì phía Mua thấy số mới */
   setStockLeft(id: string, left: number): Observable<Post> {
+    if (!useMock('seller')) return this.api.patch<unknown>(`/seller/posts/${id}`, { stockLeft: left }).pipe(map((x) => this.mine(postFromApi(x))));
     return this.db.list<Post>('posts').pipe(
       map((rows) => {
         const cur = rows.find((r) => r._id === id);
@@ -161,6 +192,8 @@ export class SellerService {
 
   /** Trừ / trả số lượng của từng món trong bài (món để trống số lượng thì không đổi) */
   moveItemsLeft(id: string, deltas: { name: string; delta: number }[]): Observable<Post> {
+    // thật: server đã tự trừ / trả số lượng theo từng đơn, không cần đổi thêm
+    if (!useMock('seller')) return this.getPost(id);
     return this.db.list<Post>('posts').pipe(
       map((rows) => {
         const cur = rows.find((r) => r._id === id);
@@ -179,7 +212,7 @@ export class SellerService {
 
   /** Đổi nhanh giá đại diện của bài (sửa giá ngay trên thẻ bài phía Bán). */
   setPrice(id: string, price: number): Observable<Post> {
-    if (!useMock('seller')) return this.api.patch<Post>(`/seller/posts/${id}`, { price });
+    if (!useMock('seller')) return this.api.patch<unknown>(`/seller/posts/${id}`, { price }).pipe(map((x) => this.mine(postFromApi(x))));
     return this.db.list<Post>('posts').pipe(
       map((rows) => {
         const cur = rows.find((r) => r._id === id && r.sellerId === this.me);
@@ -192,7 +225,7 @@ export class SellerService {
   }
 
   removePost(id: string): Observable<void> {
-    if (!useMock('seller')) return this.api.delete(`/seller/posts/${id}`);
+    if (!useMock('seller')) return this.postOrJob((b) => this.api.delete(`/seller/${b}/${id}`));
     return this.db.list<Post>('posts').pipe(
       map((rows) => {
         if (!rows.some((r) => r._id === id && r.sellerId === this.me)) throw new AppError('Không tìm thấy bài của bạn.', 404, 'NOT_FOUND');
@@ -224,13 +257,92 @@ export class SellerService {
     );
   }
 
+  /** Sửa nhanh (chế độ thật): chỉ gửi các trường chính đã sửa, phần còn lại của bài giữ nguyên. Bài việc làm: tên, mô tả, tiền công, đơn vị. */
+  quickEdit(post: Post, f: { title: string; description: string; price: number; unit: string; images: string[]; open: boolean; left?: number }): Observable<unknown> {
+    if (post.kind === 'job') {
+      return this.api.put<unknown>(`/seller/jobs/${post._id}`, { title: f.title, desc: f.description, pay: f.price, unit: f.unit }).pipe(
+        switchMap(() => this.api.patch<unknown>(`/seller/jobs/${post._id}`, { closed: !f.open })),
+      );
+    }
+    return this.api.put<unknown>(`/seller/posts/${post._id}`, { title: f.title, description: f.description, price: f.price, unit: f.unit, images: f.images }).pipe(
+      switchMap(() => this.api.patch<unknown>(`/seller/posts/${post._id}`, { closed: !f.open, ...(f.left !== undefined ? { stockLeft: f.left } : {}) })),
+    );
+  }
+
+  // ---- Gian hàng (chỉ chế độ thật): hồ sơ, giờ nhận đơn, ngày nghỉ, tạm ngưng, thống kê, đánh giá ----
+  shopInfo(): Observable<ServerShop> {
+    return this.api.get<ServerShop>('/seller/shop');
+  }
+
+  updateShop(body: { name?: string; kind?: string; address?: string; bio?: string; cover?: string | null; replyTime?: string }): Observable<ServerShop> {
+    return this.api.put<ServerShop>('/seller/shop', body);
+  }
+
+  saveHours(hours: DayHours[]): Observable<ServerShop> {
+    return this.api.put<ServerShop>('/seller/shop/hours', { hours });
+  }
+
+  /** `date` = yyyy-mm-dd; note null = bỏ ngày nghỉ */
+  saveOff(date: string, note: string | null): Observable<ServerShop> {
+    return note === null ? this.api.delete(`/seller/shop/offs/${date}`).pipe(switchMap(() => this.shopInfo())) : this.api.put<ServerShop>('/seller/shop/offs', { date, note });
+  }
+
+  savePause(pause: SellerPause | null): Observable<ServerShop> {
+    return pause ? this.api.put<ServerShop>('/seller/shop/pause', { until: pause.until }) : this.api.delete('/seller/shop/pause').pipe(switchMap(() => this.shopInfo()));
+  }
+
+  serverStats(): Observable<Record<StatsRange, SellerStats>> {
+    return this.api.get<Record<StatsRange, SellerStats>>('/seller/stats');
+  }
+
+  serverReviews(): Observable<SellerReview[]> {
+    return this.api.get<unknown[]>('/seller/reviews').pipe(map((l) => l.map((r) => sellerReviewFromApi(r))));
+  }
+
+  replyToReview(id: string, text: string): Observable<unknown> {
+    return this.api.post<unknown>(`/seller/reviews/${id}/reply`, { text });
+  }
+
+  // ---- Messenger (chỉ chế độ thật): dùng chung kho hội thoại với phía Mua ----
+  serverChats(jobOfOffer: (offerId: string) => string | undefined): Observable<SellerChat[]> {
+    return this.api.get<{ _id: string }[]>('/conversations').pipe(
+      switchMap((list) => {
+        const top = list.slice(0, 30);
+        return top.length ? forkJoin(top.map((c) => this.api.get<unknown[]>(`/conversations/${c._id}/messages`, { limit: 100 }).pipe(map((m) => sellerChatFromApi(c, m as never[], this.me, jobOfOffer))))) : of([] as SellerChat[]);
+      }),
+    );
+  }
+
+  /** Mở (hoặc lấy lại) hội thoại với một người, gắn đơn / việc đang nói tới. Trả về id hội thoại ở server */
+  openConversation(withUser: string, ctx: SellerChat['ctx']): Observable<string> {
+    return this.api.post<{ _id: string }>('/conversations', { withUser, context: chatContextToApi(ctx) }).pipe(map((c) => c._id));
+  }
+
+  sendChat(conversationId: string, text: string, media?: { kind: string; url: string; name?: string; size?: number; sec?: number }): Observable<unknown> {
+    return this.api.post<unknown>(`/conversations/${conversationId}/messages`, { text, ...(media ? { media: { kind: media.kind, url: media.url, name: media.name, size: media.size, sec: media.sec } } : {}) });
+  }
+
+  readChat(conversationId: string): Observable<unknown> {
+    return this.api.post<unknown>(`/conversations/${conversationId}/read`);
+  }
+
+  /** Chỉ chế độ thật: đơn khách đặt ở server, đã đổi sang dạng hiển thị của khu Bán */
+  incomingSellerOrders(): Observable<SellerOrder[]> {
+    return this.api.get<unknown[]>('/seller/orders').pipe(map((l) => l.map((o) => sellerOrderFromApi(o))));
+  }
+
+  /** Chỉ chế độ thật: người bán xử lý đơn (confirm · prepare · deliver · ready · complete · decline · approveCancel · keepOrder · surcharge) */
+  sellerOrderAct(id: string, action: string, data: { amount?: number; reason?: string; reply?: string; lines?: { name: string; qty: number; price: number }[] } = {}): Observable<SellerOrder> {
+    return this.api.post<unknown>(`/seller/orders/${id}/${action}`, data).pipe(map((o) => sellerOrderFromApi(o)));
+  }
+
   // ---- Đề nghị nhận việc của tôi (người đăng việc chọn người) ----
   incomingOffers(): Observable<Offer[]> {
-    return useMock('seller') ? this.db.list<Offer>('seller-offers') : this.api.get<Offer[]>('/seller/offers');
+    return useMock('seller') ? this.db.list<Offer>('seller-offers') : this.api.get<unknown[]>('/seller/offers').pipe(map((l) => l.map(posterOfferFromApi)));
   }
 
   offerAction(id: string, action: PosterAction): Observable<Offer[]> {
-    if (!useMock('seller')) return this.api.post<Offer[]>(`/seller/offers/${id}/${action}`);
+    if (!useMock('seller')) return this.api.post<unknown>(`/seller/offers/${id}/${action}`).pipe(switchMap(() => this.incomingOffers()));
     return this.db.list<Offer>('seller-offers').pipe(
       map((rows) => {
         let next: Offer[];

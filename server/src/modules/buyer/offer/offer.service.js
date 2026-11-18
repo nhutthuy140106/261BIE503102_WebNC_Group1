@@ -5,6 +5,7 @@ const { nextCode } = require('../../shared/counter.model');
 const { notify } = require('../../shared/notify');
 const ApiError = require('../../../utils/ApiError');
 const { parsePaging } = require('../../../utils/pagination');
+const Review = require('../review/review.model');
 
 const AUTO_DONE_MS = 24 * 3600 * 1000; // reported -> done tự động sau 24 giờ (tính lúc đọc, không cần cron — Q4)
 
@@ -31,6 +32,10 @@ async function applyAutoDone(offer) {
 async function present(offer) {
   await offer.populate({ path: 'job', populate: { path: 'poster', select: 'name avatar area' } });
   const out = offer.toJSON();
+  if (offer.reviewed) {
+    const r = await Review.findOne({ targetType: 'offer', targetId: offer._id }).select('rating comment');
+    if (r) out.review = { rating: r.rating, comment: r.comment || '' };
+  }
   if (out.job) {
     if (!Offer.REVEAL_ADDRESS.includes(offer.state)) delete out.job.exactAddress;
   }

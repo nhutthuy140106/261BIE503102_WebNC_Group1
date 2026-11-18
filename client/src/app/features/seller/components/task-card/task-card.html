@@ -13,7 +13,7 @@
       <b>{{ task.person }}</b>
     </span>
     <span class="ost" [class.red]="task.type === 'cancel'">{{ task.status }}</span>
-    @if (task.due) { <span class="due"><svg class="i"><use href="#clock" /></svg>{{ task.due }}</span> }
+    @if (dueView; as d) { <span class="due" [class.hot]="d.hot"><svg class="i"><use href="#clock" /></svg>{{ d.text }}</span> }
   </div>
 
   <div class="body">

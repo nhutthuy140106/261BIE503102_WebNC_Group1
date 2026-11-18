@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map, switchMap } from 'rxjs';
+import { Observable, map, switchMap, throwError } from 'rxjs';
 import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { CreateOfferBody, Offer, OfferAction } from '../models/offer';
 import { offerFromApi } from '../utils/api-mappers';
+import { posterOfferFromApi } from '../utils/seller-mappers';
 import { applyAction, canDo } from '../utils/offer-state';
 import { Post } from '../models/post';
 import { ApiService } from './api';
@@ -40,6 +41,8 @@ export class JobOfferService {
 
   /** Mọi đề nghị trong kho */
   all(): Observable<Offer[]> {
+    // thật: đề nghị gửi tới việc của TÔI (phía người đăng việc); mẫu: cả kho chung
+    if (!useMock('seller')) return this.api.get<unknown[]>('/seller/offers').pipe(map((l) => l.map(posterOfferFromApi)));
     return this.db.list<Offer>(COLLECTION);
   }
 
@@ -137,7 +140,12 @@ export class JobOfferService {
    * Máy chủ chưa có endpoint cho các bước này (docs/handoff.md).
    */
   patch(id: string, patch: Partial<Offer>, _line?: string): Observable<Offer> {
-    if (!useMock('offer')) throw new AppError('Bước này cần máy chủ hỗ trợ, chưa có API.', 501, 'NOT_IMPLEMENTED');
+    if (!useMock('offer')) {
+      // xác nhận đã nhận tiền công; đánh giá đã lưu qua API đánh giá (ở đây chỉ ghi lên màn hình)
+      if (patch.paid) return this.api.post<unknown>(`/offers/${id}/confirm-paid`).pipe(map(offerFromApi));
+      if (Object.keys(patch).every((k) => k === 'rated')) return this.get(id).pipe(map((o) => ({ ...o, ...patch })));
+      return throwError(() => new AppError('Bước này chưa dùng được với máy chủ.', 501, 'NOT_IMPLEMENTED'));
+    }
     return this.mutate(id, (o) => ({
       ...o,
       ...patch,
@@ -150,6 +158,11 @@ export class JobOfferService {
    * Chưa có API (chỉ dữ liệu mẫu), giống các bước khác của phía Bán.
    */
   posterAct(id: string, a: 'choose' | 'reject' | 'confirmDone' | 'rate', data: { exact?: string; head?: number; stars?: number; text?: string } = {}): Observable<Offer> {
+    if (!useMock('seller')) {
+      // thật: chọn / từ chối / xác nhận hoàn thành do server xử lý (đổi trạng thái, loại các đề nghị khác, cộng Xu, báo người làm)
+      if (a !== 'rate') return this.api.post<unknown>(`/seller/offers/${id}/${a}`).pipe(map(posterOfferFromApi));
+      return this.api.post<unknown>(`/seller/offers/${id}/rate`, { stars: data.stars ?? 5, text: data.text ?? '' }).pipe(map(posterOfferFromApi));
+    }
     return this.all().pipe(
       map((rows) => {
         const cur = rows.find((r) => r._id === id);

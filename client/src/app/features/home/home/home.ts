@@ -13,7 +13,7 @@ import { SavedService } from '../../../core/services/saved';
 import { SearchUiService } from '../../../core/services/search-ui';
 
 type FeedFilter = 'all' | PostKind;
-type FeedSort = 'near' | 'new' | 'cheap' | 'dear' | 'pay';
+type FeedSort = 'mix' | 'near' | 'new' | 'cheap' | 'dear' | 'pay';
 
 
 /** Trang chủ không gian Mua — bê từ design/mockups/home-v5.html (khối đầu trang giữ bản đã duyệt: kiến người nhện). */
@@ -51,11 +51,12 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
    * Riêng Khám phá hiện mọi bài của khu, kể cả bài đã có ở các khối trên.
    */
   protected readonly clock = inject(ClockService);
-  /** Bài đang trong Giờ vàng (kết thúc sớm nhất xếp trước), tối đa 4 */
+  /** Bài đang trong Giờ vàng (kết thúc sớm nhất xếp trước), tối đa 4 (một hàng), phần còn lại ở "Xem thêm" */
   protected readonly dealsNow = computed(() => {
     const now = this.clock.now();
+    const shown = new Set(this.featured().map((p) => p._id)); // bài đã ở "Nổi bật" thì không lặp lại ở đây
     return this.posts()
-      .filter((p) => p.kind !== 'job' && !p.closed)
+      .filter((p) => p.kind !== 'job' && !p.closed && !shown.has(p._id))
       .map((p) => ({ p, d: dealAt(p, now) }))
       .filter((x): x is { p: Post; d: NonNullable<typeof x.d> } => x.d !== null)
       .sort((a, b) => a.d.endsAt - b.d.endsAt)
@@ -65,6 +66,8 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     const first = this.dealsNow()[0];
     return first ? countdown(first.d.endsAt - this.clock.now()) : '';
   });
+  /** Đồng hồ tách từng số (giờ : phút : giây) để vẽ thành các ô */
+  protected readonly dealsParts = computed(() => (this.dealsLeft() ? this.dealsLeft().split(':') : []));
   /** Chưa có bài nào đang giảm: bài sắp giảm trong 3 giờ tới */
   protected readonly dealsNext = computed(() => {
     const now = this.clock.now();
@@ -80,7 +83,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     return this.forYou().filter((p) => !taken.has(p._id) && inArea(p, this.area.current())).slice(0, 4);
   });
   protected readonly nearby = computed(() => {
-    const taken = new Set([...this.featured(), ...this.forYouShown()].map((p) => p._id));
+    const taken = new Set([...this.featured(), ...this.forYouShown(), ...this.dealsNow().map((x) => x.p)].map((p) => p._id));
     return this.posts().filter((p) => p.kind !== 'job' && !p.promoted && !taken.has(p._id)).slice(0, 4);
   });
   protected readonly jobs = computed(() => {
@@ -97,6 +100,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     { key: 'job', label: 'Việc làm' },
   ];
   private readonly sortLabels: Record<FeedSort, string> = {
+    mix: 'Ngẫu nhiên',
     near: 'Gần nhất',
     new: 'Mới nhất',
     cheap: 'Giá thấp → cao',
@@ -104,14 +108,16 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     pay: 'Tiền công cao nhất',
   };
   private readonly sortOptions: Record<FeedFilter, FeedSort[]> = {
-    all: ['near', 'new', 'cheap', 'dear'],
-    food: ['near', 'new', 'cheap', 'dear'],
-    goods: ['near', 'new', 'cheap', 'dear'],
-    service: ['near', 'new', 'cheap', 'dear'],
+    all: ['mix', 'near', 'new', 'cheap', 'dear'],
+    food: ['mix', 'near', 'new', 'cheap', 'dear'],
+    goods: ['mix', 'near', 'new', 'cheap', 'dear'],
+    service: ['mix', 'near', 'new', 'cheap', 'dear'],
     job: ['new', 'near', 'pay'],
   };
   protected readonly feedFilter = signal<FeedFilter>('all');
-  protected readonly feedSort = signal<FeedSort>('near');
+  protected readonly feedSort = signal<FeedSort>('mix');
+  /** Hạt giống của lần xáo trộn: đổi mỗi lần vào trang, nên thứ tự ngẫu nhiên nhưng ổn định khi bấm lọc / quay lại xem tiếp */
+  private readonly mixSeed = Math.floor(Math.random() * 2 ** 31);
   protected readonly sortMenuOpen = signal(false);
   protected readonly sortMenu = computed(() => this.sortOptions[this.feedFilter()].map((k) => ({ key: k, label: this.sortLabels[k] })));
   protected readonly sortLabel = computed(() => this.sortLabels[this.feedSort()]);
@@ -120,6 +126,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     const f = this.feedFilter();
     const pool = this.posts().filter((p) => f === 'all' || p.kind === f);
     const by = this.feedSort();
+    if (by === 'mix') return this.mixed(pool);
     return [...pool].sort((a, b) => {
       switch (by) {
         case 'near':
@@ -135,6 +142,24 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   });
+
+  /** Xáo trộn có hạt giống rồi tách các bài cùng loại đứng liền nhau (không để 3 bài cùng loại liên tiếp) */
+  private mixed(list: Post[]): Post[] {
+    let t = this.mixSeed;
+    const rnd = () => ((t = (t + 0x6d2b79f5) | 0), ((Math.imul(t ^ (t >>> 15), 1 | t) >>> 0) / 4294967296));
+    const out = [...list];
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
+    for (let i = 2; i < out.length; i++) {
+      if (out[i].kind === out[i - 1].kind && out[i].kind === out[i - 2].kind) {
+        const k = out.findIndex((p, n) => n > i && p.kind !== out[i].kind);
+        if (k > -1) [out[i], out[k]] = [out[k], out[i]];
+      }
+    }
+    return out;
+  }
 
   /** Kiến người nhện chào hàng xóm: các câu đổi dần, bấm vào kiến để nghe câu khác (giống kiến ở trang giới thiệu). */
   protected readonly greeting = signal('');

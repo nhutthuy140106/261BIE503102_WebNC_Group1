@@ -88,3 +88,5 @@
   .twocol { grid-template-columns: 1fr; }
   .sh-stats { grid-template-columns: repeat(3, 1fr); }
 }
+/* giữ đúng cách xuống dòng, cách đoạn người đăng gõ trong form */
+.bio { white-space: pre-line; }

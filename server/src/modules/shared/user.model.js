@@ -7,9 +7,14 @@ const userSchema = new Schema({
   password: { type: String, select: false, required: function () { return !this.googleId; } },
   googleId: { type: String, unique: true, sparse: true }, // sparse: tài khoản thường không có googleId vẫn không bị trùng nhau
   email: { type: String, trim: true, lowercase: true },
+  phoneVerifiedAt: Date,                            // xác minh SĐT bằng OTP lúc nào; trống = chưa xác minh (vd. tài khoản Google)
   avatar: { type: String, default: null },          // URL ảnh chân dung; null = chưa có (FE hiện chữ cái đầu)
   area: { type: String, default: 'B' },
-  role: { type: String, enum: ['enduser', 'admin'], default: 'enduser' },
+  // hồ sơ tự khai (không bắt buộc)
+  gender: { type: String, enum: ['male', 'female', 'other'] },
+  birthday: { type: String, match: /^\d{4}-\d{2}-\d{2}$/ },  // yyyy-MM-dd
+  bio: { type: String, maxlength: 300 },
+  role: { type: String, enum: ['enduser', 'moderator', 'admin'], default: 'enduser' },
   status: { type: String, enum: ['active', 'locked'], default: 'active', index: true },
   lockedReason: { type: String, default: '' },
   lockedAt: Date,

@@ -14,11 +14,12 @@ export function toSellerOffer(o: Offer): SellerOffer {
   return {
     id: o._id,
     code: o.code,
-    worker: { name, avatar: o.workerAvatar || initialAvatar(name), phone: o.workerPhone ?? '', rating: 'Mới', jobs: 0, distance: o.workerBlock ?? '' },
+    worker: { name, avatar: o.workerAvatar || initialAvatar(name), phone: o.workerPhone ?? '', userId: o.workerId, rating: 'Mới', jobs: 0, distance: o.workerBlock ?? '' },
     slot: o.slots.length ? o.slots.join(', ') : 'Thỏa thuận sau',
     intro: o.intro,
     state: o.state,
     report: o.reportNote ? { note: o.reportNote, at: reportedAt ? formatDateTime(reportedAt) : '', photos: 0 } : undefined,
+    reportedAt,
     rated: o.posterRated ?? null,
   };
 }

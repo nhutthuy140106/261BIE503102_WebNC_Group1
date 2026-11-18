@@ -45,7 +45,7 @@ test('server kiểm combo: >= 2 món khác nhau, cùng người bán, giá thấ
   await assert.rejects(Post.create(mk({ combo: { items, comboPrice: 90000 } })), /thấp hơn tổng giá lẻ/);
   const may = await Post.findOne({ title: /Trà sữa/ });
   await assert.rejects(Post.create(mk({ combo: { items: [items[0], { postId: may._id, qty: 1 }], comboPrice: 50000 } })), /không phải của người bán này/);
-  const taiNghe = await Post.findOne({ oneTime: true });
+  const taiNghe = await Post.findOne({ 'stock.mode': 'once' });
   if (taiNghe && String(taiNghe.seller) === String(lan._id)) await assert.rejects(Post.create(mk({ combo: { items: [items[0], { postId: taiNghe._id, qty: 1 }], comboPrice: 10000 } })), /bán một lần/);
   await assert.rejects(Post.create(mk({ combo: { items: [items[0], { postId: new mongoose.Types.ObjectId(), qty: 1 }], comboPrice: 10000 } })), /không tồn tại/);
 
@@ -70,8 +70,8 @@ test('danh sách có listPrice; chi tiết liệt kê món + số tiền tiết 
 });
 
 test('đặt combo: một đơn có snapshot từng món, tính theo giá combo, Giờ vàng áp lên combo, trừ kho từng món', async () => {
-  await Post.updateOne({ _id: com._id }, { stock: 5 });
-  await Post.updateOne({ _id: pho._id }, { stock: 3 });
+  await Post.updateOne({ _id: com._id }, { stock: { mode: 'limit', left: 5 } });
+  await Post.updateOne({ _id: pho._id }, { stock: { mode: 'limit', left: 3 } });
   const r = await order({ quantity: 2 });
   assert.equal(r.status, 201, JSON.stringify(r.body));
   const o = r.body.data;
@@ -79,8 +79,8 @@ test('đặt combo: một đơn có snapshot từng món, tính theo giá combo,
   assert.equal(o.total, 140000);
   assert.equal(o.snapshot.listPrice, 80000);
   assert.deepEqual(o.snapshot.combo.map((i) => [i.title.slice(0, 3), i.qty, i.unitPrice]).sort(), [['Cơm', 1, 35000], ['Phở', 1, 45000]].sort());
-  assert.equal((await Post.findById(com._id)).stock, 3); // 5 - 2
-  assert.equal((await Post.findById(pho._id)).stock, 1); // 3 - 2
+  assert.equal((await Post.findById(com._id)).stock.left, 3); // 5 - 2
+  assert.equal((await Post.findById(pho._id)).stock.left, 1); // 3 - 2
 
   await Post.updateOne({ _id: combo._id }, { promo: { kind: 'percent', value: 10, from: '00:00', to: '23:59', days: EVERY, active: true } });
   const g = await order({ quantity: 1 });
@@ -92,13 +92,13 @@ test('đặt combo: một đơn có snapshot từng món, tính theo giá combo,
 });
 
 test('thiếu số lượng một món hoặc món đã dừng bán thì 409 và không trừ kho món nào', async () => {
-  await Post.updateOne({ _id: com._id }, { stock: 5 });
-  await Post.updateOne({ _id: pho._id }, { stock: 1 });
+  await Post.updateOne({ _id: com._id }, { stock: { mode: 'limit', left: 5 } });
+  await Post.updateOne({ _id: pho._id }, { stock: { mode: 'limit', left: 1 } });
   const r = await order({ quantity: 2 }); // phở chỉ còn 1
   assert.equal(r.status, 409);
   assert.match(r.body.error.message, /Phở/);
-  assert.equal((await Post.findById(com._id)).stock, 5);
-  assert.equal((await Post.findById(pho._id)).stock, 1);
+  assert.equal((await Post.findById(com._id)).stock.left, 5);
+  assert.equal((await Post.findById(pho._id)).stock.left, 1);
   await Post.updateOne({ _id: pho._id }, { status: 'hidden' });
   const h = await order({ quantity: 1 });
   assert.equal(h.status, 409);

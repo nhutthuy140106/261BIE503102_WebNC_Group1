@@ -27,3 +27,13 @@ details p { margin: 0 0 16px; padding: 0 2px; line-height: 1.65; color: var(--sm
 .fb button { justify-self: start; margin-top: 6px; padding: 10px 22px; border: 0; border-radius: 10px; background: #D85A1C; color: #fff; font-weight: 700; cursor: pointer; }
 .fb .err { color: #b42318; } .fb .cnt { color: #6b7280; text-align: right; }
 .fb .okmsg { margin: 6px 0 0; color: #1f7a4d; font-weight: 600; }
+
+.tk { margin: 24px 0 8px; max-width: 560px; display: grid; gap: 10px; }
+.tk h2 { margin: 0; font-size: 18px; }
+.tk article { padding: 12px 14px; border: 1px solid #F0E2DC; border-radius: 12px; display: grid; gap: 6px; }
+.tk header { display: flex; justify-content: space-between; }
+.tk .st { font-size: 12.5px; font-weight: 600; color: #b4440f; }
+.tk .st.done { color: #1f7a4d; }
+.tk p { margin: 0; padding: 8px 10px; border-radius: 10px; background: #FBF4F1; font-size: 14px; }
+.tk p.staff { background: #E8F3F1; }
+.tk p small { display: block; color: #6b7280; font-size: 12px; }

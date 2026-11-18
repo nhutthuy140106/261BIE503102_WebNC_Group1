@@ -13,6 +13,8 @@ export interface SellerPerson {
   name: string;
   avatar: string;
   phone: string;
+  /** Chế độ thật: id tài khoản của người này (để mở hội thoại) */
+  userId?: string;
 }
 
 /** Bài đăng của tôi — `stock`: số phần còn / số cái / buổi trống / số người cần, tùy loại */
@@ -43,7 +45,7 @@ export interface SellerPost {
   buyerPostId?: string;
   /** dữ liệu form đăng bài (để mở lại đúng khi sửa) + loại form: food / drink / goods / service / job */
   form?: Record<string, unknown>;
-  formType?: 'food' | 'drink' | 'goods' | 'service' | 'job';
+  formType?: 'food' | 'drink' | 'combo' | 'goods' | 'service' | 'job';
 }
 
 /** Trạng thái đơn khách đặt — nhìn từ phía người bán */
@@ -70,6 +72,8 @@ export interface SellerOrder {
   items: SellerOrderItem[];
   buyer: SellerPerson;
   fulfil: Fulfil;
+  /** Nơi làm không cố định (gia sư): ghi thay cho hình thức nhận */
+  placeNote?: string;
   address: string;
   day: number;
   time: string;
@@ -82,6 +86,10 @@ export interface SellerOrder {
   /** Khách xin hủy: lý do. null = không có yêu cầu */
   cancelRequest?: string | null;
   declineReason?: string;
+  /** Lý do hủy / từ chối (đơn thật), kể cả đơn tự hủy khi quá hạn */
+  cancelWhy?: string;
+  /** Khách báo vấn đề sau khi nhận (đơn thật): người bán trả lời làm lại / hoàn tiền / nhận lại hàng / từ chối */
+  issue?: { st: 'open' | 'redo' | 'refund' | 'returnAgreed' | 'rejected' | 'closed'; type: string; text: string; photos: number; images?: string[]; reply?: string; amount?: number; result?: string } | null;
   surcharge?: { amount: number; reason: string; ok: boolean } | null;
   answers?: [string, string][];
   /** laundry = đơn giặt sấy: tiệm qua lấy đồ, cân lại, báo giá cho khách duyệt rồi mới giặt · repair = đơn sửa chữa: kiểm tra, báo giá, khách duyệt rồi mới sửa */
@@ -91,6 +99,10 @@ export interface SellerOrder {
   /** Chữ hạn xử lý trên thẻ ("Còn 12 phút") */
   due?: string;
   history: [SellerOrderState, string][];
+  /** Mốc thời gian (ISO) để đếm ngược hạn xử lý: lúc khách đặt · lúc khách xin hủy · lúc đơn đổi bước gần nhất */
+  placedAt?: string;
+  cancelAt?: string;
+  stepAt?: string;
   reviewId?: string;
   /** Đơn do khách đặt thật ở phía Mua: `_id` của Order tương ứng (cùng một đơn, hai bên đổi bước theo nhau) */
   buyerOrderId?: string;
@@ -111,6 +123,8 @@ export interface SellerOffer {
   /** ngày làm của riêng đề nghị này (việc lặp) */
   day?: number;
   report?: { note: string; at: string; photos: number };
+  /** Lúc người làm báo xong (ISO): hạn xác nhận hoàn thành tính từ đây */
+  reportedAt?: string;
   rated?: { stars: number; text: string } | null;
 }
 
@@ -215,9 +229,21 @@ export interface SellerChat {
   name: string;
   avatar?: string;
   unread: number;
+  /** Chế độ thật: id tài khoản người bên kia; `tmp-…` là hội thoại mới chưa gửi tin nào lên server */
+  userId?: string;
   /** đơn / việc đang nói tới */
   ctx: { type: 'order' | 'job'; id: string } | null;
-  messages: { from: 'me' | 'them'; text: string; time: string }[];
+  messages: SellerMsg[];
+}
+
+/** Tin nhắn người bán: chữ, hoặc ảnh / video / ghi âm / tệp đính kèm */
+export interface SellerMsg {
+  from: 'me' | 'them';
+  text: string;
+  time: string;
+  /** Ngày gửi (yyyy-mm-dd, giờ máy); tin mẫu không có = hôm nay */
+  date?: string;
+  media?: { kind: 'image' | 'video' | 'audio' | 'file'; url: string; name?: string; size?: number; sec?: number };
 }
 
 export type StatsRange = 'today' | '7' | '30' | '90' | 'year';

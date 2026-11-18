@@ -34,13 +34,13 @@
 
   <div class="kpis">
     <div class="kduo">
-      <div class="kbig"><span class="lb"><svg class="i"><use href="#store" /></svg>Tổng tiền đã bán</span><b>{{ d.income | vnd }}</b><span class="up">▲ {{ up(d.incomeUp) }}</span></div>
-      <div class="kbig"><span class="lb"><svg class="i"><use href="#hand" /></svg>Tổng tiền đã thuê</span><b>{{ d.paid | vnd }}</b><span class="up">▲ {{ up(d.paidUp) }}</span></div>
+      <div class="kbig"><span class="lb"><svg class="i"><use href="#store" /></svg>Tổng tiền đã bán</span><b>{{ d.income | vnd }}</b><span class="up" [class.down]="down(d.incomeUp)">{{ down(d.incomeUp) ? '▼' : '▲' }} {{ up(d.incomeUp) }}</span></div>
+      <div class="kbig"><span class="lb"><svg class="i"><use href="#hand" /></svg>Tổng tiền đã thuê</span><b>{{ d.paid | vnd }}</b><span class="up" [class.down]="down(d.paidUp)">{{ down(d.paidUp) ? '▼' : '▲' }} {{ up(d.paidUp) }}</span></div>
     </div>
     <div class="kq">
-      <div class="kt"><span>Đơn hoàn thành</span><b>{{ d.done }}</b><span class="up">▲ {{ up(d.doneUp) }}</span></div>
-      <div class="kt"><span>Lượt xem bài</span><b>{{ d.views | vnd: '' }}</b><span class="up">▲ {{ up(d.viewsUp) }}</span></div>
-      <div class="kt"><span>Tỉ lệ đặt</span><b>{{ bookRate() }}%</b><span class="up">▲ {{ up(d.bookUp) }}</span></div>
+      <div class="kt"><span>Đơn hoàn thành</span><b>{{ d.done }}</b><span class="up" [class.down]="down(d.doneUp)">{{ down(d.doneUp) ? '▼' : '▲' }} {{ up(d.doneUp) }}</span></div>
+      <div class="kt"><span>Lượt xem bài</span><b>{{ d.views | vnd: '' }}</b><span class="up" [class.down]="down(d.viewsUp)">{{ down(d.viewsUp) ? '▼' : '▲' }} {{ up(d.viewsUp) }}</span></div>
+      <div class="kt"><span>Tỉ lệ đặt</span><b>{{ bookRate() }}%</b><span class="up" [class.down]="down(d.bookUp)">{{ down(d.bookUp) ? '▼' : '▲' }} {{ up(d.bookUp) }}</span></div>
       <div class="kt"><span>Đánh giá</span><b><span class="st">★</span> {{ d.rating }}</b><small>{{ seller.reviews().length }} đánh giá</small></div>
     </div>
   </div>

@@ -38,15 +38,18 @@ function receiveFact(place: PlaceBlock): PostTemplate['facts'][number] | null {
   return ['pin', 'Cách nhận', [delivers ? 'Giao tận nơi' : '', picks ? 'Tự đến lấy' : ''].filter(Boolean).join(', ')];
 }
 
-/** Đồ ăn & uống: Giờ nhận đặt · Cách nhận · Thời gian chuẩn bị */
+/**
+ * Đồ ăn & uống: LUÔN đủ 3 ô, cùng thứ tự — Giờ nhận đặt · Cách nhận · Thời gian chuẩn bị.
+ * Người bán chưa điền ô nào thì ô đó ghi "Nhắn người bán" để khách biết cần hỏi, thay vì biến mất.
+ */
 function foodFacts(post: Post, place: PlaceBlock): PostTemplate['facts'] {
+  const ASK = 'Nhắn người bán';
   const w = post.orderWindow;
-  const out: PostTemplate['facts'] = [];
-  if (w) out.push(['clock', 'Giờ nhận đặt', `${w.from} – ${w.to}`]);
-  const r = receiveFact(place);
-  if (r) out.push(r);
-  if (post.prepMinutes) out.push(['bolt', 'Thời gian chuẩn bị', `Khoảng ${post.prepMinutes} phút`]);
-  return out;
+  return [
+    ['clock', 'Giờ nhận đặt', w ? `${w.from} – ${w.to}` : ASK],
+    receiveFact(place) ?? ['pin', 'Cách nhận', ASK],
+    ['bolt', 'Thời gian chuẩn bị', post.prepMinutes ? `Khoảng ${post.prepMinutes} phút` : ASK]
+  ];
 }
 
 /** Chữ ngắn cho "Nơi làm" của dịch vụ */
@@ -56,21 +59,28 @@ function placeText(place: PlaceBlock): string {
     case 'seller': return 'Bạn mang tới';
     case 'choice': return (place.choices ?? []).map(([n]) => n).join(', ');
     case 'ab': return 'Lấy ở A, giao tới B';
+    case 'none': return '';
   }
 }
 
 /** Dịch vụ: Thời gian hoàn thành · Nơi làm · Bảo hành (báo giá sau mà chưa ghi bảo hành thì ô 3 là Phí kiểm tra); còn thiếu ô thì thêm Giờ nhận lịch */
 function serviceFacts(post: Post, place: PlaceBlock): PostTemplate['facts'] {
-  if (post.highlights?.length) return post.highlights.map((h) => [h.icon, h.label, h.value]);
-  const out: PostTemplate['facts'] = [];
-  const info = post.serviceInfo;
-  if (info?.turnaround) out.push(['clock', 'Thời gian hoàn thành', info.turnaround]);
-  const where = placeText(place);
-  if (where) out.push(['pin', 'Nơi làm', where]);
-  if (info?.warranty) out.push(['shield', 'Bảo hành', info.warranty]);
-  else if (post.priceType === 'quote') out.push(['receipt', 'Phí kiểm tra', vnd(post.inspectFee ?? 0)]);
-  if (out.length < 3 && post.handover) out.push(['clock', 'Giờ nhận lịch', `${post.handover.from} – ${post.handover.to}`]);
-  return out;
+  const hl = post.highlights ?? [];
+  // Lưu trú có bộ 3 ô riêng (nhận – trả phòng · địa điểm · đặt cọc)
+  if (hl.some((h) => h.label === 'Nhận – trả phòng')) return hl.map((h) => [h.icon, h.label, h.value]);
+  // Còn lại: LUÔN 3 ô cố định Giờ nhận lịch · Nơi làm · Thời gian hoàn thành; thiếu số liệu thì ghi "Nhắn người bán"
+  const ASK = 'Nhắn người bán';
+  const FIRST = ['Giờ nhận lịch', 'Giờ giao hàng', 'Nơi làm', 'Thanh toán'];
+  const when = hl.find((h) => h.label === 'Giờ nhận lịch' || h.label === 'Giờ giao hàng')?.value ?? (post.handover ? `${post.handover.from} – ${post.handover.to}` : '');
+  const where = hl.find((h) => h.label === 'Nơi làm')?.value ?? placeText(place);
+  // ô 3 theo loại dịch vụ (Trả đồ, Phí kiểm tra, Phí giao, Thời lượng, Buổi học, Thời gian làm); bài cũ chưa có thì lấy thời gian làm dự kiến
+  const third = hl.find((h) => !FIRST.includes(h.label));
+  const old = post.serviceInfo?.turnaround;
+  return [
+    ['clock', 'Giờ nhận lịch', when || ASK],
+    ['pin', 'Nơi làm', where || ASK],
+    third ? [third.icon, third.label, third.value] : ['clock', 'Thời gian làm', old || ASK],
+  ];
 }
 
 const COND: Record<string, string> = { '100': 'Mới 100%', '90': 'Mới 90%', '80': 'Còn 80%', '50': 'Còn 50%' };
@@ -109,9 +119,13 @@ function svcPlace(post: Post, base: PlaceBlock): PlaceBlock {
   const pl = post.place!;
   const fee = post.deliveryFee ?? 0;
   switch (pl.mode) {
-    case 'seller': return { mode: 'seller', label: 'Nơi làm', where: pl.where ?? base.where };
+    // lưu trú: "Địa điểm"; bài cũ chưa lưu tòa nhà vào place thì lấy ô Nơi làm ở đầu bài
+    case 'seller': return post.timeMode === 'stay'
+      ? { mode: 'seller', label: 'Địa điểm', where: pl.where ?? post.highlights?.find((h) => h.icon === 'pin')?.value ?? base.where }
+      : { mode: 'seller', label: 'Nơi làm', where: pl.where ?? base.where };
     case 'choice': return { mode: 'choice', label: 'Hình thức', choices: [['Đến nhà bạn', fee], ['Bạn mang tới', 0]], where: pl.where };
     case 'ab': return { mode: 'ab', label: 'Lấy & giao' };
+    case 'none': return { mode: 'none', label: 'Nơi làm' };
     default: return { mode: 'buyer', label: 'Địa chỉ làm', fee };
   }
 }
@@ -144,6 +158,8 @@ export function viewOf(post: Post): PostView {
     : null;
   // Đồ ăn thêm / tùy chọn: GOM thành các nhóm riêng bên dưới danh sách món (không bung dưới từng món).
   // Gồm tùy chọn cấp bài + tùy chọn của các món; trùng tên nhóm thì gộp lựa chọn (trùng nhãn thì giữ cái đầu).
+  const toQs = (list: NonNullable<Post['questions']>): PostTemplate['qs'] =>
+    list.map((q) => ({ type: q.type ?? ('text' as const), label: q.label, opts: q.opts, ph: q.ph, req: q.required, long: q.long, hint: q.hint, pay: q.pay }));
   const toBlock = (g: OptionGroup): OptionBlock => ({
     name: g.name,
     multi: g.multi || undefined,
@@ -167,10 +183,12 @@ export function viewOf(post: Post): PostView {
         : base.place;
   const hours = post.handover ? ([post.handover.from, post.handover.to] as [string, string]) : base.time.win;
   const time: PostTemplate['time'] = svc
-    ? post.timeMode === 'datedur'
+    ? post.timeMode === 'stay'
+      ? { ...base.time, label: 'Nhận phòng lúc' }
+      : post.timeMode === 'datedur'
       ? { mode: 'datedur', label: 'Ngày & giờ', win: hours, dur: post.duration ? [post.duration.min, post.duration.max] : base.time.dur ?? [2, 4], repeat: post.repeat }
       : post.timeMode === 'slot'
-        ? { mode: 'slot', label: quote ? 'Hẹn kiểm tra lúc' : 'Giờ hẹn', win: hours }
+        ? { mode: 'slot', label: post.timeLabel ?? (quote ? 'Hẹn kiểm tra lúc' : 'Giờ hẹn'), win: hours }
         : base.time
     : post.handover
       ? { ...base.time, win: hours }
@@ -202,7 +220,7 @@ export function viewOf(post: Post): PostView {
             // giá ước tính là của người bán chọn, không lấy của mẫu (mẫu giặt sấy luôn "ước tính")
             ...(svc ? { estimate: !!post.estimate } : {}),
           },
-    qty: cups ? null : svc ? (quote || (post.timeMode === 'datedur' && !items) ? null : { label: 'Số lượng', min: 1, max: 20 }) : base.qty,
+    qty: cups ? null : svc ? (quote || post.bookOnce || (post.timeMode === 'datedur' && !items) ? null : { label: 'Số lượng', min: 1, max: 20 }) : base.qty,
     seller: {
       ...base.seller,
       name: post.sellerName,
@@ -223,7 +241,8 @@ export function viewOf(post: Post): PostView {
     dishList: cups ? false : dish ? true : same ? base.dishList : false,
     cups,
     dishPriced: !!dish,
-    qs: post.questions?.length ? post.questions.map((q) => ({ type: q.type ?? ('text' as const), label: q.label, opts: q.opts, ph: q.ph, req: q.required, long: q.long, hint: q.hint, pay: q.pay })) : same ? base.qs : [],
+    qs: post.questions?.length ? toQs(post.questions) : same ? base.qs : [],
+    menu: post.serviceMenu?.length ? post.serviceMenu.map((m) => ({ name: m.name, opts: m.optionGroups.map(toBlock), qs: toQs(m.questions) })) : undefined,
     xuOk: post.acceptsXu ?? base.xuOk,
     pays: pays?.length ? pays : undefined,
     bank: post.bank,
@@ -233,8 +252,14 @@ export function viewOf(post: Post): PostView {
     ...(dish && items?.some((i) => i.dailyQty !== undefined)
       ? { dishLeft: Object.fromEntries(items.flatMap((it, i) => (it.dailyQty !== undefined ? [[dish.choices[i], it.dailyQty]] : []))) }
       : {}),
+    ...(dish && svc && items?.some((i) => i.unit)
+      ? { dishUnit: Object.fromEntries(items.flatMap((it, i) => (it.unit ? [[dish.choices[i], it.unit]] : []))) }
+      : {}),
     quick: post.quickOptions,
     noteOff: post.noteEnabled === false,
+    optsOnce: post.kind === 'service' || undefined,
+    priceInOpts: post.bookOnce || undefined,
+    noSchedule: post.noSchedule || undefined,
     // dịch vụ đăng từ form: một bộ chữ chung, không lấy chữ riêng của mẫu ("Đặt lấy đồ", "áo len" của giặt sấy)
     ...(svc ? { action: quote ? 'Gửi yêu cầu' : 'Đặt lịch', notePh: 'Thêm thông tin cho người làm (không bắt buộc)…' } : {}),
     time,

@@ -9,11 +9,15 @@ export interface AdminUser {
   name: string;
   phone: string;
   block: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'moderator';
   status: 'active' | 'locked';
   avatar: string | null;
   createdAt: string;
   lockedReason?: string;
+  /** Hồ sơ người bán: none (chưa đăng ký) · pending · approved · rejected */
+  sellerStatus?: string;
+  /** Số lần bị báo cáo (nhắm vào người đó hoặc bài của họ) */
+  reportCount?: number;
 }
 
 export interface AdminPost {
@@ -39,7 +43,11 @@ export interface AdminReport {
   detail: string;
   state: ReportState;
   adminNote: string;
+  /** Hướng xử lý đã áp dụng (rỗng khi chưa kết thúc) */
+  action?: string;
   createdAt: string;
+  /** Tóm tắt đối tượng bị báo cáo (server kèm sẵn ở danh sách) */
+  target?: { found: boolean; title: string; status: string; issueSt?: string; ownerName: string; orderId: string };
 }
 
 export interface AdminStats {
@@ -126,23 +134,25 @@ export class AdminService {
   }
 
   // ---------------- Người dùng ----------------
-  listUsers(f: { q: string; role: string; status: string; page: number }): Observable<Paged<AdminUser>> {
+  listUsers(f: { q: string; status: string; page: number }): Observable<Paged<AdminUser>> {
     if (this.mock) {
-      const rows = this.users.filter((u) => (!f.q || pick(u.name + ' ' + u.phone, f.q)) && (!f.role || u.role === f.role) && (!f.status || u.status === f.status));
+      const rows = this.users.filter((u) => (!f.q || pick(u.name + ' ' + u.phone, f.q)) && u.role === 'user' && (!f.status || u.status === f.status));
       return of({ items: rows.slice((f.page - 1) * PAGE_SIZE, f.page * PAGE_SIZE), total: rows.length, limit: PAGE_SIZE });
     }
-    return this.api.getList<Record<string, unknown>>('/admin/users', { q: f.q || null, role: f.role === 'user' ? 'enduser' : f.role || null, status: f.status || null, page: f.page, limit: PAGE_SIZE }).pipe(
+    return this.api.getList<Record<string, unknown>>('/admin/users', { q: f.q || null, status: f.status || null, page: f.page, limit: PAGE_SIZE }).pipe(
       map((r) => ({
         items: r.data.map((u) => ({
           _id: String(u['_id']),
           name: String(u['name'] ?? ''),
           phone: String(u['phone'] ?? ''),
           block: String(u['area'] ?? ''),
-          role: u['role'] === 'admin' ? ('admin' as const) : ('user' as const),
+          role: u['role'] === 'admin' ? ('admin' as const) : u['role'] === 'moderator' ? ('moderator' as const) : ('user' as const),
           status: u['status'] === 'locked' ? ('locked' as const) : ('active' as const),
           avatar: (u['avatar'] as string | null) ?? null,
           createdAt: String(u['createdAt'] ?? ''),
           lockedReason: (u['lockedReason'] as string) || undefined,
+          sellerStatus: String(u['sellerStatus'] ?? 'none'),
+          reportCount: Number(u['reportCount'] ?? 0),
         })),
         total: r.meta.total,
         limit: r.meta.limit,
@@ -237,21 +247,24 @@ export class AdminService {
           detail: String(x['detail'] ?? ''),
           state: x['state'] as ReportState,
           adminNote: String(x['adminNote'] ?? ''),
+          action: String(x['action'] ?? ''),
           createdAt: String(x['createdAt'] ?? ''),
+          target: x['target'] as AdminReport['target'],
         })),
       ),
     );
   }
 
-  transition(id: string, to: ReportState, note: string): Observable<void> {
+  transition(id: string, to: ReportState, note: string, action?: string): Observable<void> {
     if (this.mock) {
       const r = this.reports.find((x) => x._id === id);
       if (r) {
         r.state = to;
         if (note) r.adminNote = note;
+        r.action = to === 'rejected' ? 'none' : action ?? '';
       }
       return of(undefined);
     }
-    return this.api.post<unknown>(`/admin/reports/${id}/transition`, { to, note }).pipe(map(() => undefined));
+    return this.api.post<unknown>(`/admin/reports/${id}/transition`, { to, note, action }).pipe(map(() => undefined));
   }
 }

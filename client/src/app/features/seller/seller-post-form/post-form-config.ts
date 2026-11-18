@@ -8,7 +8,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
  * giá · số lượng · thời gian · địa điểm · tùy chọn cộng giá · câu hỏi riêng · tình trạng bán + 3 ô thông tin nhanh.
  * Việc làm: theo trang chi tiết việc phía Mua (thời gian làm, địa điểm, số người cần, tiền công, thanh toán).
  */
-export type FormType = 'food' | 'drink' | 'goods' | 'service' | 'job';
+export type FormType = 'food' | 'drink' | 'combo' | 'goods' | 'service' | 'job';
 
 export const DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 /** Khu của nền tảng (core/config/areas.ts) — cùng danh sách ô "Khu vực đang xem" ở header */
@@ -25,8 +25,9 @@ export const AMENITIES = ['Wi-Fi', 'Máy lạnh', 'Nước nóng', 'Tủ lạnh'
 export const CATS: Record<FormType, string[]> = {
   food: ['Cơm nhà làm', 'Món nước', 'Bánh & tráng miệng', 'Đồ ăn vặt', 'Đồ chay'],
   drink: ['Cà phê', 'Trà sữa', 'Trà trái cây', 'Nước ép', 'Sinh tố', 'Khác'],
+  combo: ['Combo'],
   goods: ['Đồ bếp', 'Đồ gia dụng', 'Điện tử', 'Nội thất', 'Quần áo', 'Sách & học tập', 'Đồ trẻ em', 'Thể thao', 'Khác'],
-  service: ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận hộ', 'Nấu ăn', 'Chăm sóc', 'Gia sư / lớp học', 'Làm đẹp', 'Lưu trú', 'Khác'],
+  service: ['Giặt sấy', 'Sửa chữa', 'Dọn dẹp', 'Giao nhận', 'Chăm sóc', 'Gia sư', 'Làm đẹp', 'Lưu trú', 'Khác'],
   job: ['Giao nhận', 'Mua hộ', 'Việc nhà', 'Sửa chữa nhỏ', 'Khuân vác', 'Trông trẻ / thú cưng', 'Gia sư', 'Xếp hàng giữ chỗ', 'Hỗ trợ máy tính', 'Khác'],
 };
 
@@ -42,7 +43,7 @@ export const SWEET = ['0%', '30%', '50%', '70%', '100%'];
 export const ICE = ['Không đá', 'Ít đá', 'Bình thường', 'Đá để riêng'];
 /** Cách báo giá dịch vụ: bảng giá nhiều dịch vụ con (khách chọn nhiều trong một đơn) hoặc báo giá sau khi kiểm tra */
 export const PRICE_TYPES: [string, string][] = [['list', 'Bảng giá'], ['quote', 'Báo giá sau']];
-export const Q_TYPES: [string, string][] = [['text', 'Chữ'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['photo', 'Hình ảnh']];
+export const Q_TYPES: [string, string][] = [['text', 'Văn bản'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['photo', 'Hình ảnh']];
 /** Khối Địa điểm phía Mua */
 export const SVC_PLACES: [string, string][] = [['buyer', 'Tại nhà khách'], ['seller', 'Khách mang tới'], ['choice', 'Khách chọn'], ['ab', 'Lấy ở A, giao tới B']];
 /** Mẫu Sửa chữa: nơi sửa */
@@ -50,7 +51,7 @@ export const REPAIR_PLACES: [string, string][] = [['buyer', 'Thợ đến nhà']
 /** Form chung (mẫu Khác): nơi làm */
 export const GENERIC_PLACES: [string, string][] = [['buyer', 'Tại nhà khách'], ['seller', 'Tại chỗ của tôi'], ['choice', 'Khách chọn']];
 /** Form chung: kiểu trả lời của từng câu hỏi; chọn một / chọn nhiều có danh sách lựa chọn, mỗi lựa chọn cộng giá được */
-export const ASK_TYPES: [string, string][] = [['text', 'Chữ ngắn'], ['long', 'Đoạn dài'], ['number', 'Số'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['date', 'Ngày'], ['range', 'Khoảng ngày'], ['photo', 'Ảnh'], ['address', 'Địa chỉ']];
+export const ASK_TYPES: [string, string][] = [['text', 'Văn bản ngắn'], ['long', 'Văn bản dài'], ['number', 'Số'], ['choice', 'Chọn một'], ['multi', 'Chọn nhiều'], ['date', 'Ngày'], ['range', 'Khoảng ngày'], ['photo', 'Ảnh'], ['address', 'Địa chỉ']];
 /** Form chung: nút thêm nhanh các câu hỏi hay gặp */
 export const ASK_QUICK: { type: string; label: string; required: boolean; hint: string }[] = [
   { type: 'long', label: 'Mô tả vấn đề', required: true, hint: 'Nói rõ bạn cần làm gì' },
@@ -76,7 +77,7 @@ export interface SvcPreset {
   timeMode: 'slot' | 'datedur' | 'stay';
   dur: [number, number];
   repeat: boolean;
-  place: 'buyer' | 'seller' | 'choice' | 'ab';
+  place: 'buyer' | 'seller' | 'choice' | 'ab' | 'none';
   homeFee: number;
   options: { name: string; choices: [string, number][]; multi?: boolean }[];
   questions: { type: string; label: string; required: boolean; opts: string; hint?: string; choices?: [string, number][] }[];
@@ -93,22 +94,38 @@ export interface SvcPreset {
   repair?: boolean;
   /** form chung (mẫu Khác): không theo ngành nào, người bán tự tạo câu hỏi cho khách */
   generic?: boolean;
+  /** mẫu không có kiểu "Báo giá sau" (chỉ bảng giá) */
+  noQuote?: boolean;
+  /** mẫu không có ô "Giá ước tính" và "Cho khách đặt lặp lại hằng tuần" */
+  noEstimate?: boolean;
+  noRepeat?: boolean;
+  /** mẫu chỉ có một kiểu lịch (không hiện hai nút chọn kiểu lịch): chăm sóc luôn cho khách chọn ngày + số giờ */
+  fixedTime?: 'slot' | 'datedur';
+  /** mẫu không có mục Lịch hẹn: khách không chọn ngày giờ, thời gian học ghi trong mô tả và thỏa thuận sau */
+  noSchedule?: boolean;
+  /** mẫu giao nhận: người làm lấy hàng ngay khi nhận đơn, khách chọn giờ muốn nhận hàng; có thể nhờ trả tiền hàng giùm */
+  courier?: boolean;
+  /** mẫu dọn dẹp: mục 2 chỉ liệt kê tên dịch vụ, giá đặt ở mục Cài đặt tùy chọn; khách đặt một dịch vụ mỗi đơn */
+  cleaning?: boolean;
+  /** mẫu dọn dẹp: các dịch vụ có sẵn, mỗi dịch vụ có tùy chọn cộng giá và câu hỏi riêng */
+  menu?: { name: string; options: SvcPreset['options']; questions: SvcPreset['questions'] }[];
   /** mẫu lưu trú: hiện mục "Tiện nghi & nội quy", lịch theo đêm, cột số phòng / khách tối đa */
   stay?: boolean;
 }
 const P = (o: Partial<SvcPreset>): SvcPreset => ({
   priceType: 'list', items: [['', null, 'lần']], estimate: false, inspect: null,
-  timeMode: 'slot', dur: [2, 4], repeat: false, place: 'buyer', homeFee: 0, options: [], questions: [], turnaround: '', warranty: '', ...o,
+  // không mẫu nào còn mục Thông tin nhanh (thời gian hoàn thành, phạm vi, bảo hành); mẫu Khác có ô riêng cho thời gian và bảo hành
+  timeMode: 'slot', dur: [2, 4], repeat: false, place: 'buyer', homeFee: 0, options: [], questions: [], turnaround: '', warranty: '', noQuick: true, ...o,
 });
 export const SVC_PRESETS: Record<string, SvcPreset> = {
   'Giặt sấy': P({
     items: [['Giặt sấy quần áo', 18000, 'kg'], ['Giặt chăn, ga', 40000, 'bộ'], ['Giặt gối', 25000, 'cái'], ['Giặt thú bông', 30000, 'cái'], ['Vệ sinh giày', 60000, 'đôi']],
-    estimate: true, noQuick: true, noPlace: true, noQuestions: true, laundry: true,
+    estimate: true, noQuick: true, noPlace: true, noQuestions: true, laundry: true, noQuote: true,
     options: [{ name: 'Nước xả', choices: [['Hương nhẹ', 0], ['Không mùi', 0]] }, { name: 'Gấp đồ', choices: [['Gấp gọn', 0], ['Treo móc', 10000]] }],
   }),
   'Sửa chữa': P({
     repair: true, items: [['Vệ sinh máy lạnh', 150000, 'máy'], ['Thông tắc ống nước', 200000, 'lần'], ['Sửa ổ điện, công tắc', 80000, 'lần']],
-    inspect: 50000, place: 'buyer', homeFee: 30000, noQuick: true,
+    inspect: 50000, place: 'buyer', noQuick: true, noPlace: true,
     questions: [
       { type: 'text', label: 'Thiết bị / vị trí bị hư', required: true, opts: '' },
       { type: 'text', label: 'Mô tả lỗi', required: true, opts: '' },
@@ -116,31 +133,38 @@ export const SVC_PRESETS: Record<string, SvcPreset> = {
     ],
   }),
   'Dọn dẹp': P({
-    items: [['Dọn nhà theo giờ', 120000, 'giờ'], ['Lau kính', 50000, 'lần']], timeMode: 'datedur', dur: [2, 6], repeat: true, turnaround: '2 giờ mỗi lần',
-    questions: [
-      { type: 'choice', label: 'Diện tích nhà', required: false, opts: 'Dưới 50m², 50 – 80m², Trên 80m²' },
-      { type: 'multi', label: 'Việc cần làm', required: false, opts: 'Lau nhà, Vệ sinh bếp, Vệ sinh nhà tắm, Gấp đồ' },
-      { type: 'choice', label: 'Nhà có nuôi thú cưng?', required: false, opts: 'Không, Có' },
+    cleaning: true, noPlace: true, noQuote: true, items: [],
+    // mỗi dịch vụ tự đặt giá: theo m², theo phòng, khoảng giá…
+    menu: [
+      {
+        name: 'Dọn nhà tổng quát',
+        options: [{ name: 'Diện tích', choices: [['Dưới 50m²', 150000], ['50 – 80m²', 250000], ['Trên 80m²', 350000]] }],
+        questions: [{ type: 'choice', label: 'Nhà có nuôi thú cưng?', required: false, opts: 'Không, Có' }],
+      },
+      { name: 'Dọn sau tiệc', options: [{ name: 'Số khách', choices: [['Dưới 20 khách', 300000], ['20 – 50 khách', 500000]] }], questions: [] },
+      { name: 'Lau kính', options: [{ name: 'Số ô cửa', choices: [['Dưới 5 ô', 100000], ['5 – 10 ô', 180000], ['Trên 10 ô', 250000]] }], questions: [] },
     ],
   }),
-  'Giao nhận hộ': P({
-    items: [['Lấy đồ trong khu', 15000, 'lượt'], ['Đồ to, nặng từ 10kg', 25000, 'lượt']], place: 'ab', turnaround: 'Thường trong 20 phút',
+  'Giao nhận': P({
+    items: [['Lấy đồ trong khu', 15000, 'lượt'], ['Đồ to, nặng từ 10kg', 25000, 'lượt']], place: 'ab', noPlace: true, noQuote: true, noEstimate: true, noRepeat: true, courier: true,
     questions: [
+      { type: 'text', label: 'Lấy ở đâu?', required: true, opts: '' },
       { type: 'text', label: 'Lấy món gì?', required: true, opts: '' },
       { type: 'choice', label: 'Kích thước', required: false, opts: 'Nhỏ dưới 10kg, To / nặng từ 10kg' },
-      { type: 'choice', label: 'Cần trả tiền giùm?', required: false, opts: 'Không, Có' },
     ],
   }),
-  'Nấu ăn': P({
-    items: [['Nấu cỗ tại nhà', 1200000, 'buổi']], timeMode: 'datedur', dur: [3, 5],
-    questions: [{ type: 'text', label: 'Số người ăn', required: true, opts: '' }, { type: 'choice', label: 'Nguyên liệu', required: true, opts: 'Nhà có sẵn, Nhờ đi chợ giúp' }],
+  // chăm sóc: người làm đến nhà khách (địa chỉ lấy từ địa chỉ đặt hàng), tính theo giờ
+  'Chăm sóc': P({
+    items: [['Trông trẻ theo giờ', 60000, 'giờ'], ['Trông thú cưng theo giờ', 40000, 'giờ']], timeMode: 'datedur', dur: [2, 6],
+    noPlace: true, noQuote: true, noEstimate: true, noRepeat: true, fixedTime: 'datedur',
   }),
-  'Chăm sóc': P({ items: [['Trông trẻ theo giờ', 60000, 'giờ'], ['Trông thú cưng theo giờ', 40000, 'giờ']], timeMode: 'datedur', dur: [2, 6] }),
-  'Gia sư / lớp học': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], repeat: true, place: 'choice', turnaround: '90 phút mỗi buổi' }),
-  'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']], turnaround: 'Khoảng 45 phút' }),
+  // gia sư: lịch học, nơi học ghi trong mô tả, khách đăng ký rồi thỏa thuận
+  'Gia sư': P({ items: [['Buổi học 90 phút', 150000, 'buổi']], place: 'none', noPlace: true, noSchedule: true, noQuote: true, noEstimate: true, noRepeat: true }),
+  // làm đẹp tại nhà khách: chỉ hẹn giờ, không báo giá sau, không lặp hằng tuần, nơi làm cố định (nhà khách)
+  'Làm đẹp': P({ items: [['Cắt tóc tại nhà', 80000, 'lần'], ['Gội sấy', 50000, 'lần']], noPlace: true, noQuote: true, noEstimate: true, noRepeat: true, fixedTime: 'slot' }),
   // homestay / cho thuê phòng ngắn ngày trong khu (tham khảo Traveloka, Booking, Airbnb): loại phòng · nhận / trả phòng · tiện nghi · nội quy · hủy & cọc
   'Lưu trú': P({
-    stay: true, noQuick: true, noPlace: true, timeMode: 'stay', place: 'seller',
+    stay: true, noQuick: true, noPlace: true, noQuote: true, timeMode: 'stay', place: 'seller',
     items: [['Phòng đơn', 350000, 'đêm', 2, 2], ['Phòng đôi', 500000, 'đêm', 1, 4], ['Nguyên căn 2 phòng ngủ', 1200000, 'đêm', 1, 6]],
     options: [{ name: 'Dịch vụ thêm', multi: true, choices: [['Thêm nệm phụ', 80000], ['Bữa sáng', 50000], ['Giặt đồ', 30000]] }],
     questions: [
@@ -166,7 +190,7 @@ export function commonGroup(fb: FormBuilder, type: FormType) {
     area: [DEFAULT_AREA],
     /** đồ ăn & uống bán cho nhiều khu; `area` = khu đầu tiên (lưu bài, điểm tự lấy) */
     areas: fb.control<string[]>([DEFAULT_AREA]),
-    desc: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
+    desc: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(2000)]],
     notes: strList(fb, ['']),
     /** Giờ vàng (khuyến mãi theo khung giờ) — gửi lên server dạng `Promo` (core/utils/promo.ts); days: 0 = CN … 6 = T7, rỗng = mọi ngày */
     promo: fb.group({ on: [false], kind: ['percent'], value: [10], from: ['11:00'], to: ['13:00'], days: fb.control<number[]>([]) }),
@@ -180,7 +204,7 @@ export const nextDays = (n: number) => Array.from({ length: n }, (_, i) => ymd(n
 
 /** Lịch bán đồ ăn / đồ uống: chọn từng ngày bán trên lịch (`dates`, chọn nhiều) */
 const sellSchedule = (fb: FormBuilder, prep: number) =>
-  fb.group({ mode: ['daily'], days: fb.control<number[]>([0, 1, 2, 3, 4, 5]), dates: fb.control<string[]>(nextDays(7)), orderFrom: ['06:00'], orderTo: ['10:30'], prep: [prep, Validators.min(0)], pickFrom: ['11:00'], pickTo: ['13:00'], batchDate: [''] });
+  fb.group({ mode: ['daily'], days: fb.control<number[]>([0, 1, 2, 3, 4, 5]), dates: fb.control<string[]>(nextDays(7)), orderFrom: ['06:00'], orderTo: ['10:30'], prep: [prep, [Validators.required, Validators.min(1)]], pickFrom: ['11:00'], pickTo: ['13:00'], batchDate: [''] });
 
 /** Thông tin nhận chuyển khoản: bắt buộc khi bật "Chuyển khoản" (kiểm tra ở extraError); `name` = mã ngân hàng (banks.ts) */
 const bankGroup = (fb: FormBuilder) => fb.group({ name: [''], no: [''], holder: [''], qr: [''] });
@@ -205,6 +229,20 @@ export function foodGroup(fb: FormBuilder) {
     pay: fb.control<string[]>(['cash']),
     bank: bankGroup(fb),
     fresh: [false, Validators.requiredTrue],
+  });
+}
+
+/** Combo: một bài đồ ăn như bình thường, người bán tự đặt tên, tự liệt kê món và tự đặt giá (hệ thống không tính gì thêm) */
+export function comboGroup(fb: FormBuilder) {
+  return fb.group({
+    /** các món trong combo: người bán tự gõ từng dòng chữ, không gắn với bài lẻ nào */
+    includes: fb.array([fb.control(''), fb.control('')]),
+    comboPrice: [null as number | null, [Validators.required, Validators.min(1000)]],
+    kitchenNote: [true],
+    schedule: sellSchedule(fb, 30),
+    fulfil: fulfil(fb),
+    pay: fb.control<string[]>(['cash']),
+    bank: bankGroup(fb),
   });
 }
 
@@ -258,6 +296,8 @@ export function serviceGroup(fb: FormBuilder, preset: string) {
     warranty: [p.warranty],
     // giá: bảng giá các dịch vụ con hoặc báo giá sau
     priceType: [p.priceType],
+    /** mẫu dọn dẹp: các dịch vụ, mỗi dịch vụ có tùy chọn và câu hỏi riêng */
+    menu: fb.array((p.menu ?? []).map((m) => menuGroup(fb, m))),
     items: fb.array(p.items.map(([n, pr, u, q, g]) => itemGroup(fb, n, pr, u, q ?? null, [], g ?? null))),
     estimate: [p.estimate],
     inspect: [p.inspect, Validators.min(0)],
@@ -290,6 +330,8 @@ export function serviceGroup(fb: FormBuilder, preset: string) {
     place: [p.place],
     where: [''],
     homeFee: [p.homeFee, Validators.min(0)],
+    /** giao nhận: nhận ứng trước tiền hàng cho khách, số tiền cộng vào tổng đơn */
+    advancePay: [!!p.courier],
     /** khách gõ ghi chú khi đặt; mặc định bật như đồ ăn, đồ uống */
     kitchenNote: [true],
     pay: fb.control<string[]>(['cash']),
@@ -315,6 +357,15 @@ export function quickGroup(fb: FormBuilder, label = '', on = true) {
 
 export function questionGroup(fb: FormBuilder, q: SvcPreset['questions'][number] = { type: 'text', label: '', required: false, opts: '' }) {
   return fb.group({ type: [q.type], label: [q.label, Validators.required], required: [q.required], opts: [q.opts], hint: [q.hint ?? ''], choices: fb.array((q.choices ?? []).map(([l, p]) => choice(fb, l, p))) });
+}
+
+/** Một dịch vụ của mẫu dọn dẹp: tên, tùy chọn cộng giá, câu hỏi riêng */
+export function menuGroup(fb: FormBuilder, m: { name: string; options: SvcPreset['options']; questions: SvcPreset['questions'] } = { name: '', options: [], questions: [] }) {
+  return fb.group({
+    name: [m.name],
+    options: fb.array(m.options.map((g) => optGroup(fb, g.name, !!g.multi, !g.multi, g.choices))),
+    questions: fb.array(m.questions.map((q) => questionGroup(fb, q))),
+  });
 }
 
 /** Một khung giờ khác của việc */
@@ -344,6 +395,24 @@ export function jobGroup(fb: FormBuilder) {
 type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 /** Bài mẫu Khác đăng trước khi có form chung: lựa chọn dạng chuỗi và nhóm tùy chọn cộng giá chuyển thành câu hỏi */
+/**
+ * Mẫu Khác giờ dùng mục "Cài đặt tùy chọn" như các mẫu khác: câu hỏi chọn một / chọn nhiều có danh sách lựa chọn (có thể có giá)
+ * thành nhóm tùy chọn cộng giá; câu hỏi kiểu riêng của form chung cũ (đoạn dài, số, ngày, địa chỉ…) thành câu hỏi văn bản.
+ */
+export function toGenericOptions(s: V): V {
+  const isPick = (t: string) => t === 'choice' || t === 'multi';
+  const qs = (s['questions'] as V[]) ?? [];
+  const toOption = (q: V) => isPick(q['type']) && ((q['choices'] as V[]) ?? []).some((c) => String(c?.['label'] ?? '').trim());
+  const options = [
+    ...((s['options'] as V[]) ?? []),
+    ...qs.filter(toOption).map((q) => ({ name: q['label'], multi: q['type'] === 'multi', required: !!q['required'], choices: (q['choices'] as V[]).filter((c) => String(c?.['label'] ?? '').trim()) })),
+  ];
+  const questions = qs
+    .filter((q) => !toOption(q))
+    .map((q) => ({ ...q, type: ['text', 'choice', 'multi', 'photo'].includes(q['type']) ? q['type'] : 'text', choices: [] }));
+  return { ...s, options, questions };
+}
+
 export function toGenericSpec(s: V): V {
   const isPick = (t: string) => t === 'choice' || t === 'multi';
   const old = ((s['questions'] as V[]) ?? []).map((q) =>

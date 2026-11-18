@@ -8,11 +8,18 @@ const { parsePaging } = require('../../../utils/pagination');
 const xu = require('../xu/xu.service');
 const { effectivePrice } = require('../../../utils/promo');
 const { compute: computeTracking, canTrack } = require('./tracking');
+const { release, flowOf } = require('../../shared/order-release');
+const { move } = require('../../shared/order-move');
+const { applyOne, sweep } = require('../../shared/order-deadlines');
+const Review = require('../review/review.model');
+
+// Bài giới hạn số lượng (stock.mode = 'limit'): chỉ loại này mới trừ kho theo từng đơn
+const isLimited = (p) => !!p.stock && p.stock.mode === 'limit' && typeof p.stock.left === 'number';
 
 // Voucher AntXu tạm (Q11): sau này lấy từ model Voucher. Chỉ áp cho bài có acceptsXu.
 const VOUCHERS = { XU10: { amount: 10000 }, XU5: { amount: 5000 } };
 
-const CANCELABLE = ['waiting', 'confirmed', 'preparing'];
+const CANCELABLE = ['waiting', 'confirmed', 'picked', 'pricing', 'preparing'];
 const RETURN_WINDOW_DAYS = 7; // giả định, chờ Q6
 
 /** Tính tiền ở server từ giá bài hiện tại + lựa chọn; ném 422 nếu lựa chọn sai. */
@@ -81,10 +88,10 @@ function priceOrder(post, input, xuVoucher = null, now = new Date()) {
 
 // Bước 1: kiểm tra + tính tiền, CHƯA ghi gì vào DB (giỏ nháp gọi bước này cho mọi món trước khi tạo đơn nào)
 async function prepare(user, input) {
-  const post = await Post.findById(input.postId).populate('seller', 'name avatar');
+  const post = await Post.findById(input.postId).select('+bank').populate('seller', 'name avatar');
   if (!post) throw ApiError.notFound('Bài không tồn tại');
   if (post.status !== 'open') throw ApiError.invalidState('Bài đã hết hàng, đã đóng hoặc không còn hiển thị');
-  if (post.stock !== null && post.stock < input.quantity) throw ApiError.invalidState('Không đủ số lượng còn lại');
+  if (isLimited(post) && post.stock.left < input.quantity) throw ApiError.invalidState('Không đủ số lượng còn lại');
   if (String(post.seller._id) === String(user._id)) throw ApiError.forbidden('Bạn không thể đặt bài của chính mình');
 
   const xuVoucher = await xu.findVoucher(user._id, input.voucherCode);
@@ -98,7 +105,7 @@ async function prepare(user, input) {
     components = post.combo.items.map((i) => ({ post: byId.get(String(i.postId)), qty: i.qty }));
     for (const { post: p, qty } of components) {
       if (!p || p.status !== 'open') throw ApiError.invalidState(`Món "${p ? p.title : 'trong combo'}" hiện không còn bán nên chưa đặt được combo này`);
-      if (p.stock !== null && p.stock < qty * input.quantity) throw ApiError.invalidState(`Món "${p.title}" trong combo không đủ số lượng`);
+      if (isLimited(p) && p.stock.left < qty * input.quantity) throw ApiError.invalidState(`Món "${p.title}" trong combo không đủ số lượng`);
     }
   }
 
@@ -117,11 +124,11 @@ async function commit(user, input, { post, priced, address, xuVoucher, component
   // giữ voucher trước khi trừ kho: mất lượt dùng thì dừng sớm, chưa đụng tới tồn kho
   if (xuVoucher && !(await xu.claimVoucher(xuVoucher.doc))) throw ApiError.invalidState('Voucher đã được dùng cho đơn khác');
   // trừ tồn kho nguyên tử: tránh hai người cùng đặt món cuối cùng
-  if (post.stock !== null) {
-    const r = await Post.updateOne({ _id: post._id, stock: { $gte: input.quantity } }, { $inc: { stock: -input.quantity } });
+  if (isLimited(post)) {
+    const r = await Post.updateOne({ _id: post._id, 'stock.left': { $gte: input.quantity } }, { $inc: { 'stock.left': -input.quantity } });
     if (r.modifiedCount === 0) throw ApiError.invalidState('Không đủ số lượng còn lại');
-    if (post.stock - input.quantity === 0) await Post.updateOne({ _id: post._id }, { status: 'soldout' });
-  } else if (post.oneTime) {
+    if (post.stock.left - input.quantity === 0) await Post.updateOne({ _id: post._id }, { status: 'soldout' });
+  } else if (post.stock && post.stock.mode === 'once') {
     const r = await Post.updateOne({ _id: post._id, status: 'open' }, { status: 'soldout' });
     if (r.modifiedCount === 0) throw ApiError.invalidState('Bài đã được bán');
   }
@@ -130,25 +137,26 @@ async function commit(user, input, { post, priced, address, xuVoucher, component
   const taken = [];
   try {
     for (const { post: p, qty } of components) {
-      if (p.stock === null) continue;
+      if (!isLimited(p)) continue;
       const need = qty * input.quantity;
-      const r = await Post.updateOne({ _id: p._id, stock: { $gte: need } }, { $inc: { stock: -need } });
+      const r = await Post.updateOne({ _id: p._id, 'stock.left': { $gte: need } }, { $inc: { 'stock.left': -need } });
       if (r.modifiedCount === 0) throw ApiError.invalidState(`Món "${p.title}" trong combo không đủ số lượng`);
       taken.push([p._id, need]);
-      if (p.stock - need === 0) await Post.updateOne({ _id: p._id }, { status: 'soldout' });
+      if (p.stock.left - need === 0) await Post.updateOne({ _id: p._id }, { status: 'soldout' });
     }
   } catch (e) {
-    for (const [id, n] of taken) await Post.updateOne({ _id: id }, { $inc: { stock: n }, status: 'open' });
+    for (const [id, n] of taken) await Post.updateOne({ _id: id }, { $inc: { 'stock.left': n }, status: 'open' });
     if (xuVoucher) await xu.restoreVoucher(user._id, xuVoucher.doc.code);
     throw e;
   }
 
   const order = await Order.create({
     code: await nextCode('order', 'AG-O'),
+    flow: flowOf(post),
     buyer: user._id,
     seller: post.seller._id,
     post: post._id,
-    snapshot: { title: post.title, type: post.type, image: post.images[0], sellerName: post.seller.name, sellerAvatar: post.seller.avatar || null, unitPrice: priced.promo ? priced.promo.price : post.price, originalPrice: priced.promo ? priced.promo.original : undefined, promoLabel: priced.promo ? priced.promo.label : undefined, unit: post.unit,
+    snapshot: { bank: input.payment === 'transfer' && post.bank && post.bank.no ? post.bank.toObject() : undefined, title: post.title, type: post.type, image: post.images[0], sellerName: post.seller.name, sellerAvatar: post.seller.avatar || null, unitPrice: priced.promo ? priced.promo.price : post.price, originalPrice: priced.promo ? priced.promo.original : undefined, promoLabel: priced.promo ? priced.promo.label : undefined, unit: post.unit,
       ...(components.length ? { combo: components.map(({ post: p, qty }) => ({ postId: p._id, title: p.title, qty, unitPrice: p.price })), listPrice: post.combo.listPrice } : {}) },
     quantity: input.quantity,
     selections: priced.selections,
@@ -176,6 +184,7 @@ async function create(user, input) {
 
 async function list(user, { state, ...paging }) {
   const { page, limit, skip } = parsePaging(paging);
+  await sweep({ buyer: user._id });
   const filter = { buyer: user._id };
   if (state === 'active') filter.state = { $in: Order.ACTIVE };
   if (state === 'history') filter.state = { $in: Order.HISTORY };
@@ -188,7 +197,7 @@ async function list(user, { state, ...paging }) {
 
 // Xem đơn: người mua hoặc người bán của đơn (admin cũng được); người khác 403
 async function getVisible(user, id) {
-  const o = await Order.findById(id);
+  const o = await applyOne(await Order.findById(id));
   if (!o) throw ApiError.notFound('Không tìm thấy đơn');
   const mine = [o.buyer, o.seller].some((u) => String(u) === String(user._id));
   if (!mine && user.role !== 'admin') throw ApiError.forbidden('Đây không phải đơn của bạn');
@@ -243,5 +252,106 @@ async function approveSurcharge(user, id) {
   return o;
 }
 
+/** Gắn đánh giá của người mua (nếu có) vào đơn để màn hình hiện "Bạn đã đánh giá …" */
+async function present(x) {
+  const arr = Array.isArray(x) ? x : [x];
+  const done = arr.filter((o) => o && o.reviewed).map((o) => o._id);
+  const rows = done.length ? await Review.find({ targetType: 'order', targetId: { $in: done } }).select('targetId rating comment') : [];
+  const by = new Map(rows.map((r) => [String(r.targetId), r]));
+  const out = arr.map((o) => {
+    const j = o.toJSON();
+    const r = by.get(String(o._id));
+    if (r) j.review = { rating: r.rating, comment: r.comment || '' };
+    return j;
+  });
+  return Array.isArray(x) ? out : out[0];
+}
+
+const LATE_MS = 2 * 3600 * 1000;
+const ISSUE_HOURS = { food: 2, goods: 24, service: 24 };
+
+/** Người mua hủy NGAY khi người bán chưa bắt đầu làm (chờ xác nhận / đã xác nhận). Đã làm thì chỉ xin hủy. */
+async function cancelNow(user, id, reason) {
+  const o = await getOwned(user, id);
+  if (!['waiting', 'confirmed'].includes(o.state)) throw ApiError.invalidState('Người bán đã bắt đầu nên không hủy ngay được, hãy gửi yêu cầu hủy');
+  const late = o.snapshot.type === 'service' && o.state === 'confirmed' && !!o.scheduledAt && new Date(o.scheduledAt).getTime() - Date.now() < LATE_MS;
+  o.cancelInfo = { by: 'buyer', reason, late };
+  await move(o, 'cancelled', { quiet: true });
+  await release(o);
+  await notify(o.seller, { type: 'order_cancelled', title: `Khách đã hủy đơn ${o.code}`, body: reason, link: { type: 'order', id: o._id } });
+  return o;
+}
+
+/** Người mua xác nhận đã nhận đủ hàng / kết quả dịch vụ → đơn hoàn thành (cộng Xu, tăng số đã bán) */
+async function confirmReceived(user, id) {
+  const o = await getOwned(user, id);
+  if (!['delivering', 'ready'].includes(o.state)) throw ApiError.invalidState('Đơn chưa tới bước nhận hàng');
+  await move(o, 'done', { quiet: true });
+  await notify(o.seller, { type: 'order_done', title: `Khách đã xác nhận nhận đủ đơn ${o.code}`, link: { type: 'order', id: o._id } });
+  return o;
+}
+
+/** Báo vấn đề (đồ ăn / dịch vụ) hoặc yêu cầu trả hàng (đồ dùng) trong thời hạn sau khi hoàn thành */
+async function openIssue(user, id, { type, text = '', photos = 0, images = [] }) {
+  if (images.length) photos = images.length;
+  const o = await getOwned(user, id);
+  if (o.state !== 'done') throw ApiError.invalidState('Chỉ báo vấn đề sau khi đơn hoàn thành');
+  if (o.issue && o.issue.st) throw ApiError.duplicate('Đơn này đã có yêu cầu báo vấn đề');
+  const hours = ISSUE_HOURS[o.snapshot.type] || 24;
+  const doneAt = (o.history.slice().reverse().find((h) => h.state === 'done') || {}).at || o.updatedAt;
+  if (Date.now() - new Date(doneAt).getTime() > hours * 3600 * 1000) throw ApiError.invalidState(`Đã quá ${hours} giờ kể từ khi hoàn thành`);
+  if (o.snapshot.type !== 'service' && !photos) throw ApiError.validation('Cần ít nhất 1 ảnh để người bán kiểm tra', [{ field: 'photos', message: 'Cần ít nhất 1 ảnh' }]);
+  o.issue = { st: 'open', type, text, photos, images, at: new Date() };
+  await o.save();
+  await notify(o.seller, { type: 'order_issue', title: `Khách báo vấn đề đơn ${o.code}`, body: type, link: { type: 'order', id: o._id } });
+  return o;
+}
+
+/** Người mua đóng yêu cầu (đã được làm lại / đã nhận tiền hoàn / thôi không theo nữa) */
+async function closeIssue(user, id, result) {
+  const o = await getOwned(user, id);
+  if (!o.issue || !o.issue.st || o.issue.st === 'closed') throw ApiError.invalidState('Không có yêu cầu nào đang mở');
+  const st = o.issue.st;
+  const money = (n) => `${Math.round(n || 0).toLocaleString('vi-VN')}đ`;
+  o.issue.result = result || (st === 'redo' ? 'đã được làm lại' : st === 'refund' ? `đã nhận tiền hoàn ${money(o.issue.amount)}` : st === 'returnAgreed' ? `đã trả hàng và nhận lại ${money(o.issue.amount)}` : 'bạn đã đóng yêu cầu');
+  o.issue.st = 'closed';
+  await o.save();
+  // hoàn hết tiền hoặc trả lại hàng: không còn là đơn thành công → thu lại Xu
+  if (st === 'returnAgreed' || (st === 'refund' && (o.issue.amount || 0) >= o.total)) await xu.revokeOrder(o.buyer, o._id, o.code);
+  await notify(o.seller, { type: 'order_issue_closed', title: `Khách đã đóng yêu cầu của đơn ${o.code}`, body: o.issue.result, link: { type: 'order', id: o._id } });
+  return o;
+}
+
+/** Người mua đồng ý giá cuối người bán báo: tổng tiền đổi sang giá mới, đơn chuyển sang "đang làm" */
+async function approveQuote(user, id) {
+  const o = await getOwned(user, id);
+  if (o.state !== 'pricing' || !o.quote || o.quote.status !== 'pending') throw ApiError.invalidState('Đơn này không có giá cuối nào đang chờ bạn duyệt');
+  const ship = (o.breakdown && o.breakdown.deliveryFee) || 0;
+  o.oldTotal = o.total;
+  o.total = o.quote.total + ship;
+  o.breakdown.items = o.quote.total;
+  o.quote.status = 'approved';
+  o.state = 'preparing';
+  o.history.push({ state: 'preparing', at: new Date() });
+  await o.save();
+  await notify(o.seller, { type: 'order_quote_ok', title: `Khách đồng ý giá cuối đơn ${o.code}, bắt đầu làm`, link: { type: 'order', id: o._id } });
+  return o;
+}
+
+/** Người mua từ chối giá cuối: đơn hủy (sửa chữa: chỉ trả phí kiểm tra đã tính lúc đặt; giặt sấy: không mất tiền giặt) */
+async function rejectQuote(user, id, reason = '') {
+  const o = await getOwned(user, id);
+  if (o.state !== 'pricing' || !o.quote || o.quote.status !== 'pending') throw ApiError.invalidState('Đơn này không có giá cuối nào đang chờ bạn duyệt');
+  o.quote.status = 'rejected';
+  o.quote.rejectReason = reason;
+  o.state = 'cancelled';
+  o.history.push({ state: 'cancelled', at: new Date() });
+  await o.save();
+  await release(o);
+  await notify(o.seller, { type: 'order_quote_rejected', title: `Khách không đồng ý giá cuối đơn ${o.code}`, body: reason, link: { type: 'order', id: o._id } });
+  return o;
+}
+
 module.exports = {
-  tracking, create, prepare, commit, list, getVisible, requestCancel, requestReturn, approveSurcharge, priceOrder };
+  present, cancelNow, confirmReceived, openIssue, closeIssue,
+  approveQuote, rejectQuote, tracking, create, prepare, commit, list, getVisible, requestCancel, requestReturn, approveSurcharge, priceOrder };

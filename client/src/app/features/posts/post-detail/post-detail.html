@@ -49,7 +49,7 @@
       <section class="block">
         <div class="facts">
           @for (f of v.tpl.facts; track f[1]) {
-            <div><svg class="i"><use [attr.href]="'#' + f[0]" /></svg><span><b>{{ f[2] }}</b>{{ f[1] }}</span></div>
+            <div><svg class="i"><use [attr.href]="'#' + f[0]" /></svg><span><small>{{ f[1] }}</small><b>{{ f[2] }}</b></span></div>
           }
         </div>
       </section>
@@ -70,10 +70,6 @@
                   </li>
                 }
               </ul>
-              <dl class="csum">
-                <div><dt>Giá lẻ</dt><dd><s>{{ fmt(cd.listPrice) }}</s></dd></div>
-                <div class="sv"><dt>Tiết kiệm</dt><dd>{{ fmt(saving()) }}</dd></div>
-              </dl>
               @if (comboUnavailable()) { <p class="cwarn" role="alert">Có món trong combo đang tạm hết, bạn có thể chưa đặt được.</p> }
             </section>
           }
@@ -126,7 +122,7 @@
             @for (c of g.choices; track c) {
               <div class="row extra" role="checkbox" tabindex="0" [attr.aria-checked]="d.extraQty(scope, g.name, c) > 0" [class.on]="d.extraQty(scope, g.name, c) > 0" (click)="d.toggleExtra(scope, g.name, c)" (keydown.enter)="d.toggleExtra(scope, g.name, c)" (keydown.space)="d.toggleExtra(scope, g.name, c); $event.preventDefault()">
                 <i class="check"></i>
-                <span class="nm">{{ parse(c).name }}</span>
+                <span class="nm">{{ dishName(v.tpl, c) }}</span>
                 @if (parse(c).add) { <small class="pr">+{{ fmt(parse(c).add) }}</small> }
                 @if (d.extraQty(scope, g.name, c) > 0) {
                   <span class="qty sm" (click)="$event.stopPropagation()">
@@ -143,7 +139,7 @@
             <h4>{{ g.name }} <small>{{ g.req === false ? 'Chọn 1, không bắt buộc' : 'Chọn 1' }}</small></h4>
             @for (c of g.choices; track c) {
               <button type="button" class="row" [class.on]="d.isOpt(scope, g.name, c)" (click)="d.setOpt(g.name, c, scope)">
-                <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
+                <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>{{ d.tpl.priceInOpts ? '' : '+' }}{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
               </button>
             }
           </div>
@@ -152,7 +148,16 @@
 
       @if (v.tpl.cups) { <app-cup-order [draft]="d" (popup)="cupPopup.set($event)" /> }
 
-      @for (g of v.tpl.opts; track g.name) {
+      <!-- dọn dẹp: chưa chọn dịch vụ thì chỉ hiện tên các dịch vụ; chọn rồi mới hiện tùy chọn, câu hỏi của dịch vụ đó -->
+      @if (v.tpl.menu?.length) {
+        <div class="rows">
+          <h4>Dịch vụ <small>Chọn 1</small></h4>
+          @for (m of v.tpl.menu!; track m.name) {
+            <button type="button" class="row" [class.on]="d.service() === m.name" (click)="d.setService(m.name)"><span>{{ m.name }}</span><i class="radio"></i></button>
+          }
+        </div>
+      }
+      @for (g of d.opts(); track g.name) {
         @if (g === d.dishGroup) {
           <div class="rows">
             <h4>{{ g.name }} <small>Chọn nhiều</small></h4>
@@ -160,8 +165,8 @@
               <div class="dishbox" [class.on]="d.dishQty(c) > 0">
                 <div class="row dish" role="checkbox" tabindex="0" [attr.aria-checked]="d.dishQty(c) > 0" [class.on]="d.dishQty(c) > 0" (click)="d.toggleDish(c)" (keydown.enter)="d.toggleDish(c)" (keydown.space)="d.toggleDish(c); $event.preventDefault()">
                   <i class="check"></i>
-                  <span class="nm">{{ parse(c).name }}</span>
-                  @if (v.tpl.dishPriced || parse(c).add) { <small class="pr">{{ v.tpl.dishPriced ? fmt((v.tpl.price.amount ?? 0) + parse(c).add) : '+' + fmt(parse(c).add) }}@if (v.tpl.dishLeft?.[c] !== undefined && v.tpl.dishLeft![c] < 1) { · Hết }</small> }
+                  <span class="nm">{{ dishName(v.tpl, c) }}</span>
+                  @if (v.tpl.dishPriced || parse(c).add) { <small class="pr">{{ v.tpl.dishPriced ? fmt((v.tpl.price.amount ?? 0) + parse(c).add) : '+' + fmt(parse(c).add) }}@if (v.tpl.dishUnit?.[c]) { / {{ v.tpl.dishUnit![c] }} }@if (v.tpl.dishLeft?.[c] !== undefined && v.tpl.dishLeft![c] < 1) { · Hết }</small> }
                   @if (d.dishQty(c) > 0) {
                     <span class="qty sm" (click)="$event.stopPropagation()">
                       <button type="button" [disabled]="d.dishQty(c) <= 1" (click)="d.setDish(c, d.dishQty(c) - 1)" aria-label="Giảm">−</button>
@@ -178,22 +183,22 @@
         }
       }
 
-      @for (q of v.tpl.qs; track q.label) {
+      @for (q of d.qs(); track q.label) {
         @switch (q.type) {
           @case ('choice') {
             <div class="rows">
               <h4>{{ q.label }}@if (q.req) { <em class="rq">*</em> } <small>Chọn 1</small></h4>
               @for (c of q.opts ?? []; track c) {
                 <button type="button" class="row" [class.on]="d.ans()[q.label] === c" (click)="d.setAns(q.label, c)">
-                  <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
+                  <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>{{ d.tpl.priceInOpts ? '' : '+' }}{{ fmt(parse(c).add) }}</small> }<i class="radio"></i>
                 </button>
               }
               @if (q.hint) { <p class="hint">{{ q.hint }}</p> }
               @if (q.pay && d.ans()[q.label] === 'Có') {
                 <div class="qfield pay">
-                  <label>Số tiền cần trả giùm</label>
-                  <input class="input" inputmode="numeric" placeholder="Ví dụ: 120000" [value]="d.payBack()" (input)="d.payBack.set($any($event.target).value.replace(/\D/g, ''))" />
-                  <p class="hint">Bạn trả lại số tiền này khi nhận đồ.</p>
+                  <label>Tổng tiền hàng</label>
+                  <span class="money"><input class="input" inputmode="numeric" placeholder="120.000" [value]="moneyText(d.payBack())" (input)="onMoney(d, $event)" /></span>
+                  <p class="hint">Số tiền này được cộng vào tổng đơn, bạn thanh toán chung với phí dịch vụ.</p>
                 </div>
               }
             </div>
@@ -203,7 +208,7 @@
               <h4>{{ q.label }}@if (q.req) { <em class="rq">*</em> } <small>Chọn nhiều</small></h4>
               @for (c of q.opts ?? []; track c) {
                 <button type="button" class="row" [class.on]="d.picks(q.label).includes(c)" (click)="d.togglePick(q.label, c)">
-                  <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>+{{ fmt(parse(c).add) }}</small> }<i class="check"></i>
+                  <span>{{ parse(c).name }}</span>@if (parse(c).add) { <small>{{ d.tpl.priceInOpts ? '' : '+' }}{{ fmt(parse(c).add) }}</small> }<i class="check"></i>
                 </button>
               }
             </div>
@@ -211,10 +216,16 @@
           @case ('photo') {
             <div class="qfield">
               <label>{{ q.label }}@if (q.req) { <em class="rq">*</em> }</label>
-              @if (d.ans()[q.label]; as photo) {
-                <div class="qphoto"><img [src]="photo" alt="Ảnh bạn đã chọn" /><button type="button" (click)="d.setAns(q.label, '')">Bỏ ảnh</button></div>
-              } @else {
-                <label class="upload"><input type="file" accept="image/*" hidden (change)="onPhoto(d, q.label, $event)" />Thêm ảnh</label>
+              <!-- tối đa 5 ảnh; mỗi ảnh có nút bỏ, còn chỗ thì còn nút thêm -->
+              @if (d.photos(q.label).length) {
+                <div class="qphotos">
+                  @for (ph of d.photos(q.label); track $index; let i = $index) {
+                    <span class="qph"><img [src]="ph" [alt]="'Ảnh ' + (i + 1)" /><button type="button" [attr.aria-label]="'Bỏ ảnh ' + (i + 1)" (click)="d.removePhoto(q.label, i)">✕</button></span>
+                  }
+                </div>
+              }
+              @if (d.photos(q.label).length < maxPhotos) {
+                <label class="upload"><input type="file" accept="image/*" multiple hidden (change)="onPhoto(d, q.label, $event)" />Thêm ảnh <small>({{ d.photos(q.label).length }}/{{ maxPhotos }})</small></label>
               }
             </div>
           }
@@ -275,6 +286,9 @@
               @if (o.detail?.when) { <div><dt>Thời gian</dt><dd>{{ o.detail?.when }}</dd></div> }
               <div><dt>Thanh toán</dt><dd>{{ o.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản' }}</dd></div>
             </dl>
+            @if (o.paymentMethod === 'transfer' && (o.bank ?? v.tpl.bank); as b) {
+              <app-bank-pay [bank]="b" [amount]="o.total" [content]="o.code" />
+            }
             <div class="stepper mini" [style.--n]="doneSteps(o).length">
               @for (n of doneSteps(o); track $index) {
                 @if ($index > 0) { <i class="ln"></i> }
@@ -291,7 +305,9 @@
           <div class="mbody ck">
             <!-- 1. Địa chỉ -->
             <section class="cs">
-              @if (v.tpl.place.mode !== 'seller') {
+              @if (v.tpl.place.mode === 'none') {
+                <!-- không có nơi làm cố định: không hỏi địa chỉ -->
+              } @else if (v.tpl.place.mode !== 'seller') {
                 @if (d.needsAddress()) {
                   <button type="button" class="crow addr" (click)="addrOpen.set(true)">
                     <svg class="i ic pin"><use href="#l-pin" /></svg>
@@ -304,7 +320,7 @@
                   <div class="crow"><svg class="i ic pin"><use href="#l-pin" /></svg><span class="ct"><small>Địa chỉ lấy hàng</small><b>{{ p.sellerName }}</b><span>{{ p.block }}@if (p.area) { · {{ p.area }} }</span></span></div>
                 }
               } @else {
-                <div class="crow"><svg class="i ic pin"><use href="#l-pin" /></svg><span class="ct"><small>Nơi nhận hàng</small><b>{{ v.tpl.place.where }}</b></span></div>
+                <div class="crow"><svg class="i ic pin"><use href="#l-pin" /></svg><span class="ct"><small>{{ v.tpl.place.label === 'Địa điểm' ? 'Địa điểm' : 'Nơi nhận hàng' }}</small><b>{{ v.tpl.place.where || p.block }}</b>@if (v.tpl.place.label === 'Địa điểm') { <span>Số phòng gửi cho bạn sau khi chủ nhà xác nhận</span> }</span></div>
               }
             </section>
 
@@ -314,10 +330,11 @@
                 <img [src]="v.images[0]" alt="" />
                 <span class="ct">
                   <b>{{ v.tpl.title }}</b>
-                  @for (r of d.dishRows(); track r.raw) { <small>{{ r.name }} x {{ r.qty }}</small> }
+                  @for (r of d.dishRows(); track r.raw) { <small>{{ dishName(v.tpl, r.raw) }} x {{ r.qty }}@if (v.tpl.dishUnit?.[r.raw]) { {{ v.tpl.dishUnit![r.raw] }} }</small> }
                   @for (c of d.cups(); track c) { <small>{{ c.drink }} x {{ c.qty }}@if (c.text) { · {{ c.text }} }</small> }
                   @if (v.tpl.qty && !d.dishGroup) { <small>Số lượng: {{ d.qty() }}</small> }
-                  @if (d.lines().length) { <small>{{ d.lines().join(' · ') }}</small> }
+                  <!-- mỗi tùy chọn, mỗi câu trả lời một dòng -->
+                  @for (l of d.lines(); track l) { <small>{{ l }}</small> }
                 </span>
                 <strong>{{ fmt(d.subtotal()) }}</strong>
               </div>
@@ -325,6 +342,7 @@
 
             <!-- 3. Cách nhận, thời gian, tùy chọn -->
             <section class="cs">
+              @if (!v.tpl.noSchedule) {
               <div class="crow col">
                 <svg class="i ic"><use href="#l-clock" /></svg>
                 <span class="ct"><b>{{ v.tpl.time.label }}</b>
@@ -375,6 +393,7 @@
                   }
                 </span>
               </div>
+              }
 
               @if (v.tpl.place.mode === 'choice') {
                 <label class="crow sw">
@@ -431,7 +450,7 @@
                     @if (!v.tpl.pays || v.tpl.pays.includes('cash')) { <button type="button" [class.on]="d.pay() === 'cash'" (click)="d.pay.set('cash')">Tiền mặt</button> }
                     @if (!v.tpl.pays || v.tpl.pays.includes('transfer')) { <button type="button" [class.on]="d.pay() === 'transfer'" (click)="d.pay.set('transfer')">Chuyển khoản</button> }
                   </span>
-                  @if (d.pay() === 'transfer' && v.tpl.bank; as b) { <app-bank-pay [bank]="b" /> }
+                  @if (d.pay() === 'transfer' && v.tpl.bank; as b) { <app-bank-pay [bank]="b" /> <small class="qrnote">Mã QR có sẵn số tiền và mã đơn sẽ hiện sau khi bạn bấm Đặt đơn.</small> }
                 </span>
               </div>
             </section>
@@ -444,6 +463,7 @@
                 @if (d.promoOff()) { <div class="disc"><dt>Giảm giờ vàng</dt><dd>−{{ fmt(d.promoOff()) }}</dd></div> }
                 @if (d.placeFee()) { <div><dt>Phí vận chuyển</dt><dd>{{ fmt(d.placeFee()) }}</dd></div> }
                 @if (d.discount()) { <div class="disc"><dt>Voucher</dt><dd>−{{ fmt(d.discount()) }}</dd></div> }
+                @if (d.advance()) { <div><dt>Tiền hàng ứng trước</dt><dd>{{ fmt(d.advance()) }}</dd></div> }
                 @if (v.tpl.price.type === 'quote') { <div><dt>Tiền sửa</dt><dd>báo giá sau khi kiểm tra</dd></div> }
               </dl>
               @if (error()) { <div class="notice" role="alert">{{ error() }}</div> }

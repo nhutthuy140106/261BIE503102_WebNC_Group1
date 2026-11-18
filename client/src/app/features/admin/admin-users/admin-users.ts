@@ -22,7 +22,6 @@ export class AdminUsers implements OnInit {
   protected readonly busy = signal(false);
 
   protected q = '';
-  protected role = '';
   protected status = '';
   protected page = 1;
   private timer: ReturnType<typeof setTimeout> | null = null;
@@ -44,6 +43,10 @@ export class AdminUsers implements OnInit {
   protected go(p: number): void {
     this.page = Math.min(this.pages(), Math.max(1, p));
     this.load();
+  }
+
+  protected isAdmin(): boolean {
+    return this.me()?.role === 'admin';
   }
 
   protected isSelf(u: AdminUser): boolean {
@@ -71,7 +74,7 @@ export class AdminUsers implements OnInit {
 
   private load(): void {
     this.error.set('');
-    this.admin.listUsers({ q: this.q, role: this.role, status: this.status, page: this.page }).subscribe({
+    this.admin.listUsers({ q: this.q, status: this.status, page: this.page }).subscribe({
       next: (r) => {
         this.rows.set(r.items);
         this.total.set(r.total);

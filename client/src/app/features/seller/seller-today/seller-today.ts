@@ -222,4 +222,9 @@ export class SellerToday implements OnInit {
   protected up(v: string): string {
     return v.replace(/^\+/, '');
   }
+
+  /** Số liệu giảm so với kỳ trước (chữ bắt đầu bằng dấu trừ) → hiện mũi tên xuống, màu cảnh báo */
+  protected down(v: string): boolean {
+    return /^[-−]/.test(v);
+  }
 }

@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const ApiError = require('../../../utils/ApiError');
-const { XuEntry, XuVoucher } = require('./xu.model');
+const { XuEntry, XuVoucher, VoucherDefinition } = require('./xu.model');
 
 // Luật chống gian lận do server quyết định, FE gửi gì cũng không vượt được (CẦN CHỐT: decisions.md F10)
 const GAME = { id: 'hai-xu', maxPlays: 3, dailyCap: 30, maxScore: 80, scorePerXu: 8 };
@@ -11,6 +11,18 @@ const CATALOG = [
   { cid: 'v20', title: 'Giảm 20.000đ', cond: 'Đơn từ 150.000đ', amount: 20000, min: 150000, cost: 50 },
   { cid: 'ship', title: 'Miễn phí giao trong khu', cond: 'Đơn đồ ăn có giao tận cửa', ship: true, min: 0, cost: 30 },
 ];
+
+// Danh mục voucher: admin sửa trong DB; chưa có dòng nào thì dùng bộ mặc định ở trên
+const pub = (d) => ({ cid: d.cid, title: d.title, cond: d.cond, amount: d.amount || undefined, min: d.min, ship: d.ship || undefined, cost: d.cost });
+async function catalog({ all = false } = {}) {
+  const rows = await VoucherDefinition.find(all ? {} : { active: true }).sort({ cost: 1, createdAt: 1 });
+  if (rows.length || (await VoucherDefinition.exists({}))) return rows.map(pub);
+  return CATALOG;
+}
+// Tìm định nghĩa theo cid, kể cả loại đã tắt (voucher đã đổi vẫn phải dùng được)
+async function defOf(cid) {
+  return (await VoucherDefinition.findOne({ cid })) || CATALOG.find((c) => c.cid === cid);
+}
 
 // Ngày theo giờ Việt Nam (UTC+7)
 const today = (now = Date.now()) => new Date(now + 7 * 3600e3).toISOString().slice(0, 10);
@@ -26,8 +38,13 @@ async function gameState(userId, day = today()) {
   return { plays: rows.length, playsLeft: Math.max(0, GAME.maxPlays - rows.length), capLeft: Math.max(0, GAME.dailyCap - earned) };
 }
 
+// Chỉ mục duy nhất (user, key) được Mongoose tạo bất đồng bộ lúc khởi động; đợi nó xong rồi mới ghi sổ,
+// kẻo hai lần ghi sớm có thể cùng lọt qua và cộng đôi Xu chào mừng
+const indexesReady = XuEntry.init().catch(() => undefined);
+
 // Ghi một dòng; trùng key thì bỏ qua (idempotent)
 async function addEntry(userId, data) {
+  await indexesReady;
   try { return await XuEntry.create({ user: userId, ...data }); }
   catch (e) { if (e.code === 11000) return null; throw e; }
 }
@@ -44,14 +61,14 @@ async function overview(userId) {
   return {
     balance: bal,
     ledger: ledger.map((e) => ({ id: e._id, delta: e.delta, title: e.title, kind: e.kind, at: e.createdAt })),
-    vouchers: vouchers.map((v) => {
-      const def = CATALOG.find((c) => c.cid === v.cid) || {};
+    vouchers: await Promise.all(vouchers.map(async (v) => {
+      const def = (await defOf(v.cid)) || {};
       return {
         id: v._id, cid: v.cid, code: v.code, title: def.title, cond: def.cond, expiresAt: v.expiresAt,
         status: v.usedAt ? 'used' : v.expiresAt.getTime() < now ? 'expired' : 'active',
       };
-    }),
-    catalog: CATALOG,
+    })),
+    catalog: await catalog(),
     game: { id: GAME.id, playsLeft: g.playsLeft, capLeft: g.capLeft, maxPlays: GAME.maxPlays, dailyCap: GAME.dailyCap },
   };
 }
@@ -71,7 +88,7 @@ async function playGame(userId, game, score) {
 }
 
 async function redeem(userId, cid) {
-  const def = CATALOG.find((c) => c.cid === cid);
+  const def = (await catalog()).find((c) => c.cid === cid);
   if (!def) throw ApiError.notFound('Voucher không tồn tại');
   await overview(userId); // bảo đảm đã có Xu chào mừng
   if ((await balance(userId)) < def.cost) throw ApiError.invalidState('Bạn chưa đủ Xu để đổi voucher này');
@@ -102,15 +119,30 @@ async function award(userId, kind, refId, ctx = {}) {
   } catch (e) { console.error('Không cộng được Xu:', e.message); return null; }
 }
 
+// Đơn được hoàn tiền hết (hoặc trả lại hàng) thì thu lại Xu đã cộng cho đơn đó; không có Xu để thu thì bỏ qua
+async function revokeOrder(userId, orderId, code) {
+  try {
+    const got = await XuEntry.findOne({ user: userId, key: `order:${orderId}`, delta: { $gt: 0 } });
+    if (!got) return null;
+    return await addEntry(userId, { delta: -got.delta, title: `Thu lại Xu · đơn ${code} được hoàn tiền`, kind: 'other', key: `revoke:order:${orderId}`, day: today() });
+  } catch (e) { if (e.code !== 11000) console.error('Không thu lại được Xu:', e.message); return null; }
+}
+
 // Voucher của chính người dùng, còn hạn, chưa dùng; trả { doc, def } hoặc null
 async function findVoucher(userId, code) {
   if (!code || !XU_CODE.test(String(code).toUpperCase())) return null;
   const doc = await XuVoucher.findOne({ user: userId, code: String(code).toUpperCase(), usedAt: { $exists: false }, expiresAt: { $gt: new Date() } });
-  return doc ? { doc, def: CATALOG.find((c) => c.cid === doc.cid) } : null;
+  return doc ? { doc, def: await defOf(doc.cid) } : null;
 }
 // Đánh dấu đã dùng nguyên tử (hai đơn cùng lúc không dùng được một voucher hai lần)
 const claimVoucher = (doc) => XuVoucher.findOneAndUpdate({ _id: doc._id, usedAt: { $exists: false } }, { usedAt: new Date() });
 // Đơn bị hủy/từ chối thì trả lại voucher
 const restoreVoucher = (userId, code) => (code && XU_CODE.test(code) ? XuVoucher.updateOne({ user: userId, code }, { $unset: { usedAt: 1 } }) : null);
 
-module.exports = { overview, playGame, redeem, balance, award, findVoucher, claimVoucher, restoreVoucher, XU_CODE, GAME, CATALOG, today };
+// Admin cộng/trừ Xu thủ công (kèm lý do, mỗi lần một dòng riêng trong sổ)
+async function adjust(userId, delta, title) {
+  await indexesReady;
+  return XuEntry.create({ user: userId, delta, title, kind: 'other', key: `admin:${Date.now()}:${crypto.randomBytes(3).toString('hex')}`, day: today() });
+}
+
+module.exports = { adjust, catalog, defOf, overview, playGame, redeem, balance, award, revokeOrder, findVoucher, claimVoucher, restoreVoucher, XU_CODE, GAME, CATALOG, today };

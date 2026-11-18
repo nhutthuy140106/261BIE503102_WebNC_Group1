@@ -1,0 +1,105 @@
+<a class="back" routerLink="/admin/orders">← Tất cả đơn</a>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+@if (done()) { <div class="okmsg" role="status">{{ done() }}</div> }
+
+@if (o(); as o) {
+  <div class="head">
+    <div>
+      <h1><span class="mono">{{ o.code }}</span> <span class="pill" [ngClass]="tone(o.state)">{{ label(o.state) }}</span></h1>
+      <p class="lead">{{ o.title }} · đặt lúc {{ o.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+    </div>
+    @if (isActive(o.state)) { <button type="button" class="btn danger" (click)="cancelling.set(true)">Hủy đơn vì vi phạm</button> }
+  </div>
+
+  <div class="grid2">
+    <div class="stack">
+      @if (o.full.issue; as is) {
+        <section class="panel issue">
+          <h2>Khách báo vấn đề <span class="pill" [ngClass]="issueTone(is.st)">{{ issueLabel(is.st) }}</span></h2>
+          <dl class="kv">
+            <dt>Loại vấn đề</dt><dd>{{ is.type || '—' }}</dd>
+            <dt>Khách mô tả</dt><dd>{{ is.text || '—' }}</dd>
+            @if (is.images?.length) { <dt>Ảnh khách gửi</dt><dd class="imgs">@for (u of is.images; track u) { <a [href]="u" target="_blank" rel="noopener"><img [src]="u" alt="Ảnh khách gửi" /></a> }</dd> }
+            @if (is.reply) { <dt>Người bán trả lời</dt><dd>{{ is.reply }}</dd> }
+            @if (is.amount) { <dt>Số tiền hoàn</dt><dd>{{ is.amount | vnd }}</dd> }
+            @if (is.result) { <dt>Kết quả</dt><dd>{{ is.result }}</dd> }
+          </dl>
+          @if (canJudge(o)) {
+            <form class="judge" (ngSubmit)="judge(o)">
+              <h3>Quyết định của AntGo</h3>
+              <div class="opts" role="radiogroup" aria-label="Quyết định">
+                <label class="opt"><input type="radio" name="d" value="refund" [(ngModel)]="decision" /><span><b>Hoàn tiền</b><small>Người bán hoàn lại cho khách</small></span></label>
+                <label class="opt"><input type="radio" name="d" value="redo" [(ngModel)]="decision" /><span><b>Làm lại</b><small>Người bán phải làm lại đơn</small></span></label>
+                <label class="opt"><input type="radio" name="d" value="reject" [(ngModel)]="decision" /><span><b>Không hoàn tiền</b><small>Báo vấn đề không có cơ sở</small></span></label>
+              </div>
+              @if (decision === 'refund') {
+                <div class="field"><label for="amt">Số tiền hoàn (đ)</label><input appMoney id="amt" name="amt" [(ngModel)]="amount" placeholder="VD: 25.000" /><small>Tối đa bằng tổng đơn: {{ o.total | vnd }}. Hoàn hết thì AntGo thu lại Xu của đơn.</small></div>
+              }
+              <div class="field"><label for="nt">Lý do / giải thích (cả hai bên đều đọc được)</label><textarea id="nt" name="nt" rows="3" [(ngModel)]="note" maxlength="300" placeholder="Ít nhất 5 ký tự"></textarea>
+                @if (noteErr) { <span class="e" role="alert">Vui lòng nhập ít nhất 5 ký tự.</span> }</div>
+              <div class="btns"><button type="submit" class="btn main" [disabled]="busy()">Ghi nhận quyết định</button></div>
+            </form>
+          }
+        </section>
+      }
+
+      <section class="panel">
+        <h2>Tiến trình đơn</h2>
+        <ol class="tl">
+          @for (h of o.full.history; track h.at) { <li><b>{{ label(h.state) }}</b><span class="sub">{{ h.at | date: 'dd/MM/yyyy HH:mm' }}</span></li> }
+        </ol>
+        @if (o.full.cancelInfo; as ci) { <p class="note">Hủy bởi {{ ci.by === 'buyer' ? 'người mua' : ci.by === 'seller' ? 'người bán' : 'hệ thống / AntGo' }}: {{ ci.reason }}</p> }
+      </section>
+
+      <section class="panel">
+        <h2>Tin nhắn của đơn <small>chỉ xem khi cần phân xử, mỗi lần xem được ghi vào nhật ký</small></h2>
+        @if (!chatOpen()) {
+          <button type="button" class="btn" (click)="showChat()">Xem tin nhắn giữa hai bên</button>
+        } @else if (o.messages?.length) {
+          <ul class="chat">
+            @for (m of o.messages; track m.at) { <li [class.me]="m.senderId === o.seller._id"><span class="sub">{{ m.sender }} · {{ m.at | date: 'dd/MM HH:mm' }}</span><p>{{ m.text }}@if (m.media) { <em> [đính kèm {{ m.media }}]</em> }</p></li> }
+          </ul>
+        } @else { <p class="empty">Hai bên chưa nhắn tin trong đơn này.</p> }
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="panel">
+        <h2>Thanh toán</h2>
+        <dl class="kv">
+          <dt>Hình thức</dt><dd>{{ pay(o.payment) }}</dd>
+          <dt>Số lượng</dt><dd>{{ o.full.quantity }}</dd>
+          @if (o.full.breakdown; as b) {
+            <dt>Tiền hàng</dt><dd>{{ b.items | vnd }}</dd>
+            <dt>Phí giao</dt><dd>{{ b.deliveryFee | vnd }}</dd>
+            @if (b.discount) { <dt>Giảm giá</dt><dd>−{{ b.discount | vnd }}</dd> }
+            @if (b.surcharge) { <dt>Phụ thu</dt><dd>{{ b.surcharge | vnd }}</dd> }
+          }
+          @if (o.full.voucherCode) { <dt>Voucher</dt><dd class="mono">{{ o.full.voucherCode }}</dd> }
+          <dt>Tổng cộng</dt><dd><b>{{ o.total | vnd }}</b></dd>
+        </dl>
+      </section>
+      <section class="panel">
+        <h2>Hai bên</h2>
+        <div class="two">
+          <a class="pc" [routerLink]="['/admin/users', o.buyer._id]"><span class="sub">Người mua</span><b>{{ o.buyer.name }}</b><span class="sub">{{ o.buyer.phone }}</span></a>
+          <a class="pc" [routerLink]="['/admin/users', o.seller._id]"><span class="sub">Người bán</span><b>{{ o.seller.name }}</b><span class="sub">{{ o.seller.phone }}</span></a>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Nhận hàng</h2>
+        <dl class="kv">
+          <dt>Cách nhận</dt><dd>{{ o.full.fulfillment === 'delivery' ? 'Giao tận nơi' : 'Tự đến lấy' }}</dd>
+          @if (o.full.address; as a) { <dt>Địa chỉ</dt><dd>{{ a.name }} · {{ a.phone }}<br />{{ a.unit }} {{ a.block }}</dd> }
+          @if (o.full.scheduledAt) { <dt>Hẹn lúc</dt><dd>{{ o.full.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</dd> }
+          @if (o.full.note) { <dt>Ghi chú</dt><dd>{{ o.full.note }}</dd> }
+        </dl>
+      </section>
+    </div>
+  </div>
+
+  @if (cancelling()) {
+    <app-admin-dialog title="Hủy đơn này vì vi phạm?" message="Đơn chuyển sang Đã hủy, số lượng và voucher được trả lại. Cả hai bên nhận thông báo." confirmLabel="Hủy đơn" [danger]="true"
+      [withReason]="true" reasonLabel="Lý do hủy (cả hai bên đều đọc được)" [busy]="busy()" (confirmed)="cancel($event)" (cancelled)="cancelling.set(false)" />
+  }
+} @else if (!error()) { <div class="sk"></div><div class="sk"></div><div class="sk"></div> }

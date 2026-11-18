@@ -4,15 +4,16 @@
 .fhead h1 { margin: 10px 0 0; font-size: 30px; letter-spacing: -.02em; }
 .fhead p { margin: 6px 0 0; color: var(--smoke); }
 
-.tpl { margin-top: 20px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.tpl button { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: #fff; text-align: left; }
+/* cùng kích thước 4 nút đăng bài ở trang Hôm nay (.posts4) */
+.tpl { margin-top: 22px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.tpl button { display: flex; align-items: center; gap: 10px; height: 90px; padding: 0 14px; border: 1px solid var(--border); border-radius: 16px; background: #fff; text-align: left; white-space: nowrap; }
 .tpl button:hover:not(:disabled) { border-color: #e2cfc6; }
 .tpl button:disabled { opacity: .45; cursor: not-allowed; }
 .tpl button.on { border-color: var(--accent); background: #fff6f1; box-shadow: 0 0 0 1px var(--accent) inset; opacity: 1; }
-.pi { width: 40px; height: 40px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; flex: none; }
+.pi { width: 44px; height: 44px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; flex: none; }
 .tpl button.on .pi { background: var(--accent); color: #fff; }
-.tpl svg { width: 20px; height: 20px; }
-.tpl b { display: block; font-size: 14.5px; }
+.tpl svg { width: 22px; height: 22px; }
+.tpl b { display: block; font-size: 15.5px; font-weight: 700; letter-spacing: -.01em; }
 .tpl small { display: block; font-size: 12px; color: var(--smoke); }
 
 .fgrid { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 26px; align-items: start; }
@@ -46,6 +47,22 @@ textarea.small { min-height: 64px; }
 .pills { display: flex; flex-wrap: wrap; gap: 6px; }
 .pills button { height: 36px; padding: 0 14px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 13px; font-weight: 600; }
 .pills button.on { border-color: var(--ink); background: var(--ink); color: #fff; }
+/* ô chọn mẫu dịch vụ: icon + tên, khác hẳn các nút chọn trong form */
+.tiles { display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; }
+@media (max-width: 900px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
+.tiles button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 84px; padding: 10px 4px; border: 1.5px solid transparent; border-radius: 14px; background: var(--soft); color: var(--ink); font-size: 12.5px; font-weight: 600; text-align: center; line-height: 1.25; white-space: nowrap; transition: border-color .15s, background .15s; }
+.tiles button:hover { border-color: var(--border); background: #fff; }
+.tiles .ic { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #fff; color: var(--smoke); }
+.tiles .ic .i { width: 21px; height: 21px; }
+.tiles button.on { border-color: var(--ink); background: #fff; }
+.tiles button.on .ic { background: var(--ink); color: #fff; }
+.tiles button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* tiện nghi lưu trú: lưới ô tick đều cột */
+.amen { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.amen button { display: flex; align-items: center; justify-content: center; height: 42px; padding: 0 12px; border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--smoke); font-size: 13.5px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.amen button:hover { border-color: #e2cfc6; }
+.amen button.on { border-color: var(--ink); background: var(--soft); color: var(--ink); font-weight: 600; box-shadow: 0 0 0 1px var(--ink) inset; }
+@media (max-width: 900px) { .amen { grid-template-columns: repeat(2, minmax(0, 1fr)); } .amen button { height: auto; min-height: 44px; padding: 8px 12px; white-space: normal; line-height: 1.3; } }
 .checks { display: grid; gap: 8px; }
 .ck { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; cursor: pointer; }
 .ck:has(> input:checked) { border-color: var(--ink); background: var(--soft); }
@@ -144,6 +161,7 @@ textarea.small { min-height: 64px; }
   .fgrid { grid-template-columns: 1fr; }
   .side { position: static; }
   .tpl { grid-template-columns: repeat(2, 1fr); }
+  .tpl button { height: 72px; }
   .imgs { grid-template-columns: repeat(4, 1fr); }
 }
 @media (max-width: 640px) {
@@ -250,6 +268,9 @@ textarea.small { min-height: 64px; }
 .quick:empty { display: none; }
 /* nhãn, nội dung và nút thêm cách đều; chưa có nhóm nào thì không để lại khoảng trống */
 .optblock, .qlist { display: grid; gap: 8px; }
+/* dọn dẹp: khung tùy chọn, câu hỏi của từng dịch vụ */
+.svcblock { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; }
+.svcblock .svcname { font-weight: 600; }
 .optblock > .pkgs:empty { display: none; }
 .optblock > .mini, .qlist > .mini { margin-top: 4px; }
 .ck.qk { display: grid; grid-template-columns: 16px minmax(0, 1fr) 32px; align-items: center; gap: 10px; padding: 4px 6px 4px 12px; }
@@ -257,10 +278,13 @@ textarea.small { min-height: 64px; }
 .ck.qk .rm { width: 32px; height: 32px; }
 .ck.qk .input:hover, .ck.qk .input:focus { border-color: var(--border); background: #fff; }
 .ck.qk.off .input { color: var(--fog); }
+.ck.qk.plain { border-color: var(--border); background: #fff; cursor: default; }
+.ck.qk .dot { width: 6px; height: 6px; margin-left: 5px; border-radius: 50%; background: var(--smoke); }
 .irow { display: grid; gap: 6px; }
 .irow + .irow { padding-top: 8px; border-top: 1px dashed var(--border); }
 /* lưu trú: bảng loại phòng thêm cột Số phòng + Khách tối đa */
-.items.q.g .ihead, .items.q.g .iline { grid-template-columns: minmax(0, 1fr) 116px 176px 72px 72px 40px; }
+.items.q.g .ihead, .items.q.g .iline { grid-template-columns: minmax(0, 1fr) 116px 150px 76px 92px 40px; }
+.items.q.g .ihead span { white-space: nowrap; }
 .hint.warn { color: #c0392b; }
 .promo { display: grid; gap: 10px; }
 .promo .pbody { display: grid; gap: 12px; margin-left: 18px; padding-left: 12px; border-left: 2px solid var(--soft); }
@@ -287,3 +311,4 @@ textarea.small { min-height: 64px; }
   .items.q .iline, .items.q.g .iline { grid-template-columns: 1fr 1fr 40px; }
   .items.q .iline > input[formcontrolname="qty"], .items.q .iline > input[formcontrolname="guests"] { grid-column: span 2; }
 }
+@media (max-width: 1100px) { .tpl { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

@@ -38,7 +38,6 @@ export class Header {
     { path: '/seller/posts', icon: 'store', label: 'Bài đăng', exact: false },
     { path: '/seller/calendar', icon: 'calendar', label: 'Lịch', exact: false },
     { path: '/seller/insights', icon: 'chart', label: 'Hiệu quả', exact: false },
-    { path: '/seller/messenger', icon: 'chat', label: 'Messenger', exact: false },
   ];
 
   // ----- khung thông báo thả xuống từ chuông (kiểu Facebook) -----

@@ -13,19 +13,23 @@ import { AuthPromptService } from '../../../core/services/auth-prompt';
 import { DrawerService } from '../../../core/services/drawer';
 import { OrderService } from '../../../core/services/order';
 import { PostService } from '../../../core/services/post';
+import { ReviewService } from '../../../core/services/review';
+import { SampleReview } from '../../../core/models/post-template';
+import { useMock } from '../../../core/config/api.config';
 import { RecommendService } from '../../../core/services/recommend';
 import { SavedService } from '../../../core/services/saved';
 import { NotificationService } from '../../../core/services/notification';
 import { ToastService } from '../../../core/services/toast';
 import { Voucher, XuService } from '../../../core/services/xu';
 import { imageToDataUrl } from '../../../core/utils/image-file';
+import { MAX_PHOTOS } from '../../../core/utils/order-draft';
 import { canPickDate, firstOpenDate, lastOpenDate } from '../../../core/utils/open-dates';
 import { formatDateTime } from '../../../core/utils/status-label';
 import { ClockService } from '../../../core/services/clock';
-import { comboSaving } from '../../../core/utils/combo';
 import { countdown, clockVN, dealAt } from '../../../core/utils/promo';
 import { windowSlots, windowStateAt } from '../../../core/utils/order-window';
 import { OrderDraft, parseChoice } from '../../../core/utils/order-draft';
+import { PostTemplate } from '../../../core/models/post-template';
 import { placedStepNames } from '../../../core/utils/placed-steps';
 import { resolveId } from '../../../core/utils/slug-helper';
 import { PostView, viewOf } from '../../../core/utils/template-for';
@@ -49,6 +53,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   private readonly orderService = inject(OrderService);
   private readonly addressService = inject(AddressService);
   private readonly recommend = inject(RecommendService);
+  private readonly reviewService = inject(ReviewService);
   private readonly prompt = inject(AuthPromptService);
   private readonly toast = inject(ToastService);
   private readonly notifications = inject(NotificationService);
@@ -59,6 +64,13 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
 
   protected readonly kindLabel = KIND_LABEL;
   protected readonly parse = parseChoice;
+
+  /** Tên dòng dịch vụ không kèm "(đơn vị)": đơn vị ghi sau giá */
+  protected dishName(tpl: PostTemplate, raw: string): string {
+    const name = parseChoice(raw).name;
+    const u = tpl.dishUnit?.[raw];
+    return u && name.endsWith(` (${u})`) ? name.slice(0, -(u.length + 3)) : name;
+  }
   protected readonly img = unsplash;
   protected readonly post = signal<Post | null>(null);
   protected readonly view = signal<PostView | null>(null);
@@ -105,7 +117,9 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
   protected readonly tried = signal(false);
 
   // ----- đánh giá (điểm và số lượt tính từ dữ liệu) -----
-  protected readonly reviews = computed(() => this.view()?.reviews ?? []);
+  /** Chế độ thật: đánh giá thật của bài (null = đang tải); chế độ mẫu dùng đánh giá mẫu nằm sẵn trong bài */
+  private readonly liveReviews = signal<SampleReview[] | null>(null);
+  protected readonly reviews = computed(() => (useMock('review') ? this.view()?.reviews ?? [] : this.liveReviews() ?? []));
   protected readonly rate = computed(() => {
     const r = this.reviews();
     return r.length ? (r.reduce((s, x) => s + x[4], 0) / r.length).toFixed(1).replace('.', ',') : 'Mới';
@@ -254,6 +268,8 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         next: (r) => {
           const p = r?.post ?? null;
           this.post.set(p);
+          this.liveReviews.set(null);
+          if (p && !useMock('review')) this.reviewService.forPost(p._id).subscribe({ next: (rows) => this.liveReviews.set(rows), error: () => this.liveReviews.set([]) });
           this.addresses.set(r?.addresses ?? []);
           this.similar.set([]);
           this.checkout.set(false);
@@ -349,11 +365,6 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     });
   }
 
-  /** Combo: tiết kiệm theo giá đang trả (tự đổi khi vào/ra Giờ vàng) */
-  protected readonly saving = computed(() => {
-    const p = this.post();
-    return p ? comboSaving(p, this.clock.now()) : 0;
-  });
   protected readonly comboUnavailable = computed(() => this.post()?.comboDetail?.items.some((i) => !i.available) ?? false);
 
   protected dealEnds(): string {
@@ -385,14 +396,32 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
     d.qty.set(Math.min(d.maxQty(), Math.max(d.tpl.qty?.min ?? 1, n)));
   }
 
+  protected readonly maxPhotos = MAX_PHOTOS;
+
+  /** Ô tiền: hiện có dấu chấm ngăn cách nghìn, lưu chỉ chữ số */
+  protected moneyText(v: string): string {
+    return v ? Number(v).toLocaleString('vi-VN') : '';
+  }
+
+  protected onMoney(d: OrderDraft, e: Event): void {
+    const input = e.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 12);
+    d.payBack.set(digits);
+    input.value = this.moneyText(digits);
+  }
+
+  /** Chọn một hoặc nhiều ảnh; quá số ảnh cho phép thì chỉ lấy đủ và báo cho khách */
   protected onPhoto(d: OrderDraft, label: string, e: Event): void {
     const input = e.target as HTMLInputElement;
-    const f = input.files?.[0];
+    const files = [...(input.files ?? [])];
     input.value = '';
-    if (!f) return;
-    void imageToDataUrl(f).then((url) => {
-      if (url) d.setAns(label, url);
-      else this.toast.show('Không đọc được ảnh, bạn chọn ảnh khác nhé');
+    if (!files.length) return;
+    const room = MAX_PHOTOS - d.photos(label).length;
+    if (files.length > room) this.toast.show(`Mỗi câu tối đa ${MAX_PHOTOS} ảnh, chỉ thêm được ${room} ảnh`);
+    void Promise.all(files.slice(0, room).map((f) => imageToDataUrl(f))).then((urls) => {
+      const ok = urls.filter(Boolean);
+      if (ok.length < urls.length) this.toast.show('Có ảnh không đọc được, bạn chọn ảnh khác nhé');
+      if (ok.length) d.addPhotos(label, ok);
     });
   }
 
@@ -563,14 +592,15 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
       postId: p._id,
       quantity: d.tpl.cups ? d.totalCups() : d.qty(),
       selections: [
-        ...d.tpl.opts.map((g) => ({ group: g.name, choices: g === d.dishGroup ? d.dishRows().map((r) => r.name) : d.chosen('', g) })),
+        ...(d.service() ? [{ group: 'Dịch vụ', choices: [d.service()] }] : []),
+        ...d.opts().map((g) => ({ group: g.name, choices: g === d.dishGroup ? d.dishRows().map((r) => r.name) : d.chosen('', g) })),
         ...d.dishOptSelections(),
         ...(d.quickPicks().length ? [{ group: 'Tùy chọn thêm', choices: d.quickPicks() }] : []),
       ],
-      answers: d.tpl.qs.map((q) => ({ question: q.label, value: q.type === 'photo' ? d.ans()[q.label] ?? '' : d.lines().find((l) => l.startsWith(q.label + ': '))?.slice(q.label.length + 2) ?? '' })).filter((x) => x.value),
+      answers: d.qs().map((q) => ({ question: q.label, value: q.type === 'photo' ? d.ans()[q.label] ?? '' : d.lines().find((l) => l.startsWith(q.label + ': '))?.slice(q.label.length + 2) ?? '' })).filter((x) => x.value),
       fulfillment: d.toBuyer() ? 'delivery' : 'pickup',
       addressId: d.needsAddress() ? d.addressId() : undefined,
-      scheduledAt: d.date() ? new Date(d.date() + 'T' + d.time()).toISOString() : undefined,
+      scheduledAt: !d.tpl.noSchedule && d.date() ? new Date(d.date() + 'T' + d.time()).toISOString() : undefined,
       utensils: d.tpl.key === 'food' && !d.tpl.quick && d.utensils(),
       note: d.note().trim() || undefined,
       voucherCode: d.voucher()?.id,
@@ -589,7 +619,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         address: d.needsAddress() && a ? a.name + ' (' + a.phone + ')\n' + this.addressText(a) : place.mode === 'seller' ? place.where : undefined,
         place: placeText,
         placeLabel: 'Hình thức nhận hàng',
-        when: this.whenLabel(d),
+        when: d.tpl.noSchedule ? undefined : this.whenLabel(d),
         whenLabel: 'Thời gian',
         pickup: !d.toBuyer(),
         utensils: d.tpl.key === 'food' && !d.tpl.quick ? d.utensils() : undefined,
@@ -597,6 +627,7 @@ export class PostDetail implements OnInit, CanComponentDeactivate {
         subtotal: d.subtotal(),
         fee: d.placeFee(),
         discount: d.discount(),
+        advance: d.advance() || undefined,
         steps: d.tpl.steps,
         template: d.tpl.key,
       },

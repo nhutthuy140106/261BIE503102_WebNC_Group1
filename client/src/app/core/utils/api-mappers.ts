@@ -1,8 +1,9 @@
 import { Offer, OfferState, StateEntry } from '../models/offer';
-import { Order, PlacedStatus } from '../models/order';
+import { Order, OrderDetail, PlacedStatus } from '../models/order';
 import { Post, PostKind } from '../models/post';
 import { AppNotification, Conversation, Message, Question } from '../models/social';
 import { User } from '../models/user';
+import { placedStepNames } from './placed-steps';
 
 /**
  * Chuyển dữ liệu BE (docs/api-buyer-job.md, `Post`/`Job`/`Order`/`Offer`…) sang model của FE.
@@ -27,9 +28,17 @@ export function userFromApi(u: Raw): User {
     block: areaLabel(u.area),
     avatar: u.avatar || undefined,
     xu: typeof u.xu === 'number' ? u.xu : undefined,
-    role: u.role === 'admin' ? 'admin' : 'user',
+    role: u.role === 'admin' ? 'admin' : u.role === 'moderator' ? 'moderator' : 'user',
+    email: u.email || undefined,
+    gender: u.gender || undefined,
+    birthday: u.birthday || undefined,
+    bio: u.bio || undefined,
   };
 }
+
+/** Mongo luôn trả mảng rỗng cho mảng chưa điền; FE hiểu "không có dữ liệu" là undefined. */
+const arr = <T>(a: T[] | undefined | null): T[] | undefined => (Array.isArray(a) && a.length ? a : undefined);
+const obj = <T>(o: T | undefined | null): T | undefined => (o && typeof o === 'object' ? o : undefined);
 
 export function postFromApi(p: Raw): Post {
   return {
@@ -57,6 +66,43 @@ export function postFromApi(p: Raw): Post {
     orderWindow: p.orderWindow?.from && p.orderWindow?.to ? { from: p.orderWindow.from, to: p.orderWindow.to, days: p.orderWindow.days ?? [] } : undefined,
     promo: p.promo && p.promo.active !== false ? { kind: p.promo.kind, value: p.promo.value, from: p.promo.from, to: p.promo.to, days: p.promo.days ?? [], active: true } : undefined,
     combo: p.combo?.items?.length ? { items: p.combo.items.map((i: Raw) => ({ postId: String(i.postId), qty: i.qty })), comboPrice: p.combo.comboPrice, listPrice: p.combo.listPrice } : undefined,
+    // ---- các khối theo docs/post-contract.md ----
+    status: p.status,
+    stock: p.stock?.mode ? { mode: p.stock.mode, left: p.stock.left } : undefined,
+    areas: arr(p.areas),
+    payMethods: arr(p.payMethods),
+    // `bank` không có trong API công khai (server để select:false) — chỉ về cùng đơn của người đã đặt
+    bank: p.bank?.no ? { bankName: p.bank.bankName ?? '', no: p.bank.no, holder: p.bank.holder ?? '', qr: p.bank.qr || undefined } : undefined,
+    priceType: p.priceType || undefined,
+    estimate: p.estimate || undefined,
+    inspectFee: p.inspectFee ?? undefined,
+    items: arr(p.items)?.map((i: Raw) => ({ id: i.id ?? i.name, name: i.name, price: i.price ?? 0, unit: i.unit || undefined, dailyQty: i.dailyQty ?? undefined, optionGroups: arr(i.optionGroups) })),
+    serviceMenu: arr(p.serviceMenu)?.map((m: Raw) => ({ name: m.name, optionGroups: m.optionGroups ?? [], questions: m.questions ?? [] })),
+    bookOnce: p.bookOnce || undefined,
+    noSchedule: p.noSchedule || undefined,
+    repeat: p.repeat || undefined,
+    pickupAtBuyer: p.pickupAtBuyer || undefined,
+    noteEnabled: p.noteEnabled ?? undefined,
+    quickOptions: arr(p.quickOptions),
+    freeShipFrom: p.freeShipFrom ?? undefined,
+    timeLabel: p.timeLabel || undefined,
+    timeMode: p.timeMode || undefined,
+    dates: arr(p.dates),
+    duration: p.duration?.min != null ? { min: p.duration.min, max: p.duration.max ?? p.duration.min } : undefined,
+    prepMinutes: p.prepMinutes ?? undefined,
+    handover: p.handover?.from ? { from: p.handover.from, to: p.handover.to ?? '' } : undefined,
+    place: p.place?.mode ? { mode: p.place.mode, where: p.place.where || undefined } : undefined,
+    serviceInfo: obj(p.serviceInfo),
+    condition: p.condition?.level ? { level: p.condition.level, note: p.condition.note || undefined } : undefined,
+    highlights: arr(p.highlights),
+    info: arr(p.info),
+    promoted: p.promoted || undefined,
+    rating: typeof p.rating === 'number' ? p.rating : undefined,
+    reviewCount: typeof p.reviewCount === 'number' ? p.reviewCount : undefined,
+    sold: typeof p.sold === 'number' ? p.sold : undefined,
+    views: typeof p.views === 'number' ? p.views : undefined,
+    saves: typeof p.saves === 'number' ? p.saves : undefined,
+    formData: p.formData && p.formData.form ? { type: String(p.formData.type), form: p.formData.form } : undefined,
     comboDetail: p.comboDetail
       ? {
           items: p.comboDetail.items.map((i: Raw) => ({ postId: String(i.postId), qty: i.qty, title: i.title, unitPrice: i.unitPrice, unit: i.unit || undefined, image: i.image || undefined, available: i.available !== false })),
@@ -86,19 +132,80 @@ export function jobFromApi(j: Raw): Post {
       offers: j.offerCount ?? 0,
       status: j.status === 'open' ? 'open' : 'taken',
       windows: j.windows ?? [],
+      head: j.headcount ?? undefined,
+      building: j.exactAddress || undefined,
     },
   };
 }
 
 const ORDER_STATE: Record<string, PlacedStatus> = {
-  waiting: 'pending', confirmed: 'confirmed', preparing: 'preparing', delivering: 'delivering', ready: 'delivering',
+  waiting: 'pending', confirmed: 'confirmed', picked: 'confirmed', pricing: 'pricing', preparing: 'preparing', delivering: 'delivering', ready: 'delivering',
   done: 'done', cancelled: 'cancelled', declined: 'cancelled',
 };
+
+const money = (n: number): string => `${Math.round(n).toLocaleString('vi-VN')}đ`;
+
+/** Đơn có bước báo giá: giá cuối chờ duyệt / đã duyệt / bị từ chối, theo `quote` của server */
+function quoteFields(o: Raw): Partial<Order> {
+  if (!o.flow) return {};
+  const seller: string = o.snapshot?.sellerName ?? 'Người bán';
+  const ship: number = o.breakdown?.deliveryFee ?? 0;
+  const q = o.quote;
+  const out: Partial<Order> = { priceCheck: o.flow === 'repair' ? 'quote' : 'estimate' };
+  if (o.oldTotal != null) out.oldTotal = o.oldTotal;
+  if (q?.status === 'pending') {
+    out.newPrice = { total: (q.total ?? 0) + ship, reason: o.flow === 'repair' ? 'Giá sau khi kiểm tra' : 'Giá sau khi cân thực tế', lines: (q.lines ?? []).map((l: Raw) => [l.name, Math.round(l.qty * l.price)] as [string, number]) };
+  } else if (q?.status === 'approved') {
+    out.priceDone = true;
+  } else if (q?.status === 'rejected') {
+    const after = o.flow === 'repair' ? `Bạn chỉ trả phí kiểm tra ${money(o.total ?? 0)}, ${seller} trả lại máy. Đơn kết thúc.` : `Đơn hủy, ${seller} trả lại đồ cho bạn và không tính tiền giặt.`;
+    out.priceRejected = after + (q.rejectReason ? ` Lý do bạn gửi: ${q.rejectReason}` : '');
+  }
+  return out;
+}
+
+/** Nội dung đơn (món đã chọn, câu trả lời, địa chỉ, giờ, tiền) dựng từ đơn của server để màn hình chi tiết hiện đủ */
+function detailFromApi(o: Raw): OrderDetail {
+  const s = o.snapshot ?? {};
+  const kind = s.type === 'goods' || s.type === 'service' ? s.type : 'food';
+  const pickup = o.fulfillment === 'pickup';
+  const a = o.address;
+  const lines: string[] = [
+    ...((o.selections ?? []) as Raw[]).filter((x) => (x.choices ?? []).length).map((x) => `${x.group}: ${(x.choices as Raw[]).map((c) => c.label).join(', ')}`),
+    ...((o.answers ?? []) as Raw[]).filter((x) => x.value && !String(x.value).startsWith('data:')).map((x) => `${x.question}: ${x.value}`),
+  ];
+  const b = o.breakdown ?? {};
+  return {
+    lines,
+    quantity: o.quantity,
+    unit: s.unit || undefined,
+    place: pickup ? 'Tự đến lấy' : 'Giao tận nơi',
+    pickup,
+    address: !pickup && a ? [a.name, a.unit, areaLabel(a.block)].filter(Boolean).join(' · ') + (a.note ? ` (${a.note})` : '') : undefined,
+    when: o.scheduledAt ? new Date(o.scheduledAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : undefined,
+    utensils: o.utensils || undefined,
+    voucher: o.voucherCode || undefined,
+    // tạm tính suy từ tổng để bảng chi phí luôn cộng đúng (kể cả khi đã có phụ thu)
+    subtotal: (o.total ?? 0) - (b.deliveryFee ?? 0) + (b.discount ?? 0),
+    fee: b.deliveryFee ?? 0,
+    discount: b.discount ?? 0,
+    steps: placedStepNames(kind, !!o.flow, pickup),
+  };
+}
+
+/** Lúc đơn hoàn thành (ms), lấy từ lịch sử — dùng tính hạn báo vấn đề */
+function doneAtOf(o: Raw): number | undefined {
+  if (o.state !== 'done') return undefined;
+  const h = ([...(o.history ?? [])] as Raw[]).reverse().find((x) => x.state === 'done');
+  return h?.at ? new Date(h.at).getTime() : undefined;
+}
 
 export function orderFromApi(o: Raw): Order {
   const s = o.snapshot ?? {};
   const mapState = (st: string): string => ORDER_STATE[st] ?? st;
   return {
+    ...quoteFields(o),
+    detail: detailFromApi(o),
     _id: o._id,
     code: o.code,
     type: 'placed',
@@ -109,13 +216,23 @@ export function orderFromApi(o: Raw): Order {
     counterpartId: typeof o.seller === 'object' ? o.seller?._id : o.seller,
     image: s.image || undefined,
     category: s.type,
+    kind: s.type === 'goods' || s.type === 'service' ? s.type : 'food',
+    sellerLinked: true, // đơn thật: người bán xử lý ở khu Bán, không dùng nút mô phỏng
     status: mapState(o.state) as PlacedStatus,
     total: o.total ?? 0,
     paymentMethod: o.payment === 'transfer' ? 'transfer' : 'cash',
+    bank: s.bank?.no ? { bankName: s.bank.bankName ?? '', no: s.bank.no, holder: s.bank.holder ?? '', qr: s.bank.qr || undefined } : undefined,
     note: o.note || undefined,
     createdAt: o.createdAt,
-    history: (o.history ?? []).map((h: Raw) => ({ state: mapState(h.state), at: h.at })),
+    // "đã lấy đồ / đã kiểm tra" (picked) phía Mua vẫn là Đã xác nhận nên không ghi thêm một mốc trùng
+    history: (o.history ?? []).filter((h: Raw) => h.state !== 'picked').map((h: Raw) => ({ state: mapState(h.state), at: h.at })),
     cancelRequested: o.cancelRequest?.status === 'pending' || undefined,
+    cancelDenied: o.cancelRequest?.status === 'rejected' && !['cancelled', 'declined', 'done'].includes(o.state) ? 'người bán vẫn giữ đơn, bạn nhắn để trao đổi thêm nhé.' : undefined,
+    ...(o.cancelInfo ? { cancelBy: o.cancelInfo.by === 'buyer' ? ('buyer' as const) : ('seller' as const), cancelWhy: o.cancelInfo.reason || undefined, cancelLate: o.cancelInfo.late || undefined } : {}),
+    doneAt: doneAtOf(o),
+    apptIn: o.scheduledAt ? (new Date(o.scheduledAt).getTime() - Date.now()) / 3600e3 : undefined,
+    issue: o.issue?.st ? { st: o.issue.st, type: o.issue.type ?? '', want: '', text: o.issue.text ?? '', photos: o.issue.photos ?? 0, images: o.issue.images?.length ? o.issue.images : undefined, reply: o.issue.reply || undefined, amount: o.issue.amount, result: o.issue.result || undefined } : undefined,
+    rated: o.review ? { s: o.review.rating, t: o.review.comment ?? '' } : o.reviewed ? { s: 5, t: '' } : undefined,
     surcharge: o.surcharge?.amount
       ? { amount: o.surcharge.amount, reason: o.surcharge.reason ?? '', state: o.surcharge.status === 'approved' ? 'approved' : 'pending' }
       : undefined,
@@ -144,6 +261,10 @@ export function offerFromApi(f: Raw): Offer {
     history: offerHistory(f.history).length ? offerHistory(f.history) : f.createdAt ? [{ state: f.state, at: f.createdAt }] : [],
     exactAddress: job.exactAddress || undefined,
     reportNote: f.report?.note || undefined,
+    cancelReason: f.cancel?.reason || undefined,
+    paid: !!f.paidAt,
+    rated: f.review ? { s: f.review.rating, t: f.review.comment ?? '' } : f.reviewed ? { s: 5, t: '' } : undefined,
+    posterRated: f.posterRating?.stars ? { stars: f.posterRating.stars, text: f.posterRating.text ?? '' } : undefined,
   };
 }
 
@@ -172,7 +293,7 @@ export function conversationFromApi(c: Raw): Conversation {
 const CONTEXT_LABEL: Record<string, string> = { order: 'Đơn hàng', offer: 'Việc đã nhận', post: 'Bài đăng', job: 'Việc làm' };
 
 export function messageFromApi(m: Raw, myId: string): Message {
-  return { _id: m._id, mine: m.sender === myId || m.sender?._id === myId, text: m.text, createdAt: m.createdAt };
+  return { _id: m._id, mine: m.sender === myId || m.sender?._id === myId, text: m.text ?? '', ...(m.media ? { media: { kind: m.media.kind, url: m.media.url, name: m.media.name, size: m.media.size, sec: m.media.sec } } : {}), createdAt: m.createdAt };
 }
 
 /** Link thông báo của BE `{type, id}` → đường dẫn FE. */

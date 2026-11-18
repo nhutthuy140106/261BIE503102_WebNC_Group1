@@ -13,7 +13,7 @@ type V = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 export type PostFields = Pick<
   PostBody,
   | 'category' | 'priceType' | 'estimate' | 'inspectFee' | 'items' | 'optionGroups' | 'questions' | 'fulfillmentModes' | 'deliveryFee'
-  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'highlights' | 'pickupAtBuyer' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
+  | 'needSchedule' | 'payMethods' | 'bank' | 'quickOptions' | 'noteEnabled' | 'highlights' | 'pickupAtBuyer' | 'bookOnce' | 'serviceMenu' | 'timeLabel' | 'noSchedule' | 'template' | 'freeShipFrom' | 'info' | 'prepMinutes' | 'handover' | 'orderWindow' | 'condition' | 'serviceInfo' | 'dates' | 'timeMode' | 'duration' | 'repeat' | 'place' | 'stock' | 'job'
 >;
 
 /** "A, B|+5.000đ" không dùng nữa: form lưu lựa chọn là chuỗi cách nhau dấu phẩy */
@@ -28,6 +28,38 @@ const optionsOf = (arr: unknown): OptionGroup[] =>
       required: !!g['required'],
       choices: (g['choices'] as V[]).filter((c) => String(c['label'] ?? '').trim()).map((c) => ({ label: String(c['label']).trim(), price: +c['price'] || 0 })),
     }));
+
+/**
+ * Dọn dẹp: giá thấp nhất khách có thể trả = tổng giá rẻ nhất của các nhóm bắt buộc chọn một (giá theo phòng, m², khoảng giá…).
+ * `from`: các lựa chọn có giá khác nhau nên ghi "từ".
+ */
+/** Các dịch vụ của mẫu dọn dẹp (bản cũ lưu tên dạng chuỗi, tùy chọn và câu hỏi chung ở cấp bài) */
+export function menuOf(s: V): { name: string; options: V[]; questions: V[] }[] {
+  return ((s['menu'] as unknown[]) ?? [])
+    .map((m) => (typeof m === 'string' ? { name: m, options: (s['options'] as V[]) ?? [], questions: (s['questions'] as V[]) ?? [] } : (m as V)))
+    .map((m) => ({ name: String(m?.['name'] ?? '').trim(), options: (m?.['options'] as V[]) ?? [], questions: (m?.['questions'] as V[]) ?? [] }))
+    .filter((m) => m.name);
+}
+
+/** Giá thấp nhất của một dịch vụ = tổng giá rẻ nhất của các nhóm bắt buộc chọn một */
+const menuPrice = (options: V[]): number =>
+  optionsOf(options).filter((g) => g.required && !g.multi).reduce((n, g) => n + Math.min(...g.choices.map((c) => c.price)), 0);
+
+/**
+ * Dọn dẹp: giá trên bài là giá thấp nhất trong các dịch vụ (mỗi dịch vụ tự đặt giá theo phòng, m², khoảng giá…).
+ * `from`: khách có thể trả nhiều mức khác nhau nên ghi "từ".
+ */
+export function cleaningPrice(s: V): { price: number; from: boolean } {
+  const list = menuOf(s);
+  const prices = list.map((m) => menuPrice(m.options)).filter((n) => n > 0);
+  const varies = list.some((m) => optionsOf(m.options).some((g) => new Set(g.choices.map((c) => c.price)).size > 1 || (g.multi && g.choices.some((c) => c.price > 0))));
+  return { price: prices.length ? Math.min(...prices) : 0, from: varies || new Set(prices).size > 1 };
+}
+
+/** Dịch vụ chưa có giá (không có nhóm bắt buộc chọn một có giá): trả về tên dịch vụ đó */
+export function unpricedService(s: V): string | null {
+  return menuOf(s).find((m) => !menuPrice(m.options))?.name ?? null;
+}
 
 const itemsOf = (s: V): PostItem[] =>
   ((s['items'] as V[]) ?? [])
@@ -63,8 +95,6 @@ const questionsOf = (arr: unknown): PostQuestion[] =>
         ...(type === 'choice' || type === 'multi' ? { opts: choicesOf(q) } : {}),
         ...(raw === 'long' ? { long: true } : {}),
         ...(hint ? { hint } : {}),
-        // câu "Cần trả tiền giùm?": chọn "Có" thì hỏi thêm số tiền (khung đặt phía Mua)
-        ...(/trả tiền giùm/i.test(label) ? { pay: true } : {}),
       };
     });
 
@@ -102,18 +132,22 @@ const row = (label: string, value: unknown): { label: string; value: string }[] 
 function serviceInfoRows(s: V): { label: string; value: string }[] {
   const preset = String(s['preset'] ?? '');
   // mục bị ẩn trong form của mẫu này thì không đưa giá trị mặc định của nó sang bên Mua
-  const shown = SVC_PRESETS[preset];
+  const shown = SVC_PRESETS[preset] ?? SVC_PRESETS['Khác'];
   const on = ((s['rules'] as V[]) ?? []).filter((r) => r['on'] && String(r['label'] ?? '').trim()).map((r) => String(r['label']).trim());
+  const f = (s['fulfil'] as V) ?? {};
   return [
     ...(shown?.noQuick ? [] : row('Phạm vi phục vụ', s['serviceArea'])),
-    ...(preset === 'Sửa chữa' && s['priceType'] !== 'quote' ? row('Phí kiểm tra', +s['inspect'] ? 'Trừ vào tiền sửa nếu bạn đồng ý giá' : '') : []),
+    // các thông tin trước đây ở 3 ô đầu bài: chuyển xuống đây để không mất
+    ...(shown?.generic ? row('Bảo hành', s['warranty']) : []),
+    ...(s['priceType'] === 'quote' ? row('Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ, trừ vào tiền làm nếu bạn đồng ý giá` : 'Miễn phí') : []),
+    ...(preset === 'Giặt sấy'
+      ? [...row('Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : ''), ...row('Cách trả đồ', [f['delivery'] ? 'Giao tận nơi' : '', f['pickup'] ? 'Tự đến lấy' : ''].filter(Boolean).join(', '))]
+      : []),
     ...(preset === 'Lưu trú'
       ? [
-          ...row('Tòa nhà', s['building']),
           ...row('Tiện nghi', ((s['amenities'] as string[]) ?? []).join(', ')),
           ...row('Nội quy', on.join('; ')),
           ...row('Hủy miễn phí', s['freeCancelDays'] !== null && s['freeCancelDays'] !== '' ? `Trước ${+s['freeCancelDays']} ngày` : ''),
-          ...row('Đặt cọc', +s['deposit'] ? `${+s['deposit']}%` : ''),
           ...row('Giấy tờ', s['idRequired'] ? 'Xuất trình CCCD khi nhận phòng' : ''),
         ]
       : []),
@@ -122,34 +156,49 @@ function serviceInfoRows(s: V): { label: string; value: string }[] {
   ];
 }
 
-/** 3 ô đầu bài của giặt sấy, lưu trú (các mẫu không có mục Thông tin nhanh và Nơi làm trong form); mẫu khác thì không có */
-function serviceHighlights(s: V): Post['highlights'] {
+/**
+ * 3 ô đầu bài dịch vụ (trừ Lưu trú có bộ riêng): Giờ nhận lịch · Nơi làm · ô 3 theo loại (Trả đồ / Phí kiểm tra / Phí giao / Thời lượng / Buổi học / Thời gian làm).
+ * Luôn đủ 3 ô; ô nào người bán chưa có số liệu thì ghi "Nhắn người bán" để khách biết cần hỏi.
+ * Thẻ xem trước trong form và trang chi tiết phía Mua cùng dùng hàm này nên luôn khớp nhau.
+ */
+export function serviceHighlights(s: V): NonNullable<Post['highlights']> {
   const preset = String(s['preset'] ?? '');
-  const f = (s['fulfil'] as V) ?? {};
   const cell = (icon: NonNullable<Post['highlights']>[number]['icon'], label: string, value: unknown) => (String(value ?? '').trim() ? [{ icon, label, value: String(value).trim() }] : []);
-  if (preset === 'Giặt sấy') {
+  const where = String(s['where'] ?? '').trim();
+  const courier = !!SVC_PRESETS[preset]?.courier;
+  const place =
+    courier ? 'Giao tới nhà bạn'
+    : preset === 'Giặt sấy' ? 'Lấy đồ tại nhà bạn'
+    : preset === 'Lưu trú' ? String(s['building'] ?? '').trim() || 'Tại chỗ người cho thuê'
+    : preset === 'Sửa chữa' ? 'Tại nhà bạn'
+    : SVC_PRESETS[preset]?.noPlace ? ({ buyer: 'Tại nhà bạn', seller: 'Bạn mang tới', none: '' } as V)[SVC_PRESETS[preset].place]
+    : ({ buyer: 'Tại nhà bạn', seller: where || 'Bạn mang tới', choice: 'Tại nhà bạn hoặc bạn mang tới', ab: 'Lấy ở A, giao tới B' } as V)[String(s['place'])];
+  // lưu trú: giờ nhận phòng · địa điểm (tòa nhà) · đặt cọc
+  if (preset === 'Lưu trú')
     return [
-      ...cell('clock', 'Giờ nhận đơn', s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
-      ...cell('bolt', 'Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : ''),
-      ...cell('pin', 'Cách nhận', [f['delivery'] ? 'Giao tận nơi' : '', f['pickup'] ? 'Tự đến lấy' : ''].filter(Boolean).join(', ')),
+      ...cell('clock', 'Nhận – trả phòng', [s['checkIn'] ? `Nhận ${s['checkIn']}` : '', s['checkOut'] ? `Trả ${s['checkOut']}` : ''].filter(Boolean).join(' · ')),
+      ...cell('pin', 'Địa điểm', place),
+      ...cell('receipt', 'Đặt cọc', +s['deposit'] ? `${+s['deposit']}% khi đặt phòng` : 'Không cần đặt cọc'),
     ];
-  }
-  if (preset === 'Sửa chữa') {
-    const where = { buyer: 'Tại nhà bạn', seller: 'Bạn mang tới', choice: 'Đến nhà bạn, Bạn mang tới' }[String(s['place'])];
-    return [
-      ...cell('pin', 'Nơi làm', where),
-      ...cell('receipt', 'Phí kiểm tra', +s['inspect'] ? `${(+s['inspect']).toLocaleString('vi-VN')}đ` : 'Miễn phí'),
-      ...cell('clock', 'Giờ nhận lịch', s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : ''),
-    ];
-  }
-  if (preset === 'Lưu trú') {
-    return [
-      ...cell('clock', 'Nhận phòng', s['checkIn'] ? `Từ ${s['checkIn']}` : ''),
-      ...cell('clock', 'Trả phòng', s['checkOut'] ? `Trước ${s['checkOut']}` : ''),
-      ...cell('check', 'Ở tối thiểu', +s['minNights'] ? `${+s['minNights']} đêm` : ''),
-    ];
-  }
-  return undefined;
+  const ASK = 'Nhắn người bán';
+  const vnd = (n: number) => Math.round(n).toLocaleString('vi-VN') + 'đ';
+  const turnaround = String(s['turnaround'] ?? '').trim();
+  const items = ((s['items'] as V[]) ?? []).filter((i) => String(i?.['name'] ?? '').trim());
+  const priced = items.filter((i) => +i['price'] > 0).sort((a, b) => +a['price'] - +b['price']);
+  // ô 3 theo loại dịch vụ: lấy đúng thông tin người bán đã nhập ở form (không bắt nhập thêm ô riêng cho ô này)
+  const third: [NonNullable<Post['highlights']>[number]['icon'], string, string] =
+    preset === 'Giặt sấy' ? ['bolt', 'Trả đồ', +s['returnHours'] ? `Trong khoảng ${+s['returnHours']} giờ` : '']
+    : preset === 'Sửa chữa' ? ['receipt', 'Phí kiểm tra', +s['inspect'] > 0 ? vnd(+s['inspect']) : 'Miễn phí']
+    : courier ? ['receipt', 'Phí giao', priced.length ? `Từ ${vnd(+priced[0]['price'])} / ${priced[0]['unit'] || 'lượt'}` : '']
+    : preset === 'Chăm sóc' ? ['clock', 'Thời lượng', +s['durMin'] > 0 && +s['durMax'] > 0 ? `${+s['durMin']}–${+s['durMax']} giờ / lần` : '']
+    : preset === 'Gia sư' ? ['clock', 'Buổi học', String(items[0]?.['name'] ?? '').trim()]
+    : ['clock', 'Thời gian làm', turnaround];
+  const when = SVC_PRESETS[preset]?.noSchedule ? 'Thỏa thuận khi đặt' : s['from'] && s['to'] ? `${s['from']} – ${s['to']}` : '';
+  return [
+    ...cell('clock', courier ? 'Giờ giao hàng' : 'Giờ nhận lịch', when || ASK),
+    ...cell('pin', 'Nơi làm', place || ASK),
+    ...cell(third[0], third[1], third[2] || ASK),
+  ];
 }
 
 /** Giá đại diện: dòng rẻ nhất; nhiều mức giá khác nhau → 'from' */
@@ -170,6 +219,24 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
   const base = { category: c['category'] as string, payMethods: payOf(s), bank: bankOf(s) };
 
   switch (type) {
+    case 'combo': {
+      const sc = (s['schedule'] as V) ?? {};
+      const lines = ((s['includes'] as string[]) ?? []).map((x) => String(x ?? '').trim()).filter(Boolean);
+      return {
+        ...base, ...fulfilOf(s),
+        priceType: 'fixed',
+        optionGroups: [],
+        noteEnabled: !!s['kitchenNote'],
+        dates: (sc['dates'] as string[]) ?? [],
+        orderWindow: sc['orderFrom'] && sc['orderTo'] && sc['orderFrom'] !== sc['orderTo'] ? { from: sc['orderFrom'], to: sc['orderTo'], days: [] } : undefined,
+        prepMinutes: +sc['prep'] > 0 ? +sc['prep'] : undefined,
+        handover: sc['pickFrom'] && sc['pickTo'] ? { from: sc['pickFrom'], to: sc['pickTo'] } : undefined,
+        stock: { mode: 'open' },
+        needSchedule: false,
+        // combo tự đặt giá: món trong combo chỉ là chữ cho khách đọc (hiện ở phần thông tin của bài)
+        info: row('Combo gồm', lines.join(' + ')),
+      };
+    }
     case 'food':
     case 'drink': {
       const items = itemsOf(s);
@@ -211,31 +278,53 @@ export function formToPostFields(type: FormType, raw: V, kind: PostKind, jobDue 
       };
     }
     case 'service': {
-      const its = itemsOf(s);
-      const quote = s['priceType'] === 'quote';
+      // dọn dẹp: danh sách dịch vụ thành nhóm chọn một bắt buộc đứng đầu, giá nằm ở các tùy chọn; mỗi đơn một dịch vụ
+      const cleaning = !!SVC_PRESETS[String(s['preset'] ?? '')]?.cleaning;
+      const its = cleaning ? [] : itemsOf(s);
+      const preset = SVC_PRESETS[String(s['preset'] ?? '')];
+      const courier = !!preset?.courier;
+      const noSchedule = !!preset?.noSchedule;
+      const quote = !cleaning && !preset?.noQuote && s['priceType'] === 'quote';
       const where = String(s['where'] ?? '').trim();
-      const shown = SVC_PRESETS[String(s['preset'] ?? '')];
+      // mẫu đã bỏ (Nấu ăn) hoặc không ghi mẫu: coi như mẫu Khác
+      const shown = SVC_PRESETS[String(s['preset'] ?? '')] ?? SVC_PRESETS['Khác'];
       const hideQuick = !!shown?.noQuick && !shown.generic;
       return {
         ...base,
-        priceType: quote ? 'quote' : priceTypeOf(its, its.length === 1 && s['estimate'] ? 'unit' : 'fixed'),
-        estimate: !!s['estimate'] || undefined,
+        priceType: cleaning ? (cleaningPrice(s).from ? 'from' : 'fixed') : quote ? 'quote' : priceTypeOf(its, its.length === 1 && s['estimate'] && !preset?.noEstimate ? 'unit' : 'fixed'),
+        estimate: (!cleaning && !preset?.noEstimate && !!s['estimate']) || undefined,
+        // giao nhận: khách chọn giờ muốn nhận hàng
+        timeLabel: courier ? 'Giờ giao hàng' : undefined,
+        bookOnce: cleaning || undefined,
         inspectFee: quote ? +s['inspect'] || 0 : undefined,
         items: its.length > 1 || quote ? its : undefined,
-        optionGroups: optionsOf(s['options']),
-        questions: questionsOf(s['questions']),
-        dates: (s['dates'] as string[]) ?? [],
-        timeMode: s['timeMode'],
+        optionGroups: cleaning ? [] : optionsOf(s['options']),
+        questions: cleaning
+          ? []
+          : [
+              // câu hỏi cũ "Cần trả tiền giùm?" đã thay bằng ô tick ở giao nhận
+              ...questionsOf(courier ? ((s['questions'] as V[]) ?? []).filter((q) => !/trả tiền giùm/i.test(String(q?.['label'] ?? ''))) : s['questions']),
+              ...(courier && s['advancePay']
+                ? [{ type: 'choice' as const, label: 'Cần ứng trước tiền hàng?', required: false, opts: ['Không', 'Có'], pay: true }]
+                : []),
+            ],
+        serviceMenu: cleaning ? menuOf(s).map((m) => ({ name: m.name, optionGroups: optionsOf(m.options), questions: questionsOf(m.questions) })) : undefined,
+        dates: noSchedule ? [] : (s['dates'] as string[]) ?? [],
+        // dọn dẹp: luôn hẹn giờ, kể cả bài cũ đã lưu kiểu chọn số giờ
+        noSchedule: noSchedule || undefined,
+        timeMode: cleaning || courier ? 'slot' : preset?.fixedTime ?? s['timeMode'],
         duration: { min: +s['durMin'] || 1, max: +s['durMax'] || 1 },
-        repeat: !!s['repeat'],
-        place: { mode: s['place'], ...(where ? { where } : {}) },
+        repeat: !cleaning && !preset?.noRepeat && !noSchedule && !!s['repeat'],
+        // mẫu không có mục Nơi làm (sửa chữa, giặt sấy, lưu trú): nơi làm theo mẫu, không lấy giá trị cũ còn lưu trong form
+        // lưu trú: địa điểm là tòa nhà (số phòng chỉ gửi sau khi xác nhận) để hộp xác nhận đơn có địa chỉ
+        place: { mode: shown?.noPlace ? shown.place : s['place'], ...(where && !shown?.noPlace ? { where } : shown?.stay && String(s['building'] ?? '').trim() ? { where: String(s['building']).trim() } : {}) },
         // khung giờ khách chọn hẹn (giờ nhận lịch của người làm)
-        handover: s['from'] && s['to'] ? { from: s['from'], to: s['to'] } : undefined,
+        handover: !noSchedule && s['from'] && s['to'] ? { from: s['from'], to: s['to'] } : undefined,
         // mẫu không có mục Thông tin nhanh thì không gửi giá trị đã lưu của mục đó (mẫu Khác có ô riêng cho thời gian, bảo hành)
         serviceInfo: { turnaround: hideQuick ? undefined : String(s['turnaround'] ?? '').trim() || undefined, warranty: hideQuick ? undefined : String(s['warranty'] ?? '').trim() || undefined, area: SVC_PRESETS[String(s['preset'] ?? '')]?.noQuick ? undefined : String(s['serviceArea'] ?? '').trim() || undefined },
         highlights: serviceHighlights(s),
         // giặt sấy chọn cách nhận như đồ ăn, đồ dùng; dịch vụ khác tính phụ phí đến nhà
-        ...(s['preset'] === 'Giặt sấy' ? { ...fulfilOf(s), pickupAtBuyer: true } : { deliveryFee: s['place'] === 'buyer' || s['place'] === 'choice' ? +s['homeFee'] || 0 : 0 }),
+        ...(s['preset'] === 'Giặt sấy' ? { ...fulfilOf(s), pickupAtBuyer: true } : { deliveryFee: !shown?.noPlace && (s['place'] === 'buyer' || s['place'] === 'choice') ? +s['homeFee'] || 0 : 0 }),
         noteEnabled: !!s['kitchenNote'],
         info: serviceInfoRows(s),
         stock: { mode: 'open' },

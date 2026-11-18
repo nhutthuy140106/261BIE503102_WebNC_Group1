@@ -34,8 +34,21 @@
     @if (text.invalid && (text.touched || f.submitted)) { <small class="err" role="alert">Vui lòng nhập ít nhất 10 ký tự.</small> }
     <small class="cnt">{{ fb.text.length }}/500</small>
     <button type="submit" [disabled]="f.invalid && f.submitted">Gửi góp ý</button>
-    @if (sent) { <p class="okmsg" role="status">Đã ghi nhận góp ý của bạn (bản demo lưu trong trình duyệt). Cảm ơn bạn!</p> }
+    @if (sendErr()) { <small class="err" role="alert">{{ sendErr() }}</small> }
+    @if (sent) { <p class="okmsg" role="status">{{ live ? 'Đã gửi tới AntGo. Khi có trả lời, bạn sẽ nhận thông báo và xem được ngay bên dưới.' : 'Đã ghi nhận góp ý của bạn (bản demo lưu trong trình duyệt). Cảm ơn bạn!' }}</p> }
   </form>
 </section>
+
+@if (tickets().length) {
+  <section class="tk">
+    <h2>Phiếu hỗ trợ của bạn</h2>
+    @for (t of tickets(); track t.id) {
+      <article>
+        <header><b>{{ t.code }}</b><span class="st" [class.done]="t.state !== 'open'">{{ t.state === 'open' ? 'Chờ AntGo trả lời' : t.state === 'answered' ? 'AntGo đã trả lời' : 'Đã đóng' }}</span></header>
+        @for (m of t.messages; track m.at) { <p [class.staff]="m.by === 'staff'"><small>{{ m.by === 'staff' ? 'AntGo' : 'Bạn' }} · {{ m.at | date: 'dd/MM HH:mm' }}</small>{{ m.text }}</p> }
+      </article>
+    }
+  </section>
+}
 
 <p class="foot">Không tìm thấy câu trả lời? <a routerLink="/legal">Xem điều khoản & chính sách</a></p>

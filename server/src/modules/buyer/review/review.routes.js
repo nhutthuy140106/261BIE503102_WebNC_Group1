@@ -3,6 +3,7 @@ const xu = require('../xu/xu.service');
 const mongoose = require('mongoose');
 const { z } = require('zod');
 const Review = require('./review.model');
+const postStats = require('../../shared/post-stats');
 const Order = require('../order/order.model');
 const Offer = require('../offer/offer.model');
 const Job = require('../../shared/job.model');
@@ -97,6 +98,7 @@ router.post('/', auth, body(createSchema), asyncHandler(async (req, res) => {
 
   const review = await Review.create({ reviewer: req.user._id, target, targetType, targetId, post, rating, comment, images })
     .catch((e) => { if (e.code === 11000) throw ApiError.duplicate('Bạn đã đánh giá rồi'); throw e; });
+  if (post) await postStats.refresh(post); // điểm sao + số đánh giá của bài cập nhật ngay
   source.reviewed = true;
   await source.save();
   if (comment && comment.trim()) await xu.award(req.user._id, 'review', review._id);
@@ -125,7 +127,7 @@ router.get('/', query(listSchema), asyncHandler(async (req, res) => {
   if (q.hasPhoto === 'true') filter['images.0'] = { $exists: true };
   const sort = { newest: { createdAt: -1 }, oldest: { createdAt: 1 }, high: { rating: -1, createdAt: -1 }, low: { rating: 1, createdAt: -1 } }[q.sort || 'newest'];
   const [items, total] = await Promise.all([
-    Review.find(filter).sort(sort).skip(skip).limit(limit).populate('reviewer', 'name avatar'),
+    Review.find(filter).sort(sort).skip(skip).limit(limit).populate('reviewer', 'name avatar area').populate('post', 'title'),
     Review.countDocuments(filter),
   ]);
   res.json({

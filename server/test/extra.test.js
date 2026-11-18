@@ -1,5 +1,6 @@
 // Phiên đăng nhập, slug/tìm không dấu, giỏ nháp, upload, gợi ý, admin
 process.env.NODE_ENV = 'test';
+process.env.OTP_REQUIRED = '0'; // test này kiểm thứ khác, không đi qua bước nhập mã OTP (otp.test.js kiểm riêng)
 process.env.SEED_PASSWORD = 'Test@2026';
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
@@ -206,11 +207,11 @@ test('admin: 401/403, khóa/mở khóa, ẩn bài, báo cáo, thống kê, audit
   const q = (await api('GET', '/admin/reports?state=open', { token: admin.jar })).body;
   assert.ok(q.data.some((r) => r._id === rep._id), 'báo cáo mới nằm trong hàng đợi');
   assert.ok(q.data[0].createdAt <= q.data[q.data.length - 1].createdAt, 'cũ nhất trước');
-  const t = (to, note) => api('POST', `/admin/reports/${rep._id}/transition`, { token: admin.jar, body: { to, note } });
-  assert.equal((await t('resolved', 'chưa xem')).status, 409); // open -> resolved không hợp lệ
+  const t = (to, note, action) => api('POST', `/admin/reports/${rep._id}/transition`, { token: admin.jar, body: { to, note, action } });
+  assert.equal((await t('resolved', 'chưa chọn hướng')).status, 422); // kết thúc phải chọn hướng xử lý
   assert.equal((await t('reviewing')).body.data.state, 'reviewing');
-  assert.equal((await t('resolved')).status, 422); // kết thúc phải có ghi chú
-  assert.equal((await t('resolved', 'Đã liên hệ người bán hoàn tiền')).body.data.state, 'resolved');
+  assert.equal((await t('resolved', '', 'warn_owner')).status, 422); // kết thúc phải có ghi chú
+  assert.equal((await t('resolved', 'Đã liên hệ người bán hoàn tiền', 'warn_owner')).body.data.state, 'resolved');
   assert.equal((await t('rejected', 'thử lại')).status, 409);
   const mine = (await api('GET', '/reports?mine=true', { token: user.jar })).body.data[0];
   assert.equal(mine.state, 'resolved'); assert.equal(mine.adminNote, 'Đã liên hệ người bán hoàn tiền'); assert.equal(mine.handledBy, undefined);

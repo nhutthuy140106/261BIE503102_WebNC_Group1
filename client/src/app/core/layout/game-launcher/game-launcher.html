@@ -1,0 +1,32 @@
+@if (visible()) {
+  <div class="gl">
+    @if (open()) {
+      <div class="panel" role="dialog" aria-label="Chơi vui nhận Xu">
+        <p class="ptitle">Chơi vui, nhận Xu mỗi ngày</p>
+        <a class="opt" routerLink="/quay-mon">
+          <span class="wheel sm" aria-hidden="true"><img src="assets/clean/antxu.png" alt="" /></span>
+          <span class="txt"><b>Quay món</b><small>Thử vận may, trúng món ngon</small></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+        <a class="opt" routerLink="/vuon">
+          <img class="thumb" src="assets/clean/ant-basket.png" alt="" width="46" height="46" />
+          <span class="txt"><b>Vườn AntGo</b><small>Hái xu, tưới cây mỗi ngày</small></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+        <p class="pnote">Xu đổi voucher giảm giá khi đặt đơn.</p>
+      </div>
+    } @else if (bubble()) {
+      <div class="tip" role="status">
+        <button type="button" class="tipbtn" (click)="toggle()">Quay món, nhận Xu!</button>
+        <button type="button" class="x" aria-label="Hôm nay không nhắc nữa" (click)="dismiss($event)">×</button>
+      </div>
+    }
+    <button type="button" class="fab" [class.on]="open()" (click)="toggle()" [attr.aria-expanded]="open()" aria-label="Chơi vui, nhận Xu: Quay món và Vườn AntGo">
+      @if (open()) {
+        <span class="close">×</span>
+      } @else {
+        <span class="wheel" aria-hidden="true"><img src="assets/clean/antxu.png" alt="" /></span>
+      }
+    </button>
+  </div>
+}

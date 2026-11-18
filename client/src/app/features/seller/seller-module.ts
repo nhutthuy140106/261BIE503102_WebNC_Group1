@@ -10,6 +10,7 @@ import { SellerShop } from './seller-shop/seller-shop';
 import { SellerPosts } from './seller-posts/seller-posts';
 import { SellerCalendar } from './seller-calendar/seller-calendar';
 import { SellerPostForm } from './seller-post-form/seller-post-form';
+import { SellerPostQuick } from './seller-post-quick/seller-post-quick';
 import { SellerOrders } from './seller-orders/seller-orders';
 import { SellerOrderDetail } from './seller-order-detail/seller-order-detail';
 import { SellerJobDetail } from './seller-job-detail/seller-job-detail';
@@ -22,12 +23,11 @@ import { SellerConfirmDialog } from './components/confirm-dialog/confirm-dialog'
 import { SellerPickDialog } from './components/pick-dialog/pick-dialog';
 import { SellerTimeInput } from './components/time-input/time-input';
 import { SellerBankSelect } from './components/bank-select/bank-select';
-import { SellerMoneyInput } from './components/money-input/money-input';
 
 @NgModule({
   declarations: [
-    SellerLayout, SellerToday, SellerInsights, SellerMessenger, SellerShop, SellerPosts, SellerCalendar, SellerPostForm, SellerVerify, SellerOrders, SellerOrderDetail, SellerJobDetail,
-    SellerTaskCard, SellerDayAgenda, SellerPostCard, SellerConfirmDialog, SellerPickDialog, SellerSteps, SellerTimeInput, SellerBankSelect, SellerMoneyInput,
+    SellerLayout, SellerToday, SellerInsights, SellerMessenger, SellerShop, SellerPosts, SellerCalendar, SellerPostForm, SellerPostQuick, SellerVerify, SellerOrders, SellerOrderDetail, SellerJobDetail,
+    SellerTaskCard, SellerDayAgenda, SellerPostCard, SellerConfirmDialog, SellerPickDialog, SellerSteps, SellerTimeInput, SellerBankSelect,
   ],
   imports: [SharedModule, SellerRoutingModule],
 })

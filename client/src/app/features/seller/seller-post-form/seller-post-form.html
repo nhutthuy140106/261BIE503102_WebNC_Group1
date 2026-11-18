@@ -26,7 +26,13 @@
       <div class="bd">
         @if (type() === 'service') {
           <div class="fld"><span class="lbl">Điền nhanh theo mẫu</span>
-            <div class="pills">@for (p of svcPresets; track p) { <button type="button" [class.on]="c('spec.preset').value === p" (click)="applyPreset(p)">{{ p }}</button> }</div>
+            <div class="tiles" role="radiogroup" aria-label="Mẫu dịch vụ">
+              @for (p of svcPresets; track p) {
+                <button type="button" role="radio" [attr.aria-checked]="c('spec.preset').value === p" [class.on]="c('spec.preset').value === p" (click)="applyPreset(p)">
+                  <span class="ic"><svg class="i"><use [attr.href]="'#' + presetIcon(p)" /></svg></span>{{ p }}
+                </button>
+              }
+            </div>
           </div>
         }
 
@@ -70,9 +76,9 @@
         }
         <div class="fld" [class.bad]="bad('common.desc')">
           <label for="desc">{{ type() === 'job' ? 'Mô tả việc' : 'Mô tả' }}</label>
-          <textarea id="desc" class="input" formControlName="desc" maxlength="1000"
+          <textarea id="desc" class="input" formControlName="desc" maxlength="2000"
             [placeholder]="type() === 'job' ? 'Vì sao cần, làm gì, ở đâu…' : type() === 'service' ? 'Bạn làm gì, làm thế nào, khách cần chuẩn bị gì…' : type() === 'goods' ? 'Mua khi nào, dùng ra sao, vì sao bán…' : 'Mỗi phần gồm gì, nấu thế nào, thực đơn đổi ra sao…'"></textarea>
-          <span class="err">Mô tả 10–1000 ký tự</span>
+          <span class="err">Mô tả 10–2000 ký tự</span>
         </div>
       </div>
     </section>
@@ -109,6 +115,43 @@
           </section>
           <!-- cam kết cho cả bài, nằm ngoài khung thanh toán -->
           <label class="ck pledge" [class.badck]="bad('spec.fresh')"><input type="checkbox" formControlName="fresh" /><span>Tôi cam kết món ăn được chế biến trong ngày và đảm bảo an toàn vệ sinh thực phẩm.</span></label>
+        }
+
+        <!-- ================= COMBO ================= -->
+        @case ('combo') {
+          <section class="sec">
+            <header><span class="no">2</span><span><b>Nội dung combo</b></span></header>
+            <div class="bd">
+              <div class="grp" formArrayName="includes">
+                <span class="lbl">Combo gồm những món nào?</span>
+                <div class="lines sub">
+                  @for (m of arr('spec.includes').controls; track $index; let mi = $index) {
+                    <div class="line">
+                      <input class="input" [formControlName]="mi" maxlength="60" [placeholder]="mi === 0 ? 'Ví dụ: Cơm gà xối mỡ' : mi === 1 ? 'Ví dụ: Canh rau' : 'Ví dụ: Trà đá'" [attr.aria-label]="'Món ' + (mi + 1)" />
+                      @if (arr('spec.includes').length > 2) { <button type="button" class="rm" aria-label="Bỏ món" (click)="removeAt('spec.includes', mi)"><svg class="i"><use href="#xmark" /></svg></button> }
+                    </div>
+                  }
+                </div>
+                <button type="button" class="mini sub" (click)="addStr('spec.includes')"><svg class="i"><use href="#plus" /></svg>Thêm món</button>
+                <span class="hint">Khách thấy danh sách này ở trang bài. Bạn tự ghi, không cần đăng các món lẻ trước.</span>
+              </div>
+              <div class="fld" [class.bad]="bad('spec.comboPrice')">
+                <label for="cbp">Giá combo</label>
+                <span class="money"><input appMoney id="cbp" class="input" formControlName="comboPrice" placeholder="Ví dụ: 85.000" /></span>
+                <span class="err">Nhập giá combo từ 1.000đ</span>
+              </div>
+              <div class="checks">
+                <label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú cho quán</span></label>
+              </div>
+              <ng-container *ngTemplateOutlet="promoBox" />
+            </div>
+          </section>
+          <ng-container *ngTemplateOutlet="sellSchedule; context: { n: 3 }" />
+          <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: 4 }" />
+          <section class="sec">
+            <header><span class="no">5</span><span><b>Thanh toán</b></span></header>
+            <div class="bd"><ng-container *ngTemplateOutlet="payPills" /></div>
+          </section>
         }
 
         <!-- ================= ĐỒ UỐNG ================= -->
@@ -197,24 +240,37 @@
 
         <!-- ================= DỊCH VỤ (đủ 7 khối của trang chi tiết phía Mua + 3 ô thông tin nhanh) ================= -->
         @case ('service') {
-          @if (!svcPreset().noQuick) {
+          @if (svcPreset().cleaning) {
+          <!-- dọn dẹp: chỉ liệt kê tên dịch vụ, khách chọn một; giá đặt ở mục Cài đặt tùy chọn -->
           <section class="sec">
-            <header><span class="no">{{ svcNo('quick') }}</span><span><b>Thông tin nhanh</b></span></header>
+            <header><span class="no">{{ svcNo('price') }}</span><span><b>Tùy chọn dịch vụ</b></span></header>
             <div class="bd">
-              <div class="row3">
-                <div class="fld"><label for="ta">Thời gian hoàn thành</label><input id="ta" class="input" formControlName="turnaround" maxlength="40" placeholder="Ví dụ: trong ngày" /></div>
-                <div class="fld"><label for="sa">Phạm vi phục vụ</label><input id="sa" class="input" formControlName="serviceArea" maxlength="40" placeholder="Ví dụ: trong khu" /></div>
-                <div class="fld"><label for="sw">Bảo hành</label><input id="sw" class="input" formControlName="warranty" maxlength="40" placeholder="Không bắt buộc" /></div>
-              </div>
+              <span class="hint">Khách chọn một dịch vụ cho mỗi đơn, chọn xong mới thấy tùy chọn và câu hỏi của dịch vụ đó. Đặt giá theo phòng, theo m² hay khoảng giá tùy bạn; giá khách trả là tổng các lựa chọn khách chọn.</span>
+              @for (mn of arr('spec.menu').controls; track $index; let i = $index) {
+                <div class="svcblock">
+                  <div class="line2" [formGroup]="grp(mn)"><input class="input svcname" formControlName="name" maxlength="60" placeholder="Tên dịch vụ" [attr.aria-label]="'Tên dịch vụ ' + (i + 1)" />
+                    <button type="button" class="rm" aria-label="Bỏ dịch vụ" (click)="removeAt('spec.menu', i)"><svg class="i"><use href="#xmark" /></svg></button></div>
+                  <div class="optblock">
+                    <span class="lbl">Tùy chọn cộng giá</span>
+                    <ng-container *ngTemplateOutlet="optGroups; context: { base: 'spec.menu.' + i + '.options' }" />
+                  </div>
+                  <span class="lbl">Câu hỏi riêng</span>
+                  <ng-container *ngTemplateOutlet="qList; context: { base: 'spec.menu.' + i + '.questions' }" />
+                </div>
+              }
+              <button type="button" class="mini" (click)="addMenu()"><svg class="i"><use href="#plus" /></svg>Thêm dịch vụ</button>
+              <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú khi đặt lịch</span></label></div>
             </div>
           </section>
-          }
+          } @else {
           <!-- bảng giá: mỗi dịch vụ con một giá + đơn vị; khách chọn nhiều dòng trong cùng một đơn, mỗi dòng một số lượng -->
           <section class="sec">
             <header><span class="no">{{ svcNo('price') }}</span><span><b>Cài đặt giá</b></span></header>
             <div class="bd">
+              @if (!svcPreset().noQuote) {
               <div class="pills">@for (m of priceTypes; track m[0]) { <button type="button" [class.on]="c('spec.priceType').value === m[0]" (click)="set('spec.priceType', m[0])">{{ m[1] }}</button> }</div>
-              @if (c('spec.priceType').value === 'quote') {
+              }
+              @if (c('spec.priceType').value === 'quote' && !svcPreset().noQuote) {
                 <div class="row3">
                   <div class="fld"><label for="insp">{{ svcPreset().generic ? 'Phí kiểm tra / khảo sát' : 'Phí kiểm tra' }}</label><span class="money"><input appMoney id="insp" class="input" formControlName="inspect" placeholder="50.000" /></span></div>
                 </div>
@@ -225,28 +281,23 @@
                 } @else {
                   <ng-container *ngTemplateOutlet="itemTable; context: { list: svcUnits, nameLabel: 'Tên dịch vụ', namePh: svcPreset().generic ? 'Ví dụ: Gói cơ bản' : svcPreset().repair ? 'Ví dụ: Vệ sinh máy lạnh' : 'Ví dụ: Giặt chăn, ga', pricePh: '40.000', addLabel: 'Thêm dịch vụ', ph: 'phòng' }" />
                 }
-                @if (svcPreset().stay) {
-                  <span class="hint">Giá mỗi đêm cho từng loại phòng. Khách chọn loại phòng, số phòng và ngày nhận – trả phòng; tổng tiền = giá × số đêm × số phòng.</span>
-                } @else if (svcPreset().repair) {
-                  <div class="row3">
-                    <div class="fld"><label for="insr">Phí kiểm tra</label><span class="money"><input appMoney id="insr" class="input" formControlName="inspect" placeholder="50.000" /></span></div>
-                  </div>
-                } @else if (!svcPreset().generic) {
+                @if (!svcPreset().stay && !svcPreset().generic && !svcPreset().repair && !svcPreset().noEstimate) {
                   <label class="ck"><input type="checkbox" formControlName="estimate" /><span>Giá ước tính, cân / đếm thực tế khi nhận đồ</span></label>
                 }
               }
               <ng-container *ngTemplateOutlet="promoBox" />
             </div>
           </section>
+          }
           @if (svcPreset().stay) {
           <section class="sec">
             <header><span class="no">{{ svcNo('stay') }}</span><span><b>Tiện nghi & nội quy</b></span></header>
             <div class="bd">
               <div class="fld"><span class="lbl">Tiện nghi <span class="hint">(chọn được nhiều)</span></span>
-                <div class="pills">@for (a of amenities; track a) { <button type="button" [class.on]="has('spec.amenities', a)" (click)="toggleIn('spec.amenities', a)">{{ a }}</button> }</div>
+                <div class="amen">@for (a of amenities; track a) { <button type="button" role="checkbox" [attr.aria-checked]="has('spec.amenities', a)" [class.on]="has('spec.amenities', a)" (click)="toggleIn('spec.amenities', a)">{{ a }}</button> }</div>
               </div>
               <div class="fld"><span class="lbl">Nội quy</span>
-                <ng-container *ngTemplateOutlet="quickList; context: { ph: 'Ví dụ: Không tổ chức tiệc', name: 'rules', add: 'Thêm nội quy' }" />
+                <ng-container *ngTemplateOutlet="quickList; context: { ph: 'Ví dụ: Không tổ chức tiệc', name: 'rules', add: 'Thêm nội quy', plain: true }" />
               </div>
               <div class="row3">
                 <div class="fld"><label for="fc">Hủy miễn phí trước (ngày)</label><input id="fc" class="input" type="number" min="0" formControlName="freeCancelDays" /></div>
@@ -261,9 +312,9 @@
             </div>
           </section>
           }
-          @if (!svcPreset().generic) {
+          @if (!svcPreset().cleaning) {
           <section class="sec">
-            <header><span class="no">{{ svcNo('ask') }}</span><span><b>Khách chọn khi đặt</b></span></header>
+            <header><span class="no">{{ svcNo('ask') }}</span><span><b>Cài đặt tùy chọn</b></span></header>
             <div class="bd">
               <div class="optblock">
                 <span class="lbl">Tùy chọn cộng giá</span>
@@ -271,29 +322,18 @@
               </div>
               @if (!svcPreset().noQuestions) {
               <span class="lbl">Câu hỏi riêng</span>
-              <div formArrayName="questions" class="pkgs">
-                @for (q of arr('spec.questions').controls; track $index; let i = $index) {
-                  <div class="grp" [formGroupName]="i">
-                    <div class="top">
-                      <input class="input" formControlName="label" placeholder="Câu hỏi, ví dụ: Máy bị sao?" maxlength="80" />
-                      <app-select formControlName="type" [options]="qTypeOpts" />
-                      <label class="reqck"><input type="checkbox" formControlName="required" />Bắt buộc</label>
-                      <button type="button" class="rm" aria-label="Bỏ câu hỏi" (click)="removeAt('spec.questions', i)"><svg class="i"><use href="#xmark" /></svg></button>
-                    </div>
-                    @if (grp(q).get('type')!.value === 'choice' || grp(q).get('type')!.value === 'multi') {
-                      <input class="input sub" formControlName="opts" placeholder="Các lựa chọn, cách nhau bằng dấu phẩy" />
-                    }
-                  </div>
-                }
-              </div>
-              <button type="button" class="mini" (click)="addQuestion()"><svg class="i"><use href="#plus" /></svg>Thêm câu hỏi</button>
+              <ng-container *ngTemplateOutlet="qList; context: { base: 'spec.questions' }" />
+              }
+              @if (svcPreset().courier) {
+                <div class="checks"><label class="ck"><input type="checkbox" formControlName="advancePay" /><span>Nhận ứng trước tiền hàng cho khách<small>Khách nhập tổng số tiền hàng, số tiền được cộng vào tổng đơn và khách phải thanh toán chung với phí dịch vụ.</small></span></label></div>
               }
               <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú khi đặt lịch</span></label></div>
             </div>
           </section>
           }
+          @if (!svcPreset().noSchedule) {
           <section class="sec">
-            <header><span class="no">{{ svcNo('time') }}</span><span><b>{{ svcPreset().stay ? 'Lịch nhận phòng' : svcPreset().laundry ? 'Lịch lấy đồ' : 'Lịch hẹn' }}</b></span></header>
+            <header><span class="no">{{ svcNo('time') }}</span><span><b>{{ svcPreset().stay ? 'Lịch nhận phòng' : svcPreset().laundry ? 'Lịch lấy đồ' : svcPreset().courier ? 'Lịch giao hàng' : 'Lịch hẹn' }}</b></span></header>
             <div class="bd">
               @if (svcPreset().laundry) {
                 <!-- giặt sấy: khách hẹn giờ để tiệm qua lấy đồ; giặt xong tiệm báo và trả, không hẹn lịch trả -->
@@ -309,35 +349,37 @@
                   <div class="fld"><label for="ci">Nhận phòng từ</label><app-time-input inputId="ci" formControlName="checkIn" /></div>
                   <div class="fld"><label for="co">Trả phòng trước</label><app-time-input inputId="co" formControlName="checkOut" /></div>
                 </div>
-                <div class="row3">
-                  <div class="fld"><label for="mn">Ở tối thiểu (đêm)</label><input id="mn" class="input" type="number" min="1" formControlName="minNights" /></div>
-                </div>
               } @else {
-              @if (!svcPreset().repair && !svcPreset().generic) {
+              <!-- dọn dẹp, giao nhận: chỉ cho khách chọn giờ hẹn, không chọn số giờ -->
+              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning && !svcPreset().courier && !svcPreset().fixedTime) {
               <div class="pills">@for (m of svcTimes; track m[0]) { <button type="button" [class.on]="c('spec.timeMode').value === m[0]" (click)="set('spec.timeMode', m[0])">{{ m[1] }}</button> }</div>
               }
+              @if (svcPreset().courier) {
+                <span class="hint">Bạn đi lấy hàng ngay khi nhận đơn rồi giữ lại. Khách chọn ngày giờ muốn nhận hàng trong khung dưới đây để bạn giao.</span>
+              }
               <div class="drow">
-                <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: 'Ngày nhận lịch' }" />
-                <div class="fld"><label for="sf">Từ</label><app-time-input inputId="sf" formControlName="from" /></div>
+                <ng-container *ngTemplateOutlet="datePick; context: { path: 'spec.dates', label: svcPreset().courier ? 'Ngày giao hàng' : 'Ngày nhận lịch' }" />
+                <div class="fld"><label for="sf">{{ svcPreset().courier ? 'Giao từ' : 'Từ' }}</label><app-time-input inputId="sf" formControlName="from" /></div>
                 <div class="fld"><label for="st">Đến</label><app-time-input inputId="st" formControlName="to" /></div>
               </div>
-              @if (c('spec.timeMode').value === 'datedur') {
+              @if ((svcPreset().fixedTime ?? c('spec.timeMode').value) === 'datedur' && !svcPreset().cleaning) {
                 <div class="row3">
                   <div class="fld"><label for="dmin">Ít nhất (giờ)</label><input id="dmin" class="input" type="number" min="1" formControlName="durMin" /></div>
                   <div class="fld"><label for="dmax">Nhiều nhất (giờ)</label><input id="dmax" class="input" type="number" min="1" formControlName="durMax" /></div>
                 </div>
               }
-              @if (svcPreset().generic) {
+              @if (needsTurnaround()) {
                 <div class="row">
-                  <div class="fld"><label for="gta">Thời gian làm dự kiến <span class="hint">(không bắt buộc)</span></label><input id="gta" class="input" formControlName="turnaround" maxlength="40" placeholder="Ví dụ: khoảng 2 giờ" /></div>
+                  <div class="fld"><label for="gta">Thời gian làm dự kiến <span class="req">*</span></label><input id="gta" class="input" formControlName="turnaround" maxlength="40" placeholder="Ví dụ: khoảng 2 giờ" /></div>
                 </div>
               }
-              @if (!svcPreset().repair && !svcPreset().generic) {
+              @if (!svcPreset().repair && !svcPreset().generic && !svcPreset().cleaning && !svcPreset().noRepeat) {
               <label class="ck"><input type="checkbox" formControlName="repeat" /><span>Cho khách đặt lặp lại hằng tuần</span></label>
               }
               }
             </div>
           </section>
+          }
           @if (svcPreset().laundry) {
             <ng-container *ngTemplateOutlet="fulfilBlock; context: { n: svcNo('recv'), title: 'Cách trả đồ sau khi giặt xong, tiệm luôn qua nhà khách lấy đồ' }" />
           }
@@ -359,64 +401,6 @@
                   <div class="fld"><label for="gfee">Phụ phí đi lại <span class="hint">(không bắt buộc)</span></label><span class="money"><input appMoney id="gfee" class="input" formControlName="homeFee" placeholder="0" /></span></div>
                 </div>
               }
-            </div>
-          </section>
-          }
-          <!-- form chung: người bán tự tạo câu hỏi, khách điền đúng những gì người bán cần -->
-          @if (svcPreset().generic) {
-          <section class="sec">
-            <header><span class="no">{{ svcNo('ask') }}</span><span><b>Thông tin cần từ khách</b></span></header>
-            <div class="bd">
-              <span class="hint">Bạn cần biết thêm gì từ khách thì tạo câu hỏi ở đây, khách sẽ trả lời khi đặt.</span>
-              <div formArrayName="questions" class="pkgs ask">
-                @for (q of arr('spec.questions').controls; track $index; let i = $index) {
-                  <div class="grp" [formGroupName]="i">
-                    <div class="top">
-                      <input class="input" formControlName="label" placeholder="Câu hỏi, ví dụ: Bạn cần làm gì?" maxlength="80" [attr.aria-label]="'Câu hỏi ' + (i + 1)" />
-                      <app-select [options]="askTypeOpts" [ngModel]="grp(q).get('type')!.value" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setAskType(q, $event)" />
-                      <label class="reqck"><input type="checkbox" formControlName="required" />Bắt buộc</label>
-                      <button type="button" class="rm" aria-label="Bỏ câu hỏi" (click)="removeAt('spec.questions', i)"><svg class="i"><use href="#xmark" /></svg></button>
-                    </div>
-                    <input class="input" formControlName="hint" placeholder="Gợi ý cho khách (không bắt buộc)" maxlength="80" [attr.aria-label]="'Gợi ý câu hỏi ' + (i + 1)" />
-                    @if (grp(q).get('type')!.value === 'choice' || grp(q).get('type')!.value === 'multi') {
-                      <div formArrayName="choices" class="lines sub">
-                        @for (ch of arr('spec.questions.' + i + '.choices').controls; track $index; let ci = $index) {
-                          <div class="line" [formGroupName]="ci">
-                            <input class="input" formControlName="label" placeholder="Lựa chọn" maxlength="40" />
-                            <span class="money"><input appMoney class="input" formControlName="price" placeholder="Giá" aria-label="Cộng thêm" /></span>
-                            <button type="button" class="rm" aria-label="Bỏ lựa chọn" [disabled]="arr('spec.questions.' + i + '.choices').length === 1" (click)="removeAt('spec.questions.' + i + '.choices', ci)"><svg class="i"><use href="#xmark" /></svg></button>
-                          </div>
-                        }
-                      </div>
-                      <button type="button" class="mini sub" (click)="addChoice('spec.questions.' + i + '.choices')"><svg class="i"><use href="#plus" /></svg>Thêm lựa chọn</button>
-                    }
-                  </div>
-                }
-              </div>
-              <div class="askadd">
-                <button type="button" class="mini" (click)="addAsk()"><svg class="i"><use href="#plus" /></svg>Thêm câu hỏi</button>
-                @for (a of askQuick; track a.label) {
-                  @if (!askUsed(a.label)) { <button type="button" class="mini ghost" (click)="addAsk(a)"><svg class="i"><use href="#plus" /></svg>{{ a.label }}</button> }
-                }
-              </div>
-              <div class="askpv">
-                <span class="lbl">Khách sẽ điền khi đặt</span>
-                <div class="apf">
-                  @for (f of askFixed(); track f) { <div class="apr fixed"><span>{{ f }}</span><small>Luôn có</small></div> }
-                  @for (q of $any(v()['spec']['questions']); track $index) {
-                    <div class="apr">
-                      <span>{{ q.label || 'Câu hỏi chưa đặt tên' }}@if (q.required) { <i>*</i> }</span>
-                      @if (q.type === 'choice' || q.type === 'multi') {
-                        <div class="apc">@for (ch of q.choices; track $index) { <em>{{ ch.label || 'Lựa chọn' }}@if (+ch.price > 0) { +{{ +ch.price | vnd }} }</em> }</div>
-                        @if (q.hint) { <small>{{ q.hint }}</small> }
-                      } @else {
-                        <div class="apb">{{ q.hint || askPh(q.type) }}</div>
-                      }
-                    </div>
-                  }
-                </div>
-              </div>
-              <div class="checks"><label class="ck"><input type="checkbox" formControlName="kitchenNote" /><span>Cho khách ghi chú khi đặt lịch</span></label></div>
             </div>
           </section>
           }
@@ -523,6 +507,26 @@
         <button type="button" class="mini" (click)="addOptGroup(base)"><svg class="i"><use href="#plus" /></svg>Thêm nhóm tùy chọn</button>
       </ng-template>
 
+      <!-- ===== câu hỏi riêng (dịch vụ): base = đường dẫn tới danh sách câu hỏi ===== -->
+      <ng-template #qList let-base="base">
+        <div class="pkgs">
+          @for (q of arr(base).controls; track $index; let i = $index) {
+            <div class="grp" [formGroup]="grp(q)">
+              <div class="top">
+                <input class="input" formControlName="label" placeholder="Câu hỏi, ví dụ: Máy bị sao?" maxlength="80" />
+                <app-select formControlName="type" [options]="qTypeOpts" />
+                <label class="reqck"><input type="checkbox" formControlName="required" />Bắt buộc</label>
+                <button type="button" class="rm" aria-label="Bỏ câu hỏi" (click)="removeAt(base, i)"><svg class="i"><use href="#xmark" /></svg></button>
+              </div>
+              @if (grp(q).get('type')!.value === 'choice' || grp(q).get('type')!.value === 'multi') {
+                <input class="input sub" formControlName="opts" placeholder="Các lựa chọn, cách nhau bằng dấu phẩy" />
+              }
+            </div>
+          }
+        </div>
+        <button type="button" class="mini" (click)="addQuestionAt(base)"><svg class="i"><use href="#plus" /></svg>Thêm câu hỏi</button>
+      </ng-template>
+
       <!-- ===== lịch bán (đồ ăn / đồ uống) ===== -->
       <ng-template #sellSchedule let-n="n">
         <section class="sec" formGroupName="schedule">
@@ -611,12 +615,13 @@
       </ng-template>
 
       <!-- ===== tùy chọn nhanh (đồ ăn, đồ uống): người bán tự đặt; bật thì khách tick được khi đặt, không tính tiền ===== -->
-      <ng-template #quickList let-ph="ph" let-name="name" let-add="add">
+      <ng-template #quickList let-ph="ph" let-name="name" let-add="add" let-plain="plain">
         <div class="qlist">
           <div class="quick" [formArrayName]="name || 'quick'">
             @for (q of arr('spec.' + (name || 'quick')).controls; track $index; let i = $index) {
-              <div class="ck qk" [formGroupName]="i" [class.off]="!grp(q).get('on')!.value">
-                <input type="checkbox" formControlName="on" [attr.aria-label]="'Bật tùy chọn ' + (i + 1)" />
+              <!-- plain (nội quy): danh sách gạch đầu dòng, không có ô tick -->
+              <div class="ck qk" [class.plain]="plain" [formGroupName]="i" [class.off]="!plain && !grp(q).get('on')!.value">
+                @if (plain) { <i class="dot"></i> } @else { <input type="checkbox" formControlName="on" [attr.aria-label]="'Bật tùy chọn ' + (i + 1)" /> }
                 <input class="input" formControlName="label" maxlength="60" [placeholder]="ph" [attr.aria-label]="'Tùy chọn nhanh ' + (i + 1)" />
                 <button type="button" class="rm" aria-label="Bỏ tùy chọn" (click)="removeAt('spec.' + (name || 'quick'), i)"><svg class="i"><use href="#xmark" /></svg></button>
               </div>

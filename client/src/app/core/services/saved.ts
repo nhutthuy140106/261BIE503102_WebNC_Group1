@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, effect, inject, signal } from '@angular/core';
 import { useMock } from '../config/api.config';
 import { ApiService } from './api';
+import { AuthService } from './auth';
 import { AuthPromptService } from './auth-prompt';
 import { MOCK_SAVED_SEED } from '../config/mock-seed';
 import { ToastService } from './toast';
@@ -17,13 +18,18 @@ export class SavedService {
   private readonly api = inject(ApiService);
   private readonly prompt = inject(AuthPromptService);
   private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthService);
   readonly ids = signal<string[]>(useMock('saved') ? this.read() : []);
 
   constructor() {
+    // Thật: chỉ hỏi danh sách đã lưu khi ĐÃ đăng nhập (khách hỏi sẽ nhận 401 và bị đưa về trang đăng nhập); đăng xuất thì xóa
     if (!useMock('saved')) {
-      this.api.get<{ postId: string }[]>('/me/saved').subscribe({
-        next: (rows) => this.ids.set(rows.map((r) => r.postId)),
-        error: () => this.ids.set([]), // chưa đăng nhập hoặc lỗi: danh sách rỗng
+      effect(() => {
+        if (!this.auth.currentUser()) return void this.ids.set([]);
+        this.api.get<{ postId: string }[]>('/me/saved').subscribe({
+          next: (rows) => this.ids.set(rows.map((r) => r.postId)),
+          error: () => this.ids.set([]),
+        });
       });
     }
   }

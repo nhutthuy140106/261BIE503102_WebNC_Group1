@@ -1,5 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { USE_MOCK } from '../../../core/config/api.config';
+import { AppError } from '../../../core/models/api';
+import { ApiService } from '../../../core/services/api';
+import { AuthService } from '../../../core/services/auth';
+
+interface Ticket { id: string; code: string; state: 'open' | 'answered' | 'closed'; messages: { by: 'user' | 'staff'; text: string; at: string }[]; createdAt: string }
 
 interface Faq {
   group: string;
@@ -13,7 +19,23 @@ interface Faq {
   templateUrl: './help-page.html',
   styleUrl: './help-page.css',
 })
-export class HelpPage {
+export class HelpPage implements OnInit {
+  private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
+  /** Phiếu hỗ trợ của tôi (chỉ có khi chạy với máy chủ thật và đã đăng nhập) */
+  protected readonly tickets = signal<Ticket[]>([]);
+  protected readonly sendErr = signal('');
+  protected readonly live = !USE_MOCK;
+
+  ngOnInit(): void {
+    this.loadTickets();
+  }
+
+  private loadTickets(): void {
+    if (USE_MOCK || !this.auth.currentUser()) return;
+    this.api.get<Ticket[]>('/support/tickets').subscribe({ next: (t) => this.tickets.set(t), error: () => undefined });
+  }
+
   protected readonly faqs: Faq[] = [
     {
       group: 'Đặt hàng & dịch vụ',
@@ -65,6 +87,17 @@ export class HelpPage {
 
   protected send(f: NgForm): void {
     if (f.invalid) return;
+    if (!USE_MOCK) {
+      // máy chủ thật: gửi vào hộp thư hỗ trợ để quản trị viên trả lời
+      if (!this.auth.currentUser()) { this.sendErr.set('Bạn cần đăng nhập để gửi góp ý.'); return; }
+      const topic = this.fb.topic.includes('đặt hàng') ? 'order' : 'other';
+      this.sendErr.set('');
+      this.api.post('/support/tickets', { topic, text: `[${this.fb.topic}] ${this.fb.text}` }).subscribe({
+        next: () => { this.sent = true; f.resetForm({ topic: '', text: '' }); this.loadTickets(); },
+        error: (e: unknown) => this.sendErr.set(e instanceof AppError ? e.message : 'Chưa gửi được, bạn thử lại sau nhé.'),
+      });
+      return;
+    }
     try {
       const all = JSON.parse(localStorage.getItem('antgo_feedback') ?? '[]') as unknown[];
       localStorage.setItem('antgo_feedback', JSON.stringify([...all, { ...this.fb, at: new Date().toISOString() }]));

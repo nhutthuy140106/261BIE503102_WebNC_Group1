@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { z } = require('zod');
 const service = require('./order.service');
 const v = require('./order.validation');
 const asyncHandler = require('../../../utils/asyncHandler');
@@ -98,6 +99,56 @@ const { auth } = require('../../../middlewares/auth');
  *       200: { description: "{ data: { simulated, note, shop:{lat,lng}, home:{lat,lng}, courier:{lat,lng,phase,etaMin,distanceKm} } }; phase = waiting | preparing | delivering | delivered" }
  *       403: { description: Không phải đơn của bạn }
  *       404: { description: Không có đơn, hoặc NO_TRACKING }
+ * /orders/{id}/cancel:
+ *   post:
+ *     tags: [Đơn hàng]
+ *     summary: Hủy ngay khi người bán chưa bắt đầu (waiting / confirmed); trả lại kho + voucher. Đã bắt đầu thì dùng cancel-request
+ *     security: [{ cookieAuth: [] }]
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object, required: [reason], properties: { reason: { type: string } } } } } }
+ *     responses: { 200: { description: Đơn ở trạng thái cancelled }, 409: { description: Người bán đã bắt đầu } }
+ * /orders/{id}/confirm-received:
+ *   post:
+ *     tags: [Đơn hàng]
+ *     summary: Xác nhận đã nhận đủ hàng / kết quả dịch vụ (delivering | ready → done, cộng Xu)
+ *     security: [{ cookieAuth: [] }]
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+ *     responses: { 200: { description: Đơn done }, 409: { description: Chưa tới bước nhận hàng } }
+ * /orders/{id}/issue:
+ *   post:
+ *     tags: [Đơn hàng]
+ *     summary: Báo vấn đề / yêu cầu trả hàng sau khi hoàn thành (đồ ăn 2 giờ, còn lại 24 giờ; đồ ăn + đồ dùng cần ≥1 ảnh)
+ *     security: [{ cookieAuth: [] }]
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object, required: [type], properties: { type: { type: string }, text: { type: string }, photos: { type: integer } } } } } }
+ *     responses: { 201: { description: Đơn có issue.st = open }, 409: { description: Quá hạn hoặc đã có yêu cầu } }
+ * /orders/{id}/issue/close:
+ *   post:
+ *     tags: [Đơn hàng]
+ *     summary: Đóng yêu cầu báo vấn đề (đã được làm lại / đã nhận tiền hoàn / thôi không theo nữa)
+ *     security: [{ cookieAuth: [] }]
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+ *     responses: { 200: { description: issue.st = closed }, 409: { description: Không có yêu cầu đang mở } }
+ * /orders/{id}/approve-quote:
+ *   post:
+ *     tags: [Đơn hàng]
+ *     summary: Đồng ý giá cuối người bán báo (giặt sấy sau khi cân, sửa chữa sau khi kiểm tra) — tổng tiền đổi sang giá mới, đơn chuyển "đang làm"
+ *     security: [{ cookieAuth: [] }]
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+ *     responses:
+ *       200: { description: Đơn ở trạng thái preparing, total = giá cuối + phí giao, oldTotal = tổng lúc đặt }
+ *       403: { description: Không phải đơn của bạn }
+ *       409: { description: Không có giá cuối nào đang chờ }
+ * /orders/{id}/reject-quote:
+ *   post:
+ *     tags: [Đơn hàng]
+ *     summary: Từ chối giá cuối — đơn hủy (sửa chữa chỉ trả phí kiểm tra; giặt sấy không mất tiền giặt)
+ *     security: [{ cookieAuth: [] }]
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+ *     requestBody: { content: { application/json: { schema: { type: object, properties: { reason: { type: string } } } } } }
+ *     responses:
+ *       200: { description: Đơn ở trạng thái cancelled }
+ *       409: { description: Không có giá cuối nào đang chờ }
  * /orders/{id}/approve-surcharge:
  *   post:
  *     tags: [Đơn hàng]
@@ -110,20 +161,32 @@ const { auth } = require('../../../middlewares/auth');
  */
 router.use(auth);
 router.post('/', body(v.create), asyncHandler(async (req, res) =>
-  res.status(201).json({ data: await service.create(req.user, req.body) })));
+  res.status(201).json({ data: await service.present(await service.create(req.user, req.body)) })));
 router.get('/', query(v.list), asyncHandler(async (req, res) => {
   const { items, meta } = await service.list(req.user, req.valid.query);
-  res.json({ data: items, meta });
+  res.json({ data: await service.present(items), meta });
 }));
 router.get('/:id', ids('id'), asyncHandler(async (req, res) =>
-  res.json({ data: await service.getVisible(req.user, req.params.id) })));
+  res.json({ data: await service.present(await service.getVisible(req.user, req.params.id)) })));
 router.get('/:id/tracking', ids('id'), asyncHandler(async (req, res) =>
   res.json({ data: await service.tracking(req.user, req.params.id) })));
 router.post('/:id/cancel-request', ids('id'), body(v.reason), asyncHandler(async (req, res) =>
-  res.json({ data: await service.requestCancel(req.user, req.params.id, req.body.reason) })));
+  res.json({ data: await service.present(await service.requestCancel(req.user, req.params.id, req.body.reason)) })));
 router.post('/:id/return-request', ids('id'), body(v.reason), asyncHandler(async (req, res) =>
-  res.json({ data: await service.requestReturn(req.user, req.params.id, req.body.reason) })));
+  res.json({ data: await service.present(await service.requestReturn(req.user, req.params.id, req.body.reason)) })));
+router.post('/:id/approve-quote', ids('id'), asyncHandler(async (req, res) =>
+  res.json({ data: await service.present(await service.approveQuote(req.user, req.params.id)) })));
+router.post('/:id/reject-quote', ids('id'), body(z.object({ reason: z.string().trim().max(300).optional() })), asyncHandler(async (req, res) =>
+  res.json({ data: await service.present(await service.rejectQuote(req.user, req.params.id, req.body.reason || '')) })));
 router.post('/:id/approve-surcharge', ids('id'), asyncHandler(async (req, res) =>
-  res.json({ data: await service.approveSurcharge(req.user, req.params.id) })));
+  res.json({ data: await service.present(await service.approveSurcharge(req.user, req.params.id)) })));
+router.post('/:id/cancel', ids('id'), body(v.cancelNow), asyncHandler(async (req, res) =>
+  res.json({ data: await service.present(await service.cancelNow(req.user, req.params.id, req.body.reason)) })));
+router.post('/:id/confirm-received', ids('id'), asyncHandler(async (req, res) =>
+  res.json({ data: await service.present(await service.confirmReceived(req.user, req.params.id)) })));
+router.post('/:id/issue', ids('id'), body(v.issue), asyncHandler(async (req, res) =>
+  res.status(201).json({ data: await service.present(await service.openIssue(req.user, req.params.id, req.body)) })));
+router.post('/:id/issue/close', ids('id'), body(v.issueClose), asyncHandler(async (req, res) =>
+  res.json({ data: await service.present(await service.closeIssue(req.user, req.params.id, req.body.result)) })));
 
 module.exports = router;

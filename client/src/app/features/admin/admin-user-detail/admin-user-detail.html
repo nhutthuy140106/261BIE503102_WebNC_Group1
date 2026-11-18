@@ -1,0 +1,86 @@
+<a class="back" routerLink="/admin/users">← Tất cả người dùng</a>
+@if (error()) { <div class="err" role="alert">{{ error() }}</div> }
+@if (ok()) { <div class="okmsg" role="status">{{ ok() }}</div> }
+
+@if (p(); as p) {
+  <div class="head">
+    <div class="who"><app-avatar [name]="p.user.name" [src]="p.user.avatar ?? ''" [size]="52" />
+      <div><h1>{{ p.user.name }}</h1><p class="lead">{{ p.user.phone }} · Khu {{ p.user.area }}
+        <span class="pill" [class.ok]="p.user.status === 'active'" [class.bad]="p.user.status === 'locked'">{{ p.user.status === 'active' ? 'Hoạt động' : 'Bị khóa' }}</span></p></div></div>
+    @if (isAdmin() && !isSelf()) {
+      <div class="btns">
+        @if (p.user.status === 'locked') { <button type="button" class="btn" (click)="lockDlg.set(false)">Mở khóa</button> }
+        @else { <button type="button" class="btn danger" (click)="lockDlg.set(true)">Khóa tài khoản</button> }
+      </div>
+    }
+  </div>
+  @if (p.user.status === 'locked' && p.user.lockedReason) { <p class="note" style="margin-bottom: 16px">Lý do khóa: {{ p.user.lockedReason }}</p> }
+
+  <div class="stat">
+    <div><b>{{ p.counts.ordersPlaced }}</b><span>đơn đã đặt</span></div>
+    <div><b>{{ p.counts.ordersReceived }}</b><span>đơn đã nhận bán</span></div>
+    <div><b>{{ p.counts.posts }}</b><span>bài đăng</span></div>
+    <div><b>{{ p.counts.jobs }}</b><span>việc đã đăng</span></div>
+    <div [class.hot]="p.counts.reportsAgainst > 0"><b>{{ p.counts.reportsAgainst }}</b><span>báo cáo về người này</span></div>
+    <div><b>{{ p.xu.balance }}</b><span>Xu hiện có</span></div>
+  </div>
+
+  <div class="grid2">
+    <div class="stack">
+      <section class="panel">
+        <h2>Đơn gần đây</h2>
+        @if (p.recentOrders.length) {
+          <table class="tbl">
+            <thead><tr><th>Đơn</th><th>Vai trò</th><th class="num">Tiền</th><th>Trạng thái</th></tr></thead>
+            <tbody>
+              @for (o of p.recentOrders; track o._id) {
+                <tr class="click" [routerLink]="['/admin/orders', o._id]"><td data-l="Đơn"><b class="mono">{{ o.code }}</b><div class="sub">{{ o.title }}</div></td><td data-l="Vai trò">{{ o.role === 'buyer' ? 'Mua' : 'Bán' }}</td><td data-l="Tiền" class="num">{{ o.total | vnd }}</td><td data-l="Trạng thái"><span class="pill" [ngClass]="tone(o.state)">{{ state(o.state) }}</span></td></tr>
+              }
+            </tbody>
+          </table>
+        } @else { <p class="empty">Chưa có đơn nào.</p> }
+      </section>
+      <section class="panel">
+        <h2>Sổ Xu <small>15 dòng gần nhất</small></h2>
+        @if (p.xu.ledger.length) {
+          <ul class="led">
+            @for (e of p.xu.ledger; track e.id) { <li><span>{{ e.title }}<small class="sub"> · {{ e.at | date: 'dd/MM/yyyy HH:mm' }}</small></span><b [class.plus]="e.delta > 0" [class.minus]="e.delta < 0">{{ e.delta > 0 ? '+' : '' }}{{ e.delta }}</b></li> }
+          </ul>
+        } @else { <p class="empty">Chưa có giao dịch Xu.</p> }
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="panel">
+        <h2>Thông tin</h2>
+        <dl class="kv">
+          <dt>Ngày tạo</dt><dd>{{ p.user.createdAt | date: 'dd/MM/yyyy' }}</dd>
+          <dt>SĐT xác minh</dt><dd>{{ p.user.phoneVerifiedAt ? (p.user.phoneVerifiedAt | date: 'dd/MM/yyyy') : 'Chưa xác minh' }}</dd>
+          @if (p.user.email) { <dt>Email</dt><dd>{{ p.user.email }}</dd> }
+          <dt>Người bán</dt><dd>{{ verif(p.verification.status) }}@if (p.verification.body?.shopName) { · {{ p.verification.body?.shopName }} }</dd>
+          @if (p.verification.rejectReason) { <dt>Lý do từ chối</dt><dd>{{ p.verification.rejectReason }}</dd> }
+        </dl>
+      </section>
+      @if (isAdmin()) {
+        <section class="panel">
+          <h2>Điều chỉnh Xu</h2>
+          <form (ngSubmit)="adjust()">
+            <div class="field"><label for="dx">Số Xu</label><input id="dx" type="number" name="dx" [(ngModel)]="delta" step="1" placeholder="VD: 50 hoặc -20" />
+              <small class="hint">Mỗi lần điều chỉnh từ 1 đến 1.000 Xu. Số dương để cộng, số âm để trừ; không trừ quá số dư hiện có.</small></div>
+            <div class="field"><label for="rs">Lý do</label><textarea id="rs" name="rs" rows="2" [(ngModel)]="reason" maxlength="300" placeholder="Ít nhất 5 ký tự"></textarea>
+              <small class="hint">Lý do hiển thị nguyên văn trong lịch sử Xu của người dùng.</small></div>
+            @if (xuErr) { <p class="e" role="alert">{{ xuErr }}</p> }
+            <div class="btns"><button type="submit" class="btn main" [disabled]="busy()">Cập nhật Xu</button></div>
+          </form>
+        </section>
+      }
+    </div>
+  </div>
+
+  @if (lockDlg() !== null) {
+    <app-admin-dialog [title]="lockDlg() ? 'Khóa tài khoản ' + p.user.name + '?' : 'Mở khóa ' + p.user.name + '?'"
+      [message]="lockDlg() ? 'Người này bị đăng xuất và không đăng nhập lại được cho đến khi mở khóa.' : 'Tài khoản đăng nhập lại được bình thường.'"
+      [confirmLabel]="lockDlg() ? 'Khóa tài khoản' : 'Mở khóa'" [danger]="!!lockDlg()" [withReason]="!!lockDlg()" reasonLabel="Lý do khóa" [busy]="busy()"
+      (confirmed)="lock($event)" (cancelled)="lockDlg.set(null)" />
+  }
+} @else if (!error()) { <div class="sk"></div><div class="sk"></div><div class="sk"></div> }

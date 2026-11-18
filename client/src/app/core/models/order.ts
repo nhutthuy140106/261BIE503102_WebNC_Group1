@@ -1,3 +1,4 @@
+import type { PostBank } from './post';
 /** Đơn đã đặt (phía Mua) */
 export type PlacedStatus =
   | 'pending' | 'confirmed' | 'pricing' | 'preparing' | 'delivering' | 'ready' | 'done' | 'cancelled' | 'declined';
@@ -10,6 +11,8 @@ export type JobStatus =
 export type PaymentMethod = 'cash' | 'transfer';
 
 export interface Order {
+  /** Tài khoản nhận chuyển khoản của người bán, server chụp lúc đặt (chỉ đơn chuyển khoản). Mock không có: lấy từ bài */
+  bank?: PostBank;
   _id: string;
   /** Mã hiển thị, ví dụ AG-O3012 (đơn đặt) hoặc AG-J1998 (việc nhận) */
   code: string;
@@ -87,6 +90,8 @@ export interface OrderIssue {
   want: string;
   text: string;
   photos: number;
+  /** Ảnh đã tải lên (đơn thật) */
+  images?: string[];
   reply?: string;
   amount?: number;
   result?: string;
@@ -121,6 +126,8 @@ export interface OrderDetail {
   subtotal: number;
   fee: number;
   discount: number;
+  /** Tiền hàng người làm trả giùm, khách trả lại chung với phí dịch vụ */
+  advance?: number;
   /** Các bước theo dõi của loại bài này (đồ ăn khác dịch vụ giặt khác sửa máy…) */
   steps: string[];
   template?: string;

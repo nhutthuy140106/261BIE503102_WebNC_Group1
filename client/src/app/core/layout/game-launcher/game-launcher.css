@@ -1,0 +1,44 @@
+/* góc dưới bên phải, nằm ngay trên nút trợ lý (cao 56px + khoảng cách) */
+:host { position: fixed; right: 20px; bottom: 90px; z-index: 34; font-size: 14px; }
+.gl { position: relative; display: flex; flex-direction: row-reverse; align-items: center; gap: 10px; }
+
+/* nút tròn: vòng quay nhiều màu quay chậm, đồng xu ở giữa; có sóng vàng lan ra như nút gọi */
+.fab { position: relative; flex: none; width: 54px; height: 54px; border-radius: 50%; background: transparent; border: 0; display: grid; place-items: center; transition: transform .15s; }
+.fab:hover, .fab:focus-visible { transform: translateY(-2px) scale(1.06); }
+.fab:not(.on)::before { content: ''; position: absolute; inset: -1px; border-radius: 50%; pointer-events: none; animation: gl-wave 3.2s ease-out infinite; }
+@keyframes gl-wave { 0%, 55% { box-shadow: 0 0 0 0 rgba(242, 154, 40, .42); } 90%, 100% { box-shadow: 0 0 0 20px rgba(242, 154, 40, 0); } }
+.fab.on { background: var(--ink, #22304A); box-shadow: 0 10px 28px rgba(34, 48, 74, .26); }
+.close { color: #fff; font-size: 30px; line-height: 1; }
+
+.wheel { position: relative; display: block; width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 6px 16px rgba(34, 48, 74, .3);
+  background: conic-gradient(#F27A3F 0 60deg, #FFD36B 60deg 120deg, #F27A3F 120deg 180deg, #FFD36B 180deg 240deg, #F27A3F 240deg 300deg, #FFD36B 300deg 360deg);
+  animation: gl-spin 14s linear infinite; }
+.fab:hover .wheel { animation-duration: 3s; }
+.wheel img { position: absolute; left: 50%; top: 50%; width: 23px; height: 23px; margin: -11.5px 0 0 -11.5px; border-radius: 50%; background: #fff; padding: 2px; animation: gl-spin 14s linear infinite reverse; }
+.fab:hover .wheel img { animation-duration: 3s; }
+@keyframes gl-spin { to { transform: rotate(360deg); } }
+.wheel.sm { flex: none; width: 46px; height: 46px; box-shadow: none; animation-duration: 10s; }
+.wheel.sm img { width: 24px; height: 24px; margin: -12px 0 0 -12px; animation-duration: 10s; }
+
+/* bong bóng chữ nhắc nhẹ, tự ẩn */
+.tip { display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: #fff; border: 1px solid #F8D7C6; box-shadow: 0 8px 22px rgba(34, 48, 74, .2); animation: gl-pop .3s ease both; }
+.tipbtn { padding: 8px 6px 8px 14px; font-weight: 700; font-size: 14px; color: #B34A14; white-space: nowrap; }
+.x { width: 26px; height: 26px; border-radius: 50%; color: var(--smoke, #6b7280); font-size: 18px; line-height: 1; }
+.x:hover { background: #FBF4F1; color: var(--ink, #22304A); }
+@keyframes gl-pop { from { opacity: 0; transform: translateX(8px) scale(.96); } to { opacity: 1; transform: none; } }
+
+/* bảng 2 lựa chọn */
+.panel { position: absolute; right: 0; bottom: 66px; width: min(320px, calc(100vw - 24px)); padding: 14px; border-radius: 18px; background: #fff; border: 1px solid var(--border, #E7E2DC); box-shadow: 0 22px 50px rgba(34, 48, 74, .28); animation: gl-pop .22s ease both; }
+.ptitle { margin: 0 0 10px 2px; font-weight: 700; font-size: 15px; color: var(--ink, #22304A); }
+.opt { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: #FBF4F1; color: var(--ink, #22304A); transition: background .15s, transform .15s; }
+.opt + .opt { margin-top: 8px; }
+.opt:hover { background: #F6E4DA; transform: translateX(2px); }
+.thumb { flex: none; width: 46px; height: 46px; object-fit: contain; }
+.txt { flex: 1; min-width: 0; display: grid; line-height: 1.3; }
+.txt b { font-size: 15px; }
+.txt small { color: var(--smoke, #6b7280); font-size: 12.5px; }
+.go { color: #D85A1C; font-size: 22px; line-height: 1; }
+.pnote { margin: 10px 2px 0; font-size: 12px; color: var(--smoke, #6b7280); }
+
+@media (max-width: 640px) { :host { right: 12px; bottom: 80px; } .fab { width: 48px; height: 48px; } .wheel { width: 42px; height: 42px; } .tip { max-width: calc(100vw - 100px); } }
+@media (prefers-reduced-motion: reduce) { .wheel, .wheel img, .fab::before { animation: none !important; } }

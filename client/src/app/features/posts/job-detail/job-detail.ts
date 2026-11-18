@@ -56,6 +56,11 @@ export class JobDetail implements OnInit, CanComponentDeactivate {
   /** Ảnh minh họa người đăng chụp (ví dụ căn phòng cần dọn); việc không có ảnh thì không hiện mục này. */
   protected readonly photos = computed(() => (this.job()?.images ?? []).map((i) => unsplash(i, 1200, 900)));
   protected readonly lightbox = signal<number | null>(null);
+
+  /** Nền mờ của ô ảnh = chính ảnh đó */
+  protected bg(src: string): string {
+    return 'url("' + src + '")';
+  }
   protected readonly myOffer = signal<Offer | null>(null);
   protected readonly qa = signal<Question[]>([]);
   protected readonly loading = signal(true);

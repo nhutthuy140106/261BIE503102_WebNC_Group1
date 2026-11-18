@@ -1,0 +1,27 @@
+h1 .pill { vertical-align: middle; margin-left: 6px; font-size: 13px; }
+.issue { border-color: var(--a-warn-line); background: linear-gradient(180deg, var(--a-warn-soft), var(--a-card) 55%); }
+.imgs { display: flex; flex-wrap: wrap; gap: 8px; }
+.imgs img { width: 84px; height: 84px; object-fit: cover; border-radius: 8px; border: 1px solid var(--a-line); }
+.judge { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--a-warn-line); }
+.judge h3 { margin: 0 0 10px; font-size: 15px; }
+.opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+.opt { display: flex; gap: 8px; align-items: flex-start; padding: 10px; border: 1px solid var(--a-line); border-radius: 10px; background: var(--a-glass); cursor: pointer; }
+.opt:has(input:checked) { border-color: var(--a-accent); background: var(--a-accent-soft); }
+.opt input { margin-top: 3px; accent-color: var(--a-accent); }
+.opt b { display: block; font-size: 14px; }
+.opt small { color: var(--a-mute); font-size: 12px; }
+/* tiến trình: chấm tròn nằm đúng trên đường nối, thẳng hàng với dòng chữ */
+.tl { list-style: none; margin: 4px 0 0; padding: 0; }
+.tl li { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 20px; padding: 0 0 16px 26px; font-size: 14px; line-height: 20px; }
+.tl li:last-child { padding-bottom: 0; }
+.tl li::before { content: ''; position: absolute; left: 0; top: 4px; box-sizing: border-box; width: 12px; height: 12px; border-radius: 50%; background: var(--a-accent); box-shadow: 0 0 0 3px var(--a-accent-soft); z-index: 1; }
+.tl li::after { content: ''; position: absolute; left: 5px; top: 16px; bottom: -4px; width: 2px; background: var(--a-line2); }
+.tl li:last-child::after { display: none; }
+.chat { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 340px; overflow-y: auto; }
+.chat li { max-width: 86%; padding: 8px 12px; border-radius: 12px; background: var(--a-chip); justify-self: start; }
+.chat li.me { justify-self: end; background: var(--a-accent-soft); }
+.chat p { margin: 2px 0 0; font-size: 14px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pc { display: grid; gap: 1px; padding: 10px 12px; border: 1px solid var(--a-line); border-radius: 10px; color: var(--a-ink); }
+.pc:hover { background: var(--a-hover); }
+@media (max-width: 640px) { .opts, .two { grid-template-columns: 1fr; } }

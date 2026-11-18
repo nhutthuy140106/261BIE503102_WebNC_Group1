@@ -98,7 +98,8 @@ export class XuService {
       if (!r) return;
       this.state.set({
         v: 2,
-        ledger: r.ledger.map((x) => ({ d: x.delta, t: x.title, key: (x.delta > 0 && x.kind === 'game' ? 'game:' : 'srv:') + x.id, at: Date.parse(x.at), exp: null, note: x.delta > 0 })),
+        // Xu cộng có hạn 6 tháng như bản mẫu (exp = null bị tính là hết hạn → số dư luôn 0)
+        ledger: r.ledger.map((x) => ({ d: x.delta, t: x.title, key: (x.delta > 0 && x.kind === 'game' ? 'game:' : 'srv:') + x.id, at: Date.parse(x.at), exp: x.delta > 0 ? Date.parse(x.at) + HALF_YEAR : null, note: x.delta > 0 })),
         vch: r.vouchers.map((v) => ({ id: v.id ?? v.code, cid: v.cid, at: Date.parse(v.expiresAt) - 30 * DAY, exp: Date.parse(v.expiresAt), used: v.status === 'active' || v.status === 'unused' ? null : 'srv' })),
       });
     });

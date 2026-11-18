@@ -18,6 +18,8 @@ const Report = require('../modules/buyer/report/report.model');
 const orders = require('../modules/buyer/order/order.service');
 const offers = require('../modules/buyer/offer/offer.service');
 const { USERS, POSTS, JOBS, COMBOS, COMBO_PROMOS, IMG, img } = require('./data');
+const { ENRICH, BANK_BY_NAME, IMAGE_BY_TITLE } = require('./post-enrich');
+const { addActivity } = require('./activity-extra');
 
 // Mật khẩu tài khoản mẫu lấy từ biến môi trường SEED_PASSWORD (.env), không viết cứng trong repo
 const getPassword = () => {
@@ -59,25 +61,53 @@ async function cleanup(userIds) {
 
 async function seed() {
   const password = getPassword();
-  const hash = await bcrypt.hash(password, 10);
 
   /* ---------- Người dùng ---------- */
   const u = {};
   for (const { key, ...d } of USERS) {
+    // băm riêng cho từng tài khoản: bcrypt tự sinh muối ngẫu nhiên nên cùng mật khẩu vẫn ra bản băm khác nhau
+    const hash = await bcrypt.hash(password, 10);
     u[key] = await User.findOneAndUpdate(
       { phone: d.phone },
-      { role: 'enduser', status: 'active', lockedReason: '', ...d, password: hash },
+      { role: 'enduser', status: 'active', lockedReason: '', phoneVerifiedAt: new Date(), ...d, password: hash },
       { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
     );
   }
   await cleanup(Object.values(u).map((x) => x._id));
 
   /* ---------- Bài đăng ---------- */
+  // Dữ liệu mẫu cũ ghi `stock: số` / `oneTime: true`; model mới dùng stock { mode, left } (docs/post-contract.md, khối 7)
+  const toStock = ({ stock, oneTime, ...rest }) => ({
+    ...rest,
+    stock: oneTime ? { mode: 'once' }
+      : stock && typeof stock === 'object' ? stock                       // đã là kiểu mới (bài lấy từ client-posts.json)
+      : typeof stock === 'number' ? { mode: 'limit', left: stock } : { mode: 'open' },
+  });
+  // Bài của bạn nhóm (khu Bán), sinh bằng `node scripts/build-client-posts.js` từ client/public/datasets/posts.json:
+  // extras = khối bổ sung cho bài đã có (theo tiêu đề); extra = bài chỉ có ở phía FE
+  const CLIENT = require('./client-posts.json');
   const p = {};
   const promos = {}; // Giờ vàng gán SAU khi tạo đơn mẫu, để tổng tiền đơn mẫu không đổi theo giờ chạy seed
-  for (const [i, { key, seller, daysAgo, images, promo, ...d }] of POSTS.entries()) {
+  // post-enrich.js: điền thông tin cho bài còn "trơ" (chỉ trường đang trống, không đè dữ liệu có sẵn)
+  const nameOfKey = Object.fromEntries(USERS.map((x) => [x.key, x.name]));
+  const enrich = (d) => {
+    const add = ENRICH[d.title];
+    if (!add && !IMAGE_BY_TITLE[d.title]) return d;
+    const out = { ...d };
+    if (IMAGE_BY_TITLE[d.title]) out.images = [IMAGE_BY_TITLE[d.title]];
+    if (!add) return out;
+    for (const [k, v] of Object.entries(add)) if (v !== undefined && (out[k] == null || (Array.isArray(out[k]) && !out[k].length))) out[k] = v;
+    const bank = BANK_BY_NAME[nameOfKey[d.seller]];
+    if (bank && !out.bank && (out.payMethods || []).includes('transfer')) out.bank = bank;
+    return out;
+  };
+  // Hai bài trùng hẳn bài khác (cùng người bán, cùng nội dung/ảnh) — bỏ khỏi dữ liệu mẫu, giữ bản đầy đủ hơn
+  const DUPLICATE_TITLES = new Set(['Tiệm xôi Yuumi - Nhận đơn đồ ăn sáng', 'Sửa laptop, điện thoại, kiểm tra tận nơi']);
+  const ALL_POSTS = [...POSTS.map((d) => enrich({ ...d, ...(CLIENT.extras[d.title] || {}) })),
+    ...CLIENT.extra.map((d, i) => enrich({ key: `fe${i}`, ...d }))].filter((d) => !DUPLICATE_TITLES.has(d.title));
+  for (const [i, { key, seller, daysAgo, images, promo, ...d }] of ALL_POSTS.entries()) {
     if (promo) promos[key] = promo;
-    p[key] = await Post.create({ ...d, seller: u[seller]._id, images: (images || []).map(img) });
+    p[key] = await Post.create({ ...toStock(d), seller: u[seller]._id, images: (images || []).map(img) });
     await backdate(Post, p[key]._id, ago(daysAgo * DAY + i * 17 * 60000));
   }
 
@@ -86,6 +116,7 @@ async function seed() {
     p[c.key] = await Post.create({
       type: 'food', category: 'Combo', title: c.title, description: c.description, unit: c.unit, seller: u[c.seller]._id, area: c.area, distance: c.distance,
       images: [img(IMG[c.image])], fulfillmentModes: ['delivery', 'pickup'], deliveryFee: c.deliveryFee, acceptsXu: !!c.acceptsXu,
+      ...(({ seller, key, daysAgo, ...rest }) => rest)(enrich({ title: c.title, seller: c.seller })),
       price: c.comboPrice, combo: { items: c.items.map(([k, qty]) => ({ postId: p[k]._id, qty })), comboPrice: c.comboPrice },
     });
     await backdate(Post, p[c.key]._id, ago(c.daysAgo * DAY + i * 13 * 60000));
@@ -149,7 +180,7 @@ async function seed() {
   const addrMe = String((await Address.findOne({ user: u.thuy._id, isDefault: { $ne: true } }))._id);
   o.prep = await place('thuy', 'bunCha', { fulfillment: 'delivery', addressId: addr.thuy });
   await advance(o.prep, 'preparing', 0.02);
-  o.deliver2 = await place('thuy', 'comChay', { fulfillment: 'delivery', addressId: addrMe, note: 'Đưa cho mẹ' });
+  o.deliver2 = await place('thuy', 'comChay', { fulfillment: 'delivery', addressId: addrMe, note: 'Đưa cho mẹ', selections: [{ group: 'Loại cơm', choices: ['Gạo lứt'] }] });
   await advance(o.deliver2, 'delivering', 0.03);
   o.ready = await place('thuy', 'banhFlan', {});
   await advance(o.ready, 'ready', 0.5);
@@ -234,6 +265,7 @@ async function seed() {
   await Job.updateMany({ _id: { $in: [j.meo._id, j.tuoiCay._id, j.thung._id] } }, { status: 'closed' });
   await Job.updateOne({ _id: j.thung._id }, { status: 'done' });
   for (const job of Object.values(j)) await offers.syncOfferCount(job._id);
+  await addActivity(); // đánh giá + đề nghị nhận việc thêm cho web "đã dùng lâu" (seeds/activity-extra.js)
 
   /* ---------- Hỏi đáp công khai ---------- */
   const qa = async (job, author, text, hoursAgo, answerBy, answerText) => {

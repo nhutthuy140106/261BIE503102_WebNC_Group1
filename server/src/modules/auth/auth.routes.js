@@ -2,7 +2,7 @@ const router = require('express').Router();
 const rateLimit = require('express-rate-limit');
 const c = require('./auth.controller');
 const v = require('./auth.validation');
-const { body } = require('../../middlewares/validate');
+const { body, query } = require('../../middlewares/validate');
 const { auth } = require('../../middlewares/auth');
 const { isTest } = require('../../config/env');
 
@@ -24,6 +24,26 @@ const registerLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => res.status(429).json({ error: { code: 'TOO_MANY_REQUESTS', message: 'Bạn đăng ký quá nhiều lần, vui lòng thử lại sau' } }),
+});
+
+// Kiểm tra số điện thoại ở bước 1 form đăng ký: tối đa 60 lần / 15 phút / IP (chống dò danh sách số đã đăng ký)
+const phoneCheckLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 60,
+  skip: () => isTest && !process.env.FORCE_RATE_LIMIT,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => res.status(429).json({ error: { code: 'TOO_MANY_REQUESTS', message: 'Bạn kiểm tra quá nhiều lần, vui lòng đợi ít phút' } }),
+});
+
+// Xin / nhập mã OTP: tối đa 30 lần / giờ / IP (ngoài giới hạn riêng từng số điện thoại trong otp.service)
+const otpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  skip: () => isTest && !process.env.FORCE_RATE_LIMIT,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => res.status(429).json({ error: { code: 'TOO_MANY_REQUESTS', message: 'Bạn thao tác quá nhiều lần, vui lòng thử lại sau' } }),
 });
 
 /**
@@ -49,6 +69,16 @@ const registerLimiter = rateLimit({
  *       201: { description: "{ data: User } + Set-Cookie; avatar mặc định null" }
  *       409: { description: Số điện thoại đã đăng ký }
  *       422: { description: Dữ liệu không hợp lệ }
+ * /auth/phone-exists:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Số điện thoại đã đăng ký chưa (bước 1 form đăng ký)
+ *     parameters:
+ *       - { in: query, name: phone, required: true, schema: { type: string, example: "0901234567" } }
+ *     responses:
+ *       200: { description: "{ data: { exists: boolean } }" }
+ *       422: { description: Số điện thoại sai định dạng }
+ *       429: { description: Kiểm tra quá nhiều lần }
  * /auth/login:
  *   post:
  *     tags: [Auth]
@@ -121,11 +151,68 @@ const registerLimiter = rateLimit({
  *       401: { description: Chưa đăng nhập hoặc hết phiên }
  *       403: { description: Tài khoản bị khóa }
  */
+/**
+ * @openapi
+ * /auth/profile:
+ *   patch:
+ *     tags: [Auth]
+ *     summary: Sửa hồ sơ của mình (tên, ảnh đại diện, email, giới tính, ngày sinh, giới thiệu)
+ *     description: Trường nào gửi lên mới đổi; chuỗi rỗng = xóa. `avatar` chỉ nhận ảnh đã tải lên AntGo (/images/uploads/...) hoặc https.
+ *     security: [{ cookieAuth: [] }]
+ *     responses: { 200: { description: "{ data: User }" }, 422: { description: Dữ liệu chưa hợp lệ } }
+ * /auth/password/change:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Đổi mật khẩu khi đang đăng nhập (cần mật khẩu hiện tại)
+ *     security: [{ cookieAuth: [] }]
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object, required: [current, next], properties: { current: { type: string }, next: { type: string } } } } } }
+ *     responses: { 204: { description: Đã đổi }, 409: { description: Tài khoản Google chưa có mật khẩu }, 422: { description: Sai mật khẩu hiện tại / mật khẩu mới chưa đạt } }
+ */
+/**
+ * @openapi
+ * /auth/otp/send:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Gửi mã OTP tới số điện thoại (giả lập, chưa gửi SMS thật)
+ *     description: |
+ *       `purpose` = `register` (số chưa có tài khoản) hoặc `reset` (quên mật khẩu). Mã 6 số, hạn 5 phút, gửi lại cách nhau 60 giây, tối đa 5 lần/giờ.
+ *       Mã in ra màn hình server; ngoài production còn trả `devCode`. `reset` với số chưa đăng ký vẫn trả như đã gửi.
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object, required: [phone, purpose], properties: { phone: { type: string }, purpose: { type: string, enum: [register, reset] } } } } } }
+ *     responses:
+ *       200: { description: "{ data: { sent, expiresInSec, resendInSec, devCode? } }" }
+ *       409: { description: Số đã đăng ký (purpose register) }
+ *       429: { description: Gửi lại quá sớm hoặc quá số lần }
+ * /auth/otp/verify:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Nhập mã OTP
+ *     description: Đúng mã thì số này được coi là đã xác minh trong 10 phút (mã dùng một lần). Nhập sai tối đa 5 lần.
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object, required: [phone, purpose, code], properties: { phone: { type: string }, purpose: { type: string, enum: [register, reset] }, code: { type: string } } } } } }
+ *     responses:
+ *       200: { description: "{ data: { verified: true } }" }
+ *       409: { description: Mã hết hạn hoặc chưa gửi }
+ *       422: { description: Sai mã }
+ *       429: { description: Sai quá nhiều lần }
+ * /auth/password/reset:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Đặt mật khẩu mới sau khi xác minh OTP (purpose reset)
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object, required: [phone, password], properties: { phone: { type: string }, password: { type: string } } } } } }
+ *     responses:
+ *       204: { description: Đã đổi mật khẩu }
+ *       403: { description: Chưa xác minh số điện thoại }
+ */
+router.post('/otp/send', otpLimiter, body(v.otpSend), c.otpSend);
+router.post('/otp/verify', otpLimiter, body(v.otpVerify), c.otpVerify);
+router.post('/password/reset', otpLimiter, body(v.passwordReset), c.passwordReset);
 router.post('/register', registerLimiter, body(v.register), c.register);
+router.get('/phone-exists', phoneCheckLimiter, query(v.phoneQuery), c.phoneExists);
 router.post('/login', loginLimiter, body(v.login), c.login);
 router.post('/google', loginLimiter, body(v.google), c.google);
 router.post('/google/complete', loginLimiter, body(v.googleComplete), c.googleComplete);
 router.post('/logout', c.logout);
 router.get('/profile', auth, c.profile);
+router.patch('/profile', auth, body(v.profile), c.updateProfile);
+router.post('/password/change', auth, loginLimiter, body(v.passwordChange), c.changePassword);
 
 module.exports = router;

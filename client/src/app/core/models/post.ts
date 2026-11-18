@@ -118,6 +118,11 @@ export interface Post {
   reviewCount?: number;
   /** Số lượt đã bán / đã đặt (chỉ bài bán, không có ở việc làm) */
   sold?: number;
+  /** Chỉ danh sách bài của người bán (server tính): lượt xem, lượt lưu */
+  views?: number;
+  saves?: number;
+  /** Chỉ chủ bài đọc được: dữ liệu form đăng bài ({ type, form }) để mở lại đúng từng ô khi sửa */
+  formData?: { type: string; form: Record<string, unknown> };
   /** Bài quảng bá bằng AntXu — hiện nhãn "QUẢNG BÁ" */
   promoted?: boolean;
   /** Người bán trả AntXu để món dễ ra hơn trong trang Quay món (có nhãn "Quảng bá"); khác với `promoted` ở trang chủ */
@@ -155,6 +160,12 @@ export interface Post {
   freeShipFrom?: number;
   /** Các khu người bán phục vụ (bài đăng từ form khu Bán); `block` ghi sẵn tên các khu để hiển thị */
   areas?: string[];
+  /** Tên dòng giờ trong khung đặt, ví dụ "Giờ giao hàng" (giao nhận); không có thì theo mẫu */
+  timeLabel?: string;
+  /** Dọn dẹp: mỗi đơn một dịch vụ, khách không chọn số lượng; giá là tổng các tùy chọn khách chọn */
+  bookOnce?: boolean;
+  /** Dọn dẹp: danh sách dịch vụ, mỗi dịch vụ có tùy chọn cộng giá và câu hỏi riêng (khách chọn dịch vụ xong mới hiện) */
+  serviceMenu?: { name: string; optionGroups: OptionGroup[]; questions: PostQuestion[] }[];
   /** Giặt sấy: người làm luôn qua nhà khách lấy đồ nên luôn cần địa chỉ; cách nhận chỉ áp dụng lúc trả đồ */
   pickupAtBuyer?: boolean;
   /** Dịch vụ không có mục Thông tin nhanh (giặt sấy, lưu trú): 3 ô đầu bài lấy từ các ô người bán đã điền */
@@ -168,7 +179,10 @@ export interface Post {
   duration?: { min: number; max: number };
   repeat?: boolean;
   /** Khối 4: dịch vụ làm ở đâu (tại nhà khách · khách mang tới · khách chọn · A→B) + địa chỉ người bán */
-  place?: { mode: 'buyer' | 'seller' | 'choice' | 'ab'; where?: string };
+  /** none: không có nơi làm cố định (gia sư: ghi trong mô tả, thỏa thuận sau) */
+  place?: { mode: 'buyer' | 'seller' | 'choice' | 'ab' | 'none'; where?: string };
+  /** Không có lịch hẹn: khách không chọn ngày giờ khi đặt (gia sư) */
+  noSchedule?: boolean;
   /** Đồ ăn/uống: thời gian chuẩn bị (phút). `handover` = khung giờ khách chọn hẹn: giờ giao/nhận món (đồ ăn) hoặc giờ làm dịch vụ */
   prepMinutes?: number;
   handover?: { from: string; to: string };

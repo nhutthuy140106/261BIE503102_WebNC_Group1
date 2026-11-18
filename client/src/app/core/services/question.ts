@@ -4,6 +4,7 @@ import { useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { Question } from '../models/social';
 import { questionFromApi } from '../utils/api-mappers';
+import { posterQuestionFromApi } from '../utils/seller-mappers';
 import { containsPhone } from '../utils/validators';
 import { ApiService } from './api';
 import { AuthService } from './auth';
@@ -25,6 +26,7 @@ export class QuestionService {
 
   /** Người đăng việc trả lời: ghi vào cùng câu hỏi nên người hỏi thấy ngay */
   answer(id: string, text: string): Observable<Question> {
+    if (!useMock('seller')) return this.api.post<unknown>(`/seller/questions/${id}/answer`, { text }).pipe(map(posterQuestionFromApi));
     return this.db.list<Question>(COLLECTION).pipe(
       map((rows) => {
         const cur = rows.find((q) => q._id === id);

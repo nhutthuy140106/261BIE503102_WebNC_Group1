@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, tap, throwError } from 'rxjs';
 import { API_BASE, useMock } from '../config/api.config';
 import { User } from '../models/user';
 import { userFromApi } from '../utils/api-mappers';
 import { AppError } from '../models/api';
 import { toAppError } from './api';
+import { UploadService } from './upload';
 
 export interface LoginBody {
   phone: string;
@@ -23,6 +24,7 @@ const REMEMBER_COOKIE = 'antgo_remember_username';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly uploads = inject(UploadService);
 
   readonly currentUser = signal<User | null>(null);
   readonly isLoggedIn = computed(() => this.currentUser() !== null);
@@ -138,6 +140,20 @@ export class AuthService {
     }
   }
 
+  /** Số điện thoại đã có tài khoản chưa — để form đăng ký báo ngay ở bước nhập số. Mock: số đã đăng ký trong trình duyệt này (antgo_names) */
+  phoneExists(phone: string): Observable<boolean> {
+    if (useMock('auth')) {
+      try {
+        return of(phone in (JSON.parse(localStorage.getItem('antgo_names') ?? '{}') as Record<string, string>));
+      } catch {
+        return of(false);
+      }
+    }
+    return this.http
+      .get<{ data: { exists: boolean } }>(`${API_BASE}/auth/phone-exists`, { params: { phone }, withCredentials: true })
+      .pipe(map((r) => r.data.exists), catchError(toAppError));
+  }
+
   private saveMockName(phone: string, name: string): void {
     try {
       const m = JSON.parse(localStorage.getItem('antgo_names') ?? '{}') as Record<string, string>;
@@ -161,7 +177,26 @@ export class AuthService {
   updateProfile(body: Partial<Pick<User, 'fullName' | 'avatar' | 'email' | 'gender' | 'birthday' | 'bio'>>): Observable<User> {
     const cur = this.currentUser();
     if (!cur) return throwError(() => new AppError('Bạn cần đăng nhập.', 401, 'UNAUTHORIZED'));
-    if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
+    if (!useMock('auth')) {
+      // thật: ảnh đang ở dạng data: phải tải lên server trước (server chỉ nhận địa chỉ ảnh của AntGo)
+      const avatar$ = body.avatar && /^(data|blob):/.test(body.avatar) ? this.uploads.uploadDataUrl(body.avatar) : of(body.avatar);
+      return avatar$.pipe(
+        switchMap((avatar) => {
+          const send: Record<string, unknown> = {
+            ...(body.fullName !== undefined ? { name: body.fullName } : {}),
+            ...(body.avatar !== undefined ? { avatar } : {}),
+            ...('email' in body ? { email: body.email ?? '' } : {}),
+            ...('gender' in body ? { gender: body.gender ?? '' } : {}),
+            ...('birthday' in body ? { birthday: body.birthday ?? '' } : {}),
+            ...('bio' in body ? { bio: body.bio ?? '' } : {}),
+          };
+          return this.http.patch<{ data: unknown }>(`${API_BASE}/auth/profile`, send, { withCredentials: true });
+        }),
+        map((r) => ({ ...userFromApi(r.data), xu: cur.xu })),
+        tap((user) => this.currentUser.set(user)),
+        catchError(toAppError),
+      );
+    }
     const user: User = { ...cur, ...body };
     if (body.fullName) this.saveMockName(cur.username, body.fullName);
     sessionStorage.setItem(MOCK_KEY, JSON.stringify(user));
@@ -171,16 +206,30 @@ export class AuthService {
 
   /** Đổi mật khẩu. Mock luôn thành công; API thật chờ máy chủ có điểm cuối. */
   changePassword(current: string, next: string): Observable<void> {
-    if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
+    if (!useMock('auth')) return this.http.post<void>(`${API_BASE}/auth/password/change`, { current, next }, { withCredentials: true }).pipe(catchError(toAppError));
     if (!current || next.length < 8) return throwError(() => new AppError('Mật khẩu chưa hợp lệ.', 422, 'VALIDATION_ERROR'));
     return of(void 0);
   }
 
-  /** Quên mật khẩu: đặt mật khẩu mới sau khi xác nhận mã. Mock luôn thành công; API thật chờ máy chủ có điểm cuối. */
+  /** Gửi mã OTP tới số điện thoại (đăng ký hoặc quên mật khẩu). Mock: không gửi gì, nhập 6 số bất kỳ. Thật: server giả lập, ngoài production trả thêm `devCode` để thử. */
+  sendOtp(phone: string, purpose: 'register' | 'reset'): Observable<{ devCode?: string; resendInSec?: number }> {
+    if (useMock('auth')) return of({});
+    return this.http
+      .post<{ data: { devCode?: string; resendInSec?: number } }>(`${API_BASE}/auth/otp/send`, { phone, purpose }, { withCredentials: true })
+      .pipe(map((r) => r.data), catchError(toAppError));
+  }
+
+  /** Nhập mã OTP. Mock luôn đúng. Thật: server kiểm mã (hạn 5 phút, sai tối đa 5 lần). */
+  verifyOtp(phone: string, purpose: 'register' | 'reset', code: string): Observable<void> {
+    if (useMock('auth')) return of(void 0);
+    return this.http.post<unknown>(`${API_BASE}/auth/otp/verify`, { phone, purpose, code }, { withCredentials: true }).pipe(map(() => void 0), catchError(toAppError));
+  }
+
+  /** Quên mật khẩu: đặt mật khẩu mới sau khi đã nhập đúng mã (verifyOtp, purpose reset). Mock luôn thành công. */
   resetPassword(phone: string, password: string): Observable<void> {
-    if (!useMock('auth')) return throwError(() => new AppError('Chức năng này chờ máy chủ.', 501, 'NOT_IMPLEMENTED'));
     if (!phone || password.length < 8) return throwError(() => new AppError('Mật khẩu chưa hợp lệ.', 422, 'VALIDATION_ERROR'));
-    return of(void 0);
+    if (useMock('auth')) return of(void 0);
+    return this.http.post<unknown>(`${API_BASE}/auth/password/reset`, { phone, password }, { withCredentials: true }).pipe(map(() => void 0), catchError(toAppError));
   }
 
   /** Hỏi server phiên còn hiệu lực không (GET /api/auth/profile: 200 hay 401). */

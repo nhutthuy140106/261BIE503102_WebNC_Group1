@@ -11,6 +11,7 @@ import { SellerShop } from './seller-shop/seller-shop';
 import { SellerPosts } from './seller-posts/seller-posts';
 import { SellerCalendar } from './seller-calendar/seller-calendar';
 import { SellerPostForm } from './seller-post-form/seller-post-form';
+import { SellerPostQuick } from './seller-post-quick/seller-post-quick';
 import { SellerOrders } from './seller-orders/seller-orders';
 import { SellerOrderDetail } from './seller-order-detail/seller-order-detail';
 import { SellerJobDetail } from './seller-job-detail/seller-job-detail';
@@ -34,6 +35,7 @@ const routes: Routes = [
       { path: 'calendar', component: SellerCalendar, title: 'Lịch · AntGo Bán' },
       { path: 'posts', component: SellerPosts, title: 'Bài đăng · AntGo Bán' },
       { path: 'posts/new', component: SellerPostForm, title: 'Đăng bài · AntGo Bán', canDeactivate: [pendingChangesGuard] },
+      { path: 'posts/:id/quick', component: SellerPostQuick, title: 'Sửa nhanh bài · AntGo Bán' },
       { path: 'posts/:id/edit', component: SellerPostForm, title: 'Đăng bài · AntGo Bán', canDeactivate: [pendingChangesGuard] },
       { path: 'insights', component: SellerInsights, title: 'Hiệu quả · AntGo Bán' },
       { path: 'messenger', component: SellerMessenger, title: 'Messenger · AntGo Bán' },

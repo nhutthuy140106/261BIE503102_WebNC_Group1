@@ -1,13 +1,21 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { REPORT_REASON_LABEL, ReportReason } from '../../../core/models/social';
-import { AdminReport, AdminService, AdminStats } from '../../../core/services/admin';
+import { AdminApi, Dashboard, msgOf } from '../../../core/services/admin-api';
+import { AuthService } from '../../../core/services/auth';
 
 const STATE_LABEL: Record<string, string> = {
-  pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận', pricing: 'Chờ duyệt giá', preparing: 'Đang chuẩn bị', delivering: 'Đang giao', ready: 'Sẵn sàng',
-  done: 'Hoàn thành', cancelled: 'Đã hủy', declined: 'Bị từ chối',
+  waiting: 'Chờ xác nhận', confirmed: 'Đã xác nhận', picked: 'Đã lấy đồ', pricing: 'Chờ duyệt giá', preparing: 'Đang chuẩn bị',
+  delivering: 'Đang giao', ready: 'Sẵn sàng', done: 'Hoàn thành', cancelled: 'Đã hủy', declined: 'Bị từ chối',
+};
+const STATE_ORDER = ['done', 'delivering', 'preparing', 'ready', 'confirmed', 'picked', 'waiting', 'pricing', 'cancelled', 'declined'];
+/** Màu từng trạng thái trên biểu đồ vành khuyên: xanh lá = xong, vàng = chờ, đỏ = hủy, còn lại nhóm cam / xanh dương */
+const STATE_COLOR: Record<string, string> = {
+  done: '#5BD1A0', delivering: '#F58A5B', preparing: '#E8662F', ready: '#FFB08D', confirmed: '#7FB2FF', picked: '#5B8FE0',
+  waiting: '#F5B04C', pricing: '#F7C873', cancelled: '#F58585', declined: '#C95D5D',
 };
 
-/** Tổng quan Quản trị: 4 ô số, biểu đồ cột đơn theo trạng thái (CSS thuần) và 5 báo cáo mới nhất. */
+interface Slice { key: string; label: string; n: number; pct: number; color: string; len: number; off: number }
+
+/** Tổng quan: việc cần xử lý hôm nay, chỉ số chính, biểu đồ cột theo ngày, vành khuyên đơn theo trạng thái, người bán hàng đầu. */
 @Component({
   selector: 'app-admin-overview',
   standalone: false,
@@ -15,27 +23,106 @@ const STATE_LABEL: Record<string, string> = {
   styleUrls: ['../admin-shared.css', './admin-overview.css'],
 })
 export class AdminOverview implements OnInit {
-  private readonly admin = inject(AdminService);
-
-  protected readonly stats = signal<AdminStats | null>(null);
-  protected readonly recent = signal<AdminReport[]>([]);
+  private readonly api = inject(AdminApi);
+  protected readonly me = inject(AuthService).currentUser;
+  protected readonly data = signal<Dashboard | null>(null);
   protected readonly error = signal('');
+  /** Cung đang rê chuột trên vành khuyên + vị trí con trỏ (tính trong khung vành khuyên) để vẽ chú thích riêng */
+  protected readonly hov = signal<{ label: string; n: number; pct: number; color: string } | null>(null);
+  protected readonly tipPos = signal({ x: 0, y: 0 });
+  protected days = 7;
+  /** Chu vi vành khuyên r = 54 */
+  protected readonly C = 2 * Math.PI * 54;
 
   ngOnInit(): void {
-    this.admin.stats().subscribe({ next: (s) => this.stats.set(s), error: () => this.error.set('Không tải được số liệu. Bạn thử lại sau nhé.') });
-    this.admin.listReports().subscribe({
-      next: (r) => this.recent.set([...r].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5)),
-      error: () => this.error.set('Không tải được số liệu. Bạn thử lại sau nhé.'),
+    this.load();
+  }
+
+  protected load(): void {
+    this.error.set('');
+    this.api.dashboard(+this.days).subscribe({
+      next: (d) => this.data.set(d),
+      error: (e: unknown) => this.error.set(msgOf(e, 'Không tải được số liệu.')),
     });
   }
 
-  protected bars(s: AdminStats): { key: string; label: string; n: number; pct: number }[] {
-    const rows = Object.entries(s.orders.byState).filter(([, n]) => n > 0);
-    const max = Math.max(1, ...rows.map(([, n]) => n));
-    return rows.map(([key, n]) => ({ key, label: STATE_LABEL[key] ?? key, n, pct: (n / max) * 100 }));
+  protected sum(a: number[]): number {
+    return a.reduce((x, y) => x + y, 0);
   }
 
-  protected reason(r: string): string {
-    return REPORT_REASON_LABEL[r as ReportReason] ?? r;
+  protected tasks(d: Dashboard): { label: string; n: number; to: string; q?: Record<string, string> }[] {
+    return [
+      { label: 'Hồ sơ người bán', n: d.todo.verifications, to: '/admin/verifications' },
+      { label: 'Báo cáo vi phạm', n: d.todo.reports, to: '/admin/reports' },
+      { label: 'Đơn báo vấn đề', n: d.todo.issues, to: '/admin/orders', q: { issue: 'open' } },
+      { label: 'Yêu cầu hủy đơn', n: d.todo.cancelRequests, to: '/admin/orders' },
+      { label: 'Phiếu hỗ trợ', n: d.todo.tickets, to: '/admin/support' },
+    ];
+  }
+
+  protected allClear(d: Dashboard): boolean {
+    return this.tasks(d).every((t) => t.n === 0);
+  }
+
+  /** Trần trục tung: làm tròn lên để các vạch chia là số tròn */
+  protected niceMax(...series: number[][]): number {
+    const m = Math.max(1, ...series.flat());
+    const p = 10 ** Math.floor(Math.log10(m));
+    const n = m / p;
+    // chọn bội số chia hết cho 4 để cả 4 khoảng trên trục đều ra số tròn (0 – 8 – 16 – 24 – 32)
+    return ([1, 1.2, 1.6, 2, 2.4, 3.2, 4, 4.8, 6.4, 8, 10].find((x) => x >= n) ?? 10) * p;
+  }
+
+  protected ticks(max: number, money = false): { pct: number; text: string }[] {
+    return [0, 0.25, 0.5, 0.75, 1].map((f) => ({ pct: f * 100, text: money ? this.compact(max * f) : String(Math.round(max * f)) }));
+  }
+
+  /** 1.250.000 → "1,3 tr"; 45.000 → "45k" */
+  protected compact(n: number): string {
+    if (n >= 1e6) return `${Math.round((n / 1e6) * 10) / 10} tr`.replace('.', ',');
+    if (n >= 1e3) return `${Math.round(n / 1e3)}k`;
+    return String(Math.round(n));
+  }
+
+  protected pct(v: number, max: number): number {
+    return max > 0 ? Math.max(v > 0 ? 3 : 0, (v / max) * 100) : 0;
+  }
+
+  /** Nhãn trục ngày: chỉ hiện mỗi k ngày để không dính nhau khi xem 30 / 90 ngày */
+  protected xLabels(days: string[]): string[] {
+    const k = Math.max(1, Math.ceil(days.length / 10));
+    return days.map((d, i) => ((days.length - 1 - i) % k === 0 ? d.slice(8) + '/' + d.slice(5, 7) : ''));
+  }
+
+  protected dayFull(k: string): string {
+    return k.slice(8) + '/' + k.slice(5, 7);
+  }
+
+  protected hover(s: Slice | null, e?: MouseEvent): void {
+    this.hov.set(s ? { label: s.label, n: s.n, pct: s.pct, color: s.color } : null);
+    if (s && e) this.moveTip(e);
+  }
+
+  protected moveTip(e: MouseEvent): void {
+    const wrap = (e.currentTarget as Element).closest('.donut-wrap');
+    if (!wrap) return;
+    const r = wrap.getBoundingClientRect();
+    this.tipPos.set({ x: e.clientX - r.left, y: e.clientY - r.top });
+  }
+
+  protected slices(d: Dashboard): Slice[] {
+    const rows = STATE_ORDER.filter((k) => d.ordersByState[k]).map((k) => ({ key: k, label: STATE_LABEL[k], n: d.ordersByState[k], color: STATE_COLOR[k] }));
+    const total = Math.max(1, rows.reduce((a, r) => a + r.n, 0));
+    let acc = 0;
+    return rows.map((r) => {
+      const len = (r.n / total) * this.C;
+      const s = { ...r, pct: Math.round((r.n / total) * 1000) / 10, len: Math.max(0, len - 2.5), off: -acc }; // chừa khe 2,5 giữa các cung
+      acc += len;
+      return s;
+    });
+  }
+
+  protected topMax(d: Dashboard): number {
+    return Math.max(1, ...d.topSellers.map((s) => s.revenue));
   }
 }

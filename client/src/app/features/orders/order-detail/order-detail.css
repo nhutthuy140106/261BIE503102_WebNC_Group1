@@ -353,3 +353,11 @@ a.pbtn.link { text-decoration: none; }
 .thanks .btns .go { width: auto; padding: 0 36px; }
 .thanks img { width: 150px; }
 .trk-slot { display: block; margin-bottom: 16px; }
+/* giữ đúng cách xuống dòng, cách đoạn người đăng gõ trong form */
+.iv.plain { white-space: pre-line; }
+
+.paybox { margin-top: 16px; }
+.paybox h3 { margin: 0; font-size: 15px; }
+
+.rqpics { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.rqpics img { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; border: 1px solid #E5E7EB; }

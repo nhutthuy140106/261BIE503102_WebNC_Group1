@@ -20,8 +20,10 @@
         <h2>Thông tin đơn</h2>
         <dl class="info">
           <div><dt><svg class="i"><use href="#user" /></svg>Khách</dt><dd>{{ o.buyer.name }}<small>{{ o.buyer.phone }}</small></dd></div>
-          <div><dt><svg class="i"><use href="#pin" /></svg>{{ o.flow === 'laundry' ? 'Lấy đồ tại' : o.flow === 'repair' ? 'Nơi sửa' : o.fulfil === 'home' ? 'Làm tại' : 'Hình thức nhận' }}</dt>
-            @if (o.flow === 'laundry') {
+          <div><dt><svg class="i"><use href="#pin" /></svg>{{ o.placeNote ? 'Nơi làm' : o.flow === 'laundry' ? 'Lấy đồ tại' : o.flow === 'repair' ? 'Nơi sửa' : o.fulfil === 'home' ? 'Làm tại' : 'Hình thức nhận' }}</dt>
+            @if (o.placeNote) {
+              <dd>{{ o.placeNote }}</dd>
+            } @else if (o.flow === 'laundry') {
               <dd>{{ o.address }}<small>Trả đồ: {{ o.fulfil === 'pickup' ? 'khách tự đến lấy' : 'giao tận tòa' }}</small></dd>
             } @else {
             <dd>{{ o.fulfil === 'pickup' ? (o.flow === 'repair' ? 'Khách mang tới' : 'Khách tự đến lấy') : o.fulfil === 'home' ? 'Tại nhà khách' : 'Giao tận tòa' }}<small>{{ o.address }}</small></dd>
@@ -30,7 +32,7 @@
           <div><dt><svg class="i"><use href="#bag" /></svg>{{ o.fulfil === 'home' || o.flow === 'repair' ? 'Dịch vụ' : 'Món' }}</dt>
             <dd>@for (i of o.items; track $index) { {{ i.name }} × {{ i.qty }}@if (i.option) { <small>{{ i.option }}</small> } }</dd></div>
           @for (a of o.answers ?? []; track $index) {
-            <div><dt><svg class="i"><use href="#question" /></svg>{{ a[0] }}</dt><dd>@if (a[1].startsWith('data:image')) { <a class="ansphoto" [href]="a[1]" target="_blank" rel="noopener"><img [src]="a[1]" [alt]="a[0]" /></a> } @else { {{ a[1] }} }</dd></div>
+            <div><dt><svg class="i"><use href="#question" /></svg>{{ a[0] }}</dt><dd>@if (a[1].startsWith('data:image')) { <span class="ansphotos">@for (ph of a[1].split('|||'); track $index) { <a class="ansphoto" [href]="ph" target="_blank" rel="noopener"><img [src]="ph" [alt]="a[0]" /></a> }</span> } @else { {{ a[1] }} }</dd></div>
           }
           @if (o.note) { <div><dt><svg class="i"><use href="#pencil" /></svg>Ghi chú</dt><dd>{{ o.note }}</dd></div> }
           @if (o.declineReason && o.state === 'declined') { <div><dt><svg class="i"><use href="#xmark" /></svg>Lý do từ chối</dt><dd>{{ o.declineReason }}</dd></div> }
@@ -55,6 +57,18 @@
           <div class="tot"><span>Tổng cộng</span><b>{{ o.total | vnd }}</b></div>
         </div>
       </div>
+
+      @if (o.issue; as is) {
+        <div class="box" id="issue">
+          <h2>Khách báo vấn đề</h2>
+          <dl class="info">
+            <div><dt><svg class="i"><use href="#question" /></svg>Vấn đề</dt><dd>@for (r of splitReasons(is.type); track $index) { {{ r }}@if (!$last) { · } }</dd></div>
+            @if (is.text) { <div><dt><svg class="i"><use href="#pencil" /></svg>Khách mô tả</dt><dd>{{ is.text }}</dd></div> }
+            @if (is.images?.length) { <div><dt><svg class="i"><use href="#photo" /></svg>Ảnh</dt><dd><span class="ansphotos">@for (ph of is.images; track $index) { <a class="ansphoto" [href]="ph" target="_blank" rel="noopener"><img [src]="ph" alt="Ảnh khách gửi" /></a> }</span></dd></div> }
+            <div><dt><svg class="i"><use href="#clock" /></svg>Trạng thái</dt><dd>{{ issueText(is.st) }}@if (is.amount) { <small>{{ is.amount | vnd }}</small> }@if (is.reply) { <small>Bạn trả lời: “{{ is.reply }}”</small> }@if (is.result) { <small>{{ is.result }}</small> }</dd></div>
+          </dl>
+        </div>
+      }
 
       @if (review(); as rv) {
         <div class="box" id="review">
@@ -82,11 +96,13 @@
     <aside class="side">
       <div class="panel">
         <div class="now"><span class="stat" [class]="'stat ' + o.cls">{{ o.cancelRequest ? 'Khách xin hủy' : o.label }}</span></div>
+        @if (dueView(); as d) { <p class="dueline" [class.hot]="d.hot"><svg class="i"><use href="#clock" /></svg>{{ d.text }}</p> }
         @if (o.cancelRequest) {
           <div class="warn"><b>Khách xin hủy đơn</b>“{{ o.cancelRequest }}”</div>
         } @else {
-          <p>{{ guideText() }}@if (o.state === 'waiting' && o.due) { <b class="due"> {{ o.due }}.</b> }</p>
+          <p>{{ guideText() }}</p>
         }
+        @if (o.cancelWhy && (o.state === 'cancelled' || o.state === 'declined')) { <p class="muted">Lý do: {{ o.cancelWhy }}</p> }
         @switch (form()) {
           @case ('decline') {
             <form class="form" (submit)="decline($event)">
@@ -130,7 +146,20 @@
               <div class="row2"><button type="button" class="btn" (click)="form.set(null)">Thôi</button><button type="submit" class="btn primary">Gửi báo giá</button></div>
             </form>
           }
+          @case ('issue') {
+            <form class="form" (submit)="sendIssue($event, ia.value, ir.value)">
+              <span class="ftitle">Trả lời khách</span>
+              @for (opt of issueOptions(); track opt.act) {
+                <label class="rd" [class.on]="issueChoice() === opt.act"><input type="radio" name="isc" [checked]="issueChoice() === opt.act" (change)="issueChoice.set(opt.act)" />{{ opt.label }}</label>
+              }
+              <input #ia appMoney class="input" placeholder="Số tiền hoàn, ví dụ 20.000" [hidden]="!issueMoney()" />
+              <textarea #ir class="input" placeholder="Lời nhắn cho khách (bắt buộc nếu không đồng ý)" maxlength="300"></textarea>
+              <span class="muted small">Tiền hoàn do bạn chuyển trực tiếp cho khách, AntGo không giữ tiền.</span>
+              <div class="row2"><button type="button" class="btn" (click)="form.set(null)">Thôi</button><button type="submit" class="btn primary">Gửi khách</button></div>
+            </form>
+          }
           @default {
+            @if (o.issue?.st === 'open') { <button type="button" class="btn primary" (click)="openIssue()">Trả lời khách báo vấn đề</button> }
             @if (o.flow && o.quote && o.state === 'pricing') {
               <div class="qbox">
                 @for (l of o.quote.lines; track $index) { <div><span>{{ l.name }}@if (o.flow === 'laundry') { × {{ l.qty }} }</span><b>{{ l.qty * l.price | vnd }}</b></div> }

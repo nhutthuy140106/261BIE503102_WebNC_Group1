@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
 import { KIND_LABEL } from '../../../../core/models/post';
-import { SellerTask } from '../../../../core/services/seller-space';
+import { SellerSpaceService, SellerTask } from '../../../../core/services/seller-space';
+import { dueText } from '../../../../core/utils/countdown';
 
 /** Hành động trên thẻ: primary = nút chính, decline = ✕, chat = 💬 */
 export type TaskAction = 'primary' | 'decline' | 'chat';
@@ -22,6 +23,13 @@ export class SellerTaskCard {
   @Output() readonly opened = new EventEmitter<void>();
 
   protected readonly replying = signal(false);
+  private readonly seller = inject(SellerSpaceService);
+
+  /** Hạn xử lý đếm ngược theo đồng hồ chung (mỗi giây); việc không có hạn (hỏi đáp, đánh giá, trả đồ…) thì không hiện */
+  protected get dueView(): { text: string; hot: boolean } | null {
+    const d = this.task.deadline;
+    return d ? dueText(d, this.seller.now()) : null;
+  }
   protected readonly kindLabel = KIND_LABEL;
 
   /** Nút chính chỉ có hai chữ: "Phản hồi" (hỏi đáp / đánh giá) và "Xác nhận" (mọi việc còn lại) — nhãn trạng thái nói rõ xác nhận gì */

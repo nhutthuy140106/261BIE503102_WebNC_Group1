@@ -44,8 +44,14 @@ export function toSellerOrder(order: Order, post: Post, body: CreateOrderBody, s
     ? cups.map((c, i) => ({ name: c.name, qty: c.qty, option: [c.option, i === 0 ? option : ''].filter(Boolean).join(' · '), price: c.price }))
     : post.priceType === 'quote'
     ? [{ name: 'Phí kiểm tra', qty: 1, option, price: order.total - ship }]
+    // dọn dẹp: giá nằm hết ở lựa chọn của khách, một dòng đúng tổng tiền
+    : post.bookOnce
+    ? [{ name: post.title, qty: 1, option, price: order.total - ship }]
     : dishes.map((d, i) => ({ name: d.name, qty: d.qty, option: i === 0 ? option : '', price: post.items?.find((x) => x.name === d.name || (x.unit && `${x.name} (${x.unit})` === d.name))?.price ?? post.price }));
   // dịch vụ: phía Mua ghi tên kèm đơn vị, ví dụ "Vệ sinh máy lạnh (máy)", nên so cả hai cách ghi
+  // tiền hàng ứng trước: dòng riêng, không lẫn vào tùy chọn cộng giá
+  const advance = body.detail?.advance ?? 0;
+  if (advance) items.push({ name: 'Tiền hàng ứng trước', qty: 1, option: '', price: advance });
   const rest = order.total - ship - items.reduce((n, i) => n + i.qty * i.price, 0);
   if (rest) items.push({ name: rest > 0 ? 'Tùy chọn cộng giá' : 'Giảm giá', qty: 1, option: '', price: rest });
   const at = body.scheduledAt ? new Date(body.scheduledAt) : now;
@@ -63,6 +69,7 @@ export function toSellerOrder(order: Order, post: Post, body: CreateOrderBody, s
     items,
     buyer,
     fulfil: body.fulfillment === 'pickup' ? 'pickup' : post.kind === 'service' ? 'home' : 'delivery',
+    placeNote: post.place?.mode === 'none' ? 'Theo thỏa thuận, xem mô tả bài' : undefined,
     address: body.detail?.address ?? '',
     day: dayDiff(at, now),
     time: hm(at),
@@ -76,6 +83,7 @@ export function toSellerOrder(order: Order, post: Post, body: CreateOrderBody, s
     flow,
     quote: null,
     history: [['waiting', hm(now)]],
+    placedAt: order.createdAt ?? now.toISOString(),
   };
 }
 
@@ -93,7 +101,9 @@ export function applyBuyerChange(t: SellerOrder, o: Order, now = new Date()): bo
   if (moved) {
     t.state = state;
     t.history.push([state, hm(now)]);
+    t.stepAt = now.toISOString();
   }
+  if (o.cancelRequested && !t.cancelRequest) t.cancelAt = now.toISOString();
   t.cancelRequest = o.cancelRequested ? o.cancelWhy || 'Khách xin hủy đơn' : null;
   if (o.surcharge) t.surcharge = o.surcharge.state === 'declined' ? null : { amount: o.surcharge.amount, reason: o.surcharge.reason, ok: o.surcharge.state === 'approved' };
   if (o.priceDone && t.quote) t.quote.ok = true;

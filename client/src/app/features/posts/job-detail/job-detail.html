@@ -1,7 +1,11 @@
 @if (loading()) {
   <app-loader />
 } @else if (job(); as j) {
-  <div class="crumb"><button type="button" class="back" (click)="back()">Quay lại</button><span>·</span><a routerLink="/">Trang chủ</a><span>›</span><span>Việc làm</span></div>
+  <nav class="crumb" aria-label="Vị trí">
+    <a routerLink="/">Trang chủ</a><span>/</span>
+    <a routerLink="/search" [queryParams]="{ kind: 'job' }">Việc làm</a><span>/</span>
+    <span class="cur">{{ j.title }}</span>
+  </nav>
 
   <div class="jobhero">
     <div>
@@ -9,38 +13,36 @@
       <div class="meta">
         <span>{{ j.block }}@if (j.distance != null) { · {{ j.distance | distance }} }</span>
         <span>Đăng {{ j.createdAt | ago }}</span>
-        <span>Hạn: {{ j.job | jobWhen }}</span>
       </div>
     </div>
-    <div class="pay"><small>Tiền công</small><b>{{ j.price | vnd }}</b><span>/ {{ j | unit }}</span>
-      <div class="acts">
-        <button type="button" (click)="share()">Chia sẻ</button>
-        <button type="button" [class.on]="saved.has(j._id)" (click)="toggleSave()">
-          <svg class="i"><use [attr.href]="saved.has(j._id) ? '#heartFill' : '#heart'" /></svg>{{ saved.has(j._id) ? 'Đã lưu' : 'Lưu' }}
-        </button>
-      </div>
+    <div class="acts">
+      <button type="button" (click)="share()"><svg class="i"><use href="#share" /></svg>Chia sẻ</button>
+      <button type="button" [class.on]="saved.has(j._id)" (click)="toggleSave()">
+        <svg class="i"><use [attr.href]="saved.has(j._id) ? '#heartFill' : '#heart'" /></svg>{{ saved.has(j._id) ? 'Đã lưu' : 'Lưu' }}
+      </button>
     </div>
   </div>
 
-  <div class="kfacts">
-    <div><svg class="i"><use href="#clock" /></svg><span><b>Thời gian làm</b>{{ j.job | jobWhen }}</span></div>
-    <div><svg class="i"><use href="#pin" /></svg><span><b>Địa điểm</b>{{ j.block }}@if (j.job?.building) { · {{ j.job?.building }} }</span></div>
-    <div><svg class="i"><use href="#users" /></svg><span><b>Số người cần</b>{{ j.job?.head ?? 1 }} người</span></div>
-    <div><svg class="i"><use href="#receipt" /></svg><span><b>Thanh toán</b>{{ j.job?.payBy === 'transfer' ? 'Chuyển khoản' : 'Tiền mặt' }}</span></div>
-  </div>
+  @if (photos().length) {
+    <div class="gallery" [class]="'gallery n' + (photos().length > 5 ? 5 : photos().length)">
+      @for (src of photos(); track src; let i = $index) {
+        <figure [style.--bg]="bg(src)" (click)="lightbox.set(i)"><img [src]="src" [alt]="j.title" /></figure>
+      }
+      @if (photos().length > 1) {
+        <button type="button" class="all" (click)="lightbox.set(0)"><svg class="i"><use href="#grid" /></svg>{{ photos().length }} ảnh</button>
+      }
+    </div>
+  }
+
+  <ul class="kfacts" aria-label="Thông tin nhanh">
+    <li><span class="ic"><svg class="i"><use href="#clock" /></svg></span><span><small>Làm lúc</small><b>{{ j.job | jobWhen }}</b></span></li>
+    <li><span class="ic"><svg class="i"><use href="#pin" /></svg></span><span><small>Địa điểm</small><b>{{ j.block }}@if (j.job?.building) { · {{ j.job?.building }} }</b></span></li>
+    <li><span class="ic"><svg class="i"><use href="#users" /></svg></span><span><small>Cần</small><b>{{ j.job?.head ?? 1 }} người</b></span></li>
+    <li><span class="ic"><svg class="i"><use href="#receipt" /></svg></span><span><small>Trả công</small><b>{{ j.job?.payBy === 'transfer' ? 'Chuyển khoản' : 'Tiền mặt' }}</b></span></li>
+  </ul>
 
   <div class="cols">
     <div>
-      @if (photos().length) {
-        <section class="block">
-          <h2>Ảnh minh họa <small>({{ photos().length }})</small></h2>
-          <div class="jgal" [attr.data-n]="photos().length">
-            @for (src of photos(); track src; let i = $index) {
-              <button type="button" class="jph" (click)="lightbox.set(i)" [attr.aria-label]="'Xem ảnh ' + (i + 1)"><img [src]="src" alt="" loading="lazy" /></button>
-            }
-          </div>
-        </section>
-      }
       <section class="block"><h2>Việc cần làm</h2><div class="desc"><p>{{ j.description }}</p></div></section>
 
       <section class="block" id="qa">

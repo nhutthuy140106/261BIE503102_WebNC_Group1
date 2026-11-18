@@ -1,5 +1,6 @@
 import { Component, DestroyRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, forkJoin, interval } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { useMock } from '../../../core/config/api.config';
 import { AppError } from '../../../core/models/api';
@@ -12,6 +13,7 @@ import { OrderService } from '../../../core/services/order';
 import { PostService } from '../../../core/services/post';
 import { ReviewService } from '../../../core/services/review';
 import { ToastService } from '../../../core/services/toast';
+import { UploadService } from '../../../core/services/upload';
 import { XuService } from '../../../core/services/xu';
 import { placedStepNames } from '../../../core/utils/placed-steps';
 import { canSeeExactAddress } from '../../../core/utils/offer-state';
@@ -68,6 +70,7 @@ export class OrderDetail implements OnInit {
   private readonly toast = inject(ToastService);
   protected readonly act = ORDER_ACTION;
   private readonly xu = inject(XuService);
+  private readonly uploads = inject(UploadService);
 
   protected readonly order = signal<Order | null>(null);
   protected readonly offer = signal<Offer | null>(null);
@@ -118,11 +121,15 @@ export class OrderDetail implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => this.load(params.get('id') ?? ''));
     // người bán đổi đơn ở tab khác: cập nhật ngay, không hiện vòng tải
-    this.orderService.changed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      const id = this.order()?._id;
-      if (id) this.orderService.getOrder(id).subscribe({ next: (o) => this.order.set(o), error: () => undefined });
-      if (id && this.offer()) this.offerService.get(id).subscribe({ next: (o) => this.offer.set(o), error: () => undefined });
-    });
+    this.orderService.changed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.refresh());
+    // đơn thật: người bán / người đăng việc xử lý ở máy của họ → tự đọc lại mỗi 15 giây (không đọc khi đang mở hộp thoại)
+    if (!useMock('order')) interval(15000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { if (!this.dlg()) this.refresh(); });
+  }
+
+  private refresh(): void {
+    const id = this.order()?._id;
+    if (id) this.orderService.getOrder(id).subscribe({ next: (o) => this.order.set(o), error: () => undefined });
+    if (id && this.offer()) this.offerService.get(id).subscribe({ next: (o) => this.offer.set(o), error: () => undefined });
   }
 
   private load(id: string): void {
@@ -390,6 +397,19 @@ export class OrderDetail implements OnInit {
   }
 
   /** Cập nhật đơn đã đặt + Xu (cộng khi xong / đánh giá, trả voucher khi hủy, thu lại khi hoàn tiền hết) */
+  /** Chế độ thật: đồng ý / từ chối giá cuối ở server, rồi hiện đơn mới */
+  private respondQuote(call: Observable<Order>, msg: string): void {
+    call.subscribe({
+      next: (n) => {
+        this.order.set(n);
+        this.close();
+        this.toast.show(msg);
+        if (n.status === 'cancelled') this.xu.returnVoucher(n.code);
+      },
+      error: (e: Error) => this.fail(e),
+    });
+  }
+
   private move(patch: Partial<Order>, line: string, msg?: string, after?: DlgType): void {
     const o = this.order();
     if (!o) return;
@@ -398,6 +418,7 @@ export class OrderDetail implements OnInit {
       next: (n) => {
         this.order.set(n);
         this.close();
+        this.xu.sync(); // đơn thật: Xu do server cộng, kéo số dư mới về (bản mẫu: không làm gì)
         if (after) this.dlg.set(after);
         if (msg) this.toast.show(msg);
         if (patch.status === 'done' && before.status !== 'done' && n.total >= 30000) this.xu.earn(10, 'Hoàn thành đơn ' + n.code, 'order:' + n._id);
@@ -559,7 +580,11 @@ export class OrderDetail implements OnInit {
       if (!this.picks().length) return void this.bad.set('Chọn ít nhất một vấn đề.');
       if (this.picks().includes(OTHER_REASON) && !this.text().trim()) return void this.bad.set('Mô tả ngắn giúp bên bán hiểu.');
       if (needPhoto && !this.rvPics().length) return void this.bad.set('Cần ít nhất 1 ảnh để bên bán kiểm tra.');
-      return this.move({ issue: { st: 'open', type: this.reasonText(), want: '', text: this.more().trim(), photos: this.rvPics().length } }, (this.kind(o) === 'service' ? 'Bạn báo vấn đề: ' : 'Bạn yêu cầu trả hàng/hoàn tiền: ') + this.reasonText(), 'Đã gửi cho ' + n);
+      const send = (images?: string[]): void =>
+        this.move({ issue: { st: 'open', type: this.reasonText(), want: '', text: this.more().trim(), photos: images?.length ?? this.rvPics().length, ...(images ? { images } : {}) } }, (this.kind(o) === 'service' ? 'Bạn báo vấn đề: ' : 'Bạn yêu cầu trả hàng/hoàn tiền: ') + this.reasonText(), 'Đã gửi cho ' + n);
+      // đơn thật: ảnh phải tải lên server trước để người bán xem được
+      if (!useMock('order') && this.rvPics().length) return void forkJoin(this.rvPics().map((u) => this.uploads.uploadDataUrl(u))).subscribe({ next: (urls) => send(urls), error: (e: Error) => this.fail(e) });
+      return send();
     }
     if (d === 'resched') {
       if (!this.pick() || !this.pick2()) return void this.bad.set('Chọn ngày và giờ.');
@@ -570,12 +595,14 @@ export class OrderDetail implements OnInit {
     if (d === 'approve') {
       const np = o.newPrice;
       if (!np) return;
+      if (!useMock('order')) return this.respondQuote(this.orderService.approveQuote(o._id), 'Đã đồng ý giá mới, đơn làm tiếp');
       return this.move({ status: 'preparing', oldTotal: o.total, total: np.total, priceDone: true, newPrice: null }, 'Bạn đồng ý giá cuối ' + this.vnd(np.total), 'Đã đồng ý giá mới, đơn làm tiếp');
     }
     if (d === 'reject') {
       const pc = o.priceCheck;
       const after = pc === 'quote' ? 'Bạn chỉ trả phí kiểm tra ' + this.vnd(o.total) + ', ' + n + ' trả lại máy. Đơn kết thúc.' : pc === 'surcharge' ? n + ' không lấy đồ nữa, đơn hủy và bạn không phải trả gì.' : 'Đơn hủy, ' + n + ' trả lại đồ cho bạn và không tính tiền giặt.';
       const why = this.text().trim();
+      if (!useMock('order')) return this.respondQuote(this.orderService.rejectQuote(o._id, why), 'Đã từ chối giá mới');
       return this.move({ status: 'cancelled', cancelFrom: 'pricing', priceRejected: after + (why ? ' Lý do bạn gửi: ' + why : ''), newPrice: null }, 'Bạn từ chối giá cuối' + (why ? ': ' + why : ''), 'Đã từ chối giá mới');
     }
   }

@@ -1,5 +1,7 @@
 # Danh sách kiểm thử AntGo (bản mẫu, chạy bằng dữ liệu mẫu)
 
+> Muốn test với **server và MongoDB thật** (`?mock=0`): xem `docs/test-server-that.md`.
+
 > 04/11/2026. Dùng để tự bấm thử toàn bộ web. Đánh dấu `[x]` khi đúng; chỗ nào sai thì ghi **bài nào · bên nào · thấy gì · đáng lẽ thấy gì** (kèm ảnh chụp) rồi gửi cho người sửa.
 > Mỗi mục có **Làm gì** → **Phải thấy**. Chỗ ghi 🔸 là phần **đã biết chưa làm**, không cần báo lỗi.
 

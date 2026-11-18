@@ -13,6 +13,9 @@ const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 
+// Chạy sau proxy ngược (nginx, hosting): tin X-Forwarded-* để cookie phiên 'secure' hoạt động qua HTTPS
+if (isProd) app.set('trust proxy', 1);
+
 // Header an toàn. CSP tắt vì đây là API JSON (Swagger UI cần script nội tuyến); ảnh /images được FE khác origin nhúng nên cho cross-origin
 app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 // FE (Angular) gọi kèm cookie => phải chỉ đích danh origin và bật credentials
@@ -47,7 +50,12 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api/auth', require('./modules/auth/auth.routes'));
 require('./modules/buyer').mount(app);
+app.use('/api/support/tickets', require('./modules/buyer/support/support.routes'));
+app.use('/api/meta', require('./modules/shared/meta.routes'));
+app.use('/api/admin/seller-verifications', require('./modules/seller/admin-verification.routes'));
 app.use('/api/admin', require('./modules/admin/admin.routes'));
+app.use('/api/seller', require('./modules/seller/seller.routes'));
+app.use('/api/shops', require('./modules/seller/shop.routes'));
 if (!isProd) app.use('/api/dev', require('./modules/dev/dev.routes'));
 
 app.use(notFound);

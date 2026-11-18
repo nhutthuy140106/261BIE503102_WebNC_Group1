@@ -25,6 +25,7 @@ const GREETINGS = ['Cần gì <i>cứ gọi</i>!', 'Có <i>mình</i> đây!', 'G
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+import { markWelcomeSeen } from '../../../core/guards/landing-guard';
 
 @Component({
   selector: 'app-landing',
@@ -35,6 +36,10 @@ const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 export class Landing implements AfterViewInit, OnDestroy {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
+
+  constructor() {
+    markWelcomeSeen(); // lần sau mở web sẽ vào thẳng trang chủ
+  }
 
   private readonly flyer = viewChild.required<ElementRef<HTMLElement>>('flyer');
   private readonly bob = viewChild.required<ElementRef<HTMLElement>>('bob');

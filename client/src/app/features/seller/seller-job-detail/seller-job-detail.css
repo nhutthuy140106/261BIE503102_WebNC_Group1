@@ -38,3 +38,5 @@
   .offer { grid-template-columns: 44px minmax(0, 1fr); }
   .oacts { grid-column: 1 / -1; }
 }
+/* giữ đúng cách xuống dòng, cách đoạn người đăng gõ trong form */
+.keepline { white-space: pre-line; overflow-wrap: anywhere; }

@@ -1,5 +1,5 @@
 /* Messenger người bán — chuyển từ design/mockups/seller-messenger.html. Vừa một màn hình (footer ẩn qua body.no-footer). */
-.chat-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: calc(100vh - 104px); min-height: 460px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: #fff; }
+.chat-layout { display: grid; grid-template-columns: 370px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: calc(100vh - 104px); min-height: 460px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: #fff; }
 .chat-list { border-right: 1px solid var(--border); display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .chat-list-head { padding: 14px 16px; border-bottom: 1px solid var(--border); }
 .chat-list-head h2 { font-size: 17px; margin: 0 0 10px; }
@@ -8,9 +8,9 @@
 .tabs button { height: 30px; padding: 0 10px; white-space: nowrap; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-size: 12.5px; font-weight: 600; }
 .tabs button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 .thread-list { overflow: auto; flex: 1; min-height: 0; }
-.thread { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid var(--border); background: #fff; text-align: left; }
+.thread { width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px 16px; border-bottom: 1px solid var(--border); background: #fff; text-align: left; }
 .thread:hover, .thread.on { background: var(--soft); }
-.thread img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex: none; }
+.thread img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex: none; }
 .text { min-width: 0; flex: 1; }
 .text b, .text small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .text small { color: var(--smoke); margin-top: 2px; }
@@ -27,7 +27,7 @@
 .chat-top h2 { font-size: 17px; margin: 0; }
 .chat-top small { color: var(--smoke); }
 .messages { flex: 1; min-height: 0; overflow: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; background: #fffdfc; }
-.context-card { align-self: center; width: 100%; max-width: 540px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font-size: 13px; margin-bottom: 6px; }
+.context-card { align-self: center; width: 100%; max-width: 380px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; font-size: 13px; margin-bottom: 6px; }
 .context-card:hover { background: var(--soft); }
 .context-card > img, .context-card .th { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; flex: none; background: var(--soft); display: grid; place-items: center; }
 .context-card .th svg { width: 20px; height: 20px; }
@@ -49,6 +49,41 @@
 .compose { flex: none; padding: 10px 18px 14px; display: flex; align-items: flex-end; gap: 10px; }
 .compose textarea { flex: 1; height: 44px; min-height: 44px; max-height: 120px; resize: none; padding-top: 11px; line-height: 1.4; }
 .compose .btn { height: 44px; }
+.tabs .n { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 6px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 11px; }
+/* hàng công cụ dưới ô nhắn: ghi âm · đính kèm · ảnh */
+.tools { flex: none; display: flex; align-items: center; gap: 0; height: 44px; margin-left: -6px; }
+.tb { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: none; color: var(--smoke); cursor: pointer; }
+.tb:hover, .tb.on { background: var(--soft); color: var(--ink); }
+.tb svg { width: 20px; height: 20px; }
+.terr { flex: none; margin: -8px 18px 10px; font-size: 12.5px; color: #c0392b; }
+.compose.rec { align-items: center; }
+.compose.rec b { flex: 1; font-size: 14px; }
+.daystamp { align-self: center; font-size: 12px; font-weight: 600; color: var(--fog); margin: 4px 0; }
+.cc .top { display: block; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc .top b { display: inline; }
+.cc .top .stat { font-size: 13px; font-weight: 600; }
+.cc > small { display: block; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pulse { width: 10px; height: 10px; border-radius: 50%; background: #d93025; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+.picwrap { position: relative; display: inline-flex; }
+.picmenu { position: absolute; left: 0; bottom: 46px; z-index: 5; width: 230px; padding: 6px; border-radius: 14px; background: #fff; box-shadow: 0 8px 28px rgba(34, 48, 74, .22); display: grid; gap: 2px; }
+.picmenu button, .picmenu label { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 12px; border-radius: 10px; background: none; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; text-align: left; }
+.picmenu button:hover, .picmenu label:hover { background: var(--soft); }
+.picmenu svg { width: 19px; height: 19px; color: var(--smoke); flex: none; }
+/* tin có ảnh / ghi âm / tệp */
+.bubble.media { padding: 4px; background: none; border: 0; }
+.bubble.media small { padding: 0 6px 2px; color: var(--fog); }
+.mimg { display: block; max-width: 300px; max-height: 300px; border-radius: 12px; object-fit: cover; background: var(--soft); }
+.maud { display: block; max-width: 260px; height: 40px; }
+.mfile { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 6px 4px; color: inherit; }
+.mfile svg { width: 26px; height: 26px; flex: none; }
+.mfile b { display: block; max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bubble .mfile small { display: block; margin: 0; text-align: left; }
+.camscrim { position: fixed; inset: 0; z-index: 90; background: rgba(34, 48, 74, .5); display: grid; place-items: center; padding: 20px; }
+.cambox { width: min(520px, 100%); padding: 14px; border-radius: 18px; background: #fff; display: grid; gap: 12px; }
+.cambox video { width: 100%; border-radius: 12px; background: #000; max-height: 60vh; }
+.camact { display: flex; gap: 10px; }
+.camact .btn { flex: 1; height: 44px; }
 .empty-chat { margin: auto; text-align: center; color: var(--smoke); }
 .empty-chat img { width: 110px; margin: 0 auto 12px; }
 @media (max-width: 760px) {

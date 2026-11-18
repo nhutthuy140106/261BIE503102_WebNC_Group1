@@ -2,7 +2,24 @@
   @if (googleName() !== null) {
     <h1>Chỉ còn một bước</h1>
     <p class="why">Chào {{ googleName() }}! Nhập số điện thoại để hàng xóm liên lạc với bạn khi đặt đơn hoặc nhận việc.</p>
-    <form (ngSubmit)="completeGoogle()" novalidate>
+    @if (gStep() === 2) {
+      <p class="why">Mã 6 số đã gửi tới <b>{{ phoneOnly.value }}</b>.</p>
+      <form (ngSubmit)="verifyCode()" novalidate>
+        <label for="gotp">Mã xác nhận</label>
+        <input id="gotp" class="tx otp" [formControl]="otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"
+               [class.is-invalid]="otp.invalid && otp.touched" />
+        @if (otp.invalid && otp.touched) { <small class="error">Mã gồm 6 chữ số.</small> }
+        @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+        <button type="submit" class="go" [disabled]="otp.invalid || submitting()">Xác nhận và vào AntGo</button>
+        @if (devCode(); as dc) { <p class="demo">Chạy thử: chưa gửi SMS thật. Mã của bạn là <b>{{ dc }}</b> (cũng in ở màn hình server).</p> }
+        @else { <p class="demo">Bản mẫu: chưa gửi SMS thật, bạn nhập 6 số bất kỳ để tiếp tục.</p> }
+        <div class="resend">
+          <button type="button" class="lnk plain" (click)="backToPhone()">Đổi số</button>
+          @if (countdown() > 0) { <span>Gửi lại mã sau {{ countdown() }} giây</span> } @else { <button type="button" class="lnk" (click)="sendCode()">Gửi lại mã</button> }
+        </div>
+      </form>
+    } @else {
+    <form (ngSubmit)="sendCode()" novalidate>
       <label for="gphone">Số điện thoại</label>
       <input id="gphone" class="tx" [formControl]="phoneOnly" name="gphone" autocomplete="tel" inputmode="numeric" maxlength="10"
              [class.is-invalid]="phoneOnly.invalid && phoneOnly.touched" />
@@ -10,15 +27,20 @@
         <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small>
       }
       @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
-      <button type="submit" class="go" [disabled]="phoneOnly.invalid || submitting()">Hoàn tất</button>
+      <button type="submit" class="go" [disabled]="phoneOnly.invalid || submitting()">Nhận mã xác nhận</button>
     </form>
+    }
   } @else {
     <h1>Đăng nhập</h1>
     <p class="why">{{ why }}</p>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
       <label for="phone">Số điện thoại</label>
       <input id="phone" class="tx" formControlName="phone" name="username" autocomplete="username" inputmode="numeric" maxlength="10"
+             [attr.list]="rememberedPhone ? 'phoneSuggest' : null"
              [class.is-invalid]="form.controls.phone.invalid && form.controls.phone.touched" />
+      @if (rememberedPhone) {
+        <datalist id="phoneSuggest"><option [value]="rememberedPhone"></option></datalist>
+      }
       @if (form.controls.phone.invalid && form.controls.phone.touched) {
         <small class="error">Số điện thoại gồm 10 số, bắt đầu bằng 0.</small>
       }

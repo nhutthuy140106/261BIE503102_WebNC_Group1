@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, Scroll } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from './core/services/auth';
 import { SavedService } from './core/services/saved';
@@ -14,7 +14,7 @@ export class App implements OnInit {
   private readonly router = inject(Router);
   private readonly saved = inject(SavedService);
 
-  /** Trang giới thiệu và đăng nhập tự có bố cục toàn màn hình nên không dùng header/footer chung. */
+  /** Trang giới thiệu, đăng nhập và khu Quản trị tự có bố cục toàn màn hình nên không dùng header/footer chung. */
   private static readonly BARE_PAGES = ['/welcome', '/auth/login', '/auth/register', '/auth/forgot'];
   protected readonly bare = signal(false);
 
@@ -24,9 +24,30 @@ export class App implements OnInit {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((e) => {
-        this.bare.set(App.BARE_PAGES.includes(e.urlAfterRedirects.split(/[?#]/)[0]));
+        const path = e.urlAfterRedirects.split(/[?#]/)[0];
+        // khu Quản trị có khung riêng (thanh bên), không dùng header/footer của phía Mua
+        this.bare.set(App.BARE_PAGES.includes(path) || path === '/admin' || path.startsWith('/admin/'));
         // khách đã bấm ♡ rồi đăng nhập: về lại trang thì lưu bài đó
         if (this.auth.isLoggedIn()) this.saved.applyResume();
       });
+    // Bấm Quay lại: về đúng chỗ đang lướt. Trang tải dữ liệu chậm nên lúc Angular cuộn thì trang còn ngắn (đang quay chờ) và bị kẹt ở đầu trang;
+    // ta đợi nội dung dài ra đủ rồi mới cuộn.
+    this.router.events.pipe(filter((e): e is Scroll => e instanceof Scroll)).subscribe((e) => {
+      if (e.position) this.restoreScroll(e.position[1]);
+    });
+  }
+
+  private restoreScroll(y: number): void {
+    if (y <= 0) return;
+    const start = performance.now();
+    const step = () => {
+      const enough = document.documentElement.scrollHeight >= y + window.innerHeight;
+      if (enough || performance.now() - start > 2500) {
+        window.scrollTo(0, y);
+        return;
+      }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 }
