@@ -1,4 +1,5 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { USE_MOCK } from '../config/api.config';
 import { AuthService } from './auth';
 
 export type GardenGame = 'hai-xu' | 'tuoi-cay' | 'thu-cung';
@@ -10,7 +11,8 @@ export const COIN_MILESTONES = [
   { at: 50, badge: 'Vua hái xu' },
 ] as const;
 
-export const COIN_MAX_PLAYS = 3;
+/** Hái xu: 3 lượt/ngày ở máy chủ thật; chế độ dữ liệu mẫu (demo) mở rộng để thử chơi thoải mái */
+export const COIN_MAX_PLAYS = USE_MOCK ? 20 : 3;
 /** Tưới cây: tối đa 3 lần/ngày, đủ 9 lần là thu hoạch (+5 Xu) */
 /** Chăm cây: mỗi ngày tưới 1 lần; 7 giai đoạn = hạt giống + 6 lần tưới, sang ngày thứ 7 thì thu hoạch */
 export const WATER_PER_DAY = 1;

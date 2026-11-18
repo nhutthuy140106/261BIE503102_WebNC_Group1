@@ -1,6 +1,6 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, tap } from 'rxjs';
-import { useMock } from '../config/api.config';
+import { USE_MOCK, useMock } from '../config/api.config';
 import { AppError } from '../models/api';
 import { ApiService } from './api';
 import { AuthService } from './auth';
@@ -19,7 +19,8 @@ const KEY = 'antgo_xu';
 const DAY = 864e5;
 const HALF_YEAR = 182 * DAY;
 /** Trần Xu nhận từ mini game mỗi ngày (chống cày Xu lấy voucher). */
-export const GAME_DAILY_CAP = 30;
+/** Trần Xu từ game mỗi ngày: 30 ở máy chủ thật; chế độ dữ liệu mẫu (demo) nới ra để thử chơi */
+export const GAME_DAILY_CAP = USE_MOCK ? 300 : 30;
 
 export interface XuEntry {
   /** Số Xu: + nhận, − tiêu / hết hạn */
