@@ -169,7 +169,7 @@ export class SellerSpaceService {
   private readonly sharedQuestions = signal<Question[]>([]);
   private static readonly NAME = 'seller-space';
   /** khớp trường `version` trong datasets/seller-space.json */
-  private static readonly VERSION = '2026-11-10-c';
+  private static readonly VERSION = '2026-11-19-a';
 
   /** Chế độ thật (?mock=0): Giao dịch, Bài đăng, Việc lấy từ server; dữ liệu chỉ có ở máy lưu riêng, không lẫn với bản mẫu */
   private readonly live = !useMock('seller');
